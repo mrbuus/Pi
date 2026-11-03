@@ -25,7 +25,7 @@ import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import PhotoPicker from "./PhotoPicker";
 import { setMakeupCount } from "./MakeupNavBadge";
-import { dayLabel, isOpen, type MyMakeup, type MakeupTest, STATUS_CHIP, STATUS_META, testLabel } from "./types";
+import { dayLabel, isOpen, isUndecided, type MyMakeup, type MakeupTest, STATUS_CHIP, STATUS_META, testLabel } from "./types";
 
 export function StatusChip({ status }: { status: MyMakeup["status"] }) {
   const meta = STATUS_META[status];
@@ -255,8 +255,10 @@ export default function StudentMakeupView() {
     setMakeupCount(list);
   }
 
-  const pending = (items ?? []).filter((i) => isOpen(i.status));
-  const done = (items ?? []).filter((i) => !isOpen(i.status));
+  // Бүгдийг илгээсэн ч багш батлаагүй бол карт үлдэнэ («Багш шалгана»); «үлдсэн» тоо нь зөвхөн үйлдэл шаардлагатай нь
+  const pending = (items ?? []).filter((i) => isUndecided(i.status));
+  const actionable = pending.filter((i) => isOpen(i.status)).length;
+  const done = (items ?? []).filter((i) => !isUndecided(i.status));
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
@@ -270,9 +272,9 @@ export default function StudentMakeupView() {
             Тасалсан, чөлөөтэй эсвэл хоцорсон өдрийн онолоо дэвтэртээ бичээд зургийг нь илгээж, тэр өдрийн тестийн A, B
             хувилбарыг шалгалтын горимоор хийнэ. Ангид суусан бол ангид хийсэн хувилбар тооцогдоно
           </InfoHint>
-          {items && pending.length > 0 && (
+          {items && actionable > 0 && (
             <span className="ml-auto rounded-full bg-error/15 px-2.5 py-0.5 text-xs font-semibold tabular-nums text-error">
-              {pending.length} үлдсэн
+              {actionable} үлдсэн
             </span>
           )}
         </div>

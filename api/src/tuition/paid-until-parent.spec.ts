@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 describe('GET /tuition/paid-until/:studentId — эцэг эх (G26)', () => {
   function make(link: object | null) {
     const prisma = { parentLink: { findFirst: jest.fn(async () => link) }, enrollment: { findMany: jest.fn() } };
-    const service = new TuitionService(prisma as unknown as PrismaService, {} as never);
+    const service = new TuitionService(prisma as unknown as PrismaService, {} as never, {} as never);
     jest.spyOn(service, 'getPaidUntil').mockResolvedValue(new Date('2026-10-20T00:00:00Z'));
     const ctrl = new (TuitionController as any)(service);
     return { ctrl, prisma, service };

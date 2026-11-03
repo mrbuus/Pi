@@ -27,6 +27,7 @@ import RoomBadge from "../RoomBadge";
 import { formatMinutes, WEEKDAY_LABELS } from "../types";
 import PdfLink from "./PdfLink";
 import { Excluded, roadOf } from "./RoadMap";
+import TheoryPhotosStaff from "@/components/TheoryPhotosStaff";
 import TestPicker from "./TestPicker";
 import TestProblems from "./TestProblems";
 import { TeacherTag } from "./LessonRow";
@@ -208,6 +209,7 @@ function ReadOnly(p: Props & { entry: DayEntry }) {
           </div>
         </Section>
       )}
+      {p.date <= p.today && <TheoryPhotosStaff classroomId={e.classroomId} date={p.date} />}
       {(e.plan?.dismissMode || e.plan?.photoStudent) && (
         <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
           {e.plan?.dismissMode && (
@@ -401,6 +403,8 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
             )}
           </div>
         </Section>
+
+        {p.date <= p.today && <TheoryPhotosStaff classroomId={e.classroomId} date={p.date} />}
 
         <Section title="Тэмдэглэл">
           <label htmlFor={`plan-note-${e.scheduleId}`} className="sr-only">

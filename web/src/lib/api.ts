@@ -195,7 +195,7 @@ export class ApiError extends Error {
 
 export async function api<T = unknown>(
   path: string,
-  opts: { method?: string; body?: unknown; auth?: boolean; responseType?: "json" | "text" } = {},
+  opts: { method?: string; body?: unknown; auth?: boolean; responseType?: "json" | "text" | "blob" } = {},
 ): Promise<T> {
   const headers: Record<string, string> = {};
   const isFormData = typeof FormData !== "undefined" && opts.body instanceof FormData;
@@ -241,7 +241,12 @@ export async function api<T = unknown>(
       );
     }
 
-    const data = (opts.responseType === "text" ? await res.text().catch(() => "") : await res.json().catch(() => null)) as T & {
+    // «blob» — файл татах (амжилттай бол Blob, алдаа бол JSON мессеж)
+    const data = (opts.responseType === "blob" && res.ok
+      ? await res.blob().catch(() => null)
+      : opts.responseType === "text"
+        ? await res.text().catch(() => "")
+        : await res.json().catch(() => null)) as T & {
       message?: string | string[];
     };
     if (opts.auth !== false && (requestSession !== sessionVersion || token !== getToken())) {

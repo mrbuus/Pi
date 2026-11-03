@@ -1,10 +1,11 @@
-import { CircleCheck, CircleDashed, CircleMinus, CircleDot } from "lucide-react";
+import { CircleCheck, CircleDashed, CircleMinus, CircleDot, Hourglass } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { MAKEUP_LABEL, type MakeupStatus } from "./lib";
 
 const META: Record<MakeupStatus, { icon: typeof CircleCheck; cls: string }> = {
   PENDING: { icon: CircleDashed, cls: "border-warning/40 bg-warning/10 text-warning" },
   PARTIAL: { icon: CircleDot, cls: "border-info/40 bg-info/10 text-info" },
+  SUBMITTED: { icon: Hourglass, cls: "border-brand-bright/50 bg-brand-bright/15 text-brand-soft" },
   DONE: { icon: CircleCheck, cls: "border-success/40 bg-success/10 text-success" },
   WAIVED: { icon: CircleMinus, cls: "border-line bg-ink/[0.04] text-ink-dim" },
 };

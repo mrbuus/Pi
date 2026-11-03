@@ -38,6 +38,18 @@ export class HomeworkPracticeController {
     return this.homework.my(req.user.userId, days);
   }
 
+  /** Дахин бодох: хичээл бүрийн А, Б тест, нээгдсэн эсэх, оролдлогын дүн */
+  @Get('redo')
+  redo(@Req() req: AuthedRequest) {
+    return this.homework.redoList(req.user.userId);
+  }
+
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @Post('redo/attempts')
+  startRedo(@Body() dto: StartHomeworkDto, @Req() req: AuthedRequest) {
+    return this.homework.startRedo(req.user.userId, dto);
+  }
+
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @Post('attempts')
   start(@Body() dto: StartHomeworkDto, @Req() req: AuthedRequest) {
@@ -52,7 +64,7 @@ export class HomeworkPracticeController {
     @Body() dto: HomeworkAnswersDto,
     @Req() req: AuthedRequest,
   ) {
-    return this.homework.save(req.user.userId, id, dto.answers);
+    return this.homework.save(req.user.userId, id, dto.answers, dto.activity);
   }
 
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
@@ -62,7 +74,7 @@ export class HomeworkPracticeController {
     @Body() dto: HomeworkAnswersDto,
     @Req() req: AuthedRequest,
   ) {
-    return this.homework.check(req.user.userId, id, dto.answers);
+    return this.homework.check(req.user.userId, id, dto.answers, dto.activity);
   }
 
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
@@ -72,7 +84,7 @@ export class HomeworkPracticeController {
     @Body() dto: HomeworkAnswersDto,
     @Req() req: AuthedRequest,
   ) {
-    return this.homework.submit(req.user.userId, id, dto.answers);
+    return this.homework.submit(req.user.userId, id, dto.answers, dto.activity);
   }
 
   @Throttle({ default: { limit: 20, ttl: 60_000 } })

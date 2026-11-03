@@ -35,6 +35,7 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
       'lessonMakeup',
       'user',
       'testAccess',
+      'studentTestAccess',
       'lessonTopic',
       'lessonPhoto',
       'storedFile',
@@ -65,6 +66,11 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
     db.test.findMany.mockImplementation(async (args: any) =>
       args.where.groupKey ? tests : tests.filter((t) => args.where.id.in.includes(t.id)),
     );
+    // Багш хичээлийг батласан (нөхөх үүрэг батлагдсан хичээлд л автоматаар гарна)
+    db.lessonRecord.findMany.mockResolvedValue([
+      { classroomId: 'c1', date: D('2026-10-10') },
+      { classroomId: 'c1', date: D('2026-10-12') },
+    ]);
     db.lessonMakeup.findMany.mockResolvedValue([
       { classroomId: 'c1', studentId: 's2', date: D('2026-10-12'), imageKeys: ['n.jpg'], submittedAt: new Date(), confirmedById: 'owner', confirmedAt: new Date(), note: 'WAIVED\nӨвчтэй' },
     ]);
@@ -73,7 +79,21 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
 
   const staff = (userId: string, role: Role) => ({ userId, role });
 
-  it('хоцорсон сурагчид зөвхөн B, тасалсанд A+B; шийдвэр ба тэмдэглэл ажилтанд', async () => {
+  it('багш хичээлийг БАТЛААГҮЙ бол нөхөх үүрэг гарахгүй; батлаагүй ч нөхөх мөр (зураг/шийдвэр) үүссэн бол хэвээр', async () => {
+    db.lessonRecord.findMany.mockResolvedValue([]);
+    const rows = await service.classroomMakeups(staff('x', Role.TEACHER_PLUS), 'c1', { from: '2026-10-01', to: '2026-10-31' });
+    // s1 (хоцорсон, нөхөх мөргүй) харагдахгүй; s2-д аль хэдийн мөр бий — хэвээр
+    expect(rows.map((r) => r.studentId)).toEqual(['s2']);
+  });
+
+  it('хоцорсон сурагч АВТОМАТААР нөхөхгүй (эзэн 2026-11-03); тасалсанд A+B; шийдвэр ба тэмдэглэл ажилтанд', async () => {
+    const auto = await service.classroomMakeups(staff('x', Role.TEACHER_PLUS), 'c1', { from: '2026-10-01', to: '2026-10-31' });
+    expect(auto.map((r) => r.studentId)).toEqual(['s2']);
+    // Өмнө нь нөхөх мөр үүссэн хоцорсон сурагч хэвээр харагдана — ангид хийсэн A тооцогдож B л үлдэнэ
+    db.lessonMakeup.findMany.mockResolvedValue([
+      { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), imageKeys: [], submittedAt: null, confirmedById: null, confirmedAt: null, note: null },
+      { classroomId: 'c1', studentId: 's2', date: D('2026-10-12'), imageKeys: ['n.jpg'], submittedAt: new Date(), confirmedById: 'owner', confirmedAt: new Date(), note: 'WAIVED\nӨвчтэй' },
+    ]);
     const rows = await service.classroomMakeups(staff('x', Role.TEACHER_PLUS), 'c1', { from: '2026-10-01', to: '2026-10-31' });
     const late = rows.find((r) => r.studentId === 's1')!;
     expect(late.reason).toBe('LATE');
@@ -110,7 +130,7 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
   it('батлах нь шийдвэрийг note-д кодлож хадгална', async () => {
     db.attendance.findMany.mockImplementation(async (args: any) =>
       [
-        { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'LATE', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
+        { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'ABSENT', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
       ].filter((a) => !args.where.studentId || a.studentId === args.where.studentId),
     );
     await service.decide(staff('owner', Role.TEACHER), 'c1', 's1', '2026-10-10', 'CONFIRM', 'Цаасаар хийсэн');
@@ -123,7 +143,7 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
   it('батлахад нөхөх зураг 14 хоногийн дараа устахаар, дахин нээхэд хугацаагүй болно', async () => {
     db.attendance.findMany.mockImplementation(async (args: any) =>
       [
-        { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'LATE', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
+        { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'ABSENT', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
       ].filter((a) => !args.where.studentId || a.studentId === args.where.studentId),
     );
     db.lessonMakeup.upsert.mockResolvedValue({ imageKeys: ['n.pdf'] });
@@ -140,7 +160,7 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
 
   it('шинээр илгээхэд солигдсон хуучин тэмдэглэл 14 хоногийн дараа устахаар тэмдэглэгдэнэ', async () => {
     db.attendance.findMany.mockResolvedValue([
-      { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'LATE', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
+      { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'ABSENT', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
     ]);
     db.lessonMakeup.findUnique.mockResolvedValue({ imageKeys: ['old.pdf'] });
     db.storedFile.findMany.mockResolvedValue([{ key: 'new.pdf', mime: 'application/pdf', pages: 2 }]);
@@ -161,7 +181,7 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
 
   it('нөхөх зураг: бусдын файлыг хавсаргахгүй', async () => {
     db.attendance.findMany.mockResolvedValue([
-      { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'LATE', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
+      { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'ABSENT', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
     ]);
     db.lessonMakeup.findMany.mockResolvedValue([]);
     db.storedFile.findMany.mockResolvedValue([]);
@@ -177,10 +197,63 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
     await expect(service.submitMakeupPhotos('s9', 'c1', '2026-10-10', [])).rejects.toMatchObject({ status: 404 });
   });
 
+  it('нөхөх тестийг ЗӨВХӨН тэр сурагчид нээнэ — ангийн TestAccess үүсгэхгүй (эзэн 2026-11-03)', async () => {
+    db.lessonMakeup.findMany.mockResolvedValue([]);
+    const res = await service.openMakeupTest(staff('s1', Role.STUDENT), 'c1', '2026-10-10', 'tB');
+    expect(res.testId).toBe('tB');
+    expect(db.studentTestAccess.upsert).toHaveBeenCalledTimes(1);
+    expect(db.studentTestAccess.upsert.mock.calls[0][0]).toMatchObject({
+      where: { testId_studentId: { testId: 'tB', studentId: 's1' } },
+      create: { testId: 'tB', studentId: 's1', classroomId: 'c1', source: 'MAKEUP' },
+    });
+    expect(db.testAccess.upsert).not.toHaveBeenCalled();
+    expect(db.testAccess.create).not.toHaveBeenCalled();
+  });
+
+  it('сурагчид тусгайлан нээсэн тест «open» гэж харагдана', async () => {
+    db.lessonMakeup.findMany.mockResolvedValue([]);
+    db.studentTestAccess.findMany.mockResolvedValue([{ testId: 'tB' }]);
+    const mine = await service.myMakeups('s1');
+    expect(mine[0].tests.find((t) => t.testId === 'tB')?.open).toBe(true);
+    expect(mine[0].tests.find((t) => t.testId === 'tA')?.open).toBe(false);
+  });
+
+  it('14 хоногийн дараа устсан файлын холбоос өгөхгүй, «устсан» гэж тэмдэглэнэ; төлөв хэвээр', async () => {
+    db.lessonMakeup.findMany.mockResolvedValue([
+      { classroomId: 'c1', studentId: 's2', date: D('2026-10-12'), imageKeys: ['gone.pdf', 'here.pdf'], submittedAt: new Date(), confirmedById: 'owner', confirmedAt: new Date(), note: 'CONFIRMED' },
+    ]);
+    db.storedFile.findMany.mockResolvedValue([{ key: 'here.pdf', mime: 'application/pdf', pages: 2 }]);
+    const rows = await service.classroomMakeups(staff('x', Role.TEACHER_PLUS), 'c1', { from: '2026-10-01', to: '2026-10-31' });
+    const r = rows.find((x) => x.studentId === 's2')!;
+    expect(r.imageKeys).toEqual(['here.pdf']);
+    expect(r.filesExpired).toBe(true);
+    expect(r.status).toBe('DONE');
+  });
+
+  it('бүх шаардлагыг илгээсэн ч «Нөхсөн» биш — багшийн шийдвэр хүртэл SUBMITTED', async () => {
+    db.lessonMakeup.findMany.mockResolvedValue([
+      { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), imageKeys: ['k.pdf'], submittedAt: new Date(), confirmedById: null, confirmedAt: null, note: null },
+    ]);
+    db.storedFile.findMany.mockResolvedValue([{ key: 'k.pdf', mime: 'application/pdf', pages: 1 }]);
+    db.testResult.findMany.mockResolvedValue([{ studentId: 's1', testId: 'tB' }]);
+    const rows = await service.classroomMakeups(staff('x', Role.TEACHER_PLUS), 'c1', { date: '2026-10-10' });
+    expect(rows.find((x) => x.studentId === 's1')?.status).toBe('SUBMITTED');
+  });
+
   describe('онолын зураг илгээх (СУРАГЧ V2, эзэн 2026-10-31)', () => {
     // УБ 2026-10-24 18:00
     beforeEach(() => jest.useFakeTimers({ now: new Date('2026-10-24T10:00:00Z'), doNotFake: ['nextTick', 'setImmediate'] }));
     afterEach(() => jest.useRealTimers());
+
+    it('хоосон жагсаалтаар илгээхэд өмнөх зураг УСТАХГҮЙ — 400 (эзэн 2026-11-03)', async () => {
+      db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
+      db.classTestSession.findFirst.mockResolvedValue({ id: 'cts' });
+      db.lessonTopic.findMany.mockResolvedValue([]);
+      db.lessonPhoto.findFirst.mockResolvedValue({ id: 'lp1', imageKeys: ['old.jpg'] });
+      db.storedFile.findMany.mockResolvedValue([]);
+      await expect(service.uploadDayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-20', [])).rejects.toMatchObject({ status: 400 });
+      expect(db.lessonPhoto.delete).not.toHaveBeenCalled();
+    });
 
     it('томилогдоогүй ч ангийн гишүүн сурагч илгээнэ; томилолт зөвхөн тэмдэг', async () => {
       db.enrollment.findFirst.mockResolvedValue({ id: 'e' });

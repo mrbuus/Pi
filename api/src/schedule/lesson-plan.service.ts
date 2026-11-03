@@ -33,6 +33,8 @@ import { bookDisplayName } from '../common/book-display';
 type Actor = { userId: string; role: Role };
 const STAFF: Role[] = [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER];
 const PLANNERS: Role[] = [Role.ADMIN, Role.TEACHER_PLUS];
+/** Хичээл батлах/тест тэмдэглэх — ямар ч багш (эзэн 2026-11-03) */
+const CONFIRMERS: Role[] = [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER];
 /** «Өмнөх хичээл»-ийг хайх хамгийн хол хугацаа */
 const PREVIOUS_WINDOW_DAYS = 60;
 
@@ -520,7 +522,7 @@ export class LessonPlanService {
       viewer: {
         role: actor.role,
         canPlan: PLANNERS.includes(actor.role),
-        canConfirm: PLANNERS.includes(actor.role),
+        canConfirm: CONFIRMERS.includes(actor.role),
       },
       entries: entries.map((e) => {
         const occurrenceDate = occurrenceOf(e);

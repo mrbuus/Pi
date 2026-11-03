@@ -11,12 +11,13 @@ export default function SolveClient() {
   const search = useSearchParams();
   const date = search.get("date") ?? "";
   const classroomId = search.get("classroomId") ?? "";
+  const redo = search.get("redo") === "1";
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(date) && !!classroomId && !!params.testId;
 
   return (
     <RequireRole allow={["STUDENT"]}>
       {valid ? (
-        <HomeworkSolve testId={decodeURIComponent(params.testId)} date={date} classroomId={classroomId} />
+        <HomeworkSolve testId={decodeURIComponent(params.testId)} date={date} classroomId={classroomId} redo={redo} />
       ) : (
         <div className="mx-auto max-w-2xl space-y-3">
           <ErrorState message="Даалгаврын холбоос буруу байна" />

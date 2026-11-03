@@ -174,7 +174,6 @@ export default function TheoryDayPanel({
                   sent={{ keys: p.imageKeys, pages: p.pages, at: p.createdAt }}
                   canEdit
                   onSave={save}
-                  onDelete={() => save([])}
                   purpose="theory"
                   maxPages={THEORY_MAX_PAGES}
                   crop

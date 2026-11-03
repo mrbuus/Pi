@@ -20,6 +20,7 @@ import { CreateClassroomStudentDto } from './dto/create-classroom-student.dto';
 import { parseDateOnly, todayUB } from '../common/date';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { toNationalMn } from '../notifications/phone';
+import { buildRegistrationWorkbook, type RegistrationRow } from './registration-standard';
 import {
   nextSevenDigitStudentCode,
   parseClassroomLabel,
@@ -401,6 +402,9 @@ export class UsersService {
         });
         closed = res?.count ?? 0;
       }
+      // Сэргээвэл «гарсан» огноо (сургалтаас хасах тооцоо) арилна — төлбөрийн ledger дахин идэвхтэй
+      if (restore)
+        await tx.studentProfile.updateMany({ where: { userId: id }, data: { leftOn: null } });
       if (restore && classroom)
         await tx.enrollment.create({
           data: { studentId: id, classroomId: classroom.id, movedById: actorId },
@@ -760,6 +764,61 @@ export class UsersService {
       return `"${safe.replace(/"/g, '""')}"`;
     };
     return '\uFEFF' + csv.map((row) => row.map(field).join(',')).join('\r\n');
+  }
+
+  /**
+   * Бүртгэлийн Excel (эзэн 2026-11-03): танхимын сурагчдыг эх БҮРТГЭЛ-2027-тэй ИЖИЛ табтай, ИЖИЛ
+   * баганатай (users/registration-standard.ts) татна. Идэвхтэй нь ангийн табаар, гарсан нь «ГАРСАН»-д.
+   * Эрх: сурагч бүртгэх эрхтэй ажилтан (CSV-тэй ижил).
+   */
+  async exportStudentsXlsx(actorId: string): Promise<Buffer> {
+    await this.assertCentreAdmissionsStaff(actorId);
+    const users = await this.prisma.user.findMany({
+      where: {
+        role: Role.STUDENT,
+        studentProfile: { is: { type: StudentType.CLASSROOM } },
+      },
+      select: {
+        firstName: true,
+        lastName: true,
+        phone: true,
+        archivedAt: true,
+        studentProfile: {
+          select: {
+            grade: true,
+            school: true,
+            section: true,
+            branch: true,
+            fatherPhone: true,
+            motherPhone: true,
+            tuitionAmount: true,
+            joinedOn: true,
+            leftOn: true,
+          },
+        },
+      },
+    });
+    const toRow = (u: (typeof users)[number]): RegistrationRow => ({
+      lastName: u.lastName,
+      firstName: u.firstName,
+      grade: u.studentProfile?.grade ?? null,
+      ownPhone: u.phone,
+      fatherPhone: u.studentProfile?.fatherPhone ?? null,
+      motherPhone: u.studentProfile?.motherPhone ?? null,
+      school: u.studentProfile?.school ?? null,
+      section: u.studentProfile?.section ?? null,
+      joinedOn: u.studentProfile?.joinedOn ?? null,
+      leftOn: u.studentProfile?.leftOn ?? null,
+      tuitionAmount: u.studentProfile?.tuitionAmount ?? null,
+      branch: u.studentProfile?.branch ?? null,
+    });
+    const gone = (u: (typeof users)[number]) =>
+      !!u.archivedAt || !!u.studentProfile?.leftOn;
+    const wb = buildRegistrationWorkbook(
+      users.filter((u) => !gone(u)).map(toRow),
+      users.filter(gone).map(toRow),
+    );
+    return Buffer.from(await wb.xlsx.writeBuffer());
   }
 
   // role=STUDENT үед бүртгэлийн бүх талбар + одоогийн анги. Өмнө нь 500-аар

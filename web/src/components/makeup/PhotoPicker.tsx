@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import {
   Camera,
   ChevronLeft,
@@ -22,12 +22,19 @@ import {
 import { Button } from "@/components/ui/kit/button";
 import { fileUrl, uploadFile, type UploadPurpose } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import {
+  copyFileToMemory,
+  HEIC_READ_ERROR,
+  IMAGE_READ_ERROR,
+  ImageReadError,
+  normalizePickedImage,
+} from "@/lib/imageNormalize";
 import { PDF_MAX_PAGES, photosToPdf, type Rotation } from "@/lib/photosToPdf";
 import CropDialog from "./CropDialog";
 
 interface Picked {
   id: string;
-  /** Анх сонгосон файл — дахин тайрахад эндээс эхэлнэ */
+  /** Сонгоод босоо JPEG болгосон файл (санах ойд) — дахин crop хийхэд эндээс эхэлнэ */
   original: File;
   file: File;
   url: string;
@@ -81,6 +88,8 @@ export default function PhotoPicker({
   const [editing, setEditing] = useState(current.length === 0);
   const [picked, setPicked] = useState<Picked[]>([]);
   const [phase, setPhase] = useState<"" | "build" | "upload" | "save">("");
+  /** Сонгосон зургуудыг уншиж босоо JPEG болгож буй явц */
+  const [preparing, setPreparing] = useState<{ done: number; total: number } | null>(null);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -96,22 +105,78 @@ export default function PhotoPicker({
     return () => list.forEach((u) => URL.revokeObjectURL(u));
   }, []);
 
-  const busy = phase !== "";
+  const busy = phase !== "" || preparing !== null;
 
-  function add(files: FileList | null) {
-    if (!files?.length) return;
+  /**
+   * Хуучин/сул утсанд найдвартай (Galaxy A10 г.м.): 1) бүх файлын байтыг ДАРУЙ санах ойд
+   * хуулна (Android content:// файл хожим уншигдахгүй болдог), дараа нь л оролтыг цэвэрлэнэ;
+   * 2) нэг нэгээр нь босоо JPEG (≤2000px, EXIF-гүй) болгоно — санах ой хэмнэнэ. Нэг зураг
+   * алдвал бусад нь үргэлжилнэ.
+   */
+  async function add(files: File[], resetInput: () => void) {
+    if (!files.length) {
+      resetInput();
+      return;
+    }
     setError("");
     setJustSent(false);
     const room = max - picked.length;
-    const chosen = Array.from(files).slice(0, Math.max(0, room));
-    if (chosen.length < files.length) setError(`${max} хүртэл зураг сонгоно`);
-    const next = chosen.map((file, i) => {
-      const url = URL.createObjectURL(file);
-      urls.current.push(url);
-      return { id: `${Date.now()}-${i}-${file.name}`, original: file, file, url, rotation: 0 as Rotation };
-    });
+    const chosen = files.slice(0, Math.max(0, room));
+    const notes: string[] = [];
+    if (chosen.length < files.length) notes.push(`${max} хүртэл зураг сонгоно`);
+    const next: Picked[] = [];
+    let failed = 0;
+    let heic = false;
+    setPreparing({ done: 0, total: chosen.length });
+    try {
+      const copies: (File | ImageReadError)[] = [];
+      for (const f of chosen) {
+        try {
+          copies.push(await copyFileToMemory(f));
+        } catch (e) {
+          copies.push(e instanceof ImageReadError ? e : new ImageReadError());
+        }
+      }
+      resetInput();
+      for (let i = 0; i < copies.length; i++) {
+        const copy = copies[i];
+        try {
+          if (copy instanceof ImageReadError) throw copy;
+          const file = await normalizePickedImage(copy);
+          const url = URL.createObjectURL(file);
+          urls.current.push(url);
+          next.push({ id: `${Date.now()}-${i}-${file.name}`, original: file, file, url, rotation: 0 });
+        } catch (e) {
+          failed++;
+          if (e instanceof ImageReadError && e.heic) heic = true;
+        }
+        setPreparing({ done: i + 1, total: copies.length });
+      }
+    } finally {
+      resetInput();
+      setPreparing(null);
+    }
+    if (failed) {
+      const tail = heic
+        ? "Камерын тохиргоонд JPEG хэлбэр сонгоод дахин зураарай эсвэл өөр зураг сонгоно уу"
+        : "Дахин зураарай эсвэл өөр зураг сонгоно уу";
+      notes.push(
+        chosen.length > 1 ? `${failed} зургийг уншиж чадсангүй. ${tail}` : heic ? HEIC_READ_ERROR : IMAGE_READ_ERROR,
+      );
+    }
+    if (notes.length) setError(notes.join(". "));
+    if (!next.length) return;
     setPicked((prev) => [...prev, ...next]);
     if (crop) setCropQueue((q) => [...q, ...next.map((n) => n.id)]);
+  }
+
+  /** Оролтын файлуудыг авч, бүрэн уншиж дууссаны дараа л value-г цэвэрлэнэ */
+  function onPick(e: ChangeEvent<HTMLInputElement>) {
+    const input = e.currentTarget;
+    const files = Array.from(input.files ?? []);
+    void add(files, () => {
+      input.value = "";
+    });
   }
 
   function applyCrop(id: string, file: File) {
@@ -300,7 +365,7 @@ export default function PhotoPicker({
                       type="button"
                       disabled={busy}
                       onClick={() => setCropQueue((q) => (q.includes(p.id) ? q : [p.id, ...q]))}
-                      aria-label={`${i + 1}-р зургийг тайрах`}
+                      aria-label={`${i + 1}-р зургийг crop хийх`}
                       className="absolute bottom-1 right-1 flex size-8 items-center justify-center rounded-full bg-ink/70 text-bg transition hover:bg-ink focus-visible:ring-2 focus-visible:ring-brand-bright"
                     >
                       <Crop className="size-4" aria-hidden />
@@ -377,10 +442,7 @@ export default function PhotoPicker({
         className="sr-only"
         tabIndex={-1}
         aria-hidden
-        onChange={(e) => {
-          add(e.target.files);
-          e.target.value = "";
-        }}
+        onChange={onPick}
       />
       <input
         ref={inputRef}
@@ -390,10 +452,7 @@ export default function PhotoPicker({
         className="sr-only"
         tabIndex={-1}
         aria-hidden
-        onChange={(e) => {
-          add(e.target.files);
-          e.target.value = "";
-        }}
+        onChange={onPick}
       />
 
       {cropping && (
@@ -405,6 +464,13 @@ export default function PhotoPicker({
           onDone={(file) => applyCrop(cropping.id, file)}
           onSkip={() => setCropQueue((q) => q.filter((x) => x !== cropping.id))}
         />
+      )}
+
+      {preparing && (
+        <p role="status" className="flex items-center gap-1.5 text-sm font-semibold text-ink-dim">
+          <LoaderCircle className="size-4 shrink-0 animate-spin motion-reduce:animate-none" aria-hidden />
+          {preparing.total > 1 ? `Бэлдэж байна ${preparing.done}/${preparing.total}` : "Бэлдэж байна"}
+        </p>
       )}
 
       {error && (

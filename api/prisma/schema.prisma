@@ -1099,6 +1099,21 @@ model TestAccess {
   @@id([testId, classroomId])
 }
 
+/// Нэг сурагчид тусгайлан нээсэн тест (эзэн 2026-11-03): нөхөх хичээл — тасалсан/чөлөөтэй сурагч
+/// ангид хийсэн A болон гэрийн B хувилбарыг шалгалтын горимоор ӨӨРӨӨ өгнө. Өмнө нь TestAccess-ээр
+/// БҮХ ангид нээгдэж байсан (бусад сурагч урьдчилан хийх боломжтой) — одоо зөвхөн тухайн сурагчид.
+model StudentTestAccess {
+  testId      String
+  studentId   String
+  classroomId String
+  /// Одоогоор зөвхөн «MAKEUP»
+  source      String   @default("MAKEUP")
+  createdAt   DateTime @default(now())
+
+  @@id([testId, studentId])
+  @@index([studentId])
+}
+
 // Онлайн шалгалтын session — сервер-эрхт таймер, shuffle, autosave (Шийдвэр 2).
 // Дараалал анх нэг удаа санамсаргүй үүсээд session дуустал хөлдөнө; явц нь
 // draftAnswers-т хадгалагдах тул refresh/гацалтад тэсвэртэй. Дуусмагц хөлддөг.
@@ -1734,6 +1749,28 @@ model TuitionRefund {
   @@index([studentId])
   @@index([status])
   @@index([classroomId, leftOn])
+}
+
+/// Сургалтаас хасах үеийн төлбөрийн тооцоо (эзэн 2026-11-03, гэрээ «Найм»): «Сургалтаас хасах» товч
+/// дарахад л үүснэ, ХЭЗЭЭ Ч устгахгүй. Бүтэн сар = сарын төлбөр, гарсан сар = суусан хичээл × нэг хичээлийн
+/// үнэ. `detail` — тооцооны бүтэн хуулбар (мөчлөг, хассан өдөр, төлбөрүүд), хожим дүрэм өөрчлөгдсөн ч хэвээр.
+model StudentWithdrawal {
+  id          String   @id @default(cuid())
+  studentId   String
+  classroomId String?
+  leftOn      DateTime @db.Date
+  countFrom   DateTime @db.Date
+  reason      String
+  owed        Int
+  paid        Int
+  refund      Int
+  detail      Json
+  /// Буцаах дүн > 0 бол үүссэн TuitionRefund (DRAFT)
+  refundId    String?
+  createdById String
+  createdAt   DateTime @default(now())
+
+  @@index([studentId, createdAt])
 }
 
 // Төвийн зарлал — танхимын сурагчдын нийтийн самбарт харагдана
@@ -3098,8 +3135,17 @@ model HomeworkAttempt {
   submittedAt  DateTime?
   updatedAt    DateTime              @updatedAt
   checks       HomeworkCheck[]
+  /// Идэвх (эзэн 2026-11-03): хуудас нүдэнд харагдаж байсан нийт секунд, вэбээс гарсан тоо/секунд,
+  /// хичээллэж нээсэн тоо. Клиент хэмжиж илгээнэ; сервер зөвхөн өсгөж (max), бодит хугацаагаар хязгаарлана
+  activeSec    Int                   @default(0)
+  awaySec      Int                   @default(0)
+  leaveCount   Int                   @default(0)
+  openCount    Int                   @default(0)
+  /// 1 = гэрийн даалгавар (B) ; 2 = «Дахин бодох» (эзэн 2026-11-03): хичээлээс хойш 2 хичээл өнгөрсний
+  /// дараа ангийн А, гэрийн Б хоёрыг НЭГ удаа дахин бодно. Анхны оролдлогыг дарахгүй, тусдаа хадгална
+  round        Int                   @default(1)
 
-  @@unique([studentId, testId, lessonDate])
+  @@unique([studentId, testId, lessonDate, round])
   @@index([classroomId, lessonDate])
 }
 

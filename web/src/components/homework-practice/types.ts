@@ -1,6 +1,7 @@
 /**
  * Гэрийн даалгавар (сурагч) — API гэрээ (AGENT-RULES.md «Homework API contract»).
- * Сервер хэзээ ч correctAnswer / isCorrect / solution илгээхгүй.
+ * Бодож байх (IN_PROGRESS, «Шалгах» ч) үед сервер correctAnswer / isCorrect / solution ХЭЗЭЭ Ч илгээхгүй.
+ * Илгээсний дараа л `review` (алдсан бодлогын зөв хариу, баталгаажсан бодолт, бичлэг) ирнэ (эзэн 2026-11-03).
  */
 
 import type { HomeworkStatus } from "@/components/attendance/marks";
@@ -33,6 +34,8 @@ export interface HwPhoto {
   fileKey: string;
   pages: number;
   uploadedAt: string;
+  /** Дараагийн хичээлээс хойш илгээсэн */
+  late?: boolean;
 }
 
 /** V2 (SURAGCH-V2-GEREE): хичээлийн ӨДӨР БҮР ирнэ, `items` хоосон байж болно */
@@ -57,6 +60,45 @@ export interface HwMyResponse {
   days: HwDay[];
 }
 
+/** Дахин бодох (эзэн 2026-11-03): хичээлээс хойш 2 хичээл өнгөрсний дараа А (ангид), Б (гэртээ) нэг удаа */
+export interface HwRedoRound {
+  /** 1 = гэрийн даалгавар, 2 = дахин бодсон */
+  round: number;
+  attemptId: string;
+  status: HwItemStatus;
+  score: HwScore | null;
+  submittedAt: string | null;
+}
+
+export interface HwRedoItem {
+  testId: string;
+  title: string;
+  variantLabel: string | null;
+  /** CLASS = ангид бодсон (А), HOME = гэртээ (Б) */
+  kind: "CLASS" | "HOME";
+  problemCount: number;
+  timeLimitMin: number | null;
+  /** Бусад ангид бодогдох хүлээгдэж байгаа — түр хаалттай */
+  locked: boolean;
+  rounds: HwRedoRound[];
+}
+
+export interface HwRedoDay {
+  date: string;
+  classroomId: string;
+  classroomName: string;
+  topic: string | null;
+  opened: boolean;
+  /** Нээгдэхэд үлдсэн хичээлийн тоо */
+  lessonsLeft: number;
+  items: HwRedoItem[];
+}
+
+export interface HwRedoResponse {
+  lessonsToOpen: number;
+  days: HwRedoDay[];
+}
+
 export interface HwChoice {
   label: string;
   text: string;
@@ -76,8 +118,35 @@ export interface HwProblem {
 /** Хариу: CHOICE → сонголтын `label`, FILL_NUMBER/бусад → мөр */
 export type HwAnswers = Record<string, unknown>;
 
+/** Идэвхийн тоолуур (эзэн 2026-11-03): бодож байх хугацаа, вэбээс гарсан тоо/хугацаа */
+export interface HwActivity {
+  activeSec: number;
+  awaySec: number;
+  leaveCount: number;
+  openCount: number;
+}
+
+export type HwAnswerView = string | Record<string, string> | null;
+
+/** Илгээсний дараах нэг (алдсан) бодлогын зөв хариу, бодолт */
+export interface HwReview {
+  correct: HwAnswerView;
+  solution: string | null;
+  video: { url: string; embedUrl: string } | null;
+}
+
+export interface HwReviewPayload {
+  /** Тест ангид бодогдох тул зөв хариу нээгдэхгүй */
+  locked: boolean;
+  /** Хариулаагүй бодлогын зөв хариу нээгдэх цаг (нууж байгаа үед) */
+  opensAt: string | null;
+  items: Record<string, HwReview>;
+}
+
 export interface HwAttempt {
   attemptId: string;
+  /** 1 = гэрийн даалгавар, 2 = дахин бодсон */
+  round?: number;
   status: HwItemStatus;
   startedAt: string;
   deadlineAt: string | null;
@@ -89,6 +158,9 @@ export interface HwAttempt {
   problems: HwProblem[];
   answers: HwAnswers;
   lastCheck: Record<string, CheckResult> | null;
+  activity: HwActivity;
+  /** Илгээсэн бол алдсан бодлогын зөв хариу; бодож байгаа бол null */
+  review: HwReviewPayload | null;
 }
 
 export interface HwCheckResponse {
@@ -102,4 +174,5 @@ export interface HwSubmitResponse {
   score: HwScore;
   results: Record<string, CheckResult>;
   submittedAt: string;
+  review: HwReviewPayload;
 }

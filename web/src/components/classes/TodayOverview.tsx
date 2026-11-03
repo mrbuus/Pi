@@ -24,6 +24,10 @@ interface DaySummary {
     students: number;
     attendance: { present: number; late: number; absent: number; excused: number; unmarked: number };
     homework: { done: number; partial: number; notDone: number; unmarked: number } | null;
+    /** Онлайн даалгавар (эзэн 2026-11-03): сүүлийн тесттэй хичээлийн илгээсэн/зураг/зөв-нийт бодлого */
+    online: { date: string; submitted: number; photos: number; correct: number; total: number } | null;
+    /** Онолын зураг: томилогдсон сурагч байгаа эсэх, илгээсэн багцын тоо */
+    theory: { assigned: boolean; sent: number };
     confirmed: boolean;
   }[];
 }
@@ -115,7 +119,13 @@ export default function TodayOverview() {
                     <span className="min-w-0">
                       <span className="block truncate text-base font-bold text-ink">{shortClass(c.name)}</span>
                       <span className="block text-xs tabular-nums text-ink-dim">
-                        <Meta items={[formatMinutes(c.startMinute), `${c.students} сурагч`]} />
+                        <Meta
+                          items={[
+                            formatMinutes(c.startMinute),
+                            `${c.students} сурагч`,
+                            c.theory.sent > 0 ? "онолын зураг илгээсэн" : started && c.theory.assigned ? "онолын зураг алга" : null,
+                          ]}
+                        />
                       </span>
                     </span>
                   </span>
@@ -146,7 +156,7 @@ export default function TodayOverview() {
                       label="Даалгавар хийсэн"
                       value={c.homework.done}
                       total={c.students}
-                      note={c.homework.notDone + c.homework.partial > 0 ? `${c.homework.notDone + c.homework.partial} дутуу, хийгээгүй` : null}
+                      note={homeworkNote(c)}
                       className="col-span-2 sm:col-span-1"
                     />
                   ) : (
@@ -160,6 +170,20 @@ export default function TodayOverview() {
       )}
     </section>
   );
+}
+
+/** «онлайн 12/28 · зөв 78% · зураг 20/28 · 3 дутуу, хийгээгүй» — байгаа хэсгүүдийг л */
+function homeworkNote(c: DaySummary["classes"][number]): string | null {
+  const parts: string[] = [];
+  const o = c.online;
+  if (o && (o.submitted > 0 || o.photos > 0)) {
+    parts.push(`онлайн ${o.submitted}/${c.students}`);
+    if (o.total > 0) parts.push(`зөв ${Math.round((o.correct / o.total) * 100)}%`);
+    if (o.photos > 0) parts.push(`зураг ${o.photos}/${c.students}`);
+  }
+  const bad = (c.homework?.notDone ?? 0) + (c.homework?.partial ?? 0);
+  if (bad > 0) parts.push(`${bad} дутуу, хийгээгүй`);
+  return parts.length ? parts.join(" · ") : null;
 }
 
 function minuteNow(): number {
@@ -200,7 +224,7 @@ function Progress({
       >
         <span className="block h-full rounded-full bg-brand-bright" style={{ width: `${pct}%` }} />
       </span>
-      {note && <span className="mt-0.5 block truncate text-[11px] text-ink-dim">{note}</span>}
+      {note && <span className="mt-0.5 block text-[11px] leading-4 text-ink-dim">{note}</span>}
     </span>
   );
 }

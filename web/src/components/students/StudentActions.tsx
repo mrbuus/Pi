@@ -8,6 +8,9 @@ import ExamDialog from "@/components/exams/ExamDialog";
 import { Button } from "@/components/ui/kit/button";
 import { api } from "@/lib/api";
 import ChangeClassDialog from "./ChangeClassDialog";
+import { todayKeyUB } from "@/components/homework-practice/lib";
+import WithdrawalSummary from "./withdrawal/WithdrawalSummary";
+import { ATT_LABEL, md, type WithdrawalPreview } from "./withdrawal/types";
 import { errMsg } from "./types";
 
 /**
@@ -34,7 +37,11 @@ interface ClassOption {
 
 const REASONS = ["Сургалтаа орхисон", "Өөр сургалтад шилжсэн", "Төлбөр", "Давхар бүртгэл"];
 
-/** «Сургалтаас хасах» — шалтгаан заавал; идэвхтэй анги хаагдаж, түүх хэвээр үлдэнэ. */
+/**
+ * «Сургалтаас хасах» (эзэн 2026-11-03): шалтгаан, мэдэгдсэн (гарсан) өдөр → гэрээгээр буцаах төлбөрийн тооцоо
+ * шууд харагдана (бүтэн сар = сарын төлбөр, гарсан сар = суусан хичээл). Гарсан сарын хичээлээс эмнэлгийн
+ * чөлөө гэх мэтийг «тооцохгүй» болгож болно. «Хасах» дарахад л тооцоо хадгалагдаж, сурагч архивлагдана.
+ */
 export function RemoveFromTrainingDialog({
   student,
   onClose,
@@ -45,17 +52,56 @@ export function RemoveFromTrainingDialog({
   onDone: () => void;
 }) {
   const [reason, setReason] = useState("");
+  const [leftOn, setLeftOn] = useState(todayKeyUB());
+  const [countFrom, setCountFrom] = useState("");
+  const [exclude, setExclude] = useState<string[]>([]);
+  const [preview, setPreview] = useState<WithdrawalPreview | null>(null);
+  const [previewError, setPreviewError] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const ready = reason.trim().length >= 3;
+  const ready = reason.trim().length >= 3 && !!preview && !previewError;
+
+  useEffect(() => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(leftOn)) return;
+    let alive = true;
+    const q = new URLSearchParams({ studentId: student.id, leftOn });
+    if (countFrom) q.set("countFrom", countFrom);
+    if (exclude.length) q.set("exclude", exclude.join(","));
+    const t = setTimeout(() => {
+      api<WithdrawalPreview>(`/tuition/withdrawal/preview?${q.toString()}`)
+        .then((p) => {
+          if (!alive) return;
+          setPreview(p);
+          setPreviewError("");
+        })
+        .catch((e) => alive && setPreviewError(errMsg(e)));
+    }, 250);
+    return () => {
+      alive = false;
+      clearTimeout(t);
+    };
+  }, [student.id, leftOn, countFrom, exclude]);
 
   async function submit() {
-    if (!ready || saving) return;
+    if (!ready || saving || !preview) return;
     setSaving(true);
     setError("");
     try {
-      await api(`/users/${encodeURIComponent(student.id)}/archive`, { method: "POST", body: { reason: reason.trim() } });
-      toast.success(`${student.name} сургалтаас хасагдлаа`);
+      const res = await api<{ refund: number }>("/tuition/withdrawal", {
+        method: "POST",
+        body: {
+          studentId: student.id,
+          leftOn,
+          countFrom: preview.countFrom,
+          exclude,
+          reason: reason.trim(),
+        },
+      });
+      toast.success(
+        res.refund > 0
+          ? `${student.name} сургалтаас хасагдлаа. Буцаах ${res.refund.toLocaleString("en-US")}₮ буцаалтын жагсаалтад орлоо`
+          : `${student.name} сургалтаас хасагдлаа`,
+      );
       onDone();
       onClose();
     } catch (e) {
@@ -64,6 +110,8 @@ export function RemoveFromTrainingDialog({
       setSaving(false);
     }
   }
+
+  const toggle = (d: string) => setExclude((xs) => (xs.includes(d) ? xs.filter((x) => x !== d) : [...xs, d]));
 
   return (
     <ExamDialog
@@ -108,6 +156,76 @@ export function RemoveFromTrainingDialog({
             className={`${FIELD} py-2`}
           />
         </label>
+        <div className="grid grid-cols-2 gap-2">
+          <label className="block text-sm text-ink-dim">
+            <span className="mb-1 block">Мэдэгдсэн өдөр</span>
+            <input
+              type="date"
+              value={leftOn}
+              max={todayKeyUB()}
+              onChange={(e) => {
+                setLeftOn(e.target.value);
+                setExclude([]);
+              }}
+              className={FIELD}
+            />
+          </label>
+          <label className="block text-sm text-ink-dim">
+            <span className="mb-1 block">Тооцоо эхлэх</span>
+            <input
+              type="date"
+              value={countFrom || preview?.countFrom || ""}
+              max={leftOn}
+              onChange={(e) => {
+                setCountFrom(e.target.value);
+                setExclude([]);
+              }}
+              className={FIELD}
+            />
+          </label>
+        </div>
+
+        {previewError && (
+          <p role="alert" className="rounded-xl border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
+            {previewError}
+          </p>
+        )}
+        {!preview && !previewError && <p className="text-sm text-ink-dim">Тооцоо бодож байна</p>}
+        {preview && (
+          <>
+            <WithdrawalSummary data={preview} />
+            {preview.lastCycleDays.length > 0 && (
+              <section aria-label="Гарсан сарын хичээлүүд" className="rounded-xl border border-line bg-surface p-3">
+                <h4 className="text-sm font-bold text-ink">Гарсан сарын хичээлүүд</h4>
+                <p className="mb-2 text-xs text-ink-dim">
+                  Сард 1 чөлөө автоматаар хасагдана. Эмнэлгийн чөлөө гэх мэт өдрийг сонговол суугаагүйд тооцно
+                </p>
+                <ul className="space-y-1">
+                  {preview.lastCycleDays.map((d) => (
+                    <li key={d.date}>
+                      <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-2 text-sm hover:bg-ink/[0.03]">
+                        <input
+                          type="checkbox"
+                          checked={exclude.includes(d.date)}
+                          onChange={() => toggle(d.date)}
+                          disabled={d.leave && !exclude.includes(d.date)}
+                          className="size-4 accent-[var(--color-brand-bright)]"
+                        />
+                        <span className="w-12 tabular-nums text-ink-dim">{md(d.date)}</span>
+                        <span className="min-w-0 flex-1 truncate text-ink">
+                          {d.status ? ATT_LABEL[d.status] : "Ирц бүртгээгүй"}
+                          {d.note ? ` — ${d.note}` : ""}
+                        </span>
+                        {d.leave && <span className="shrink-0 text-xs font-semibold text-brand-soft">Чөлөө хассан</span>}
+                        {d.excluded && <span className="shrink-0 text-xs font-semibold text-brand-soft">Тооцохгүй</span>}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </>
+        )}
         {error && (
           <p role="alert" className="rounded-xl border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
             {error}

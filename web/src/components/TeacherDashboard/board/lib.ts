@@ -120,7 +120,7 @@ export interface OnlinePayload {
   students: Record<string, { score: number; max: number; testId: string; taken: number }>;
 }
 
-export type MakeupStatus = "PENDING" | "PARTIAL" | "DONE" | "WAIVED";
+export type MakeupStatus = "PENDING" | "PARTIAL" | "SUBMITTED" | "DONE" | "WAIVED";
 export interface MakeupRow {
   studentId: string;
   status: MakeupStatus;
@@ -200,6 +200,7 @@ export const NOTE_MAX = 200;
 export const MAKEUP_LABEL: Record<MakeupStatus, string> = {
   PENDING: "Нөхөөгүй",
   PARTIAL: "Хагас нөхсөн",
+  SUBMITTED: "Илгээсэн, шалгана",
   DONE: "Нөхсөн",
   WAIVED: "Чөлөөлсөн",
 };
@@ -318,35 +319,6 @@ export function addMonths(month: string, n: number): string {
 export function fmtPhone(p: string): string {
   const d = p.replace(/\D/g, "");
   return d.length === 8 ? `${d.slice(0, 4)} ${d.slice(4)}` : p;
-}
-
-/* ───────── Сонгосон таб: нөхцөл тус бүрээр санана ───────── */
-
-export type Tab = "monitor" | "mark";
-const TAB_STORE = "pi_board_tab";
-
-/** Өнөөдөр хичээл яг явагдаж байвал «Тэмдэглэх», бусад үед «Хяналт»; багшийн сонголтыг тэр нөхцөлд санана */
-export function initialTab(lessonNow: boolean): Tab {
-  try {
-    const raw = window.localStorage.getItem(TAB_STORE);
-    const v = raw ? (JSON.parse(raw) as Record<string, unknown>)[lessonNow ? "now" : "other"] : null;
-    if (v === "monitor" || v === "mark") return v;
-  } catch {
-    // хувийн цонх, хаалттай хадгалалт — өгөгдмөлөөр
-  }
-  return lessonNow ? "mark" : "monitor";
-}
-
-export function rememberTab(lessonNow: boolean, tab: Tab): void {
-  try {
-    const raw = window.localStorage.getItem(TAB_STORE);
-    const parsed: unknown = raw ? JSON.parse(raw) : null;
-    const obj = parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
-    obj[lessonNow ? "now" : "other"] = tab;
-    window.localStorage.setItem(TAB_STORE, JSON.stringify(obj));
-  } catch {
-    // хадгалж чадахгүй бол зүгээр л санахгүй
-  }
 }
 
 export function readStore(key: string): string | null {

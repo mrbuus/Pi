@@ -745,3 +745,17 @@ textarea:focus-visible,
   :root:not([data-theme="light"]) .logo-on-dark { display: block; }
 }
 
+
+/*
+ * iPhone (iOS Safari): 16px-ээс жижиг бичих талбар дээр дарахад хөтөч хуудсыг өөрөө томруулж, гар
+ * хаагдсаны дараа ч томорсон хэвээр үлдэнэ — хуваарийн хичээлийн цонх зэрэг газар баруун тал нь
+ * дэлгэцээс гарч, «интерфэйс эвдэрсэн» мэт харагддаг (эзэн 2026-11-03). Зөвхөн iOS-д талбарын
+ * үсгийг 16px болгоно; layer-гүй тул Tailwind-ийн `text-sm`-ээс давамгайлна.
+ */
+@supports (-webkit-touch-callout: none) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

@@ -223,16 +223,17 @@ describe('LessonRecordsService.confirm', () => {
     expect(out.date).toBe(DATE);
   });
 
-  it('эрх: зөвхөн Багш+, Админ батална (эзэн 2026-10-18); Багш — тэр өдөр орсон ч үгүй', async () => {
+  it('эрх: ямар ч багш батална (эзэн 2026-11-03); сурагч, эцэг эх, худалдан авагч үгүй', async () => {
     const { service, prisma } = makeService();
-    for (const role of [Role.TEACHER, Role.STUDENT, Role.PARENT, Role.BUYER])
+    for (const role of [Role.STUDENT, Role.PARENT, Role.BUYER])
       await expect(
         service.confirm({ userId: 'lead', role }, 's1', DATE),
       ).rejects.toThrow();
     expect(prisma.lessonRecord.upsert).not.toHaveBeenCalled();
     await service.confirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE);
     await service.confirm({ userId: 'adm', role: Role.ADMIN }, 's1', DATE);
-    expect(prisma.lessonRecord.upsert).toHaveBeenCalledTimes(2);
+    await service.confirm({ userId: 'any', role: Role.TEACHER }, 's1', DATE);
+    expect(prisma.lessonRecord.upsert).toHaveBeenCalledTimes(3);
   });
 
   it('батлахдаа хийсэн тест + хассан бодлогыг ClassTestSession-д бичнэ, бусдыг устгана', async () => {
@@ -296,7 +297,7 @@ describe('LessonRecordsService.confirm', () => {
     ).rejects.toThrow('товлогдоогүй');
   });
 
-  it('буцаахад аудит REVERSE бичнэ; энгийн багш буцаахгүй', async () => {
+  it('буцаахад аудит REVERSE бичнэ; сурагч буцаахгүй, багш буцаана', async () => {
     const { service, prisma } = makeService();
     prisma.lessonRecord.findUnique.mockResolvedValue({
       id: 'r1',
@@ -307,9 +308,9 @@ describe('LessonRecordsService.confirm', () => {
       students: [],
     });
     await expect(
-      service.unconfirm({ userId: 'lead', role: Role.TEACHER }, 's1', DATE),
+      service.unconfirm({ userId: 'x', role: Role.STUDENT }, 's1', DATE),
     ).rejects.toThrow();
-    await service.unconfirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE);
+    await service.unconfirm({ userId: 'lead', role: Role.TEACHER }, 's1', DATE);
     expect(prisma.auditLog.create.mock.calls[0][0].data.action).toBe('REVERSE');
   });
 
@@ -557,10 +558,8 @@ describe('Сурагчийн хичээлийн түүх (ажилтан)', () =
 describe('LessonRecordsController маршрутын эрх', () => {
   const roles = (name: keyof LessonRecordsController) =>
     Reflect.getMetadata(ROLES_KEY, LessonRecordsController.prototype[name]);
-  it('батлах/буцаах — Багш+, Админ; тайлбар/өдөр/анги — ажилтан; /me — сурагч', () => {
-    for (const name of ['confirm', 'unconfirm'] as const)
-      expect([...roles(name)].sort()).toEqual([Role.ADMIN, Role.TEACHER_PLUS].sort());
-    for (const name of ['note', 'day', 'classroom', 'student'] as const)
+  it('батлах/буцаах/тайлбар/өдөр/анги — ажилтан (ямар ч багш); /me — сурагч', () => {
+    for (const name of ['confirm', 'unconfirm', 'note', 'day', 'classroom', 'student'] as const)
       expect([...roles(name)].sort()).toEqual(
         [Role.ADMIN, Role.TEACHER, Role.TEACHER_PLUS].sort(),
       );

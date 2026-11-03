@@ -38,6 +38,8 @@ export interface HomeworkPhoto {
   fileKey: string;
   pages: number;
   uploadedAt: string;
+  /** Дараагийн хичээлээс хойш илгээсэн */
+  late?: boolean;
 }
 
 /** «YYYY-MM-DD»-ээс n хоногийн зөрүү (цагийн бүсгүй өдөр) */

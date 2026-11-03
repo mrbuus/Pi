@@ -44,6 +44,7 @@ interface Props {
   onHw: (id: string, v: HomeworkStatus | null) => void;
   onHwNote: (id: string, text: string, typed: boolean) => void;
   onDrawer: (id: string) => void;
+  onOnline: (id: string) => void;
 }
 
 const NO_FLAGS: string[] = [];
@@ -84,6 +85,7 @@ export default function MarkView(p: Props) {
             onHw={p.onHw}
             onHwNote={p.onHwNote}
             onDrawer={p.onDrawer}
+            onOnline={p.onOnline}
           />
         ))}
       </ul>
@@ -93,6 +95,11 @@ export default function MarkView(p: Props) {
       <Legend label="Тэмдгийн тайлбар" className="px-1">
         <LegendItem icon={<RiskDot />}>Шалгуур хангаагүй</LegendItem>
         {p.sent.size > 0 && <LegendItem icon={<SentMark />}>Даалгавраа илгээсэн</LegendItem>}
+        {p.homework && p.sent.size > 0 && (
+          <LegendItem icon={<span aria-hidden className="size-3.5 rounded border border-brand-bright/60 bg-brand-bright/10" />}>
+            Илгээсэн ч шалгаагүй, тэмдэглэмэгц энгийн болно
+          </LegendItem>
+        )}
         {p.homework && p.onlineTests && (
           <LegendItem icon={<Laptop className="size-3.5 text-brand" aria-hidden />}>
             Өмнөх хичээлийн онлайн гэрийн даалгаврын оноо, дарж дүнг үзнэ

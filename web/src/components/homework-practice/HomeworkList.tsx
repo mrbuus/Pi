@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BookOpenCheck, CalendarClock, ChevronRight, CircleCheck, CircleDashed, Clock, Hourglass, MessageSquareText, Play, RotateCcw } from "lucide-react";
+import { BookOpenCheck, CalendarClock, ChevronDown, ChevronRight, History, CircleCheck, CircleDashed, Clock, Hourglass, MessageSquareText, Play, RotateCcw } from "lucide-react";
 import { HOMEWORK_MARKS, TONE_SELECTED } from "@/components/attendance/marks";
 import { dayLabel } from "@/components/makeup/types";
 import { weekdayShort } from "@/components/student-hub/lib";
@@ -11,9 +11,10 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock
 import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
-import { formatMnDateTime } from "@/lib/dateMn";
+import { formatMnDate } from "@/lib/dateMn";
 import HomeworkPhotoPanel from "@/components/student-hub/HomeworkPhotoPanel";
 import { HOMEWORK_WINDOW_DAYS, dayDiff } from "@/components/student-hub/photo-types";
+import HomeworkRedo from "./HomeworkRedo";
 import { cleanTitle, solveHref, todayKeyUB } from "./lib";
 import type { HwDay, HwItem, HwMyResponse, HwPhoto } from "./types";
 
@@ -110,6 +111,52 @@ function MarkBadge({ day }: { day: HwDay }) {
   );
 }
 
+
+/** Нэг минутад нэг шинэчлэгдэх «одоо» — үлдсэн хугацааг шинэчилнэ */
+function useNow(): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  return now;
+}
+
+/**
+ * Хугацаа энгийнээр (эзэн 2026-11-03): «Мягмар 23:59 хүртэл» + үлдсэн хугацаа («2 өдөр 5 цаг үлдсэн»).
+ * Сервер дараагийн хичээлийн өдрийн 00:00-ийг өгдөг — өмнөх өдрийн 23:59 гэж харуулна.
+ */
+function DeadlineChip({ iso }: { iso: string }) {
+  const now = useNow();
+  const end = new Date(iso).getTime();
+  if (!Number.isFinite(end)) return null;
+  const endKey = formatMnDate(new Date(end - 60_000), { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\./g, "-");
+  const left = end - now;
+  const mins = Math.floor(left / 60_000);
+  const days = Math.floor(mins / 1440);
+  const hours = Math.floor((mins % 1440) / 60);
+  const remain =
+    left <= 0
+      ? "Хугацаа дууссан"
+      : days > 0
+        ? `${days} өдөр${hours ? ` ${hours} цаг` : ""} үлдсэн`
+        : hours > 0
+          ? `${hours} цаг үлдсэн`
+          : `${Math.max(1, mins)} минут үлдсэн`;
+  const urgent = left > 0 && left < 6 * 3_600_000;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold",
+        left <= 0 ? "border-error/50 text-error" : urgent ? "border-brand-bright/60 text-brand-soft" : "border-line",
+      )}
+    >
+      <Clock className="size-3" aria-hidden />
+      <Meta items={[`${weekdayShort(endKey)} 23:59 хүртэл`, remain]} />
+    </span>
+  );
+}
+
 function DayCard({
   day,
   today,
@@ -147,12 +194,7 @@ function DayCard({
         {day.topic && <p className="cyrillic-tight font-semibold text-ink">{day.topic}</p>}
         <div className="flex flex-wrap items-center gap-1.5 text-sm text-ink-dim">
           <span>{day.classroomName}</span>
-          {day.deadlineAt && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5 text-[11px] font-semibold tabular-nums">
-              <Clock className="size-3" aria-hidden />
-              {formatMnDateTime(day.deadlineAt, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })} хүртэл
-            </span>
-          )}
+          {day.deadlineAt && !day.upcoming && <DeadlineChip iso={day.deadlineAt} />}
         </div>
         {comment && (
           <p className="flex items-start gap-1.5 rounded-lg bg-panel px-3 py-2 text-sm text-ink">
@@ -250,6 +292,8 @@ export default function HomeworkList() {
   const [days, setDays] = useState<HwDay[] | null>(null);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
+  const [showOlder, setShowOlder] = useState(false);
+  const [showUpcoming, setShowUpcoming] = useState(false);
   const todayKey = todayKeyUB();
 
   const load = useCallback(async () => {
@@ -275,17 +319,45 @@ export default function HomeworkList() {
     [days],
   );
 
-  // Өнөөдөр → дараагийн хичээлүүд (ойрх нь эхэнд) → өмнөх (шинэ нь эхэнд)
-  const sections = useMemo(
-    () => [
-      { title: "Өнөөдөр", days: sorted.filter((d) => d.date === todayKey) },
-      {
-        title: "Урьдчилан илгээх",
-        days: sorted.filter((d) => d.date > todayKey).reverse(),
-      },
-      { title: "Өмнөх хичээлүүд", days: sorted.filter((d) => d.date < todayKey) },
-    ],
-    [sorted, todayKey],
+  // Энгийн байлгах (эзэн 2026-11-03): үндсэн нь зөвхөн өнөөдрийн (эсвэл өнөөдөр хичээлгүй бол сүүлийн) хичээл;
+  // өмнөх өдрүүд, урьдчилан илгээх нь тусдаа товчоор нээгдэнэ
+  const groups = useMemo(() => {
+    const todays = sorted.filter((d) => d.date === todayKey);
+    const upcoming = sorted.filter((d) => d.date > todayKey).reverse();
+    const past = sorted.filter((d) => d.date < todayKey);
+    if (todays.length || !past.length) return { title: "Өнөөдөр", main: todays, older: past, upcoming };
+    const latest = past[0].date;
+    return {
+      title: "Сүүлийн хичээл",
+      main: past.filter((d) => d.date === latest),
+      older: past.filter((d) => d.date !== latest),
+      upcoming,
+    };
+  }, [sorted, todayKey]);
+
+  const canSendDay = (d: HwDay) =>
+    !!d.upcoming || (dayDiff(todayKey, d.date) >= 0 && dayDiff(todayKey, d.date) < HOMEWORK_WINDOW_DAYS);
+  // Өмнөх өдрүүдээс зураг нь илгээгдээгүй, одоо ч илгээж болох — товчон дээр сануулна
+  const missed = groups.older.filter((d) => !d.photo && canSendDay(d)).length;
+
+  const cards = (list: HwDay[]) => (
+    <div className="space-y-3">
+      {list.map((d) => (
+        <DayCard
+          key={dayId(d)}
+          day={d}
+          today={d.date === todayKey}
+          canSend={canSendDay(d)}
+          onPhoto={(photo) => {
+            setDays((prev) =>
+              (prev ?? []).map((x) => (x.date === d.date && x.classroomId === d.classroomId ? { ...x, photo } : x)),
+            );
+            // «Хоцорсон» тэмдэг серверийн хугацаагаар тооцогддог — шинэчилж авна
+            if (photo) void load();
+          }}
+        />
+      ))}
+    </div>
   );
 
   return (
@@ -303,36 +375,63 @@ export default function HomeworkList() {
         />
       ) : (
         <>
-          <DayStrip days={sorted} todayKey={todayKey} />
-          {sections.map((sec) =>
-            sec.days.length ? (
-              <section key={sec.title} className="mb-6">
-                <h2 className="mb-2 text-sm font-semibold text-ink-dim">{sec.title}</h2>
-                <div className="space-y-3">
-                  {sec.days.map((d) => (
-                    <DayCard
-                      key={dayId(d)}
-                      day={d}
-                      today={d.date === todayKey}
-                      canSend={
-                        !!d.upcoming ||
-                        (dayDiff(todayKey, d.date) >= 0 && dayDiff(todayKey, d.date) < HOMEWORK_WINDOW_DAYS)
-                      }
-                      onPhoto={(photo) =>
-                        setDays((prev) =>
-                          (prev ?? []).map((x) =>
-                            x.date === d.date && x.classroomId === d.classroomId ? { ...x, photo } : x,
-                          ),
-                        )
-                      }
-                    />
-                  ))}
+          {groups.main.length > 0 && (
+            <section className="mb-4">
+              <h2 className="mb-2 text-sm font-semibold text-ink-dim">{groups.title}</h2>
+              {cards(groups.main)}
+            </section>
+          )}
+
+          {groups.older.length > 0 && (
+            <section className="mb-4">
+              <button
+                type="button"
+                aria-expanded={showOlder}
+                aria-controls="hw-older"
+                onClick={() => setShowOlder((v) => !v)}
+                className="flex min-h-12 w-full items-center gap-2 rounded-xl border border-line bg-surface px-4 text-left font-semibold text-ink transition hover:bg-ink/[0.03] focus-visible:ring-2 focus-visible:ring-brand-bright"
+              >
+                <History className="size-5 shrink-0 text-brand-soft" aria-hidden />
+                <span className="flex-1">Өмнөх өдрийн даалгавар илгээх</span>
+                {missed > 0 && (
+                  <span className="rounded-full bg-error px-2 text-xs font-bold leading-5 tabular-nums text-on-error" aria-label={`${missed} өдөр илгээгээгүй`}>
+                    {missed}
+                  </span>
+                )}
+                <ChevronDown className={cn("size-4 shrink-0 text-ink-dim transition-transform", showOlder && "rotate-180")} aria-hidden />
+              </button>
+              {showOlder && (
+                <div id="hw-older" className="mt-3">
+                  <DayStrip days={groups.older} todayKey={todayKey} />
+                  {cards(groups.older)}
                 </div>
-              </section>
-            ) : null,
+              )}
+            </section>
+          )}
+
+          {groups.upcoming.length > 0 && (
+            <section className="mb-6">
+              <button
+                type="button"
+                aria-expanded={showUpcoming}
+                aria-controls="hw-upcoming"
+                onClick={() => setShowUpcoming((v) => !v)}
+                className="flex min-h-12 w-full items-center gap-2 rounded-xl border border-dashed border-brand-bright/50 bg-surface px-4 text-left font-semibold text-ink transition hover:bg-ink/[0.03] focus-visible:ring-2 focus-visible:ring-brand-bright"
+              >
+                <CalendarClock className="size-5 shrink-0 text-brand-soft" aria-hidden />
+                <span className="flex-1">Урьдчилан илгээх</span>
+                <ChevronDown className={cn("size-4 shrink-0 text-ink-dim transition-transform", showUpcoming && "rotate-180")} aria-hidden />
+              </button>
+              {showUpcoming && (
+                <div id="hw-upcoming" className="mt-3">
+                  {cards(groups.upcoming)}
+                </div>
+              )}
+            </section>
           )}
         </>
       )}
+      {days && <HomeworkRedo />}
     </div>
   );
 }

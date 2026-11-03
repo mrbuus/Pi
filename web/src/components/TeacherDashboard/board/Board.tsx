@@ -1,7 +1,6 @@
 "use client";
 
-import * as Tabs from "@radix-ui/react-tabs";
-import { CalendarX2, ChevronLeft, ChevronRight, Eye, PencilLine } from "lucide-react";
+import { CalendarX2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import RoomBadge from "@/components/schedule/RoomBadge";
 import { ErrorState } from "@/components/ui/StateBlock";
@@ -13,9 +12,11 @@ import CriteriaButton from "./CriteriaButton";
 import DateStrip, { type YearMonth } from "./DateStrip";
 import LessonNoteBox from "./LessonNoteBox";
 import MarkView, { type BulkState } from "./MarkView";
-import MonitorView, { type FilterKey } from "./MonitorView";
+import { BoardFilters, LessonInfo, matchesFilter, type FilterKey } from "./BoardFilters";
 import OtherInfo from "./OtherInfo";
 import RecordedByLine from "./RecordedBy";
+import TheoryPhotosStaff from "@/components/TheoryPhotosStaff";
+import OnlineDetail from "./OnlineDetail";
 import StudentDrawer from "./StudentDrawer";
 import type { OnlineCell } from "./StudentCard";
 import SummaryBar from "./SummaryBar";
@@ -26,24 +27,20 @@ import {
   fromKey,
   hasNote,
   hm,
-  initialTab,
   needsDetail,
   readStore,
-  rememberTab,
   shortDay,
   toKey,
   ubNowMinute,
   ubTodayKey,
   writeStore,
   type AttendanceStatus,
-  type BoardLesson,
   type DayClass,
   type DayRec,
   type HomeworkStatus,
   type MakeupRow,
   type MakeupStatus,
   type OnlinePayload,
-  type Tab,
 } from "./lib";
 import { useBoard } from "./useBoard";
 
@@ -316,23 +313,15 @@ function nextOpen(open: Ui["open"], id: string, rec: DayRec, wantsOpen: boolean,
   return open;
 }
 
-function lessonNowOf(lessons: BoardLesson[], date: string, today: string) {
-  if (date !== today) return false;
-  const now = ubNowMinute();
-  return lessons.some((l) => l.startMinute <= now && now < l.endMinute);
-}
-
 function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: string; today: string; canManage: boolean }) {
   const board = useBoard(cls.id, date);
   const { data, recs } = board;
   const homework = cls.type !== "ONLINE";
-  const [lessonNow] = useState(() => lessonNowOf(cls.lessons, date, today));
-  const [picked, setPicked] = useState<Tab | null>(null);
-  const tab = picked ?? initialTab(lessonNow);
   const [ui, setUi] = useState<Ui>(EMPTY_UI);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [filter, setFilter] = useState<FilterKey | null>(null);
   const [drawerId, setDrawerId] = useState<string | null>(null);
+  const [onlineId, setOnlineId] = useState<string | null>(null);
 
   // Энэ анги, энэ өдрийг зэрэг нээсэн бусад багш (D8)
   const editors = usePresence([`attendance:${cls.id}:${date}`]);
@@ -389,12 +378,22 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
   }, [students, board.risk]);
   // «Илгээсэн»: тухайн хичээлийн даалгаврыг илгээсэн сурагчид (сервер одоогийн сурагчаар шүүсэн)
   const sentSet = useMemo(() => new Set(board.sent), [board.sent]);
+  // Шүүлтүүр сонгосон бол тохирсон сурагчид л жагсаалтад (тэмдэглэх карт хэвээр)
+  const shownStudents = useMemo(
+    () =>
+      filter
+        ? students.filter((s) =>
+            matchesFilter(filter, {
+              rec: recs.get(s.id)!,
+              flags: flags.get(s.id) ?? [],
+              online: online[s.id] ?? null,
+              sent: sentSet.has(s.id),
+            }),
+          )
+        : students,
+    [filter, students, recs, flags, online, sentSet],
+  );
   const flaggedCount = useMemo(() => [...flags.values()].filter((f) => f.length > 0).length, [flags]);
-
-  const changeTab = (t: Tab) => {
-    setPicked(t);
-    rememberTab(lessonNow, t);
-  };
 
   // `recs`-ээс ХАМААРАХГҮЙ (board.current-оор уншина): эс бөгөөс товшилт бүрт функц шинэчлэгдэж
   // 40 карт бүгд дахин зурагдаж, сул утсан дээр 200–400 мс гацдаг байв (эзэн 2026-10-31)
@@ -428,6 +427,7 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
     });
   }, []);
   const openDrawer = useCallback((id: string) => setDrawerId(id), []);
+  const openOnline = useCallback((id: string) => setOnlineId(id), []);
 
   /* Бөөнөөр: зөвхөн тэмдэглээгүй нүд; дараа нь гараар өөрчилсөнийг буцаахгүй */
   const presentIds = students.filter((s) => recs.get(s.id)?.att === null).map((s) => s.id);
@@ -484,113 +484,122 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
   const firstStart = Math.min(...cls.lessons.map((l) => l.startMinute));
   const upcoming = date > today || (date === today && ubNowMinute() < firstStart);
   const drawer = drawerId ? students.find((s) => s.id === drawerId) : undefined;
+  const onlineStudent = onlineId ? students.find((s) => s.id === onlineId) : undefined;
 
   return (
     <div className="space-y-3">
       <LessonNoteBox scheduleId={cls.lessons[0].scheduleId} date={date} today={today} />
 
-      <Tabs.Root value={tab} onValueChange={(v) => changeTab(v as Tab)}>
-        <Tabs.List aria-label="Самбарын хэсэг" className="flex gap-1 border-b border-line">
-          {(
-            [
-              ["monitor", "Хяналт", Eye],
-              ["mark", "Тэмдэглэх", PencilLine],
-            ] as const
-          ).map(([value, label, Icon]) => (
-            <Tabs.Trigger
-              key={value}
-              value={value}
-              className="-mb-px inline-flex min-h-11 items-center gap-1.5 border-b-2 border-transparent px-3 text-sm font-bold text-ink-dim transition-colors hover:text-ink data-[state=active]:border-brand-bright data-[state=active]:text-brand-soft"
-            >
-              <Icon className="size-4" aria-hidden />
-              {label}
-            </Tabs.Trigger>
-          ))}
-        </Tabs.List>
+      <div className="space-y-3">
+        <SummaryBar
+          counts={counts}
+          homework={homework}
+          sent={students.filter((s) => sentSet.has(s.id)).length}
+          online={hasOnline ? Object.keys(online).length : null}
+          total={total}
+          save={board.save}
+          idleHint
+          others={others}
+          criteria={
+            board.criteria && (
+              <CriteriaButton
+                value={board.criteria}
+                flagged={flaggedCount}
+                total={total}
+                canEdit={data.canEditCriteria}
+                onChange={(c) => void board.saveCriteria(c)}
+              />
+            )
+          }
+        />
+        <RecordedByLine data={board.recordedBy} date={date} homework={homework} />
+        {total === 0 ? (
+          <div className="rounded-xl border border-dashed border-line px-4 py-8 text-center">
+            <p className="font-bold text-ink">Энэ ангид сурагч алга</p>
+            <p className="mt-1 text-sm text-ink-dim">Сурагчдыг «Сурагчид» хэсгээс ангид нэмнэ</p>
+          </div>
+        ) : (
+          <>
+            <LessonInfo
+              students={students}
+              homework={homework}
+              topic={cls.lessons.map((l) => l.topic).find(Boolean) ?? null}
+              onlineData={onlineData}
+              online={online}
+            />
+            <TheoryPhotosStaff classroomId={cls.id} date={date} defaultOpen={date <= today} />
+            <BoardFilters
+              students={students}
+              recs={recs}
+              flags={flags}
+              homework={homework}
+              online={online}
+              sent={sentSet}
+              hasOnline={hasOnline}
+              filter={filter}
+              onFilter={setFilter}
+              shown={shownStudents.length}
+            />
+            {shownStudents.length > 0 ? (
+              <MarkView
+                students={shownStudents}
+                names={names}
+                recs={recs}
+                flags={flags}
+                homework={homework}
+                upcoming={upcoming}
+                onlineTests={hasOnline}
+                online={online}
+                makeup={makeup}
+                sent={sentSet}
+                open={ui.open}
+                bulk={ui.bulk}
+                bulkBusy={bulkBusy}
+                presentCount={presentIds.length}
+                doneCount={doneIds.length}
+                hwSkipped={hwSkipped}
+                onBulkPresent={bulkPresent}
+                onUndoPresent={undoPresent}
+                onBulkDone={bulkDone}
+                onUndoDone={undoDone}
+                onToggle={onToggle}
+                onAtt={onAtt}
+                onRange={board.onRange}
+                onAttNote={board.onAttNote}
+                onHw={onHw}
+                onHwNote={board.onHwNote}
+                onDrawer={openDrawer}
+                onOnline={openOnline}
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-line px-4 py-8 text-center text-sm text-ink-dim">
+                Шүүлтүүрт тохирох сурагч алга
+                <button
+                  type="button"
+                  onClick={() => setFilter(null)}
+                  className="inline-flex min-h-11 items-center rounded-lg border border-line px-3 font-semibold text-ink hover:bg-ink/5 sm:min-h-9"
+                >
+                  Бүх сурагчийг харах
+                </button>
+              </div>
+            )}
+            <OtherInfo classId={cls.id} classType={cls.type} date={date} canManage={canManage} />
+          </>
+        )}
+      </div>
 
-        <div className="mt-3 space-y-3">
-          <SummaryBar
-            counts={counts}
-            homework={homework}
-            sent={students.filter((s) => sentSet.has(s.id)).length}
-            online={hasOnline ? Object.keys(online).length : null}
-            total={total}
-            save={board.save}
-            idleHint={tab === "mark"}
-            others={others}
-            criteria={
-              board.criteria && (
-                <CriteriaButton
-                  value={board.criteria}
-                  flagged={flaggedCount}
-                  total={total}
-                  canEdit={data.canEditCriteria}
-                  onChange={(c) => void board.saveCriteria(c)}
-                />
-              )
-            }
-          />
-          <RecordedByLine data={board.recordedBy} date={date} homework={homework} />
-          {total === 0 ? (
-            <div className="rounded-xl border border-dashed border-line px-4 py-8 text-center">
-              <p className="font-bold text-ink">Энэ ангид сурагч алга</p>
-              <p className="mt-1 text-sm text-ink-dim">Сурагчдыг «Сурагчид» хэсгээс ангид нэмнэ</p>
-            </div>
-          ) : (
-            <>
-              <Tabs.Content value="monitor" className="space-y-3">
-                <MonitorView
-                  students={students}
-                  names={names}
-                  recs={recs}
-                  flags={flags}
-                  homework={homework}
-                  topic={cls.lessons.map((l) => l.topic).find(Boolean) ?? null}
-                  onlineData={onlineData}
-                  online={online}
-                  makeup={makeup}
-                  sent={sentSet}
-                  filter={filter}
-                  onFilter={setFilter}
-                  onDrawer={openDrawer}
-                  footer={<OtherInfo classId={cls.id} classType={cls.type} date={date} canManage={canManage} />}
-                />
-              </Tabs.Content>
-              <Tabs.Content value="mark">
-                <MarkView
-                  students={students}
-                  names={names}
-                  recs={recs}
-                  flags={flags}
-                  homework={homework}
-                  upcoming={upcoming}
-                  onlineTests={hasOnline}
-                  online={online}
-                  makeup={makeup}
-                  sent={sentSet}
-                  open={ui.open}
-                  bulk={ui.bulk}
-                  bulkBusy={bulkBusy}
-                  presentCount={presentIds.length}
-                  doneCount={doneIds.length}
-                  hwSkipped={hwSkipped}
-                  onBulkPresent={bulkPresent}
-                  onUndoPresent={undoPresent}
-                  onBulkDone={bulkDone}
-                  onUndoDone={undoDone}
-                  onToggle={onToggle}
-                  onAtt={onAtt}
-                  onRange={board.onRange}
-                  onAttNote={board.onAttNote}
-                  onHw={onHw}
-                  onHwNote={board.onHwNote}
-                  onDrawer={openDrawer}
-                />
-              </Tabs.Content>
-            </>
-          )}
-        </div>
-      </Tabs.Root>
+      {onlineStudent && (
+        <OnlineDetail
+          classId={cls.id}
+          className={cls.name}
+          studentId={onlineStudent.id}
+          name={names.get(onlineStudent.id) ?? onlineStudent.firstName}
+          date={date}
+          hw={recs.get(onlineStudent.id)?.hw ?? null}
+          hwNote={recs.get(onlineStudent.id)?.hwNote ?? ""}
+          onClose={() => setOnlineId(null)}
+        />
+      )}
 
       {drawer && (
         <StudentDrawer

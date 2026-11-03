@@ -31,7 +31,19 @@ export interface LedgerRow {
   phone: string | null;
   classroom: { id: string; name: string } | null;
   /** settled = Багш+ гараар «бүтэн жил» гэж тооцсон (гэрээ = төлсөн дүн) */
-  plan: { kind: PlanKind; guessed: boolean; settled: boolean; fee: number; total: number; first: number; raw: string | null };
+  plan: {
+    kind: PlanKind;
+    guessed: boolean;
+    settled: boolean;
+    fee: number;
+    total: number;
+    first: number;
+    raw: string | null;
+    /** Төлбөрөөр автоматаар бүтэн жил (суудал баталгаажуулах + үлдэгдэл хугацаандаа, эсвэл нэг дор) */
+    autoFull?: boolean;
+    /** Бүтэн жилийн дүн төлсөн ч хугацаа хэтэрсэн — Багш+ шалгана */
+    fullYearLate?: boolean;
+  };
   startDate: string | null;
   leftOn: string | null;
   blocks: MonthBlock[];

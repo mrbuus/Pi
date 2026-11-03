@@ -11,6 +11,7 @@ import { isOpen } from "./types";
  * өөрчлөгдөхөд `refreshMakeupCount()` шууд шинэчилнэ.
  */
 let count = 0;
+let openItems: MyMakeup[] = [];
 let loadedAt = 0;
 let inflight: Promise<void> | null = null;
 const listeners = new Set<() => void>();
@@ -20,7 +21,8 @@ function emit() {
 }
 
 export function setMakeupCount(items: MyMakeup[]) {
-  count = items.filter((i) => isOpen(i.status)).length;
+  openItems = items.filter((i) => isOpen(i.status));
+  count = openItems.length;
   loadedAt = Date.now();
   emit();
 }
@@ -51,6 +53,22 @@ export function useMakeupCount(): number {
     () => 0,
   );
 }
+
+/** Сурагчийн нөхөх шаардлагатай (нөхөөгүй + дутуу) мөрүүд — самбар дээд талд харуулахад */
+export function useOpenMakeups(): MyMakeup[] {
+  useEffect(() => {
+    void refreshMakeupCount();
+  }, []);
+  return useSyncExternalStore(
+    (l) => {
+      listeners.add(l);
+      return () => listeners.delete(l);
+    },
+    () => openItems,
+    () => EMPTY,
+  );
+}
+const EMPTY: MyMakeup[] = [];
 
 /** Цэсний мөрийн баруун талд: `{item.badge === "makeup" && <MakeupNavBadge />}` */
 export default function MakeupNavBadge({ className = "" }: { className?: string }) {

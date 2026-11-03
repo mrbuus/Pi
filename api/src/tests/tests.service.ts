@@ -1666,6 +1666,26 @@ export class TestsService {
     if (enrollment) {
       return;
     }
+    // Нөхөх хичээл: энэ сурагчид ТУСГАЙЛАН нээсэн тест (эзэн 2026-11-03) — бусад сурагчид нээгдэхгүй
+    const own = await db.studentTestAccess.findUnique({
+      where: { testId_studentId: { testId: test.id, studentId: userId } },
+      select: { classroomId: true },
+    });
+    // Эрх нь тухайн ангид идэвхтэй сурагчид л хүчинтэй (анги орхисон/архивласан бол хуучирсан эрх үйлчлэхгүй)
+    if (
+      own &&
+      (await db.enrollment.findFirst({
+        where: {
+          studentId: userId,
+          classroomId: own.classroomId,
+          leftAt: null,
+          classroom: { archived: false },
+        },
+        select: { id: true },
+      }))
+    ) {
+      return;
+    }
 
     let bookId: string | null = null;
     if (test.chapterId) {

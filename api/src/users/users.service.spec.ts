@@ -64,7 +64,7 @@ function setup(initialRow = row()) {
       create: jest.fn().mockResolvedValue({ id: 'new-student' }),
       update: jest.fn().mockResolvedValue({}),
     },
-    studentProfile: { upsert: jest.fn().mockResolvedValue({}) },
+    studentProfile: { upsert: jest.fn().mockResolvedValue({}), updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
     enrollment: {
       updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       create: jest.fn().mockResolvedValue({}),

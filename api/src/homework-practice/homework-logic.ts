@@ -26,6 +26,32 @@ export const MAX_DAYS = 31;
 // өөр ангийн/дараагийн шалгалтад нөөцлөгдсөн байж болно — аюулгүй байдлын шалгалт 2026-10-29)
 export const EXCLUDED_TYPES = ['THOUSAND', 'EESH_MOCK', 'CHAPTER_EXAM'] as const;
 
+/** «Дахин бодох» (эзэн 2026-11-03): хичээлээс хойш ингэж олон хичээл өнгөрсний дараа А, Б нээгдэнэ */
+export const REDO_LESSONS = 2;
+/** Дахин бодох оролдлогын дугаар (нэг удаа) */
+export const REDO_ROUND = 2;
+
+/**
+ * Хичээл `date`-ээс хойш `today`-аас ӨМНӨ болсон хичээлийн тоо (өнөөдрийн хичээл өнгөрсөнд
+ * тооцогдохгүй — хамгаалах талаар). `lessonDates` — тухайн ангийн хичээлийн бүх өдөр «YYYY-MM-DD».
+ */
+export function lessonsPassedAfter(
+  lessonDates: readonly string[],
+  date: string,
+  today: string,
+): number {
+  return new Set(lessonDates.filter((d) => d > date && d < today)).size;
+}
+
+/** Хичээлээс хойш REDO_LESSONS хичээл өнгөрсөн үү */
+export function redoOpen(
+  lessonDates: readonly string[],
+  date: string,
+  today: string,
+): boolean {
+  return lessonsPassedAfter(lessonDates, date, today) >= REDO_LESSONS;
+}
+
 /** Хугацааны хязгаараас хойш зөвшөөрөх сүлжээний зай (секунд) */
 export const TIME_GRACE_SEC = 60;
 
@@ -331,4 +357,104 @@ export function clampDays(raw: unknown): number {
   const n = typeof raw === 'string' ? Number(raw) : typeof raw === 'number' ? raw : NaN;
   if (!Number.isInteger(n) || n < 1) return DEFAULT_DAYS;
   return Math.min(n, MAX_DAYS);
+}
+
+/* ───────── Идэвхийн хяналт (эзэн 2026-11-03) ───────── */
+
+export interface ActivityState {
+  /** Хуудас нүдэнд харагдаж байсан нийт секунд (бодож байх хугацаа) */
+  activeSec: number;
+  /** Вэбээс (таб/апп) гарсан нийт секунд */
+  awaySec: number;
+  /** Вэбээс гарсан тоо */
+  leaveCount: number;
+  /** Даалгаврыг нээсэн (эхлүүлсэн/үргэлжлүүлсэн) тоо — сервер өсгөнө */
+  openCount: number;
+}
+
+export const ACTIVITY_MAX_LEAVES = 5000;
+
+function wholeNonNegative(v: unknown): number | null {
+  if (typeof v !== 'number' || !Number.isFinite(v) || v < 0) return null;
+  return Math.floor(v);
+}
+
+/**
+ * Клиентийн хэмжсэн идэвхийг хадгалсан утгатай нэгтгэнэ: ЗӨВХӨН өснө (дахин ачаалахад тоолуур
+ * 0-ээс эхлэх вий), бодит хугацаанаас (эхэлснээс хойших секунд) хэтрэхгүй. Буруу утгыг үл тооно.
+ * `openCount`-ыг клиент өөрчлөхгүй.
+ */
+export function mergeActivity(
+  current: ActivityState,
+  incoming: unknown,
+  startedAt: Date,
+  now: Date = new Date(),
+): ActivityState {
+  if (!incoming || typeof incoming !== 'object' || Array.isArray(incoming))
+    return current;
+  const inc = incoming as Record<string, unknown>;
+  const wall = Math.max(
+    0,
+    Math.floor((now.getTime() - startedAt.getTime()) / 1000),
+  );
+  const pick = (cur: number, v: unknown, cap: number) => {
+    const n = wholeNonNegative(v);
+    return n === null ? cur : Math.max(cur, Math.min(n, cap));
+  };
+  return {
+    activeSec: pick(current.activeSec, inc.activeSec, wall),
+    awaySec: pick(current.awaySec, inc.awaySec, wall),
+    leaveCount: pick(current.leaveCount, inc.leaveCount, ACTIVITY_MAX_LEAVES),
+    openCount: current.openCount,
+  };
+}
+
+/* ───────── Хариуг үзүүлэх (илгээсний дараа / багшид) ───────── */
+
+export type AnswerView = string | Record<string, string> | null;
+
+/** Сурагчийн хадгалсан хариу → үзүүлэх хэлбэр (хоосон бол null) */
+export function myAnswerView(raw: unknown): AnswerView {
+  if (isBlank(raw)) return null;
+  if (typeof raw === 'string') return raw.trim();
+  if (typeof raw === 'number') return String(raw);
+  if (raw && typeof raw === 'object' && !Array.isArray(raw))
+    return Object.fromEntries(
+      Object.entries(raw as Record<string, unknown>).map(([k, v]) => [
+        k,
+        isBlankAnswer(v) ? '' : String(v).trim(),
+      ]),
+    );
+  return null;
+}
+
+/**
+ * Зөв хариу (илгээсний дараа л хэрэглэнэ): сонголттой бол үсэг (A, B, …), нөхөх бодлого бол
+ * нүд бүрийн утга, бусад нь мөр. Хариуны түлхүүр байхгүй бодлого → null.
+ */
+export function correctAnswerView(row: HomeworkProblemRow): AnswerView {
+  const g = toGradable(row);
+  if (!hasKnownAnswer(g)) return null;
+  const mode = choiceModeOf(g);
+  const c = row.problem.correctAnswer;
+  if (mode === 'TEXT') {
+    const opts = row.problem.choiceOptions;
+    if (opts.length > 0) {
+      const sorted = [...opts].sort((a, b) => a.order - b.order);
+      const idx = sorted.findIndex((o) => o.isCorrect);
+      return idx >= 0 ? letter(idx) : null;
+    }
+    if (typeof c === 'string') return c.trim().toUpperCase();
+    if (typeof c === 'number' && Number.isInteger(c)) return letter(c);
+    return null;
+  }
+  if (mode === 'LETTER') return String(c ?? '').trim().toUpperCase();
+  if (c && typeof c === 'object' && !Array.isArray(c))
+    return Object.fromEntries(
+      Object.entries(c as Record<string, unknown>).map(([k, v]) => [
+        k,
+        String(v ?? '').trim(),
+      ]),
+    );
+  return String(c ?? '').trim();
 }

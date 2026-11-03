@@ -5,12 +5,19 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service';
-import { dateKey, parseDateOnly } from '../common/date';
+import { dateKey, parseDateOnly, todayUB } from '../common/date';
 import { Role } from '../generated/prisma/enums';
 import { classTeacherWhere } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
 import { homeworkVariants, normalizeVariant } from '../attendance/board-logic';
 import { loadPreviousLesson } from '../attendance/lesson-dates';
+import { loadPlanned } from '../homework-practice/planned-tests';
+import {
+  correctAnswerView,
+  gradeHomework,
+  myAnswerView,
+  type HomeworkProblemRow,
+} from '../homework-practice/homework-logic';
 import {
   TEACHER_SEES_ALL,
   assertMarkAccess,
@@ -458,6 +465,82 @@ export class HomeworkMarksService {
    * ангид хийсэн тест (ClassTestSession) бүрийн нөгөө хувилбар (A → B, groupKey-ээр)
    * = гэрийн даалгавар; сурагч бүрийн TestResult (оноо/дээд оноо).
    */
+  /**
+   * Өмнөх хичээлийн гэрийн даалгавар болох тестүүд: хичээл батлагдсан (ClassTestSession) бол тэр,
+   * үгүй бол хуваарьт төлөвлөсөн («Орох тест», эзэн 2026-11-03). A → B хувилбар (groupKey-ээр).
+   */
+  private async homeworkTests(classroomId: string, key: string) {
+    const { prev, sessions } = await loadPreviousLesson(
+      this.prisma,
+      classroomId,
+      key,
+    );
+    const none = {
+      prev,
+      pairs: [] as { fromTestId: string; testId: string }[],
+      siblings: [] as {
+        id: string;
+        title: string;
+        groupKey: string | null;
+        variantLabel: string | null;
+        _count: { problems: number };
+      }[],
+    };
+    if (!prev) return none;
+    let doneIds = [
+      ...new Set(
+        sessions
+          .filter((s) => dateKey(s.date) === prev && s.testId)
+          .map((s) => s.testId as string),
+      ),
+    ];
+    if (!doneIds.length) {
+      const planned = await loadPlanned(
+        this.prisma,
+        [classroomId],
+        prev,
+        prev,
+        dateKey(todayUB()),
+      );
+      doneIds = [
+        ...new Set(
+          planned
+            .filter((s) => s.date === prev && s.testId)
+            .map((s) => s.testId as string),
+        ),
+      ];
+    }
+    if (!doneIds.length) return none;
+    const done = await this.prisma.test.findMany({
+      where: { id: { in: doneIds } },
+      select: { id: true, groupKey: true, variantLabel: true },
+    });
+    const groups = [
+      ...new Set(done.map((t) => t.groupKey).filter((g): g is string => !!g)),
+    ];
+    if (!groups.length) return none;
+    const siblings = await this.prisma.test.findMany({
+      where: { groupKey: { in: groups }, deletedAt: null },
+      select: {
+        id: true,
+        title: true,
+        groupKey: true,
+        variantLabel: true,
+        _count: { select: { problems: true } },
+      },
+    });
+    // Ангид хийсэн дарааллаар
+    const ordered = doneIds
+      .map((id) => done.find((t) => t.id === id))
+      .filter((t): t is (typeof done)[number] => !!t);
+    return { prev, pairs: homeworkVariants(ordered, siblings), siblings };
+  }
+
+  /**
+   * Тухайн хичээлийн гэрийн даалгаврын ОНЛАЙН дүн (эзэн 2026-10-18): ӨМНӨХ хичээлд
+   * ангид хийсэн тест (ClassTestSession) бүрийн нөгөө хувилбар (A → B, groupKey-ээр)
+   * = гэрийн даалгавар; сурагч бүрийн TestResult (оноо/дээд оноо).
+   */
   async online(
     classroomId: string,
     dateStr: string,
@@ -467,8 +550,8 @@ export class HomeworkMarksService {
     const date = this.parseDate(dateStr);
     const key = dateKey(date);
     await this.assertClassAccess(classroomId, userId, role, date);
-    const [{ prev, sessions }, enrollments] = await Promise.all([
-      loadPreviousLesson(this.prisma, classroomId, key),
+    const [{ prev, pairs, siblings }, enrollments] = await Promise.all([
+      this.homeworkTests(classroomId, key),
       this.prisma.enrollment.findMany({
         where: { classroomId, leftAt: null, student: { archivedAt: null } },
         select: { studentId: true },
@@ -489,40 +572,7 @@ export class HomeworkMarksService {
         { score: number; max: number; testId: string; taken: number }
       >,
     };
-    if (!prev) return empty;
-
-    const doneIds = [
-      ...new Set(
-        sessions
-          .filter((s) => dateKey(s.date) === prev && s.testId)
-          .map((s) => s.testId as string),
-      ),
-    ];
-    if (!doneIds.length) return empty;
-    const done = await this.prisma.test.findMany({
-      where: { id: { in: doneIds } },
-      select: { id: true, groupKey: true, variantLabel: true },
-    });
-    const groups = [
-      ...new Set(done.map((t) => t.groupKey).filter((g): g is string => !!g)),
-    ];
-    if (!groups.length) return empty;
-    const siblings = await this.prisma.test.findMany({
-      where: { groupKey: { in: groups }, deletedAt: null },
-      select: {
-        id: true,
-        title: true,
-        groupKey: true,
-        variantLabel: true,
-        _count: { select: { problems: true } },
-      },
-    });
-    // Ангид хийсэн дарааллаар
-    const ordered = doneIds
-      .map((id) => done.find((t) => t.id === id))
-      .filter((t): t is (typeof done)[number] => !!t);
-    const pairs = homeworkVariants(ordered, siblings);
-    if (!pairs.length) return empty;
+    if (!prev || !pairs.length) return empty;
 
     const byId = new Map(siblings.map((t) => [t.id, t]));
     const studentIds = enrollments.map((e) => e.studentId);
@@ -560,6 +610,7 @@ export class HomeworkMarksService {
         classroomId,
         lessonDate: parseDateOnly(prev),
         status: 'SUBMITTED',
+        round: 1,
         testId: { in: pairs.map((p) => p.testId) },
         studentId: { in: studentIds },
       },
@@ -599,6 +650,219 @@ export class HomeworkMarksService {
         };
       }),
       students,
+    };
+  }
+
+  /**
+   * Нэг сурагчийн онлайн гэрийн даалгаврын ДЭЛГЭРЭНГҮЙ (эзэн 2026-11-03): тест бүрийн оноо,
+   * эхэлсэн/илгээсэн цаг, бодсон хугацаа, вэбээс гарсан тоо, бодлого бүрийн хариу (үсэг) +
+   * зөв хариу, мөн сурагчийн илгээсэн дэвтрийн зураг (PDF). Бодлогын агуулга ИЛГЭЭХГҮЙ.
+   */
+  async onlineDetail(
+    classroomId: string,
+    dateStr: string,
+    studentId: string,
+    userId: string,
+    role: Role,
+  ) {
+    const date = this.parseDate(dateStr);
+    const key = dateKey(date);
+    await this.assertClassAccess(classroomId, userId, role, date);
+    const enrolled = await this.prisma.enrollment.findFirst({
+      where: { classroomId, studentId, leftAt: null },
+      select: { student: { select: { firstName: true, lastName: true } } },
+    });
+    if (!enrolled) throw new NotFoundException('Сурагч энэ ангид алга байна');
+    const { prev, pairs, siblings } = await this.homeworkTests(
+      classroomId,
+      key,
+    );
+    const student = {
+      id: studentId,
+      firstName: enrolled.student.firstName,
+      lastName: enrolled.student.lastName,
+    };
+    const photo = prev
+      ? await this.prisma.homeworkPhoto.findFirst({
+          where: {
+            studentId,
+            classroomId,
+            lessonDate: parseDateOnly(prev),
+            deletedAt: null,
+          },
+          orderBy: { createdAt: 'desc' },
+          select: { fileKey: true, pages: true, createdAt: true },
+        })
+      : null;
+    const photoView = photo
+      ? {
+          fileKey: photo.fileKey,
+          pages: photo.pages,
+          uploadedAt: photo.createdAt.toISOString(),
+          // Энэ өдөр = дараагийн хичээл: өмнөх хичээлийн зургийг тэр өдрөөс хойш илгээсэн бол хоцорсон
+          late: photo.createdAt.getTime() >= new Date(`${key}T00:00:00+08:00`).getTime(),
+        }
+      : null;
+    if (!prev || !pairs.length)
+      return {
+        date: key,
+        previousLessonDate: prev,
+        student,
+        tests: [],
+        photo: photoView,
+        redos: [],
+      };
+
+    const testIds = pairs.map((p) => p.testId);
+    const [attempts, exams, problemRows] = await Promise.all([
+      this.prisma.homeworkAttempt.findMany({
+        where: {
+          studentId,
+          classroomId,
+          lessonDate: parseDateOnly(prev),
+          round: 1,
+          testId: { in: testIds },
+        },
+      }),
+      this.prisma.testResult.findMany({
+        where: { studentId, testId: { in: testIds } },
+        select: { testId: true, totalScore: true, maxScore: true },
+      }),
+      this.prisma.testProblem.findMany({
+        where: { testId: { in: testIds } },
+        orderBy: [{ testId: 'asc' }, { order: 'asc' }],
+        select: {
+          testId: true,
+          problemId: true,
+          order: true,
+          problem: {
+            select: {
+              id: true,
+              format: true,
+              statementText: true,
+              imageKey: true,
+              choices: true,
+              correctAnswer: true,
+              choiceOptions: {
+                select: { order: true, text: true, isCorrect: true, imageKey: true },
+              },
+            },
+          },
+        },
+      }),
+    ]);
+    const finals = attempts.length
+      ? await this.prisma.homeworkCheck.findMany({
+          where: { attemptId: { in: attempts.map((a) => a.id) }, n: 0 },
+          select: { attemptId: true, results: true },
+        })
+      : [];
+    const bySibling = new Map(siblings.map((t) => [t.id, t]));
+    const asObj = (v: unknown): Record<string, unknown> =>
+      v && typeof v === 'object' && !Array.isArray(v)
+        ? (v as Record<string, unknown>)
+        : {};
+
+    const tests = pairs.map((pair) => {
+      const t = bySibling.get(pair.testId);
+      const a = attempts.find((x) => x.testId === pair.testId);
+      const exam = exams.find((x) => x.testId === pair.testId);
+      const rows = problemRows.filter(
+        (r) => r.testId === pair.testId,
+      ) as unknown as HomeworkProblemRow[];
+      let attempt: Record<string, unknown> | null = null;
+      if (a) {
+        const answers = asObj(a.answers);
+        const stored = finals.find((f) => f.attemptId === a.id);
+        const results =
+          a.status === 'SUBMITTED' && stored
+            ? asObj(stored.results)
+            : (gradeHomework(rows, answers).results as Record<string, unknown>);
+        attempt = {
+          id: a.id,
+          status: a.status,
+          startedAt: a.startedAt.toISOString(),
+          submittedAt: a.submittedAt?.toISOString() ?? null,
+          durationSec: a.submittedAt
+            ? Math.max(
+                0,
+                Math.floor((a.submittedAt.getTime() - a.startedAt.getTime()) / 1000),
+              )
+            : null,
+          activeSec: a.activeSec,
+          awaySec: a.awaySec,
+          leaveCount: a.leaveCount,
+          openCount: a.openCount,
+          checksUsed: a.checksUsed,
+          late:
+            !!a.submittedAt &&
+            !!a.deadlineAt &&
+            a.submittedAt.getTime() > a.deadlineAt.getTime(),
+          score: a.score,
+          total: a.total,
+          items: rows.map((r, i) => ({
+            n: i + 1,
+            problemId: r.problemId,
+            mine: myAnswerView(answers[r.problemId]),
+            correct: correctAnswerView(r),
+            result: (results[r.problemId] as string | undefined) ?? null,
+          })),
+        };
+      }
+      return {
+        testId: pair.testId,
+        title: t?.title ?? 'Тест',
+        variant: normalizeVariant(t?.variantLabel ?? null),
+        problems: t?._count.problems ?? rows.length,
+        attempt,
+        exam: exam ? { score: exam.totalScore, max: exam.maxScore } : null,
+      };
+    });
+    // «Дахин бодох» (2-р оролдлого): тэр хичээлийн А, Б тестийг сурагч дахин бодсон бол багш харна
+    const redoRows = await this.prisma.homeworkAttempt.findMany({
+      where: {
+        studentId,
+        classroomId,
+        lessonDate: parseDateOnly(prev),
+        round: { gt: 1 },
+      },
+      orderBy: { startedAt: 'asc' },
+    });
+    const redoTests = redoRows.length
+      ? await this.prisma.test.findMany({
+          where: { id: { in: redoRows.map((r) => r.testId) } },
+          select: { id: true, title: true, variantLabel: true },
+        })
+      : [];
+    const redoCounted = new Map(redoTests.map((t) => [t.id, t]));
+    const aIds = new Set(pairs.map((p) => p.fromTestId));
+    const redos = redoRows.map((a) => {
+      const t = redoCounted.get(a.testId);
+      return {
+        attemptId: a.id,
+        testId: a.testId,
+        title: t?.title ?? 'Тест',
+        variant: normalizeVariant(t?.variantLabel ?? null),
+        kind: aIds.has(a.testId) ? ('CLASS' as const) : ('HOME' as const),
+        round: a.round,
+        status: a.status,
+        startedAt: a.startedAt.toISOString(),
+        submittedAt: a.submittedAt?.toISOString() ?? null,
+        activeSec: a.activeSec,
+        awaySec: a.awaySec,
+        leaveCount: a.leaveCount,
+        openCount: a.openCount,
+        score: a.score,
+        total: a.total,
+      };
+    });
+    return {
+      date: key,
+      previousLessonDate: prev,
+      student,
+      tests,
+      photo: photoView,
+      redos,
     };
   }
 }

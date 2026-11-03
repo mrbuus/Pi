@@ -86,6 +86,7 @@ export const ModelName = {
   TestDraft: 'TestDraft',
   TestProblem: 'TestProblem',
   TestAccess: 'TestAccess',
+  StudentTestAccess: 'StudentTestAccess',
   TestAttemptSession: 'TestAttemptSession',
   TestResult: 'TestResult',
   TestItemMark: 'TestItemMark',
@@ -110,6 +111,7 @@ export const ModelName = {
   ExpenseRecord: 'ExpenseRecord',
   TuitionSettlement: 'TuitionSettlement',
   TuitionRefund: 'TuitionRefund',
+  StudentWithdrawal: 'StudentWithdrawal',
   Announcement: 'Announcement',
   AnnouncementClassroomTarget: 'AnnouncementClassroomTarget',
   Notification: 'Notification',
@@ -750,6 +752,17 @@ export const TestAccessScalarFieldEnum = {
 export type TestAccessScalarFieldEnum = (typeof TestAccessScalarFieldEnum)[keyof typeof TestAccessScalarFieldEnum]
 
 
+export const StudentTestAccessScalarFieldEnum = {
+  testId: 'testId',
+  studentId: 'studentId',
+  classroomId: 'classroomId',
+  source: 'source',
+  createdAt: 'createdAt'
+} as const
+
+export type StudentTestAccessScalarFieldEnum = (typeof StudentTestAccessScalarFieldEnum)[keyof typeof StudentTestAccessScalarFieldEnum]
+
+
 export const TestAttemptSessionScalarFieldEnum = {
   id: 'id',
   testId: 'testId',
@@ -1128,6 +1141,25 @@ export const TuitionRefundScalarFieldEnum = {
 } as const
 
 export type TuitionRefundScalarFieldEnum = (typeof TuitionRefundScalarFieldEnum)[keyof typeof TuitionRefundScalarFieldEnum]
+
+
+export const StudentWithdrawalScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  classroomId: 'classroomId',
+  leftOn: 'leftOn',
+  countFrom: 'countFrom',
+  reason: 'reason',
+  owed: 'owed',
+  paid: 'paid',
+  refund: 'refund',
+  detail: 'detail',
+  refundId: 'refundId',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type StudentWithdrawalScalarFieldEnum = (typeof StudentWithdrawalScalarFieldEnum)[keyof typeof StudentWithdrawalScalarFieldEnum]
 
 
 export const AnnouncementScalarFieldEnum = {
@@ -2110,7 +2142,12 @@ export const HomeworkAttemptScalarFieldEnum = {
   score: 'score',
   total: 'total',
   submittedAt: 'submittedAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  activeSec: 'activeSec',
+  awaySec: 'awaySec',
+  leaveCount: 'leaveCount',
+  openCount: 'openCount',
+  round: 'round'
 } as const
 
 export type HomeworkAttemptScalarFieldEnum = (typeof HomeworkAttemptScalarFieldEnum)[keyof typeof HomeworkAttemptScalarFieldEnum]

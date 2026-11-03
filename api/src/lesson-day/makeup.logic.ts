@@ -4,12 +4,13 @@
  * - Шаардлага: тэмдэглэлийн зураг + тэр өдрийн ClassTestSession тест бүрийн A, B
  *   хувилбар (шалгалтын горим → TestResult). Ангид суусан (LATE) бол ангид хийсэн
  *   хувилбар (ихэвчлэн A) тооцогдоно → үлдсэн нь (B) л.
- * - Ажилтны шийдвэр: CONFIRMED → DONE, WAIVED → WAIVED, REOPENED → дахин тооцно
+ * - Ажилтны шийдвэр: CONFIRMED → DONE (ЗӨВХӨН энэ замаар), WAIVED → WAIVED, REOPENED → дахин тооцно
  *   (REOPEN-оос өмнө илгээсэн зураг тооцогдохгүй — дахин илгээнэ).
  */
 
 export type MakeupReason = 'ABSENT' | 'EXCUSED' | 'LATE';
-export type MakeupStatus = 'PENDING' | 'PARTIAL' | 'DONE' | 'WAIVED';
+/** SUBMITTED = бүх шаардлагыг илгээсэн, багш ШАЛГААГҮЙ (эзэн 2026-11-03: «Нөхсөн» болгох нь зөвхөн багшийн шийдвэр) */
+export type MakeupStatus = 'PENDING' | 'PARTIAL' | 'SUBMITTED' | 'DONE' | 'WAIVED';
 export type MakeupDecision = 'CONFIRMED' | 'WAIVED' | 'REOPENED';
 export type MakeupAction = 'CONFIRM' | 'WAIVE' | 'REOPEN';
 
@@ -137,7 +138,8 @@ export function makeupStatus(input: StatusInput): MakeupStatus {
   const photos = photosAccepted(input);
   const todo = input.required.filter((t) => !t.inClass);
   const done = todo.filter((t) => input.doneTestIds.has(t.testId)).length;
-  if (photos && done === todo.length) return 'DONE';
+  // Автоматаар «Нөхсөн» болгохгүй — багш орж шалгаад батална (эсвэл тайлбартай чөлөөлнө)
+  if (photos && done === todo.length) return 'SUBMITTED';
   if (photos || done > 0) return 'PARTIAL';
   return 'PENDING';
 }

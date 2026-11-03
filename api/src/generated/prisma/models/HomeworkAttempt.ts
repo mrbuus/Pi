@@ -31,6 +31,11 @@ export type HomeworkAttemptAvgAggregateOutputType = {
   checksUsed: number | null
   score: number | null
   total: number | null
+  activeSec: number | null
+  awaySec: number | null
+  leaveCount: number | null
+  openCount: number | null
+  round: number | null
 }
 
 export type HomeworkAttemptSumAggregateOutputType = {
@@ -38,6 +43,11 @@ export type HomeworkAttemptSumAggregateOutputType = {
   checksUsed: number | null
   score: number | null
   total: number | null
+  activeSec: number | null
+  awaySec: number | null
+  leaveCount: number | null
+  openCount: number | null
+  round: number | null
 }
 
 export type HomeworkAttemptMinAggregateOutputType = {
@@ -55,6 +65,11 @@ export type HomeworkAttemptMinAggregateOutputType = {
   total: number | null
   submittedAt: Date | null
   updatedAt: Date | null
+  activeSec: number | null
+  awaySec: number | null
+  leaveCount: number | null
+  openCount: number | null
+  round: number | null
 }
 
 export type HomeworkAttemptMaxAggregateOutputType = {
@@ -72,6 +87,11 @@ export type HomeworkAttemptMaxAggregateOutputType = {
   total: number | null
   submittedAt: Date | null
   updatedAt: Date | null
+  activeSec: number | null
+  awaySec: number | null
+  leaveCount: number | null
+  openCount: number | null
+  round: number | null
 }
 
 export type HomeworkAttemptCountAggregateOutputType = {
@@ -91,6 +111,11 @@ export type HomeworkAttemptCountAggregateOutputType = {
   total: number
   submittedAt: number
   updatedAt: number
+  activeSec: number
+  awaySec: number
+  leaveCount: number
+  openCount: number
+  round: number
   _all: number
 }
 
@@ -100,6 +125,11 @@ export type HomeworkAttemptAvgAggregateInputType = {
   checksUsed?: true
   score?: true
   total?: true
+  activeSec?: true
+  awaySec?: true
+  leaveCount?: true
+  openCount?: true
+  round?: true
 }
 
 export type HomeworkAttemptSumAggregateInputType = {
@@ -107,6 +137,11 @@ export type HomeworkAttemptSumAggregateInputType = {
   checksUsed?: true
   score?: true
   total?: true
+  activeSec?: true
+  awaySec?: true
+  leaveCount?: true
+  openCount?: true
+  round?: true
 }
 
 export type HomeworkAttemptMinAggregateInputType = {
@@ -124,6 +159,11 @@ export type HomeworkAttemptMinAggregateInputType = {
   total?: true
   submittedAt?: true
   updatedAt?: true
+  activeSec?: true
+  awaySec?: true
+  leaveCount?: true
+  openCount?: true
+  round?: true
 }
 
 export type HomeworkAttemptMaxAggregateInputType = {
@@ -141,6 +181,11 @@ export type HomeworkAttemptMaxAggregateInputType = {
   total?: true
   submittedAt?: true
   updatedAt?: true
+  activeSec?: true
+  awaySec?: true
+  leaveCount?: true
+  openCount?: true
+  round?: true
 }
 
 export type HomeworkAttemptCountAggregateInputType = {
@@ -160,6 +205,11 @@ export type HomeworkAttemptCountAggregateInputType = {
   total?: true
   submittedAt?: true
   updatedAt?: true
+  activeSec?: true
+  awaySec?: true
+  leaveCount?: true
+  openCount?: true
+  round?: true
   _all?: true
 }
 
@@ -266,6 +316,11 @@ export type HomeworkAttemptGroupByOutputType = {
   total: number | null
   submittedAt: Date | null
   updatedAt: Date
+  activeSec: number
+  awaySec: number
+  leaveCount: number
+  openCount: number
+  round: number
   _count: HomeworkAttemptCountAggregateOutputType | null
   _avg: HomeworkAttemptAvgAggregateOutputType | null
   _sum: HomeworkAttemptSumAggregateOutputType | null
@@ -308,6 +363,11 @@ export type HomeworkAttemptWhereInput = {
   total?: Prisma.IntNullableFilter<"HomeworkAttempt"> | number | null
   submittedAt?: Prisma.DateTimeNullableFilter<"HomeworkAttempt"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"HomeworkAttempt"> | Date | string
+  activeSec?: Prisma.IntFilter<"HomeworkAttempt"> | number
+  awaySec?: Prisma.IntFilter<"HomeworkAttempt"> | number
+  leaveCount?: Prisma.IntFilter<"HomeworkAttempt"> | number
+  openCount?: Prisma.IntFilter<"HomeworkAttempt"> | number
+  round?: Prisma.IntFilter<"HomeworkAttempt"> | number
   checks?: Prisma.HomeworkCheckListRelationFilter
 }
 
@@ -328,12 +388,17 @@ export type HomeworkAttemptOrderByWithRelationInput = {
   total?: Prisma.SortOrderInput | Prisma.SortOrder
   submittedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  activeSec?: Prisma.SortOrder
+  awaySec?: Prisma.SortOrder
+  leaveCount?: Prisma.SortOrder
+  openCount?: Prisma.SortOrder
+  round?: Prisma.SortOrder
   checks?: Prisma.HomeworkCheckOrderByRelationAggregateInput
 }
 
 export type HomeworkAttemptWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  studentId_testId_lessonDate?: Prisma.HomeworkAttemptStudentIdTestIdLessonDateCompoundUniqueInput
+  studentId_testId_lessonDate_round?: Prisma.HomeworkAttemptStudentIdTestIdLessonDateRoundCompoundUniqueInput
   AND?: Prisma.HomeworkAttemptWhereInput | Prisma.HomeworkAttemptWhereInput[]
   OR?: Prisma.HomeworkAttemptWhereInput[]
   NOT?: Prisma.HomeworkAttemptWhereInput | Prisma.HomeworkAttemptWhereInput[]
@@ -352,8 +417,13 @@ export type HomeworkAttemptWhereUniqueInput = Prisma.AtLeast<{
   total?: Prisma.IntNullableFilter<"HomeworkAttempt"> | number | null
   submittedAt?: Prisma.DateTimeNullableFilter<"HomeworkAttempt"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"HomeworkAttempt"> | Date | string
+  activeSec?: Prisma.IntFilter<"HomeworkAttempt"> | number
+  awaySec?: Prisma.IntFilter<"HomeworkAttempt"> | number
+  leaveCount?: Prisma.IntFilter<"HomeworkAttempt"> | number
+  openCount?: Prisma.IntFilter<"HomeworkAttempt"> | number
+  round?: Prisma.IntFilter<"HomeworkAttempt"> | number
   checks?: Prisma.HomeworkCheckListRelationFilter
-}, "id" | "studentId_testId_lessonDate">
+}, "id" | "studentId_testId_lessonDate_round">
 
 export type HomeworkAttemptOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -372,6 +442,11 @@ export type HomeworkAttemptOrderByWithAggregationInput = {
   total?: Prisma.SortOrderInput | Prisma.SortOrder
   submittedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  activeSec?: Prisma.SortOrder
+  awaySec?: Prisma.SortOrder
+  leaveCount?: Prisma.SortOrder
+  openCount?: Prisma.SortOrder
+  round?: Prisma.SortOrder
   _count?: Prisma.HomeworkAttemptCountOrderByAggregateInput
   _avg?: Prisma.HomeworkAttemptAvgOrderByAggregateInput
   _max?: Prisma.HomeworkAttemptMaxOrderByAggregateInput
@@ -399,6 +474,11 @@ export type HomeworkAttemptScalarWhereWithAggregatesInput = {
   total?: Prisma.IntNullableWithAggregatesFilter<"HomeworkAttempt"> | number | null
   submittedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"HomeworkAttempt"> | Date | string | null
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"HomeworkAttempt"> | Date | string
+  activeSec?: Prisma.IntWithAggregatesFilter<"HomeworkAttempt"> | number
+  awaySec?: Prisma.IntWithAggregatesFilter<"HomeworkAttempt"> | number
+  leaveCount?: Prisma.IntWithAggregatesFilter<"HomeworkAttempt"> | number
+  openCount?: Prisma.IntWithAggregatesFilter<"HomeworkAttempt"> | number
+  round?: Prisma.IntWithAggregatesFilter<"HomeworkAttempt"> | number
 }
 
 export type HomeworkAttemptCreateInput = {
@@ -418,6 +498,11 @@ export type HomeworkAttemptCreateInput = {
   total?: number | null
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  activeSec?: number
+  awaySec?: number
+  leaveCount?: number
+  openCount?: number
+  round?: number
   checks?: Prisma.HomeworkCheckCreateNestedManyWithoutAttemptInput
 }
 
@@ -438,6 +523,11 @@ export type HomeworkAttemptUncheckedCreateInput = {
   total?: number | null
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  activeSec?: number
+  awaySec?: number
+  leaveCount?: number
+  openCount?: number
+  round?: number
   checks?: Prisma.HomeworkCheckUncheckedCreateNestedManyWithoutAttemptInput
 }
 
@@ -458,6 +548,11 @@ export type HomeworkAttemptUpdateInput = {
   total?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activeSec?: Prisma.IntFieldUpdateOperationsInput | number
+  awaySec?: Prisma.IntFieldUpdateOperationsInput | number
+  leaveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  openCount?: Prisma.IntFieldUpdateOperationsInput | number
+  round?: Prisma.IntFieldUpdateOperationsInput | number
   checks?: Prisma.HomeworkCheckUpdateManyWithoutAttemptNestedInput
 }
 
@@ -478,6 +573,11 @@ export type HomeworkAttemptUncheckedUpdateInput = {
   total?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activeSec?: Prisma.IntFieldUpdateOperationsInput | number
+  awaySec?: Prisma.IntFieldUpdateOperationsInput | number
+  leaveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  openCount?: Prisma.IntFieldUpdateOperationsInput | number
+  round?: Prisma.IntFieldUpdateOperationsInput | number
   checks?: Prisma.HomeworkCheckUncheckedUpdateManyWithoutAttemptNestedInput
 }
 
@@ -498,6 +598,11 @@ export type HomeworkAttemptCreateManyInput = {
   total?: number | null
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  activeSec?: number
+  awaySec?: number
+  leaveCount?: number
+  openCount?: number
+  round?: number
 }
 
 export type HomeworkAttemptUpdateManyMutationInput = {
@@ -517,6 +622,11 @@ export type HomeworkAttemptUpdateManyMutationInput = {
   total?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activeSec?: Prisma.IntFieldUpdateOperationsInput | number
+  awaySec?: Prisma.IntFieldUpdateOperationsInput | number
+  leaveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  openCount?: Prisma.IntFieldUpdateOperationsInput | number
+  round?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type HomeworkAttemptUncheckedUpdateManyInput = {
@@ -536,12 +646,18 @@ export type HomeworkAttemptUncheckedUpdateManyInput = {
   total?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activeSec?: Prisma.IntFieldUpdateOperationsInput | number
+  awaySec?: Prisma.IntFieldUpdateOperationsInput | number
+  leaveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  openCount?: Prisma.IntFieldUpdateOperationsInput | number
+  round?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
-export type HomeworkAttemptStudentIdTestIdLessonDateCompoundUniqueInput = {
+export type HomeworkAttemptStudentIdTestIdLessonDateRoundCompoundUniqueInput = {
   studentId: string
   testId: string
   lessonDate: Date | string
+  round: number
 }
 
 export type HomeworkAttemptCountOrderByAggregateInput = {
@@ -561,6 +677,11 @@ export type HomeworkAttemptCountOrderByAggregateInput = {
   total?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  activeSec?: Prisma.SortOrder
+  awaySec?: Prisma.SortOrder
+  leaveCount?: Prisma.SortOrder
+  openCount?: Prisma.SortOrder
+  round?: Prisma.SortOrder
 }
 
 export type HomeworkAttemptAvgOrderByAggregateInput = {
@@ -568,6 +689,11 @@ export type HomeworkAttemptAvgOrderByAggregateInput = {
   checksUsed?: Prisma.SortOrder
   score?: Prisma.SortOrder
   total?: Prisma.SortOrder
+  activeSec?: Prisma.SortOrder
+  awaySec?: Prisma.SortOrder
+  leaveCount?: Prisma.SortOrder
+  openCount?: Prisma.SortOrder
+  round?: Prisma.SortOrder
 }
 
 export type HomeworkAttemptMaxOrderByAggregateInput = {
@@ -585,6 +711,11 @@ export type HomeworkAttemptMaxOrderByAggregateInput = {
   total?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  activeSec?: Prisma.SortOrder
+  awaySec?: Prisma.SortOrder
+  leaveCount?: Prisma.SortOrder
+  openCount?: Prisma.SortOrder
+  round?: Prisma.SortOrder
 }
 
 export type HomeworkAttemptMinOrderByAggregateInput = {
@@ -602,6 +733,11 @@ export type HomeworkAttemptMinOrderByAggregateInput = {
   total?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  activeSec?: Prisma.SortOrder
+  awaySec?: Prisma.SortOrder
+  leaveCount?: Prisma.SortOrder
+  openCount?: Prisma.SortOrder
+  round?: Prisma.SortOrder
 }
 
 export type HomeworkAttemptSumOrderByAggregateInput = {
@@ -609,6 +745,11 @@ export type HomeworkAttemptSumOrderByAggregateInput = {
   checksUsed?: Prisma.SortOrder
   score?: Prisma.SortOrder
   total?: Prisma.SortOrder
+  activeSec?: Prisma.SortOrder
+  awaySec?: Prisma.SortOrder
+  leaveCount?: Prisma.SortOrder
+  openCount?: Prisma.SortOrder
+  round?: Prisma.SortOrder
 }
 
 export type HomeworkAttemptScalarRelationFilter = {
@@ -651,6 +792,11 @@ export type HomeworkAttemptCreateWithoutChecksInput = {
   total?: number | null
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  activeSec?: number
+  awaySec?: number
+  leaveCount?: number
+  openCount?: number
+  round?: number
 }
 
 export type HomeworkAttemptUncheckedCreateWithoutChecksInput = {
@@ -670,6 +816,11 @@ export type HomeworkAttemptUncheckedCreateWithoutChecksInput = {
   total?: number | null
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  activeSec?: number
+  awaySec?: number
+  leaveCount?: number
+  openCount?: number
+  round?: number
 }
 
 export type HomeworkAttemptCreateOrConnectWithoutChecksInput = {
@@ -705,6 +856,11 @@ export type HomeworkAttemptUpdateWithoutChecksInput = {
   total?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activeSec?: Prisma.IntFieldUpdateOperationsInput | number
+  awaySec?: Prisma.IntFieldUpdateOperationsInput | number
+  leaveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  openCount?: Prisma.IntFieldUpdateOperationsInput | number
+  round?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type HomeworkAttemptUncheckedUpdateWithoutChecksInput = {
@@ -724,6 +880,11 @@ export type HomeworkAttemptUncheckedUpdateWithoutChecksInput = {
   total?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activeSec?: Prisma.IntFieldUpdateOperationsInput | number
+  awaySec?: Prisma.IntFieldUpdateOperationsInput | number
+  leaveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  openCount?: Prisma.IntFieldUpdateOperationsInput | number
+  round?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 
@@ -774,6 +935,11 @@ export type HomeworkAttemptSelect<ExtArgs extends runtime.Types.Extensions.Inter
   total?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
+  activeSec?: boolean
+  awaySec?: boolean
+  leaveCount?: boolean
+  openCount?: boolean
+  round?: boolean
   checks?: boolean | Prisma.HomeworkAttempt$checksArgs<ExtArgs>
   _count?: boolean | Prisma.HomeworkAttemptCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["homeworkAttempt"]>
@@ -795,6 +961,11 @@ export type HomeworkAttemptSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   total?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
+  activeSec?: boolean
+  awaySec?: boolean
+  leaveCount?: boolean
+  openCount?: boolean
+  round?: boolean
 }, ExtArgs["result"]["homeworkAttempt"]>
 
 export type HomeworkAttemptSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -814,6 +985,11 @@ export type HomeworkAttemptSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   total?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
+  activeSec?: boolean
+  awaySec?: boolean
+  leaveCount?: boolean
+  openCount?: boolean
+  round?: boolean
 }, ExtArgs["result"]["homeworkAttempt"]>
 
 export type HomeworkAttemptSelectScalar = {
@@ -833,9 +1009,14 @@ export type HomeworkAttemptSelectScalar = {
   total?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
+  activeSec?: boolean
+  awaySec?: boolean
+  leaveCount?: boolean
+  openCount?: boolean
+  round?: boolean
 }
 
-export type HomeworkAttemptOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "classroomId" | "testId" | "lessonDate" | "status" | "startedAt" | "deadlineAt" | "timeLimitMin" | "answers" | "firstAnswers" | "checksUsed" | "score" | "total" | "submittedAt" | "updatedAt", ExtArgs["result"]["homeworkAttempt"]>
+export type HomeworkAttemptOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "classroomId" | "testId" | "lessonDate" | "status" | "startedAt" | "deadlineAt" | "timeLimitMin" | "answers" | "firstAnswers" | "checksUsed" | "score" | "total" | "submittedAt" | "updatedAt" | "activeSec" | "awaySec" | "leaveCount" | "openCount" | "round", ExtArgs["result"]["homeworkAttempt"]>
 export type HomeworkAttemptInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   checks?: boolean | Prisma.HomeworkAttempt$checksArgs<ExtArgs>
   _count?: boolean | Prisma.HomeworkAttemptCountOutputTypeDefaultArgs<ExtArgs>
@@ -874,6 +1055,19 @@ export type $HomeworkAttemptPayload<ExtArgs extends runtime.Types.Extensions.Int
     total: number | null
     submittedAt: Date | null
     updatedAt: Date
+    /**
+     * Идэвх (эзэн 2026-11-03): хуудас нүдэнд харагдаж байсан нийт секунд, вэбээс гарсан тоо/секунд,
+     * хичээллэж нээсэн тоо. Клиент хэмжиж илгээнэ; сервер зөвхөн өсгөж (max), бодит хугацаагаар хязгаарлана
+     */
+    activeSec: number
+    awaySec: number
+    leaveCount: number
+    openCount: number
+    /**
+     * 1 = гэрийн даалгавар (B) ; 2 = «Дахин бодох» (эзэн 2026-11-03): хичээлээс хойш 2 хичээл өнгөрсний
+     * дараа ангийн А, гэрийн Б хоёрыг НЭГ удаа дахин бодно. Анхны оролдлогыг дарахгүй, тусдаа хадгална
+     */
+    round: number
   }, ExtArgs["result"]["homeworkAttempt"]>
   composites: {}
 }
@@ -1314,6 +1508,11 @@ export interface HomeworkAttemptFieldRefs {
   readonly total: Prisma.FieldRef<"HomeworkAttempt", 'Int'>
   readonly submittedAt: Prisma.FieldRef<"HomeworkAttempt", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"HomeworkAttempt", 'DateTime'>
+  readonly activeSec: Prisma.FieldRef<"HomeworkAttempt", 'Int'>
+  readonly awaySec: Prisma.FieldRef<"HomeworkAttempt", 'Int'>
+  readonly leaveCount: Prisma.FieldRef<"HomeworkAttempt", 'Int'>
+  readonly openCount: Prisma.FieldRef<"HomeworkAttempt", 'Int'>
+  readonly round: Prisma.FieldRef<"HomeworkAttempt", 'Int'>
 }
     
 

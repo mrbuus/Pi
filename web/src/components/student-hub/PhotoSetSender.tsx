@@ -13,6 +13,8 @@ export interface SentSet {
   keys: string[];
   pages: number;
   at: string | null;
+  /** Хугацаанаас хойш илгээсэн */
+  late?: boolean;
 }
 
 export function sentTime(at: string | null) {
@@ -102,7 +104,15 @@ export default function PhotoSetSender({
           )}
           <Meta
             className="text-sm tabular-nums text-ink-dim"
-            items={[time, `${sent.pages} хуудас`]}
+            items={[
+              time ? `илгээсэн ${time}` : null,
+              `${sent.pages} хуудас`,
+              sent.late ? (
+                <span key="late" className="font-semibold text-error">
+                  Хоцорч илгээсэн
+                </span>
+              ) : null,
+            ]}
           />
         </div>
         <PhotoPages keys={sent.keys} pages={sent.pages} title={viewerTitle} subtitle={viewerSubtitle} autoLoad={autoLoad} />

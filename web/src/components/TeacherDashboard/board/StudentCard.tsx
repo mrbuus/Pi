@@ -1,7 +1,6 @@
 "use client";
 
 import { Laptop, Minus, MoreHorizontal, NotebookPen, StickyNote, UserCheck } from "lucide-react";
-import Link from "next/link";
 import { memo, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import {
   ATTENDANCE_MARKS,
@@ -134,6 +133,8 @@ export interface CardProps {
   onHw: (id: string, v: HomeworkStatus | null) => void;
   onHwNote: (id: string, text: string, typed: boolean) => void;
   onDrawer: (id: string) => void;
+  /** «Онлайн» дэлгэрэнгүй (оноо, хугацаа, хариу, зураг) */
+  onOnline: (id: string) => void;
 }
 
 function StudentCardImpl({
@@ -155,6 +156,7 @@ function StudentCardImpl({
   onHw,
   onHwNote,
   onDrawer,
+  onOnline,
 }: CardProps) {
   const detailId = `note-${id}`;
   const preview = [rec.attNote.trim(), homework ? rec.hwNote.trim() : ""].filter(Boolean).join(", ");
@@ -172,8 +174,16 @@ function StudentCardImpl({
     onToggle(id);
   };
 
+  // Даалгавраа илгээсэн ч багш одоохондоо тэмдэглээгүй (эзэн 2026-11-03) — өөр өнгөөр тодорно; тэмдэглэмэгц энгийн болно
+  const awaiting = homework && sent && rec.hw === null;
   return (
-    <li className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-1 rounded-xl border border-line bg-surface p-1.5 sm:grid-cols-[11rem_minmax(0,1fr)_auto] sm:gap-x-3 sm:p-2">
+    <li
+      data-awaiting={awaiting || undefined}
+      className={cn(
+        "grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-1 rounded-xl border p-1.5 sm:grid-cols-[11rem_minmax(0,1fr)_auto] sm:gap-x-3 sm:p-2",
+        awaiting ? "border-brand-bright/60 bg-brand-bright/[0.08]" : "border-line bg-surface",
+      )}
+    >
       {/* Нэр: утсан дээр дээд мөр, компьютер дээр зүүн багана */}
       <div className="col-start-1 row-start-1 flex min-h-11 min-w-0 items-center gap-1.5 pl-1 sm:min-h-0 sm:flex-col sm:items-stretch sm:gap-0.5 sm:pt-1">
         <div className="flex min-w-0 shrink-0 items-center gap-1.5 sm:shrink">
@@ -189,6 +199,7 @@ function StudentCardImpl({
             {name}
           </button>
           {sent && <SentMark />}
+          {awaiting && <span className="shrink-0 rounded-full bg-brand-bright/15 px-1.5 py-0.5 text-[10px] font-bold text-brand-soft">Шалгаагүй</span>}
         </div>
         {makeup && (
           <span className="shrink-0 sm:pl-[2.625rem]">
@@ -233,29 +244,45 @@ function StudentCardImpl({
             className={cn(COLS, "rounded-lg bg-ink/[0.05] p-1")}
             leading={<RowLabel icon={NotebookPen} text="Даалгавар" className="text-ink-dim" />}
           >
-            {online ? (
-              <Link
-                href={`/app/tests/${encodeURIComponent(online.testId)}/results`}
-                aria-label={`${name}, онлайн гэрийн даалгавар ${scoreText(online.score, online.max)}, дүнг нээх`}
-                className={cn(BOX, "border-brand-bright/40 bg-brand-bright/10 text-brand-soft hover:bg-brand-bright/20")}
+            {/* Онлайн тест байхгүй ч сурагч дэвтрийн зураг илгээсэн бол дарж харна (эзэн 2026-11-03) */}
+            {onlineTests || sent ? (
+              <button
+                type="button"
+                onClick={() => onOnline(id)}
+                aria-haspopup="dialog"
+                aria-label={
+                  online
+                    ? `${name}, онлайн гэрийн даалгавар ${scoreText(online.score, online.max)}, дэлгэрэнгүй`
+                    : sent
+                      ? `${name}, илгээсэн даалгавар харах`
+                      : `${name}, онлайнаар бодоогүй, дэлгэрэнгүй`
+                }
+                className={cn(
+                  BOX,
+                  "active:opacity-80",
+                  online || sent
+                    ? "border-brand-bright/40 bg-brand-bright/10 text-brand-soft hover:bg-brand-bright/20"
+                    : "border-dashed border-line bg-transparent text-ink-dim/70 hover:border-ink/30 hover:text-ink",
+                )}
               >
                 <span className="inline-flex items-center gap-1">
-                  <Laptop className="size-4 shrink-0" aria-hidden />
+                  <Laptop className={cn("size-4 shrink-0", !online && !sent && "opacity-50")} aria-hidden />
                   <span className="hidden sm:inline">Онлайн</span>
                 </span>
-                <span className="max-w-full truncate font-bold tabular-nums">{scoreText(online.score, online.max)}</span>
-              </Link>
+                {online ? (
+                  <span className="max-w-full truncate font-bold tabular-nums">{scoreText(online.score, online.max)}</span>
+                ) : (
+                  <Minus className="size-3.5 shrink-0 opacity-60" aria-hidden />
+                )}
+              </button>
             ) : (
-              <span
-                title={onlineTests ? "Онлайнаар бодоогүй" : "Онлайн гэрийн даалгавар алга"}
-                className={cn(BOX, "border-dashed border-line bg-transparent text-ink-dim/70")}
-              >
+              <span title="Онлайн гэрийн даалгавар алга" className={cn(BOX, "border-dashed border-line bg-transparent text-ink-dim/70")}>
                 <span className="inline-flex items-center gap-1">
                   <Laptop className="size-4 shrink-0 opacity-50" aria-hidden />
                   <span className="hidden sm:inline">Онлайн</span>
                 </span>
                 <Minus className="size-3.5 shrink-0 opacity-60" aria-hidden />
-                <span className="sr-only">{onlineTests ? "Онлайнаар бодоогүй" : "Онлайн гэрийн даалгавар алга"}</span>
+                <span className="sr-only">Онлайн гэрийн даалгавар алга</span>
               </span>
             )}
           </StatusGroup>
