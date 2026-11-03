@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
 import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
@@ -7,34 +7,61 @@ import { normalizePath, normalizeTarget } from './usage-normalize';
 
 const TOP_PAGES = 15;
 const TOP_CLICKS = 20;
+// Хүсэлт бүрт сан руу бичвэл ачаалалтай үед (300 хүн, 8 мөрийн багц) холболтын нөөцийг
+// эзэлж, гэрийн даалгавар илгээх мэт чухал үйлдлийг удаашруулж байсан (k6, 2026-11-04:
+// медиан 209ms, pool timeout). Санах ойд цуглуулж 5 секундэд нэг createMany — сервер
+// дахин асахад хамгийн ихдээ 5 секундын бүртгэл алдагдана (судалгааны лог, зөвшөөрөгдөнө).
+const FLUSH_MS = 5_000;
+const CHUNK = 1_000;
+const MAX_BUFFER = 20_000;
 
 // createdAt нь UTC найв timestamp (events.service.ts-ийн UTC_NOW тайлбарыг үз).
 const UTC_NOW = Prisma.sql`(now() AT TIME ZONE 'UTC')`;
 
 @Injectable()
-export class UsageService {
+export class UsageService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(UsageService.name);
+  private buffer: Prisma.UiEventCreateManyInput[] = [];
+  private timer?: NodeJS.Timeout;
 
   constructor(private prisma: PrismaService) {}
 
-  // userId, role ЗӨВХӨН JWT-ээс. Бүртгэл бичигдээгүй ч хэрэглэгчийн ажилд нөлөөлөхгүй.
-  async record(userId: string, role: Role, dto: RecordUsageDto) {
-    const rows: Prisma.UiEventCreateManyInput[] = [];
+  onModuleInit() {
+    this.timer = setInterval(() => void this.flush(), FLUSH_MS);
+    this.timer.unref();
+  }
+
+  async onModuleDestroy() {
+    clearInterval(this.timer);
+    await this.flush();
+  }
+
+  // userId, role ЗӨВХӨН JWT-ээс. Сан руу шууд бичихгүй — flush() багцалж бичнэ.
+  record(userId: string, role: Role, dto: RecordUsageDto) {
+    const now = new Date();
+    let accepted = 0;
     for (const e of dto.events) {
+      if (this.buffer.length >= MAX_BUFFER) break; // сан удаа унтарвал санах ой дүүргэхгүй
       const path = normalizePath(e.path);
       if (!path) continue;
       const target = e.kind === 'click' ? normalizeTarget(e.target) : null;
       if (e.kind === 'click' && !target) continue;
-      rows.push({ userId, role, kind: e.kind, path, target, device: dto.device });
+      this.buffer.push({ userId, role, kind: e.kind, path, target, device: dto.device, createdAt: now });
+      accepted++;
     }
-    if (rows.length) {
+    return { accepted };
+  }
+
+  async flush() {
+    const rows = this.buffer;
+    this.buffer = [];
+    for (let i = 0; i < rows.length; i += CHUNK) {
       try {
-        await this.prisma.uiEvent.createMany({ data: rows });
+        await this.prisma.uiEvent.createMany({ data: rows.slice(i, i + CHUNK) });
       } catch (err) {
-        this.logger.error('UiEvent createMany амжилтгүй', err);
+        this.logger.error(`UiEvent ${Math.min(CHUNK, rows.length - i)} мөр бичигдсэнгүй`, err);
       }
     }
-    return { accepted: rows.length };
   }
 
   async summary(rawDays?: string) {
