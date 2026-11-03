@@ -16,24 +16,35 @@ class HomeworkScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final online = ref.watch(isOnlineStudentProvider);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Гэрийн даалгавар'),
-        actions: [
-          if (!online)
-            IconButton(
-              tooltip: 'Жилийн түүх',
-              icon: const Icon(AppIcons.historyLog),
-              onPressed: () => context.push('/app/homework/history'),
-            ),
-          InfoHint(
-            title: 'Гэрийн даалгавар',
-            message: online
-                ? 'Багшийн өгсөн даалгаврын зургийг илгээнэ. Багш шалгаад батлах эсвэл буцаана. Зураг 7 хоног хадгалагдана.'
-                : 'Хичээлийн өдөр бүрийн дэвтрийнхээ зургийг илгээнэ. Ангид хийсэн тестийн нөгөө хувилбарыг энд бодно. Зураг 7 хоног хадгалагдана.',
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Гэрийн даалгавар'), actions: const [HomeworkAppBarActions()]),
       body: online ? const OnlineHomeworkView() : const ClassroomHomeworkView(),
+    );
+  }
+}
+
+/// «Жилийн түүх», тайлбар — даалгаврын AppBar-ын үйлдлүүд (хэсгийн AppBar-т ч мөн адил).
+class HomeworkAppBarActions extends ConsumerWidget {
+  const HomeworkAppBarActions({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final online = ref.watch(isOnlineStudentProvider);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (!online)
+          IconButton(
+            tooltip: 'Жилийн түүх',
+            icon: const Icon(AppIcons.historyLog),
+            onPressed: () => context.push('/app/homework/history'),
+          ),
+        InfoHint(
+          title: 'Гэрийн даалгавар',
+          message: online
+              ? 'Багшийн өгсөн даалгаврын зургийг илгээнэ. Багш шалгаад батлах эсвэл буцаана. Зураг 7 хоног хадгалагдана.'
+              : 'Хичээлийн өдөр бүрийн дэвтрийнхээ зургийг илгээнэ. Ангид хийсэн тестийн нөгөө хувилбарыг энд бодно. Зураг 7 хоног хадгалагдана.',
+        ),
+      ],
     );
   }
 }
