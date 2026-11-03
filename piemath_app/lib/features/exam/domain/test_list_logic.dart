@@ -1,6 +1,8 @@
 /// Тестийн жагсаалтын цэвэр логик — вэбийн `components/test-list/types.ts`-тэй ИЖИЛ.
 library;
 
+import 'package:flutter/foundation.dart' show immutable;
+
 import '../data/exam_models.dart';
 
 /// Жинхэнэ шалгалтын төрлүүд (1000 бодлого орно). Бусад нь энгийн дасгал тест.
@@ -104,3 +106,78 @@ List<({String topic, List<TestRow> rows})> groupByTopic(List<TestRow> rows) {
       ),
   ];
 }
+
+/// Оноосон шалгалтыг «өгсөн» гэх нөхцөл — вэбийн `useMyExams.done`: дүн, ирээгүй, эсвэл илгээсэн.
+bool examIsTaken(TestRow r) => r.results.isNotEmpty || r.absent || r.sessionStatus == SessionStatus.submitted;
+
+/// «Өгөх» шалгалтуудын эрэмбэ (вэб): эхэлсэн нь түрүүлж → эхлээгүй (upcoming) нь сүүлд → оноосон нь шинэ нь дээр.
+List<TestRow> sortExamsToTake(Iterable<TestRow> rows) {
+  int rank(TestRow r) => (r.sessionStatus == SessionStatus.inProgress ? 0 : 2) + (r.upcoming ? 1 : 0);
+  final out = [...rows];
+  out.sort((a, b) {
+    final byState = rank(a).compareTo(rank(b));
+    if (byState != 0) return byState;
+    return _desc(a.assignedAt, b.assignedAt);
+  });
+  return out;
+}
+
+int _desc(DateTime? a, DateTime? b) {
+  if (a == null && b == null) return 0;
+  if (a == null) return 1;
+  if (b == null) return -1;
+  return b.compareTo(a);
+}
+
+/// «Өгсөн, дүн» жагсаалтын нэг мөр (вэбийн `DoneRow`).
+@immutable
+class DoneRow {
+  const DoneRow({
+    required this.id,
+    required this.title,
+    required this.type,
+    required this.date,
+    required this.absent,
+    required this.score,
+  });
+
+  final String id;
+  final String title;
+  final String type;
+  final DateTime? date;
+  final bool absent;
+  final ScorePair? score;
+
+  /// Шалгалтын төрөл → `/result`, дасгал → `/review` (`ExamResult`-ийн дүрэм).
+  String get path => isExamType(type) ? '/app/tests/$id/result' : '/app/tests/$id/review';
+}
+
+/// Вэбийн `DoneTab`: шалгалтын «өгсөн» (A/Б-оос нэгийг) + `/tests/my-results`-д байгаа, шалгалтын жагсаалтад
+/// ОГТ ороогүй дүн; шинэ нь дээр. [allExams] — A/Б нэгтгэхээс өмнөх бүх шалгалт (давхардал таслах).
+List<DoneRow> buildDoneRows({
+  required List<TestRow> takenExams,
+  required List<TestRow> allExams,
+  required List<MyResult> results,
+}) {
+  final out = <DoneRow>[
+    for (final r in takenExams)
+      DoneRow(
+        id: r.id,
+        title: r.type == 'THOUSAND' ? thousandShortTitle(r.title) : r.title,
+        type: r.type,
+        date: r.takenAt,
+        absent: r.absent,
+        score: r.result,
+      ),
+  ];
+  final seen = {for (final r in allExams) r.id};
+  for (final r in results) {
+    if (!seen.add(r.testId)) continue;
+    out.add(DoneRow(id: r.testId, title: r.title, type: r.type, date: r.createdAt, absent: false, score: r.score));
+  }
+  out.sort((a, b) => _desc(a.date, b.date));
+  return out;
+}
+
+/// «N ижил дүн» — `tied` нь өөрийгөө ОРУУЛСАН тоо (`ranking.service.ts`), тиймээс зөвхөн >1 үед (вэб `MyRankings`).
+String? tiedLabel(int tied) => tied > 1 ? '$tied ижил дүн' : null;

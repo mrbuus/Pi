@@ -196,6 +196,16 @@ void main() {
           'sessionStatus': 'SUBMITTED',
         },
       ])
+      ..json('GET', '/tests/my-results', [
+        {
+          'id': 'r1',
+          'testId': 'c',
+          'totalScore': 7,
+          'maxScore': 8,
+          'createdAt': '2026-11-01T03:00:00.000Z',
+          'test': {'id': 'c', 'title': 'Илтгэгч 1', 'type': 'DAILY'},
+        },
+      ])
       ..json('GET', '/exam-results/my', {
         'exams': [
           {

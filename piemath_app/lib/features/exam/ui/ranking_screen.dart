@@ -7,6 +7,7 @@ import '../../../core/ui/ui.dart';
 import '../data/exam_models.dart';
 import '../data/exam_repository.dart';
 import '../data/ranking_models.dart';
+import '../domain/test_list_logic.dart' show tiedLabel;
 
 final testRankingProvider = FutureProvider.autoDispose.family<TestRanking, String>(
   (ref, id) => ref.watch(examRepositoryProvider).ranking(id),
@@ -110,7 +111,7 @@ class _RankRow extends StatelessWidget {
     final value = rank == null ? 'Тооцогдоогүй' : '$rank-р байр';
     final detail = [
       if (rank != null && e.participants > 0) '${e.participants} оролцогчоос',
-      if (e.tied > 0) 'ижил оноотой ${e.tied} хүн',
+      ?tiedLabel(e.tied),
     ].join(', ');
     return Semantics(
       label: '${e.label}: $value${detail.isEmpty ? '' : ', $detail'}',
