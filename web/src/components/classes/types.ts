@@ -91,7 +91,7 @@ export interface StudentRow {
   predictedEesh: number | null;
   risk: RiskFlag[];
   flags: ActiveFlag[];
-  payment: { state: PaymentState; tuitionAmount: number | null; paidThisMonth: number } | null;
+  payment: { state: PaymentState; tuitionAmount: number | null; paidThisMonth: number | null } | null;
 }
 
 export interface WeekRate {

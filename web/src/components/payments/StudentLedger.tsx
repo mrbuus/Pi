@@ -30,7 +30,7 @@ import PlanDialog from "./PlanDialog";
 import RefundDialog from "./RefundDialog";
 import SettleSwitch from "./SettleSwitch";
 import { BlockLegend, LargeBlocks } from "./MonthBlocks";
-import { dayLabel, mnt, monthName, PLAN_LABEL, stampLabel } from "./ledgerFormat";
+import { dayLabel, isOwed, mnt, monthName, PLAN_LABEL, stampLabel } from "./ledgerFormat";
 import { METHOD_LABEL, STATUS_LABEL, errMsg } from "./paymentHelpers";
 import type { LedgerPayment, LedgerRow, StudentLedger as Data } from "./ledgerTypes";
 import type { Payment } from "./types";
@@ -117,7 +117,7 @@ export default function StudentLedger({ id }: { id: string }) {
     ? "Бүтэнд тооцсон"
     : r.plan.guessed
       ? "Багц тодорхойгүй"
-      : `${PLAN_LABEL[r.plan.kind]} ${mnt(r.plan.kind === "MONTHLY" ? r.plan.fee : r.plan.total)}`;
+      : `${PLAN_LABEL[r.plan.kind]} ${mnt(r.plan.kind === "MONTHLY" ? r.plan.fee : r.plan.total)}`.trim();
   const name = `${r.firstName} ${r.lastName}`;
 
   return (
@@ -163,17 +163,33 @@ export default function StudentLedger({ id }: { id: string }) {
         </div>
 
         <div className="grid grid-cols-3 gap-2 rounded-2xl bg-ink/[0.03] p-3 sm:gap-3">
-          <Stat label="Төлсөн" value={mnt(r.paidTotal)} />
-          <Stat
-            label="Өр"
-            value={mnt(r.owedNow)}
-            tone={r.owedNow > 0 ? "text-error" : "text-ink"}
-            sub={r.overdueDays > 0 ? `${r.overdueDays} хоног хэтэрсэн` : undefined}
-          />
-          {r.credit > 0 ? (
-            <Stat label="Илүү төлсөн" value={mnt(r.credit)} tone="text-info" />
+          {data.amountsHidden ? (
+            // Багш+ — зөвхөн төлөв (сервер дүнг хассан)
+            <>
+              <Stat label="Төлсөн хүртэл" value={r.coveredThrough ? monthName(r.coveredThrough) : "Үгүй"} />
+              <Stat
+                label="Өр"
+                value={isOwed(r) ? `${r.owedMonths} сар` : "Өргүй"}
+                tone={isOwed(r) ? "text-error" : "text-ink"}
+                sub={r.overdueDays > 0 ? `${r.overdueDays} хоног хэтэрсэн` : undefined}
+              />
+              <Stat label="Төлөлт" value={String(data.payments.length)} />
+            </>
           ) : (
-            <Stat label="Жилийн үлдэгдэл" value={mnt(r.remaining)} />
+            <>
+              <Stat label="Төлсөн" value={mnt(r.paidTotal)} />
+              <Stat
+                label="Өр"
+                value={mnt(r.owedNow)}
+                tone={r.owedNow > 0 ? "text-error" : "text-ink"}
+                sub={r.overdueDays > 0 ? `${r.overdueDays} хоног хэтэрсэн` : undefined}
+              />
+              {r.credit > 0 ? (
+                <Stat label="Илүү төлсөн" value={mnt(r.credit)} tone="text-info" />
+              ) : (
+                <Stat label="Жилийн үлдэгдэл" value={mnt(r.remaining)} />
+              )}
+            </>
           )}
         </div>
 
@@ -265,7 +281,7 @@ export default function StudentLedger({ id }: { id: string }) {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className={`block font-bold tabular-nums ${muted ? "text-ink-dim line-through" : "text-ink"}`}>
-                      {mnt(p.amount)}
+                      {p.amount == null ? (st.text ?? "Төлөлт") : mnt(p.amount)}
                     </span>
                     <span className="block text-xs text-ink-dim">
                       <Meta
@@ -317,7 +333,7 @@ export default function StudentLedger({ id }: { id: string }) {
                     <span className="text-ink-dim"> {dayLabel(f.leftOn)}-нд гарсан</span>
                   </span>
                   <span className="font-bold tabular-nums text-ink">
-                    {f.refundAmount > 0 ? mnt(f.refundAmount) : `Дутуу ${mnt(f.shortfall)}`}
+                    {f.refundAmount == null ? "Буцаалт" : f.refundAmount > 0 ? mnt(f.refundAmount) : `Дутуу ${mnt(f.shortfall)}`}
                   </span>
                 </Link>
               </li>

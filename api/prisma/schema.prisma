@@ -1402,9 +1402,13 @@ model StudentNote {
   // Төлбөрийн тэмдэглэл: эцэг эх «хэзээ төлнө» гэж амласан өдөр. Энэ өдөр
   // өнгөрөөд тэмдэглэлээс хойш баталгаажсан төлбөр ирээгүй бол «амлалт тасарсан».
   promisedOn   DateTime?       @db.Date
+  // Зөөлөн устгал (эзний хатуу дүрэм 2026-10-23): мөр үлдэнэ, уншихад deletedAt: null
+  deletedAt    DateTime?
+  deletedById  String?
 
   @@index([studentId, type])
   @@index([createdAt])
+  @@index([deletedAt])
 }
 
 // ============ Аудит лог (Audit Log) ============
@@ -2272,8 +2276,11 @@ model StudentGoal {
   subject     Subject?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  // Зөөлөн устгал (эзний хатуу дүрэм 2026-10-23)
+  deletedAt   DateTime?
 
   @@index([studentId, status])
+  @@index([deletedAt])
 }
 
 // ============ Стрийк хамгаалалт (Streak Freeze) ============

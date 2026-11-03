@@ -57,6 +57,10 @@ export interface ClassStat {
   expected: number;
   covered: number;
   late: number;
+  /** Энэ сард төлөх ёстой / бүрэн төлсөн / хугацаа хэтэрсэн сурагчдын тоо */
+  activeStudents?: number;
+  paidStudents?: number;
+  lateStudents?: number;
   owedStudents: number;
   owedNow: number;
   brokenPromises: number;
@@ -74,6 +78,8 @@ export interface LedgerOverview {
     pending: { count: number; amount: number };
   };
   classes: ClassStat[];
+  /** Багш+ — сервер мөнгөн дүнг null болгосон (зөвхөн төлөв) */
+  amountsHidden?: boolean;
 }
 
 export interface LedgerBoard {
@@ -84,6 +90,7 @@ export interface LedgerBoard {
   total: number;
   owedNow?: number;
   rows: LedgerRow[];
+  amountsHidden?: boolean;
 }
 
 export interface LedgerPayment {
@@ -147,4 +154,5 @@ export interface StudentLedger {
   payments: LedgerPayment[];
   notes: LedgerNote[];
   refunds: LedgerRefund[];
+  amountsHidden?: boolean;
 }

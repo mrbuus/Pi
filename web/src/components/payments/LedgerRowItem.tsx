@@ -5,7 +5,7 @@ import { useSyncExternalStore, type CSSProperties } from "react";
 import { CalendarClock, CalendarX2, Check, MessageSquareText } from "lucide-react";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { CompactBlocks } from "./MonthBlocks";
-import { dayLabel, mnt, PLAN_LABEL, shortMnt } from "./ledgerFormat";
+import { dayLabel, isComplete, isOwed, mnt, PLAN_LABEL, shortMnt } from "./ledgerFormat";
 import type { LedgerRow } from "./ledgerTypes";
 
 const QUERY = "(min-width: 768px)";
@@ -24,10 +24,10 @@ export const studentHref = (id: string) => `/app/payments/student/${encodeURICom
 /** Баруун талын нэг тоо — өр, илүү, бүтэн эсвэл дараагийн төлөх өдөр. */
 export function RowSummary({ r, align = "right" }: { r: LedgerRow; align?: "right" | "left" }) {
   const box = `flex flex-col ${align === "right" ? "items-end text-right" : "items-start"} leading-tight`;
-  if (r.owedNow > 0)
+  if (isOwed(r))
     return (
       <span className={box}>
-        <span className="font-bold tabular-nums text-error">{mnt(r.owedNow)}</span>
+        <span className="font-bold tabular-nums text-error">{r.owedNow == null ? "Өртэй" : mnt(r.owedNow)}</span>
         <span className="text-xs text-ink-dim">
           {r.overdueDays > 0 ? `${r.overdueDays} хоног хэтэрсэн` : `${r.owedMonths} сарын өр`}
         </span>
@@ -40,7 +40,7 @@ export function RowSummary({ r, align = "right" }: { r: LedgerRow; align?: "righ
         <span className="text-xs text-ink-dim">илүү төлсөн</span>
       </span>
     );
-  if (r.remaining === 0)
+  if (isComplete(r))
     return (
       <span className={box}>
         <span className="inline-flex items-center gap-1 font-semibold text-success">
@@ -51,7 +51,7 @@ export function RowSummary({ r, align = "right" }: { r: LedgerRow; align?: "righ
   if (r.nextDue)
     return (
       <span className={box}>
-        <span className="tabular-nums text-ink">{shortMnt(r.nextDue.amount)}</span>
+        <span className="tabular-nums text-ink">{r.nextDue.amount == null ? "Дараагийн төлөлт" : shortMnt(r.nextDue.amount)}</span>
         <span className="text-xs text-ink-dim">{dayLabel(r.nextDue.dueOn)}-нд</span>
       </span>
     );
