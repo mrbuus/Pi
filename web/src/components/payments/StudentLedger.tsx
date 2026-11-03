@@ -162,6 +162,17 @@ export default function StudentLedger({ id }: { id: string }) {
           </button>
         </div>
 
+        {r.plan.autoFull && (
+          <p className="rounded-xl border border-success/30 bg-success/5 px-3 py-2 text-sm text-ink">
+            Суудал баталгаажуулах төлбөр ба үлдэгдлээр бүтэн жил төлөгдсөн
+          </p>
+        )}
+        {r.plan.fullYearLate && !r.plan.settled && (
+          <p role="status" className="rounded-xl border border-error/30 bg-error/5 px-3 py-2 text-sm text-ink">
+            Бүтэн жилийн дүн төлсөн ч үлдэгдлийг хугацаанаас хойш төлсөн. Шалгаад тохирвол доорх «Жилийн төлбөр» дээр «Бүрэн» сонгоно уу
+          </p>
+        )}
+
         <div className="grid grid-cols-3 gap-2 rounded-2xl bg-ink/[0.03] p-3 sm:gap-3">
           <Stat label="Төлсөн" value={mnt(r.paidTotal)} />
           <Stat
