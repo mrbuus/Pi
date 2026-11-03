@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_providers.dart';
+import 'ledger.dart';
 import 'payment_record.dart';
 
 class PaymentsRepository {
@@ -9,16 +10,21 @@ class PaymentsRepository {
 
   final ApiClient _api;
 
+  /// `GET /payments/ledger/overview` — ангиудын товч (ADMIN, Багш+).
+  Future<LedgerOverview> ledgerOverview() => _api.get('/payments/ledger/overview', parse: LedgerOverview.fromJson);
+
+  /// `GET /payments/ledger/board?classroomId=` — ангийн сурагч бүрийн сарын төлөв.
+  Future<LedgerBoard> ledgerBoard(String classroomId) =>
+      _api.get('/payments/ledger/board', query: {'classroomId': classroomId}, parse: LedgerBoard.fromJson);
+
+  /// `GET /payments/ledger/student/:id` — нэг сурагчийн ledger (үнэ серверээс).
+  Future<StudentLedger> ledgerStudent(String studentId) =>
+      _api.get('/payments/ledger/student/${Uri.encodeComponent(studentId)}', parse: StudentLedger.fromJson);
+
   /// `GET /payments/my` — өөрийн төлбөрүүд, `createdAt` буурах.
   Future<List<PaymentRecord>> myPayments() => _api.get(
         '/payments/my',
         parse: (j) => [for (final e in j! as List) PaymentRecord.fromJson((e as Map).cast<String, Object?>())],
-      );
-
-  /// `GET /assignments/my-classrooms` — төлбөрийн түвшин (ангиар) сонгоход.
-  Future<List<MyClassroom>> myClassrooms() => _api.get(
-        '/assignments/my-classrooms',
-        parse: (j) => [for (final e in j! as List) MyClassroom.fromJson((e as Map).cast<String, Object?>())],
       );
 }
 
@@ -30,15 +36,14 @@ final myPaymentsProvider = FutureProvider.autoDispose<List<PaymentRecord>>(
   (ref) => ref.watch(paymentsRepositoryProvider).myPayments(),
 );
 
-/// Танхимын ангийн сургуулийн анги (9–12) — үнийн түвшинд. Алдаа гарвал null (үнэ харуулахгүй).
-final myTuitionGradeProvider = FutureProvider.autoDispose<int?>((ref) async {
-  try {
-    final rows = await ref.watch(paymentsRepositoryProvider).myClassrooms();
-    for (final r in rows) {
-      if (r.type == 'IN_PERSON' && r.grade != null) return r.grade;
-    }
-    return null;
-  } catch (_) {
-    return null;
-  }
-});
+final ledgerOverviewProvider = FutureProvider.autoDispose<LedgerOverview>(
+  (ref) => ref.watch(paymentsRepositoryProvider).ledgerOverview(),
+);
+
+final ledgerBoardProvider = FutureProvider.autoDispose.family<LedgerBoard, String>(
+  (ref, id) => ref.watch(paymentsRepositoryProvider).ledgerBoard(id),
+);
+
+final ledgerStudentProvider = FutureProvider.autoDispose.family<StudentLedger, String>(
+  (ref, id) => ref.watch(paymentsRepositoryProvider).ledgerStudent(id),
+);

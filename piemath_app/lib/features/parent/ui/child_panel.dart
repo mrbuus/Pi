@@ -140,7 +140,6 @@ class ChildPanel extends ConsumerWidget {
         const SizedBox(height: AppSpace.md),
         PayInfoCard(
           note: transferNote(firstName: child.firstName, lastName: child.lastName, phone: child.phone),
-          tier: tierForGrade(grade),
         ),
       ],
     );

@@ -4,37 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/ui/ui.dart';
-import '../../../shared/payment_status/payment_status.dart';
 import '../domain/org_info.dart';
 
 /// Төлбөр төлөх данс (вэбийн `PayInfo`): мөр бүрийг тусад нь, эсвэл бүгдийг нэг дор «Хуулах».
 /// Өнгөгүй, саарал карт.
 class PayInfoCard extends StatelessWidget {
-  const PayInfoCard({super.key, required this.note, this.tier});
+  const PayInfoCard({super.key, required this.note});
 
   /// «Гүйлгээний утга» ([transferNote]).
   final String note;
 
-  /// Сургуулийн ангийн үнийн түвшин; null бол үнэ харуулахгүй.
-  final TuitionTier? tier;
-
-  String get allText {
-    final monthly = tier?.amountOf(TuitionPlanKind.monthly);
-    final yearly = tier?.amountOf(TuitionPlanKind.fullYear);
-    return [
-      '${BankInfo.account} ${BankInfo.name} ${BankInfo.holder}',
-      'IBAN: ${BankInfo.iban}',
-      'Утга: $note',
-      OrgInfo.centerName,
-      if (monthly != null) 'Сарын төлбөр: ${formatMnt(monthly)}',
-      if (yearly != null) 'Бүтэн жилийн төлбөр: ${formatMnt(yearly)}',
-    ].join('\n');
-  }
+  // Сургалтын үнэ энд байхгүй: үнийг зөвхөн серверээс (PARITY-AUDIT §4 #2). Сурагч/эцэг эхэд үнийн талбар
+  // серверт гарахаар энд нэмнэ — апп өөрөө тоо зохиохгүй.
+  String get allText => [
+    '${BankInfo.account} ${BankInfo.name} ${BankInfo.holder}',
+    'IBAN: ${BankInfo.iban}',
+    'Утга: $note',
+    OrgInfo.centerName,
+  ].join('\n');
 
   @override
   Widget build(BuildContext context) {
-    final monthly = tier?.amountOf(TuitionPlanKind.monthly);
-    final yearly = tier?.amountOf(TuitionPlanKind.fullYear);
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -57,22 +47,6 @@ class PayInfoCard extends StatelessWidget {
           const _InfoRow(label: 'Хүлээн авагч', value: BankInfo.holder, copy: true),
           Divider(height: 1, color: context.colors.line),
           _InfoRow(label: 'Гүйлгээний утга', value: note, copy: true),
-          Divider(height: 1, color: context.colors.line),
-          if (monthly != null || yearly != null) ...[
-            const SizedBox(height: AppSpace.md),
-            Row(
-              children: [
-                if (monthly != null)
-                  Expanded(
-                    child: _Amount(label: 'Сарын төлбөр', amount: monthly),
-                  ),
-                if (yearly != null)
-                  Expanded(
-                    child: _Amount(label: 'Бүтэн жилийн төлбөр', amount: yearly),
-                  ),
-              ],
-            ),
-          ],
         ],
       ),
     );
@@ -109,24 +83,6 @@ class _InfoRow extends StatelessWidget {
           if (copy) CopyButton(text: value, label: label),
         ],
       ),
-    );
-  }
-}
-
-class _Amount extends StatelessWidget {
-  const _Amount({required this.label, required this.amount});
-
-  final String label;
-  final int amount;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: context.text.bodySmall),
-        Text(formatMnt(amount), style: context.text.titleMedium),
-      ],
     );
   }
 }

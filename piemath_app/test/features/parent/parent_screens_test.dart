@@ -125,4 +125,15 @@ void main() {
       expect(find.text('Баталгаажсан хүүхэд алга'), findsOneWidget);
     });
   });
+
+  testWidgets('эцэг эх: сервер үнэ өгөөгүй тул тариф харагдахгүй, хугацаа серверээс', (tester) async {
+    final link = verifiedLink();
+    ((link['student']! as Map)['payments']! as List).clear();
+    final http = _http([link]);
+    await pumpM7(tester, const ParentHomeScreen(), http: http, session: _parent);
+    await scrollTo(tester, find.text('Төлбөр төлөх данс'));
+    expect(find.textContaining('₮'), findsNothing);
+    expect(find.text('Сарын төлбөр'), findsNothing);
+    expect(http.count('GET', '/tuition/paid-until/s1'), 1);
+  });
 }

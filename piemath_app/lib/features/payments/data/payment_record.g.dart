@@ -29,18 +29,3 @@ Map<String, dynamic> _$PaymentRecordToJson(_PaymentRecord instance) =>
       'paidAt': instance.paidAt,
       'createdAt': instance.createdAt,
     };
-
-_MyClassroom _$MyClassroomFromJson(Map<String, dynamic> json) => _MyClassroom(
-  id: json['id'] as String,
-  name: json['name'] as String? ?? '',
-  type: json['type'] as String,
-  grade: (json['grade'] as num?)?.toInt(),
-);
-
-Map<String, dynamic> _$MyClassroomToJson(_MyClassroom instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'type': instance.type,
-      'grade': instance.grade,
-    };

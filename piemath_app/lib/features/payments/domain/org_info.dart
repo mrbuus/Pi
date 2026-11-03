@@ -30,53 +30,9 @@ String groupChars(String raw, {int size = 4}) {
   return parts.join(' ');
 }
 
-enum TuitionPlanKind { fullYear, installment, monthly }
-
-class TuitionPlan {
-  const TuitionPlan(this.kind, this.label, this.amount);
-
-  final TuitionPlanKind kind;
-  final String label;
-  final int amount;
-}
-
-class TuitionTier {
-  const TuitionTier(this.label, this.grades, this.plans);
-
-  final String label;
-  final List<int> grades;
-  final List<TuitionPlan> plans;
-
-  int? amountOf(TuitionPlanKind kind) {
-    for (final p in plans) {
-      if (p.kind == kind) return p.amount;
-    }
-    return null;
-  }
-}
-
-/// 2026–2027 оны сургалтын төлбөр (`orgInfo.ts` `TUITION`). Вэб үнийг сургуулийн ангиар харуулдаг тул
-/// апп ч ижил (api-contract: серверийн ledger суудаг ангийн өдрөөр — ТОДРУУЛАХ, эзэнтэй).
-const tuitionTiers = <TuitionTier>[
-  TuitionTier('12-р анги', [12], [
-    TuitionPlan(TuitionPlanKind.fullYear, 'Бүтэн жилийн төлбөр', 2500000),
-    TuitionPlan(TuitionPlanKind.installment, 'Хуваан төлөх', 3000000),
-    TuitionPlan(TuitionPlanKind.monthly, 'Сар бүр төлөх', 350000),
-  ]),
-  TuitionTier('9-11-р анги', [9, 10, 11], [
-    TuitionPlan(TuitionPlanKind.fullYear, 'Бүтэн жилийн төлбөр', 2000000),
-    TuitionPlan(TuitionPlanKind.installment, 'Хуваан төлөх', 2500000),
-    TuitionPlan(TuitionPlanKind.monthly, 'Сар бүр төлөх', 300000),
-  ]),
-];
-
-TuitionTier? tierForGrade(int? grade) {
-  if (grade == null) return null;
-  for (final t in tuitionTiers) {
-    if (t.grades.contains(grade)) return t;
-  }
-  return null;
-}
+// Сургалтын үнэ, тарифыг апп-д ХЭЗЭЭ Ч хатуу бичихгүй (PARITY-AUDIT §4 #2): үнэ нь ангийн 7 хоногийн
+// өдрөөс серверт тооцогдоно. Ажилтан `/payments/ledger/student/:id`-ийн `tier`-ээс харна; сурагч, эцэг эхэд
+// серверт үнийн талбар одоогоор алга тул үнэ харуулахгүй.
 
 /// Гүйлгээний утгын он (вэбийн `NOTE_YEAR`).
 const transferNoteYear = '2027';

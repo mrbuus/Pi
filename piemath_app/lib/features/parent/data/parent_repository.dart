@@ -46,6 +46,12 @@ class ParentRepository {
         parse: ParentHistory.fromJson,
       );
 
+  /// Хүүхдийн эрхтэй бүлгийн онол (зураг, LaTeX). 403 «Энэ хичээлийг үзэх эрхгүй.», 404 «Хичээл олдсонгүй.»
+  Future<ChildTheory> theory({required String studentId, required String chapterId}) => _api.get(
+        '/parent/children/${Uri.encodeComponent(studentId)}/theory/${Uri.encodeComponent(chapterId)}',
+        parse: ChildTheory.fromJson,
+      );
+
   /// АНХААР: угтвар `/parents` (олон тоо). [week] — Даваа гарагийн `YYYY-MM-DD` (UB).
   Future<WeeklyReport> weeklyReport({required String studentId, required String week}) => _api.get(
         '/parents/weekly-report',
@@ -74,4 +80,9 @@ final weeklyReportProvider =
 final parentHistoryProvider =
     FutureProvider.autoDispose.family<ParentHistory, ({String studentId, int year, int page})>(
   (ref, a) => ref.watch(parentRepositoryProvider).history(studentId: a.studentId, year: a.year, page: a.page),
+);
+
+final childTheoryProvider =
+    FutureProvider.autoDispose.family<ChildTheory, ({String studentId, String chapterId})>(
+  (ref, a) => ref.watch(parentRepositoryProvider).theory(studentId: a.studentId, chapterId: a.chapterId),
 );
