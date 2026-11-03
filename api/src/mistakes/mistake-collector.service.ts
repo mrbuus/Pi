@@ -15,6 +15,8 @@ interface CollectInput {
   sourceOccurredAt: Date;
   testTitle?: string | null;
   givenAnswer?: unknown;
+  /** Тестийн оролдлого бол тест (хугацаатай давталтын хариу нээх хаалганд) */
+  testId?: string | null;
 }
 
 @Injectable()
@@ -105,6 +107,8 @@ export class MistakeCollector implements OnModuleDestroy {
         problemId: input.problemId,
         source: input.source,
         occurredAt: input.sourceOccurredAt,
+        sourceTestId: input.testId ?? null,
+        sourceRefId: input.sourceRefId,
       });
       return true;
     } catch (error) {
@@ -180,6 +184,7 @@ export class MistakeCollector implements OnModuleDestroy {
         sourceOccurredAt: attempt.createdAt,
         testTitle: test?.title,
         givenAnswer: attempt.givenAnswer,
+        testId: attempt.testId,
       });
       if (collected) {
         await this.prisma.attempt.updateMany({

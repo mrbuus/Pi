@@ -11,6 +11,7 @@ import { dateKey, parseDateOnly, todayUB } from '../common/date';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProblemReviewService } from '../mistakes/problem-review.service';
+import { reservedAnywhere } from './answer-gates';
 import {
   currentClass,
   loadLessonDays,
@@ -1176,32 +1177,9 @@ export class HomeworkPracticeService {
     };
   }
 
-  /**
-   * Тест ангийн хуваарьт (өнөөдөр/ирээдүйд) ямар ч ангид бодогдох, эсвэл ирээдүйд оноогдох уу —
-   * тэгвэл зөв хариуг ХЭЗЭЭ Ч нээхгүй (хариу бусад ангид дамжих эрсдэл; аюулгүй байдлын шалгалт).
-   */
-  private async reservedAnywhere(testId: string): Promise<boolean> {
-    const today = todayUB();
-    const [session, topic, access] = await Promise.all([
-      this.prisma.classTestSession.findFirst({
-        where: { testId, date: { gte: today } },
-        select: { id: true },
-      }),
-      this.prisma.lessonTopic.findFirst({
-        // Анхны огноо 14 хоногийн өмнөөс — хичээл ирээдүй рүү ЗӨӨГДСӨН (ScheduleException.newDate)
-        // байж болно; зөөлтийг тусад нь тайлахгүй, хамгаалах талаар барина
-        where: {
-          testIds: { has: testId },
-          date: { gte: new Date(today.getTime() - 14 * 86_400_000) },
-        },
-        select: { id: true },
-      }),
-      this.prisma.testAccess.findFirst({
-        where: { testId, assignedAt: { gt: new Date() } },
-        select: { testId: true },
-      }),
-    ]);
-    return !!(session || topic || access);
+  /** Ангид бодогдох тест бол хариу нээхгүй — `answer-gates.ts` (хугацаатай давталт ч ашиглана). */
+  private reservedAnywhere(testId: string): Promise<boolean> {
+    return reservedAnywhere(this.prisma, testId);
   }
 
   /**
@@ -1419,7 +1397,14 @@ export class HomeworkPracticeService {
     this.reviews?.recordWrongInBackground(
       Object.entries(graded.results)
         .filter(([, result]) => result === 'WRONG')
-        .map(([problemId]) => ({ studentId, problemId, source: 'HOMEWORK' as const, occurredAt: submittedAt })),
+        .map(([problemId]) => ({
+          studentId,
+          problemId,
+          source: 'HOMEWORK' as const,
+          occurredAt: submittedAt,
+          sourceTestId: attempt.testId,
+          sourceRefId: attempt.id,
+        })),
     );
     return {
       score: { correct: graded.correct, total: graded.total },

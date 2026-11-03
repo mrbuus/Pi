@@ -534,7 +534,14 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
     expect(res.score).toEqual({ correct: 1, total: 2 });
     expect(reviews.recordWrongInBackground).toHaveBeenCalledTimes(1);
     expect(reviews.recordWrongInBackground.mock.calls[0][0]).toEqual([
-      { studentId: 's1', problemId: 'p2', source: 'HOMEWORK', occurredAt: expect.any(Date) },
+      {
+        studentId: 's1',
+        problemId: 'p2',
+        source: 'HOMEWORK',
+        occurredAt: expect.any(Date),
+        sourceTestId: 'B1',
+        sourceRefId: attemptId,
+      },
     ]);
     // Давтан илгээлт (аль хэдийн SUBMITTED) дахин бүртгэхгүй
     await hooked.submit('s1', attemptId, { p1: 'A' });

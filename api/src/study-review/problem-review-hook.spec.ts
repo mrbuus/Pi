@@ -46,7 +46,13 @@ describe('StudyReviewService.response — хугацаатай давталты�
     await h.service.response('student-1', 'STUDENT' as never, 'run-1', 'item-1', body('A'));
     expect(h.tx.studyReviewResponse.create.mock.calls[0][0].data.correct).toBe(false);
     expect(h.reviews.recordWrongInBackground).toHaveBeenCalledWith([
-      { studentId: 'student-1', problemId: 'problem-1', source: 'STUDY_REVIEW', occurredAt: expect.any(Date) },
+      {
+        studentId: 'student-1',
+        problemId: 'problem-1',
+        source: 'STUDY_REVIEW',
+        occurredAt: expect.any(Date),
+        sourceRefId: 'run-1',
+      },
     ]);
   });
 

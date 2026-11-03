@@ -681,7 +681,13 @@ export class StudyReviewService {
     // Хугацаатай давталт: commit болсны дараа, хүсэлтийн замаас гадуур (дүнг өөрчлөхгүй)
     if (wrongProblemId)
       this.reviews?.recordWrongInBackground([
-        { studentId: userId, problemId: wrongProblemId, source: 'STUDY_REVIEW', occurredAt: answeredAt },
+        {
+          studentId: userId,
+          problemId: wrongProblemId,
+          source: 'STUDY_REVIEW',
+          occurredAt: answeredAt,
+          sourceRefId: id,
+        },
       ]);
     return this.get(userId, role, id);
   }

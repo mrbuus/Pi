@@ -8,6 +8,9 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { studentReviewPolicy } from '../exams/exam-analytics';
+import { studentReviewLevel } from '../exams/exam-data';
+import { reservedAnywhere } from '../homework-practice/answer-gates';
 import { choiceModeOf, gradeAnswer, GradableProblem, hasKnownAnswer } from '../tests/grading';
 import { MistakesService, publicCorrectAnswer, safeAnswerFields } from './mistakes.service';
 import {
@@ -75,7 +78,27 @@ export interface WrongEvent {
   problemId: string;
   source: ProblemReviewSource;
   occurredAt: Date;
+  /** Тест эсвэл гэрийн даалгаврын тест — хариу нээх хаалганд */
+  sourceTestId?: string | null;
+  /** Attempt / HomeworkAttempt / давтлагын ID */
+  sourceRefId?: string | null;
 }
+
+/**
+ * Хариу, бодолт нээх эсэх. `locked` бол давтлагад огт гаргахгүй, дүгнэхгүй (зөв/буруу ч зөвлөгөө болно).
+ * Дүрэм нь одоо байгаа хаалгууд: `reservedAnywhere` (ангид бодогдох тест), шалгалтын
+ * `studentReviewLevel` + `studentReviewPolicy` (тест дахин ашиглагдах тул зөв хариу нээхгүй, 1000 бодлого
+ * зөвхөн FULL түвшинд), гэрийн даалгавар илгээсний дараах нээлт (тухайн даалгаврын тестэд л).
+ */
+export interface RevealGate {
+  locked: boolean;
+  answer: boolean;
+  solution: boolean;
+}
+
+const LOCKED: RevealGate = { locked: true, answer: false, solution: false };
+
+type GateCache = Map<string, Promise<unknown>>;
 
 @Injectable()
 export class ProblemReviewService implements OnModuleDestroy {
@@ -108,7 +131,13 @@ export class ProblemReviewService implements OnModuleDestroy {
             problemId: event.problemId,
             lastEventAt: { lt: event.occurredAt },
           },
-          data: { ...next, source: event.source, lastEventAt: event.occurredAt },
+          data: {
+            ...next,
+            source: event.source,
+            sourceTestId: event.sourceTestId ?? null,
+            sourceRefId: event.sourceRefId ?? null,
+            lastEventAt: event.occurredAt,
+          },
         });
         return true;
       }
@@ -119,6 +148,8 @@ export class ProblemReviewService implements OnModuleDestroy {
             problemId: event.problemId,
             ...next,
             source: event.source,
+            sourceTestId: event.sourceTestId ?? null,
+            sourceRefId: event.sourceRefId ?? null,
             lastEventAt: event.occurredAt,
           },
         ],
@@ -167,15 +198,76 @@ export class ProblemReviewService implements OnModuleDestroy {
         where,
         include: REVIEW_INCLUDE,
         orderBy: [{ dueAt: 'asc' }, { id: 'asc' }],
-        take: limit * 2,
+        take: limit * 3,
       }),
     ]);
-    // Хариуны түлхүүргүй бодлогыг дүгнэх боломжгүй тул харуулахгүй
-    const gradable = rows.filter((row) => hasKnownAnswer(gradableOf(row)));
+    // Хариуны түлхүүргүй бодлогыг дүгнэх боломжгүй; хаалттай эх (ангид бодогдох тест г.м.) бодлогыг
+    // дүгнэвэл зөв/буруу нь түлхүүрийг задруулна — аль алийг нь гаргахгүй (хуваарь хэвээр, нээгдэхээр гарна)
+    const cache: GateCache = new Map();
+    const shown: ReviewWithProblem[] = [];
+    let hidden = 0;
+    for (const row of rows) {
+      if (shown.length >= limit) break;
+      if (!hasKnownAnswer(gradableOf(row)) || (await this.revealGate(studentId, row, cache)).locked) hidden += 1;
+      else shown.push(row);
+    }
     return {
-      total: Math.max(0, total - (rows.length - gradable.length)),
-      items: gradable.slice(0, limit).map(serializeDue),
+      total: Math.max(shown.length, total - hidden),
+      items: shown.map(serializeDue),
     };
+  }
+
+  /** Бодлогыг агуулсан тест бүрийн хаалгыг нэгтгэнэ (хамгийн хатуу нь давамгайлна). */
+  async revealGate(
+    studentId: string,
+    row: { problemId: string; source: string; sourceTestId?: string | null },
+    cache: GateCache = new Map(),
+  ): Promise<RevealGate> {
+    const links = await this.prisma.testProblem.findMany({
+      where: { problemId: row.problemId },
+      select: {
+        test: { select: { id: true, type: true, chapterId: true, chapter: { select: { bookId: true } } } },
+      },
+    });
+    const tests = [...new Map(links.map((l) => [l.test.id, l.test])).values()];
+    if (row.sourceTestId && !tests.some((t) => t.id === row.sourceTestId)) {
+      // Эх тест бодлогоос салсан ч нөөцлөлт хэвээр шалгагдана
+      if (await this.cached(cache, `reserved:${row.sourceTestId}`, () => reservedAnywhere(this.prisma, row.sourceTestId!)))
+        return LOCKED;
+    }
+    let answer = true;
+    for (const test of tests) {
+      if (await this.cached(cache, `reserved:${test.id}`, () => reservedAnywhere(this.prisma, test.id))) return LOCKED;
+      const level = await this.cached(cache, `level:${test.id}`, () => this.reviewLevel(studentId, test));
+      const policy = studentReviewPolicy(test.type, level);
+      if (!policy.open || policy.solutions === 'NONE') return LOCKED;
+      // Гэрийн даалгавар: илгээсний дараа тухайн тестийн буруу бодлогын хариу нээгддэг (reviewOf)
+      const homeworkReveal = row.source === 'HOMEWORK' && row.sourceTestId === test.id;
+      if (!policy.correctAnswer && !homeworkReveal) answer = false;
+    }
+    return { locked: false, answer, solution: true };
+  }
+
+  private async reviewLevel(
+    studentId: string,
+    test: { id: string; type: Parameters<typeof studentReviewPolicy>[0]; chapterId: string | null; chapter: { bookId: string | null } | null },
+  ) {
+    if (test.type !== 'THOUSAND') return 'FULL' as const;
+    const where = { testId_studentId: { testId: test.id, studentId } };
+    const [result, session] = await Promise.all([
+      this.prisma.testResult.findUnique({ where, select: { createdAt: true } }),
+      this.prisma.testAttemptSession.findUnique({ where, select: { submittedAt: true, status: true } }),
+    ]);
+    const data = {
+      result: result as never,
+      session: session?.status === 'SUBMITTED' ? ({ submittedAt: session.submittedAt } as never) : null,
+    };
+    return (await studentReviewLevel(this.prisma, test as never, studentId, data)).level;
+  }
+
+  private cached<T>(cache: GateCache, key: string, load: () => Promise<T>): Promise<T> {
+    if (!cache.has(key)) cache.set(key, load());
+    return cache.get(key) as Promise<T>;
   }
 
   async answer(studentId: string, id: string, answer: unknown) {
@@ -191,35 +283,33 @@ export class ProblemReviewService implements OnModuleDestroy {
     if (!row) throw new NotFoundException('Давтах бодлого олдсонгүй');
     const g = gradableOf(row);
     if (!hasKnownAnswer(g)) throw new BadRequestException('Энэ бодлогын хариу баталгаажаагүй байна');
+    // Хугацаа болоогүй бол дүгнэхгүй: давтан илгээж зөв/буруугаар түлхүүр таах боломжгүй,
+    // хариу, бодолт ч задрахгүй. Давхар товшилтын 2 дахь хүсэлт энд 409 авна.
+    if (!isReviewDue(row.dueAt, now)) throw new ConflictException('Энэ бодлогын давтах өдөр болоогүй байна');
+    const gate = await this.revealGate(studentId, row);
+    if (gate.locked) throw new ConflictException('Энэ бодлогыг одоохондоо давтах боломжгүй');
 
     const grade = gradeAnswer(g, answer);
-    const due = isReviewDue(row.dueAt, now);
-    let schedule = {
-      dueAt: row.dueAt,
-      intervalDays: row.intervalDays,
-      reps: row.reps,
-      lapses: row.lapses,
-    };
-    // Зөвхөн хугацаа нь болсон бодлогын хуваарийг өөрчилнө — давхар товшилт интервалыг хоёр сунгахгүй
-    if (due) {
-      const next = nextProblemReview(
-        { intervalDays: row.intervalDays, ease: row.ease ?? INITIAL_EASE, reps: row.reps, lapses: row.lapses },
-        grade.correct,
-        now,
-      );
-      const changed = await this.prisma.problemReview.updateMany({
-        where: { id: row.id, studentId, dueAt: row.dueAt, reps: row.reps, lapses: row.lapses },
-        data: { ...next, lastEventAt: now },
-      });
-      if (changed.count !== 1) throw new ConflictException('Дахин оролдоно уу');
-      schedule = { dueAt: next.dueAt, intervalDays: next.intervalDays, reps: next.reps, lapses: next.lapses };
-    }
+    const next = nextProblemReview(
+      { intervalDays: row.intervalDays, ease: row.ease ?? INITIAL_EASE, reps: row.reps, lapses: row.lapses },
+      grade.correct,
+      now,
+    );
+    const changed = await this.prisma.problemReview.updateMany({
+      where: { id: row.id, studentId, dueAt: row.dueAt, reps: row.reps, lapses: row.lapses },
+      data: { ...next, lastEventAt: now },
+    });
+    if (changed.count !== 1) throw new ConflictException('Дахин оролдоно уу');
     return {
       correct: grade.correct,
-      correctAnswer: publicCorrectAnswer(g),
-      solutionOutline: row.problem.analysis?.status === 'VERIFIED' ? row.problem.analysis.solutionOutline : null,
-      scheduled: due,
-      ...schedule,
+      correctAnswer: gate.answer ? publicCorrectAnswer(g) : null,
+      solutionOutline:
+        gate.solution && row.problem.analysis?.status === 'VERIFIED' ? row.problem.analysis.solutionOutline : null,
+      scheduled: true,
+      dueAt: next.dueAt,
+      intervalDays: next.intervalDays,
+      reps: next.reps,
+      lapses: next.lapses,
     };
   }
 }

@@ -139,6 +139,8 @@ describe('MistakeCollector', () => {
       problemId: 'problem-1',
       source: 'TEST',
       occurredAt: base.sourceOccurredAt,
+      sourceTestId: null,
+      sourceRefId: 'attempt-1',
     });
   });
 

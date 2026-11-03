@@ -2442,6 +2442,9 @@ model ProblemReview {
   lapses       Int       @default(0)
   lastResult   String? // WRONG | CORRECT
   source       String // PRACTICE | TEST | STUDY_REVIEW | HOMEWORK | REVIEW
+  // Эх үйл явдал: тест/гэрийн даалгаврын тест (хариу нээх хаалганд), Attempt/HomeworkAttempt/давтлагын ID
+  sourceTestId String?
+  sourceRefId  String?
   // Сүүлийн үйл явдлын мөч — хоцорч ирсэн/давтагдсан үйл явдал хуваарийг дахин тэглэхгүй
   lastEventAt  DateTime
   createdAt    DateTime  @default(now())

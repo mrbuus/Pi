@@ -51,6 +51,8 @@ export type ProblemReviewMinAggregateOutputType = {
   lapses: number | null
   lastResult: string | null
   source: string | null
+  sourceTestId: string | null
+  sourceRefId: string | null
   lastEventAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -67,6 +69,8 @@ export type ProblemReviewMaxAggregateOutputType = {
   lapses: number | null
   lastResult: string | null
   source: string | null
+  sourceTestId: string | null
+  sourceRefId: string | null
   lastEventAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -83,6 +87,8 @@ export type ProblemReviewCountAggregateOutputType = {
   lapses: number
   lastResult: number
   source: number
+  sourceTestId: number
+  sourceRefId: number
   lastEventAt: number
   createdAt: number
   updatedAt: number
@@ -115,6 +121,8 @@ export type ProblemReviewMinAggregateInputType = {
   lapses?: true
   lastResult?: true
   source?: true
+  sourceTestId?: true
+  sourceRefId?: true
   lastEventAt?: true
   createdAt?: true
   updatedAt?: true
@@ -131,6 +139,8 @@ export type ProblemReviewMaxAggregateInputType = {
   lapses?: true
   lastResult?: true
   source?: true
+  sourceTestId?: true
+  sourceRefId?: true
   lastEventAt?: true
   createdAt?: true
   updatedAt?: true
@@ -147,6 +157,8 @@ export type ProblemReviewCountAggregateInputType = {
   lapses?: true
   lastResult?: true
   source?: true
+  sourceTestId?: true
+  sourceRefId?: true
   lastEventAt?: true
   createdAt?: true
   updatedAt?: true
@@ -250,6 +262,8 @@ export type ProblemReviewGroupByOutputType = {
   lapses: number
   lastResult: string | null
   source: string
+  sourceTestId: string | null
+  sourceRefId: string | null
   lastEventAt: Date
   createdAt: Date
   updatedAt: Date
@@ -289,6 +303,8 @@ export type ProblemReviewWhereInput = {
   lapses?: Prisma.IntFilter<"ProblemReview"> | number
   lastResult?: Prisma.StringNullableFilter<"ProblemReview"> | string | null
   source?: Prisma.StringFilter<"ProblemReview"> | string
+  sourceTestId?: Prisma.StringNullableFilter<"ProblemReview"> | string | null
+  sourceRefId?: Prisma.StringNullableFilter<"ProblemReview"> | string | null
   lastEventAt?: Prisma.DateTimeFilter<"ProblemReview"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"ProblemReview"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProblemReview"> | Date | string
@@ -307,6 +323,8 @@ export type ProblemReviewOrderByWithRelationInput = {
   lapses?: Prisma.SortOrder
   lastResult?: Prisma.SortOrderInput | Prisma.SortOrder
   source?: Prisma.SortOrder
+  sourceTestId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceRefId?: Prisma.SortOrderInput | Prisma.SortOrder
   lastEventAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -329,6 +347,8 @@ export type ProblemReviewWhereUniqueInput = Prisma.AtLeast<{
   lapses?: Prisma.IntFilter<"ProblemReview"> | number
   lastResult?: Prisma.StringNullableFilter<"ProblemReview"> | string | null
   source?: Prisma.StringFilter<"ProblemReview"> | string
+  sourceTestId?: Prisma.StringNullableFilter<"ProblemReview"> | string | null
+  sourceRefId?: Prisma.StringNullableFilter<"ProblemReview"> | string | null
   lastEventAt?: Prisma.DateTimeFilter<"ProblemReview"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"ProblemReview"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProblemReview"> | Date | string
@@ -347,6 +367,8 @@ export type ProblemReviewOrderByWithAggregationInput = {
   lapses?: Prisma.SortOrder
   lastResult?: Prisma.SortOrderInput | Prisma.SortOrder
   source?: Prisma.SortOrder
+  sourceTestId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceRefId?: Prisma.SortOrderInput | Prisma.SortOrder
   lastEventAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -371,6 +393,8 @@ export type ProblemReviewScalarWhereWithAggregatesInput = {
   lapses?: Prisma.IntWithAggregatesFilter<"ProblemReview"> | number
   lastResult?: Prisma.StringNullableWithAggregatesFilter<"ProblemReview"> | string | null
   source?: Prisma.StringWithAggregatesFilter<"ProblemReview"> | string
+  sourceTestId?: Prisma.StringNullableWithAggregatesFilter<"ProblemReview"> | string | null
+  sourceRefId?: Prisma.StringNullableWithAggregatesFilter<"ProblemReview"> | string | null
   lastEventAt?: Prisma.DateTimeWithAggregatesFilter<"ProblemReview"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ProblemReview"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ProblemReview"> | Date | string
@@ -385,6 +409,8 @@ export type ProblemReviewCreateInput = {
   lapses?: number
   lastResult?: string | null
   source: string
+  sourceTestId?: string | null
+  sourceRefId?: string | null
   lastEventAt: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -403,6 +429,8 @@ export type ProblemReviewUncheckedCreateInput = {
   lapses?: number
   lastResult?: string | null
   source: string
+  sourceTestId?: string | null
+  sourceRefId?: string | null
   lastEventAt: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -417,6 +445,8 @@ export type ProblemReviewUpdateInput = {
   lapses?: Prisma.IntFieldUpdateOperationsInput | number
   lastResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastEventAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -435,6 +465,8 @@ export type ProblemReviewUncheckedUpdateInput = {
   lapses?: Prisma.IntFieldUpdateOperationsInput | number
   lastResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastEventAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -451,6 +483,8 @@ export type ProblemReviewCreateManyInput = {
   lapses?: number
   lastResult?: string | null
   source: string
+  sourceTestId?: string | null
+  sourceRefId?: string | null
   lastEventAt: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -465,6 +499,8 @@ export type ProblemReviewUpdateManyMutationInput = {
   lapses?: Prisma.IntFieldUpdateOperationsInput | number
   lastResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastEventAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -481,6 +517,8 @@ export type ProblemReviewUncheckedUpdateManyInput = {
   lapses?: Prisma.IntFieldUpdateOperationsInput | number
   lastResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastEventAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -512,6 +550,8 @@ export type ProblemReviewCountOrderByAggregateInput = {
   lapses?: Prisma.SortOrder
   lastResult?: Prisma.SortOrder
   source?: Prisma.SortOrder
+  sourceTestId?: Prisma.SortOrder
+  sourceRefId?: Prisma.SortOrder
   lastEventAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -535,6 +575,8 @@ export type ProblemReviewMaxOrderByAggregateInput = {
   lapses?: Prisma.SortOrder
   lastResult?: Prisma.SortOrder
   source?: Prisma.SortOrder
+  sourceTestId?: Prisma.SortOrder
+  sourceRefId?: Prisma.SortOrder
   lastEventAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -551,6 +593,8 @@ export type ProblemReviewMinOrderByAggregateInput = {
   lapses?: Prisma.SortOrder
   lastResult?: Prisma.SortOrder
   source?: Prisma.SortOrder
+  sourceTestId?: Prisma.SortOrder
+  sourceRefId?: Prisma.SortOrder
   lastEventAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -656,6 +700,8 @@ export type ProblemReviewCreateWithoutStudentInput = {
   lapses?: number
   lastResult?: string | null
   source: string
+  sourceTestId?: string | null
+  sourceRefId?: string | null
   lastEventAt: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -672,6 +718,8 @@ export type ProblemReviewUncheckedCreateWithoutStudentInput = {
   lapses?: number
   lastResult?: string | null
   source: string
+  sourceTestId?: string | null
+  sourceRefId?: string | null
   lastEventAt: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -717,6 +765,8 @@ export type ProblemReviewScalarWhereInput = {
   lapses?: Prisma.IntFilter<"ProblemReview"> | number
   lastResult?: Prisma.StringNullableFilter<"ProblemReview"> | string | null
   source?: Prisma.StringFilter<"ProblemReview"> | string
+  sourceTestId?: Prisma.StringNullableFilter<"ProblemReview"> | string | null
+  sourceRefId?: Prisma.StringNullableFilter<"ProblemReview"> | string | null
   lastEventAt?: Prisma.DateTimeFilter<"ProblemReview"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"ProblemReview"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProblemReview"> | Date | string
@@ -731,6 +781,8 @@ export type ProblemReviewCreateWithoutProblemInput = {
   lapses?: number
   lastResult?: string | null
   source: string
+  sourceTestId?: string | null
+  sourceRefId?: string | null
   lastEventAt: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -747,6 +799,8 @@ export type ProblemReviewUncheckedCreateWithoutProblemInput = {
   lapses?: number
   lastResult?: string | null
   source: string
+  sourceTestId?: string | null
+  sourceRefId?: string | null
   lastEventAt: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -788,6 +842,8 @@ export type ProblemReviewCreateManyStudentInput = {
   lapses?: number
   lastResult?: string | null
   source: string
+  sourceTestId?: string | null
+  sourceRefId?: string | null
   lastEventAt: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -802,6 +858,8 @@ export type ProblemReviewUpdateWithoutStudentInput = {
   lapses?: Prisma.IntFieldUpdateOperationsInput | number
   lastResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastEventAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -818,6 +876,8 @@ export type ProblemReviewUncheckedUpdateWithoutStudentInput = {
   lapses?: Prisma.IntFieldUpdateOperationsInput | number
   lastResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastEventAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -833,6 +893,8 @@ export type ProblemReviewUncheckedUpdateManyWithoutStudentInput = {
   lapses?: Prisma.IntFieldUpdateOperationsInput | number
   lastResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastEventAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -848,6 +910,8 @@ export type ProblemReviewCreateManyProblemInput = {
   lapses?: number
   lastResult?: string | null
   source: string
+  sourceTestId?: string | null
+  sourceRefId?: string | null
   lastEventAt: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -862,6 +926,8 @@ export type ProblemReviewUpdateWithoutProblemInput = {
   lapses?: Prisma.IntFieldUpdateOperationsInput | number
   lastResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastEventAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -878,6 +944,8 @@ export type ProblemReviewUncheckedUpdateWithoutProblemInput = {
   lapses?: Prisma.IntFieldUpdateOperationsInput | number
   lastResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastEventAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -893,6 +961,8 @@ export type ProblemReviewUncheckedUpdateManyWithoutProblemInput = {
   lapses?: Prisma.IntFieldUpdateOperationsInput | number
   lastResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastEventAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -911,6 +981,8 @@ export type ProblemReviewSelect<ExtArgs extends runtime.Types.Extensions.Interna
   lapses?: boolean
   lastResult?: boolean
   source?: boolean
+  sourceTestId?: boolean
+  sourceRefId?: boolean
   lastEventAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -929,6 +1001,8 @@ export type ProblemReviewSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   lapses?: boolean
   lastResult?: boolean
   source?: boolean
+  sourceTestId?: boolean
+  sourceRefId?: boolean
   lastEventAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -947,6 +1021,8 @@ export type ProblemReviewSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   lapses?: boolean
   lastResult?: boolean
   source?: boolean
+  sourceTestId?: boolean
+  sourceRefId?: boolean
   lastEventAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -965,12 +1041,14 @@ export type ProblemReviewSelectScalar = {
   lapses?: boolean
   lastResult?: boolean
   source?: boolean
+  sourceTestId?: boolean
+  sourceRefId?: boolean
   lastEventAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProblemReviewOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "problemId" | "dueAt" | "intervalDays" | "ease" | "reps" | "lapses" | "lastResult" | "source" | "lastEventAt" | "createdAt" | "updatedAt", ExtArgs["result"]["problemReview"]>
+export type ProblemReviewOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "problemId" | "dueAt" | "intervalDays" | "ease" | "reps" | "lapses" | "lastResult" | "source" | "sourceTestId" | "sourceRefId" | "lastEventAt" | "createdAt" | "updatedAt", ExtArgs["result"]["problemReview"]>
 export type ProblemReviewInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
@@ -1001,6 +1079,8 @@ export type $ProblemReviewPayload<ExtArgs extends runtime.Types.Extensions.Inter
     lapses: number
     lastResult: string | null
     source: string
+    sourceTestId: string | null
+    sourceRefId: string | null
     lastEventAt: Date
     createdAt: Date
     updatedAt: Date
@@ -1439,6 +1519,8 @@ export interface ProblemReviewFieldRefs {
   readonly lapses: Prisma.FieldRef<"ProblemReview", 'Int'>
   readonly lastResult: Prisma.FieldRef<"ProblemReview", 'String'>
   readonly source: Prisma.FieldRef<"ProblemReview", 'String'>
+  readonly sourceTestId: Prisma.FieldRef<"ProblemReview", 'String'>
+  readonly sourceRefId: Prisma.FieldRef<"ProblemReview", 'String'>
   readonly lastEventAt: Prisma.FieldRef<"ProblemReview", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"ProblemReview", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ProblemReview", 'DateTime'>

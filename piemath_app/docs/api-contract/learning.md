@@ -100,8 +100,11 @@ OPEN → мөр. (`gradeAnswer(problem, answer)` choiceOrder-гүй.) Сонго
 - `GET /review/problems/due?limit=` (1–30, анхдагч 10) → `{ total, items: [{ id, problem: {id, statementText, choices, choiceMode, answerFields,
   format, imageKey}, dueAt, intervalDays, reps, lapses, lastResult: WRONG|CORRECT, source, formulas }] }`. `problem` нь `/mistakes/today`-тэй
   ижил хэлбэр; хариуны түлхүүр, бодолт ИРЭХГҮЙ.
-- `POST /review/problems/:id/answer` `{ answer }` (§1.1-ийн retry хэлбэр) → `{ correct, correctAnswer, solutionOutline|null, scheduled, dueAt,
-  intervalDays, reps, lapses }`. Хугацаа болоогүй бол дүгнэнэ, хуваарь өөрчлөгдөхгүй (`scheduled: false`). Бусдын мөр 404, зэрэг 409.
+- `POST /review/problems/:id/answer` `{ answer }` (§1.1-ийн retry хэлбэр) → `{ correct, correctAnswer|null, solutionOutline|null, scheduled,
+  dueAt, intervalDays, reps, lapses }`. Хугацаа болоогүй бол 409 (дүгнэхгүй, юу ч задрахгүй). Бусдын мөр 404, зэрэг 409.
+- Хариу нээх хаалга (гэрийн даалгавар, шалгалтын дүнтэй ижил): ангид бодогдох тестийн (`reservedAnywhere`) эсвэл эрх нь FULL биш
+  1000 бодлогын бодлого давтлагад гарахгүй (хуваарь хэвээр). Тестэд орсон бодлогод `correctAnswer: null` (тест дахин ашиглагдана),
+  гэрийн даалгаврын тухайн тестэд л нээгдэнэ; бодолт зөвхөн VERIFIED.
 
 ## 4. Хичээл, номын сан, видео (`/app/learn`, `/app/library`, `/app/videos`)
 

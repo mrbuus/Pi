@@ -11882,6 +11882,8 @@ export const ProblemReviewScalarFieldEnum = {
   lapses: 'lapses',
   lastResult: 'lastResult',
   source: 'source',
+  sourceTestId: 'sourceTestId',
+  sourceRefId: 'sourceRefId',
   lastEventAt: 'lastEventAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

@@ -49,6 +49,17 @@ function harness() {
       findMany: jest.fn(async (_args?: any) => [] as unknown[]),
       findFirst: jest.fn(),
     },
+    // Хариу нээх хаалганы асуулгууд (анхдагч: ямар ч тестэд ороогүй, нөөцлөөгүй)
+    testProblem: { findMany: jest.fn(async (_args?: any) => [] as unknown[]) },
+    classTestSession: { findFirst: jest.fn(async (_args?: any) => null as unknown) },
+    lessonTopic: { findFirst: jest.fn(async () => null) },
+    testAccess: { findFirst: jest.fn(async () => null), findMany: jest.fn(async () => []) },
+    testResult: { findUnique: jest.fn(async () => null) },
+    testAttemptSession: { findUnique: jest.fn(async () => null) },
+    enrollment: { findMany: jest.fn(async () => []) },
+    userPass: { findMany: jest.fn(async () => []) },
+    purchase: { findMany: jest.fn(async () => []) },
+    studentProfile: { findUnique: jest.fn(async () => null) },
   };
   const access = { deletedAt: null };
   const mistakes = { accessibleChapterWhere: jest.fn(async () => access) };
@@ -154,13 +165,31 @@ describe('ProblemReviewService.due', () => {
     expect(text).not.toMatch(/correctAnswer|isCorrect|solutionOutline|Бодолт/);
   });
 
+  it('ангид бодогдох тестийн бодлогыг давтлагад гаргахгүй', async () => {
+    const h = harness();
+    h.db.problemReview.count.mockResolvedValue(2);
+    h.db.problemReview.findMany.mockResolvedValue([
+      reviewRow({ id: 'locked', problemId: 'p-locked', source: 'TEST', sourceTestId: 't1' }),
+      reviewRow({ id: 'open', problemId: 'p-open', problem: problem({ id: 'p-open' }) }),
+    ]);
+    h.db.testProblem.findMany.mockImplementation(async (args: any) =>
+      args.where.problemId === 'p-locked'
+        ? [{ test: { id: 't1', type: 'CHAPTER_EXAM', chapterId: null, chapter: null } }]
+        : [],
+    );
+    h.db.classTestSession.findFirst.mockImplementation(async (args: any) => (args.where.testId === 't1' ? { id: 's' } : null));
+    const res = await h.service.due('student-1');
+    expect(res.items.map((i) => i.id)).toEqual(['open']);
+    expect(res.total).toBe(1);
+  });
+
   it('limit 1–30', async () => {
     const h = harness();
     await expect(h.service.due('student-1', '0')).rejects.toBeInstanceOf(BadRequestException);
     await expect(h.service.due('student-1', '31')).rejects.toBeInstanceOf(BadRequestException);
     await expect(h.service.due('student-1', 'x')).rejects.toBeInstanceOf(BadRequestException);
     await h.service.due('student-1');
-    expect(h.db.problemReview.findMany.mock.calls[0][0].take).toBe(20);
+    expect(h.db.problemReview.findMany.mock.calls[0][0].take).toBe(30);
   });
 });
 
@@ -180,7 +209,7 @@ describe('ProblemReviewService.answer', () => {
     await expect(h.service.answer('student-1', 'review-1', '')).rejects.toBeInstanceOf(BadRequestException);
   });
 
-  it('хугацаа болсон, зөв: интервал 3 хоног болж, хариу/бодолт нээгдэнэ', async () => {
+  it('хугацаа болсон, тестэд ороогүй бодлого, зөв: интервал 3 хоног, хариу/бодолт нээгдэнэ', async () => {
     const h = harness();
     h.db.problemReview.findFirst.mockResolvedValue(reviewRow());
     const res = await h.service.answer('student-1', 'review-1', 1);
@@ -205,12 +234,63 @@ describe('ProblemReviewService.answer', () => {
     expect(res).toMatchObject({ correct: false, scheduled: true, intervalDays: 1, reps: 0, lapses: 1 });
   });
 
-  it('хугацаа болоогүй: дүгнэнэ, хуваарь өөрчлөгдөхгүй (давхар товшилт сунгахгүй)', async () => {
+  it('хугацаа болоогүй: дүгнэхгүй, юу ч задрахгүй, хуваарь өөрчлөгдөхгүй', async () => {
     const h = harness();
     const later = new Date('2026-11-10T16:00:00.000Z');
     h.db.problemReview.findFirst.mockResolvedValue(reviewRow({ dueAt: later, intervalDays: 7, reps: 2 }));
+    const err = await h.service.answer('student-1', 'review-1', 1).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(ConflictException);
+    expect(JSON.stringify(err)).not.toMatch(/Бодолт|"2"/);
+    expect(h.db.problemReview.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('ангид бодогдох (reserved) тестийн бодлого: дүгнэхгүй, хариу/бодолт задрахгүй', async () => {
+    const h = harness();
+    h.db.problemReview.findFirst.mockResolvedValue(reviewRow({ source: 'TEST', sourceTestId: 't1' }));
+    h.db.testProblem.findMany.mockResolvedValue([
+      { test: { id: 't1', type: 'CHAPTER_EXAM', chapterId: null, chapter: null } },
+    ]);
+    h.db.classTestSession.findFirst.mockResolvedValue({ id: 'session-tomorrow' });
+    const err = await h.service.answer('student-1', 'review-1', 1).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(ConflictException);
+    expect(JSON.stringify(err)).not.toMatch(/Бодолт|correctAnswer/);
+    expect(h.db.problemReview.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('эх тест бодлогоос салсан ч нөөцлөгдсөн бол хаалттай', async () => {
+    const h = harness();
+    h.db.problemReview.findFirst.mockResolvedValue(reviewRow({ source: 'TEST', sourceTestId: 'gone' }));
+    h.db.classTestSession.findFirst.mockImplementation(async (args: any) =>
+      args.where.testId === 'gone' ? { id: 's' } : null,
+    );
+    await expect(h.service.answer('student-1', 'review-1', 1)).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('шалгалт/тестийн бодлого (нөөцлөөгүй): зөв хариу нээхгүй, баталгаажсан бодолт л', async () => {
+    const h = harness();
+    h.db.problemReview.findFirst.mockResolvedValue(reviewRow({ source: 'TEST', sourceTestId: 't1' }));
+    h.db.testProblem.findMany.mockResolvedValue([
+      { test: { id: 't1', type: 'CHAPTER_EXAM', chapterId: null, chapter: null } },
+    ]);
     const res = await h.service.answer('student-1', 'review-1', 1);
-    expect(res).toMatchObject({ correct: true, scheduled: false, dueAt: later, intervalDays: 7, reps: 2 });
+    expect(res).toMatchObject({ correct: true, correctAnswer: null, solutionOutline: 'Бодолт' });
+  });
+
+  it('гэрийн даалгавар: тухайн даалгаврын тестэд хариу нээгдэнэ (reviewOf-той ижил)', async () => {
+    const h = harness();
+    h.db.problemReview.findFirst.mockResolvedValue(reviewRow({ source: 'HOMEWORK', sourceTestId: 'hw' }));
+    h.db.testProblem.findMany.mockResolvedValue([{ test: { id: 'hw', type: 'PRACTICE', chapterId: null, chapter: null } }]);
+    const res = await h.service.answer('student-1', 'review-1', 1);
+    expect(res).toMatchObject({ correctAnswer: '2', solutionOutline: 'Бодолт' });
+  });
+
+  it('1000 бодлогын эрхгүй (FULL биш) тестийн бодлого хаалттай', async () => {
+    const h = harness();
+    h.db.problemReview.findFirst.mockResolvedValue(reviewRow());
+    h.db.testProblem.findMany.mockResolvedValue([
+      { test: { id: 'k', type: 'THOUSAND', chapterId: null, chapter: null } },
+    ]);
+    await expect(h.service.answer('student-1', 'review-1', 1)).rejects.toBeInstanceOf(ConflictException);
     expect(h.db.problemReview.updateMany).not.toHaveBeenCalled();
   });
 
