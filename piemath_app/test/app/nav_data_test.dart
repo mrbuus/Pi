@@ -73,7 +73,7 @@ void main() {
     expect(NavData.sectionIndexOf(UserRole.student, '/app/notifications'), -1);
     expect(NavData.sectionIndexOf(UserRole.teacher, '/app/teacher/board/c1'), 0);
     expect(NavData.sectionIndexOf(UserRole.teacher, '/app/classes/c1'), 1);
-    expect(NavData.sectionIndexOf(UserRole.admin, '/app/teacher/board/c1'), 3);
+    expect(NavData.sectionIndexOf(UserRole.admin, '/app/teacher/board/c1'), 0);
     expect(NavData.sectionIndexOf(UserRole.admin, '/app/admin/placement'), 2);
     expect(NavData.sectionIndexOf(UserRole.teacherPlus, '/app/admin/leads'), 3);
   });

@@ -287,10 +287,10 @@ void main() {
       UserRole.teacher: [('/app/admin/students', 1, 3), ('/app/videos', 2, 1), ('/app/tools', 2, 3)],
       UserRole.teacherPlus: [('/app/admin/reconcile', 2, 1), ('/app/admin/leads', 3, 1), ('/app/sms', 3, 5)],
       UserRole.admin: [
-        ('/app/admin/finance', 0, 2),
+        ('/app/admin/finance', 0, 3),
         ('/app/sms', 1, 1),
         ('/app/admin/placement', 2, 2),
-        ('/app/teacher-hours', 3, 4),
+        ('/app/teacher-hours', 3, 3),
       ],
       UserRole.buyer: [('/app/study/history', 1, 3), ('/app/tests', 1, 1)],
       UserRole.groupTeacher: [('/app/tools', 1, 1)],

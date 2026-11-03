@@ -74,7 +74,7 @@ abstract final class NavData {
     UserRole.student: NavLink('/app/student', 'Миний самбар', AppIcons.home, short: 'Нүүр'),
     UserRole.teacher: NavLink('/app/teacher', 'Багшийн самбар', AppIcons.home, short: 'Нүүр'),
     UserRole.teacherPlus: NavLink('/app/teacher', 'Багшийн самбар', AppIcons.home, short: 'Нүүр'),
-    UserRole.admin: NavLink('/app/admin', 'Удирдлага', AppIcons.home, short: 'Нүүр'),
+    UserRole.admin: NavLink('/app/teacher', 'Удирдлага', AppIcons.home, short: 'Нүүр'),
     UserRole.buyer: NavLink('/app/buyer', 'Миний эрхүүд', AppIcons.home, short: 'Нүүр'),
     UserRole.parent: NavLink('/app/parent', 'Хүүхдийн явц', AppIcons.home, short: 'Нүүр'),
     UserRole.unknown: NavLink('/app/profile', 'Миний мэдээлэл', AppIcons.home, short: 'Нүүр'),
@@ -102,7 +102,6 @@ abstract final class NavData {
   // Хуваарь/Төлөвлөгч, `ENROLL_HUB`-ийн Хүсэлт/Элсэлт/Түвшин.
   static const _planner = NavLink('/app/planner', 'Төлөвлөгч', AppIcons.checklist, short: 'Төлөвлөгч');
   static const _classesTab = NavLink('/app/classes', 'Ангиуд', AppIcons.myClass, short: 'Ангиуд');
-  static const _teacherBoard = NavLink('/app/teacher', 'Багшийн самбар', AppIcons.classes, short: 'Багш');
   static const _teacherHours = NavLink('/app/teacher-hours', 'Цагийн бүртгэл', AppIcons.time, short: 'Цаг');
   static const _leadsTab = NavLink('/app/admin/leads', 'Хүсэлтүүд', AppIcons.enroll, short: 'Хүсэлт');
   static const _enrollment = NavLink('/app/admin/enrollment', 'Элсэлтийн удирдлага', AppIcons.enroll, short: 'Элсэлт');
@@ -162,8 +161,10 @@ abstract final class NavData {
     UserRole.admin: [
       NavSection(
         'home',
-        NavLink('/app/admin', 'Удирдлага', AppIcons.home, short: 'Нүүр'),
+        // Админы самбар апп-д хийгдээгүй тул эхний дэд таб нь ажилладаг өнөөдрийн хичээл
+        NavLink('/app/teacher', 'Удирдлага', AppIcons.home, short: 'Нүүр'),
         pages: [
+          NavLink('/app/teacher', 'Өнөөдрийн хичээл', AppIcons.classes, short: 'Өнөөдөр'),
           NavLink('/app/admin', 'Удирдлага', AppIcons.home, short: 'Самбар'),
           NavLink('/app/admin/analytics', 'Аналитик', AppIcons.chart, short: 'Аналитик'),
           NavLink('/app/admin/finance', 'Санхүү', AppIcons.payments, short: 'Санхүү'),
@@ -183,7 +184,7 @@ abstract final class NavData {
           _sorilsTab,
         ],
       ),
-      NavSection('schedule', _schedule, pages: [..._staffSchedule, _teacherBoard, _teacherHours]),
+      NavSection('schedule', _schedule, pages: [..._staffSchedule, _teacherHours]),
     ],
     UserRole.buyer: [
       NavSection('home', NavLink('/app/buyer', 'Миний эрхүүд', AppIcons.home, short: 'Нүүр')),
