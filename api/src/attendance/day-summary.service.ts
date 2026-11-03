@@ -42,7 +42,10 @@ export class AttendanceDaySummaryService {
         select: { scheduleId: true },
       }),
     ]);
-    const online = await this.onlineByClass(ids, key, enrolled);
+    const [online, theory] = await Promise.all([
+      this.onlineByClass(ids, key, enrolled),
+      this.theoryByClass(ids, date),
+    ]);
     return {
       date: key,
       classes: summarizeDay(
@@ -51,8 +54,35 @@ export class AttendanceDaySummaryService {
         attendance,
         homework,
         new Set(records.map((r) => r.scheduleId)),
-      ).map((c) => ({ ...c, online: online.get(c.id) ?? null })),
+      ).map((c) => ({
+        ...c,
+        online: online.get(c.id) ?? null,
+        theory: theory.get(c.id) ?? { assigned: false, sent: 0 },
+      })),
     };
+  }
+
+  /** Тухайн өдрийн онолын зураг: томилогдсон сурагч байгаа эсэх, илгээсэн багцын тоо (эзэн 2026-11-03) */
+  private async theoryByClass(ids: string[], date: Date) {
+    const [topics, photos] = await Promise.all([
+      this.prisma.lessonTopic.findMany({
+        where: { date, photoStudentId: { not: null }, schedule: { classroomId: { in: ids } } },
+        select: { schedule: { select: { classroomId: true } } },
+      }),
+      this.prisma.lessonPhoto.findMany({
+        where: { date, classroomId: { in: ids } },
+        select: { classroomId: true, imageKeys: true },
+      }),
+    ]);
+    const out = new Map<string, { assigned: boolean; sent: number }>();
+    const at = (id: string) => {
+      let v = out.get(id);
+      if (!v) out.set(id, (v = { assigned: false, sent: 0 }));
+      return v;
+    };
+    for (const t of topics) at(t.schedule.classroomId).assigned = true;
+    for (const p of photos) if (p.imageKeys.length) at(p.classroomId).sent += 1;
+    return out;
   }
 
   /**

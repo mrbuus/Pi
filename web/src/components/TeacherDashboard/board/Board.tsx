@@ -15,6 +15,7 @@ import MarkView, { type BulkState } from "./MarkView";
 import { BoardFilters, LessonInfo, matchesFilter, type FilterKey } from "./BoardFilters";
 import OtherInfo from "./OtherInfo";
 import RecordedByLine from "./RecordedBy";
+import TheoryPhotosStaff from "@/components/TheoryPhotosStaff";
 import OnlineDetail from "./OnlineDetail";
 import StudentDrawer from "./StudentDrawer";
 import type { OnlineCell } from "./StudentCard";
@@ -526,6 +527,7 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
               onlineData={onlineData}
               online={online}
             />
+            <TheoryPhotosStaff classroomId={cls.id} date={date} defaultOpen={date <= today} />
             <BoardFilters
               students={students}
               recs={recs}

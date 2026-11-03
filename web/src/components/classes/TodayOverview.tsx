@@ -26,6 +26,8 @@ interface DaySummary {
     homework: { done: number; partial: number; notDone: number; unmarked: number } | null;
     /** Онлайн даалгавар (эзэн 2026-11-03): сүүлийн тесттэй хичээлийн илгээсэн/зураг/зөв-нийт бодлого */
     online: { date: string; submitted: number; photos: number; correct: number; total: number } | null;
+    /** Онолын зураг: томилогдсон сурагч байгаа эсэх, илгээсэн багцын тоо */
+    theory: { assigned: boolean; sent: number };
     confirmed: boolean;
   }[];
 }
@@ -117,7 +119,13 @@ export default function TodayOverview() {
                     <span className="min-w-0">
                       <span className="block truncate text-base font-bold text-ink">{shortClass(c.name)}</span>
                       <span className="block text-xs tabular-nums text-ink-dim">
-                        <Meta items={[formatMinutes(c.startMinute), `${c.students} сурагч`]} />
+                        <Meta
+                          items={[
+                            formatMinutes(c.startMinute),
+                            `${c.students} сурагч`,
+                            c.theory.sent > 0 ? "онолын зураг илгээсэн" : started && c.theory.assigned ? "онолын зураг алга" : null,
+                          ]}
+                        />
                       </span>
                     </span>
                   </span>
