@@ -35,11 +35,10 @@ class BookName extends StatelessWidget {
       : Text(name, style: style, maxLines: maxLines, overflow: maxLines == null ? null : TextOverflow.ellipsis);
 }
 
-const accessNoteText =
-    'Номын бүх тест, зөв хариу, бодолт, видео тайлбарыг эрхтэй сурагчид үзнэ. Эрхээ вэб эсвэл сургалтын төвөөр аваарай.';
+const accessNoteText = 'Номын бүх тест, зөв хариу, бодолт, видео тайлбарыг эрхтэй сурагчид үзнэ';
 
-/// Эрх нээх тухай мэдээлэл. Апп дотор ХУДАЛДАХГҮЙ (Apple 3.1.1 — In-App Purchase шаардлага):
-/// үнэ, худалдах товчгүй, зөвхөн «вэб эсвэл сургалтын төвөөр».
+/// Эрх нээх тухай мэдээлэл. Апп дотор ХУДАЛДАХГҮЙ, гадны худалдан авалт руу хөтлөхгүй
+/// (Apple 3.1.1, Google Play Payments): үнэ, худалдах товч, вэб холбоос БАЙХГҮЙ.
 class AccessNoteCard extends StatelessWidget {
   const AccessNoteCard({super.key, this.webPath = '/books'});
 
@@ -60,12 +59,6 @@ class AccessNoteCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpace.sm),
           Text(accessNoteText, style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim)),
-          const SizedBox(height: AppSpace.md),
-          OutlinedButton.icon(
-            icon: const Icon(AppIcons.forward, size: 18),
-            label: const Text('Вэбээр нээх'),
-            onPressed: () => openWeb(webPath),
-          ),
         ],
       ),
     );
@@ -74,28 +67,22 @@ class AccessNoteCard extends StatelessWidget {
 
 /// Доороос гарах мэдээлэл (тестийн мөрийн «Эрх нээх»).
 Future<void> showAccessSheet(BuildContext context, {String webPath = '/books'}) => showModalBottomSheet<void>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpace.xl, 0, AppSpace.xl, AppSpace.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Эрх нээх', style: ctx.text.titleMedium),
-              const SizedBox(height: AppSpace.sm),
-              Text(accessNoteText, style: ctx.text.bodyMedium),
-              const SizedBox(height: AppSpace.lg),
-              OutlinedButton.icon(
-                icon: const Icon(AppIcons.forward, size: 18),
-                label: const Text('Вэбээр нээх'),
-                onPressed: () => openWeb(webPath),
-              ),
-            ],
-          ),
-        ),
+  context: context,
+  builder: (ctx) => SafeArea(
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpace.xl, 0, AppSpace.xl, AppSpace.xl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Эрх нээх', style: ctx.text.titleMedium),
+          const SizedBox(height: AppSpace.sm),
+          Text(accessNoteText, style: ctx.text.bodyMedium),
+        ],
       ),
-    );
+    ),
+  ),
+);
 
 /// Вэбийн нийтийн хуудсыг гаднаас нээнэ (зөвхөн апп-ын өөрийн домэйн).
 Future<void> openWeb(String path) =>

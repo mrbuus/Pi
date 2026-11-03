@@ -41,10 +41,7 @@ class SorilsScreen extends ConsumerWidget {
                   message: 'Шинэ сорил товлогдмогц энд харагдана',
                 ),
               ],
-              if (m.live != null) ...[
-                const SectionHeader(title: 'Одоо явагдаж байна'),
-                _EventCard(event: m.live!),
-              ],
+              if (m.live != null) ...[const SectionHeader(title: 'Одоо явагдаж байна'), _EventCard(event: m.live!)],
               if (m.next != null && m.next!.id != m.live?.id) ...[
                 const SectionHeader(title: 'Дараагийн сорил'),
                 _EventCard(event: m.next!),

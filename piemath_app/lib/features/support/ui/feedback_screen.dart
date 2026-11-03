@@ -94,6 +94,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       builder: (ctx) => SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(AppSpace.xl, 0, AppSpace.xl, AppSpace.xl),

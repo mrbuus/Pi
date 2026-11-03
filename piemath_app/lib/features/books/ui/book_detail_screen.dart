@@ -21,9 +21,8 @@ class BookDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(bookDetailProvider(code));
-    final name = async.whenOrNull(data: (d) => bookDisplayName(d.code, d.title, d.displayName)) ??
-        bookMeta[code]?.name ??
-        'Ном';
+    final name =
+        async.whenOrNull(data: (d) => bookDisplayName(d.code, d.title, d.displayName)) ?? bookMeta[code]?.name ?? 'Ном';
     return Scaffold(
       appBar: AppBar(leading: const AppBackButton(), title: BookName(name, maxLines: 1)),
       body: async.when(
@@ -171,12 +170,7 @@ class _ChapterCardState extends ConsumerState<ChapterCard> {
           ],
           for (final t in rows) ...[
             const SizedBox(height: AppSpace.md),
-            _TestRow(
-              code: widget.code,
-              test: t,
-              showTitle: labels.isEmpty && ch.tests.length > 1,
-              signedIn: signedIn,
-            ),
+            _TestRow(code: widget.code, test: t, showTitle: labels.isEmpty && ch.tests.length > 1, signedIn: signedIn),
           ],
           if (isStaff) ...[
             const SizedBox(height: AppSpace.md),
@@ -260,7 +254,6 @@ class _TestRow extends StatelessWidget {
   }
 }
 
-
 /// Төвийн багшийн «Эх PDF» (`GET /tests/source-pdf?chapterId=`): бүлгийн A ба B хамт, гараар шивсэн эх.
 /// Файл олдохгүй бол тайван тайлбар; нээх нь `core/files` (токен URL-д орохгүй).
 class _SourcePdfButton extends ConsumerStatefulWidget {
@@ -300,11 +293,11 @@ class _SourcePdfButtonState extends ConsumerState<_SourcePdfButton> {
 
   @override
   Widget build(BuildContext context) => OutlinedButton.icon(
-        style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
-        icon: _busy
-            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-            : const Icon(BooksIcons.sourcePdf, size: 18),
-        label: const Text('Эх PDF'),
-        onPressed: _busy ? null : _open,
-      );
+    style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
+    icon: _busy
+        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+        : const Icon(BooksIcons.sourcePdf, size: 18),
+    label: const Text('Эх PDF'),
+    onPressed: _busy ? null : _open,
+  );
 }

@@ -231,6 +231,7 @@ class _Taking extends ConsumerWidget {
   static Future<void> _openNavigator(BuildContext context, ExamController c) => showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     builder: (ctx) => SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(AppSpace.gutter, 0, AppSpace.gutter, AppSpace.xl),
@@ -262,6 +263,7 @@ class _Taking extends ConsumerWidget {
     final submit = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       builder: (ctx) => _SubmitSheet(controller: c),
     );
     if (submit != true || !context.mounted) return;

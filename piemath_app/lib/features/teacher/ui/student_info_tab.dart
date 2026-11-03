@@ -47,7 +47,11 @@ class _BodyState extends ConsumerState<_Body> {
   String? _saved;
 
   Future<void> _edit(String viewerRole) async {
-    final msg = await ProfileEditSheet.open(context, detail: widget.detail, showGuardians: canSeeGuardianPhones(viewerRole));
+    final msg = await ProfileEditSheet.open(
+      context,
+      detail: widget.detail,
+      showGuardians: canSeeGuardianPhones(viewerRole),
+    );
     if (msg != null && mounted) setState(() => _saved = msg);
   }
 
@@ -116,7 +120,9 @@ class _BodyState extends ConsumerState<_Body> {
           ),
           const SizedBox(height: AppSpace.sm),
           if (history.isEmpty)
-            const AppCard(child: EmptyState(icon: AppIcons.students, title: 'Ангийн түүх алга'))
+            const AppCard(
+              child: EmptyState(icon: AppIcons.students, title: 'Ангийн түүх алга'),
+            )
           else
             AppCard(
               padding: EdgeInsets.zero,
@@ -197,6 +203,7 @@ class ProfileEditSheet extends ConsumerStatefulWidget {
       showModalBottomSheet<String>(
         context: context,
         isScrollControlled: true,
+        useSafeArea: true,
         showDragHandle: true,
         builder: (_) => ProfileEditSheet(detail: detail, showGuardians: showGuardians),
       );
@@ -266,7 +273,11 @@ class _ProfileEditSheetState extends ConsumerState<ProfileEditSheet> {
   static final _eight = RegExp(r'^\d{8}$');
 
   String? _validate(Map<String, Object?> body) {
-    for (final (key, label) in [('phone', 'Утасны дугаар'), ('fatherPhone', 'Эцгийн утас'), ('motherPhone', 'Эхийн утас')]) {
+    for (final (key, label) in [
+      ('phone', 'Утасны дугаар'),
+      ('fatherPhone', 'Эцгийн утас'),
+      ('motherPhone', 'Эхийн утас'),
+    ]) {
       final v = body[key];
       if (v is String && !_eight.hasMatch(v)) return '$label 8 оронтой байх ёстой';
     }
@@ -325,25 +336,36 @@ class _ProfileEditSheetState extends ConsumerState<ProfileEditSheet> {
     }
   }
 
-  Widget _field(TextEditingController c, String label, {TextInputType? type, int? maxLength, int maxLines = 1, bool digits = false}) =>
-      Padding(
-        padding: const EdgeInsets.only(bottom: AppSpace.md),
-        child: TextField(
-          controller: c,
-          keyboardType: type,
-          maxLength: maxLength,
-          maxLines: maxLines,
-          inputFormatters: digits ? [FilteringTextInputFormatter.digitsOnly] : null,
-          decoration: InputDecoration(labelText: label, counterText: ''),
-        ),
-      );
+  Widget _field(
+    TextEditingController c,
+    String label, {
+    TextInputType? type,
+    int? maxLength,
+    int maxLines = 1,
+    bool digits = false,
+  }) => Padding(
+    padding: const EdgeInsets.only(bottom: AppSpace.md),
+    child: TextField(
+      controller: c,
+      keyboardType: type,
+      maxLength: maxLength,
+      maxLines: maxLines,
+      inputFormatters: digits ? [FilteringTextInputFormatter.digitsOnly] : null,
+      decoration: InputDecoration(labelText: label, counterText: ''),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     return SafeArea(
       child: Padding(
-        padding: EdgeInsets.fromLTRB(AppSpace.gutter, 0, AppSpace.gutter, MediaQuery.viewInsetsOf(context).bottom + AppSpace.lg),
+        padding: EdgeInsets.fromLTRB(
+          AppSpace.gutter,
+          0,
+          AppSpace.gutter,
+          MediaQuery.viewInsetsOf(context).bottom + AppSpace.lg,
+        ),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -19,6 +19,7 @@ class CriteriaSheet extends ConsumerWidget {
     final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       showDragHandle: true,
       builder: (_) => CriteriaSheet(classId: classId),
     );

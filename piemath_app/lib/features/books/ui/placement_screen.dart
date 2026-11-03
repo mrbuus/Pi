@@ -9,17 +9,22 @@ import 'books_common.dart';
 
 /// `GET /placement/test` — нийтийн мэдээлэл (хариуны түлхүүргүй).
 class PlacementInfo {
-  const PlacementInfo({required this.title, required this.minutes, required this.problemCount, required this.instructions});
+  const PlacementInfo({
+    required this.title,
+    required this.minutes,
+    required this.problemCount,
+    required this.instructions,
+  });
 
   factory PlacementInfo.fromJson(Map<String, Object?> j) => PlacementInfo(
-        title: j['title'] as String? ?? 'Түвшин шалгах тест',
-        minutes: (j['minutes'] as num?)?.toInt() ?? 0,
-        problemCount: (j['problems'] as List?)?.length ?? 0,
-        instructions: [
-          for (final l in (j['instructions'] as String? ?? '').split('\n'))
-            if (l.trim().isNotEmpty) l.trim(),
-        ],
-      );
+    title: j['title'] as String? ?? 'Түвшин шалгах тест',
+    minutes: (j['minutes'] as num?)?.toInt() ?? 0,
+    problemCount: (j['problems'] as List?)?.length ?? 0,
+    instructions: [
+      for (final l in (j['instructions'] as String? ?? '').split('\n'))
+        if (l.trim().isNotEmpty) l.trim(),
+    ],
+  );
 
   final String title;
   final int minutes;
@@ -28,11 +33,9 @@ class PlacementInfo {
 }
 
 final placementInfoProvider = FutureProvider.autoDispose<PlacementInfo>((ref) {
-  return ref.read(apiClientProvider).get(
-        '/placement/test',
-        auth: false,
-        parse: (j) => PlacementInfo.fromJson((j! as Map).cast<String, Object?>()),
-      );
+  return ref
+      .read(apiClientProvider)
+      .get('/placement/test', auth: false, parse: (j) => PlacementInfo.fromJson((j! as Map).cast<String, Object?>()));
 });
 
 /// Түвшин тогтоох шалгалт (`/placement`, нэвтрэлтгүй).

@@ -17,20 +17,23 @@ class PendingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: const AppBackButton(),
-        title: Text(title ?? AppStrings.appName),
-      ),
+      appBar: AppBar(leading: const AppBackButton(), title: Text(title ?? AppStrings.appName)),
       body: EmptyState(
         icon: AppIcons.info,
         title: 'Энэ хэсэг удахгүй апп-д нэмэгдэнэ',
         message: 'Одоогоор вэб хуудсаар ашиглах боломжтой',
-        action: OutlinedButton.icon(
-          icon: const Icon(AppIcons.forward, size: 18),
-          label: const Text('Вэбээр нээх'),
-          onPressed: () => launchUrl(Uri.parse('${Env.webBaseUrl}$path'), mode: LaunchMode.externalApplication),
-        ),
+        // Худалдан авалтын хуудас руу (дэлгүүр, ном, эрх) хөтлөхгүй — Apple 3.1.1 / Google Play Payments.
+        action: _isPurchasePath(path)
+            ? null
+            : OutlinedButton.icon(
+                icon: const Icon(AppIcons.forward, size: 18),
+                label: const Text('Вэбээр нээх'),
+                onPressed: () => launchUrl(Uri.parse('${Env.webBaseUrl}$path'), mode: LaunchMode.externalApplication),
+              ),
       ),
     );
   }
 }
+
+bool _isPurchasePath(String path) =>
+    const ['/app/store', '/store', '/app/buyer', '/books', '/app/passes'].any(path.startsWith);

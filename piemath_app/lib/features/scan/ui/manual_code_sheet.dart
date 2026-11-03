@@ -6,10 +6,11 @@ import '../domain/scan_code.dart';
 
 /// Кодыг гараар бичих (камер ажиллахгүй, зөвшөөрөл өгөөгүй үед). Зөв код бол буцаана.
 Future<String?> showManualCodeSheet(BuildContext context) => showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => const ManualCodeSheet(),
-    );
+  context: context,
+  isScrollControlled: true,
+  useSafeArea: true,
+  builder: (_) => const ManualCodeSheet(),
+);
 
 class ManualCodeSheet extends StatefulWidget {
   const ManualCodeSheet({super.key});
@@ -40,12 +41,7 @@ class _ManualCodeSheetState extends State<ManualCodeSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        AppSpace.xl,
-        0,
-        AppSpace.xl,
-        AppSpace.xl + MediaQuery.viewInsetsOf(context).bottom,
-      ),
+      padding: EdgeInsets.fromLTRB(AppSpace.xl, 0, AppSpace.xl, AppSpace.xl + MediaQuery.viewInsetsOf(context).bottom),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,12 +58,7 @@ class _ManualCodeSheetState extends State<ManualCodeSheet> {
             enableSuggestions: false,
             maxLength: 40,
             inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9\-\s]'))],
-            decoration: InputDecoration(
-              labelText: 'QR код',
-              hintText: 'AB12CD34',
-              counterText: '',
-              errorText: _error,
-            ),
+            decoration: InputDecoration(labelText: 'QR код', hintText: 'AB12CD34', counterText: '', errorText: _error),
             onChanged: (_) {
               if (_error != null) setState(() => _error = null);
             },

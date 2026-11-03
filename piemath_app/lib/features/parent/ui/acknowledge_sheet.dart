@@ -13,6 +13,7 @@ Future<bool> showAcknowledgeSheet(BuildContext context, {required String testRes
   final ok = await showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     builder: (_) => _AcknowledgeSheet(testResultId: testResultId, title: title),
   );
   return ok ?? false;
@@ -99,10 +100,7 @@ class _AcknowledgeSheetState extends ConsumerState<_AcknowledgeSheet> {
             MetaTitle(widget.title, style: context.text.bodySmall),
             const SizedBox(height: AppSpace.lg),
             if (!_sent) ...[
-              Text(
-                'Баталгаажуулах код хүүхдийн бүртгэлтэй имэйл рүү очно.',
-                style: context.text.bodyMedium,
-              ),
+              Text('Баталгаажуулах код хүүхдийн бүртгэлтэй имэйл рүү очно.', style: context.text.bodyMedium),
               const SizedBox(height: AppSpace.lg),
               FilledButton(onPressed: _busy ? null : _request, child: Text(_busy ? 'Илгээж байна' : 'Код авах')),
             ] else ...[

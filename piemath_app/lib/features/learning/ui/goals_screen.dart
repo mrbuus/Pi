@@ -175,6 +175,7 @@ class _GoalCardState extends ConsumerState<_GoalCard> {
 Future<void> showGoalSheet(BuildContext context, {Goal? goal}) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
+  useSafeArea: true,
   showDragHandle: true,
   builder: (_) => GoalSheet(goal: goal),
 );

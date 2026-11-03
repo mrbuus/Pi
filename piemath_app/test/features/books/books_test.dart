@@ -190,7 +190,9 @@ void main() {
       // Эрх нээх → мэдээлэл (үнэ, худалдах товчгүй)
       await tester.tap(find.widgetWithText(OutlinedButton, 'Эрх нээх').first);
       await settle(tester);
-      expect(find.textContaining('вэб эсвэл сургалтын төвөөр'), findsWidgets);
+      expect(find.textContaining('эрхтэй сурагчид үзнэ'), findsWidgets);
+      // Apple 3.1.1 / Google Play: худалдан авалт руу хөтлөх холбоос байхгүй
+      expect(find.text('Вэбээр нээх'), findsNothing);
     });
 
     testWidgets('нэвтэрсэн бол үнэгүй биш тест → «Эрхтэй бол нээх»', (tester) async {

@@ -134,6 +134,7 @@ class LessonNoteSheet extends ConsumerStatefulWidget {
   }) => showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     showDragHandle: true,
     builder: (_) => LessonNoteSheet(date: date, scheduleId: scheduleId, note: note),
   );
@@ -316,6 +317,7 @@ class DismissalSheet extends ConsumerStatefulWidget {
   }) => showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     showDragHandle: true,
     builder: (_) => DismissalSheet(classId: classId, date: date, current: current),
   );

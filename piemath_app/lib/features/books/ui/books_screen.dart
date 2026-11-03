@@ -34,10 +34,7 @@ class BooksScreen extends ConsumerWidget {
               if (books.isEmpty)
                 const EmptyState(title: 'Ном удахгүй нэмэгдэнэ')
               else
-                for (final b in books) ...[
-                  _BookCard(book: b),
-                  const SizedBox(height: AppSpace.md),
-                ],
+                for (final b in books) ...[_BookCard(book: b), const SizedBox(height: AppSpace.md)],
               const SectionHeader(title: 'Бусад'),
               _LinkCard(
                 icon: BooksIcons.mock,

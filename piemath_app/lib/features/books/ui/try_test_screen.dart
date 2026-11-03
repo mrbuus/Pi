@@ -130,15 +130,7 @@ class _TryTestScreenState extends ConsumerState<TryTestScreen> {
         loading: () => const LoadingState(),
         error: (e, _) {
           if (e is ApiError && e.kind == ApiErrorKind.forbidden) {
-            return EmptyState(
-              icon: BooksIcons.lock,
-              title: e.message,
-              message: accessNoteText,
-              action: OutlinedButton(
-                onPressed: () => openWeb('/books/${Uri.encodeComponent(widget.code)}'),
-                child: const Text('Вэбээр нээх'),
-              ),
-            );
+            return EmptyState(icon: BooksIcons.lock, title: e.message, message: accessNoteText);
           }
           return publicError(e, onRetry: () => ref.invalidate(tryTestProvider(widget.testId)));
         },
@@ -229,7 +221,10 @@ class _TimerChip extends StatelessWidget {
             const SizedBox(width: AppSpace.xs),
             Text(
               mmss(seconds),
-              style: context.text.titleSmall?.copyWith(color: color, fontFeatures: const [FontFeature.tabularFigures()]),
+              style: context.text.titleSmall?.copyWith(
+                color: color,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
           ],
         ),
@@ -333,7 +328,9 @@ class _ProblemCard extends ConsumerWidget {
     final p = problem;
     final textMode = p.choiceMode == 'TEXT';
     final choices = p.choices!;
-    final selected = textMode ? (answer is int ? answer! as int : null) : (answer is String ? choices.indexOf(answer! as String) : null);
+    final selected = textMode
+        ? (answer is int ? answer! as int : null)
+        : (answer is String ? choices.indexOf(answer! as String) : null);
     return ChoiceGrid(
       groupLabel: '${p.n}-р бодлогын хариултын сонголтууд',
       selectedIndex: selected == null || selected < 0 ? null : selected,

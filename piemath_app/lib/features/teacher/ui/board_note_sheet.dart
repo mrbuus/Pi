@@ -26,6 +26,7 @@ class BoardNoteSheet extends ConsumerStatefulWidget {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       showDragHandle: true,
       builder: (_) => BoardNoteSheet(args: args, studentId: studentId, name: name),
     );
