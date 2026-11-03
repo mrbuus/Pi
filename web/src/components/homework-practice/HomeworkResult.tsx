@@ -12,6 +12,36 @@ import type { CheckResult, HwAnswers, HwProblem, HwReviewPayload, HwScore } from
 /** Хариуны түлхүүргүй бодлого — сервер дүгнээгүй (results-д байхгүй), оноонд орохгүй */
 const UNGRADED = { label: "Дүгнэгдээгүй", icon: CircleMinus, cls: "border-dashed border-line bg-surface text-ink-dim" };
 
+/** «зөв/нийт» дугуй — тойргийн дүүрэлт нь зөв бодлогын хувь */
+function ScoreRing({ correct, total, pct }: { correct: number; total: number; pct: number }) {
+  const r = 30;
+  const c = 2 * Math.PI * r;
+  return (
+    <div className="relative size-[4.5rem] shrink-0 sm:size-20" role="img" aria-label={`${total} бодлогоос ${correct} зөв`}>
+      <svg viewBox="0 0 72 72" className="size-full -rotate-90" aria-hidden>
+        <circle cx="36" cy="36" r={r} fill="none" strokeWidth="7" className="stroke-line" />
+        <circle
+          cx="36"
+          cy="36"
+          r={r}
+          fill="none"
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - pct / 100)}
+          className="stroke-brand-bright"
+        />
+      </svg>
+      <span className="absolute inset-0 flex flex-col items-center justify-center font-display font-extrabold leading-none tabular-nums text-ink">
+        <span className="text-base sm:text-lg">
+          {correct}/{total}
+        </span>
+        <span className="mt-0.5 text-[10px] font-semibold text-ink-dim">{pct}%</span>
+      </span>
+    </div>
+  );
+}
+
 /**
  * Илгээсний дараах дүн: «зөв/нийт» оноо, бодлого бүрийн зөв/буруу, нэгээс олон алдсан бол алдаагаа
  * засах сануулга, алдсан бодлого бүрийн зөв хариу + бодолт (эзэн 2026-11-03).
@@ -41,61 +71,71 @@ export default function HomeworkResult({
   const hasUngraded = !!results && problemIds.some((id) => !results[id]);
   const missed = problems.filter((p) => results?.[p.id] === "WRONG" || results?.[p.id] === "BLANK");
   const opensAt = review?.opensAt ? formatMnDateTime(review.opensAt, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : null;
+  const total = score?.total ?? problemIds.length;
+  const correct = score?.correct ?? 0;
+  const wrong = missed.filter((p) => results?.[p.id] === "WRONG").length;
+  const blank = missed.length - wrong;
+  const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <section className="rounded-xl border border-line bg-surface p-5 text-center elev-1 sm:p-6">
-        <CircleCheck className="mx-auto size-10 text-success" aria-hidden />
-        <h1 className="cyrillic-heading mt-2 text-xl font-extrabold text-ink">Даалгавар илгээгдлээ</h1>
-        <p className="mt-1 truncate text-sm text-ink-dim">{title}</p>
-        {score && (
-          <p className="mt-4 font-display text-4xl font-extrabold tabular-nums text-ink">
-            {score.correct}/{score.total}
-            <span className="ml-2 text-base font-semibold text-ink-dim">зөв</span>
-          </p>
-        )}
-      </section>
-
-      {results && problemIds.length > 0 && (
-        <section className="rounded-xl border border-line bg-surface p-4 elev-1 sm:p-5" aria-labelledby="hw-res-title">
-          <h2 id="hw-res-title" className="mb-3 font-bold text-brand-soft">
-            Бодлого бүрээр
-          </h2>
-          <ul className="grid grid-cols-5 gap-2 sm:grid-cols-8">
-            {problemIds.map((id, i) => {
-              const r = results[id];
-              const m = r ? CHECK_META[r] : UNGRADED;
-              const Icon = m.icon;
-              return (
-                <li
-                  key={id}
-                  className={cn("flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg border", m.cls)}
-                  aria-label={`${i + 1}-р бодлого, ${m.label}`}
-                >
-                  <span className="text-xs font-bold tabular-nums">{i + 1}</span>
-                  <Icon className="size-4" aria-hidden />
-                </li>
-              );
-            })}
-          </ul>
-          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-dim">
-            {(["CORRECT", "WRONG", "BLANK"] as const).map((k) => {
-              const Icon = CHECK_META[k].icon;
-              return (
-                <span key={k} className="inline-flex items-center gap-1">
-                  <Icon className="size-3.5" aria-hidden />
-                  {CHECK_META[k].label}
-                </span>
-              );
-            })}
-            {hasUngraded && (
-              <span className="inline-flex items-center gap-1">
-                <CircleMinus className="size-3.5" aria-hidden />
-                {UNGRADED.label}
-              </span>
+      <section className="rounded-2xl border border-line bg-surface p-4 elev-1 sm:p-5" aria-labelledby="hw-res-title">
+        <div className="flex items-center gap-4">
+          <ScoreRing correct={correct} total={total} pct={pct} />
+          <div className="min-w-0">
+            <h1 id="hw-res-title" className="cyrillic-heading flex items-center gap-1.5 text-lg font-extrabold text-ink sm:text-xl">
+              <CircleCheck className="size-5 shrink-0 text-success" aria-hidden />
+              Даалгавар илгээгдлээ
+            </h1>
+            <p className="truncate text-sm text-ink-dim">{title}</p>
+            {results && (
+              <p className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-sm tabular-nums">
+                <span className="font-semibold text-success">{correct} зөв</span>
+                {wrong > 0 && <span className="font-semibold text-error">{wrong} буруу</span>}
+                {blank > 0 && <span className="font-semibold text-ink-dim">{blank} хариулаагүй</span>}
+              </p>
             )}
           </div>
-        </section>
-      )}
+        </div>
+
+        {results && problemIds.length > 0 && (
+          <>
+            <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(3rem,1fr))] gap-1.5" aria-label="Бодлого бүрээр">
+              {problemIds.map((id, i) => {
+                const r = results[id];
+                const m = r ? CHECK_META[r] : UNGRADED;
+                const Icon = m.icon;
+                return (
+                  <li
+                    key={id}
+                    className={cn("flex h-11 items-center justify-center gap-1 rounded-lg border text-sm font-bold tabular-nums", m.cls)}
+                    aria-label={`${i + 1}-р бодлого, ${m.label}`}
+                  >
+                    {i + 1}
+                    <Icon className="size-3.5" aria-hidden />
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-dim">
+              {(["CORRECT", "WRONG", "BLANK"] as const).map((k) => {
+                const Icon = CHECK_META[k].icon;
+                return (
+                  <span key={k} className="inline-flex items-center gap-1">
+                    <Icon className="size-3.5" aria-hidden />
+                    {CHECK_META[k].label}
+                  </span>
+                );
+              })}
+              {hasUngraded && (
+                <span className="inline-flex items-center gap-1">
+                  <CircleMinus className="size-3.5" aria-hidden />
+                  {UNGRADED.label}
+                </span>
+              )}
+            </div>
+          </>
+        )}
+      </section>
 
       {missed.length > 1 && (
         <p role="status" className="flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm font-semibold text-ink">

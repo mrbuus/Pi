@@ -320,35 +320,6 @@ export function fmtPhone(p: string): string {
   return d.length === 8 ? `${d.slice(0, 4)} ${d.slice(4)}` : p;
 }
 
-/* ───────── Сонгосон таб: нөхцөл тус бүрээр санана ───────── */
-
-export type Tab = "monitor" | "mark";
-const TAB_STORE = "pi_board_tab";
-
-/** Өнөөдөр хичээл яг явагдаж байвал «Тэмдэглэх», бусад үед «Хяналт»; багшийн сонголтыг тэр нөхцөлд санана */
-export function initialTab(lessonNow: boolean): Tab {
-  try {
-    const raw = window.localStorage.getItem(TAB_STORE);
-    const v = raw ? (JSON.parse(raw) as Record<string, unknown>)[lessonNow ? "now" : "other"] : null;
-    if (v === "monitor" || v === "mark") return v;
-  } catch {
-    // хувийн цонх, хаалттай хадгалалт — өгөгдмөлөөр
-  }
-  return lessonNow ? "mark" : "monitor";
-}
-
-export function rememberTab(lessonNow: boolean, tab: Tab): void {
-  try {
-    const raw = window.localStorage.getItem(TAB_STORE);
-    const parsed: unknown = raw ? JSON.parse(raw) : null;
-    const obj = parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
-    obj[lessonNow ? "now" : "other"] = tab;
-    window.localStorage.setItem(TAB_STORE, JSON.stringify(obj));
-  } catch {
-    // хадгалж чадахгүй бол зүгээр л санахгүй
-  }
-}
-
 export function readStore(key: string): string | null {
   try {
     return window.localStorage.getItem(key);

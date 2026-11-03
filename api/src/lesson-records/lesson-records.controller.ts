@@ -67,8 +67,8 @@ export class LessonRecordsController {
     );
   }
 
-  // Батлах/буцаах — Багш+, Админ л (эзэн 2026-10-18)
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  // Батлах/буцаах — ямар ч багш (эзэн 2026-11-03; өмнө нь зөвхөн Багш+, Админ). Аудит бүртгэнэ
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Put(':scheduleId/confirm')
   confirm(
     @Req() req: AuthedRequest,
@@ -82,7 +82,7 @@ export class LessonRecordsController {
     });
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Delete(':scheduleId/confirm')
   unconfirm(
     @Req() req: AuthedRequest,

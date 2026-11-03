@@ -622,6 +622,7 @@
     "path": "/api/lesson-records/:scheduleId/confirm",
     "roles": [
       "ADMIN",
+      "TEACHER",
       "TEACHER_PLUS"
     ]
   },
@@ -633,6 +634,7 @@
     "path": "/api/lesson-records/:scheduleId/confirm",
     "roles": [
       "ADMIN",
+      "TEACHER",
       "TEACHER_PLUS"
     ]
   },

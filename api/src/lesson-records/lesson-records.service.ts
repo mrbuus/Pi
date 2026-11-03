@@ -34,7 +34,7 @@ export type Actor = { userId: string; role: Role };
 
 const STAFF: Role[] = [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER];
 /** Батлах/буцаах эрх (эзэн 2026-10-18) */
-const CONFIRMERS: Role[] = [Role.ADMIN, Role.TEACHER_PLUS];
+const CONFIRMERS: Role[] = [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER];
 
 /**
  * Батлагдсан хичээлийн түүх (эзэн 2026-10-08).
@@ -120,7 +120,7 @@ export class LessonRecordsService {
 
   private assertCanConfirm(actor: Actor) {
     if (!CONFIRMERS.includes(actor.role))
-      throw new ForbiddenException('Хичээлийг Багш+ батална.');
+      throw new ForbiddenException('Хичээлийг багш батална.');
   }
 
   /**

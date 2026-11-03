@@ -359,7 +359,7 @@ function Body({
         </button>
         <button type="button" onClick={confirm} disabled={busy} className={cn(chip, "border-success bg-success text-on-success")}>
           <BadgeCheck className="size-4" aria-hidden />
-          {e.record ? "Шинэчлэх" : "Батлах"}
+          {busy ? "Хадгалж байна" : "Хадгалах"}
         </button>
       </footer>
     </div>
