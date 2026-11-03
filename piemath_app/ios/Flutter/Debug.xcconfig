@@ -1,1 +1,6 @@
 #include "Generated.xcconfig"
+
+// Google нэвтрэлтийн reversed iOS client ID (нууц биш). Эзэн GoogleSignIn.xcconfig-д
+// GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.XXXX гэж бичнэ (COMPLIANCE.md §1.3).
+GOOGLE_REVERSED_CLIENT_ID = mn.piemath.app.google-unset
+#include? "GoogleSignIn.xcconfig"

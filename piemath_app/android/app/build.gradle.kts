@@ -19,7 +19,7 @@ val hasReleaseKey = keystorePropertiesFile.exists()
 
 android {
     namespace = "mn.piemath.app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = maxOf(36, flutter.compileSdkVersion)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -34,7 +34,9 @@ android {
         // Flutter-ийн өгөгдмөл (24 = Android 7). Зорилтот хамгийн сул утас Android 8 (API 26) —
         // PERFORMANCE.md. Залгаасуудын доод хязгаар 24-өөс хэтрэхгүй (secure_storage 24).
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        // Google Play: 2026-08-31-ээс шинэ апп, шинэчлэл API 36 (Android 16)-г заавал онилно
+        // (COMPLIANCE.md §2.1). Flutter-ийн өгөгдмөл өөрчлөгдсөн ч доош буухгүйн тулд тодорхой бичив.
+        targetSdk = maxOf(36, flutter.targetSdkVersion)
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
         // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
         // You can force using the value of versionCode by specifying the `-P force-version-code-ignoring-abi=true`
@@ -68,6 +70,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            // Нативын (.so) crash-ийг Play Console-д уншигдахуйц болгох symbol table AAB-д орно.
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
         }
     }
 }

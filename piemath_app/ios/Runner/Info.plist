@@ -47,6 +47,21 @@
 			</array>
 		</dict>
 	</dict>
+	<!-- Зөвхөн HTTPS (системийн шифрлэлт) ашигладаг тул экспортын шифрлэлтийн баримт шаардахгүй (COMPLIANCE.md §1.4). -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<!-- Google нэвтрэлт (iOS): reversed iOS client ID. Утгыг ios/Flutter/GoogleSignIn.xcconfig-д (COMPLIANCE.md §1.3). -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Гэрийн даалгавар, онолын дэвтрийнхээ зургийг авч багшдаа илгээх, номын хуудсан дээрх QR кодыг унших үед камер хэрэгтэй. Камерын зураг хадгалагдахгүй.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
