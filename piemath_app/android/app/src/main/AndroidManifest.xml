@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- API-тай холбогдох (release-д ч заавал). SECURITY.md §2 -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Шалгалтын үеийн скриншот илрүүлэх (Android 14+, энгийн зөвшөөрөл, хэрэглэгчээс асуухгүй).
@@ -9,10 +10,26 @@
     <!-- Push мэдэгдэл (Android 13+, нэвтэрсний дараа асууна). Firebase тохируулаагүй бол асуухгүй. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
+    <!-- Залгаасаас орж ирж болох, апп-д ХЭРЭГГҮЙ зөвшөөрлийг хасна (COMPLIANCE.md §2.5).
+         - Зураг сонгохдоо image_picker нь Android Photo Picker ашиглана: өргөн медиа зөвшөөрөл хэрэггүй
+           (Play «Photo and Video Permissions» бодлого).
+         - Биометр (flutter_secure_storage-ийн сонголт) ашиглахгүй.
+         - Реклам ID ашиглахгүй (зар, tracking байхгүй; Families бодлого). -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" tools:node="remove"/>
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" tools:node="remove"/>
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" tools:node="remove"/>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
+
     <!-- allowBackup=false: токен (flutter_secure_storage) Google Drive-д нөөцлөгдөхгүй,
          сэргээхэд "Failed to unwrap key" алдаа гарахгүй. dataExtractionRules нь Android 12+
          төхөөрөмж хооронд шилжүүлэхийг ч хаана.
-         usesCleartextTraffic=false + networkSecurityConfig: зөвхөн HTTPS (debug-д л localhost). -->
+         usesCleartextTraffic=false + networkSecurityConfig: зөвхөн HTTPS (debug-д л localhost).
+         enableOnBackInvokedCallback=true: Android 13+ predictive back (Flutter PopScope-той ажиллана,
+         targetSdk 36-д өгөгдмөл; COMPLIANCE.md §2.4). -->
     <application
         android:label="Piemath"
         android:name="${applicationName}"
@@ -20,7 +37,8 @@
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:usesCleartextTraffic="false"
-        android:networkSecurityConfig="@xml/network_security_config">
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
