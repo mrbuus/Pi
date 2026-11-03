@@ -130,7 +130,10 @@ final fileBytesCacheProvider = Provider<FileBytesCache>((ref) {
 });
 
 final fileRepositoryProvider = Provider<FileRepository>(
-  (ref) => FileRepository(fetcher: FileFetcher(ref.watch(apiClientProvider)), cache: ref.watch(fileBytesCacheProvider)),
+  (ref) => FileRepository(
+    fetcher: FileFetcher(ref.watch(apiClientProvider)),
+    cache: ref.watch(fileBytesCacheProvider),
+  ),
 );
 
 final fileImageProvider = Provider<FileImageFactory>((ref) {

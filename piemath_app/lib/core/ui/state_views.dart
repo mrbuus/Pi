@@ -37,7 +37,13 @@ class LoadingState extends StatelessWidget {
 
 /// Төлөвийн нийтлэг байрлал: дүрс, гарчиг, тайлбар, товч.
 class _StateLayout extends StatelessWidget {
-  const _StateLayout({required this.icon, required this.iconColor, required this.title, this.message, this.action});
+  const _StateLayout({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    this.message,
+    this.action,
+  });
 
   final IconData icon;
   final Color iconColor;
@@ -66,7 +72,10 @@ class _StateLayout extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               ],
-              if (action != null) ...[const SizedBox(height: AppSpace.xl), action!],
+              if (action != null) ...[
+                const SizedBox(height: AppSpace.xl),
+                action!,
+              ],
             ],
           ),
         ),
@@ -129,6 +138,12 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _StateLayout(icon: icon, iconColor: context.colors.inkDim, title: title, message: message, action: action);
+    return _StateLayout(
+      icon: icon,
+      iconColor: context.colors.inkDim,
+      title: title,
+      message: message,
+      action: action,
+    );
   }
 }

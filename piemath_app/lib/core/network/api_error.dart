@@ -103,14 +103,14 @@ class ApiError implements Exception {
       DioExceptionType.connectionTimeout ||
       DioExceptionType.sendTimeout ||
       DioExceptionType.receiveTimeout ||
-      DioExceptionType.transformTimeout => const ApiError(ApiErrorKind.timeout, AppStrings.timeoutError),
+      DioExceptionType.transformTimeout =>
+        const ApiError(ApiErrorKind.timeout, AppStrings.timeoutError),
       DioExceptionType.connectionError => const ApiError(ApiErrorKind.network, AppStrings.networkError),
       DioExceptionType.badCertificate => const ApiError(ApiErrorKind.network, AppStrings.networkError),
       DioExceptionType.cancel => const ApiError(ApiErrorKind.unknown, AppStrings.genericError),
-      DioExceptionType.unknown =>
-        e.error is FormatException
-            ? const ApiError(ApiErrorKind.unknown, AppStrings.genericError)
-            : const ApiError(ApiErrorKind.network, AppStrings.networkError),
+      DioExceptionType.unknown => e.error is FormatException
+          ? const ApiError(ApiErrorKind.unknown, AppStrings.genericError)
+          : const ApiError(ApiErrorKind.network, AppStrings.networkError),
       DioExceptionType.badResponse => const ApiError(ApiErrorKind.unknown, AppStrings.genericError),
     };
   }

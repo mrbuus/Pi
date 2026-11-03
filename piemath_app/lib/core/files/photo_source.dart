@@ -44,22 +44,8 @@ class DevicePhotoSource implements PhotoSource {
   Future<List<PhotoPage>> pickFromGallery({required int limit}) async {
     if (limit <= 0) return const [];
     final List<XFile> files = limit == 1
-        ? [
-            ?await _picker.pickImage(
-              source: ImageSource.gallery,
-              maxWidth: _side,
-              maxHeight: _side,
-              imageQuality: _quality,
-              requestFullMetadata: false,
-            ),
-          ]
-        : await _picker.pickMultiImage(
-            maxWidth: _side,
-            maxHeight: _side,
-            imageQuality: _quality,
-            limit: limit,
-            requestFullMetadata: false,
-          );
+        ? [?await _picker.pickImage(source: ImageSource.gallery, maxWidth: _side, maxHeight: _side, imageQuality: _quality, requestFullMetadata: false)]
+        : await _picker.pickMultiImage(maxWidth: _side, maxHeight: _side, imageQuality: _quality, limit: limit, requestFullMetadata: false);
     final out = <PhotoPage>[];
     for (final x in files.take(limit)) {
       out.add(await _read(x));

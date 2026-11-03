@@ -185,12 +185,7 @@ class _MathTextState extends State<MathText> {
           if (text.isEmpty) continue;
           spanSegs.add(MathSegment.text(text));
           for (final run in splitBold(text)) {
-            spans.add(
-              TextSpan(
-                text: run.text,
-                style: run.bold ? const TextStyle(fontWeight: FontWeight.w700) : null,
-              ),
-            );
+            spans.add(TextSpan(text: run.text, style: run.bold ? const TextStyle(fontWeight: FontWeight.w700) : null));
           }
         case MathSegmentType.inline:
           spanSegs
@@ -207,13 +202,23 @@ class _MathTextState extends State<MathText> {
 
     final Widget child = blocks.length == 1
         ? blocks.first
-        : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: blocks);
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: blocks,
+          );
     return RepaintBoundary(child: child);
   }
 
   TextStyle _mathStyle(TextStyle base) => base.copyWith(fontSize: (base.fontSize ?? 16) * MathText.katexScale);
 
-  void _addInline(List<InlineSpan> spans, TexResult result, TextStyle base, {String? prefix, String? suffix}) {
+  void _addInline(
+    List<InlineSpan> spans,
+    TexResult result,
+    TextStyle base, {
+    String? prefix,
+    String? suffix,
+  }) {
     if (!result.ok) {
       if (prefix != null) spans.add(TextSpan(text: prefix));
       spans.addAll(_errorSpans(result.source, base));
@@ -241,7 +246,9 @@ class _MathTextState extends State<MathText> {
           ],
         );
       }
-      spans.add(WidgetSpan(alignment: PlaceholderAlignment.baseline, baseline: TextBaseline.alphabetic, child: child));
+      spans.add(
+        WidgetSpan(alignment: PlaceholderAlignment.baseline, baseline: TextBaseline.alphabetic, child: child),
+      );
     }
   }
 
@@ -282,10 +289,7 @@ class _MathTextState extends State<MathText> {
           alignment: PlaceholderAlignment.middle,
           child: _LatexErrorBadge(color: c.warning, style: base),
         ),
-      TextSpan(
-        text: tex,
-        style: TextStyle(color: c.error),
-      ),
+      TextSpan(text: tex, style: TextStyle(color: c.error)),
     ];
   }
 
@@ -336,10 +340,7 @@ class _LatexErrorBadge extends StatelessWidget {
         children: [
           Icon(AppIcons.warning, size: 12, color: color),
           const SizedBox(width: 4),
-          Text(
-            'LaTeX алдаа',
-            style: style.copyWith(fontSize: 12, color: color, fontWeight: FontWeight.w500),
-          ),
+          Text('LaTeX алдаа', style: style.copyWith(fontSize: 12, color: color, fontWeight: FontWeight.w500)),
         ],
       ),
     );

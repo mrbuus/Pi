@@ -38,8 +38,11 @@ enum LeaveDecision {
 /// бус шийтгэл өгөхгүй.
 @immutable
 class LeavePolicy {
-  const LeavePolicy({this.warnAt = 1, this.maxLeaves = 3, this.minAway = const Duration(seconds: 2)})
-    : assert(warnAt >= 1 && maxLeaves >= warnAt);
+  const LeavePolicy({
+    this.warnAt = 1,
+    this.maxLeaves = 3,
+    this.minAway = const Duration(seconds: 2),
+  }) : assert(warnAt >= 1 && maxLeaves >= warnAt);
 
   final int warnAt;
   final int maxLeaves;
@@ -101,9 +104,9 @@ class LeaveTracker {
     int initialLeaveCount = 0,
     this.onLeave,
     this.onReturn,
-  }) : _now = now ?? DateTime.now,
-       _timer = timer ?? Timer.new,
-       _leaveCount = initialLeaveCount < 0 ? 0 : initialLeaveCount;
+  })  : _now = now ?? DateTime.now,
+        _timer = timer ?? Timer.new,
+        _leaveCount = initialLeaveCount < 0 ? 0 : initialLeaveCount;
 
   /// Серверийн хадгалах дээд хэмжээ (`MAX_EVENTS = 100`) — дараалал үүнээс хэтрэхгүй.
   static const maxPending = 100;
@@ -203,7 +206,9 @@ class LeaveTracker {
     final record = LeaveRecord(leftAt: leftAt);
     _history.add(record);
     _enqueue(ExamSessionEvent.leave);
-    onLeave?.call(LeaveOutcome(leaveCount: _leaveCount, decision: policy.decide(_leaveCount), record: record));
+    onLeave?.call(
+      LeaveOutcome(leaveCount: _leaveCount, decision: policy.decide(_leaveCount), record: record),
+    );
   }
 
   void _enqueue(ExamSessionEvent e) {

@@ -19,7 +19,8 @@ String withPlus(String name, String? role) {
 }
 
 /// Ажилтан/багшийн нэр: «Б. Нэр», Багш+ бол «Б. Нэр+». Нэр харуулах бүх газарт.
-String staffName({String? firstName, String? lastName, String? role}) => withPlus(shortName(firstName, lastName), role);
+String staffName({String? firstName, String? lastName, String? role}) =>
+    withPlus(shortName(firstName, lastName), role);
 
 /// Жагсаалтын нэрс: «Б. Нэр»; ижил нэр, ижил овгийн үсэгтэй хоёр хүүхэд байвал
 /// тэднийг бүтэн «Овог Нэр»-ээр (эзэн 2026-10-18). [role] өгвөл Багш+-д «+».

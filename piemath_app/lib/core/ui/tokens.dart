@@ -246,7 +246,8 @@ abstract final class AppMotion {
       WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.reduceMotion;
 
   /// Хөдөлгөөн багасгах үед анимацгүй.
-  static Duration of(BuildContext context, Duration d) => reduced(context) ? Duration.zero : d;
+  static Duration of(BuildContext context, Duration d) =>
+      reduced(context) ? Duration.zero : d;
 }
 
 /// Хэмжээний хязгаар.

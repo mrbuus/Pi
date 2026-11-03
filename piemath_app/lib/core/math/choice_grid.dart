@@ -127,8 +127,8 @@ class _ChoiceCell extends StatelessWidget {
     final Color border = correct
         ? c.success
         : selected
-        ? c.brandBright
-        : (compact ? Colors.transparent : c.line);
+            ? c.brandBright
+            : (compact ? Colors.transparent : c.line);
     final double borderWidth = (selected || correct) ? 2 : 1;
 
     final Widget marker = compact
@@ -205,10 +205,7 @@ class _ButtonLabel extends StatelessWidget {
         ),
         child: filled
             ? Icon(AppIcons.check, size: 16, color: correct ? c.onStatus : c.onBrand)
-            : Text(
-                label,
-                style: context.text.labelMedium?.copyWith(color: c.inkDim, fontWeight: FontWeight.w700),
-              ),
+            : Text(label, style: context.text.labelMedium?.copyWith(color: c.inkDim, fontWeight: FontWeight.w700)),
       ),
     );
   }
@@ -230,11 +227,11 @@ class _CompactLabel extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            '$label.',
-            style: context.text.bodyLarge?.copyWith(color: color, fontWeight: FontWeight.w700),
-          ),
-          if (correct || selected) ...[const SizedBox(width: 2), Icon(AppIcons.check, size: 14, color: color)],
+          Text('$label.', style: context.text.bodyLarge?.copyWith(color: color, fontWeight: FontWeight.w700)),
+          if (correct || selected) ...[
+            const SizedBox(width: 2),
+            Icon(AppIcons.check, size: 14, color: color),
+          ],
         ],
       ),
     );
@@ -377,8 +374,7 @@ class RenderChoiceGrid extends RenderBox
   }
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) =>
-      defaultComputeDistanceToFirstActualBaseline(baseline);
+  double? computeDistanceToActualBaseline(TextBaseline baseline) => defaultComputeDistanceToFirstActualBaseline(baseline);
 
   @override
   void paint(PaintingContext context, Offset offset) => defaultPaint(context, offset);

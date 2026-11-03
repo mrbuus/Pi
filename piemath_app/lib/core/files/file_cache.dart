@@ -10,7 +10,11 @@ import 'package:flutter/foundation.dart';
 /// Түлхүүр нь UUID (агуулга өөрчлөгддөггүй) тул хугацаагүй, зөвхөн хэмжээгээр шахна.
 /// Гарахад (logout) бүрэн устгана (SECURITY §3).
 class FileBytesCache {
-  FileBytesCache({this.directory, this.memoryBudget = 24 * 1024 * 1024, this.diskBudget = 120 * 1024 * 1024});
+  FileBytesCache({
+    this.directory,
+    this.memoryBudget = 24 * 1024 * 1024,
+    this.diskBudget = 120 * 1024 * 1024,
+  });
 
   /// Дискийн кэшийн суурь хавтас. null буцаавал зөвхөн санах ой.
   final Future<Directory?> Function()? directory;
@@ -22,16 +26,16 @@ class FileBytesCache {
   Future<Directory?>? _dir;
 
   Future<Directory?> _cacheDir() => _dir ??= () async {
-    try {
-      final base = await directory?.call();
-      if (base == null) return null;
-      final d = Directory('${base.path}/pm_files');
-      if (!d.existsSync()) d.createSync(recursive: true);
-      return d;
-    } catch (_) {
-      return null; // Диск ашиглах боломжгүй — зөвхөн санах ой.
-    }
-  }();
+        try {
+          final base = await directory?.call();
+          if (base == null) return null;
+          final d = Directory('${base.path}/pm_files');
+          if (!d.existsSync()) d.createSync(recursive: true);
+          return d;
+        } catch (_) {
+          return null; // Диск ашиглах боломжгүй — зөвхөн санах ой.
+        }
+      }();
 
   /// Дискэн дээрх нэр — түлхүүрийг шууд биш, хэш болгож (замын тэмдэгтээс хамгаална).
   static String fileName(String key) => sha1.convert(key.codeUnits).toString();

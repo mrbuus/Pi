@@ -19,10 +19,13 @@ import 'integrity_event.dart';
 /// Платформын хэрэгжүүлэлт байхгүй бол (тест, desktop) lifecycle-ийг л ажиглана —
 /// шалгалтыг ХЭЗЭЭ Ч унагахгүй.
 class MethodChannelExamGuard implements ExamGuard {
-  MethodChannelExamGuard({MethodChannel? methodChannel, EventChannel? eventChannel, DateTime Function()? now})
-    : _method = methodChannel ?? const MethodChannel(methodChannelName),
-      _event = eventChannel ?? const EventChannel(eventChannelName),
-      _now = now ?? DateTime.now;
+  MethodChannelExamGuard({
+    MethodChannel? methodChannel,
+    EventChannel? eventChannel,
+    DateTime Function()? now,
+  })  : _method = methodChannel ?? const MethodChannel(methodChannelName),
+        _event = eventChannel ?? const EventChannel(eventChannelName),
+        _now = now ?? DateTime.now;
 
   static const methodChannelName = 'mn.piemath.app/exam_guard';
   static const eventChannelName = 'mn.piemath.app/exam_guard/events';
@@ -61,7 +64,11 @@ class MethodChannelExamGuard implements ExamGuard {
     _active = true;
     _mapper.reset();
     _lifecycle = AppLifecycleListener(onStateChange: _onLifecycle);
-    _nativeSub = _event.receiveBroadcastStream().listen(_onNative, onError: (Object _) {}, cancelOnError: false);
+    _nativeSub = _event.receiveBroadcastStream().listen(
+      _onNative,
+      onError: (Object _) {},
+      cancelOnError: false,
+    );
     try {
       final ok = await _method.invokeMethod<bool>('enter');
       _platformSecured = ok ?? false;

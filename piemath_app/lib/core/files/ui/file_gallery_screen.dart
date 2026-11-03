@@ -33,16 +33,9 @@ class FileGalleryScreen extends ConsumerStatefulWidget {
   final String title;
   final String? subtitle;
 
-  static Future<void> open(
-    BuildContext context, {
-    required List<String> fileKeys,
-    required String title,
-    String? subtitle,
-  }) {
+  static Future<void> open(BuildContext context, {required List<String> fileKeys, required String title, String? subtitle}) {
     return Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => FileGalleryScreen(fileKeys: fileKeys, title: title, subtitle: subtitle),
-      ),
+      MaterialPageRoute<void>(builder: (_) => FileGalleryScreen(fileKeys: fileKeys, title: title, subtitle: subtitle)),
     );
   }
 
@@ -96,10 +89,10 @@ class _FileGalleryScreenState extends ConsumerState<FileGalleryScreen> {
               message: notFound
                   ? 'Энэ зураг 7 хоног хадгалагдаад устсан байна'
                   : forbidden
-                  ? 'Энэ зургийг харах эрх танд алга'
-                  : e is ApiError
-                  ? e.message
-                  : AppStrings.genericError,
+                      ? 'Энэ зургийг харах эрх танд алга'
+                      : e is ApiError
+                          ? e.message
+                          : AppStrings.genericError,
               onRetry: notFound || forbidden ? null : () => setState(() => _pages = _load()),
             );
           }
@@ -141,12 +134,7 @@ class _PageView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final px = (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context)).round();
     final ImageProvider provider = switch (page) {
-      _ImagePage(:final key) => ResizeImage(
-        ref.watch(fileImageProvider).image(key),
-        width: px,
-        policy: ResizeImagePolicy.fit,
-        allowUpscaling: false,
-      ),
+      _ImagePage(:final key) => ResizeImage(ref.watch(fileImageProvider).image(key), width: px, policy: ResizeImagePolicy.fit, allowUpscaling: false),
       _RenderedPage(:final bytes) => MemoryImage(bytes),
     };
     return InteractiveViewer(
@@ -158,8 +146,11 @@ class _PageView extends ConsumerWidget {
           gaplessPlayback: true,
           loadingBuilder: (context, child, progress) =>
               progress == null ? child : const Center(child: CircularProgressIndicator(strokeWidth: 2.5)),
-          errorBuilder: (context, error, _) =>
-              const EmptyState(icon: AppIcons.error, title: 'Зургийг нээж чадсангүй', message: AppStrings.networkError),
+          errorBuilder: (context, error, _) => const EmptyState(
+            icon: AppIcons.error,
+            title: 'Зургийг нээж чадсангүй',
+            message: AppStrings.networkError,
+          ),
         ),
       ),
     );

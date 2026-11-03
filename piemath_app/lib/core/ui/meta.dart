@@ -40,9 +40,9 @@ class Meta extends StatelessWidget {
   final TextStyle? style;
 
   static List<Object> visible(List<Object?> items) => [
-    for (final x in items)
-      if (x != null && !(x is String && x.trim().isEmpty)) x,
-  ];
+        for (final x in items)
+          if (x != null && !(x is String && x.trim().isEmpty)) x,
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +62,11 @@ class Meta extends StatelessWidget {
         label: shown.whereType<String>().join(', '),
         child: ExcludeSemantics(
           excluding: shown.every((e) => e is String),
-          child: Wrap(crossAxisAlignment: WrapCrossAlignment.center, runSpacing: 2, children: children),
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runSpacing: 2,
+            children: children,
+          ),
         ),
       ),
     );
@@ -78,7 +82,8 @@ class MetaTitle extends StatelessWidget {
   final TextStyle? style;
 
   /// Хоёр талдаа зайтай дунд цэгээр задлах. Үгийн дундах цэгийг хөндөхгүй.
-  static List<String> split(String title) => title.split(RegExp('\\s+\u00B7\\s+')).where((s) => s.isNotEmpty).toList();
+  static List<String> split(String title) =>
+      title.split(RegExp('\\s+\u00B7\\s+')).where((s) => s.isNotEmpty).toList();
 
   @override
   Widget build(BuildContext context) {

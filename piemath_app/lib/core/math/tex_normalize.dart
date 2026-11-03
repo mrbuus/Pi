@@ -210,7 +210,10 @@ String _balanceLeftRight(String s) {
   final l = left.allMatches(s).length;
   final r = right.allMatches(s).length;
   if (l == r) return s;
-  return s.replaceAll(RegExp(r'\\(left|right)\.'), '').replaceAll(left, '').replaceAll(right, '');
+  return s
+      .replaceAll(RegExp(r'\\(left|right)\.'), '')
+      .replaceAll(left, '')
+      .replaceAll(right, '');
 }
 
 /// Орчин, хаалтаас гадуурх мөр шилжилт (`a\\b`) flutter_math_fork-д алдаа өгдөг (KaTeX
@@ -227,8 +230,7 @@ String _wrapTopLevelNewlines(String s) {
     if (ch != r'\') continue;
     if (s.startsWith(r'\begin', i)) env++;
     if (s.startsWith(r'\end', i)) env--;
-    final isBreak =
-        s.startsWith(r'\\', i) ||
+    final isBreak = s.startsWith(r'\\', i) ||
         (s.startsWith(r'\newline', i) && !_letterAt(s, i + 8)) ||
         (s.startsWith(r'\cr', i) && !_letterAt(s, i + 3));
     if (isBreak && brace == 0 && env == 0) {
@@ -242,4 +244,5 @@ String _wrapTopLevelNewlines(String s) {
   return '\\begin{array}{c}$body\\end{array}';
 }
 
-bool _letterAt(String s, int i) => i < s.length && RegExp('[A-Za-z]').hasMatch(s[i]);
+bool _letterAt(String s, int i) =>
+    i < s.length && RegExp('[A-Za-z]').hasMatch(s[i]);

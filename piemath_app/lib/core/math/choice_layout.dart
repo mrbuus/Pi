@@ -22,7 +22,12 @@ List<int> choiceColumnOptions(int n) {
 
 /// Хамгийн өргөн хариу [widest] (бүтэн нүдний өргөн), боломжит өргөн [width] үед
 /// баганын тоо. Аль ч хувилбар багтахгүй бол 1.
-int pickChoiceColumns({required int count, required double widest, required double width, double gap = 12}) {
+int pickChoiceColumns({
+  required int count,
+  required double widest,
+  required double width,
+  double gap = 12,
+}) {
   for (final n in choiceColumnOptions(count)) {
     if (n * widest + (n - 1) * gap <= width + 0.5) return n;
   }
