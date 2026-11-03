@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BookOpenCheck, CalendarClock, ChevronRight, CircleCheck, CircleDashed, Clock, Hourglass, MessageSquareText, Play, RotateCcw } from "lucide-react";
+import { BookOpenCheck, CalendarClock, ChevronDown, ChevronRight, History, CircleCheck, CircleDashed, Clock, Hourglass, MessageSquareText, Play, RotateCcw } from "lucide-react";
 import { HOMEWORK_MARKS, TONE_SELECTED } from "@/components/attendance/marks";
 import { dayLabel } from "@/components/makeup/types";
 import { weekdayShort } from "@/components/student-hub/lib";
@@ -292,6 +292,8 @@ export default function HomeworkList() {
   const [days, setDays] = useState<HwDay[] | null>(null);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
+  const [showOlder, setShowOlder] = useState(false);
+  const [showUpcoming, setShowUpcoming] = useState(false);
   const todayKey = todayKeyUB();
 
   const load = useCallback(async () => {
@@ -317,17 +319,45 @@ export default function HomeworkList() {
     [days],
   );
 
-  // Өнөөдөр → дараагийн хичээлүүд (ойрх нь эхэнд) → өмнөх (шинэ нь эхэнд)
-  const sections = useMemo(
-    () => [
-      { title: "Өнөөдөр", days: sorted.filter((d) => d.date === todayKey) },
-      {
-        title: "Урьдчилан илгээх",
-        days: sorted.filter((d) => d.date > todayKey).reverse(),
-      },
-      { title: "Өмнөх хичээлүүд", days: sorted.filter((d) => d.date < todayKey) },
-    ],
-    [sorted, todayKey],
+  // Энгийн байлгах (эзэн 2026-11-03): үндсэн нь зөвхөн өнөөдрийн (эсвэл өнөөдөр хичээлгүй бол сүүлийн) хичээл;
+  // өмнөх өдрүүд, урьдчилан илгээх нь тусдаа товчоор нээгдэнэ
+  const groups = useMemo(() => {
+    const todays = sorted.filter((d) => d.date === todayKey);
+    const upcoming = sorted.filter((d) => d.date > todayKey).reverse();
+    const past = sorted.filter((d) => d.date < todayKey);
+    if (todays.length || !past.length) return { title: "Өнөөдөр", main: todays, older: past, upcoming };
+    const latest = past[0].date;
+    return {
+      title: "Сүүлийн хичээл",
+      main: past.filter((d) => d.date === latest),
+      older: past.filter((d) => d.date !== latest),
+      upcoming,
+    };
+  }, [sorted, todayKey]);
+
+  const canSendDay = (d: HwDay) =>
+    !!d.upcoming || (dayDiff(todayKey, d.date) >= 0 && dayDiff(todayKey, d.date) < HOMEWORK_WINDOW_DAYS);
+  // Өмнөх өдрүүдээс зураг нь илгээгдээгүй, одоо ч илгээж болох — товчон дээр сануулна
+  const missed = groups.older.filter((d) => !d.photo && canSendDay(d)).length;
+
+  const cards = (list: HwDay[]) => (
+    <div className="space-y-3">
+      {list.map((d) => (
+        <DayCard
+          key={dayId(d)}
+          day={d}
+          today={d.date === todayKey}
+          canSend={canSendDay(d)}
+          onPhoto={(photo) => {
+            setDays((prev) =>
+              (prev ?? []).map((x) => (x.date === d.date && x.classroomId === d.classroomId ? { ...x, photo } : x)),
+            );
+            // «Хоцорсон» тэмдэг серверийн хугацаагаар тооцогддог — шинэчилж авна
+            if (photo) void load();
+          }}
+        />
+      ))}
+    </div>
   );
 
   return (
@@ -345,35 +375,59 @@ export default function HomeworkList() {
         />
       ) : (
         <>
-          <DayStrip days={sorted} todayKey={todayKey} />
-          {sections.map((sec) =>
-            sec.days.length ? (
-              <section key={sec.title} className="mb-6">
-                <h2 className="mb-2 text-sm font-semibold text-ink-dim">{sec.title}</h2>
-                <div className="space-y-3">
-                  {sec.days.map((d) => (
-                    <DayCard
-                      key={dayId(d)}
-                      day={d}
-                      today={d.date === todayKey}
-                      canSend={
-                        !!d.upcoming ||
-                        (dayDiff(todayKey, d.date) >= 0 && dayDiff(todayKey, d.date) < HOMEWORK_WINDOW_DAYS)
-                      }
-                      onPhoto={(photo) => {
-                        setDays((prev) =>
-                          (prev ?? []).map((x) =>
-                            x.date === d.date && x.classroomId === d.classroomId ? { ...x, photo } : x,
-                          ),
-                        );
-                        // «Хоцорсон» тэмдэг серверийн хугацаагаар тооцогддог — шинэчилж авна
-                        if (photo) void load();
-                      }}
-                    />
-                  ))}
+          {groups.main.length > 0 && (
+            <section className="mb-4">
+              <h2 className="mb-2 text-sm font-semibold text-ink-dim">{groups.title}</h2>
+              {cards(groups.main)}
+            </section>
+          )}
+
+          {groups.older.length > 0 && (
+            <section className="mb-4">
+              <button
+                type="button"
+                aria-expanded={showOlder}
+                aria-controls="hw-older"
+                onClick={() => setShowOlder((v) => !v)}
+                className="flex min-h-12 w-full items-center gap-2 rounded-xl border border-line bg-surface px-4 text-left font-semibold text-ink transition hover:bg-ink/[0.03] focus-visible:ring-2 focus-visible:ring-brand-bright"
+              >
+                <History className="size-5 shrink-0 text-brand-soft" aria-hidden />
+                <span className="flex-1">Өмнөх өдрийн даалгавар илгээх</span>
+                {missed > 0 && (
+                  <span className="rounded-full bg-error px-2 text-xs font-bold leading-5 tabular-nums text-on-error" aria-label={`${missed} өдөр илгээгээгүй`}>
+                    {missed}
+                  </span>
+                )}
+                <ChevronDown className={cn("size-4 shrink-0 text-ink-dim transition-transform", showOlder && "rotate-180")} aria-hidden />
+              </button>
+              {showOlder && (
+                <div id="hw-older" className="mt-3">
+                  <DayStrip days={groups.older} todayKey={todayKey} />
+                  {cards(groups.older)}
                 </div>
-              </section>
-            ) : null,
+              )}
+            </section>
+          )}
+
+          {groups.upcoming.length > 0 && (
+            <section className="mb-6">
+              <button
+                type="button"
+                aria-expanded={showUpcoming}
+                aria-controls="hw-upcoming"
+                onClick={() => setShowUpcoming((v) => !v)}
+                className="flex min-h-12 w-full items-center gap-2 rounded-xl border border-dashed border-brand-bright/50 bg-surface px-4 text-left font-semibold text-ink transition hover:bg-ink/[0.03] focus-visible:ring-2 focus-visible:ring-brand-bright"
+              >
+                <CalendarClock className="size-5 shrink-0 text-brand-soft" aria-hidden />
+                <span className="flex-1">Урьдчилан илгээх</span>
+                <ChevronDown className={cn("size-4 shrink-0 text-ink-dim transition-transform", showUpcoming && "rotate-180")} aria-hidden />
+              </button>
+              {showUpcoming && (
+                <div id="hw-upcoming" className="mt-3">
+                  {cards(groups.upcoming)}
+                </div>
+              )}
+            </section>
           )}
         </>
       )}
