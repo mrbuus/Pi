@@ -86,7 +86,14 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
     expect(rows.map((r) => r.studentId)).toEqual(['s2']);
   });
 
-  it('хоцорсон сурагчид зөвхөн B, тасалсанд A+B; шийдвэр ба тэмдэглэл ажилтанд', async () => {
+  it('хоцорсон сурагч АВТОМАТААР нөхөхгүй (эзэн 2026-11-03); тасалсанд A+B; шийдвэр ба тэмдэглэл ажилтанд', async () => {
+    const auto = await service.classroomMakeups(staff('x', Role.TEACHER_PLUS), 'c1', { from: '2026-10-01', to: '2026-10-31' });
+    expect(auto.map((r) => r.studentId)).toEqual(['s2']);
+    // Өмнө нь нөхөх мөр үүссэн хоцорсон сурагч хэвээр харагдана — ангид хийсэн A тооцогдож B л үлдэнэ
+    db.lessonMakeup.findMany.mockResolvedValue([
+      { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), imageKeys: [], submittedAt: null, confirmedById: null, confirmedAt: null, note: null },
+      { classroomId: 'c1', studentId: 's2', date: D('2026-10-12'), imageKeys: ['n.jpg'], submittedAt: new Date(), confirmedById: 'owner', confirmedAt: new Date(), note: 'WAIVED\nӨвчтэй' },
+    ]);
     const rows = await service.classroomMakeups(staff('x', Role.TEACHER_PLUS), 'c1', { from: '2026-10-01', to: '2026-10-31' });
     const late = rows.find((r) => r.studentId === 's1')!;
     expect(late.reason).toBe('LATE');
@@ -123,7 +130,7 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
   it('батлах нь шийдвэрийг note-д кодлож хадгална', async () => {
     db.attendance.findMany.mockImplementation(async (args: any) =>
       [
-        { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'LATE', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
+        { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'ABSENT', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
       ].filter((a) => !args.where.studentId || a.studentId === args.where.studentId),
     );
     await service.decide(staff('owner', Role.TEACHER), 'c1', 's1', '2026-10-10', 'CONFIRM', 'Цаасаар хийсэн');
@@ -136,7 +143,7 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
   it('батлахад нөхөх зураг 14 хоногийн дараа устахаар, дахин нээхэд хугацаагүй болно', async () => {
     db.attendance.findMany.mockImplementation(async (args: any) =>
       [
-        { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'LATE', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
+        { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'ABSENT', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
       ].filter((a) => !args.where.studentId || a.studentId === args.where.studentId),
     );
     db.lessonMakeup.upsert.mockResolvedValue({ imageKeys: ['n.pdf'] });
@@ -153,7 +160,7 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
 
   it('шинээр илгээхэд солигдсон хуучин тэмдэглэл 14 хоногийн дараа устахаар тэмдэглэгдэнэ', async () => {
     db.attendance.findMany.mockResolvedValue([
-      { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'LATE', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
+      { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'ABSENT', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
     ]);
     db.lessonMakeup.findUnique.mockResolvedValue({ imageKeys: ['old.pdf'] });
     db.storedFile.findMany.mockResolvedValue([{ key: 'new.pdf', mime: 'application/pdf', pages: 2 }]);
@@ -174,7 +181,7 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
 
   it('нөхөх зураг: бусдын файлыг хавсаргахгүй', async () => {
     db.attendance.findMany.mockResolvedValue([
-      { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'LATE', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
+      { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), status: 'ABSENT', student: { firstName: 'Бат', lastName: 'Дорж' }, classroom: { name: 'QA' } },
     ]);
     db.lessonMakeup.findMany.mockResolvedValue([]);
     db.storedFile.findMany.mockResolvedValue([]);

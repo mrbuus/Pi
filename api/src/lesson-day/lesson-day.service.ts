@@ -320,11 +320,13 @@ export class LessonDayService {
     const engagedKeys = new Set(
       makeups.map((m) => `${m.classroomId}|${m.studentId}|${dateKey(m.date)}`),
     );
-    const rows = enrolledRows.filter(
-      (a) =>
-        confirmedKeys.has(`${a.classroomId}|${dateKey(a.date)}`) ||
-        engagedKeys.has(`${a.classroomId}|${a.studentId}|${dateKey(a.date)}`),
-    );
+    // Хоцорсон (LATE) сурагч ангид суусан тул автоматаар нөхөхгүй (эзэн 2026-11-03: «ирсэн эсвэл
+    // хоцорсон биш бол заавал нөхнө»); өмнө нь нөхөх мөр үүсгэсэн бол л хэвээр харагдана.
+    const rows = enrolledRows.filter((a) => {
+      const engaged = engagedKeys.has(`${a.classroomId}|${a.studentId}|${dateKey(a.date)}`);
+      if (a.status === 'LATE') return engaged;
+      return engaged || confirmedKeys.has(`${a.classroomId}|${dateKey(a.date)}`);
+    });
     if (!rows.length) return [];
 
     const sessions = await this.prisma.classTestSession.findMany({
