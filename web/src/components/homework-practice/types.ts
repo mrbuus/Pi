@@ -1,6 +1,7 @@
 /**
  * Гэрийн даалгавар (сурагч) — API гэрээ (AGENT-RULES.md «Homework API contract»).
- * Сервер хэзээ ч correctAnswer / isCorrect / solution илгээхгүй.
+ * Бодож байх (IN_PROGRESS, «Шалгах» ч) үед сервер correctAnswer / isCorrect / solution ХЭЗЭЭ Ч илгээхгүй.
+ * Илгээсний дараа л `review` (алдсан бодлогын зөв хариу, баталгаажсан бодолт, бичлэг) ирнэ (эзэн 2026-11-03).
  */
 
 import type { HomeworkStatus } from "@/components/attendance/marks";
@@ -76,6 +77,31 @@ export interface HwProblem {
 /** Хариу: CHOICE → сонголтын `label`, FILL_NUMBER/бусад → мөр */
 export type HwAnswers = Record<string, unknown>;
 
+/** Идэвхийн тоолуур (эзэн 2026-11-03): бодож байх хугацаа, вэбээс гарсан тоо/хугацаа */
+export interface HwActivity {
+  activeSec: number;
+  awaySec: number;
+  leaveCount: number;
+  openCount: number;
+}
+
+export type HwAnswerView = string | Record<string, string> | null;
+
+/** Илгээсний дараах нэг (алдсан) бодлогын зөв хариу, бодолт */
+export interface HwReview {
+  correct: HwAnswerView;
+  solution: string | null;
+  video: { url: string; embedUrl: string } | null;
+}
+
+export interface HwReviewPayload {
+  /** Тест ангид бодогдох тул зөв хариу нээгдэхгүй */
+  locked: boolean;
+  /** Хариулаагүй бодлогын зөв хариу нээгдэх цаг (нууж байгаа үед) */
+  opensAt: string | null;
+  items: Record<string, HwReview>;
+}
+
 export interface HwAttempt {
   attemptId: string;
   status: HwItemStatus;
@@ -89,6 +115,9 @@ export interface HwAttempt {
   problems: HwProblem[];
   answers: HwAnswers;
   lastCheck: Record<string, CheckResult> | null;
+  activity: HwActivity;
+  /** Илгээсэн бол алдсан бодлогын зөв хариу; бодож байгаа бол null */
+  review: HwReviewPayload | null;
 }
 
 export interface HwCheckResponse {
@@ -102,4 +131,5 @@ export interface HwSubmitResponse {
   score: HwScore;
   results: Record<string, CheckResult>;
   submittedAt: string;
+  review: HwReviewPayload;
 }

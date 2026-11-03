@@ -1,21 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, CircleCheck, CircleMinus } from "lucide-react";
+import { ArrowLeft, CircleCheck, CircleMinus, Clock, Lock, TriangleAlert } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { formatMnDateTime } from "@/lib/dateMn";
 import { CHECK_META } from "./CheckMark";
+import HomeworkReviewCard from "./HomeworkReviewCard";
 import PhotoButton from "./PhotoButton";
-import type { CheckResult, HwScore } from "./types";
+import type { CheckResult, HwAnswers, HwProblem, HwReviewPayload, HwScore } from "./types";
 
 /** Хариуны түлхүүргүй бодлого — сервер дүгнээгүй (results-д байхгүй), оноонд орохгүй */
 const UNGRADED = { label: "Дүгнэгдээгүй", icon: CircleMinus, cls: "border-dashed border-line bg-surface text-ink-dim" };
 
-/** Илгээсний дараах дүн: оноо + бодлого бүрийн зөв/буруу (зөв хариугүй) */
+/**
+ * Илгээсний дараах дүн: «зөв/нийт» оноо, бодлого бүрийн зөв/буруу, нэгээс олон алдсан бол алдаагаа
+ * засах сануулга, алдсан бодлого бүрийн зөв хариу + бодолт (эзэн 2026-11-03).
+ */
 export default function HomeworkResult({
   title,
   score,
   results,
-  problemIds,
+  problems,
+  answers,
+  review,
   classroomId,
   date,
   backHref,
@@ -23,12 +30,17 @@ export default function HomeworkResult({
   title: string;
   score: HwScore | null;
   results: Record<string, CheckResult> | null;
-  problemIds: string[];
+  problems: HwProblem[];
+  answers: HwAnswers;
+  review: HwReviewPayload | null;
   classroomId: string;
   date: string;
   backHref: string;
 }) {
+  const problemIds = problems.map((p) => p.id);
   const hasUngraded = !!results && problemIds.some((id) => !results[id]);
+  const missed = problems.filter((p) => results?.[p.id] === "WRONG" || results?.[p.id] === "BLANK");
+  const opensAt = review?.opensAt ? formatMnDateTime(review.opensAt, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : null;
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <section className="rounded-xl border border-line bg-surface p-5 text-center elev-1 sm:p-6">
@@ -82,6 +94,49 @@ export default function HomeworkResult({
               </span>
             )}
           </div>
+        </section>
+      )}
+
+      {missed.length > 1 && (
+        <p role="status" className="flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm font-semibold text-ink">
+          <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden />
+          {missed.length} бодлого алдсан байна. Доорх зөв хариуг харж алдаагаа засаарай
+        </p>
+      )}
+
+      {missed.length > 0 && review?.locked && (
+        <p role="status" className="flex items-start gap-2 rounded-xl border border-line bg-panel p-3 text-sm text-ink-dim">
+          <Lock className="mt-0.5 size-4 shrink-0" aria-hidden />
+          Зөв хариу удахгүй нээгдэнэ
+        </p>
+      )}
+
+      {missed.length > 0 && review && !review.locked && (
+        <section aria-labelledby="hw-missed-title" className="space-y-3">
+          <h2 id="hw-missed-title" className="font-bold text-brand-soft">
+            Алдсан бодлогууд
+          </h2>
+          {opensAt && (
+            <p className="flex items-start gap-2 text-sm text-ink-dim">
+              <Clock className="mt-0.5 size-4 shrink-0" aria-hidden />
+              Хариулаагүй бодлогын зөв хариу {opensAt}-с нээгдэнэ
+            </p>
+          )}
+          <ol className="space-y-3">
+            {problems.map((p, i) =>
+              results?.[p.id] === "WRONG" || results?.[p.id] === "BLANK" ? (
+                <li key={p.id}>
+                  <HomeworkReviewCard
+                    n={i + 1}
+                    problem={p}
+                    mine={answers[p.id]}
+                    review={review.items[p.id]}
+                    blank={results[p.id] === "BLANK"}
+                  />
+                </li>
+              ) : null,
+            )}
+          </ol>
         </section>
       )}
 

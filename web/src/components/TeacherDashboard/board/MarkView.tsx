@@ -44,6 +44,7 @@ interface Props {
   onHw: (id: string, v: HomeworkStatus | null) => void;
   onHwNote: (id: string, text: string, typed: boolean) => void;
   onDrawer: (id: string) => void;
+  onOnline: (id: string) => void;
 }
 
 const NO_FLAGS: string[] = [];
@@ -84,6 +85,7 @@ export default function MarkView(p: Props) {
             onHw={p.onHw}
             onHwNote={p.onHwNote}
             onDrawer={p.onDrawer}
+            onOnline={p.onOnline}
           />
         ))}
       </ul>

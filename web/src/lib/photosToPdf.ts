@@ -8,7 +8,10 @@
  * HEIC: iOS Safari сонгох үед өөрөө JPEG болгодог; бусад хөтөч задалж чадахгүй бол
  * ойлгомжтой алдаа өгнө. Сан нь зөвхөн дуудах үед ачаалагдана (тусдаа chunk).
  * Онолын зураг, нөхөх тэмдэглэл ашигладаг; гэрийн даалгаварт ч дахин ашиглана.
+ * Decode/шахалт нь imageNormalize.ts (EXIF-ийг өөрсдөө, toBlob null нөөц, санах ойн нөөц).
  */
+
+import { canvasToJpeg, decodeUpright, releaseCanvas, type UprightImage } from "./imageNormalize";
 
 export const PDF_MAX_PAGES = 10;
 export const PDF_LONG_SIDE = 1600;
@@ -36,38 +39,11 @@ export interface PhotosToPdfOptions {
   onProgress?: (done: number, total: number) => void;
 }
 
-async function decode(file: File): Promise<Decoded> {
-  if (typeof createImageBitmap === "function") {
-    try {
-      return await createImageBitmap(file, { imageOrientation: "from-image" });
-    } catch {
-      // доорх <img> зам руу
-    }
-  }
-  const url = URL.createObjectURL(file);
-  try {
-    const img = new Image();
-    img.decoding = "async";
-    img.src = url;
-    await img.decode();
-    return Object.assign(img, { width: img.naturalWidth, height: img.naturalHeight });
-  } catch {
-    throw new Error(`«${file.name}» зургийг уншиж чадсангүй. JPG эсвэл PNG зураг сонгоно уу`);
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
-
-type Decoded = CanvasImageSource & { width: number; height: number };
-
-function encode(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
-  return new Promise((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Зургийг шахаж чадсангүй"))), "image/jpeg", quality),
-  );
-}
+/** Төсөвт хамааралгүй, санах ой дутсан (canvas/шахалт бүтэлгүйтсэн) үеийн нөөц урт талууд */
+const MEMORY_SIDES = [1200, 900];
 
 /** Эргүүлэлттэйгээр canvas-д зурна (цагаан дэвсгэр — PNG-ийн тунгалаг хэсэг хар болохоос сэргийлнэ). */
-function draw(source: Decoded, longSide: number, rotation: Rotation): HTMLCanvasElement {
+function draw(source: UprightImage, longSide: number, rotation: Rotation): HTMLCanvasElement {
   const scale = Math.min(1, longSide / Math.max(source.width, source.height));
   const w = Math.max(1, Math.round(source.width * scale));
   const h = Math.max(1, Math.round(source.height * scale));
@@ -76,24 +52,23 @@ function draw(source: Decoded, longSide: number, rotation: Rotation): HTMLCanvas
   canvas.width = sideways ? h : w;
   canvas.height = sideways ? w : h;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Зураг боловсруулах боломжгүй хөтөч байна");
+  if (!ctx) {
+    releaseCanvas(canvas);
+    throw new Error("Зураг боловсруулах боломжгүй хөтөч байна");
+  }
   ctx.fillStyle = "#ffffff"; // тунгалаг PNG-ийн дэвсгэр (JPEG-д алфа байхгүй)
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.translate(canvas.width / 2, canvas.height / 2);
   ctx.rotate((rotation * Math.PI) / 180);
-  ctx.drawImage(source, -w / 2, -h / 2, w, h);
+  ctx.drawImage(source.source, -w / 2, -h / 2, w, h);
   return canvas;
-}
-
-/** iOS Safari canvas-ийн нийт санах ойг хязгаарладаг — ашигласан canvas-ийг шууд суллана. */
-function release(canvas: HTMLCanvasElement) {
-  canvas.width = 0;
-  canvas.height = 0;
 }
 
 /**
  * Нэг зургийг шахсан JPEG байт болгоно (эргүүлэлттэй). `budget`-оос том бол чанарыг
- * бууруулж, тэгсэн ч том бол урт талыг 80% болгож дахин оролдоно (нэг удаа).
+ * бууруулж, тэгсэн ч том бол урт талыг 80% болгож дахин оролдоно (нэг удаа). Санах ой
+ * дутаж canvas/шахалт бүтэлгүйтвэл урт талыг 1200 → 900 болгож дахин оролдоно.
+ * Decode нь `decodeUpright` (EXIF-ийг хөтөч бүрт ижил, imageOrientation тохиргоогүй).
  */
 export async function compressToJpeg(
   photo: PdfPhoto,
@@ -101,28 +76,36 @@ export async function compressToJpeg(
   quality = PDF_JPEG_QUALITY,
   budget = PDF_PAGE_BUDGET,
 ): Promise<{ bytes: Uint8Array; width: number; height: number }> {
-  const source = await decode(photo.file);
+  const source = await decodeUpright(photo.file, { maxSide: longSide });
   const rotation = photo.rotation ?? 0;
   const qualities = [quality, ...FALLBACK_QUALITIES.filter((q) => q < quality)];
+  const budgetSide = Math.round(longSide * 0.8);
+  const sides = [longSide, budgetSide, ...MEMORY_SIDES.filter((s) => s < budgetSide)];
   try {
     let best: { blob: Blob; width: number; height: number } | null = null;
-    for (const side of [longSide, Math.round(longSide * 0.8)]) {
-      const canvas = draw(source, side, rotation);
+    for (let i = 0; i < sides.length; i++) {
+      // Санах ойн нөөц хэмжээг зөвхөн өмнөх оролдлогууд огт бүтэлгүйтсэн үед хэрэглэнэ
+      if (i >= 2 && best) break;
+      let canvas: HTMLCanvasElement | null = null;
       try {
+        canvas = draw(source, sides[i], rotation);
         for (const q of qualities) {
-          const blob = await encode(canvas, q);
+          const blob = await canvasToJpeg(canvas, q);
           if (!best || blob.size < best.blob.size) best = { blob, width: canvas.width, height: canvas.height };
           if (blob.size <= budget) break;
         }
+      } catch {
+        // санах ой дутсан байж магадгүй — дараагийн (жижиг) хэмжээгээр
+        await new Promise((r) => setTimeout(r, 60));
       } finally {
-        release(canvas);
+        if (canvas) releaseCanvas(canvas);
       }
       if (best && best.blob.size <= budget) break;
     }
-    if (!best) throw new Error("Зургийг шахаж чадсангүй");
+    if (!best) throw new Error("Зургийг шахаж чадсангүй. Дахин оролдоно уу");
     return { bytes: new Uint8Array(await best.blob.arrayBuffer()), width: best.width, height: best.height };
   } finally {
-    if ("close" in source && typeof source.close === "function") source.close();
+    source.close();
   }
 }
 

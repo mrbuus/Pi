@@ -16,6 +16,7 @@ import MarkView, { type BulkState } from "./MarkView";
 import MonitorView, { type FilterKey } from "./MonitorView";
 import OtherInfo from "./OtherInfo";
 import RecordedByLine from "./RecordedBy";
+import OnlineDetail from "./OnlineDetail";
 import StudentDrawer from "./StudentDrawer";
 import type { OnlineCell } from "./StudentCard";
 import SummaryBar from "./SummaryBar";
@@ -333,6 +334,7 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
   const [bulkBusy, setBulkBusy] = useState(false);
   const [filter, setFilter] = useState<FilterKey | null>(null);
   const [drawerId, setDrawerId] = useState<string | null>(null);
+  const [onlineId, setOnlineId] = useState<string | null>(null);
 
   // Энэ анги, энэ өдрийг зэрэг нээсэн бусад багш (D8)
   const editors = usePresence([`attendance:${cls.id}:${date}`]);
@@ -428,6 +430,7 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
     });
   }, []);
   const openDrawer = useCallback((id: string) => setDrawerId(id), []);
+  const openOnline = useCallback((id: string) => setOnlineId(id), []);
 
   /* Бөөнөөр: зөвхөн тэмдэглээгүй нүд; дараа нь гараар өөрчилсөнийг буцаахгүй */
   const presentIds = students.filter((s) => recs.get(s.id)?.att === null).map((s) => s.id);
@@ -484,6 +487,7 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
   const firstStart = Math.min(...cls.lessons.map((l) => l.startMinute));
   const upcoming = date > today || (date === today && ubNowMinute() < firstStart);
   const drawer = drawerId ? students.find((s) => s.id === drawerId) : undefined;
+  const onlineStudent = onlineId ? students.find((s) => s.id === onlineId) : undefined;
 
   return (
     <div className="space-y-3">
@@ -553,6 +557,7 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
                   filter={filter}
                   onFilter={setFilter}
                   onDrawer={openDrawer}
+                  onOnline={openOnline}
                   footer={<OtherInfo classId={cls.id} classType={cls.type} date={date} canManage={canManage} />}
                 />
               </Tabs.Content>
@@ -585,12 +590,26 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
                   onHw={onHw}
                   onHwNote={board.onHwNote}
                   onDrawer={openDrawer}
+                  onOnline={openOnline}
                 />
               </Tabs.Content>
             </>
           )}
         </div>
       </Tabs.Root>
+
+      {onlineStudent && (
+        <OnlineDetail
+          classId={cls.id}
+          className={cls.name}
+          studentId={onlineStudent.id}
+          name={names.get(onlineStudent.id) ?? onlineStudent.firstName}
+          date={date}
+          hw={recs.get(onlineStudent.id)?.hw ?? null}
+          hwNote={recs.get(onlineStudent.id)?.hwNote ?? ""}
+          onClose={() => setOnlineId(null)}
+        />
+      )}
 
       {drawer && (
         <StudentDrawer

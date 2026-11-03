@@ -105,6 +105,7 @@ export default function MonitorView({
   filter,
   onFilter,
   onDrawer,
+  onOnline,
   footer,
 }: {
   students: BoardStudent[];
@@ -120,6 +121,7 @@ export default function MonitorView({
   filter: FilterKey | null;
   onFilter: (f: FilterKey | null) => void;
   onDrawer: (id: string) => void;
+  onOnline: (id: string) => void;
   /** Хамгийн доор (тайлбарын дараа) — «Ангийн бусад мэдээлэл» */
   footer?: ReactNode;
 }) {
@@ -289,7 +291,9 @@ export default function MonitorView({
                   makeup={makeup.get(s.id) ?? null}
                   sent={sent.has(s.id)}
                   homework={homework}
+                  hasOnline={hasOnline}
                   onDrawer={onDrawer}
+                  onOnline={onOnline}
                 />
               );
             })}
@@ -347,10 +351,12 @@ interface RowProps {
   makeup: MakeupStatus | null;
   sent: boolean;
   homework: boolean;
+  hasOnline: boolean;
   onDrawer: (id: string) => void;
+  onOnline: (id: string) => void;
 }
 
-function MonitorRowImpl({ id, index, name, rec, flags, online, makeup, sent, homework, onDrawer }: RowProps) {
+function MonitorRowImpl({ id, index, name, rec, flags, online, makeup, sent, homework, hasOnline, onDrawer, onOnline }: RowProps) {
   const att = rec.att ? ATTENDANCE_MARKS[rec.att] : null;
   const AttIcon = att?.icon;
   const hwm = rec.hw ? HOMEWORK_MARKS[rec.hw] : null;
@@ -432,19 +438,30 @@ function MonitorRowImpl({ id, index, name, rec, flags, online, makeup, sent, hom
       {/* Онлайн: утсан дээр баруун талд хоёр мөрийг эзэлнэ */}
       <div className="relative z-[1] col-start-2 row-span-2 row-start-1 flex justify-end md:col-start-5 md:row-span-1 md:justify-start">
         {homework &&
-          (online ? (
-            <Link
-              href={`/app/tests/${encodeURIComponent(online.testId)}/results`}
-              aria-label={`${name}, онлайн гэрийн даалгавар ${scoreText(online.score, online.max)}`}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 whitespace-nowrap rounded-lg border border-brand-bright/40 bg-brand-bright/10 px-2 text-xs font-semibold tabular-nums text-brand-soft hover:bg-brand-bright/20 md:min-h-8"
+          (hasOnline ? (
+            <button
+              type="button"
+              onClick={() => onOnline(id)}
+              aria-haspopup="dialog"
+              aria-label={
+                online
+                  ? `${name}, онлайн гэрийн даалгавар ${scoreText(online.score, online.max)}, дэлгэрэнгүй`
+                  : `${name}, онлайнаар бодоогүй, дэлгэрэнгүй`
+              }
+              className={cn(
+                "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 whitespace-nowrap rounded-lg border px-2 text-xs font-semibold tabular-nums md:min-h-8",
+                online
+                  ? "border-brand-bright/40 bg-brand-bright/10 text-brand-soft hover:bg-brand-bright/20"
+                  : "border-dashed border-line text-ink-dim hover:border-ink/30 hover:text-ink",
+              )}
             >
               <Laptop className="size-3.5 shrink-0" aria-hidden />
-              {scoreText(online.score, online.max)}
-            </Link>
+              {online ? scoreText(online.score, online.max) : DASH}
+            </button>
           ) : (
-            <span className="inline-flex min-w-11 justify-center md:justify-start" title="Онлайнаар бодоогүй">
+            <span className="inline-flex min-w-11 justify-center md:justify-start" title="Онлайн гэрийн даалгавар алга">
               {DASH}
-              <span className="sr-only">Онлайнаар бодоогүй</span>
+              <span className="sr-only">Онлайн гэрийн даалгавар алга</span>
             </span>
           ))}
       </div>
@@ -469,7 +486,9 @@ const MonitorRow = memo(
     p.makeup === n.makeup &&
     p.sent === n.sent &&
     p.homework === n.homework &&
-    p.onDrawer === n.onDrawer,
+    p.hasOnline === n.hasOnline &&
+    p.onDrawer === n.onDrawer &&
+    p.onOnline === n.onOnline,
 );
 
 function MonitorLegend({ homework, online, makeup, sent }: { homework: boolean; online: boolean; makeup: boolean; sent: boolean }) {

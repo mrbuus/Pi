@@ -18,6 +18,7 @@ import CheckMark from "./CheckMark";
 import HomeworkResult from "./HomeworkResult";
 import PhotoButton from "./PhotoButton";
 import { cleanTitle, formatElapsed, isBlankAnswer } from "./lib";
+import { useActivityTracker } from "./useActivityTracker";
 import type {
   CheckResult,
   HwAnswers,
@@ -26,6 +27,7 @@ import type {
   HwItem,
   HwMyResponse,
   HwProblem,
+  HwReviewPayload,
   HwScore,
   HwSubmitResponse,
 } from "./types";
@@ -33,13 +35,17 @@ import type {
 /**
  * Гэрийн даалгавар бодох дэлгэц (эзэн 2026-10-29, шийдвэр 3):
  * Эхлэх → цаг явна (өнгөрсөн; хугацаатай бол үлдсэн) → хариу (autosave ~1.2с) →
- * «Шалгах» нь зөвхөн зөв/буруу (зөв хариуг ХЭЗЭЭ Ч үзүүлэхгүй) → засна → дахин
- * «Шалгах» (нийт 2) → «Илгээх». Шалгалтын анти-чит (fullscreen, гаралт) ЭНД БАЙХГҮЙ.
+ * «Шалгах» нь зөвхөн зөв/буруу (илгээхээс өмнө зөв хариуг ХЭЗЭЭ Ч үзүүлэхгүй) → засна → дахин
+ * «Шалгах» (нийт 2) → «Илгээх» → илгээсний дараа алдсан бодлогын зөв хариу, бодолт (эзэн 2026-11-03).
+ * Шалгалтын анти-чит (fullscreen, гаралт) ЭНД БАЙХГҮЙ — зөвхөн хэмжинэ: бодсон хугацаа, вэбээс
+ * гарсан тоо (useActivityTracker), багш «Онлайн» дэлгэрэнгүйгээс харна.
  * Шалгалтын UI хэсгүүдийг (QuestionCard, ChoiceList, FillNumberAnswer, навигатор,
  * AutosaveChip, OfflineBanner, ExamTimer) импортлож ашиглана.
  */
 
 const SAVE_DEBOUNCE_MS = 1200;
+/** Идэвхийн тоолуурыг хариу өөрчлөгдөхгүй байсан ч серверт хадгалах давтамж */
+const HEARTBEAT_MS = 45_000;
 const RETRY_BASE_MS = 2000;
 const RETRY_MAX_MS = 30_000;
 
@@ -106,9 +112,11 @@ export default function HomeworkSolve({
   const [offline, setOffline] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
-  const [final, setFinal] = useState<{ score: HwScore | null; results: Record<string, CheckResult> | null } | null>(
-    null,
-  );
+  const [final, setFinal] = useState<{
+    score: HwScore | null;
+    results: Record<string, CheckResult> | null;
+    review: HwReviewPayload | null;
+  } | null>(null);
 
   const answersRef = useRef<HwAnswers>({});
   const dirtyRef = useRef(false);
@@ -116,7 +124,12 @@ export default function HomeworkSolve({
   const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const retryCount = useRef(0);
   const doneRef = useRef(false);
-  const flushRef = useRef<(() => Promise<void>) | null>(null);
+  const flushRef = useRef<((force?: boolean) => Promise<void>) | null>(null);
+  const activityRef = useRef<() => { activeSec: number; awaySec: number; leaveCount: number }>(() => ({
+    activeSec: 0,
+    awaySec: 0,
+    leaveCount: 0,
+  }));
 
   const problems = useMemo(
     () => [...(attempt?.problems ?? [])].sort((a, b) => a.order - b.order).map(toView),
@@ -139,7 +152,11 @@ export default function HomeworkSolve({
       if (a.status === "SUBMITTED") {
         doneRef.current = true;
         // Серверийн эцсийн оноо (хариугүй бодлогыг тооцохгүй) — байхгүй бол дүнгээс тоолно
-        setFinal({ score: a.score ?? scoreFrom(a.lastCheck, a.problems.length), results: a.lastCheck });
+        setFinal({
+          score: a.score ?? scoreFrom(a.lastCheck, a.problems.length),
+          results: a.lastCheck,
+          review: a.review ?? null,
+        });
         setPhase("result");
         return;
       }
@@ -183,15 +200,17 @@ export default function HomeworkSolve({
   }, [phase, attempt]);
 
   /* ---------- Autosave (PATCH, debounce) ---------- */
-  const flush = useCallback(async () => {
-    if (!attempt || doneRef.current || !dirtyRef.current) return;
+  const flush = useCallback(
+    async (force = false) => {
+    if (!attempt || doneRef.current || (!dirtyRef.current && !force)) return;
+    const hadChanges = dirtyRef.current;
     const snapshot = answersRef.current;
     dirtyRef.current = false;
-    setSaveStatus("saving");
+    if (hadChanges) setSaveStatus("saving");
     try {
       await api(`/homework/attempts/${encodeURIComponent(attempt.attemptId)}`, {
         method: "PATCH",
-        body: { answers: snapshot },
+        body: { answers: snapshot, activity: activityRef.current() },
       });
       retryCount.current = 0;
       setOffline(false);
@@ -203,6 +222,8 @@ export default function HomeworkSolve({
         void start();
         return;
       }
+      // Хариу өөрчлөгдөөгүй байсан (зөвхөн идэвх) бол дахин оролдохгүй — дараагийн цохилтоор явна
+      if (!hadChanges) return;
       dirtyRef.current = true;
       setOffline(true);
       const n = retryCount.current;
@@ -211,7 +232,9 @@ export default function HomeworkSolve({
       if (retryTimer.current) clearTimeout(retryTimer.current);
       retryTimer.current = setTimeout(() => void flushRef.current?.(), wait);
     }
-  }, [attempt, start]);
+    },
+    [attempt, start],
+  );
 
   useEffect(() => {
     flushRef.current = flush;
@@ -225,14 +248,22 @@ export default function HomeworkSolve({
     [],
   );
 
-  // Таб хаагдах/нуугдахад хүлээгдэж буй хариуг шууд илгээнэ
+  // Таб хаагдах/нуугдахад (вэбээс гарах) хариу + идэвхийг шууд илгээнэ; дахин ачаалахад тоолуур
+  // серверийн утгаас үргэлжилнэ. Нүдэнд харагдаж байх үед 45 секунд тутам идэвхийг хадгална.
+  const activity = useActivityTracker(
+    phase === "solving",
+    attempt ? { key: attempt.attemptId, activity: attempt.activity ?? { activeSec: 0, awaySec: 0, leaveCount: 0, openCount: 0 } } : null,
+    () => void flushRef.current?.(true),
+  );
+  useEffect(() => {
+    activityRef.current = activity;
+  }, [activity]);
   useEffect(() => {
     if (phase !== "solving") return;
-    const onHide = () => {
-      if (document.visibilityState === "hidden") void flushRef.current?.();
-    };
-    document.addEventListener("visibilitychange", onHide);
-    return () => document.removeEventListener("visibilitychange", onHide);
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") void flushRef.current?.(true);
+    }, HEARTBEAT_MS);
+    return () => clearInterval(id);
   }, [phase]);
 
   function setAnswer(pid: string, value: unknown) {
@@ -272,7 +303,7 @@ export default function HomeworkSolve({
     try {
       const r = await api<HwCheckResponse>(`/homework/attempts/${encodeURIComponent(attempt.attemptId)}/check`, {
         method: "POST",
-        body: { answers: answersRef.current },
+        body: { answers: answersRef.current, activity: activityRef.current() },
       });
       dirtyRef.current = false;
       setSaveStatus("saved");
@@ -309,11 +340,11 @@ export default function HomeworkSolve({
     try {
       const r = await api<HwSubmitResponse>(`/homework/attempts/${encodeURIComponent(attempt.attemptId)}/submit`, {
         method: "POST",
-        body: { answers: answersRef.current },
+        body: { answers: answersRef.current, activity: activityRef.current() },
       });
       doneRef.current = true;
       dirtyRef.current = false;
-      setFinal({ score: r.score, results: r.results });
+      setFinal({ score: r.score, results: r.results, review: r.review ?? null });
       setConfirmOpen(false);
       setPhase("result");
     } catch (e) {
@@ -386,7 +417,9 @@ export default function HomeworkSolve({
         title={title}
         score={final?.score ?? item?.score ?? null}
         results={final?.results ?? null}
-        problemIds={problems.map((p) => p.card.id)}
+        problems={[...(attempt?.problems ?? [])].sort((a, b) => a.order - b.order)}
+        answers={answers}
+        review={final?.review ?? null}
         classroomId={classroomId}
         date={date}
         backHref={backHref}
@@ -429,7 +462,7 @@ export default function HomeworkSolve({
       <header className="flex items-center gap-2 border-b border-line bg-surface px-2 py-2 sm:px-4">
         <Link
           href={backHref}
-          onClick={() => void flushRef.current?.()}
+          onClick={() => void flushRef.current?.(true)}
           aria-label="Жагсаалт руу буцах"
           className="flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-dim transition hover:bg-ink/5 hover:text-ink"
         >

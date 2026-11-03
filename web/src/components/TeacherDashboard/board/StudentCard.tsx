@@ -1,7 +1,6 @@
 "use client";
 
 import { Laptop, Minus, MoreHorizontal, NotebookPen, StickyNote, UserCheck } from "lucide-react";
-import Link from "next/link";
 import { memo, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import {
   ATTENDANCE_MARKS,
@@ -134,6 +133,8 @@ export interface CardProps {
   onHw: (id: string, v: HomeworkStatus | null) => void;
   onHwNote: (id: string, text: string, typed: boolean) => void;
   onDrawer: (id: string) => void;
+  /** «Онлайн» дэлгэрэнгүй (оноо, хугацаа, хариу, зураг) */
+  onOnline: (id: string) => void;
 }
 
 function StudentCardImpl({
@@ -155,6 +156,7 @@ function StudentCardImpl({
   onHw,
   onHwNote,
   onDrawer,
+  onOnline,
 }: CardProps) {
   const detailId = `note-${id}`;
   const preview = [rec.attNote.trim(), homework ? rec.hwNote.trim() : ""].filter(Boolean).join(", ");
@@ -233,29 +235,42 @@ function StudentCardImpl({
             className={cn(COLS, "rounded-lg bg-ink/[0.05] p-1")}
             leading={<RowLabel icon={NotebookPen} text="Даалгавар" className="text-ink-dim" />}
           >
-            {online ? (
-              <Link
-                href={`/app/tests/${encodeURIComponent(online.testId)}/results`}
-                aria-label={`${name}, онлайн гэрийн даалгавар ${scoreText(online.score, online.max)}, дүнг нээх`}
-                className={cn(BOX, "border-brand-bright/40 bg-brand-bright/10 text-brand-soft hover:bg-brand-bright/20")}
+            {onlineTests ? (
+              <button
+                type="button"
+                onClick={() => onOnline(id)}
+                aria-haspopup="dialog"
+                aria-label={
+                  online
+                    ? `${name}, онлайн гэрийн даалгавар ${scoreText(online.score, online.max)}, дэлгэрэнгүй`
+                    : `${name}, онлайнаар бодоогүй, дэлгэрэнгүй`
+                }
+                className={cn(
+                  BOX,
+                  "active:opacity-80",
+                  online
+                    ? "border-brand-bright/40 bg-brand-bright/10 text-brand-soft hover:bg-brand-bright/20"
+                    : "border-dashed border-line bg-transparent text-ink-dim/70 hover:border-ink/30 hover:text-ink",
+                )}
               >
                 <span className="inline-flex items-center gap-1">
-                  <Laptop className="size-4 shrink-0" aria-hidden />
+                  <Laptop className={cn("size-4 shrink-0", !online && "opacity-50")} aria-hidden />
                   <span className="hidden sm:inline">Онлайн</span>
                 </span>
-                <span className="max-w-full truncate font-bold tabular-nums">{scoreText(online.score, online.max)}</span>
-              </Link>
+                {online ? (
+                  <span className="max-w-full truncate font-bold tabular-nums">{scoreText(online.score, online.max)}</span>
+                ) : (
+                  <Minus className="size-3.5 shrink-0 opacity-60" aria-hidden />
+                )}
+              </button>
             ) : (
-              <span
-                title={onlineTests ? "Онлайнаар бодоогүй" : "Онлайн гэрийн даалгавар алга"}
-                className={cn(BOX, "border-dashed border-line bg-transparent text-ink-dim/70")}
-              >
+              <span title="Онлайн гэрийн даалгавар алга" className={cn(BOX, "border-dashed border-line bg-transparent text-ink-dim/70")}>
                 <span className="inline-flex items-center gap-1">
                   <Laptop className="size-4 shrink-0 opacity-50" aria-hidden />
                   <span className="hidden sm:inline">Онлайн</span>
                 </span>
                 <Minus className="size-3.5 shrink-0 opacity-60" aria-hidden />
-                <span className="sr-only">{onlineTests ? "Онлайнаар бодоогүй" : "Онлайн гэрийн даалгавар алга"}</span>
+                <span className="sr-only">Онлайн гэрийн даалгавар алга</span>
               </span>
             )}
           </StatusGroup>

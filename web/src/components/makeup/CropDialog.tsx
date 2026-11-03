@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { createPortal } from "react-dom";
 import { Check, Crop, LoaderCircle, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/kit/button";
+import { canvasToJpeg, decodeUpright, releaseCanvas, type UprightImage } from "@/lib/imageNormalize";
 
 /**
  * Энгийн тайрах алхам (эзэн 2026-10-29): зураг дээр тэгш өнцөгт — 4 булангийн
@@ -21,49 +22,51 @@ interface Rect {
 type Handle = "nw" | "ne" | "sw" | "se" | "move";
 
 const MIN = 0.08; // хамгийн бага хэмжээ (зургийн өргөн/өндрийн хувь)
-const MAX_SIDE = 2400; // тайрсан зургийн урт тал (PDF-д 1600 болж дахин шахагдана)
+/** Тайрсан зургийн урт тал (PDF-д 1600 болж дахин шахагдана). Санах ой дутвал багасгана */
+const CROP_SIDES = [2400, 1600, 1200];
+const CROP_ERROR = "Зургийг crop хийж чадсангүй. Дахин оролдох эсвэл «Алгасах» дарна уу";
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
+/**
+ * Орж ирэх файл PhotoPicker-т аль хэдийн босоо JPEG болсон (EXIF-гүй) тул preview <img> ба
+ * canvas ижил координаттай. `decodeUpright` нь imageOrientation тохиргоо ашиглахгүй.
+ */
 async function cropFile(file: File, r: Rect): Promise<File> {
-  let source: CanvasImageSource & { width: number; height: number };
-  let close: (() => void) | null = null;
-  let url: string | null = null;
-  if (typeof createImageBitmap === "function") {
-    const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
-    source = bmp;
-    close = () => bmp.close();
-  } else {
-    url = URL.createObjectURL(file);
-    const img = new Image();
-    img.src = url;
-    await img.decode();
-    source = Object.assign(img, { width: img.naturalWidth, height: img.naturalHeight });
+  let source: UprightImage;
+  try {
+    source = await decodeUpright(file, { maxSide: CROP_SIDES[0] });
+  } catch {
+    throw new Error(CROP_ERROR);
   }
   try {
     const sx = Math.round(r.x * source.width);
     const sy = Math.round(r.y * source.height);
     const sw = Math.max(1, Math.round(r.w * source.width));
     const sh = Math.max(1, Math.round(r.h * source.height));
-    const k = Math.min(1, MAX_SIDE / Math.max(sw, sh));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(sw * k));
-    canvas.height = Math.max(1, Math.round(sh * k));
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Зураг тайрах боломжгүй хөтөч байна");
-    ctx.fillStyle = "#ffffff"; // тунгалаг PNG-ийн дэвсгэр
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(source, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob>((resolve, reject) =>
-      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Зургийг тайрч чадсангүй"))), "image/jpeg", 0.9),
-    );
-    canvas.width = 0;
-    canvas.height = 0;
-    const name = file.name.replace(/\.[^.]+$/, "") + "-crop.jpg";
-    return new File([blob], name, { type: "image/jpeg" });
+    for (const side of CROP_SIDES) {
+      const k = Math.min(1, side / Math.max(sw, sh));
+      const canvas = document.createElement("canvas");
+      try {
+        canvas.width = Math.max(1, Math.round(sw * k));
+        canvas.height = Math.max(1, Math.round(sh * k));
+        const ctx = canvas.getContext("2d");
+        if (!ctx) continue; // санах ой дутсан — жижиг хэмжээгээр
+        ctx.fillStyle = "#ffffff"; // тунгалаг PNG-ийн дэвсгэр
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(source.source, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+        const blob = await canvasToJpeg(canvas, 0.9);
+        const name = (file.name || "zurag").replace(/\.[^.]*$/, "") + "-crop.jpg";
+        return new File([blob], name, { type: "image/jpeg" });
+      } catch {
+        // дараагийн (жижиг) хэмжээгээр
+      } finally {
+        releaseCanvas(canvas);
+      }
+    }
+    throw new Error(CROP_ERROR);
   } finally {
-    close?.();
-    if (url) URL.revokeObjectURL(url);
+    source.close();
   }
 }
 
@@ -152,7 +155,7 @@ export default function CropDialog({
       const full = rect.x < 0.005 && rect.y < 0.005 && rect.w > 0.99 && rect.h > 0.99;
       onDone(full ? file : await cropFile(file, rect));
     } catch (e) {
-      setError(e instanceof Error && e.message ? e.message : "Зургийг тайрч чадсангүй");
+      setError(e instanceof Error && e.message ? e.message : CROP_ERROR);
     } finally {
       setBusy(false);
     }
@@ -173,14 +176,14 @@ export default function CropDialog({
       className="fixed inset-0 z-[80] flex flex-col bg-black/70 p-3 sm:p-6"
       role="dialog"
       aria-modal="true"
-      aria-label="Зураг тайрах"
+      aria-label="Crop"
       data-crop-dialog
       onPointerDown={(e) => e.stopPropagation()}
     >
       <div className="mx-auto flex w-full max-w-xl min-h-0 flex-1 flex-col gap-3 rounded-2xl border border-line bg-surface p-3 elev-1 sm:p-4">
         <div className="flex items-center gap-2">
           <Crop className="size-5 shrink-0 text-brand-soft" aria-hidden />
-          <p className="font-bold text-ink">Зураг тайрах</p>
+          <p className="font-bold text-ink">Crop</p>
           {index !== undefined && total !== undefined && total > 1 && (
             <span className="ml-auto text-sm tabular-nums text-ink-dim">
               {index + 1}/{total}
@@ -195,9 +198,9 @@ export default function CropDialog({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={url}
-                alt="Тайрах зураг"
+                alt="Crop хийх зураг"
                 draggable={false}
-                className="block max-h-[58dvh] max-w-full object-contain"
+                className="block max-h-[58vh] max-w-full object-contain supports-[height:1dvh]:max-h-[58dvh]"
               />
               {/* Тайрахгүй хэсгийг бараантуулна */}
               <div
@@ -246,7 +249,7 @@ export default function CropDialog({
           </Button>
           <Button className="ml-auto" onClick={apply} disabled={busy || !url}>
             {busy ? <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden /> : <Check aria-hidden />}
-            Тайрах
+            Crop
           </Button>
         </div>
       </div>
