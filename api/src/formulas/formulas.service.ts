@@ -4,12 +4,23 @@ import { PrismaService } from '../prisma/prisma.service';
 import { FormulaDto } from './dto/formula.dto';
 import { FormulaQueryDto } from './dto/formula-query.dto';
 import { validateFormulaPayload } from './formula-validator';
+import { TtlCache } from '../common/ttl-cache';
+
+/** Томьёоны сан бүх хэрэглэгчид ижил, ховор өөрчлөгдөнө — create/update бүрд цэвэрлэнэ */
+const FORMULA_CACHE_TTL_MS = 60_000;
 
 @Injectable()
 export class FormulasService {
+  // Түлхүүр: 'sections' | 'list:<шүүлтүүр>'. Хариу нь хэрэглэгчээс хамаардаггүй.
+  private readonly cache = new TtlCache<unknown>(FORMULA_CACHE_TTL_MS, 200);
+
   constructor(private readonly prisma: PrismaService) {}
 
   sections() {
+    return this.cache.get('sections', () => this.loadSections()) as ReturnType<FormulasService['loadSections']>;
+  }
+
+  private loadSections() {
     return this.prisma.formulaSection.findMany({
       orderBy: { order: 'asc' },
       include: { _count: { select: { formulas: { where: { slug: { not: null } } } } } },
@@ -17,6 +28,11 @@ export class FormulasService {
   }
 
   list(query: FormulaQueryDto) {
+    const key = `list:${JSON.stringify([query.q ?? null, query.section ?? null, query.level ?? null, query.grade ?? null, query.topic ?? null])}`;
+    return this.cache.get(key, () => this.loadList(query)) as ReturnType<FormulasService['loadList']>;
+  }
+
+  private loadList(query: FormulaQueryDto) {
     const searchPattern = query.q ? `%${query.q}%` : null;
     const where: Prisma.FormulaWhereInput = {
       slug: { not: null },
@@ -126,7 +142,9 @@ export class FormulasService {
     await this.assertReferences(dto.section, dto.related);
     try {
       const { title, section, related, ...data } = dto;
-      return await this.prisma.formula.create({ data: { ...data, name: title, section: { connect: { slug: section } }, relatedSlugs: related, variants: data.variants as unknown as Prisma.InputJsonValue, conditions: data.conditions as unknown as Prisma.InputJsonValue, derivation: data.derivation as unknown as Prisma.InputJsonValue, examples: data.examples as unknown as Prisma.InputJsonValue, commonMistakes: data.commonMistakes as unknown as Prisma.InputJsonValue, quiz: data.quiz as unknown as Prisma.InputJsonValue } });
+      const saved = await this.prisma.formula.create({ data: { ...data, name: title, section: { connect: { slug: section } }, relatedSlugs: related, variants: data.variants as unknown as Prisma.InputJsonValue, conditions: data.conditions as unknown as Prisma.InputJsonValue, derivation: data.derivation as unknown as Prisma.InputJsonValue, examples: data.examples as unknown as Prisma.InputJsonValue, commonMistakes: data.commonMistakes as unknown as Prisma.InputJsonValue, quiz: data.quiz as unknown as Prisma.InputJsonValue } });
+      this.cache.clear();
+      return saved;
     } catch (error) { this.rethrowWriteError(error); }
   }
 
@@ -158,7 +176,9 @@ export class FormulasService {
     if (typeof section !== 'string') throw new BadRequestException('Formula section is required');
     try {
       const nextUpdatedAt = new Date(Math.max(Date.now(), existing.updatedAt.getTime() + 1));
-      return await this.prisma.formula.update({ where: { slug, updatedAt: expectedUpdatedAt }, data: { ...data, name: title, relatedSlugs: related, section: { connect: { slug: section } }, variants: variants as Prisma.InputJsonValue, conditions: conditions as Prisma.InputJsonValue, derivation: derivation as Prisma.InputJsonValue, examples: examples as Prisma.InputJsonValue, commonMistakes: commonMistakes as Prisma.InputJsonValue, quiz: quiz as Prisma.InputJsonValue, widget, updatedAt: nextUpdatedAt } });
+      const saved = await this.prisma.formula.update({ where: { slug, updatedAt: expectedUpdatedAt }, data: { ...data, name: title, relatedSlugs: related, section: { connect: { slug: section } }, variants: variants as Prisma.InputJsonValue, conditions: conditions as Prisma.InputJsonValue, derivation: derivation as Prisma.InputJsonValue, examples: examples as Prisma.InputJsonValue, commonMistakes: commonMistakes as Prisma.InputJsonValue, quiz: quiz as Prisma.InputJsonValue, widget, updatedAt: nextUpdatedAt } });
+      this.cache.clear();
+      return saved;
     } catch (error) {
       const code = typeof error === 'object' && error !== null && 'code' in error ? error.code : undefined;
       if (code === 'P2025') {

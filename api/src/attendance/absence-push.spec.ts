@@ -20,7 +20,7 @@ describe('attendance: newly absent -> parent notification', () => {
       },
     };
     const notifications = { notify: notifyImpl ?? jest.fn().mockResolvedValue(undefined) };
-    const svc = new AttendanceService(prisma as never, {} as never, { record: jest.fn() } as never, notifications as never);
+    const svc = new AttendanceService(prisma as never, {} as never, { record: jest.fn(), recordMany: jest.fn() } as never, notifications as never);
     jest.spyOn(svc as never, 'assertClassAccess').mockResolvedValue(undefined as never);
     jest.spyOn(svc as never, 'attendanceRows').mockResolvedValue([] as never);
     return { svc, prisma, notifications, today };

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Prisma } from '../generated/prisma/client';
 import { SelfState } from '../generated/prisma/enums';
@@ -17,8 +17,10 @@ interface CollectInput {
 }
 
 @Injectable()
-export class MistakeCollector {
+export class MistakeCollector implements OnModuleDestroy {
   private readonly logger = new Logger(MistakeCollector.name);
+  /** Хүсэлтийн дараа ажиллаж буй цуглуулга — унтрахдаа дуусахыг хүлээнэ */
+  private readonly background = new Set<Promise<void>>();
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -100,6 +102,32 @@ export class MistakeCollector {
       );
       return false;
     }
+  }
+
+  /**
+   * Хүсэлтийн ЗАМААС ГАДУУР цуглуулна (docs/BACKEND-PERF.md). Нэг илгээлтийн
+   * буруу бодлого бүр ~8 query (transaction, мөр түгжээ) — 40 бодлоготой тестэд
+   * ~300 query хүсэлтийг барьж байсан. Дүн аль хэдийн commit болсон; алдаа
+   * гарвал мөр pending хэвээр үлдэж retryPending (5 мин) дахин авна.
+   * Дараалсан (зэрэг биш) — pool-ыг нэг илгээлт эзлэхгүй.
+   */
+  collectAttemptsInBackground(attemptIds: string[]): void {
+    if (attemptIds.length === 0) return;
+    const run = (async () => {
+      for (const id of attemptIds) await this.collectAttempt(id);
+    })().catch((error: unknown) => {
+      this.logger.error(
+        'Background mistake collection failed; attempts remain pending',
+        error instanceof Error ? error.stack : String(error),
+      );
+    });
+    this.background.add(run);
+    void run.finally(() => this.background.delete(run));
+  }
+
+  /** Graceful shutdown: эхэлсэн цуглуулгыг таслахгүй (SIGTERM → app.close) */
+  async onModuleDestroy(): Promise<void> {
+    await Promise.allSettled([...this.background]);
   }
 
   /** Collect only the requested committed attempt; grading never scans globally. */

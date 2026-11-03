@@ -61,32 +61,52 @@ export class AuditService {
   // rollback хийж болохгүй — гэхдээ алдааг чанга log-лоно, дуугүй өнгөрөхгүй.
   async record(input: RecordAuditInput): Promise<void> {
     try {
-      await this.prisma.auditLog.create({
-        data: {
-          actorId: input.actorId,
-          actorRole: input.actorRole,
-          action: input.action,
-          entity: input.entity,
-          entityId: input.entityId,
-          before:
-            input.before !== undefined
-              ? ((redact(input.before) ??
-                  Prisma.JsonNull) as Prisma.InputJsonValue)
-              : undefined,
-          after:
-            input.after !== undefined
-              ? ((redact(input.after) ??
-                  Prisma.JsonNull) as Prisma.InputJsonValue)
-              : undefined,
-          reason: input.reason,
-        },
-      });
+      await this.prisma.auditLog.create({ data: this.toData(input) });
     } catch (err) {
       this.logger.error(
         `Аудит бичлэг үүсгэхэд алдаа гарлаа: ${input.entity}/${input.entityId} (${input.action}, actor=${input.actorId})`,
         err instanceof Error ? err.stack : String(err),
       );
     }
+  }
+
+  /**
+   * Олон бичлэгийг НЭГ INSERT-ээр (docs/BACKEND-PERF.md). Ирцийн «Бүгд ирсэн»
+   * 40 сурагчид өмнө нь 40 зэрэг INSERT явж pool-ын (15) бүх холболтыг эзэлдэг
+   * байв. record()-той адил throw хийхгүй.
+   */
+  async recordMany(inputs: RecordAuditInput[]): Promise<void> {
+    if (inputs.length === 0) return;
+    try {
+      await this.prisma.auditLog.createMany({
+        data: inputs.map((input) => this.toData(input)),
+      });
+    } catch (err) {
+      const first = inputs[0];
+      this.logger.error(
+        `Аудит бичлэг (${inputs.length}) үүсгэхэд алдаа гарлаа: ${first.entity} (${first.action}, actor=${first.actorId})`,
+        err instanceof Error ? err.stack : String(err),
+      );
+    }
+  }
+
+  private toData(input: RecordAuditInput) {
+    return {
+      actorId: input.actorId,
+      actorRole: input.actorRole,
+      action: input.action,
+      entity: input.entity,
+      entityId: input.entityId,
+      before:
+        input.before !== undefined
+          ? ((redact(input.before) ?? Prisma.JsonNull) as Prisma.InputJsonValue)
+          : undefined,
+      after:
+        input.after !== undefined
+          ? ((redact(input.after) ?? Prisma.JsonNull) as Prisma.InputJsonValue)
+          : undefined,
+      reason: input.reason,
+    };
   }
 
   // GET /audit — зөвхөн ADMIN. Шинэ нь эхэндээ, хуудаслалттай (default 50, max 200).

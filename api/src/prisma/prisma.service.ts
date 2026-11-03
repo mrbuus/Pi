@@ -48,7 +48,17 @@ export class PrismaService
     const statementTimeoutMs = PrismaService.envInt('DB_STATEMENT_TIMEOUT_MS', 10_000);
     const idleTimeoutMs = PrismaService.envInt('DB_POOL_IDLE_TIMEOUT_MS', 30_000);
 
+    // 🐢 УДААН QUERY-Н ЛОГ (docs/BACKEND-PERF.md)
+    // ------------------------------------------------------------------
+    // DB_SLOW_QUERY_MS тохируулсан үед л идэвхжинэ (анхдагч: унтраалттай —
+    // зан төлөв өөрчлөгдөхгүй). Прод-д 500 гэж тавибал гацсан/индексгүй query-г
+    // лог дээрээс шууд харна. 0 = бүх query (зөвхөн локал хэмжилтэд).
+    const slowQueryMs = PrismaService.envNonNegativeInt('DB_SLOW_QUERY_MS');
+
     super({
+      ...(slowQueryMs !== null
+        ? { log: [{ emit: 'event' as const, level: 'query' as const }] }
+        : {}),
       adapter: new PrismaPg(
         {
           connectionString: process.env.DATABASE_URL,
@@ -66,6 +76,30 @@ export class PrismaService
         },
       ),
     });
+
+    if (slowQueryMs !== null) {
+      // log тохиргоог динамикаар дамжуулсан тул $on-ийн төрөл нарийсдаггүй
+      (
+        this as unknown as {
+          $on: (e: 'query', cb: (ev: { query: string; duration: number }) => void) => void;
+        }
+      ).$on('query', (ev) => {
+        if (ev.duration >= slowQueryMs) {
+          PrismaService.logger.warn(
+            // 0 = локал бүрэн мөрдлөг (EXPLAIN-д бүтэн SQL хэрэгтэй)
+            `slow query ${ev.duration}ms: ${slowQueryMs === 0 ? ev.query : ev.query.slice(0, 1000)}`,
+          );
+        }
+      });
+    }
+  }
+
+  /** Тохируулаагүй/буруу бол null; 0 зөвшөөрнө */
+  private static envNonNegativeInt(key: string): number | null {
+    const raw = process.env[key];
+    if (raw === undefined || raw.trim() === '') return null;
+    const n = Number(raw);
+    return Number.isInteger(n) && n >= 0 ? n : null;
   }
 
   private static envInt(key: string, fallback: number): number {

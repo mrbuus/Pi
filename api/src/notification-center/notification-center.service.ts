@@ -10,6 +10,16 @@ import { EmailService } from '../notifications/email.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationKind, Role } from '../generated/prisma/enums';
 import { isQuietHoursUB } from './quiet-hours';
+import { TtlCache } from '../common/ttl-cache';
+
+/**
+ * Уншаагүй мэдэгдлийн тоо — апп, вэб хоёулаа 60 секунд тутам асуудаг.
+ * Хэрэглэгч тутам 15 секунд кэшлэнэ; мэдэгдэл үүсгэх/уншсан болгох бүрд
+ * тухайн хэрэглэгчийн түлхүүрийг шууд устгана (өөрийн үйлдэл даруй харагдана).
+ * Өөр процесс (скрипт) үүсгэсэн мэдэгдэл хамгийн ихдээ 15 секунд хоцорно.
+ * docs/BACKEND-PERF.md
+ */
+export const unreadCountCache = new TtlCache<{ count: number }>(15_000, 5_000);
 
 export interface NewNotification {
   kind: NotificationKind;
@@ -68,6 +78,7 @@ export class NotificationCenterService {
           link: notification.link ?? null,
         })),
       });
+      for (const { id } of recipients) unreadCountCache.delete(id);
 
       // Push: fire-and-forget — үндсэн хүсэлтийг хэзээ ч удаашруулахгүй, унагахгүй.
       if (notification.push) {
@@ -174,9 +185,11 @@ export class NotificationCenterService {
   }
 
   unreadCount(userId: string) {
-    return this.prisma.notification
-      .count({ where: { userId, readAt: null } })
-      .then((count) => ({ count }));
+    return unreadCountCache.get(userId, () =>
+      this.prisma.notification
+        .count({ where: { userId, readAt: null } })
+        .then((count) => ({ count })),
+    );
   }
 
   async markRead(userId: string, id: string) {
@@ -191,6 +204,7 @@ export class NotificationCenterService {
         where: { id, userId, readAt: null },
         data: { readAt: new Date() },
       });
+      unreadCountCache.delete(userId);
     }
     return { read: true };
   }
@@ -200,6 +214,7 @@ export class NotificationCenterService {
       where: { userId, readAt: null },
       data: { readAt: new Date() },
     });
+    unreadCountCache.delete(userId);
     return { updated: result.count };
   }
 }
