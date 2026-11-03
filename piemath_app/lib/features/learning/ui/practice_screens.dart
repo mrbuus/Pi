@@ -6,6 +6,7 @@ import '../../../app/shell/app_shell.dart';
 import '../../../core/files/files.dart';
 import '../../../core/math/math.dart';
 import '../../../core/ui/ui.dart';
+import '../../../shared/anim/animation_slot.dart';
 import '../../exam/data/exam_models.dart' show ExamProblem, ProblemFormat;
 import '../../exam/ui/widgets/answer_inputs.dart';
 import '../data/practice_models.dart';
@@ -197,6 +198,10 @@ class _PracticeProblemScreenState extends ConsumerState<PracticeProblemScreen> {
           ),
         if (_error != null) ...[const SizedBox(height: AppSpace.md), InlineMessage(_error!)],
         if (_result != null) ...[
+          if (_result!.correct == true)
+            const Center(
+              child: AnimationSlot(slot: AnimSlot.correctBurst, size: 96, fallback: SizedBox.shrink()),
+            ),
           InlineMessage(
             switch (_result!.correct) {
               true => 'Зөв',

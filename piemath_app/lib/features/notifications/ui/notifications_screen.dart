@@ -7,6 +7,7 @@ import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
+import '../../../shared/anim/animation_slot.dart';
 import '../data/notification_models.dart';
 import '../domain/notification_link.dart';
 import '../domain/notifications_controller.dart';
@@ -131,6 +132,7 @@ class _NotificationsList extends ConsumerWidget {
               message: state.nextCursor != null
                   ? 'Дараагийн хуудсанд үргэлжлүүлэн шалгаж болно.'
                   : 'Шинэ даалгавар эсвэл зар ирэхэд энд харагдана.',
+              art: AnimArt.emptyNotifications,
             ),
           );
         }

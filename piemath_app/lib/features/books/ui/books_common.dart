@@ -6,6 +6,7 @@ import '../../../core/config/env.dart';
 import '../../../core/math/math.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
+import '../../../shared/anim/animation_slot.dart';
 
 /// `books` feature-ийн нэмэлт Lucide дүрс.
 abstract final class BooksIcons {
@@ -94,9 +95,11 @@ Widget publicError(Object error, {required VoidCallback onRetry}) {
   if (e?.kind == ApiErrorKind.notFound) {
     return EmptyState(icon: AppIcons.theory, title: e!.message, message: 'Номын жагсаалт руу буцаж өөр ном сонгоно уу');
   }
+  final offline = e?.isNetwork ?? false;
   return ErrorState(
-    icon: e?.isNetwork ?? false ? AppIcons.offline : AppIcons.error,
+    icon: offline ? AppIcons.offline : AppIcons.error,
     message: e?.message ?? AppStrings.genericError,
     onRetry: onRetry,
+    art: offline ? AnimArt.offline : null,
   );
 }

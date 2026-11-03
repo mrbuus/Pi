@@ -43,6 +43,10 @@ dependencies:
   sign_in_with_apple: ^8.2.0
   device_info_plus: ^13.3.0
   share_plus: ^13.3.1
+  # Анимацын слот (lib/shared/anim, assets/anim/README.md): цэвэр Dart, native сангүй. Rive НЭМЭХГҮЙ.
+  lottie: ^3.8.2
+  # assets/anim/manifest.yaml-ийг унших (цэвэр Dart, өмнө нь transitive байсан).
+  yaml: ^3.1.4
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +71,7 @@ flutter:
   assets:
     - assets/brand/
     - assets/login_hero/
+    - assets/anim/
 
   # Вэбийн web/public/fonts-оос (OFL) tool/build_fonts.py-аар TTF болгосон.
   # Ажиллах үед сүлжээнээс фонт ХЭЗЭЭ Ч татахгүй.

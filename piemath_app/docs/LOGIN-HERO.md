@@ -80,3 +80,6 @@ flutter test test/features/auth/login_hero_test.dart
 
 Код: `lib/features/auth/ui/hero/` (`login_hero.dart` дэлгэцийн хэсэг, `login_hero_media.dart` файл
 илрүүлэлт, алсын URL). Тест: `test/features/auth/login_hero_test.dart`.
+
+Анимацын слот: hero нь `AnimSlot.loginHero` (`assets/anim/manifest.yaml`, `assets/anim/README.md`).
+Видео тоглож байх үед `AnimLoopGate`-ийг эзэмшинэ (нэг удаад нэг давталттай анимац). Файлын нэр, үйлдэл өөрчлөгдөөгүй.

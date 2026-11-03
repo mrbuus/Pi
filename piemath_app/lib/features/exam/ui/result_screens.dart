@@ -11,8 +11,10 @@ import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
+import '../../../shared/anim/animation_slot.dart';
 import '../data/exam_models.dart';
 import '../data/exam_repository.dart';
+import '../domain/review_breakdown.dart';
 import 'widgets/review_parts.dart';
 
 final examResultProvider = FutureProvider.autoDispose.family<ExamResultPage, String>(
@@ -94,6 +96,10 @@ class _ResultBody extends ConsumerWidget {
         if (d.absent)
           const AppCard(child: Text('Та энэ шалгалтад ирээгүй гэж тэмдэглэгдсэн.'))
         else if (d.result != null) ...[
+          // Ганц «баярлах» мөч (UX-RESEARCH §4). Файл ирээгүй үед юу ч нэмэхгүй.
+          const Center(
+            child: AnimationSlot(slot: AnimSlot.examComplete, size: 120, fallback: SizedBox.shrink()),
+          ),
           ScoreSummary(
             score: d.result!,
             percent: d.percent,
@@ -211,9 +217,12 @@ class _WrongCard extends StatelessWidget {
 }
 
 class _TopicBar extends StatelessWidget {
-  const _TopicBar({required this.topic});
+  const _TopicBar({required this.topic, this.showCount = false});
 
   final TopicScore topic;
+
+  /// Хувийн оронд «2/3» (бодлогын тоо).
+  final bool showCount;
 
   @override
   Widget build(BuildContext context) {
@@ -221,7 +230,9 @@ class _TopicBar extends StatelessWidget {
     final p = topic.percent ?? (topic.max > 0 ? (topic.earned / topic.max * 100).round() : 0);
     return Semantics(
       container: true,
-      label: '${topic.name}: $p хувь',
+      label: showCount
+          ? '${topic.name}: ${formatScore(topic.max)} бодлогоос ${formatScore(topic.earned)} зөв'
+          : '${topic.name}: $p хувь',
       excludeSemantics: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,7 +240,10 @@ class _TopicBar extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text(topic.name, style: context.text.bodyMedium)),
-              Text('$p%', style: context.text.labelMedium),
+              Text(
+                showCount ? '${formatScore(topic.earned)}/${formatScore(topic.max)}' : '$p%',
+                style: context.text.labelMedium,
+              ),
             ],
           ),
           const SizedBox(height: AppSpace.xs),
@@ -334,6 +348,7 @@ class _PracticeReviewBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final files = ref.watch(fileImageProvider);
     final items = review.items;
+    final topics = topicBreakdown(items);
     return ListView.builder(
       padding: const EdgeInsets.all(AppSpace.gutter),
       itemCount: items.length + 2,
@@ -341,12 +356,31 @@ class _PracticeReviewBody extends ConsumerWidget {
         if (i == 0) {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpace.lg),
-            child: review.result == null
-                ? const SizedBox.shrink()
-                : ScoreSummary(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (review.result != null)
+                  ScoreSummary(
                     score: review.result!,
                     subtitle: review.leaveCount > 0 ? Text('Аппаас ${review.leaveCount} удаа гарсан') : null,
                   ),
+                // Сэдвээр задаргаа (2+ сэдэвтэй үед л — ганц сэдэвт нийт оноотой давхардана).
+                if (topics.length > 1) ...[
+                  const SectionHeader(title: 'Сэдвээр'),
+                  AppCard(
+                    child: Column(
+                      children: [
+                        for (final t in topics)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: AppSpace.xs),
+                            child: _TopicBar(topic: t, showCount: true),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
           );
         }
         if (i == items.length + 1) {

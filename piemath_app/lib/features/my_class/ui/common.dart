@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
+import '../../../shared/anim/animation_slot.dart';
 
 /// Алдааг хэрэглэгчид харуулах монгол бичвэр (техникийн мессеж хэзээ ч биш).
 String errorMessageOf(Object error) => error is ApiError ? error.message : AppStrings.genericError;
@@ -34,7 +35,13 @@ class AsyncBody<T> extends StatelessWidget {
     if (v.hasError) {
       final message = errorMessageOf(v.error!);
       if (compactError) return InlineError(message: message, onRetry: onRetry);
-      return ErrorState(message: message, onRetry: onRetry, icon: _isOffline(v.error!) ? AppIcons.offline : AppIcons.error);
+      final offline = _isOffline(v.error!);
+      return ErrorState(
+        message: message,
+        onRetry: onRetry,
+        icon: offline ? AppIcons.offline : AppIcons.error,
+        art: offline ? AnimArt.offline : null,
+      );
     }
     return loading ?? const LoadingState();
   }

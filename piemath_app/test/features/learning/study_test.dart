@@ -201,12 +201,13 @@ void main() {
     final http = FakeHttp()..json('GET', '/mistakes/today', [mistakeJson(), mistakeJson(id: 'm2')]);
     await pumpLearning(tester, http, location: '/app/study');
     expect(find.byType(StudyHubScreen), findsOneWidget);
-    expect(find.text('Өнөөдөр 2 бодлого давтахаар байна'), findsOneWidget);
-    expect(find.text('Томьёоны сан'), findsOneWidget);
-    for (final t in ['Зорилго', 'Бэлэн байдал', 'Идэвх']) {
+    // Хавтангууд төвийн доор (RESEARCH-2026-11 §2): гүйлгэж хүрнэ.
+    for (final t in ['Өнөөдөр 2 бодлого давтахаар байна', 'Томьёоны сан', 'Зорилго', 'Бэлэн байдал']) {
       await tester.scrollUntilVisible(find.text(t), 200, scrollable: find.byType(Scrollable).first);
       expect(find.text(t), findsOneWidget);
     }
+    await tester.scrollUntilVisible(find.text('Өдөр бүр бодсон бодлого'), 200, scrollable: find.byType(Scrollable).first);
+    expect(find.text('Өдөр бүр бодсон бодлого'), findsOneWidget);
     expect(find.textContaining('streak', findRichText: true), findsNothing);
   });
 }

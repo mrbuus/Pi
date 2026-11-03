@@ -7,6 +7,7 @@ import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/time/weekday.dart';
 import '../../../core/ui/ui.dart';
+import '../../../shared/anim/animation_slot.dart';
 import '../data/homework_models.dart';
 import '../domain/homework_logic.dart';
 import 'homework_badges.dart';
@@ -35,6 +36,7 @@ class ClassroomHomeworkView extends ConsumerWidget {
             icon: AppIcons.homework,
             title: 'Сүүлийн 14 хоногт хичээл алга',
             message: 'Хичээлд суусан өдөр бүр энд гарч, дэвтрийнхээ зургийг илгээнэ',
+            art: AnimArt.emptyHomework,
           );
         }
         return _DayList(days: list, today: today);
