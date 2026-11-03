@@ -32,15 +32,24 @@ void main() {
         final bg = bgName == 'surface' ? c.surface : c.bg;
         for (final e in text.entries) {
           test('${e.key} / $bgName', () {
-            expect(contrast(e.value, bg), greaterThanOrEqualTo(4.5),
-                reason: '${e.key} ${contrast(e.value, bg).toStringAsFixed(2)}');
+            expect(
+              contrast(e.value, bg),
+              greaterThanOrEqualTo(4.5),
+              reason: '${e.key} ${contrast(e.value, bg).toStringAsFixed(2)}',
+            );
           });
         }
       }
       test('onBrand / brand', () => expect(contrast(c.onBrand, c.brand), greaterThanOrEqualTo(4.5)));
-      test('brand / brandTint (сонгогдсон таб)', () => expect(contrast(c.brand, c.brandTint), greaterThanOrEqualTo(4.5)));
+      test(
+        'brand / brandTint (сонгогдсон таб)',
+        () => expect(contrast(c.brand, c.brandTint), greaterThanOrEqualTo(4.5)),
+      );
       test('onStatus / error', () => expect(contrast(c.onStatus, c.error), greaterThanOrEqualTo(4.5)));
-      test('surface / ink (snackbar, офлайн тууз)', () => expect(contrast(c.surface, c.ink), greaterThanOrEqualTo(4.5)));
+      test(
+        'surface / ink (snackbar, офлайн тууз)',
+        () => expect(contrast(c.surface, c.ink), greaterThanOrEqualTo(4.5)),
+      );
     });
   }
 

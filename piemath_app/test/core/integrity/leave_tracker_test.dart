@@ -51,12 +51,12 @@ void main() {
   late LeaveTracker tracker;
 
   LeaveTracker make({int initial = 0}) => LeaveTracker(
-        now: () => clock.now,
-        timer: clock.create,
-        initialLeaveCount: initial,
-        onLeave: leaves.add,
-        onReturn: returns.add,
-      );
+    now: () => clock.now,
+    timer: clock.create,
+    initialLeaveCount: initial,
+    onLeave: leaves.add,
+    onReturn: returns.add,
+  );
 
   void away() => tracker.handle(IntegrityEvent(IntegrityEventType.backgrounded, clock.now));
   void back() => tracker.handle(IntegrityEvent(IntegrityEventType.resumed, clock.now));
@@ -148,11 +148,7 @@ void main() {
       back();
       clock.advance(const Duration(seconds: 20));
     }
-    expect(leaves.map((o) => o.decision).toList(), [
-      LeaveDecision.warn,
-      LeaveDecision.warn,
-      LeaveDecision.autoSubmit,
-    ]);
+    expect(leaves.map((o) => o.decision).toList(), [LeaveDecision.warn, LeaveDecision.warn, LeaveDecision.autoSubmit]);
     expect(tracker.history, hasLength(3));
   });
 

@@ -90,12 +90,12 @@ void main() {
   test('signOut: цэвэрлэгээ ажиллана, нэг нь унасан ч гаралт дуусна', () async {
     http.json('GET', '/auth/me', fakeMe());
     var cleaned = 0;
-    final c = testContainer(http: http, extra: [
-      signOutCleanupsProvider.overrideWithValue([
-        () async => throw StateError('унав'),
-        () async => cleaned++,
-      ]),
-    ]);
+    final c = testContainer(
+      http: http,
+      extra: [
+        signOutCleanupsProvider.overrideWithValue([() async => throw StateError('унав'), () async => cleaned++]),
+      ],
+    );
     final n = c.read(sessionProvider.notifier);
     await n.signIn(token: 't', userId: 'u1', role: UserRole.student, remember: true);
     await n.signOut();

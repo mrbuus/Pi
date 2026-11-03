@@ -51,7 +51,7 @@ abstract final class AppPageTransitions {
   );
 }
 
-/// Shared-axis (хэвтээ): шинэ хуудас +30dp-ээс орж бүдгэрч гарна, хуучин нь −30dp руу бүдгэрнэ.
+/// Shared-axis (хэвтээ): шинэ хуудас +30dp-ээс орж бүдгэрч гарна, хуучин нь -30dp руу бүдгэрнэ.
 class SharedAxisPageTransitionsBuilder extends PageTransitionsBuilder {
   const SharedAxisPageTransitionsBuilder();
 

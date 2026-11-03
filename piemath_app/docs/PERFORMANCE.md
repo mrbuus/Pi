@@ -20,10 +20,17 @@
 - Android App Bundle + ABI split; `--split-debug-info --obfuscate`; ашиглагдаагүй дүрс tree-shake.
 - Шинэ сан нэмэхээс өмнө: хэмжээ, нативаар юу татдаг, хадгалагдаж байгаа эсэх. Firebase-ийн зөвхөн messaging.
 - Фонт: зөвхөн хэрэгтэй жин (Onest 400/600/700, Unbounded 600).
-- Зорилт: APK (arm64) 25 MB-аас бага.
+- Зорилт: APK (arm64) 25 MB-аас бага. Хэмжилт (2026-11-03, `--release --split-per-abi --obfuscate`): 27.9 → 26.6 MB.
+  Үлдсэн нь бараг бүгд native: libflutter.so 11.8 + libapp.so 11.6 MB (APK-д шахаагүй хадгалагддаг).
+- Lucide дүрс: `tool/icon_font/lucide_icons_flutter` — апп-д хэрэглэсэн глифээр л (148, 56KB) орлуулагч багц,
+  `LucideIcons`/`AppIcons` API ижил. Шинэ дүрс нэмбэл `python3 tool/icon_font/build_icon_font.py`
+  (эс тэгвэл `test/core/ui/icon_font_test.dart` унана).
 
 ## 3. Хэмжих
 
 - `flutter run --profile` + DevTools (Performance, Memory). Raster/UI thread 16ms-ээс бага.
 - Android эмулятор: 2 GB RAM, API 26–28 profile (cloud-д эмулятор болохгүй бол integration тестийг дараагийн орчинд — `PROGRESS.md`-д тэмдэглэ).
 - Гол дэлгэц бүрт benchmark integration тест (`integration_test/perf_*.dart`, `traceAction`) — хугацааг `docs/PERF-LOG.md`-д.
+  Утсан дээр: `flutter drive --profile --no-dds --driver=test_driver/perf_driver.dart --target=integration_test/perf_test.dart`
+  → `build/perf_*.timeline_summary.json` (гүйлгэх, бодолт нээх, таб солих).
+- Түвшин: `core/perf/perf_tier.dart` (`DevicePerf.tier`, `perfTierProvider`) — low бол гулсах шилжилт, шатлалгүй жагсаалт.

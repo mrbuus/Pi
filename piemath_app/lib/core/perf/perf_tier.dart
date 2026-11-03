@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Төхөөрөмжийн гүйцэтгэлийн түвшин (UX-RESEARCH §8).
 ///
-/// - [low]: Android 8–9 (API < 29: Impeller-ийн Vulkan замгүй, хуучин OpenGL), RAM ≤ 3GB эсвэл
+/// - [low]: Android 8–9 (API < 29: Impeller-ийн Vulkan замгүй, хуучин OpenGL), RAM <= 3GB эсвэл
 ///   `isLowRamDevice`. Шатлалгүй жагсаалт, зөвхөн гулсах хуудасны шилжилт (opacity давхаргагүй),
 ///   theme-ийн анимацгүй.
 /// - [high]: бусад бүх төхөөрөмж, iOS (зөвхөн Impeller).

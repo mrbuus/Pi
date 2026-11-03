@@ -23,7 +23,13 @@ class FakeCompressor implements JpegCompressor {
   Future<(int, int)?> dimensions(Uint8List bytes) async => jpegDimensions(bytes);
 
   @override
-  Future<Uint8List> compress(Uint8List bytes, {required int width, required int height, required int quality, required int rotation}) async {
+  Future<Uint8List> compress(
+    Uint8List bytes, {
+    required int width,
+    required int height,
+    required int quality,
+    required int rotation,
+  }) async {
     calls.add((width, height, quality, rotation));
     final sideways = rotation % 180 != 0;
     final (w, h) = sideways ? (height, width) : (width, height);
@@ -91,7 +97,12 @@ void main() {
         b.build(List.filled(7, PhotoPage(fakeJpeg(10, 10))), maxPages: 6),
         throwsA(isA<ApiError>().having((e) => e.message, 'm', contains('6 хүртэл'))),
       );
-      await expectLater(b.build([PhotoPage(Uint8List.fromList([1, 2, 3]))], maxPages: 6), throwsA(isA<ApiError>()));
+      await expectLater(
+        b.build([
+          PhotoPage(Uint8List.fromList([1, 2, 3])),
+        ], maxPages: 6),
+        throwsA(isA<ApiError>()),
+      );
     });
 
     test('PhotoPage.rotated 360 эргэнэ', () {
@@ -104,7 +115,8 @@ void main() {
   });
 
   testWidgets('AuthFileImage: 403 → ProblemFigure-ийн тайван «хаалттай» тайлбар', (tester) async {
-    final http = BytesFakeHttp()..json('GET', 'https://api.test/api/files/p.png', {'message': 'Энэ файлыг үзэх эрхгүй.'}, status: 403);
+    final http = BytesFakeHttp()
+      ..json('GET', 'https://api.test/api/files/p.png', {'message': 'Энэ файлыг үзэх эрхгүй.'}, status: 403);
     final client = ApiClient(baseUrl: 'https://api.test/api', tokens: TokenHolder()..set('t'), dio: http.dio());
     final repo = FileRepository(fetcher: FileFetcher(client), cache: FileBytesCache());
     final image = FileImageFactory(repo, client.fileUri).image('p.png');

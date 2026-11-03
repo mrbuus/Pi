@@ -173,8 +173,11 @@ void main() {
 
     test('parseNativeEvent', () {
       expect(MethodChannelExamGuard.parseNativeEvent({'type': 'screenshot'}), IntegrityEventType.screenshot);
-      expect(MethodChannelExamGuard.parseNativeEvent({'type': 'backgrounded'}), isNull,
-          reason: 'lifecycle-ийг натив талаас хүлээж авахгүй');
+      expect(
+        MethodChannelExamGuard.parseNativeEvent({'type': 'backgrounded'}),
+        isNull,
+        reason: 'lifecycle-ийг натив талаас хүлээж авахгүй',
+      );
       expect(MethodChannelExamGuard.parseNativeEvent(<String, Object>{}), isNull);
       expect(MethodChannelExamGuard.parseNativeEvent([1, 2]), isNull);
     });

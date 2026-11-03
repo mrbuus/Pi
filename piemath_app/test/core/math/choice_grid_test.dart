@@ -11,8 +11,8 @@ import '../../helpers/pump.dart';
 import 'math_test_helpers.dart';
 
 List<ChoiceItem> _items(List<String> texts) => [
-      for (var i = 0; i < texts.length; i++) ChoiceItem(label: String.fromCharCode(65 + i), text: texts[i]),
-    ];
+  for (var i = 0; i < texts.length; i++) ChoiceItem(label: String.fromCharCode(65 + i), text: texts[i]),
+];
 
 /// Нүдний semantics: «A хариулт» + агуулга (MathText) нэгдэнэ.
 Finder _cell(String label, {bool correct = false}) =>
@@ -68,10 +68,13 @@ void main() {
 
   group('ChoiceGrid widget', () {
     testWidgets('богино 5 хариу утсан дээр нэг мөрөнд, тэнцүү өргөнтэй', (tester) async {
-      await pumpThemed(tester, Padding(
-        padding: const EdgeInsets.all(16),
-        child: ChoiceGrid(choices: _items(['1', '2', '3', '4', '5']), variant: ChoiceGridVariant.compact),
-      ));
+      await pumpThemed(
+        tester,
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: ChoiceGrid(choices: _items(['1', '2', '3', '4', '5']), variant: ChoiceGridVariant.compact),
+        ),
+      );
       expect(_render(tester).columns, 5);
       final a = tester.getRect(_cell('A'));
       final e = tester.getRect(_cell('E'));
@@ -79,12 +82,21 @@ void main() {
     });
 
     testWidgets('урт хариу → 3 + 2', (tester) async {
-      await pumpThemed(tester, Padding(
-        padding: const EdgeInsets.all(16),
-        child: ChoiceGrid(
-          choices: _items([r'$\frac{3}{10}$', r'$\frac{1}{6}$', r'$\frac{2}{3}$', r'$\frac{1}{3}$', r'$\frac{4}{9}$']),
+      await pumpThemed(
+        tester,
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: ChoiceGrid(
+            choices: _items([
+              r'$\frac{3}{10}$',
+              r'$\frac{1}{6}$',
+              r'$\frac{2}{3}$',
+              r'$\frac{1}{3}$',
+              r'$\frac{4}{9}$',
+            ]),
+          ),
         ),
-      ));
+      );
       expect(_render(tester).columns, 3);
       final a = tester.getRect(_cell('A'));
       final d = tester.getRect(_cell('D'));
@@ -95,9 +107,10 @@ void main() {
     });
 
     testWidgets('маш урт хариу → мөр бүрт нэг', (tester) async {
-      await pumpThemed(tester, ChoiceGrid(
-        choices: _items(List.filled(5, 'Энэ бол нэлээд урт хариулт, нэг мөрөнд хоёр багтахгүй')),
-      ));
+      await pumpThemed(
+        tester,
+        ChoiceGrid(choices: _items(List.filled(5, 'Энэ бол нэлээд урт хариулт, нэг мөрөнд хоёр багтахгүй'))),
+      );
       expect(_render(tester).columns, 1);
     });
 
@@ -112,13 +125,16 @@ void main() {
 
     testWidgets('сонгоход onSelect, сонгосон төлөв semantics-д', (tester) async {
       int? picked;
-      await pumpThemed(tester, StatefulBuilder(
-        builder: (context, setState) => ChoiceGrid(
-          choices: _items(['1', '2', '3', '4', '5']),
-          selectedIndex: picked,
-          onSelect: (i) => setState(() => picked = i),
+      await pumpThemed(
+        tester,
+        StatefulBuilder(
+          builder: (context, setState) => ChoiceGrid(
+            choices: _items(['1', '2', '3', '4', '5']),
+            selectedIndex: picked,
+            onSelect: (i) => setState(() => picked = i),
+          ),
         ),
-      ));
+      );
       await tester.tap(_cell('C'));
       await tester.pump();
       expect(picked, 2);
@@ -145,20 +161,28 @@ void main() {
     });
 
     testWidgets('багшид зөв хариу тэмдэглэгдэнэ (semantics «зөв»)', (tester) async {
-      await pumpThemed(tester, const ChoiceGrid(
-        choices: [
-          ChoiceItem(label: 'A', text: '1'),
-          ChoiceItem(label: 'B', text: '2', isCorrect: true),
-        ],
-        showCorrect: true,
-        variant: ChoiceGridVariant.compact,
-      ));
+      await pumpThemed(
+        tester,
+        const ChoiceGrid(
+          choices: [
+            ChoiceItem(label: 'A', text: '1'),
+            ChoiceItem(label: 'B', text: '2', isCorrect: true),
+          ],
+          showCorrect: true,
+          variant: ChoiceGridVariant.compact,
+        ),
+      );
       expect(_cell('B', correct: true), findsOneWidget);
       expect(_cell('A'), findsOneWidget);
     });
 
     testWidgets('сурагчид зөв хариу харагдахгүй (showCorrect=false)', (tester) async {
-      await pumpThemed(tester, const ChoiceGrid(choices: [ChoiceItem(label: 'A', text: '1', isCorrect: true)]));
+      await pumpThemed(
+        tester,
+        const ChoiceGrid(
+          choices: [ChoiceItem(label: 'A', text: '1', isCorrect: true)],
+        ),
+      );
       expect(_cell('A', correct: true), findsNothing);
     });
   });

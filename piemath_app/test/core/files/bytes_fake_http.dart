@@ -20,19 +20,32 @@ class BytesFakeHttp implements HttpClientAdapter {
   void json(String method, String url, Object? body, {int status = 200}) =>
       on(method, url, (_, _) => BytesResponse.json(body, status: status));
 
-  void redirect(String url, String location, {int status = 302}) =>
-      on('GET', url, (_, _) => BytesResponse(Uint8List(0), status: status, headers: {'location': [location]}));
+  void redirect(String url, String location, {int status = 302}) => on(
+    'GET',
+    url,
+    (_, _) => BytesResponse(
+      Uint8List(0),
+      status: status,
+      headers: {
+        'location': [location],
+      },
+    ),
+  );
 
-  void network(String method, String url) =>
-      on(method, url, (_, _) => BytesResponse.network());
+  void network(String method, String url) => on(method, url, (_, _) => BytesResponse.network());
 
-  List<RequestOptions> to(String method, String url) =>
-      requests.where((r) => r.method == method.toUpperCase() && r.uri.replace(query: '').toString().replaceAll('?', '') == url).toList();
+  List<RequestOptions> to(String method, String url) => requests
+      .where((r) => r.method == method.toUpperCase() && r.uri.replace(query: '').toString().replaceAll('?', '') == url)
+      .toList();
 
   Dio dio() => Dio()..httpClientAdapter = this;
 
   @override
-  Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
     requests.add(options);
     final chunks = <int>[];
     if (requestStream != null) {
@@ -45,11 +58,17 @@ class BytesFakeHttp implements HttpClientAdapter {
     final url = options.uri.replace(query: '').toString().replaceAll('?', '');
     final handlers = _routes['${options.method} $url'];
     if (handlers == null || handlers.isEmpty) {
-      return ResponseBody.fromString(jsonEncode({'statusCode': 404, 'message': 'Not Found'}), 404, headers: {
-        Headers.contentTypeHeader: [Headers.jsonContentType],
-      });
+      return ResponseBody.fromString(
+        jsonEncode({'statusCode': 404, 'message': 'Not Found'}),
+        404,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
     }
-    final n = requests.where((r) => r.method == options.method && r.uri.replace(query: '').toString().replaceAll('?', '') == url).length;
+    final n = requests
+        .where((r) => r.method == options.method && r.uri.replace(query: '').toString().replaceAll('?', '') == url)
+        .length;
     final res = handlers[(n - 1).clamp(0, handlers.length - 1)](options, body);
     if (res.status == -1) throw DioException.connectionError(requestOptions: options, reason: 'fake network');
     return ResponseBody.fromBytes(res.body, res.status, headers: res.headers);
@@ -63,15 +82,12 @@ class BytesResponse {
   const BytesResponse(this.body, {this.status = 200, this.headers = const {}});
 
   BytesResponse.json(Object? json, {this.status = 200})
-      : body = Uint8List.fromList(utf8.encode(jsonEncode(json))),
-        headers = {
-          Headers.contentTypeHeader: [Headers.jsonContentType],
-        };
+    : body = Uint8List.fromList(utf8.encode(jsonEncode(json))),
+      headers = {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      };
 
-  BytesResponse.network()
-      : body = Uint8List(0),
-        status = -1,
-        headers = const {};
+  BytesResponse.network() : body = Uint8List(0), status = -1, headers = const {};
 
   final Uint8List body;
   final int status;
