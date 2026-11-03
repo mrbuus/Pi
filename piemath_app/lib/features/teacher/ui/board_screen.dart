@@ -8,14 +8,18 @@ import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/marks/marks.dart';
 import '../application/board_controller.dart';
+import '../application/staff_providers.dart';
 import '../application/teacher_providers.dart';
+import '../data/staff_models.dart';
 import '../data/teacher_models.dart';
 import '../domain/board_logic.dart';
 import 'board_note_sheet.dart';
+import 'board_other_info.dart';
 import 'criteria_sheet.dart';
 import 'day_pdf_card.dart';
 import 'lesson_extras.dart';
 import 'presence_beat.dart';
+import 'staff_widgets.dart';
 import 'teacher_widgets.dart';
 
 /// Ирц ба даалгаврын самбар (`/app/teacher/board/:classId?date=`). Товшилт бүр шууд хадгалагдана,
@@ -114,6 +118,11 @@ class _BoardBody extends ConsumerWidget {
       for (final st in p.students) (id: st.id, firstName: st.firstName, lastName: st.lastName, role: null),
     ]);
     final c = context.colors;
+    final day = (classId: args.classId, date: args.date);
+    // Нөхөх хичээлийн төлөв зөвхөн өнгөрсөн өдөр; онлайн гэрийн даалгаврын оноо зөвхөн танхимын анги (вэбтэй ижил).
+    final past = args.date.compareTo(ref.watch(teacherTodayProvider).dateKey) < 0;
+    final makeup = past ? ref.watch(dayMakeupProvider(day)).value : null;
+    final online = p.isOnline ? null : ref.watch(onlineMarksProvider(day)).value;
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.sm, AppSpace.gutter, AppSpace.xxl),
@@ -158,6 +167,9 @@ class _BoardBody extends ConsumerWidget {
                     homework: state.homework,
                     risk: state.risk[st.id] ?? const [],
                     sent: state.sent.contains(st.id),
+                    makeup: makeup?[st.id],
+                    online: online?.students[st.id],
+                    onlineTests: online?.hasTests ?? false,
                   ),
                 ],
               ],
@@ -185,6 +197,8 @@ class _BoardBody extends ConsumerWidget {
           DismissalCard(classId: args.classId, date: args.date),
           const SizedBox(height: AppSpace.sm),
           DayPdfCard(classId: args.classId, date: args.date),
+          const SizedBox(height: AppSpace.sm),
+          BoardOtherInfo(classId: args.classId, date: args.date),
           if (_recorders(state).isNotEmpty) ...[
             const SizedBox(height: AppSpace.md),
             Text('Хэн тэмдэглэсэн', style: context.text.labelMedium?.copyWith(color: c.inkDim)),
@@ -261,6 +275,9 @@ class _StudentRow extends ConsumerWidget {
     required this.homework,
     required this.risk,
     required this.sent,
+    this.makeup,
+    this.online,
+    this.onlineTests = false,
   });
 
   final BoardArgs args;
@@ -271,11 +288,20 @@ class _StudentRow extends ConsumerWidget {
   final List<RiskFlag> risk;
   final bool sent;
 
+  /// Нөхөх хичээлийн төлөв (тасалсан, чөлөөтэй, хоцорсон сурагчид; өнгөрсөн өдөр).
+  final MakeupStatus? makeup;
+
+  /// Өмнөх хичээлийн онлайн гэрийн даалгаврын оноо.
+  final OnlineCell? online;
+  final bool onlineTests;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ctl = ref.read(boardControllerProvider(args).notifier);
     final c = context.colors;
     final detail = needsDetail(rec, homework: homework);
+    final showMakeup = makeup != null &&
+        (rec.att == AttendanceStatus.absent || rec.att == AttendanceStatus.excused || rec.att == AttendanceStatus.late);
     final sub = <Object?>[
       if (rec.att == AttendanceStatus.late && rec.lateRange != null) 'Хоцорсон ${lateRangeShort(rec.lateRange!)}',
       if (rec.attNote.trim().isNotEmpty) rec.attNote.trim(),
@@ -325,6 +351,27 @@ class _StudentRow extends ConsumerWidget {
             Meta(
               items: sub,
               style: context.text.bodySmall?.copyWith(color: c.inkDim),
+            ),
+            const SizedBox(height: AppSpace.xs),
+          ],
+          if (showMakeup || homework && (online != null || onlineTests)) ...[
+            Wrap(
+              spacing: AppSpace.sm,
+              runSpacing: AppSpace.xs,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (showMakeup) makeupPill(context, makeup!),
+                if (homework && online != null)
+                  TextButton.icon(
+                    key: ValueKey('online-$studentId'),
+                    style: TextButton.styleFrom(minimumSize: const Size(teacherTap, teacherTap)),
+                    onPressed: () => context.push('/app/teacher/tests/${Uri.encodeComponent(online!.testId)}/results'),
+                    icon: const Icon(AppIcons.laptop, size: 16),
+                    label: Text('Онлайн даалгавар ${online!.text}'),
+                  )
+                else if (homework && onlineTests)
+                  const Pill(icon: AppIcons.laptop, label: 'Онлайнаар бодоогүй'),
+              ],
             ),
             const SizedBox(height: AppSpace.xs),
           ],

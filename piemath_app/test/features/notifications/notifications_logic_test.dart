@@ -10,6 +10,11 @@ void main() {
   group('мэдэгдлийн холбоос → апп-ын зам', () {
     String? t(String? l) => notificationTarget(l, webHost: 'pimath.mn');
 
+    test('багшийн самбарын ?class=&date= параметр хадгалагдана (апп-ын зам тэр ангийг нээнэ)', () {
+      expect(t('/app/teacher?class=c1&date=2026-11-02'), '/app/teacher?class=c1&date=2026-11-02');
+      expect(t('https://pimath.mn/app/teacher?class=c1&date=2026-11-02'), '/app/teacher?class=c1&date=2026-11-02');
+    });
+
     test('дотоод /app/... зам', () {
       expect(t('/app/homework'), '/app/homework');
       expect(t('/app/tests/abc?x=1'), '/app/tests/abc?x=1');

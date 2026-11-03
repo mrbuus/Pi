@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/shell/app_shell.dart';
 import '../../../core/auth/session.dart';
+import '../../../core/files/files.dart';
+import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
 import '../data/books_models.dart';
 import '../data/books_repository.dart';
@@ -136,7 +138,9 @@ class _ChapterCardState extends ConsumerState<ChapterCard> {
     final labels = ch.variantLabels;
     final selected = labels.isEmpty ? null : (labels.contains(_variant) ? _variant : labels.first);
     final rows = selected == null ? ch.tests : ch.tests.where((t) => t.variantLabel == selected).toList();
-    final signedIn = ref.watch(sessionProvider) is SignedIn;
+    final session = ref.watch(sessionProvider);
+    final signedIn = session is SignedIn;
+    final isStaff = session is SignedIn && session.role.isStaff;
     final c = context.colors;
 
     return AppCard(
@@ -172,6 +176,13 @@ class _ChapterCardState extends ConsumerState<ChapterCard> {
               test: t,
               showTitle: labels.isEmpty && ch.tests.length > 1,
               signedIn: signedIn,
+            ),
+          ],
+          if (isStaff) ...[
+            const SizedBox(height: AppSpace.md),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: _SourcePdfButton(chapter: ch),
             ),
           ],
           if (widget.first && ch.anyFree) ...[
@@ -247,4 +258,53 @@ class _TestRow extends StatelessWidget {
       ],
     );
   }
+}
+
+
+/// Төвийн багшийн «Эх PDF» (`GET /tests/source-pdf?chapterId=`): бүлгийн A ба B хамт, гараар шивсэн эх.
+/// Файл олдохгүй бол тайван тайлбар; нээх нь `core/files` (токен URL-д орохгүй).
+class _SourcePdfButton extends ConsumerStatefulWidget {
+  const _SourcePdfButton({required this.chapter});
+
+  final BookChapter chapter;
+
+  @override
+  ConsumerState<_SourcePdfButton> createState() => _SourcePdfButtonState();
+}
+
+class _SourcePdfButtonState extends ConsumerState<_SourcePdfButton> {
+  bool _busy = false;
+
+  Future<void> _open() async {
+    setState(() => _busy = true);
+    String? message;
+    String? key;
+    try {
+      key = await chapterSourcePdfKey(ref, widget.chapter.id);
+      if (key == null) message = 'Энэ бүлгийн эх PDF одоогоор алга';
+    } catch (e) {
+      message = e is ApiError && e.kind != ApiErrorKind.unknown && e.message.trim().isNotEmpty
+          ? e.message
+          : 'Эх PDF нээгдсэнгүй, дахин оролдоно уу';
+    }
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (key != null) {
+      await FileGalleryScreen.open(context, fileKeys: [key], title: widget.chapter.label, subtitle: 'Эх PDF');
+    } else if (message != null) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
+        icon: _busy
+            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+            : const Icon(BooksIcons.sourcePdf, size: 18),
+        label: const Text('Эх PDF'),
+        onPressed: _busy ? null : _open,
+      );
 }

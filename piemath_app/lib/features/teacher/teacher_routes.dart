@@ -1,9 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/feature_routes.dart';
+import 'ui/announcements_screen.dart';
 import 'ui/assignments_screen.dart';
 import 'ui/board_screen.dart';
 import 'ui/classes_screen.dart';
+import 'ui/leads_screen.dart';
+import 'ui/pending_actions_screen.dart';
 import 'ui/student_screen.dart';
 import 'ui/teacher_home_screen.dart';
 import 'ui/teacher_hours_screen.dart';
@@ -11,7 +15,11 @@ import 'ui/test_run_screen.dart';
 
 /// `teacher` feature-ийн маршрутууд. Энэ файлыг ЗӨВХӨН энэ feature-ийн эзэн засна.
 ///
-/// - `/app/teacher` — сонгосон өдрийн хичээлтэй ангиуд.
+/// - `/app/teacher` — сонгосон өдрийн хичээлтэй ангиуд. Вэбийн `?class=<id>&date=YYYY-MM-DD` холбоос (мэдэгдлээс)
+///   `class` байвал тэр ангийн самбар руу, зөвхөн `date` байвал тэр өдрийн жагсаалт руу.
+/// - `/app/teacher/pending` — хүлээгдэж буй (Багш+, Админ): эцэг эхийн холболт, шинэ сурагч, төлбөр.
+/// - `/app/teacher/announcements` — зар тавих.
+/// - `/app/admin/leads` — элсэлтийн хүсэлтийн төлөв (Админ, Багш+).
 /// - `/app/teacher/board/:classId?date=YYYY-MM-DD` — ирц, даалгаврын самбар (огноогүй бол өнөөдөр).
 /// - `/app/teacher-hours` — цагийн бүртгэл.
 /// - `/app/classes`, `/app/classes/:id` — ангиуд, ангийн самбар.
@@ -20,7 +28,14 @@ import 'ui/test_run_screen.dart';
 /// - `/app/students/:id` — сурагчийн хуудас (`extra` = харуулах нэр).
 final teacherRoutes = FeatureRoutes(
   shell: [
-    GoRoute(path: '/app/teacher', builder: (_, _) => const TeacherHomeScreen()),
+    GoRoute(
+      path: '/app/teacher',
+      redirect: (_, s) => teacherLinkRedirect(s.uri),
+      builder: (_, s) => TeacherHomeScreen(date: _dateParam(s.uri.queryParameters['date'])),
+    ),
+    GoRoute(path: '/app/teacher/pending', builder: (_, _) => const PendingActionsScreen()),
+    GoRoute(path: '/app/teacher/announcements', builder: (_, _) => const AnnouncementsScreen()),
+    GoRoute(path: '/app/admin/leads', builder: (_, _) => const LeadsScreen()),
     GoRoute(
       path: '/app/teacher/board/:classId',
       builder: (_, s) =>
@@ -62,3 +77,14 @@ final _dateKey = RegExp(r'^\d{4}-\d{2}-\d{2}$');
 
 /// Буруу/хоосон огноо → null (самбар өнөөдрийг авна).
 String? _dateParam(String? v) => v != null && _dateKey.hasMatch(v) ? v : null;
+
+final _classKey = RegExp(r'^[A-Za-z0-9_-]{1,40}$');
+
+/// Вэбийн `/app/teacher?class=&date=` → апп-ын самбарын зам. Анги байхгүй/буруу бол null (жагсаалт нээгдэнэ).
+@visibleForTesting
+String? teacherLinkRedirect(Uri uri) {
+  final cls = uri.queryParameters['class'];
+  if (cls == null || !_classKey.hasMatch(cls)) return null;
+  final date = _dateParam(uri.queryParameters['date']);
+  return '/app/teacher/board/${Uri.encodeComponent(cls)}${date == null ? '' : '?date=$date'}';
+}

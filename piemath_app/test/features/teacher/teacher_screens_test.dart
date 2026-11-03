@@ -22,13 +22,6 @@ Map<String, Object?> _dayClass(String id, String name, {bool mine = false, Strin
   ],
 };
 
-Map<String, Object?> _staff(String id, String first, String last, String role) => {
-  'id': id,
-  'firstName': first,
-  'lastName': last,
-  'role': role,
-};
-
 void main() {
   group('Багшийн самбар', () {
     testWidgets('өнөөдрийн ангиуд → самбар руу', (tester) async {
@@ -66,53 +59,133 @@ void main() {
     });
   });
 
-  group('Ангиуд', () {
-    final classes = [
-      {
-        'id': 'c1',
-        'name': '12Б',
-        'type': 'IN_PERSON',
-        'grade': 12,
-        'teacher': _staff('u1', 'Нараа', 'Багш', 'TEACHER'),
-        'assistantTeacher': null,
-        '_count': {'enrollments': 24},
-      },
-      {
-        'id': 'c2',
-        'name': '11А',
-        'type': 'ONLINE',
-        'grade': 11,
-        'teacher': _staff('u9', 'Болор', 'Цэрэн', 'TEACHER_PLUS'),
-        'assistantTeacher': null,
-        '_count': {'enrollments': 18},
-      },
-    ];
+  group('Ангиуд (class-dashboard)', () {
+    final mine = {'id': 'u1', 'name': 'Багш Нараа'};
+    final other = {'id': 'u9', 'name': 'Цэрэн Болор'};
 
-    testWidgets('«Миний анги» шүүлт, Багш+ нэрийн ард «+»', (tester) async {
-      final http = FakeHttp()..json('GET', '/classrooms', classes);
+    testWidgets('вэбтэй ижил /class-dashboard: тоо, анхаарах, «Миний анги» шүүлт', (tester) async {
+      final http = FakeHttp()
+        ..json(
+          'GET',
+          '/class-dashboard',
+          dashList([
+            dashClass('c1', '12Б', teacher: mine, risk: 3, attendance: 91),
+            dashClass('c2', '11А', teacher: other, type: 'ONLINE', attendance: 70),
+          ]),
+        );
       await pumpTeacher(tester, const ClassesScreen(), http: http);
+      expect(http.requests.first.path, '/class-dashboard');
       expect(find.text('12Б'), findsOneWidget);
       expect(find.text('11А'), findsNothing);
+      expect(find.text('91%'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.textContaining('₮'), findsNothing);
       await tester.tap(find.text('Бүгд (2)'));
       await settle(tester);
       expect(find.text('11А'), findsOneWidget);
-      expect(find.textContaining('Ц. Болор+', findRichText: true), findsOneWidget);
+      expect(find.text('Цэрэн Болор'), findsOneWidget);
     });
 
-    testWidgets('ангийн самбар: сурагч руу, өнөөдрийн ирц руу', (tester) async {
+    testWidgets('хайлт, ирц сулаар эрэмбэ', (tester) async {
       final http = FakeHttp()
-        ..json('GET', '/classrooms/c1', {
-          'classroom': classes.first,
-          'students': [
-            {'id': 's1', 'firstName': 'Тэмүүжин', 'lastName': 'Бат', 'studentCode': 'B27120001'},
-          ],
-          'permissions': {'canManageStudents': false},
-        });
+        ..json(
+          'GET',
+          '/class-dashboard',
+          dashList([
+            dashClass('c1', '12Б', teacher: mine, attendance: 91),
+            dashClass('c2', '11А', teacher: mine, attendance: 60),
+          ]),
+        );
+      await pumpTeacher(tester, const ClassesScreen(), http: http);
+      await tester.tap(find.text('Ирц сул'));
+      await settle(tester);
+      final first = tester.getTopLeft(find.text('11А')).dy;
+      final second = tester.getTopLeft(find.text('12Б')).dy;
+      expect(first < second, isTrue);
+      await tester.enterText(find.byType(TextField), '12');
+      await settle(tester);
+      expect(find.text('11А'), findsNothing);
+    });
+
+    testWidgets('төлбөр: эрхтэй бол зөвхөн төлсөн тоо (мөнгөгүй), эрхгүй бол харагдахгүй', (tester) async {
+      final http = FakeHttp()
+        ..json(
+          'GET',
+          '/class-dashboard',
+          dashList([
+            dashClass('c1', '12Б', teacher: mine, payment: {'PAID': 12, 'PARTIAL': 3, 'PENDING': 4, 'NONE': 1}),
+            dashClass('c2', '11А', teacher: mine),
+          ]),
+        );
+      await pumpTeacher(tester, const ClassesScreen(), http: http, session: teacherSession(role: 'TEACHER_PLUS'));
+      expect(find.text('12/20'), findsOneWidget);
+      expect(find.text('Энэ сар төлсөн'), findsOneWidget);
+    });
+
+    testWidgets('алдаа → тайван мессеж, дахин оролдох', (tester) async {
+      final http = FakeHttp()..error('GET', '/class-dashboard', 403, 'Энэ хэсэгт таны эрх хүрэхгүй');
+      await pumpTeacher(tester, const ClassesScreen(), http: http);
+      await settle(tester, frames: 20);
+      expect(find.text('Энэ хэсэгт таны эрх хүрэхгүй'), findsOneWidget);
+      expect(find.text(AppStrings.retry), findsOneWidget);
+    });
+
+    testWidgets('ангийн самбар: тойм, анхаарах сурагч (шалтгаантай), өнөөдрийн ирц руу', (tester) async {
+      final http = FakeHttp()..json('GET', '/class-dashboard/classes/c1', dashDetail());
       await pumpTeacher(tester, const ClassDetailScreen(classId: 'c1'), http: http);
+      expect(find.text('12Б'), findsOneWidget);
+      expect(find.text('82%'), findsOneWidget);
+      expect(find.text('Анхаарах сурагчид (1)'), findsOneWidget);
       expect(find.text('Б. Тэмүүжин'), findsOneWidget);
+      expect(find.text('Ирц сул'), findsOneWidget);
+      expect(find.text('Дүн сул'), findsOneWidget);
+      expect(find.text('Энэ сарын төлбөр'), findsNothing);
       await tester.tap(find.text('Өнөөдрийн ирц, даалгавар'));
       await settle(tester);
       expect(find.text('ROUTE:/app/teacher/board/c1?date=$testDate'), findsOneWidget);
+    });
+
+    testWidgets('сурагчид таб: ирц/даалгавар/дүн, төлбөрийн төлөв (мөнгөгүй)', (tester) async {
+      final http = FakeHttp()
+        ..json(
+          'GET',
+          '/class-dashboard/classes/c1',
+          dashDetail(
+            payment: {'PAID': 1, 'PARTIAL': 1, 'PENDING': 0, 'NONE': 0},
+            students: [
+              dashStudent('s1', 'Тэмүүжин', 'Бат', payment: {'state': 'PARTIAL', 'tuitionAmount': 350000, 'paidThisMonth': 100000}),
+              dashStudent('s2', 'Анужин', 'Дорж', payment: {'state': 'PAID', 'tuitionAmount': 350000, 'paidThisMonth': 350000}),
+            ],
+          ),
+        );
+      await pumpTeacher(tester, const ClassDetailScreen(classId: 'c1'), http: http, session: teacherSession(role: 'TEACHER_PLUS'));
+      expect(find.text('Энэ сарын төлбөр'), findsOneWidget);
+      await tester.tap(find.text('Сурагчид'));
+      await settle(tester, frames: 20);
+      expect(find.textContaining('Ирц 82%'), findsWidgets);
+      expect(find.text('Дутуу'), findsWidgets);
+      expect(find.textContaining('350000'), findsNothing);
+      expect(find.textContaining('₮'), findsNothing);
+    });
+
+    testWidgets('нөхөх таб: нөхөөгүй эхэнд, нөхсөнийг сонговол', (tester) async {
+      final http = FakeHttp()
+        ..json('GET', '/class-dashboard/classes/c1', dashDetail())
+        ..json('GET', '/makeup/classrooms/c1', [
+          {'studentId': 's1', 'studentName': 'Бат Тэмүүжин', 'date': '2026-10-28', 'reason': 'ABSENT', 'status': 'PENDING', 'tests': <Object?>[]},
+          {'studentId': 's2', 'studentName': 'Дорж Анужин', 'date': '2026-10-26', 'reason': 'LATE', 'status': 'DONE', 'tests': <Object?>[]},
+        ]);
+      await pumpTeacher(tester, const ClassDetailScreen(classId: 'c1'), http: http);
+      await tester.tap(find.text('Нөхөх'));
+      await settle(tester, frames: 20);
+      final q = http.requests.last.queryParameters;
+      expect(q['to'], testDate);
+      expect(q['from'], '2026-09-03');
+      expect(find.text('Бат Тэмүүжин'), findsOneWidget);
+      expect(find.text('Дорж Анужин'), findsNothing);
+      await tester.tap(find.text('Нөхсөн ч (1)'));
+      await settle(tester);
+      expect(find.text('Дорж Анужин'), findsOneWidget);
     });
   });
 

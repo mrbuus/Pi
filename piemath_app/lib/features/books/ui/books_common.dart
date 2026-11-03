@@ -18,6 +18,7 @@ abstract final class BooksIcons {
   static const IconData open = LucideIcons.arrowRight;
   static const IconData mock = LucideIcons.clipboardList;
   static const IconData placement = LucideIcons.target;
+  static const IconData sourcePdf = LucideIcons.fileDown;
 }
 
 /// Номын нэр — `$\pi$ тест` гэх мэт LaTeX агуулж болох тул MathText-ээр.

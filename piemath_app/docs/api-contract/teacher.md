@@ -261,6 +261,33 @@ HTTP 200: `{ "editors": { "<key>": [{ "name": "Б. Болд", "since": "<ISO>" }
   - Файл: `GET /files/:key` (`core/files`, Authorization толгойтой; токен URL-д орохгүй); сервер тестийн нэрээр
     `Content-Disposition: attachment` өгнө. Апп `FileGalleryScreen`-ээр хуудас хуудсаар харуулна.
 
+## 11. Вэбтэй тулгасан нэмэлт (2026-11-03, `app/pf-teacher`)
+
+Апп вэбийн дуудлагатай ЯГ ижил endpoint ашиглана; тоо, төлөв, анхаарах сурагчийг сервер тооцно.
+
+- **Ангиуд** (`/app/classes`): `GET /class-dashboard` (`DashList`) — анги бүр `students, attendanceRate, homeworkRate, examAvg,
+  examCount, riskCount, lastLesson, classTeacher{id,name}, teachers[], payment|null`. `payment` нь `finance.manage`-гүй бол null;
+  байвал ЗӨВХӨН төлөвийн тоо (`PAID/PARTIAL/PENDING/NONE`), мөнгө харуулахгүй. «Миний анги» = `classTeacher.id` эсвэл
+  `assistantTeacher.id` == би. Хайлт: анги, багшийн нэр. Эрэмбэ: нэр, `riskCount` буурах, `attendanceRate` өсөх.
+- **Ангийн самбар** (`/app/classes/:id`): `GET /class-dashboard/classes/:id` — `summary{students, attendanceRate, homeworkRate,
+  examAvg, exams, riskCount, improvedCount, makeupStudents}`, `students[]{attendance.rate, homework.rate, exam.avg, makeup,
+  risk[] (LOW_ATTENDANCE|LOW_HOMEWORK|LOW_SCORE|FALLING|MISSED_EXAMS), flags[]{kind (GUESSES|COPIES|ATTENTION|IMPROVED)},
+  payment{state}|null}`. `tuitionAmount`, `paidThisMonth` апп уншихгүй. «Нөхөх» таб: `GET /makeup/classrooms/:id?from=&to=` (сүүлийн 60 хоног).
+- **Самбарын нэмэлт**: `GET /makeup/classrooms/:id?date=` (өнгөрсөн өдөр, тасалсан/чөлөөтэй/хоцорсон сурагчид),
+  `GET /classrooms/:id/homework-marks/online?date=` (танхимын анги; `students[id]{score,max,testId}`), `GET /classrooms/:id/attention?date=`
+  (`rows[]{student{name}, flags[]{severity danger|warning, title, detail}}`, `totals`), `GET /classrooms/:id/daily-summary?date=`
+  (`stats.studentsMarked/studentsTotal/totalAttempts`; өнөөдөр 23:35-аас өмнө асуухгүй, 400 = хараахан бодогдоогүй),
+  Багш+/Админ: `GET /parent/links/pending`, `POST /parent/links/:id/verify|reject`, `GET /classrooms/attention-students`.
+- **Цагийн бүртгэл**: Админ → `GET /teacher-hours`; Багш+ → `GET /staff-capabilities/me`, `administrator` эсвэл scope-гүй `time.review`
+  байвал `/teacher-hours`, эс бөгөөс `/teacher-hours/me`; Багш → `/teacher-hours/me`. Цагийн хөлс, CSV апп-д байхгүй.
+- **Өдөр тутмын хөнгөн үйлдэл** (Админ, Багш+): `GET /users/students/pending-approval` + `POST /users/students/:id/approve`;
+  `GET /payments?status=PENDING` + `POST /payments/:id/confirm` бие `{}` (эрх олгохгүй; эрх олгох нь вэбээр; `finance.manage` шаардана);
+  `GET /leads` + `PATCH /leads/:id/status` `{status: NEW|CONTACTED|ENROLLED|LOST}`.
+- **Зар**: `POST /announcements` `{title, body, audience: ALL_CLASSROOM|ALL_STUDENTS|ALL_ONLINE|SELECTED_CLASSROOMS, pinned, classroomIds?}`
+  (Админ, Багш+, Багш); `GET /announcements/manage` унших. Устгах, засах апп-д байхгүй (вэбээр).
+- **Мэдэгдлийн холбоос**: `/app/teacher?class=<id>&date=YYYY-MM-DD` → апп `/app/teacher/board/<id>?date=` (`class` байхгүй бол `date`-ээр өдрийн жагсаалт).
+- **Номын эх PDF**: `GET /tests/source-pdf?chapterId=` `{key|null}` — номын бүлгийн карт бүр дээр (Багш, Багш+, Админ); файл `core/files` (токен URL-д байхгүй).
+
 ## ТОДРУУЛАХ
 
 1. `day-summary`, `studentCard`, `class-dashboard detail/month`, `daily-summary`, `attention` хариуны бүтэн хэлбэр — M8 эхлэхэд

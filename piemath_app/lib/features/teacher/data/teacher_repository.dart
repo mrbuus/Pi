@@ -226,8 +226,12 @@ class TeacherRepository {
 
   // ───────── Цаг ─────────
 
-  Future<TeacherHours> teacherHours(String month) =>
-      _api.get('/teacher-hours/me', query: {'month': month}, parse: (j) => TeacherHours.fromJson(_map(j)));
+  /// [all] — бүх багшийн цаг (`/teacher-hours`: Админ, эсвэл `time.review` эрхтэй Багш+); эс бөгөөс өөрийнх.
+  Future<TeacherHours> teacherHours(String month, {bool all = false}) => _api.get(
+    all ? '/teacher-hours' : '/teacher-hours/me',
+    query: {'month': month},
+    parse: (j) => TeacherHours.fromJson(_map(j)),
+  );
 
   // ───────── Онлайн даалгавар ─────────
 
