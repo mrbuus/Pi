@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../core/auth/session.dart';
 import '../features/auth/auth_routes.dart';
 import '../features/books/books_routes.dart';
+import '../features/buyer/buyer_routes.dart';
 import '../features/exam/exam_routes.dart';
 import '../features/homework/homework_routes.dart';
 import '../features/learning/learning_routes.dart';
@@ -28,6 +29,7 @@ import 'shell/splash_screen.dart';
 
 /// Бүх feature-ийн маршрут. Шинэ feature нэмэхэд энд НЭГ мөр.
 final allFeatureRoutes = <FeatureRoutes>[
+  buyerRoutes,
   toolsRoutes,
   authRoutes,
   studentHomeRoutes,

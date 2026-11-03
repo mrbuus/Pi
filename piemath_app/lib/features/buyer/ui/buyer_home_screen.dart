@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/config/env.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
@@ -89,7 +87,6 @@ class BuyerHomeScreen extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: AppSpace.xl),
-                    const _WebLink(),
                   ],
                 ),
               ),
@@ -264,31 +261,3 @@ class _PurchaseRow extends StatelessWidget {
   }
 }
 
-/// Эрх нээх, багц сонгох — вэбээр (апп дотор худалдахгүй).
-class _WebLink extends StatelessWidget {
-  const _WebLink();
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Эрх нээх, багц сонгох', style: context.text.titleSmall),
-          const SizedBox(height: AppSpace.xs),
-          Text(
-            'Эрхийн удирдлага болон худалдан авалтыг вэб хуудсаар хийнэ',
-            style: context.text.bodySmall?.copyWith(color: context.colors.inkDim),
-          ),
-          const SizedBox(height: AppSpace.md),
-          OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(minimumSize: const Size(0, AppSizes.minTap)),
-            icon: const Icon(AppIcons.externalLink, size: 18),
-            label: const Text('Вэбээр нээх'),
-            onPressed: () => launchUrl(Uri.parse('${Env.webBaseUrl}/app/buyer'), mode: LaunchMode.externalApplication),
-          ),
-        ],
-      ),
-    );
-  }
-}

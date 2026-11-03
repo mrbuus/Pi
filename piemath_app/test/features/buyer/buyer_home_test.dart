@@ -166,12 +166,11 @@ void main() {
     expect(find.textContaining('QPay-ээр төлөх'), findsNothing);
   });
 
-  testWidgets('хоосон: тайлбартай төлөв, вэбээр нээх холбоос', (tester) async {
+  testWidgets('хоосон: тайлбартай төлөв; худалдан авах холбоос БАЙХГҮЙ (Apple 3.1.1)', (tester) async {
     await _pump(tester, _http());
     expect(find.text('Эрх байхгүй'), findsOneWidget);
     expect(find.text('Худалдан авалт байхгүй'), findsOneWidget);
-    expect(find.text('Эрх нээх, багц сонгох'), findsOneWidget);
-    expect(find.text('Вэбээр нээх'), findsWidgets);
+    expect(find.text('Вэбээр нээх'), findsNothing);
   });
 
   testWidgets('нэг хэсэг алдаатай бол бусад нь гарна; дахин оролдох', (tester) async {
