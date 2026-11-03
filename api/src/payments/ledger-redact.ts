@@ -6,14 +6,16 @@ import type { LedgerRow, PaymentsLedgerService } from './ledger.service';
  * гарахгүй (эзний хатуу дүрэм, CLAUDE.md). Админ хэвээр. Төлөв, тоо, огноо,
  * хоцорсон хоног, амлалт, тэмдэглэл үлдэнэ; дүн бүр null болно.
  */
+// Зөвшөөрлийн жагсаалт: дүнг ЗӨВХӨН Админ харна, бусад бүх role (шинэ role ч) дүнгүй.
 export const amountsHiddenFor = (role: Role | string | null | undefined): boolean =>
-  role === Role.TEACHER_PLUS;
+  role !== Role.ADMIN;
 
 /** Дүнгүй мөр — талбарууд хэвээр, мөнгөн утга null. */
 export function redactRow(r: LedgerRow) {
   return {
     ...r,
-    plan: { ...r.plan, fee: null, total: null, first: null },
+    // raw = төлбөрийн төлөвлөгөөний чөлөөт бичвэр (дүн агуулж болно)
+    plan: { ...r.plan, fee: null, total: null, first: null, raw: null },
     blocks: r.blocks.map((b) => ({ ...b, due: null, paid: null })),
     price: null,
     paidTotal: null,
@@ -67,7 +69,9 @@ export function redactStudent(s: Student) {
     row: redactRow(s.row),
     tier: { ...s.tier, monthly: null, fullYear: null, installment: null, installmentFirst: null },
     profile: s.profile ? { ...s.profile, tuitionAmount: null } : null,
-    payments: s.payments.map((p) => ({ ...p, amount: null })),
+    // description нь гүйлгээний утга — дүн агуулж болно
+    payments: s.payments.map((p) => ({ ...p, amount: null, description: null })),
+    settlement: s.settlement ? { ...s.settlement, note: null } : null,
     refunds: s.refunds.map((r) => ({ ...r, refundAmount: null, shortfall: null })),
     amountsHidden: true as const,
   };

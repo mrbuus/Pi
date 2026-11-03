@@ -55,10 +55,12 @@ function moneyLeaks(v: unknown, path = ''): string[] {
 }
 
 describe('Багш+ — төлбөрийн дүнг серверээс хасна', () => {
-  it('зөвхөн Багш+-д нуугдана; Админ, Багшид хамаарахгүй', () => {
-    expect(amountsHiddenFor(Role.TEACHER_PLUS)).toBe(true);
+  it('зөвшөөрлийн жагсаалт: дүнг зөвхөн Админ харна, бусад бүх role-д нуугдана', () => {
     expect(amountsHiddenFor(Role.ADMIN)).toBe(false);
-    expect(amountsHiddenFor(Role.TEACHER)).toBe(false);
+    expect(amountsHiddenFor(Role.TEACHER_PLUS)).toBe(true);
+    expect(amountsHiddenFor(Role.TEACHER)).toBe(true);
+    expect(amountsHiddenFor('SOME_NEW_ROLE')).toBe(true);
+    expect(amountsHiddenFor(undefined)).toBe(true);
   });
 
   it('мөр: дүн бүр null, төлөв/тоо/огноо/амлалт үлдэнэ', () => {
