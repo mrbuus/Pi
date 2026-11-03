@@ -492,6 +492,11 @@ export class HomeworkPracticeService {
     // олдохгүй бол (ирээдүйд) B хувилбарын тестийн хуваарийн дараагийн өдөр
     const nextOf = (r: DayRow) =>
       nextLessonDay(lessons.byClass.get(r.classroomId) ?? [], r.date) ??
+      // Өнөөдрийн дараах хичээл (хуваарьт) — хамгийн сүүлийн даалгаврын хугацаа
+      nextLessonDay(
+        [...(upcoming.get(r.classroomId) ?? [])].sort(),
+        r.date,
+      ) ??
       r.slot?.nextLessonDate ??
       null;
     const testIds = [
@@ -514,6 +519,7 @@ export class HomeworkPracticeService {
           score: true,
           total: true,
           submittedAt: true,
+          deadlineAt: true,
         },
       });
     const [attempts, photos, marks] = await Promise.all([
@@ -601,7 +607,7 @@ export class HomeworkPracticeService {
                   ? { correct: a.score, total: a.total }
                   : null,
               submittedAt: a?.submittedAt?.toISOString() ?? null,
-              late: isLate(a?.submittedAt ?? null, slot?.deadlineAt ?? null),
+              late: isLate(a?.submittedAt ?? null, a?.deadlineAt ?? deadlineAt),
             };
           }),
           photo: photo
@@ -678,7 +684,7 @@ export class HomeworkPracticeService {
             classroomId: slot.classroomId,
             testId: item.id,
             lessonDate: parseDateOnly(date),
-            deadlineAt: slot.deadlineAt,
+            deadlineAt: await this.deadlineFor(studentId, slot, date),
             timeLimitMin: item.timeLimitMin,
             openCount: 1,
           },
@@ -700,7 +706,29 @@ export class HomeworkPracticeService {
       });
       if (res.count) attempt = { ...attempt, openCount: before + 1 };
     }
-    return this.attemptView(attempt, slot.deadlineAt);
+    return this.attemptView(attempt, attempt.deadlineAt ?? slot.deadlineAt);
+  }
+
+  /**
+   * Даалгаврын хугацаа = дараагийн хичээлийн өдрийн 00:00 (УБ). Батлагдсан хичээлийн дараагийнх
+   * олдохгүй (төлөвлөсөн тестээр нээгдсэн, дараагийнх нь ClassTestSession-гүй) үед хуваарь/сэдвийн
+   * хичээлийн өдрүүдээс олно.
+   */
+  private async deadlineFor(
+    studentId: string,
+    slot: HomeworkSlot,
+    date: string,
+  ): Promise<Date | null> {
+    if (slot.deadlineAt) return slot.deadlineAt;
+    const lessons = await loadLessonDays(
+      this.prisma,
+      studentId,
+      date,
+      addDaysKey(date, 60),
+      slot.classroomId,
+    );
+    const next = nextLessonDay(lessons.byClass.get(slot.classroomId) ?? [], date);
+    return next ? ubDayStart(next) : null;
   }
 
   private async attemptView(attempt: AttemptRow, deadlineAt: Date | null) {
@@ -765,7 +793,12 @@ export class HomeworkPracticeService {
         select: { id: true },
       }),
       this.prisma.lessonTopic.findFirst({
-        where: { testIds: { has: testId }, date: { gte: today } },
+        // Анхны огноо 14 хоногийн өмнөөс — хичээл ирээдүй рүү ЗӨӨГДСӨН (ScheduleException.newDate)
+        // байж болно; зөөлтийг тусад нь тайлахгүй, хамгаалах талаар барина
+        where: {
+          testIds: { has: testId },
+          date: { gte: new Date(today.getTime() - 14 * 86_400_000) },
+        },
         select: { id: true },
       }),
       this.prisma.testAccess.findFirst({

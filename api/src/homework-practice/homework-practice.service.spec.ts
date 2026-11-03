@@ -873,6 +873,15 @@ describe('Хуваарьт төлөвлөсөн тест = гэрийн даал
     expect((await svc.my('s1')).days.find((x) => x.date === '2026-10-27')?.items ?? []).toEqual([]);
   });
 
+  it('төлөвлөсөн тестийн даалгаврын хугацаа = дараагийн хичээлийн өдрийн 00:00 (УБ)', async () => {
+    plan('2026-10-27', ['A1'], 17 * 60);
+    env.topics.push({ scheduleId: 'sch1', classroomId: 'c1', date: d('2026-10-29'), title: 'Дараагийн сэдэв', chapterId: null });
+    await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    expect(env.attempts[0].deadlineAt.toISOString()).toBe('2026-10-28T16:00:00.000Z');
+    const day = (await svc.my('s1')).days.find((x) => x.date === '2026-10-27');
+    expect(day?.deadlineAt).toBe('2026-10-28T16:00:00.000Z');
+  });
+
   it('цуцалсан хичээлийн төлөвлөгөө даалгавар болохгүй', async () => {
     env.schedules.push({
       id: 'sch1', classroomId: 'c1', weekday: 2, startMinute: 600, endMinute: 690, room: null,
