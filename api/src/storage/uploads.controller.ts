@@ -45,6 +45,7 @@ import {
   verifyTicket,
   expiresAtFor,
 } from './file-store';
+import { attachmentHeader, sourcePdfFileName } from '../tests/source-pdf';
 import { UPLOAD_DIR } from './upload-dir';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
@@ -417,6 +418,10 @@ export class UploadsController {
     }
     res.setHeader('Cache-Control', 'private, no-store');
     res.setHeader('Referrer-Policy', 'no-referrer');
+    // Тестийн эх PDF — тестийн нэрээр татагдана (түлхүүрийн нэрээр биш)
+    const pdfName = await sourcePdfFileName(this.prisma, key);
+    const disposition = pdfName ? attachmentHeader(pdfName) : null;
+    if (disposition) res.setHeader('Content-Disposition', disposition);
     // S3-д байгаа файл: эрхийг (FilesAuthGuard) шалгасны дараа 5 минутын холбоос руу
     // чиглүүлнэ — байтыг хөтөч S3-аас шууд татна, сервер дамжуулахгүй.
     if (s3Enabled()) {
@@ -425,7 +430,7 @@ export class UploadsController {
         select: { storage: true, mime: true },
       });
       if (meta?.storage === 's3') {
-        res.redirect(302, await downloadUrl(key, meta.mime));
+        res.redirect(302, await downloadUrl(key, meta.mime, disposition ?? undefined));
         return;
       }
     }

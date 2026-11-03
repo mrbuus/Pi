@@ -169,6 +169,25 @@ describe('file authorization boundaries', () => {
     await expect(service.allowed({ id: 't', role: 'TEACHER' } as never, 'w.jpg')).resolves.toBe(true);
     await expect(service.allowed({ id: 's', role: 'STUDENT' } as never, 'w.jpg')).resolves.toBe(false);
   });
+  it('test source PDFs: every centre teacher, never external teachers, students or parents', async () => {
+    const key = 'chapter-pdf-ch1.pdf';
+    const users: Record<string, any> = {
+      t: { role: 'TEACHER', archivedAt: null, externalTeacherProfile: null },
+      tp: { role: 'TEACHER_PLUS', archivedAt: null, externalTeacherProfile: null },
+      ext: { role: 'TEACHER', archivedAt: null, externalTeacherProfile: { userId: 'ext' } },
+      old: { role: 'TEACHER', archivedAt: new Date(), externalTeacherProfile: null },
+      s: { role: 'STUDENT', archivedAt: null, externalTeacherProfile: null },
+    };
+    db.user.findUnique.mockImplementation(async (a: any) => users[a.where.id] ?? null);
+    const can = (id: string, role: string) => service.allowed({ id, role } as never, key);
+    await expect(can('t', 'TEACHER')).resolves.toBe(true);
+    await expect(can('tp', 'TEACHER_PLUS')).resolves.toBe(true);
+    await expect(can('a', 'ADMIN')).resolves.toBe(true);
+    await expect(can('ext', 'TEACHER')).resolves.toBe(false);
+    await expect(can('old', 'TEACHER')).resolves.toBe(false);
+    await expect(can('s', 'STUDENT')).resolves.toBe(false);
+    await expect(can('p', 'PARENT')).resolves.toBe(false);
+  });
   it('uses only owned server-frozen bank references and retains private attachment precedence', async () => {
     db.studyReviewItem.findMany.mockImplementation(async (args: any) =>
       args.where.run.userId === 'buyer'

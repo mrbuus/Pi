@@ -209,14 +209,18 @@ export async function readStoredBytes(
 }
 
 /** S3-ийн файлыг хөтөч шууд татах богино хугацааны холбоос (сервер байт дамжуулахгүй). */
-export async function downloadUrl(key: string, mime: string): Promise<string> {
+export async function downloadUrl(
+  key: string,
+  mime: string,
+  disposition = 'inline',
+): Promise<string> {
   return getSignedUrl(
     s3(),
     new GetObjectCommand({
       Bucket: BUCKET,
       Key: finalKey(key),
       ResponseContentType: mime,
-      ResponseContentDisposition: 'inline',
+      ResponseContentDisposition: disposition,
       ResponseCacheControl: 'private, max-age=300',
     }),
     { expiresIn: DOWNLOAD_URL_TTL },

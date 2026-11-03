@@ -37,6 +37,7 @@ import {
 import { CreateTestDto } from './dto/create-test.dto';
 import { EnterResultDto } from './dto/enter-result.dto';
 import { UpdateTestDto } from './dto/update-test.dto';
+import { chaptersWithSourcePdf, sourcePdfKey } from './source-pdf';
 import {
   CreateTestDraftDto,
   TestDraftStateDto,
@@ -700,6 +701,15 @@ export class TestsService {
 
   // Багш бүгдийг, сурагч ангидаа оноогдсон ЭСВЭЛ хүчинтэй эрхийнхээ (pass)
   // хамрах хүрээнд орсон тестүүдийг харна (Bug 2 fix — SPEC §11)
+  /** Бүлгийн эх PDF-ийн түлхүүр (төвийн багшид) — байхгүй бол null */
+  async sourcePdf(userId: string, chapterId: string) {
+    if (!(await internalTeachingRole(this.prisma, userId)))
+      throw new ForbiddenException('Зөвхөн төвийн багшид');
+    if (!chapterId) return { key: null };
+    const has = await chaptersWithSourcePdf(this.prisma, [chapterId]);
+    return { key: has.has(chapterId) ? sourcePdfKey(chapterId) : null };
+  }
+
   // «1000 бодлого» (THOUSAND) — зөвхөн includeThousand үед (/app/tests «Шалгалт»
   // таб, дэлгүүрийн удирдлага); бусад жагсаалтад (тест сонгогч г.м.) орохгүй.
   async list(

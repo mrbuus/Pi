@@ -10,6 +10,8 @@ interface Item {
   short: string;
   full: string;
   excluded: number[];
+  /** Эх PDF-ийн түлхүүр (байхгүй бол null) */
+  pdf: string | null;
 }
 
 /** Хассан бодлогын дугаар — жижиг улаан тоо (утга нь доорх тэмдэглэгээнд) */
@@ -33,7 +35,13 @@ function itemsOf(
   return list.map((x, i) => {
     const t = x.testId ? tests[x.testId] : undefined;
     const short = t?.short ?? x.manualTitle ?? "Тест";
-    return { key: `${x.testId ?? "m"}-${i}`, short, full: t ? fullTestTitle(t) : short, excluded: x.excludedNumbers };
+    return {
+      key: `${x.testId ?? "m"}-${i}`,
+      short,
+      full: t ? fullTestTitle(t) : short,
+      excluded: x.excludedNumbers,
+      pdf: t?.sourcePdfKey ?? null,
+    };
   });
 }
 

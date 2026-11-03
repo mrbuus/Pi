@@ -8,6 +8,7 @@ import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/kit/drawer";
 import { Meta } from "@/components/ui/Meta";
 import { stampUB } from "@/components/lesson-records/types";
 import { formatMinutes } from "../types";
+import PdfLink from "./PdfLink";
 import TestPicker from "./TestPicker";
 import { fullTestTitle, shortClass, type DayEntry, type TestInfo } from "./types";
 
@@ -204,6 +205,7 @@ function Body({
                       </span>
                     )}
                   </span>
+                  <PdfLink pdfKey={t?.sourcePdfKey} label={t?.short ?? "Тест"} />
                   <button
                     type="button"
                     onClick={() => setOpen(isOpen ? null : r.testId)}
