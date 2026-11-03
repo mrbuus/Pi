@@ -8,6 +8,7 @@ import '../../../core/math/math.dart';
 import '../../../core/ui/ui.dart';
 import '../data/formula_models.dart';
 import '../data/formula_repository.dart';
+import 'formula_simple_view.dart';
 import 'inline_message.dart';
 
 /// `/app/formulas/:slug` — томьёоны дэлгэрэнгүй.
@@ -62,14 +63,17 @@ class _Block extends StatelessWidget {
   );
 }
 
-class _Body extends StatelessWidget {
+class _Body extends ConsumerWidget {
   const _Body({required this.f});
 
   final FormulaDetail f;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final main = f.display;
+    // Энгийн тайлбар статик жагсаалтаас; ачаалагдаагүй/алдаатай бол чимээгүй алгасна (үндсэн дэлгэрэнгүйг саатуулахгүй).
+    final base = ref.watch(formulaCatalogProvider).value?.formulas.where((x) => x.slug == f.slug).firstOrNull;
+    final simple = base?.simple;
     return ListView(
       padding: const EdgeInsets.all(AppSpace.gutter),
       children: [
@@ -96,6 +100,8 @@ class _Body extends StatelessWidget {
             ),
           ),
         ],
+        if (simple != null)
+          _Block('Энгийнээр', FormulaSimpleView(slug: f.slug, simple: simple, section: base?.section)),
         for (final v in f.variants) ...[
           const SizedBox(height: AppSpace.md),
           Text(v.label, style: context.text.titleSmall),
@@ -115,15 +121,16 @@ class _Body extends StatelessWidget {
               ],
             ),
           ),
-        _Block(
-          'Энгийнээр',
-          f.explanation == null || f.explanation!.isEmpty
-              ? Text(
-                  'Тайлбар хараахан нэмэгдээгүй байна',
-                  style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim),
-                )
-              : MathText(f.explanation!),
-        ),
+        if (simple == null || (f.explanation?.isNotEmpty ?? false))
+          _Block(
+            simple == null ? 'Энгийнээр' : 'Тайлбар',
+            f.explanation == null || f.explanation!.isEmpty
+                ? Text(
+                    'Тайлбар хараахан нэмэгдээгүй байна',
+                    style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim),
+                  )
+                : MathText(f.explanation!),
+          ),
         if (f.derivation.isNotEmpty) _Block('Яагаад ийм болдог вэ', _Steps(steps: f.derivation)),
         if (f.mnemonic != null && f.mnemonic!.isNotEmpty)
           _Block(
