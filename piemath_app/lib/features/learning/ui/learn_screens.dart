@@ -6,6 +6,7 @@ import '../../../app/shell/app_shell.dart';
 import '../../../core/files/files.dart';
 import '../../../core/math/math.dart';
 import '../../../core/ui/ui.dart';
+import '../data/events_repository.dart';
 import '../data/lesson_models.dart';
 import '../data/lesson_repository.dart';
 import 'inline_message.dart';
@@ -215,6 +216,13 @@ class _LessonBody extends ConsumerStatefulWidget {
 class _LessonBodyState extends ConsumerState<_LessonBody> {
   late final Set<String> _read = {...widget.lesson.theoryRead};
   late final Set<String> _started = {...widget.lesson.videosWatched};
+
+  @override
+  void initState() {
+    super.initState();
+    // Вэбтэй адил: хичээл ачаалагдсаны дараа нэг удаа `CHAPTER_OPENED` (чимээгүй, блоклохгүй).
+    ref.read(eventsRepositoryProvider).chapterOpened(widget.lesson.chapterId);
+  }
 
   void _theoryOpened(TheoryBlock t) {
     if (_read.add(t.id)) {

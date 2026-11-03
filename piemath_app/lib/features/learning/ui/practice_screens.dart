@@ -11,6 +11,7 @@ import '../../exam/ui/widgets/answer_inputs.dart';
 import '../data/practice_models.dart';
 import '../data/practice_repository.dart';
 import 'inline_message.dart';
+import 'problem_video_disclosure.dart';
 
 /// `/app/practice` — серверийн санал болгосон бодлогууд.
 class PracticeScreen extends ConsumerWidget {
@@ -157,6 +158,8 @@ class _PracticeProblemScreenState extends ConsumerState<PracticeProblemScreen> {
             child: MathText(p.statementText ?? 'Бодлогын текст алга, зургаас уншина уу', style: context.text.bodyLarge),
           ),
         ),
+        const SizedBox(height: AppSpace.md),
+        ProblemVideoDisclosure(problemId: p.id),
         const SizedBox(height: AppSpace.xl),
         if (p.isChoice)
           ChoiceGrid(

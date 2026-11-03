@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/ui/ui.dart';
 import '../application/mistakes_controller.dart';
+import '../data/formula_review_repository.dart';
 
 /// `/app/study` — бие даан суралцах хэсгүүдийн нүүр. Дараалал, оноо, дарамт үгүй: зөвхөн нээх товч.
 class StudyHubScreen extends ConsumerWidget {
@@ -17,12 +18,18 @@ class StudyHubScreen extends ConsumerWidget {
       loading: () => 'Ачаалж байна',
       error: (_, _) => 'Алдааны дэвтрээ нээж үзнэ үү',
     );
+    final formulaCount = ref.watch(formulaReviewCountProvider);
+    final formulaText = formulaCount.maybeWhen(
+      data: (n) => n == 0 ? 'Өнөөдрийн давталт дууссан' : 'Өнөөдөр $n томьёо давтах боломжтой',
+      orElse: () => 'Томьёогоо санаж давтана',
+    );
     final tiles = <_Tile>[
       _Tile('Алдааны дэвтэр', todayText, AppIcons.homework, '/app/mistakes'),
       const _Tile('Давтлага', 'Сэдвээ сонгоод хугацаатай давтана', AppIcons.repeat, '/app/study/review'),
       const _Tile('Давтлагын түүх', 'Өмнөх давтлагууд', AppIcons.history, '/app/study/history'),
       const _Tile('Дасгал', 'Танд тохирсон бодлогууд', AppIcons.practice, '/app/practice'),
       const _Tile('Хичээл үзэх', 'Онол, бичлэг, сэдвийн тест', AppIcons.theory, '/app/learn'),
+      _Tile('Томьёо цээжлэх', formulaText, AppIcons.formula, '/app/formulas/review'),
       const _Tile('Томьёоны сан', 'Хайх, дэлгэрэнгүй үзэх', AppIcons.formula, '/app/formulas'),
       const _Tile('Онлайн хичээл', 'Сэдвээр бичлэг үзэх', AppIcons.video, '/app/videos'),
       const _Tile('Зорилго', 'Өөрийн зорилго, хугацаа', AppIcons.goal, '/app/goals'),

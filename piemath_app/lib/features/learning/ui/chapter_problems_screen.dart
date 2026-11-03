@@ -11,6 +11,7 @@ import '../data/chapter_problem_models.dart';
 import '../data/lesson_repository.dart';
 import '../domain/video_source.dart';
 import 'inline_message.dart';
+import 'problem_video_disclosure.dart';
 
 /// `/app/library/:chapterId/problems` — бүлгийн бодлогын жагсаалт. Хариу, шинжилгээ энд ирэхгүй (сервер хасна);
 /// бодохдоо дасгалын дэлгэц рүү орно.
@@ -154,6 +155,8 @@ class _ProblemCard extends ConsumerWidget {
                 ),
             ],
           ),
+          const SizedBox(height: AppSpace.sm),
+          ProblemVideoDisclosure(problemId: p.id),
         ],
       ),
     );

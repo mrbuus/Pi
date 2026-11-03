@@ -56,3 +56,22 @@ class ActivityYear {
 
   int monthActiveDays(int month) => days.where((d) => d.date.month == month && d.count > 0).length;
 }
+
+/// `GET /activity/streak` — дараалсан өдрийн тоо (серверийн тооцоо; апп өөрөө бодохгүй).
+@immutable
+class ActivityStreak {
+  const ActivityStreak({this.currentStreak = 0, this.longestStreak = 0, this.totalActiveDays = 0});
+
+  factory ActivityStreak.fromJson(Object? raw) {
+    final j = asMap(raw);
+    return ActivityStreak(
+      currentStreak: (asInt(j['currentStreak']) ?? 0).clamp(0, 100000),
+      longestStreak: (asInt(j['longestStreak']) ?? 0).clamp(0, 100000),
+      totalActiveDays: (asInt(j['totalActiveDays']) ?? 0).clamp(0, 100000),
+    );
+  }
+
+  final int currentStreak;
+  final int longestStreak;
+  final int totalActiveDays;
+}

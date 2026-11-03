@@ -4,6 +4,7 @@ import '../../app/feature_routes.dart';
 import 'ui/activity_screen.dart';
 import 'ui/chapter_problems_screen.dart';
 import 'ui/formula_detail_screen.dart';
+import 'ui/formula_review_screen.dart';
 import 'ui/formulas_screen.dart';
 import 'ui/goals_screen.dart';
 import 'ui/learn_screens.dart';
@@ -35,6 +36,8 @@ final learningRoutes = FeatureRoutes(
       builder: (context, state) => PracticeProblemScreen(problemId: state.pathParameters['problemId']!),
     ),
     GoRoute(path: '/app/formulas', builder: (context, state) => const FormulasScreen()),
+    // `:slug`-аас ӨМНӨ: «review» нь томьёоны slug биш.
+    GoRoute(path: '/app/formulas/review', builder: (context, state) => const FormulaReviewScreen()),
     GoRoute(
       path: '/app/formulas/:slug',
       builder: (context, state) => FormulaDetailScreen(slug: state.pathParameters['slug']!),

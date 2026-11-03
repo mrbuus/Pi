@@ -172,6 +172,13 @@ class AccountRepository {
     );
   }
 
+  /// `POST /auth/me/avatar` `{key}` — [key] нь `POST /uploads`-аар авсан файлын түлхүүр. Шинэ `avatarUrl` (файлын түлхүүр) буцаана.
+  Future<String?> setAvatar(String key) => _api.post(
+        '/auth/me/avatar',
+        body: {'key': key},
+        parse: (j) => (j is Map ? j['avatarUrl'] : null) as String?,
+      );
+
   static LinkResult _parseLink(Object? json) =>
       (json as Map?)?['result'] == 'taken' ? LinkResult.taken : LinkResult.linked;
 }
