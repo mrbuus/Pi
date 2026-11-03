@@ -5,7 +5,8 @@ import { CircleAlert, EyeOff } from "lucide-react";
 import MathText from "@/components/MathText";
 import InfoHint from "@/components/ui/InfoHint";
 import { cn } from "@/lib/cn";
-import ToolFrame, { Panel, Segmented, Toggle } from "../core/ToolFrame";
+import { GeoKeypadProvider } from "../core/GeoField";
+import ToolFrame, { Fold, Panel, Segmented, Toggle } from "../core/ToolFrame";
 import { loadState, saveState } from "../core/export";
 import Field from "./Field";
 import FigureSvg, { fitPrims, primsBox, useMedia, useSize, type View } from "./FigureSvg";
@@ -329,25 +330,24 @@ export default function TemplateMode({ modeSwitch }: { modeSwitch: ReactNode }) 
     }
   };
 
+  // Дүрс, хэмжээ нэг самбарт (эхэлж харагдана); нэмэлт шугам, шошго нээж хаадаг хэсэгт
   const controls = (
     <>
-      <Panel title="Дүрс">
-        <Segmented label="Дүрс сонгох" value={p.shape} onChange={(v) => setP({ shape: v })} options={SHAPES} />
-      </Panel>
       <Panel
-        title="Хэмжээ"
+        title="Дүрс ба хэмжээ"
         action={
-          built.ok && built.handles.length > 0 ? (
-            <InfoHint label="Зураг дээр чирэх">Зураг дээрх цагираг цэгийг чирж хэмжээг шууд өөрчилж болно</InfoHint>
-          ) : undefined
+          <InfoHint label="Хэмжээ өгөх арга">
+            {`Утгыг дарж бичнэ — язгуур, бутархай, пи, градус бичиж болно. Компьютерт «/» бутархай, «r» язгуур, «p» пи${built.ok && built.handles.length > 0 ? ". Зураг дээрх цагираг цэгийг чирж ч өөрчилнө" : ""}`}
+          </InfoHint>
         }
       >
-        <div className="space-y-3">{sizeFields()}</div>
+        <Segmented label="Дүрс сонгох" value={p.shape} onChange={(v) => setP({ shape: v })} options={SHAPES} />
+        <div className="mt-4 space-y-3 border-t border-line pt-4">{sizeFields()}</div>
       </Panel>
-      <Panel title={p.shape === "circle" ? "Тойргийн элемент" : "Нэмэлт шугам"}>
+      <Fold title={p.shape === "circle" ? "Тойргийн элемент" : "Нэмэлт шугам"} defaultOpen>
         <div className="space-y-2">{extras()}</div>
-      </Panel>
-      <Panel title="Шошго">
+      </Fold>
+      <Fold title="Шошго">
         <div className="space-y-3">
           <div className="flex flex-wrap gap-1.5">
             {tog("vertexNames", "Оройн нэр")}
@@ -367,7 +367,7 @@ export default function TemplateMode({ modeSwitch }: { modeSwitch: ReactNode }) 
             <Segmented label="Нэгж" value={o.unit || "none"} onChange={(v) => setO({ unit: v === "none" ? "" : "см" })} options={[{ value: "none", label: "Нэгжгүй" }, { value: "см", label: "см" }]} />
           </div>
         </div>
-      </Panel>
+      </Fold>
     </>
   );
 
@@ -394,6 +394,7 @@ export default function TemplateMode({ modeSwitch }: { modeSwitch: ReactNode }) 
   const footer = built.ok ? <Results metrics={built.metrics} note={built.note} /> : null;
 
   return (
+    <GeoKeypadProvider>
     <ToolFrame svgRef={built.ok ? svgRef : undefined} fileName={`pimath-${p.shape}`} controls={controls} toolbar={toolbar} footer={footer}>
       {/* утсан дээр өндрийг тогтооно; 1024px+ дээр хүрээ өөрөө дүүргэнэ */}
       <div aria-hidden className="lg:hidden" style={{ height: `clamp(44vh, ${phoneH}px, 60vh)` }} />
@@ -415,5 +416,6 @@ export default function TemplateMode({ modeSwitch }: { modeSwitch: ReactNode }) 
         )}
       </div>
     </ToolFrame>
+    </GeoKeypadProvider>
   );
 }

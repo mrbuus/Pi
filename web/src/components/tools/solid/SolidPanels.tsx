@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
-import { ChevronDown, Play, RotateCcw } from "lucide-react";
+import { ChevronDown, Minus, Play, Plus, RotateCcw } from "lucide-react";
 import MathText from "@/components/MathText";
 import InfoHint from "@/components/ui/InfoHint";
 import { Button } from "@/components/ui/kit/button";
 import { cn } from "@/lib/cn";
-import { NumberField, Panel, Segmented, Toggle } from "../core/ToolFrame";
+import GeoField, { GeoKeypadProvider } from "../core/GeoField";
+import { Fold, Panel, Segmented, Toggle } from "../core/ToolFrame";
 import { MEASURE_GROUPS, MEASURE_KINDS, type MeasureKind, type MeasureResult } from "./angles.ts";
 import { answerParts, decTex, exactTex, keyMeasures, measureSteps, type AnswerParts, type Measure } from "./measure.ts";
 import { PRESETS, type Proj, type View } from "./project.ts";
@@ -260,27 +261,6 @@ export function SolidResults({ ctx }: { ctx: PanelCtx }) {
 /* ================================================== удирдлага == */
 
 /** Хураагддаг хэсэг (тохиргоо их тул) */
-function Fold({ title, children, defaultOpen = false, action }: { title: string; children: ReactNode; defaultOpen?: boolean; action?: ReactNode }) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className="rounded-2xl border border-line bg-surface">
-      <div className="flex items-center gap-2 pr-3">
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          aria-expanded={open}
-          className="flex min-h-12 flex-1 items-center justify-between gap-2 px-4 text-left text-sm font-semibold text-ink"
-        >
-          {title}
-          <ChevronDown className={cn("h-4 w-4 text-ink-dim transition-transform duration-[var(--dur-base)]", open && "rotate-180")} aria-hidden />
-        </button>
-        {action}
-      </div>
-      {open && <div className="px-4 pb-4">{children}</div>}
-    </div>
-  );
-}
-
 export function SolidControls({ ctx }: { ctx: PanelCtx }) {
   const { st, setSt, model, params, mode, how, secRefs, measureRefs, reduced } = ctx;
   const kind = st.kind;
@@ -356,7 +336,7 @@ export function SolidControls({ ctx }: { ctx: PanelCtx }) {
   ];
 
   return (
-    <>
+    <GeoKeypadProvider className="space-y-4">
       <Panel title="Биет">
         <label className="sr-only" htmlFor="solid-kind">Биет сонгох</label>
         <select
@@ -373,13 +353,14 @@ export function SolidControls({ ctx }: { ctx: PanelCtx }) {
         </select>
         <div className="mt-3 space-y-2">
           {visibleParams.map((p) => (
-            <NumberField
+            <GeoField
               key={`${kind}-${p.key}`}
               label={<MathText>{`${p.name} ${tex(p.tex)}`}</MathText>}
-              value={round(params[p.key] ?? p.def, 3)}
+              name={p.name}
+              value={round(params[p.key] ?? p.def, 4)}
               min={p.min}
               max={p.max}
-              step={p.step}
+              kind={p.int ? "integer" : "length"}
               onChange={(v) => setParam(p.key, v)}
             />
           ))}
@@ -427,12 +408,12 @@ export function SolidControls({ ctx }: { ctx: PanelCtx }) {
             )}
             {how === "tilt" ? (
               <div className="space-y-2">
-                <NumberField label="Өндөр" value={round(sec.y * model.H)} min={0} max={round(model.H, 3)} step={round(model.H / 100, 4) || 0.01} onChange={(v) => patchSec({ y: model.H > 0 ? clamp(v / model.H, 0, 1) : 0 })} />
-                <NumberField label={<MathText>{`Налуу ${tex("\\alpha")}`}</MathText>} value={round(sec.tilt, 1)} min={0} max={90} step={1} suffix={<MathText>{tex("^\\circ")}</MathText>} onChange={(v) => patchSec({ tilt: v })} />
+                <GeoField label="Өндөр" name="Огтлолын өндөр" value={round(sec.y * model.H, 4)} min={0} max={round(model.H, 4)} onChange={(v) => patchSec({ y: model.H > 0 ? clamp(v / model.H, 0, 1) : 0 })} />
+                <GeoField label={<MathText>{`Налуу ${tex("\\alpha")}`}</MathText>} name="Налуу өнцөг" kind="angle" value={round(sec.tilt, 4)} min={0} max={90} suffix={<MathText>{tex("^\\circ")}</MathText>} onChange={(v) => patchSec({ tilt: v })} />
                 {sec.tilt > 0 && (
-                  <NumberField label="Налуугийн чиглэл" value={round(((sec.turn % 360) + 360) % 360, 0)} min={0} max={360} step={5} suffix={<MathText>{tex("^\\circ")}</MathText>} onChange={(v) => patchSec({ turn: v })} />
+                  <GeoField label="Налуугийн чиглэл" name="Налуугийн чиглэл" kind="angle" value={round(((sec.turn % 360) + 360) % 360, 4)} min={0} max={360} suffix={<MathText>{tex("^\\circ")}</MathText>} onChange={(v) => patchSec({ turn: v })} />
                 )}
-                <NumberField label="Тэнхлэгээс шилжих" value={round(sec.shift * model.span)} min={-round(model.span, 3)} max={round(model.span, 3)} step={round(model.span / 50, 4) || 0.01} onChange={(v) => patchSec({ shift: model.span > 0 ? clamp(v / model.span, -1, 1) : 0 })} />
+                <GeoField label="Тэнхлэгээс шилжих" name="Тэнхлэгээс шилжих" value={round(sec.shift * model.span, 4)} min={-round(model.span, 4)} max={round(model.span, 4)} onChange={(v) => patchSec({ shift: model.span > 0 ? clamp(v / model.span, -1, 1) : 0 })} />
               </div>
             ) : (
               <RefPicker groups={[{ name: "Хавтгайн гурван цэг", count: 3 }]} refs={secRefs} options={pointOptions(model)} slot={slot} setSlot={setSlot} setRef={setSecRef} />
@@ -447,7 +428,7 @@ export function SolidControls({ ctx }: { ctx: PanelCtx }) {
 
         {inNet && ctx.netOk && (
           <div className="mt-4 space-y-2">
-            <NumberField label="Нугалалт" value={round(st.netT, 2)} min={0} max={1} step={0.01} onChange={(v) => patch({ netT: v })} />
+            <Stepper label="Нугалалт" text={`${Math.round(st.netT * 100)}%`} onMinus={() => patch({ netT: clamp(Math.round(st.netT * 10 - 1) / 10, 0, 1) })} onPlus={() => patch({ netT: clamp(Math.round(st.netT * 10 + 1) / 10, 0, 1) })} minusOff={st.netT <= 0} plusOff={st.netT >= 1} />
             <Button variant="secondary" size="sm" className="min-h-11" onClick={playFold}>
               {st.netT < 0.5 ? <Play className="h-4 w-4" aria-hidden /> : <RotateCcw className="h-4 w-4" aria-hidden />}
               {st.netT < 0.5 ? "Нугалах" : "Дэлгэх"}
@@ -480,7 +461,7 @@ export function SolidControls({ ctx }: { ctx: PanelCtx }) {
         </div>
         <div className="mt-3 space-y-3">
           <Segmented value={st.view.proj} onChange={(v) => setView({ proj: v })} options={PROJS} label="Проекц" />
-          <NumberField label="Томруулалт" value={round(st.view.zoom, 2)} min={0.4} max={3} step={0.05} onChange={(v) => setView({ zoom: v })} />
+          <Stepper label="Томруулалт" text={`${Math.round(st.view.zoom * 100)}%`} onMinus={() => setView({ zoom: clamp(st.view.zoom / 1.2, 0.4, 3) })} onPlus={() => setView({ zoom: clamp(st.view.zoom * 1.2, 0.4, 3) })} minusOff={st.view.zoom <= 0.4 + 1e-9} plusOff={st.view.zoom >= 3 - 1e-9} />
           {!inNet && (
             <div>
               <div className="mb-1.5 text-sm text-ink-dim">Нуугдсан ирмэг</div>
@@ -502,7 +483,27 @@ export function SolidControls({ ctx }: { ctx: PanelCtx }) {
           </div>
         </div>
       </Fold>
-    </>
+    </GeoKeypadProvider>
+  );
+}
+
+/** Гулсуургүй алхамт өөрчлөлт (томруулалт, нугалалт) */
+function Stepper({ label, text, onMinus, onPlus, minusOff, plusOff }: { label: string; text: string; onMinus: () => void; onPlus: () => void; minusOff?: boolean; plusOff?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-sm text-ink-dim">{label}</span>
+      <div className="flex items-center gap-1">
+        <Button variant="outline" size="icon" onClick={onMinus} disabled={minusOff} aria-label={`${label}: багасгах`}>
+          <Minus className="h-4 w-4" aria-hidden />
+        </Button>
+        <span className="w-14 text-center text-base font-medium tabular-nums text-ink" aria-live="polite">
+          {text}
+        </span>
+        <Button variant="outline" size="icon" onClick={onPlus} disabled={plusOff} aria-label={`${label}: нэмэх`}>
+          <Plus className="h-4 w-4" aria-hidden />
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -604,12 +605,12 @@ function RefPicker({
         </details>
       )}
       {cur && !("name" in cur) && (
-        <NumberField
+        <GeoField
           label={<MathText>{`Байрлал ${tex(`${cur.a}\\to ${cur.b}`)}`}</MathText>}
-          value={round(cur.t, 3)}
+          name="Ирмэг дээрх байрлал (0-ээс 1)"
+          value={round(cur.t, 4)}
           min={0}
           max={1}
-          step={0.05}
           onChange={(v) => setRef(slot, { ...cur, t: v })}
         />
       )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
-import { Download, Maximize2, Minimize2 } from "lucide-react";
+import { ChevronDown, Download, Maximize2, Minimize2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/kit/button";
 import { cn } from "@/lib/cn";
@@ -190,7 +190,29 @@ export function Segmented<T extends string>({
   );
 }
 
-/** Тоон оролт + гулсуур (хэмжээ өгөх) */
+/** Нээж хаадаг хэсэг (нэмэлт тохиргоо) — самбарыг нягт байлгана */
+export function Fold({ title, children, defaultOpen = false, action }: { title: string; children: ReactNode; defaultOpen?: boolean; action?: ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="rounded-2xl border border-line bg-surface">
+      <div className="flex items-center gap-2 pr-3">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          className="flex min-h-12 flex-1 items-center justify-between gap-2 px-4 text-left text-sm font-semibold text-ink"
+        >
+          {title}
+          <ChevronDown className={cn("h-4 w-4 text-ink-dim transition-transform duration-[var(--dur-base)]", open && "rotate-180")} aria-hidden />
+        </button>
+        {action}
+      </div>
+      {open && <div className="px-4 pb-4">{children}</div>}
+    </div>
+  );
+}
+
+/** Тоон оролт (График). Дүрс, биетийн хэмжээнд гулсуургүй core/GeoField ашиглана */
 export function NumberField({
   label,
   value,
@@ -198,7 +220,7 @@ export function NumberField({
   min,
   max,
   step = 1,
-  slider = true,
+  slider = false,
   suffix,
 }: {
   label: ReactNode;

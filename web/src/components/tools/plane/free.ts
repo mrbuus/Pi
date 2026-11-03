@@ -9,7 +9,8 @@ import {
   type Pt, add, angleAt, bisectorDir, circleCircle, dist, distToLine, distToSegment, lineCircle, lineLine, mid, norm,
   perimeter, perp, polygonArea, sub, toDeg,
 } from "./geom.ts";
-import { degVal, piVal, val, valTex } from "./fmt.ts";
+import { degVal, num, piVal, val, valTex } from "./fmt.ts";
+import type { Metric } from "./figure.ts";
 
 export type Obj =
   | { id: number; t: "point"; x: number; y: number; name: string }
@@ -334,3 +335,149 @@ export function measures(objs: Obj[], res: Map<number, Res>, unit = ""): Measure
 
 /** Хоёр цэгээр шаардлагатай объектын төрлүүд (хэрэгслийн тохиргоо) */
 export const TWO_POINT_TOOLS = ["segment", "line", "ray", "circle", "midpoint"] as const;
+
+/* ---------------- Хүрээ хаагдахад шинэ дүрс ---------------- */
+
+/** Хэрчмийн графаар from-оос to хүртэлх хамгийн богино зам (оройн id-ууд), skip хэрчмийг тооцохгүй */
+function segPath(objs: Obj[], from: number, to: number, skip: number): number[] | null {
+  const prev = new Map<number, number>([[from, from]]);
+  const q = [from];
+  while (q.length) {
+    const v = q.shift()!;
+    if (v === to) break;
+    for (const o of objs) {
+      if (o.t !== "segment" || o.id === skip || (o.a !== v && o.b !== v)) continue;
+      const w = o.a === v ? o.b : o.a;
+      if (prev.has(w)) continue;
+      prev.set(w, v);
+      q.push(w);
+    }
+  }
+  if (!prev.has(to)) return null;
+  const out = [to];
+  for (let v = to; v !== from; ) {
+    v = prev.get(v)!;
+    out.push(v);
+  }
+  return out.reverse();
+}
+
+const sameSet = (a: number[], b: number[]) => a.length === b.length && [...a].sort((x, y) => x - y).join(",") === [...b].sort((x, y) => x - y).join(",");
+
+/**
+ * a, b цэгийг хэрчмээр холбоно. Хэрчмүүд битүү хүрээ үүсгэвэл шинэ олон
+ * өнцөгт нэмнэ (ижил оройтой нь байвал давхарлахгүй).
+ * Буцаах: шинэ жагсаалт, үүссэн олон өнцөгтийн id (эсвэл null).
+ */
+export function connect(objs: Obj[], a: number, b: number): { list: Obj[]; polyId: number | null } {
+  if (a === b || objs.some((o) => o.t === "segment" && ((o.a === a && o.b === b) || (o.a === b && o.b === a)))) return { list: objs, polyId: null };
+  const segId = nextId(objs);
+  let list: Obj[] = [...objs, { id: segId, t: "segment", a, b }];
+  const cycle = segPath(list, b, a, segId);
+  if (cycle && cycle.length >= 3 && !list.some((o) => o.t === "polygon" && sameSet(o.pts, cycle))) {
+    const polyId = nextId(list);
+    list = [...list, { id: polyId, t: "polygon", pts: cycle }];
+    return { list, polyId };
+  }
+  return { list, polyId: null };
+}
+
+/** p цэгийг агуулсан олон өнцөгт (сүүлд үүссэнийг түрүүлж) */
+export function hitPolygon(objs: Obj[], res: Map<number, Res>, p: Pt): number | null {
+  for (let i = objs.length - 1; i >= 0; i--) {
+    const r = res.get(objs[i].id);
+    if (!r || r.k !== "poly") continue;
+    let inside = false;
+    const q = r.pts;
+    for (let k = 0, j = q.length - 1; k < q.length; j = k++) {
+      if (q[k].y > p.y !== q[j].y > p.y && p.x < ((q[j].x - q[k].x) * (p.y - q[k].y)) / (q[j].y - q[k].y) + q[k].x) inside = !inside;
+    }
+    if (inside) return objs[i].id;
+  }
+  return null;
+}
+
+/** Олон өнцөгтийн дотоод өнцгүүд (градус), чиглэлээс үл хамааран */
+function interiorAngles(pts: Pt[]): number[] {
+  const n = pts.length;
+  let sa = 0;
+  for (let i = 0; i < n; i++) sa += pts[i].x * pts[(i + 1) % n].y - pts[(i + 1) % n].x * pts[i].y;
+  const orient = sa >= 0 ? 1 : -1;
+  return pts.map((b, i) => {
+    const a = pts[(i + n - 1) % n], c = pts[(i + 1) % n];
+    const u = sub(a, b), v = sub(c, b);
+    const turn = (u.x * v.y - u.y * v.x) * orient;
+    const ang = toDeg(angleAt(a, b, c));
+    return turn > 0 ? 360 - ang : ang;
+  });
+}
+
+const eqLen = (x: number, y: number) => Math.abs(x - y) < 1e-6 * Math.max(1, x, y);
+
+function quadKind(sides: number[], angs: number[]): string {
+  const right = angs.every((a) => Math.abs(a - 90) < 1e-6);
+  const allEq = sides.every((x) => eqLen(x, sides[0]));
+  const oppEq = eqLen(sides[0], sides[2]) && eqLen(sides[1], sides[3]);
+  if (right && allEq) return "Квадрат";
+  if (right) return "Тэгш өнцөгт";
+  if (allEq) return "Ромб";
+  if (oppEq) return "Параллелограмм";
+  return angs.some((a) => a > 180) ? "Дөрвөн өнцөгт (гүдгэр биш)" : "Дөрвөн өнцөгт";
+}
+
+function triKind(sides: number[], angs: number[]): string {
+  const mx = Math.max(...angs);
+  const byAngle = Math.abs(mx - 90) < 1e-6 ? "тэгш өнцөгт" : mx > 90 ? "мохоо өнцөгт" : "хурц өнцөгт";
+  const [a, b, c] = sides;
+  const eq = (eqLen(a, b) ? 1 : 0) + (eqLen(b, c) ? 1 : 0) + (eqLen(a, c) ? 1 : 0);
+  const bySide = eq === 3 ? "зөв" : eq >= 1 ? "адил хажуут" : "";
+  return `${bySide ? `${bySide}, ` : ""}${byAngle}`.replace(/^./, (ch) => ch.toUpperCase());
+}
+
+/**
+ * Олон өнцөгтийн тооцоо (Results-д): төрөл, талбай, периметр, талууд, өнцгүүд;
+ * гурвалжинд багтсан/багтаасан тойргийн радиус, дөрвөн өнцөгтөд диагональ.
+ */
+export function polygonMetrics(objs: Obj[], res: Map<number, Res>, polyId: number, unit = ""): Metric[] {
+  const o = objs.find((x) => x.id === polyId);
+  const r = res.get(polyId);
+  if (!o || o.t !== "polygon" || !r || r.k !== "poly") return [];
+  const nameOf = (id: number) => {
+    const p = objs.find((x) => x.id === id);
+    return p && isPointObj(p) ? p.name : "?";
+  };
+  const pts = r.pts;
+  const names = o.pts.map(nameOf);
+  const n = pts.length;
+  const u = unit ? `\ \text{${unit}}` : "";
+  const u2 = unit ? `\ \text{${unit}}^2` : "";
+  const sides = pts.map((p, i) => dist(p, pts[(i + 1) % n]));
+  const angs = interiorAngles(pts);
+  const area = polygonArea(pts);
+  const per = perimeter(pts);
+  const sideSym = (i: number) => `${names[i]}${names[(i + 1) % n]}`;
+  const kind = n === 3 ? "Гурвалжин" : n === 4 ? quadKind(sides, angs) : `${n} өнцөгт${angs.some((a) => a > 180) ? " (гүдгэр биш)" : ""}`;
+  const out: Metric[] = [
+    { name: `Дүрс ${names.join("")}`, text: n === 3 ? triKind([sides[1], sides[2], sides[0]], angs) + " гурвалжин" : kind, key: true },
+    { name: "Талбай", key: true, rows: [{ sym: "S", v: val(area), unit: u2 }] },
+    { name: "Периметр", key: true, rows: [{ sym: "P", steps: [sides.map((x) => num(x)).join("+")], v: val(per), unit: u }] },
+    { name: "Талууд", rows: sides.map((x, i) => ({ sym: sideSym(i), v: val(x), unit: u })) },
+    { name: "Өнцгүүд", rows: angs.map((a, i) => ({ sym: `\angle ${names[i]}`, v: degVal(a) })) },
+    { name: "Өнцгийн нийлбэр", rows: [{ sym: "\Sigma", steps: [`180^\circ\cdot(${n}-2)`], v: degVal(180 * (n - 2)) }] },
+  ];
+  if (n === 3 && area > 1e-12) {
+    const [c, a, b] = sides; // c=AB, a=BC, b=CA
+    out.push({ name: "Багтсан тойргийн радиус", rows: [{ sym: "r", steps: ["\frac{S}{p}"], v: val(area / (per / 2)), unit: u }] });
+    out.push({ name: "Багтаасан тойргийн радиус", rows: [{ sym: "R", steps: ["\frac{abc}{4S}"], v: val((a * b * c) / (4 * area)), unit: u }] });
+  }
+  if (n === 4) {
+    out.push({
+      name: "Диагоналиуд",
+      rows: [
+        { sym: `${names[0]}${names[2]}`, v: val(dist(pts[0], pts[2])), unit: u },
+        { sym: `${names[1]}${names[3]}`, v: val(dist(pts[1], pts[3])), unit: u },
+      ],
+    });
+  }
+  return out;
+}

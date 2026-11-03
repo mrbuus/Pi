@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent, type ReactNode } from "react";
 import {
-  ArrowUpRight, Check, Circle, Crosshair, Dot, Equal, Eraser, Grid3x3, Magnet, MousePointer2, MoveDiagonal, Pentagon,
+  ArrowUpRight, Check, Circle, Crosshair, Dot, Equal, Eraser, Grid3x3, LayoutGrid, Magnet, MousePointer2, MoveDiagonal, Pentagon,
   Radius, Redo2, Ruler, Scan, Slash, Split, SquareSplitHorizontal, Trash2, TriangleRight, Undo2, X, ZoomIn, ZoomOut,
   type LucideIcon,
 } from "lucide-react";
@@ -18,13 +18,18 @@ import type { Prim } from "./figure";
 import { type Pt, boxAdd, centroidOf, emptyBox, fitView, mid, norm, perp, sub } from "./geom";
 import { dec, degLabel, lenLabel } from "./fmt";
 import {
-  type Hit, type Obj, type Res, hitTest, intersections, isDraggable, isPointObj, measures, nextId, nextName, projectParam,
-  removeLast, removeWithDependents, resolve, snap, snapIntersection,
+  type Hit, type Obj, type Res, connect, hitPolygon, hitTest, intersections, isDraggable, isPointObj, measures, nextId, nextName,
+  polygonMetrics, projectParam, removeLast, removeWithDependents, resolve, snap, snapIntersection,
 } from "./free";
+import Results from "./Results";
 
 /* ============================================================================
  * «Чөлөөт» горим: цэг тавих/чирэх, хэрчим, шулуун, тойрог, байгуулалт.
  * Pointer events (хулгана, хуруу), touch-action:none. Хэмжээс шууд шинэчлэгдэнэ.
+ *
+ * Зураг дээрх горимын мөр: Сонгох / Цэг / Шулуун + «Бусад» (бүх хэрэгсэл).
+ * «Шулуун» нь цэгүүдийг дараалан холбоно (гинж); хүрээ хаагдвал шинэ олон
+ * өнцөгт үүсч, тооцоо нь (төрөл, талбай, периметр, өнцөг) доор гарна.
  * ========================================================================== */
 
 type Tool =
@@ -32,10 +37,10 @@ type Tool =
   | "perp" | "parallel" | "bisector" | "intersect" | "angle";
 
 const TOOLS: { k: Tool; label: string; icon: LucideIcon }[] = [
-  { k: "move", label: "Зөөх", icon: MousePointer2 },
+  { k: "move", label: "Сонгох", icon: MousePointer2 },
   { k: "point", label: "Цэг", icon: Dot },
-  { k: "segment", label: "Хэрчим", icon: Slash },
-  { k: "line", label: "Шулуун", icon: MoveDiagonal },
+  { k: "segment", label: "Шулуун", icon: Slash },
+  { k: "line", label: "Төгсгөлгүй шулуун", icon: MoveDiagonal },
   { k: "ray", label: "Цацраг", icon: ArrowUpRight },
   { k: "circle", label: "Тойрог", icon: Circle },
   { k: "polygon", label: "Олон өнцөгт", icon: Pentagon },
@@ -50,9 +55,10 @@ const TOOLS: { k: Tool; label: string; icon: LucideIcon }[] = [
 /** Хэрэгсэл бүрийн дараагийн алхмын зөвлөмж */
 function hintFor(tool: Tool, n: number, hasLine: boolean): string {
   switch (tool) {
-    case "move": return "Цэгийг чирч зөөнө, хоосон газрыг чирвэл зураг гүйнэ, цэг дээр дарвал нэрийг нь солино";
+    case "move": return "Дүрс, цэгийг дарж сонгоно, цэгийг чирч зөөнө, хоосон газрыг чирвэл зураг гүйнэ";
     case "point": return "Цэг тавих газраа дарна уу, шугам дээр дарвал наалдана";
-    case "segment": case "line": case "ray": return n === 0 ? "Эхний цэгээ сонгоно уу" : "Хоёр дахь цэгээ сонгоно уу";
+    case "segment": return n === 0 ? "Эхний цэгээ дарна уу" : "Дараагийн цэгээ дарна уу, эхний цэг рүү буцвал дүрс битүүрнэ";
+    case "line": case "ray": return n === 0 ? "Эхний цэгээ сонгоно уу" : "Хоёр дахь цэгээ сонгоно уу";
     case "circle": return n === 0 ? "Тойргийн төвийг сонгоно уу" : "Тойрог дайрах цэгийг сонгоно уу";
     case "polygon": return n < 3 ? `Оройгоо дараалан сонгоно уу (${n} сонгосон)` : "Эхний орой дээр дарж эсвэл «Дуусгах» товчоор битүүлнэ";
     case "midpoint": return n === 0 ? "Хоёр цэг эсвэл нэг хэрчим сонгоно уу" : "Хоёр дахь цэгээ сонгоно уу";
@@ -80,6 +86,9 @@ interface Hist {
 
 const LINE_T = new Set(["segment", "line", "ray", "perp", "parallel", "bisector"]);
 
+/** Зураг дээрх горимын мөрийн гол гурван хэрэгсэл */
+const PRIMARY: Tool[] = ["move", "point", "segment"];
+
 export default function FreeMode({ modeSwitch }: { modeSwitch: ReactNode }) {
   const [saved] = useState<Saved>(() => {
     const s = loadState<Saved>("plane-free", DEFAULT_SAVED);
@@ -96,6 +105,7 @@ export default function FreeMode({ modeSwitch }: { modeSwitch: ReactNode }) {
   const [pendLine, setPendLine] = useState<number | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [nameDraft, setNameDraft] = useState("");
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const objs = hist.objs;
   useEffect(() => saveState("plane-free", { objs, grid, snapOn, showMeasures, unit, view: cam }), [objs, grid, snapOn, showMeasures, unit, cam]);
@@ -151,6 +161,10 @@ export default function FreeMode({ modeSwitch }: { modeSwitch: ReactNode }) {
       } else if (e.key === "Escape") {
         resetPending();
         setSelected(null);
+        setMoreOpen(false);
+      } else if ((e.key === "Delete" || e.key === "Backspace") && selected !== null) {
+        e.preventDefault();
+        deleteSelected();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -191,6 +205,7 @@ export default function FreeMode({ modeSwitch }: { modeSwitch: ReactNode }) {
 
   const onDown = (e: RPointerEvent<SVGSVGElement>) => {
     if (e.button !== 0 && e.pointerType === "mouse") return;
+    setMoreOpen(false);
     (e.currentTarget as SVGSVGElement).setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.current.size >= 2) {
@@ -210,7 +225,8 @@ export default function FreeMode({ modeSwitch }: { modeSwitch: ReactNode }) {
       if (o) {
         setSelected(o.id);
         setNameDraft(isPointObj(o) ? o.name : "");
-      } else setSelected(null);
+      } else if (hit) setSelected(hit.id);
+      else setSelected(hitPolygon(objs, res, m));
       if (o && isDraggable(o)) {
         setHist((hh) => ({ ...hh, past: [...hh.past.slice(-199), hh.objs], future: [] }));
         gesture.current = { kind: "drag", id: o.id, start, moved: false };
@@ -395,6 +411,24 @@ export default function FreeMode({ modeSwitch }: { modeSwitch: ReactNode }) {
       resetPending();
       return;
     }
+    if (tool === "segment" && pending.length === 1 && id === pending[0]) {
+      // сүүлийн цэгээ дахин дарвал гинж дуусна
+      if (list !== objs) commit(list);
+      resetPending();
+      return;
+    }
+    if (tool === "segment" && pending.length === 1) {
+      const r = connect(list, pending[0], id);
+      if (r.list !== objs) commit(r.list);
+      if (r.polyId !== null) {
+        resetPending();
+        setSelected(r.polyId);
+        const poly = r.list.find((o) => o.id === r.polyId);
+        const nm = poly && poly.t === "polygon" ? poly.pts.map((pid) => { const q = r.list.find((x) => x.id === pid); return q && isPointObj(q) ? q.name : ""; }).join("") : "";
+        toast(`${nm.replace(/_/g, "")} дүрс үүслээ`);
+      } else setPending([id]);
+      return;
+    }
     if (pending.includes(id) && tool !== "polygon") return;
     if (tool === "polygon" && pending.includes(id)) return;
     const pend = [...pending, id];
@@ -423,6 +457,14 @@ export default function FreeMode({ modeSwitch }: { modeSwitch: ReactNode }) {
     setTool(t);
     resetPending();
     setSelected(null);
+    setMoreOpen(false);
+  };
+
+  const deleteSelected = () => {
+    if (selected === null) return;
+    commit(removeWithDependents(objs, selected));
+    setSelected(null);
+    resetPending();
   };
 
   /* ---------- Харагдац ---------- */
@@ -545,63 +587,61 @@ export default function FreeMode({ modeSwitch }: { modeSwitch: ReactNode }) {
     </>
   );
 
+  const objLabel = (o: Obj): string => {
+    const nm = (id: number) => {
+      const q = objs.find((x) => x.id === id);
+      return q && isPointObj(q) ? q.name : "";
+    };
+    switch (o.t) {
+      case "segment": return `Хэрчим $${nm(o.a)}${nm(o.b)}$`;
+      case "line": return `Шулуун $${nm(o.a)}${nm(o.b)}$`;
+      case "ray": return `Цацраг $${nm(o.a)}${nm(o.b)}$`;
+      case "circle": return `Тойрог, төв $${nm(o.c)}$`;
+      case "polygon": return `Дүрс $${o.pts.map(nm).join("")}$`;
+      case "perp": return "Перпендикуляр";
+      case "parallel": return "Параллель шулуун";
+      case "bisector": return `$\\angle ${nm(o.a)}${nm(o.b)}${nm(o.c)}$-ийн биссектрис`;
+      case "angle": return `$\\angle ${nm(o.a)}${nm(o.b)}${nm(o.c)}$`;
+      default: return isPointObj(o) ? `Цэг $${o.name}$` : "";
+    }
+  };
+
   const controls = (
     <>
-      <Panel title="Хэрэгсэл">
-        <div role="radiogroup" aria-label="Хэрэгсэл" className="grid grid-cols-3 gap-1.5 sm:grid-cols-4 lg:grid-cols-3">
-          {TOOLS.map(({ k, label, icon: Icon }) => (
-            <button
-              key={k}
-              type="button"
-              role="radio"
-              aria-checked={tool === k}
-              onClick={() => pickTool(k)}
-              className={cn(
-                "flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border px-1 text-xs font-medium transition-colors duration-[var(--dur-micro)]",
-                tool === k ? "border-brand-bright bg-brand-bright text-on-brand" : "border-line bg-surface text-ink-dim hover:text-ink",
-              )}
-            >
-              <Icon className="h-5 w-5" aria-hidden />
-              <span className="cyrillic-tight leading-tight">{label}</span>
-            </button>
-          ))}
-        </div>
-        {tool === "polygon" && pending.length >= 3 && (
-          <Button variant="secondary" size="md" className="mt-3 w-full" onClick={finishPolygon}>
-            <Check className="h-4 w-4" aria-hidden />
-            Дуусгах
-          </Button>
-        )}
-      </Panel>
-      {selObj && isPointObj(selObj) && (
-        <Panel title="Сонгосон цэг">
-          <div className="flex items-center gap-2">
-            <input
-              value={nameDraft}
-              onChange={(e) => setNameDraft(e.target.value)}
-              onBlur={rename}
-              onKeyDown={(e) => e.key === "Enter" && rename()}
-              className="h-11 min-w-0 flex-1 rounded-lg border border-line bg-bg px-3 text-sm text-ink"
-              aria-label="Цэгийн нэр"
-            />
-            <Button
-              variant="danger"
-              size="md"
-              onClick={() => {
-                commit(removeWithDependents(objs, selObj.id));
-                setSelected(null);
-              }}
-            >
-              <Trash2 className="h-4 w-4" aria-hidden />
-              Устгах
-            </Button>
-          </div>
-          <p className="mt-2 flex items-center gap-1 text-xs text-ink-dim">
-            Доод индекс
-            <InfoHint label="Нэр бичих тайлбар">
-              <MathText>{"«A_1» гэж бичвэл $A_1$, «\\alpha» гэж бичвэл $\\alpha$ болно"}</MathText>
-            </InfoHint>
-          </p>
+      {selObj && (
+        <Panel title="Сонгосон">
+          {isPointObj(selObj) ? (
+            <>
+              <div className="flex items-center gap-2">
+                <input
+                  value={nameDraft}
+                  onChange={(e) => setNameDraft(e.target.value)}
+                  onBlur={rename}
+                  onKeyDown={(e) => e.key === "Enter" && rename()}
+                  className="h-11 min-w-0 flex-1 rounded-lg border border-line bg-bg px-3 text-sm text-ink"
+                  aria-label="Цэгийн нэр"
+                />
+                <Button variant="danger" size="md" onClick={deleteSelected}>
+                  <Trash2 className="h-4 w-4" aria-hidden />
+                  Устгах
+                </Button>
+              </div>
+              <p className="mt-2 flex items-center gap-1 text-xs text-ink-dim">
+                Доод индекс
+                <InfoHint label="Нэр бичих тайлбар">
+                  <MathText>{"«A_1» гэж бичвэл $A_1$, «\\alpha» гэж бичвэл $\\alpha$ болно"}</MathText>
+                </InfoHint>
+              </p>
+            </>
+          ) : (
+            <div className="flex items-center justify-between gap-2">
+              <MathText className="min-w-0 text-sm text-ink">{objLabel(selObj)}</MathText>
+              <Button variant="danger" size="md" onClick={deleteSelected}>
+                <Trash2 className="h-4 w-4" aria-hidden />
+                Устгах
+              </Button>
+            </div>
+          )}
         </Panel>
       )}
       <Panel title="Харагдац">
@@ -633,15 +673,98 @@ export default function FreeMode({ modeSwitch }: { modeSwitch: ReactNode }) {
     </>
   );
 
-  const footer = ms.length ? (
-    <ul className="flex flex-wrap gap-2 px-3 py-3 sm:px-4">
-      {ms.map((m, i) => (
-        <li key={`${m.id}-${i}`} className="max-w-full overflow-x-auto overflow-y-hidden whitespace-nowrap rounded-xl border border-line bg-bg px-3 py-1.5 text-[15px] text-ink [scrollbar-width:none]">
-          <MathText>{`$${m.tex}$`}</MathText>
-        </li>
-      ))}
-    </ul>
-  ) : null;
+  // Сонгосон (эсвэл хамгийн сүүлд үүссэн) олон өнцөгтийн бүтэн тооцоо + бусад хэмжээс
+  const polyId = selObj?.t === "polygon" ? selObj.id : [...objs].reverse().find((o) => o.t === "polygon" && res.has(o.id))?.id ?? null;
+  const polyMetrics = useMemo(() => (polyId !== null ? polygonMetrics(objs, res, polyId, unit) : []), [objs, res, polyId, unit]);
+  const chips = polyId !== null ? ms.filter((m) => m.id !== polyId) : ms;
+  const footer =
+    polyMetrics.length || chips.length ? (
+      <div>
+        {polyMetrics.length > 0 && <Results metrics={polyMetrics} />}
+        {chips.length > 0 && (
+          <ul className={cn("flex flex-wrap gap-2 px-3 py-3 sm:px-4", polyMetrics.length > 0 && "border-t border-line")}>
+            {chips.map((m, i) => (
+              <li key={`${m.id}-${i}`} className="max-w-full overflow-x-auto overflow-y-hidden whitespace-nowrap rounded-xl border border-line bg-bg px-3 py-1.5 text-[15px] text-ink [scrollbar-width:none]">
+                <MathText>{`$${m.tex}$`}</MathText>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    ) : null;
+
+  const curTool = TOOLS.find((t) => t.k === tool)!;
+  const otherActive = !PRIMARY.includes(tool);
+  const MoreIcon = otherActive ? curTool.icon : LayoutGrid;
+  const barBtn = "flex min-h-12 w-[3.75rem] flex-col items-center justify-center gap-0.5 rounded-xl text-xs font-medium transition-colors duration-[var(--dur-micro)] [touch-action:manipulation]";
+  const canFinish = (tool === "polygon" && pending.length >= 3) || (tool === "segment" && pending.length === 1);
+
+  const modeBar = (
+    <div className="absolute inset-x-2 bottom-2 flex flex-col items-center gap-2">
+      {moreOpen && (
+        <div role="radiogroup" aria-label="Бусад хэрэгсэл" className="elev-3 enter-pop grid w-full max-w-md grid-cols-3 gap-1.5 rounded-2xl border border-line bg-surface p-2 sm:grid-cols-4">
+          {TOOLS.filter((t) => !PRIMARY.includes(t.k)).map(({ k, label, icon: Icon }) => (
+            <button
+              key={k}
+              type="button"
+              role="radio"
+              aria-checked={tool === k}
+              onClick={() => pickTool(k)}
+              className={cn(
+                "flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border px-1 text-xs font-medium transition-colors duration-[var(--dur-micro)]",
+                tool === k ? "border-brand-bright bg-brand-bright text-on-brand" : "border-line bg-surface text-ink-dim hover:text-ink",
+              )}
+            >
+              <Icon className="h-5 w-5" aria-hidden />
+              <span className="cyrillic-tight leading-tight">{label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="elev-2 flex max-w-full items-center gap-1 rounded-2xl border border-line bg-surface p-1">
+        <div role="radiogroup" aria-label="Горим" className="flex gap-1">
+          {PRIMARY.map((k) => {
+            const t = TOOLS.find((x) => x.k === k)!;
+            const on = tool === k;
+            return (
+              <button
+                key={k}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => pickTool(k)}
+                className={cn(barBtn, on ? "bg-brand-bright text-on-brand" : "text-ink-dim hover:bg-ink/5 hover:text-ink")}
+              >
+                <t.icon className="h-5 w-5" aria-hidden />
+                {t.label}
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            aria-expanded={moreOpen}
+            aria-label={otherActive ? `Бусад хэрэгсэл — одоо: ${curTool.label}` : "Бусад хэрэгсэл"}
+            onClick={() => setMoreOpen((v) => !v)}
+            className={cn(barBtn, otherActive ? "bg-brand-bright text-on-brand" : moreOpen ? "bg-ink/5 text-ink" : "text-ink-dim hover:bg-ink/5 hover:text-ink")}
+          >
+            <MoreIcon className="h-5 w-5" aria-hidden />
+            <span className="max-w-full truncate px-0.5">{otherActive ? curTool.label : "Бусад"}</span>
+          </button>
+        </div>
+        {(canFinish || selected !== null) && <span className="mx-0.5 h-8 w-px shrink-0 bg-line" aria-hidden />}
+        {canFinish && (
+          <button type="button" onClick={finishPolygon} aria-label="Дуусгах" title="Дуусгах" className={cn(barBtn, "w-11 text-ink hover:bg-ink/5")}>
+            <Check className="h-5 w-5" aria-hidden />
+          </button>
+        )}
+        {selected !== null && !canFinish && (
+          <button type="button" onClick={deleteSelected} aria-label="Сонгосныг устгах" title="Сонгосныг устгах" className={cn(barBtn, "w-11 text-error hover:bg-error/10")}>
+            <Trash2 className="h-5 w-5" aria-hidden />
+          </button>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <ToolFrame svgRef={svgRef} fileName="pimath-zurag" controls={controls} toolbar={toolbar} footer={footer}>
@@ -671,9 +794,10 @@ export default function FreeMode({ modeSwitch }: { modeSwitch: ReactNode }) {
         </div>
         {!objs.length && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center">
-            <p className="max-w-xs text-sm text-ink-dim">Хэрэгслээ сонгоод зураг дээр дарж эхэлнэ үү</p>
+            <p className="max-w-xs text-sm text-ink-dim">Зураг дээр дарж цэг тавина уу, «Шулуун» горимд цэгүүдээ дараалан дарж дүрс зурна</p>
           </div>
         )}
+        {modeBar}
       </div>
     </ToolFrame>
   );

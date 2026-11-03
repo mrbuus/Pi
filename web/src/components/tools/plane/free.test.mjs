@@ -71,3 +71,36 @@ test("цэг/шугам онох, торонд наалдуулах", () => {
   assert.equal(hitTest(objs, r, { x: 5, y: 2 }, 0.5, 0.3), null);
   assert.deepEqual(snap({ x: 1.26, y: -0.74 }, 0.5), { x: 1.5, y: -0.5 });
 });
+
+test("хэрчмээр хүрээ хаагдахад олон өнцөгт үүснэ, давхарлахгүй", async () => {
+  const { connect, polygonMetrics, hitPolygon } = await import("./free.ts");
+  let objs = [pt(1, 0, 0, "A"), pt(2, 4, 0, "B"), pt(3, 4, 3, "C")];
+  let r = connect(objs, 1, 2);
+  assert.equal(r.polyId, null);
+  r = connect(r.list, 2, 3);
+  assert.equal(r.polyId, null);
+  assert.equal(connect(r.list, 2, 3).list, r.list, "ижил хэрчим давхардахгүй");
+  r = connect(r.list, 3, 1);
+  assert.ok(r.polyId);
+  const poly = r.list.find((o) => o.id === r.polyId);
+  assert.deepEqual([...poly.pts].sort(), [1, 2, 3]);
+  const res = resolve(r.list);
+  const ms = polygonMetrics(r.list, res, r.polyId);
+  assert.equal(ms[0].text, "Тэгш өнцөгт гурвалжин");
+  near(ms.find((m) => m.name === "Талбай").rows[0].v.dec * 1, 6);
+  near(ms.find((m) => m.name === "Периметр").rows[0].v.dec * 1, 12);
+  const angs = ms.find((m) => m.name === "Өнцгүүд").rows.map((x) => x.v.dec);
+  assert.ok(angs.includes("90^\\circ"));
+  assert.equal(hitPolygon(r.list, res, { x: 3, y: 1 }), r.polyId);
+  assert.equal(hitPolygon(r.list, res, { x: -1, y: 1 }), null);
+  // дахин холбоход шинэ дүрс үүсэхгүй
+  assert.equal(connect(r.list.filter((o) => !(o.t === "segment" && o.a === 3 && o.b === 1)), 3, 1).polyId, null);
+});
+
+test("дөрвөн өнцөгтийн төрөл", async () => {
+  const { connect, polygonMetrics } = await import("./free.ts");
+  let list = [pt(1, 0, 0, "A"), pt(2, 2, 0, "B"), pt(3, 2, 2, "C"), pt(4, 0, 2, "D")];
+  for (const [a, b] of [[1, 2], [2, 3], [3, 4]]) list = connect(list, a, b).list;
+  const r = connect(list, 4, 1);
+  assert.equal(polygonMetrics(r.list, resolve(r.list), r.polyId)[0].text, "Квадрат");
+});
