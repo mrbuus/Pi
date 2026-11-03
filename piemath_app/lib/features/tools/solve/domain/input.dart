@@ -33,8 +33,8 @@ String prepare(String src, {bool degrees = false}) {
       )
       .replaceAllMapped(RegExp(r'(\d)\s*:\s*(?=[\d(a-zA-Z])'), (m) => '${m.group(1)}/')
       .replaceAll(RegExp(r'\)\s*:\s*(?=[\d(a-zA-Z])'), ')/');
-  if (RegExp('≠|!=').hasMatch(s)) {
-    throw InputError('«≠» тэмдгийг ойлгохгүй — тэгшитгэл эсвэл тэнцэтгэл биш оруулна уу');
+  if (RegExp('\u2260|!=').hasMatch(s)) {
+    throw InputError('«\u2260» тэмдгийг ойлгохгүй — тэгшитгэл эсвэл тэнцэтгэл биш оруулна уу');
   }
   s = degrees
       ? s.replaceAll('°', '')

@@ -13,7 +13,7 @@ import 'steps.dart';
 class Piece {
   const Piece({required this.a, required this.b, required this.aClosed, required this.bClosed});
 
-  /// null = -∞ / +∞
+  /// null = -inf / +inf
   final Root? a;
   final Root? b;
   final bool aClosed;
@@ -67,7 +67,9 @@ List<Expr> breakExprs(Expr f, String v) {
       out.add(n.args[0]);
     }
     if (n.kind == ExprKind.call && (n.name == 'log' || n.name == 'root') && dep(n.args[1], v)) out.add(n.args[1]);
-    if (n.kind == ExprKind.pow && dep(n.a!, v) && !dep(n.b!, v)) out.add(n.a!);
+    // Бүхэл сөрөг биш зэрэг (x^2) нь тасралт биш — тооны шулуунд илүү цэг нэмэхгүй.
+    final natPow = n.kind == ExprKind.pow && n.b!.kind == ExprKind.num && n.b!.v >= 0 && n.b!.v == n.b!.v.roundToDouble();
+    if (n.kind == ExprKind.pow && dep(n.a!, v) && !dep(n.b!, v) && !natPow) out.add(n.a!);
     return false;
   });
   return out;

@@ -492,14 +492,14 @@ Expr? _integ(Expr n, _IntCtx c) {
   }
 }
 
-/// Хэсэгчлэн: олон гишүүнт × (e^{u}, sin u, cos u), x^n ln x.
+/// Хэсэгчлэн: олон гишүүнт x (e^{u}, sin u, cos u), x^n ln x.
 Expr? _byParts(Expr n, _IntCtx c) {
   if (n.kind != ExprKind.mul) return null;
   final v = c.v;
   Expr? tryPair(Expr pn, Expr g) {
     final p = polyFrom(pn, v);
     if (p == null) return null;
-    // x^n · ln x
+    // x^n * ln x
     if (g.kind == ExprKind.call && g.name == 'ln' && g.args[0].kind == ExprKind.sym && g.args[0].name == v) {
       if (trim(p).length - 1 > 6) return null;
       c.rules.add('parts');
@@ -511,7 +511,7 @@ Expr? _byParts(Expr n, _IntCtx c) {
       final inner = _integ(parseExpr(_asciiPoly(rest, v)), c);
       return inner == null ? null : N.sub(N.mul(qn, g), inner);
     }
-    // Хүснэгтийн арга: Σ (-1)^k P^{(k)} · G_{k+1}
+    // Хүснэгтийн арга: Σ (-1)^k P^{(k)} * G_{k+1}
     Expr? gg = g;
     var pk = p;
     Expr res = mkNum(0);
@@ -756,7 +756,7 @@ Solution definiteIntegral(Expr f, Expr aN, Expr bN, [String v = _v0]) {
 
 /* ---------- Хязгаар ---------- */
 
-/// Хязгаарын цэг: төгсгөлөг ([inf] = 0) эсвэл ±∞ ([inf] = ±1).
+/// Хязгаарын цэг: төгсгөлөг ([inf] = 0) эсвэл ±inf ([inf] = ±1).
 class LimitTarget {
   const LimitTarget.point(this.x, this.v, this.tex) : inf = 0;
   const LimitTarget.infinity(this.inf) : x = null, v = 0, tex = '';
@@ -787,7 +787,7 @@ LimitTarget? parseTarget(String src) {
 
 double _near(Expr f, String v, double a, int side, double h) => numAt(f, v, a + side * h * math.max(1, a.abs()));
 
-/// Хариуг цэгийн орчим тоогоор тулгана: L (тоо) эсвэл ±∞.
+/// Хариуг цэгийн орчим тоогоор тулгана: L (тоо) эсвэл ±inf.
 bool _limitOk(Expr f, String v, LimitTarget t, double l) {
   final vals = <double>[];
   if (t.isPoint) {
@@ -931,7 +931,7 @@ Solution limit(Expr f, String target, [String v = _v0]) {
       }
     }
   } else {
-    // x → ±∞
+    // x → ±inf
     if (rf != null) {
       final n = deg(rf.num), d = deg(rf.den);
       if (n < 0) return done(xq(qZero));
@@ -954,7 +954,7 @@ Solution limit(Expr f, String target, [String v = _v0]) {
       steps.add(const Step(text: 'Хүртвэрийн зэрэг их тул хязгаар төгсгөлгүй'));
       return done(s * double.infinity);
     }
-    // 1^∞ хэлбэр: (B)^E, B→1, E→∞ → e^{lim (B-1)E}
+    // 1^inf хэлбэр: (B)^E, B→1, E→inf → e^{lim (B-1)E}
     if (f.kind == ExprKind.pow && dep(f.b!, v)) {
       final bv = numAt(f.a!, v, t.inf * 1e7), ev = numAt(f.b!, v, t.inf * 1e7);
       if ((bv - 1).abs() < 1e-4 && ev.abs() > 1e5) {
@@ -980,7 +980,7 @@ Solution limit(Expr f, String target, [String v = _v0]) {
         }
       }
     }
-    // Лопиталь (∞/∞)
+    // Лопиталь (inf/inf)
     if (f.kind == ExprKind.div) {
       var u = f.a!, w = f.b!;
       for (var k = 1; k <= 3; k++) {

@@ -109,7 +109,7 @@ Solution? _constantIdentity(Analysis an, bool degrees) {
   }
 }
 
-/// Задлагчийн мессеж дэх «*» → «×».
+/// Задлагчийн мессеж дэх «*» → «x».
 String _tidyMsg(String m) => m.replaceAll('«*»', r'«$\times$»');
 
 Live liveSolve(String src, {bool degrees = false, SolveAction? action, Map<String, String> params = const {}}) {

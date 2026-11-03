@@ -1,5 +1,5 @@
 // Тэгшитгэлийн систем (вэбийн `solve/system.ts`): шугаман — Крамер, Гаусс,
-// 2×2 орлуулах арга; «нэг шугаман + нэг олон гишүүнт» — орлуулах арга. Бүгд ЯГ.
+// 2x2 орлуулах арга; «нэг шугаман + нэг олон гишүүнт» — орлуулах арга. Бүгд ЯГ.
 import 'equation.dart';
 import 'exact.dart';
 import 'expr_ext.dart';
@@ -245,7 +245,7 @@ MPoly _vsReduce(MPoly p, List<String> vs) {
   return r;
 }
 
-/// 2×2 орлуулах арга (±1 коэффициенттэй хувьсагчийг илэрхийлнэ).
+/// 2x2 орлуулах арга (±1 коэффициенттэй хувьсагчийг илэрхийлнэ).
 void _substitution2(List<List<Q>> a, List<Q> b, List<String> vs, List<Step> steps) {
   (int, int)? pick;
   for (var i = 0; i < 2 && pick == null; i++) {

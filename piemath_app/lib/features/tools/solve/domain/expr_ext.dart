@@ -467,7 +467,7 @@ Expr _d(Expr n, String v) {
 
 /// Тоог энгийн бичвэрээр (координатын шошгонд): 2.5, -1.333.
 String fmt(double x, [int digits = 3]) {
-  if (!x.isFinite) return x > 0 ? '∞' : (x < 0 ? '-∞' : '—');
+  if (!x.isFinite) return x > 0 ? '\u221E' : (x < 0 ? '-\u221E' : '—');
   if (x.abs() < math.pow(10, -digits) / 2) return '0';
   return fixedNum(x, digits);
 }

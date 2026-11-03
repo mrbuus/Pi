@@ -124,7 +124,7 @@ double pval(Poly p, double x) {
 
 bool peq(Poly a, Poly b) => isZeroP(psub(a, b));
 
-/// Бүхэл, анхны (коэффициентүүдийн ХИЕХ = 1), ахлах нь эерэг: p = k · prim.
+/// Бүхэл, анхны (коэффициентүүдийн ХИЕХ = 1), ахлах нь эерэг: p = k * prim.
 ({Q k, Poly prim}) primitive(Poly p0) {
   final p = trim(p0);
   if (p.isEmpty) return (k: qOne, prim: <Q>[]);
@@ -246,7 +246,7 @@ RatFn ratReduce(RatFn r) {
 
 /* ---------- LaTeX / ASCII ---------- */
 
-/// Коэффициент·хувьсагч: -\frac{1}{2}x^{2}+3x-1.
+/// Коэффициент*хувьсагч: -\frac{1}{2}x^{2}+3x-1.
 String ptex(Poly p0, [String v = 'x']) {
   final p = trim(p0);
   if (p.isEmpty) return '0';

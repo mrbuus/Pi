@@ -1307,7 +1307,7 @@ class _Lin {
   final X b;
 }
 
-/// u = a·x + b (a рационал, b ЯГ тоо).
+/// u = a*x + b (a рационал, b ЯГ тоо).
 _Lin? _linearArg(Expr u, String v) {
   try {
     X at(int k) => evalExact(u, scope: {v: xint(k)});

@@ -29,7 +29,7 @@ class NumberLinePoint {
 class NumberLineSegment {
   const NumberLineSegment(this.from, this.to);
 
-  /// points-ийн индекс, null = ±∞
+  /// points-ийн индекс, null = ±inf
   final int? from;
   final int? to;
 }

@@ -6,7 +6,7 @@ import 'steps.dart';
 
 bool _hasY(Expr n) => freeSymbols(n).contains('y');
 
-/// n = a + b·y хэлбэрт задлах (a, b нь y-гүй); y-ээр шугаман биш бол null.
+/// n = a + b*y хэлбэрт задлах (a, b нь y-гүй); y-ээр шугаман биш бол null.
 (Expr, Expr)? _linY(Expr n) {
   if (!_hasY(n)) return (n, mkNum(0));
   switch (n.kind) {
@@ -47,7 +47,7 @@ String? solveForY(Relation r) {
   if (!vs.contains('y') || !vs.every((v) => v == 'x' || v == 'y')) return null;
   final f = mkSub(r.lhs, r.rhs);
 
-  // 1) Олон гишүүнт: F = c0(x) + c1(x)·y
+  // 1) Олон гишүүнт: F = c0(x) + c1(x)*y
   final p = mfrom(f, vars: {'x', 'y'});
   if (p != null && mdegIn(p, 'y') == 1) {
     final c0 = mcoeffAt(p, 'y', 0), c1 = mcoeffAt(p, 'y', 1);
