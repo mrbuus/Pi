@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,9 +12,6 @@ import '../m7_harness.dart';
 
 FakeHttp _http({Object? payments, String? paidUntil = '2026-11-30T00:00:00.000Z'}) => FakeHttp()
   ..json('GET', '/tuition/paid-until/my', {'paidUntil': paidUntil})
-  ..json('GET', '/assignments/my-classrooms', [
-    {'id': 'c1', 'name': '12Б', 'type': 'IN_PERSON', 'grade': 12},
-  ])
   ..json('GET', '/payments/my', payments ?? myPayments());
 
 void main() {
@@ -25,7 +23,8 @@ void main() {
     expect(find.text('MN54 0005 0057 2083 8844'), findsOneWidget);
     // Гүйлгээний утга нэвтэрсэн хүний нэр, утсаар.
     expect(find.text('Сурагч Тест, 99000000, 2027'), findsOneWidget);
-    expect(find.text('350,000₮'), findsWidgets);
+    // 350,000 нь серверийн төлбөрийн мөрөөс л (тариф биш).
+    expect(find.text('Сарын төлбөр'), findsNothing);
     await scrollTo(tester, find.text('2026 оны 10-р сар'));
     expect(find.text('2026 оны 11-р сар'), findsOneWidget);
     expect(find.text('Буцаасан'), findsOneWidget);
@@ -41,7 +40,6 @@ void main() {
   testWidgets('түүх ачаалахад алдаа → «Дахин оролдох»', (tester) async {
     final h = FakeHttp()
       ..json('GET', '/tuition/paid-until/my', {'paidUntil': null})
-      ..json('GET', '/assignments/my-classrooms', <Object?>[])
       ..error('GET', '/payments/my', 500);
     await pumpM7(tester, const StudentPaymentsScreen(), http: h);
     await scrollTo(tester, find.text(AppStrings.retry));
@@ -86,7 +84,7 @@ void main() {
       expect(haptics, hasLength(4));
     });
 
-    testWidgets('«Бүгдийг хуулах» — данс, IBAN, утга, төвийн нэр, төлбөр', (tester) async {
+    testWidgets('«Бүгдийг хуулах» — данс, IBAN, утга, төвийн нэр (үнэгүй)', (tester) async {
       mockChannel(tester);
       await pumpM7(tester, const StudentPaymentsScreen(), http: _http());
       await tester.tap(find.text('Бүгдийг хуулах'));
@@ -94,7 +92,8 @@ void main() {
       expect(copied, contains('5720838844 Хаан банк О.Баасанжав'));
       expect(copied, contains('IBAN: MN540005005720838844'));
       expect(copied, contains('Утга: Сурагч Тест, 99000000, 2027'));
-      expect(copied, contains('Сарын төлбөр: 350,000₮'));
+      expect(copied, contains('Шинэ Ирээдүйн Эзэд сургалтын төв'));
+      expect(copied, isNot(contains('₮')));
       expect(haptics, hasLength(1));
       expect(find.text('Бүх мэдээллийг хуулагдлаа'), findsOneWidget);
     });
@@ -120,5 +119,25 @@ void main() {
     expect(find.byType(AppCard), findsWidgets);
     expect(find.bySemanticsLabel('Ачаалж байна'), findsWidgets);
     await tester.pump(const Duration(seconds: 6));
+  });
+
+  testWidgets('сервер үнэ өгөөгүй бол ямар ч сургалтын үнэ харагдахгүй, анги асуухгүй', (tester) async {
+    final h = _http(payments: <Object?>[], paidUntil: null);
+    await pumpM7(tester, const StudentPaymentsScreen(), http: h);
+    await scrollTo(tester, find.text('Төлбөр бүртгэгдээгүй байна'));
+    // Зөвхөн серверийн нийлбэр (0₮) — өөр ямар ч ₮ дүн байхгүй.
+    final amounts = [
+      for (final e in find.textContaining('₮').evaluate())
+        switch (e.widget) {
+          final Text t => t.data,
+          final EditableText t => t.controller.text,
+          _ => '?',
+        },
+    ];
+    expect(amounts, everyElement('0₮'));
+    for (final n in ['350,000₮', '300,000₮', '2,500,000₮', '2,000,000₮', '3,000,000₮']) {
+      expect(find.text(n), findsNothing, reason: n);
+    }
+    expect(h.count('GET', '/assignments/my-classrooms'), 0);
   });
 }

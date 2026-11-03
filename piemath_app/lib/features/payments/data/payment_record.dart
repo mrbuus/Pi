@@ -22,12 +22,3 @@ abstract class PaymentRecord with _$PaymentRecord {
 
   factory PaymentRecord.fromJson(Map<String, Object?> json) => _$PaymentRecordFromJson(json);
 }
-
-/// Сурагчийн одоогийн анги (`GET /assignments/my-classrooms`) — төлбөрийн түвшин сонгоход.
-@freezed
-abstract class MyClassroom with _$MyClassroom {
-  const factory MyClassroom({required String id, @Default('') String name, required String type, int? grade}) =
-      _MyClassroom;
-
-  factory MyClassroom.fromJson(Map<String, Object?> json) => _$MyClassroomFromJson(json);
-}

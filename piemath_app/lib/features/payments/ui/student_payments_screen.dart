@@ -20,16 +20,13 @@ class StudentPaymentsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(sessionProvider);
     final user = session is SignedIn ? session.user : null;
-    final grade = ref.watch(myTuitionGradeProvider).value;
     final payments = ref.watch(myPaymentsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Миний төлбөр')),
       body: RefreshIndicator(
         onRefresh: () async {
-          ref
-            ..invalidate(paidUntilProvider(null))
-            ..invalidate(myTuitionGradeProvider);
+          ref.invalidate(paidUntilProvider(null));
           await ref.refresh(myPaymentsProvider.future).catchError((_) => <PaymentRecord>[]);
         },
         child: ListView(
@@ -39,7 +36,6 @@ class StudentPaymentsScreen extends ConsumerWidget {
             const SizedBox(height: AppSpace.lg),
             PayInfoCard(
               note: transferNote(firstName: user?.firstName, lastName: user?.lastName, phone: user?.phone),
-              tier: tierForGrade(grade),
             ),
             const SizedBox(height: AppSpace.lg),
             ...payments.when(

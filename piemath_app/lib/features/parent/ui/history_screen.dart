@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/shell/app_shell.dart' show AppBackButton;
 import '../../../core/network/api_error.dart';
@@ -12,6 +13,7 @@ import '../data/parent_repository.dart';
 import '../domain/parent_labels.dart';
 import 'mark_chip.dart';
 import 'parent_list_card.dart';
+import 'theory_screen.dart' show PhotoStrip;
 import 'weekly_report_screen.dart' show parentTodayProvider;
 
 /// Хэдэн жилийн түүх сонгож болох вэ (одоогийн жил + өмнөх жилүүд).
@@ -187,6 +189,7 @@ class _HistoryBodyState extends ConsumerState<HistoryBody> {
           }
         }
         return _HistoryContent(
+          studentId: widget.studentId,
           history: merged,
           tail: tail,
           onMore: () => setState(() => _pages++),
@@ -198,8 +201,15 @@ class _HistoryBodyState extends ConsumerState<HistoryBody> {
 }
 
 class _HistoryContent extends StatelessWidget {
-  const _HistoryContent({required this.history, required this.tail, required this.onMore, required this.onRetryTail});
+  const _HistoryContent({
+    required this.studentId,
+    required this.history,
+    required this.tail,
+    required this.onMore,
+    required this.onRetryTail,
+  });
 
+  final String studentId;
   final ParentHistory history;
   final AsyncValue<ParentHistory>? tail;
   final VoidCallback onMore;
@@ -282,14 +292,28 @@ class _HistoryContent extends StatelessWidget {
             empty: '',
             children: [
               for (final a in h.attempts.rows)
-                ParentDatedRow(
-                  date: dayLabel(a.at),
-                  subtitle: a.chapter,
-                  trailing: switch (a.autoCorrect) {
-                    true => MarkLabel(icon: AppIcons.success, label: 'Зөв', color: c.success),
-                    false => MarkLabel(icon: AppIcons.failure, label: 'Буруу', color: c.error),
-                    null => MarkLabel(icon: AppIcons.circleDot, label: 'Өөрөө үнэлсэн', color: c.inkDim),
-                  },
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ParentDatedRow(
+                      date: dayLabel(a.at),
+                      subtitle: a.chapter,
+                      trailing: switch (a.autoCorrect) {
+                        true => MarkLabel(icon: AppIcons.success, label: 'Зөв', color: c.success),
+                        false => MarkLabel(icon: AppIcons.failure, label: 'Буруу', color: c.error),
+                        null => MarkLabel(icon: AppIcons.circleDot, label: 'Өөрөө үнэлсэн', color: c.inkDim),
+                      },
+                    ),
+                    if (a.chapterId != null)
+                      TextButton.icon(
+                        onPressed: () => context.push(
+                          '/app/parent/theory?studentId=${Uri.encodeComponent(studentId)}'
+                          '&chapterId=${Uri.encodeComponent(a.chapterId!)}',
+                        ),
+                        icon: const Icon(AppIcons.theory, size: 18),
+                        label: Text('${a.chapter.isEmpty ? 'Бүлгийн' : a.chapter} онол'),
+                      ),
+                  ],
                 ),
             ],
           ),
@@ -314,13 +338,22 @@ class _HistoryContent extends StatelessWidget {
             empty: '',
             children: [
               for (final p in h.packets.rows)
-                ParentDatedRow(
-                  date: dayLabel(p.date),
-                  subtitle: p.chapter,
-                  trailing: Text(
-                    p.receipts > 0 ? '${p.receipts} хүлээн авсан' : 'Хүлээн аваагүй',
-                    style: context.text.labelMedium,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ParentDatedRow(
+                      date: dayLabel(p.date),
+                      subtitle: p.chapter,
+                      trailing: Text(
+                        p.receipts > 0 ? '${p.receipts} хүлээн авсан' : 'Хүлээн аваагүй',
+                        style: context.text.labelMedium,
+                      ),
+                    ),
+                    if (p.imageKeys.isNotEmpty) ...[
+                      PhotoStrip(fileKeys: p.imageKeys, title: p.chapter.isEmpty ? 'Хүүхдийн хавсралт' : p.chapter),
+                      const SizedBox(height: AppSpace.sm),
+                    ],
+                  ],
                 ),
             ],
           ),

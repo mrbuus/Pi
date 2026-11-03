@@ -8,7 +8,14 @@ String _title(Object? holder, String key) => _s(_m(_m(holder)[key])['title']) ??
 String _className(Object? j) => _s(_m(_m(j)['classroom'])['name']) ?? '';
 
 class HistoryAttempt {
-  const HistoryAttempt({required this.id, required this.at, required this.chapter, this.autoCorrect, this.source});
+  const HistoryAttempt({
+    required this.id,
+    required this.at,
+    required this.chapter,
+    this.chapterId,
+    this.autoCorrect,
+    this.source,
+  });
 
   factory HistoryAttempt.fromJson(Object? j) {
     final m = _m(j);
@@ -16,6 +23,7 @@ class HistoryAttempt {
       id: _s(m['id']) ?? '',
       at: _s(m['occurredOn']) ?? _s(m['createdAt']),
       chapter: _s(_m(_m(m['problem'])['chapter'])['title']) ?? '',
+      chapterId: _s(_m(m['problem'])['chapterId']),
       autoCorrect: m['autoCorrect'] is bool ? m['autoCorrect'] as bool : null,
       source: _s(m['source']),
     );
@@ -24,6 +32,9 @@ class HistoryAttempt {
   final String id;
   final String? at;
   final String chapter;
+
+  /// Бүлгийн онол нээхэд (`/parent/children/:id/theory/:chapterId`).
+  final String? chapterId;
 
   /// true — зөв, false — буруу, null — өөрөө үнэлсэн/тодорхойгүй.
   final bool? autoCorrect;
@@ -114,16 +125,29 @@ class HistoryDismissal {
   final String classroom;
 }
 
+List<String> _keys(Object? v) => [
+  for (final k in (v is List ? v : const <Object?>[]))
+    if (k is String && k.isNotEmpty) k,
+];
+
 class HistoryPacket {
-  const HistoryPacket({required this.id, required this.date, required this.chapter, this.receipts = 0});
+  const HistoryPacket({
+    required this.id,
+    required this.date,
+    required this.chapter,
+    this.receipts = 0,
+    this.imageKeys = const [],
+  });
 
   factory HistoryPacket.fromJson(Object? j) {
     final m = _m(j);
+    final receipts = m['receipts'] is List ? m['receipts']! as List : const <Object?>[];
     return HistoryPacket(
       id: _s(m['id']) ?? '',
       date: _s(m['date']),
       chapter: _title(m, 'chapter'),
-      receipts: (m['receipts'] as List?)?.length ?? 0,
+      receipts: receipts.length,
+      imageKeys: [for (final r in receipts) ..._keys(_m(r)['imageKeys'])],
     );
   }
 
@@ -131,6 +155,44 @@ class HistoryPacket {
   final String? date;
   final String chapter;
   final int receipts;
+
+  /// Хүүхдийн илгээсэн хавсралтын зураг (`/files/:key`).
+  final List<String> imageKeys;
+}
+
+/// `GET /parent/children/:studentId/theory/:chapterId` (parent.md §3.1).
+class ChildTheory {
+  const ChildTheory({required this.chapterTitle, this.blocks = const []});
+
+  factory ChildTheory.fromJson(Object? j) {
+    final m = _m(j);
+    return ChildTheory(
+      chapterTitle: _title(m, 'chapter'),
+      blocks: [
+        for (final b in (m['theories'] as List? ?? const <Object?>[]))
+          TheoryBlock(
+            id: _s(_m(b)['id']) ?? '',
+            title: _s(_m(b)['title']) ?? '',
+            content: _s(_m(b)['content']) ?? '',
+            imageKeys: _keys(_m(b)['imageKeys']),
+          ),
+      ],
+    );
+  }
+
+  final String chapterTitle;
+  final List<TheoryBlock> blocks;
+}
+
+class TheoryBlock {
+  const TheoryBlock({required this.id, required this.title, required this.content, this.imageKeys = const []});
+
+  final String id;
+  final String title;
+
+  /// LaTeX бичвэр — `MathText`-ээр зурна.
+  final String content;
+  final List<String> imageKeys;
 }
 
 class HistoryList<T> {

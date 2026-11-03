@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/feature_routes.dart';
 import 'ui/history_screen.dart';
 import 'ui/parent_home_screen.dart';
+import 'ui/theory_screen.dart';
 import 'ui/weekly_report_screen.dart';
 
 /// `parent` feature-ийн маршрутууд. Энэ файлыг ЗӨВХӨН энэ feature-ийн эзэн засна.
@@ -10,6 +11,7 @@ import 'ui/weekly_report_screen.dart';
 /// - `/app/parent` — хүүхдийн самбар (хүүхэд сонгох, дүн, ирц, даалгавар, төлбөр, холбох).
 /// - `/app/parent/weekly?studentId=&week=` — 7 хоногийн тайлан.
 /// - `/app/parent/history?studentId=&year=` — жилийн бүтэн түүх.
+/// - `/app/parent/theory?studentId=&chapterId=` — хүүхдийн бүлгийн онол, зураг.
 /// `/app/dismissal` нь эцэг эхийн чөлөө БИШ (багшийн «анги тарах цаг», api-contract/parent.md) — M8.
 final parentRoutes = FeatureRoutes(
   shell: [
@@ -19,6 +21,13 @@ final parentRoutes = FeatureRoutes(
       builder: (_, state) => ParentHistoryScreen(
         initialStudentId: state.uri.queryParameters['studentId'],
         initialYear: int.tryParse(state.uri.queryParameters['year'] ?? ''),
+      ),
+    ),
+    GoRoute(
+      path: '/app/parent/theory',
+      builder: (_, state) => ParentTheoryScreen(
+        studentId: state.uri.queryParameters['studentId'] ?? '',
+        chapterId: state.uri.queryParameters['chapterId'] ?? '',
       ),
     ),
     GoRoute(

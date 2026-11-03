@@ -39,11 +39,4 @@ void main() {
     expect(transferNote(firstName: 'Тэмүүлэн'), 'Тэмүүлэн, 2027');
     expect(transferNote(), 'Хүүхдийн овог нэр, утасны дугаар, 2027');
   });
-
-  test('үнийн түвшин сургуулийн ангиар', () {
-    expect(tierForGrade(12)!.amountOf(TuitionPlanKind.monthly), 350000);
-    expect(tierForGrade(10)!.amountOf(TuitionPlanKind.fullYear), 2000000);
-    expect(tierForGrade(8), isNull);
-    expect(tierForGrade(null), isNull);
-  });
 }
