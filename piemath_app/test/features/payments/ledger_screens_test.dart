@@ -66,10 +66,26 @@ void main() {
           {'id': 'p1', 'amount': 350000, 'method': 'BANK_TRANSFER', 'status': 'CONFIRMED', 'forMonth': '2026-11', 'createdAt': '2026-11-02T02:00:00.000Z'},
         ],
       });
-    await pumpM7(tester, const LedgerStudentScreen(studentId: 'st1'), http: h, session: _staff);
+    await pumpM7(tester, const LedgerStudentScreen(studentId: 'st1'), http: h, session: signedInAs('ADMIN'));
     expect(find.text('4 өдөр'), findsOneWidget);
     expect(find.text('350,000₮'), findsWidgets);
     expect(find.text('2,500,000₮'), findsOneWidget);
+  });
+
+  testWidgets('Багш+ зөвхөн төлөв харна — сервер дүн буцаасан ч мөнгөн дүнгүй', (tester) async {
+    final h = FakeHttp()
+      ..json('GET', '/payments/ledger/student/st1', {
+        'month': '2026-11',
+        'row': _row(),
+        'tier': {'key': 'd4', 'label': '7 хоногт 4 өдөр', 'monthly': 350000, 'fullYear': 2500000},
+        'daysPerWeek': 4,
+        'payments': [
+          {'id': 'p1', 'amount': 350000, 'method': 'BANK_TRANSFER', 'status': 'CONFIRMED', 'forMonth': '2026-11', 'createdAt': '2026-11-02T02:00:00.000Z'},
+        ],
+      });
+    await pumpM7(tester, const LedgerStudentScreen(studentId: 'st1'), http: h, session: _staff);
+    expect(find.text('4 өдөр'), findsOneWidget);
+    expect(find.textContaining('₮'), findsNothing);
   });
 
   testWidgets('сервер үнэ, дүн өгөөгүй бол ямар ч тоо зохиохгүй', (tester) async {
@@ -88,7 +104,7 @@ void main() {
           {'id': 'p1', 'status': 'PENDING', 'createdAt': '2026-11-02T02:00:00.000Z'},
         ],
       });
-    await pumpM7(tester, const LedgerStudentScreen(studentId: 'st1'), http: h, session: _staff);
+    await pumpM7(tester, const LedgerStudentScreen(studentId: 'st1'), http: h, session: signedInAs('ADMIN'));
     expect(find.textContaining('₮'), findsNothing);
     expect(find.text('Сарын төлбөр'), findsNothing);
     expect(find.text('Өртэй'), findsOneWidget);
