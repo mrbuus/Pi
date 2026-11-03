@@ -120,3 +120,32 @@ class AttemptResult {
 
 /// Серверийн тайлбар кирилл үсэгтэй бол л харуулна (англи техникийн бичвэр хэрэглэгчид гарахгүй).
 bool isMongolianText(String? s) => s != null && RegExp(r'[Ѐ-ӿ]').hasMatch(s);
+
+/// `GET /recommend/chapter-match` — хичээлийн сэдвийн бүлэг(үүд).
+@immutable
+class ChapterMatch {
+  const ChapterMatch({required this.chapterIds, this.title});
+
+  static ChapterMatch? tryParse(Object? raw) {
+    final j = asMap(raw);
+    final ids = [
+      for (final c in asList(j['chapterIds']))
+        if (c is String && c.isNotEmpty) c,
+    ];
+    final first = asStr(j['chapterId']);
+    if (first != null && first.isNotEmpty && !ids.contains(first)) ids.insert(0, first);
+    return ids.isEmpty ? null : ChapterMatch(chapterIds: ids, title: asStr(j['title']));
+  }
+
+  final List<String> chapterIds;
+  final String? title;
+}
+
+/// Сэдвээр дасгалын зам: `/app/practice?chapter=a,b&title=…`.
+String practiceTopicPath(List<String> chapterIds, {String? title}) => Uri(
+  path: '/app/practice',
+  queryParameters: {
+    'chapter': chapterIds.take(12).join(','),
+    if (title != null && title.trim().isNotEmpty) 'title': title.trim(),
+  },
+).toString();

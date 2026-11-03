@@ -58,9 +58,17 @@ class ActivityYear {
 }
 
 /// `GET /activity/streak` — дараалсан өдрийн тоо (серверийн тооцоо; апп өөрөө бодохгүй).
+/// Нэмэлт (сонголттой): уян цуврал, энэ 7 хоногийн амралтын өдөр. Хуучин сервер өгөхгүй бол null.
 @immutable
 class ActivityStreak {
-  const ActivityStreak({this.currentStreak = 0, this.longestStreak = 0, this.totalActiveDays = 0});
+  const ActivityStreak({
+    this.currentStreak = 0,
+    this.longestStreak = 0,
+    this.totalActiveDays = 0,
+    this.flexStreak,
+    this.restDayUsedThisWeek,
+    this.activeDaysThisWeek,
+  });
 
   factory ActivityStreak.fromJson(Object? raw) {
     final j = asMap(raw);
@@ -68,10 +76,18 @@ class ActivityStreak {
       currentStreak: (asInt(j['currentStreak']) ?? 0).clamp(0, 100000),
       longestStreak: (asInt(j['longestStreak']) ?? 0).clamp(0, 100000),
       totalActiveDays: (asInt(j['totalActiveDays']) ?? 0).clamp(0, 100000),
+      flexStreak: asInt(j['flexStreak'])?.clamp(0, 100000),
+      restDayUsedThisWeek: j['restDayUsedThisWeek'] is bool ? j['restDayUsedThisWeek'] as bool : null,
+      activeDaysThisWeek: asInt(j['activeDaysThisWeek'])?.clamp(0, 7),
     );
   }
 
   final int currentStreak;
   final int longestStreak;
   final int totalActiveDays;
+
+  /// 7 хоног бүрт нэг идэвхгүй өдрийг тэвчдэг цуврал.
+  final int? flexStreak;
+  final bool? restDayUsedThisWeek;
+  final int? activeDaysThisWeek;
 }

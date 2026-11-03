@@ -9,8 +9,14 @@ import '../../homework/ui/homework_providers.dart';
 import '../../student_home/ui/activity_week_card.dart' show weekDots;
 import '../application/mistakes_controller.dart';
 import '../application/study_hub_providers.dart';
+import '../data/activity_models.dart';
 import '../data/activity_repository.dart';
 import '../data/formula_review_repository.dart';
+import '../data/mistake_models.dart';
+import '../data/practice_models.dart';
+import '../data/practice_repository.dart';
+import '../data/problem_review_models.dart';
+import '../data/problem_review_repository.dart';
 import '../data/readiness_models.dart';
 import '../data/readiness_repository.dart';
 import '../domain/study_plan.dart';
@@ -116,16 +122,22 @@ class TodayPlanCard extends ConsumerWidget {
     }
     final mistakes = ref.watch(todayMistakesProvider);
     final formulas = ref.watch(formulaReviewCountProvider);
+    final due = ref.watch(dueProblemsProvider);
     final exams = ref.watch(myExamsProvider);
     final pending = [homework, mistakes, formulas].any((a) => a.isLoading && !a.hasValue);
     if (pending) return const SkeletonCard(lines: 4);
 
+    final topic = lastTopic?.trim();
+    final match = topic == null || topic.isEmpty ? null : ref.watch(lessonTopicChapterProvider(topic)).value;
+    final counts = _reviewCounts(mistakes, formulas, due);
     final items = buildTodayPlan(
       PlanInputs(
         homework: homework.value ?? const [],
         mistakesToday: mistakes.value?.length,
         formulasDue: formulas.value,
+        problemsDue: due.hasValue ? counts.problems : null,
         lastTopic: lastTopic,
+        lastTopicPath: match == null ? null : practiceTopicPath(match.chapterIds, title: topic),
         nextExam: exams.value == null ? null : nextExam(exams.value!, now, withinDays: 7),
       ),
     );
@@ -178,6 +190,7 @@ class TodayPlanCard extends ConsumerWidget {
     PlanKind.homework => AppIcons.homework,
     PlanKind.formulas => AppIcons.formula,
     PlanKind.mistakes => AppIcons.restart,
+    PlanKind.problemReview => AppIcons.repeat,
     PlanKind.lastTopic => AppIcons.theory,
     PlanKind.nextExam => AppIcons.exam,
     PlanKind.practice => AppIcons.practice,
@@ -187,7 +200,8 @@ class TodayPlanCard extends ConsumerWidget {
 // ---------------------------------------------------------------------------
 // 2. Тань дээр ажиллах
 
-/// Хамгийн сул 3 сэдэв, 4 түвшингээр (оноо биш). Сервер тооцоогүй бол нууцлагдана.
+/// Хамгийн сул 3 сэдэв, 4 түвшингээр (оноо биш). Сэдэв бүлэгтэй бол мөрийг дарахад тэр сэдвээр дасгал;
+/// гарчгийг дарахад бэлэн байдлын дэлгэц. Сервер тооцоогүй бол нууцлагдана.
 class WeakTopicsCard extends ConsumerWidget {
   const WeakTopicsCard({super.key});
 
@@ -203,28 +217,42 @@ class WeakTopicsCard extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AppCard(
-          onTap: () => context.push('/app/readiness'),
-          semanticLabel: topics.isEmpty
-              ? 'Тань дээр ажиллах. Дасгал, тест хийх тусам сэдвүүд гарна'
-              : 'Тань дээр ажиллах. ${topics.map((t) => '${t.title}: ${MasteryLevel.fromPercent(t.mastery!).label}').join(', ')}',
-          child: ExcludeSemantics(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const _CardTitle(icon: AppIcons.gauge, title: 'Тань дээр ажиллах'),
-                const SizedBox(height: AppSpace.md),
-                if (topics.isEmpty)
-                  Text(
+          padding: const EdgeInsets.symmetric(vertical: AppSpace.sm),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Semantics(
+                button: true,
+                label: topics.isEmpty
+                    ? 'Тань дээр ажиллах. Дасгал, тест хийх тусам сэдвүүд гарна'
+                    : 'Тань дээр ажиллах. Бэлэн байдлыг нээх',
+                excludeSemantics: true,
+                child: InkWell(
+                  onTap: () => context.push('/app/readiness'),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: AppSpace.sm),
+                      child: _CardTitle(
+                        icon: AppIcons.gauge,
+                        title: 'Тань дээр ажиллах',
+                        trailing: Icon(AppIcons.forward, size: 18, color: c.inkDim),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (topics.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(AppSpace.lg, AppSpace.xs, AppSpace.lg, AppSpace.sm),
+                  child: Text(
                     'Дасгал, тест хийх тусам энд сэдэв бүрийн түвшин гарна',
                     style: context.text.bodyMedium?.copyWith(color: c.inkDim),
-                  )
-                else
-                  for (final (i, t) in topics.indexed) ...[
-                    if (i > 0) const SizedBox(height: AppSpace.md),
-                    _TopicLevelRow(topic: t),
-                  ],
-              ],
-            ),
+                  ),
+                )
+              else
+                for (final t in topics) _WeakTopicRow(topic: t),
+            ],
           ),
         ),
         if (topics.isNotEmpty)
@@ -238,6 +266,43 @@ class WeakTopicsCard extends ConsumerWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Нэг сул сэдэв: бүлэгтэй бол тэр сэдвээр дасгал, үгүй бол бэлэн байдлын дэлгэц. Дарах өндөр 56.
+class _WeakTopicRow extends StatelessWidget {
+  const _WeakTopicRow({required this.topic});
+
+  final ReadinessTopic topic;
+
+  @override
+  Widget build(BuildContext context) {
+    final chapter = topic.chapterId;
+    final level = MasteryLevel.fromPercent(topic.mastery ?? 0);
+    return Semantics(
+      button: true,
+      label: chapter == null
+          ? '${topic.title}: ${level.label}'
+          : '${topic.title}: ${level.label}. Энэ сэдвээр дасгал хийх',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: () =>
+            context.push(chapter == null ? '/app/readiness' : practiceTopicPath([chapter], title: topic.title)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 56),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: AppSpace.sm),
+            child: Row(
+              children: [
+                Expanded(child: _TopicLevelRow(topic: topic)),
+                const SizedBox(width: AppSpace.sm),
+                Icon(chapter == null ? AppIcons.forward : AppIcons.practice, size: 18, color: context.colors.inkDim),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -302,7 +367,15 @@ class LevelSteps extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // 3. Давтах
 
-/// Өнөөдрийн алдаа + хугацаа нь болсон томьёо нэг тоолуураар.
+/// Хугацаа нь болсон бодлого + өнөөдрийн алдаа + томьёо нэг тоолуураар (давхардсан бодлогыг нэг л удаа).
+ReviewCounts _reviewCounts(AsyncValue<List<Mistake>> mistakes, AsyncValue<int> formulas, AsyncValue<DueReviews> due) =>
+    reviewCounts(
+      mistakeProblemIds: [for (final m in mistakes.value ?? const <Mistake>[]) m.problem.id],
+      formulas: formulas.value ?? 0,
+      dueTotal: due.value?.total ?? 0,
+      dueProblemIds: [for (final d in due.value?.items ?? const <DueReview>[]) d.problem.id],
+    );
+
 class ReviewCounterCard extends ConsumerWidget {
   const ReviewCounterCard({super.key});
 
@@ -310,15 +383,22 @@ class ReviewCounterCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mistakes = ref.watch(todayMistakesProvider);
     final formulas = ref.watch(formulaReviewCountProvider);
-    if (mistakes.hasError && formulas.hasError) return const SizedBox.shrink();
-    if (!mistakes.hasValue && !formulas.hasValue) return const SkeletonCard(lines: 1);
-    final m = mistakes.value?.length ?? 0;
-    final f = formulas.value ?? 0;
-    final total = m + f;
+    final due = ref.watch(dueProblemsProvider);
+    if (mistakes.hasError && formulas.hasError && due.hasError) return const SizedBox.shrink();
+    if (!mistakes.hasValue && !formulas.hasValue && !due.hasValue) return const SkeletonCard(lines: 1);
+    final n = _reviewCounts(mistakes, formulas, due);
     final c = context.colors;
+    final path = n.problems > 0
+        ? '/app/study/due'
+        : n.mistakes > 0
+        ? '/app/mistakes/today'
+        : '/app/formulas/review';
+    final parts = [if (n.problems > 0) 'Бодлого ${n.problems}', 'Алдаа ${n.mistakes}', 'Томьёо ${n.formulas}'];
     return AppCard(
-      onTap: () => context.push(m > 0 ? '/app/mistakes/today' : '/app/formulas/review'),
-      semanticLabel: total == 0 ? 'Давтах. Өнөөдөр давтах зүйл алга' : 'Давтах. Нийт $total: алдаа $m, томьёо $f. Нээх',
+      onTap: () => context.push(path),
+      semanticLabel: n.total == 0
+          ? 'Давтах. Өнөөдөр давтах зүйл алга'
+          : 'Давтах. Нийт ${n.total}: ${parts.join(', ')}. Нээх',
       child: ExcludeSemantics(
         child: Row(
           children: [
@@ -329,17 +409,17 @@ class ReviewCounterCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Давтах', style: context.text.titleSmall),
-                  if (total == 0)
+                  if (n.total == 0)
                     Text('Өнөөдөр давтах зүйл алга', style: context.text.bodySmall?.copyWith(color: c.inkDim))
                   else
                     Meta(
-                      items: ['Алдаа $m', 'Томьёо $f'],
+                      items: parts,
                       style: context.text.bodySmall?.copyWith(color: c.inkDim),
                     ),
                 ],
               ),
             ),
-            if (total > 0) Text('$total', style: context.text.titleLarge),
+            if (n.total > 0) Text('${n.total}', style: context.text.titleLarge),
             const SizedBox(width: AppSpace.xs),
             Icon(AppIcons.forward, size: 18, color: c.inkDim),
           ],
@@ -440,6 +520,7 @@ class WeeklyGoalCard extends ConsumerWidget {
     final active = weekDots(now, year.value).where((d) => d.done).length;
     final p = WeeklyGoalProgress(goal: g, activeDays: active);
     final shown = active > g ? g : active;
+    final rest = restDayNote(ref.watch(activityStreakProvider).value);
     final note = !year.hasValue
         ? ' '
         : p.reached
@@ -462,7 +543,7 @@ class WeeklyGoalCard extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(right: AppSpace.md),
             child: Semantics(
-              label: 'Энэ 7 хоногт $active өдөр, зорилго $g өдөр. $note',
+              label: ['Энэ 7 хоногт $active өдөр, зорилго $g өдөр. $note', ?rest].join('. '),
               excludeSemantics: true,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -472,6 +553,18 @@ class WeeklyGoalCard extends ConsumerWidget {
                   LevelSteps(filled: shown, total: g),
                   const SizedBox(height: AppSpace.sm),
                   Text(note, style: context.text.bodySmall?.copyWith(color: c.inkDim)),
+                  if (rest != null) ...[
+                    const SizedBox(height: AppSpace.xs),
+                    Row(
+                      children: [
+                        Icon(AppIcons.calendarCheck, size: 16, color: c.brandSoft),
+                        const SizedBox(width: AppSpace.xs),
+                        Expanded(
+                          child: Text(rest, style: context.text.bodySmall?.copyWith(color: c.inkDim)),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -511,8 +604,8 @@ Future<void> showWeeklyGoalSheet(BuildContext context, WidgetRef ref, {required 
                     selected: current == n,
                     materialTapTargetSize: MaterialTapTargetSize.padded,
                     onSelected: (_) {
-                      ref.read(weeklyGoalProvider.notifier).set(n);
                       Navigator.of(sheet).pop();
+                      _saveGoal(context, ref, n);
                     },
                   ),
               ],
@@ -523,8 +616,8 @@ Future<void> showWeeklyGoalSheet(BuildContext context, WidgetRef ref, {required 
                 alignment: AlignmentDirectional.centerStart,
                 child: TextButton(
                   onPressed: () {
-                    ref.read(weeklyGoalProvider.notifier).set(null);
                     Navigator.of(sheet).pop();
+                    _saveGoal(context, ref, null);
                   },
                   child: const Text('Зорилгогүй байх'),
                 ),
@@ -535,4 +628,17 @@ Future<void> showWeeklyGoalSheet(BuildContext context, WidgetRef ref, {required 
       ),
     ),
   );
+}
+
+Future<void> _saveGoal(BuildContext context, WidgetRef ref, int? days) async {
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  final ok = await ref.read(weeklyGoalProvider.notifier).set(days);
+  if (!ok) messenger?.showSnackBar(const SnackBar(content: Text('Зорилго хадгалагдсангүй. Дахин оролдоно уу')));
+}
+
+/// Амралтын өдрийн тайван мэдээлэл (улаангүй, буруутгалгүй). Хуучин сервер талбаргүй бол null.
+String? restDayNote(ActivityStreak? s) {
+  final used = s?.restDayUsedThisWeek;
+  if (used == null) return null;
+  return used ? 'Энэ 7 хоногийн амралтын өдрөө ашигласан' : '7 хоногт нэг өдөр амарч болно, цуврал тасрахгүй';
 }

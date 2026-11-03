@@ -507,6 +507,16 @@ class TopicScore {
   final double max;
 }
 
+/// Бодлогод зарцуулсан хугацаа (`itemTimes[]`, `items[].timeSpentSec`) — нэмэлт, сонголттой.
+@immutable
+class ItemTime {
+  const ItemTime({required this.n, required this.seconds});
+
+  /// Тест дэх дугаар.
+  final int n;
+  final int seconds;
+}
+
 /// `GET /exam-results/my/:testId` (§5.1).
 @immutable
 class ExamResultPage {
@@ -529,6 +539,7 @@ class ExamResultPage {
     this.wrong,
     this.practiceTopic,
     this.practiceChapterIds = const [],
+    this.itemTimes = const [],
   });
 
   factory ExamResultPage.fromJson(Object? raw) {
@@ -568,6 +579,11 @@ class ExamResultPage {
         for (final c in _list(practice['chapterIds']))
           if (c is String) c,
       ],
+      itemTimes: [
+        for (final t in _list(j['itemTimes']))
+          if ((_int(_map(t)['n']), _int(_map(t)['timeSpentSec'])) case (final int n, final int sec) when sec >= 0)
+            ItemTime(n: n, seconds: sec),
+      ],
     );
   }
 
@@ -589,6 +605,9 @@ class ExamResultPage {
   final List<WrongItem>? wrong;
   final String? practiceTopic;
   final List<String> practiceChapterIds;
+
+  /// Онлайнаар өгсөн бол бодлого бүрийн хугацаа (хуучин серверт хоосон).
+  final List<ItemTime> itemTimes;
 }
 
 /// `GET /tests/:id/review` мөр (§5.2).
@@ -605,6 +624,7 @@ class PracticeReviewItem {
     this.answerUnknown = false,
     this.myAnswer,
     this.solution,
+    this.timeSpentSec,
   });
 
   factory PracticeReviewItem.fromJson(Object? raw) {
@@ -620,6 +640,7 @@ class PracticeReviewItem {
       answerUnknown: _bool(j['answerUnknown']),
       myAnswer: _str(j['myAnswer']) ?? answerDisplay(normalizeAnswer(j['myAnswer'])),
       solution: _str(j['solution']),
+      timeSpentSec: _int(j['timeSpentSec']),
     );
   }
 
@@ -633,6 +654,9 @@ class PracticeReviewItem {
   final bool answerUnknown;
   final String? myAnswer;
   final String? solution;
+
+  /// Бодлогод зарцуулсан секунд (байхгүй бол null).
+  final int? timeSpentSec;
 }
 
 @immutable

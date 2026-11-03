@@ -9,6 +9,7 @@ import '../application/mistakes_controller.dart';
 import '../application/study_hub_providers.dart';
 import '../data/activity_repository.dart';
 import '../data/formula_review_repository.dart';
+import '../data/problem_review_repository.dart';
 import '../data/readiness_repository.dart';
 import 'study_hub_parts.dart';
 
@@ -58,6 +59,7 @@ class StudyHubScreen extends ConsumerWidget {
             assignmentsProvider,
             myExamsProvider,
             activityStreakProvider,
+            dueProblemsProvider,
           ]) {
             ref.invalidate(p);
           }

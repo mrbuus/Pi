@@ -10,7 +10,7 @@ import '../data/readiness_models.dart';
 /// энд зөвхөн байгаа endpoint-уудын хариуг өдрийн жагсаалт болгон эрэмбэлнэ.
 
 /// Өдрийн төлөвлөгөөний мөрийн төрөл.
-enum PlanKind { homework, formulas, mistakes, lastTopic, nextExam, practice }
+enum PlanKind { homework, formulas, mistakes, problemReview, lastTopic, nextExam, practice }
 
 @immutable
 class PlanItem {
@@ -40,14 +40,28 @@ class HomeworkDue {
 /// Өдрийн төлөвлөгөөний оролт. null = ачаалагдаагүй / алдаа (тэр мөрийг алгасна).
 @immutable
 class PlanInputs {
-  const PlanInputs({this.homework = const [], this.mistakesToday, this.formulasDue, this.lastTopic, this.nextExam});
+  const PlanInputs({
+    this.homework = const [],
+    this.mistakesToday,
+    this.formulasDue,
+    this.problemsDue,
+    this.lastTopic,
+    this.lastTopicPath,
+    this.nextExam,
+  });
 
   final List<HomeworkDue> homework;
   final int? mistakesToday;
   final int? formulasDue;
 
+  /// Хугацаатай давталтын хугацаа нь болсон бодлого (өнөөдрийн алдаатай давхардаагүй).
+  final int? problemsDue;
+
   /// Сүүлийн хичээлийн сэдэв.
   final String? lastTopic;
+
+  /// Сэдэв бүлэгтэй таарвал сэдвээр дасгалын зам, үгүй бол ерөнхий давтлага.
+  final String? lastTopicPath;
 
   /// Ойрын 7 хоногийн шалгалт.
   final UpcomingExam? nextExam;
@@ -91,6 +105,18 @@ List<PlanItem> buildTodayPlan(PlanInputs i) {
       ),
     );
   }
+  final problems = i.problemsDue ?? 0;
+  if (problems > 0) {
+    rest.add(
+      PlanItem(
+        kind: PlanKind.problemReview,
+        title: 'Хугацаа нь болсон бодлого',
+        subtitle: '$problems бодлого',
+        minutes: 5,
+        path: '/app/study/due',
+      ),
+    );
+  }
   final exam = i.nextExam;
   final topic = i.lastTopic?.trim();
   if (exam != null) {
@@ -111,7 +137,7 @@ List<PlanItem> buildTodayPlan(PlanInputs i) {
         title: 'Сүүлийн хичээлийн сэдвээр',
         subtitle: topic,
         minutes: 10,
-        path: '/app/study/review',
+        path: i.lastTopicPath ?? '/app/study/review',
       ),
     );
   }
@@ -260,3 +286,33 @@ class WeeklyGoalProgress {
 
 /// Зорилгын зөвшөөрөгдсөн утга.
 int clampWeeklyGoal(int n) => n.clamp(1, 7);
+
+/// «Давтах» тоолуурын хэсгүүд. Хугацаатай давталтын бодлого өнөөдрийн алдаатай давхцвал нэг удаа л тоолно.
+@immutable
+class ReviewCounts {
+  const ReviewCounts({required this.mistakes, required this.formulas, required this.problems});
+
+  final int mistakes;
+  final int formulas;
+
+  /// Алдаанаас гадуурх хугацаа нь болсон бодлого.
+  final int problems;
+
+  int get total => mistakes + formulas + problems;
+}
+
+/// [dueTotal] — серверийн нийт тоо, [dueProblemIds] — ачаалсан мөрүүдийн бодлого.
+ReviewCounts reviewCounts({
+  required List<String> mistakeProblemIds,
+  required int formulas,
+  required int dueTotal,
+  required List<String> dueProblemIds,
+}) {
+  final mistakes = mistakeProblemIds.toSet();
+  final overlap = dueProblemIds.where(mistakes.contains).toSet().length;
+  return ReviewCounts(
+    mistakes: mistakeProblemIds.length,
+    formulas: formulas < 0 ? 0 : formulas,
+    problems: (dueTotal - overlap).clamp(0, 100000),
+  );
+}

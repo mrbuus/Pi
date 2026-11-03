@@ -29,3 +29,13 @@ List<TopicScore> topicBreakdown(List<PracticeReviewItem> items) {
       ),
   ];
 }
+
+/// «Удаан бодсон»: хамгийн их хугацаа зарцуулсан [count] бодлого (0 секундийг алгасна; тэнцвэл дугаараар).
+List<ItemTime> slowestItems(Iterable<ItemTime> times, {int count = 3}) {
+  final l = times.where((t) => t.seconds > 0).toList()
+    ..sort((a, b) {
+      final c = b.seconds.compareTo(a.seconds);
+      return c != 0 ? c : a.n.compareTo(b.n);
+    });
+  return l.take(count).toList();
+}

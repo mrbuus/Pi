@@ -204,7 +204,7 @@ class _MistakeDetailState extends ConsumerState<MistakeDetail> {
         const SizedBox(height: AppSpace.xl),
         Text('Дахин бодоод хариулна уу', style: context.text.titleSmall),
         const SizedBox(height: AppSpace.md),
-        _RetryInput(
+        RetryAnswerInput(
           key: ValueKey('retry-${_item.id}-$_attempt'),
           problem: p,
           value: _value,
@@ -307,9 +307,9 @@ class _FormulaTile extends StatelessWidget {
   }
 }
 
-/// Хариу оруулах хэсэг — шалгалтын widget-үүдийг дахин ашиглана (`exam/ui/widgets/answer_inputs.dart`).
-class _RetryInput extends StatelessWidget {
-  const _RetryInput({
+/// Хариу оруулах хэсэг (алдааны дэвтэр, хугацаатай давталт) — шалгалтын widget-үүдийг дахин ашиглана (`exam/ui/widgets/answer_inputs.dart`).
+class RetryAnswerInput extends StatelessWidget {
+  const RetryAnswerInput({
     super.key,
     required this.problem,
     required this.value,

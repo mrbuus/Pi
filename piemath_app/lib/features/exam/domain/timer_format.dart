@@ -22,3 +22,14 @@ String spokenDuration(Duration d) {
   if (d.inMinutes >= 1) return '${d.inMinutes} минут';
   return '${d.inSeconds} секунд';
 }
+
+/// Бодлогод зарцуулсан хугацаа: «1м 20с», «45с», «1ц 5м».
+String formatSpent(int seconds) {
+  final s = seconds < 0 ? 0 : seconds;
+  final h = s ~/ 3600;
+  final m = (s % 3600) ~/ 60;
+  final sec = s % 60;
+  if (h > 0) return m > 0 ? '$hц $mм' : '$hц';
+  if (m > 0) return sec > 0 ? '$mм $secс' : '$mм';
+  return '$secс';
+}

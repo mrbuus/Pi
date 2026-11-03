@@ -25,16 +25,55 @@ Map<String, Object?> _hwDay(String date, {bool upcoming = false, String? topic})
   'topic': topic,
 };
 
-Map<String, Object?> _topic(String code, String title, int mastery) => {
+Map<String, Object?> _topic(String code, String title, int mastery, {String? chapterId}) => {
   'topic': code,
   'title': title,
   'mastery': mastery,
   'measured': true,
   'attempts': 6,
   'trend': 'FLAT',
+  'chapterId': ?chapterId,
 };
 
-FakeHttp _http({bool withData = true, Duration delay = Duration.zero}) => FakeHttp()
+/// Серверийн 7 хоногийн зорилго (PUT-оор өөрчлөгдөнө).
+class _GoalServer {
+  _GoalServer([this.days]);
+
+  int? days;
+  final puts = <Object?>[];
+
+  void register(FakeHttp http) {
+    http
+      ..on('GET', '/study/weekly-goal', (_) => FakeResponse({'daysPerWeek': days, 'updatedAt': null}))
+      ..on('PUT', '/study/weekly-goal', (r) {
+        final v = (r.data as Map)['daysPerWeek'];
+        puts.add(v);
+        days = v as int?;
+        return FakeResponse({'daysPerWeek': days, 'updatedAt': '2026-11-04T02:00:00.000Z'});
+      });
+  }
+}
+
+Map<String, Object?> _due(String id, String problemId) => {
+  'id': id,
+  'problem': {
+    'id': problemId,
+    'statementText': r'$2x=6$',
+    'choices': [r'$2$', r'$3$'],
+    'choiceMode': 'TEXT',
+    'format': 'CHOICE',
+    'imageKey': null,
+  },
+  'dueAt': '2026-11-03T16:00:00.000Z',
+  'intervalDays': 1,
+  'reps': 0,
+  'lapses': 0,
+  'lastResult': 'WRONG',
+  'source': 'TEST',
+  'formulas': <Object?>[],
+};
+
+FakeHttp _http({bool withData = true, Duration delay = Duration.zero, List<Object?>? topics}) => FakeHttp()
   ..on(
     'GET',
     '/mistakes/today',
@@ -52,14 +91,16 @@ FakeHttp _http({bool withData = true, Duration delay = Duration.zero}) => FakeHt
     'high': 65,
     'dataPoints': withData ? 30 : 0,
     'coverage': withData ? 60 : 0,
-    'topics': withData
-        ? [
-            _topic('a', 'Логарифм', 35),
-            _topic('b', 'Вектор', 72),
-            _topic('c', 'Функц', 55),
-            _topic('d', 'Тригонометр', 95),
-          ]
-        : <Object?>[],
+    'topics':
+        topics ??
+        (withData
+            ? [
+                _topic('a', 'Логарифм', 35),
+                _topic('b', 'Вектор', 72),
+                _topic('c', 'Функц', 55),
+                _topic('d', 'Тригонометр', 95),
+              ]
+            : <Object?>[]),
   })
   ..json('GET', '/exam-results/my', {
     'exams': withData
@@ -133,8 +174,10 @@ void main() {
     await settle(tester); // гүйлгэхэд хожуу барьсан картуудын хүсэлт дуустал
   });
 
-  testWidgets('7 хоногийн зорилго: сурагч өөрөө тавьж, хувийн явц харагдана, утсанд хадгална', (tester) async {
-    await _pumpHub(tester, _http());
+  testWidgets('7 хоногийн зорилго: сурагч өөрөө тавьж, хувийн явц харагдана, серверт хадгална', (tester) async {
+    final http = _http();
+    final goal = _GoalServer()..register(http);
+    await _pumpHub(tester, http);
     await tester.scrollUntilVisible(find.text('7 хоногийн зорилго'), 200, scrollable: _scrollable);
     await tester.tap(find.text('7 хоногийн зорилго'));
     await settle(tester);
@@ -145,14 +188,115 @@ void main() {
     await settle(tester);
     expect(find.text('Энэ 7 хоногт 1 / 4 өдөр'), findsOneWidget);
     expect(find.text('Дахиад 3 өдөр'), findsOneWidget);
-    expect((await SharedPreferences.getInstance()).getInt('${WeeklyGoalController.prefix}guest'), 4);
+    expect(goal.puts, [4], reason: 'серверт хадгална');
+    expect((await SharedPreferences.getInstance()).getInt('${WeeklyGoalController.prefix}guest'), isNull);
   });
 
-  testWidgets('биелсэн зорилго тайван бичвэртэй, хадгалсан утга дахин ачаална', (tester) async {
+  testWidgets('утсан дээрх хуучин зорилгыг серверт НЭГ удаа шилжүүлж, утсанд арилгана', (tester) async {
     SharedPreferences.setMockInitialValues({'${WeeklyGoalController.prefix}guest': 1});
-    await _pumpHub(tester, _http());
+    final http = _http();
+    final goal = _GoalServer()..register(http);
+    await _pumpHub(tester, http);
     await tester.scrollUntilVisible(find.text('Энэ 7 хоногт 1 / 1 өдөр'), 200, scrollable: _scrollable);
     expect(find.text('Энэ 7 хоногийн зорилго биелсэн. Бусад өдөр амарч болно'), findsOneWidget);
+    expect(goal.puts, [1]);
+    expect((await SharedPreferences.getInstance()).getInt('${WeeklyGoalController.prefix}guest'), isNull);
+  });
+
+  testWidgets('серверт зорилго байвал түүнийг, утасны хуучин утгыг илгээхгүй', (tester) async {
+    SharedPreferences.setMockInitialValues({'${WeeklyGoalController.prefix}guest': 6});
+    final http = _http();
+    final goal = _GoalServer(2)..register(http);
+    await _pumpHub(tester, http);
+    await tester.scrollUntilVisible(find.text('Энэ 7 хоногт 1 / 2 өдөр'), 200, scrollable: _scrollable);
+    expect(goal.puts, isEmpty);
+    expect((await SharedPreferences.getInstance()).getInt('${WeeklyGoalController.prefix}guest'), isNull);
+  });
+
+  testWidgets('амралтын өдрийн мэдээлэл тайван (улаан, буруутгал үгүй)', (tester) async {
+    final http = _http()
+      ..json('GET', '/activity/streak', {
+        'currentStreak': 1,
+        'longestStreak': 5,
+        'totalActiveDays': 9,
+        'flexStreak': 3,
+        'restDayUsedThisWeek': true,
+        'activeDaysThisWeek': 1,
+      });
+    _GoalServer(3).register(http);
+    await _pumpHub(tester, http);
+    const note = 'Энэ 7 хоногийн амралтын өдрөө ашигласан';
+    await tester.scrollUntilVisible(find.text(note), 200, scrollable: _scrollable);
+    final text = tester.widget<Text>(find.text(note));
+    final context = tester.element(find.text(note));
+    expect(text.style?.color, isNot(Theme.of(context).colorScheme.error));
+    for (final banned in ['тасарсан', 'алдсан', 'алдлаа']) {
+      expect(find.textContaining(banned), findsNothing, reason: banned);
+    }
+  });
+
+  testWidgets('давтах: хугацаа нь болсон бодлого тоолуур, төлөвлөгөөнд (алдаатай давхардсаныг нэг л удаа)', (
+    tester,
+  ) async {
+    final http = _http()
+      ..json('GET', '/review/problems/due', {
+        'total': 3,
+        'items': [_due('r1', 'p-m1'), _due('r2', 'px'), _due('r3', 'py')],
+      });
+    await _pumpHub(tester, http);
+    expect(find.text('Хугацаа нь болсон бодлого'), findsOneWidget);
+    // 2 алдаа + давхардаагүй 2 бодлого (p-m1 нь өнөөдрийн алдаатай давхацна)
+    expect(find.text('2 бодлого'), findsNWidgets(2));
+    await tester.scrollUntilVisible(find.text('Давтах'), 200, scrollable: _scrollable);
+    expect(find.text('7'), findsWidgets); // 2 бодлого + 2 алдаа + 3 томьёо
+    expect(find.text('Бодлого 2'), findsOneWidget);
+    await tester.tap(find.text('Давтах'));
+    await settle(tester);
+    expect(find.text('Бодлого давтах'), findsOneWidget);
+  });
+
+  testWidgets('сул сэдэв бүлэгтэй бол тэр сэдвээр дасгал, сүүлийн хичээлийн сэдэв бүлэгтэй таарвал түүгээр', (
+    tester,
+  ) async {
+    final http =
+        _http(
+            topics: [
+              _topic('a', 'Логарифм', 35, chapterId: 'ch-log'),
+              _topic('b', 'Вектор', 72),
+            ],
+          )
+          ..json('GET', '/recommend/chapter-match', {
+            'chapterId': 'ch-exp',
+            'chapterIds': ['ch-exp'],
+            'title': 'Илтгэгч функц',
+          })
+          ..json('GET', '/recommend/next', [
+            {'problemId': 'pp1', 'reason': 'WEAK_TOPIC', 'explanation': 'Сэдэв'},
+          ]);
+    final router = await pumpLearning(
+      tester,
+      http,
+      location: '/app/study',
+      overrides: [studyNowProvider.overrideWithValue(_now)],
+    );
+    await tester.tap(find.text('Сүүлийн хичээлийн сэдвээр'));
+    await settle(tester);
+    expect(router.state.uri.queryParameters['chapter'], 'ch-exp');
+    expect(find.text('Илтгэгч функц'), findsWidgets, reason: 'гарчиг нь сэдэв');
+    final match = http.requests.firstWhere((r) => r.path == '/recommend/chapter-match');
+    expect(match.queryParameters['topic'], 'Илтгэгч функц');
+    expect(http.requests.lastWhere((r) => r.path == '/recommend/next').queryParameters['chapterId'], 'ch-exp');
+
+    router.go('/app/study');
+    await settle(tester);
+    final weak = find.descendant(of: find.byType(WeakTopicsCard), matching: find.text('Логарифм'));
+    await tester.scrollUntilVisible(weak, 200, scrollable: _scrollable);
+    final row = tester.getSize(find.ancestor(of: weak, matching: find.byType(InkWell)).first);
+    expect(row.height, greaterThanOrEqualTo(48));
+    await tester.tap(weak);
+    await settle(tester);
+    expect(router.state.uri.queryParameters['chapter'], 'ch-log');
+    expect(http.requests.lastWhere((r) => r.path == '/recommend/next').queryParameters['chapterId'], 'ch-log');
   });
 
   testWidgets('өгөгдөлгүй: дасгалаар эхэлнэ, сул сэдэв тайлбартай, эрэмбэ/буруутгал үгүй', (tester) async {
@@ -173,5 +317,6 @@ void main() {
     expect(find.byType(SkeletonCard), findsWidgets);
     expect(find.ancestor(of: find.byType(SkeletonCard).first, matching: find.byType(SkeletonPulse)), findsNothing);
     await tester.pump(const Duration(seconds: 6));
+    await settle(tester); // ачаалал дууссаны дараа эхэлсэн хүсэлтүүд (сэдвийн бүлэг г.м.)
   });
 }

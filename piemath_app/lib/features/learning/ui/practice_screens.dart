@@ -14,41 +14,67 @@ import '../data/practice_repository.dart';
 import 'inline_message.dart';
 import 'problem_video_disclosure.dart';
 
-/// `/app/practice` — серверийн санал болгосон бодлогууд.
+/// `/app/practice` — серверийн санал болгосон бодлогууд. `?chapter=a,b&title=…` бол тэр сэдвээр.
 class PracticeScreen extends ConsumerWidget {
-  const PracticeScreen({super.key});
+  const PracticeScreen({super.key, this.chapters, this.title});
+
+  /// Таслалаар нийлүүлсэн бүлгийн ID (сэдвээр дасгал). null бол ерөнхий санал.
+  final String? chapters;
+  final String? title;
+
+  void _invalidate(WidgetRef ref) {
+    final key = chapters;
+    if (key == null || key.isEmpty) {
+      ref.invalidate(recommendationsProvider);
+    } else {
+      ref.invalidate(topicRecommendationsProvider(key));
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final list = ref.watch(recommendationsProvider);
+    final list = ref.watch(recommendationsFor(chapters));
+    final topic = title?.trim();
+    final focused = chapters != null && chapters!.isNotEmpty;
     return Scaffold(
-      appBar: AppBar(title: const Text('Дасгал')),
+      appBar: AppBar(
+        leading: focused ? const AppBackButton() : null,
+        title: Text(focused && topic != null && topic.isNotEmpty ? topic : 'Дасгал'),
+      ),
       body: list.when(
         loading: () => const LoadingState(),
-        error: (e, _) => ErrorState(
-          title: 'Дасгал ачаалж чадсангүй',
-          message: errorText(e),
-          onRetry: () => ref.invalidate(recommendationsProvider),
-        ),
+        error: (e, _) =>
+            ErrorState(title: 'Дасгал ачаалж чадсангүй', message: errorText(e), onRetry: () => _invalidate(ref)),
         data: (items) {
           if (items.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: AppIcons.practice,
-              title: 'Одоогоор санал болгох бодлого алга',
-              message: 'Тест, дасгал хийх тусам танд тохирсон бодлогууд энд гарна',
+              title: focused ? 'Энэ сэдвээр одоогоор бодлого алга' : 'Одоогоор санал болгох бодлого алга',
+              message: focused
+                  ? 'Ерөнхий дасгалаас танд тохирсон бодлого сонгоорой'
+                  : 'Тест, дасгал хийх тусам танд тохирсон бодлогууд энд гарна',
+              action: focused
+                  ? OutlinedButton(
+                      onPressed: () => context.pushReplacement('/app/practice'),
+                      child: const Text('Дасгал'),
+                    )
+                  : null,
             );
           }
           return RefreshIndicator(
             onRefresh: () async {
-              ref.invalidate(recommendationsProvider);
-              await ref.read(recommendationsProvider.future);
+              _invalidate(ref);
+              await ref.read(recommendationsFor(chapters).future);
             },
-            child: ListView(
+            child: ListView.builder(
               padding: const EdgeInsets.all(AppSpace.gutter),
-              children: [
-                for (final (i, r) in items.indexed) ...[
-                  AppCard(
-                    onTap: () => context.push('/app/practice/${Uri.encodeComponent(r.problemId)}'),
+              itemCount: items.length,
+              itemBuilder: (context, i) {
+                final r = items[i];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpace.md),
+                  child: AppCard(
+                    onTap: () => context.push(_problemPath(r.problemId, chapters)),
                     child: Row(
                       children: [
                         Expanded(
@@ -68,9 +94,8 @@ class PracticeScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: AppSpace.md),
-                ],
-              ],
+                );
+              },
             ),
           );
         },
@@ -79,11 +104,20 @@ class PracticeScreen extends ConsumerWidget {
   }
 }
 
+/// Бодлогын зам; сэдвээр дасгал бол «Дараагийн бодлого» мөн тэр жагсаалтаас.
+String _problemPath(String problemId, String? chapters) => Uri(
+  path: '/app/practice/${Uri.encodeComponent(problemId)}',
+  queryParameters: chapters == null || chapters.isEmpty ? null : {'chapter': chapters},
+).toString();
+
 /// `/app/practice/:problemId` — нэг бодлого бодох.
 class PracticeProblemScreen extends ConsumerStatefulWidget {
-  const PracticeProblemScreen({super.key, required this.problemId});
+  const PracticeProblemScreen({super.key, required this.problemId, this.chapters});
 
   final String problemId;
+
+  /// Сэдвээр дасгалаас ирсэн бол тэр жагсаалт (дараагийн бодлогод).
+  final String? chapters;
 
   @override
   ConsumerState<PracticeProblemScreen> createState() => _PracticeProblemScreenState();
@@ -120,7 +154,7 @@ class _PracticeProblemScreenState extends ConsumerState<PracticeProblemScreen> {
   }
 
   String? _nextId() {
-    final list = ref.read(recommendationsProvider).value;
+    final list = ref.read(recommendationsFor(widget.chapters)).value;
     if (list == null) return null;
     final i = list.indexWhere((r) => r.problemId == widget.problemId);
     return i >= 0 && i + 1 < list.length ? list[i + 1].problemId : null;
@@ -130,7 +164,7 @@ class _PracticeProblemScreenState extends ConsumerState<PracticeProblemScreen> {
   Widget build(BuildContext context) {
     final async = ref.watch(practiceProblemProvider(widget.problemId));
     // Жагсаалтыг амьд байлгана (дараагийн бодлогыг олохын тулд).
-    ref.watch(recommendationsProvider);
+    ref.watch(recommendationsFor(widget.chapters));
     return Scaffold(
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Бодлого бодох')),
       body: async.when(
@@ -217,7 +251,7 @@ class _PracticeProblemScreenState extends ConsumerState<PracticeProblemScreen> {
           if (next != null) ...[
             const SizedBox(height: AppSpace.md),
             FilledButton(
-              onPressed: () => context.pushReplacement('/app/practice/${Uri.encodeComponent(next)}'),
+              onPressed: () => context.pushReplacement(_problemPath(next, widget.chapters)),
               child: const Text('Дараагийн бодлого'),
             ),
           ],

@@ -20,6 +20,7 @@ class ReadinessTopic {
     required this.trend,
     this.mastery,
     this.weight = 0,
+    this.chapterId,
   });
 
   factory ReadinessTopic.fromJson(Object? raw) {
@@ -33,6 +34,7 @@ class ReadinessTopic {
       weight: asNum(j['weight']) ?? 0,
       attempts: asInt(j['attempts']) ?? 0,
       trend: _trend(j['trend']),
+      chapterId: asStr(j['chapterId']),
     );
   }
 
@@ -45,6 +47,9 @@ class ReadinessTopic {
   final double weight;
   final int attempts;
   final ReadinessTrend trend;
+
+  /// Сэдвээр дасгал нээх бүлэг (сурагчийн хамгийн их бодсон). Байхгүй бол null.
+  final String? chapterId;
 }
 
 @immutable

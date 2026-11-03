@@ -15,6 +15,7 @@ import '../../../shared/anim/animation_slot.dart';
 import '../data/exam_models.dart';
 import '../data/exam_repository.dart';
 import '../domain/review_breakdown.dart';
+import '../domain/timer_format.dart';
 import 'widgets/review_parts.dart';
 
 final examResultProvider = FutureProvider.autoDispose.family<ExamResultPage, String>(
@@ -128,6 +129,10 @@ class _ResultBody extends ConsumerWidget {
             ),
           ),
         ],
+        if (slowestItems(d.itemTimes).isNotEmpty) ...[
+          const SectionHeader(title: 'Удаан бодсон'),
+          _SlowItemsCard(items: slowestItems(d.itemTimes)),
+        ],
         if (d.practiceChapterIds.isNotEmpty) ...[
           const SizedBox(height: AppSpace.lg),
           _PracticeButton(topic: d.practiceTopic, chapterIds: d.practiceChapterIds),
@@ -212,6 +217,40 @@ class _WrongCard extends StatelessWidget {
               padding: const EdgeInsets.only(top: AppSpace.sm),
               child: Text('Алдсан алхам: $steps', style: context.text.bodySmall),
             ),
+    );
+  }
+}
+
+/// «Удаан бодсон» — хамгийн их хугацаа зарцуулсан 3 бодлого, «1м 20с» хэлбэрээр. Тайван, үнэлгээгүй.
+class _SlowItemsCard extends StatelessWidget {
+  const _SlowItemsCard({required this.items});
+
+  final List<ItemTime> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return AppCard(
+      child: Column(
+        children: [
+          for (final t in items)
+            Semantics(
+              label: '${t.n}-р бодлого, ${formatSpent(t.seconds)}',
+              excludeSemantics: true,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpace.xs),
+                child: Row(
+                  children: [
+                    Icon(AppIcons.time, size: 18, color: c.brandSoft),
+                    const SizedBox(width: AppSpace.sm),
+                    Expanded(child: Text('${t.n}-р бодлого', style: context.text.bodyMedium)),
+                    Text(formatSpent(t.seconds), style: context.text.titleSmall),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -349,6 +388,10 @@ class _PracticeReviewBody extends ConsumerWidget {
     final files = ref.watch(fileImageProvider);
     final items = review.items;
     final topics = topicBreakdown(items);
+    final slow = slowestItems([
+      for (final it in items)
+        if (it.timeSpentSec != null) ItemTime(n: it.n, seconds: it.timeSpentSec!),
+    ]);
     return ListView.builder(
       padding: const EdgeInsets.all(AppSpace.gutter),
       itemCount: items.length + 2,
@@ -379,6 +422,7 @@ class _PracticeReviewBody extends ConsumerWidget {
                     ),
                   ),
                 ],
+                if (slow.isNotEmpty) ...[const SectionHeader(title: 'Удаан бодсон'), _SlowItemsCard(items: slow)],
               ],
             ),
           );
