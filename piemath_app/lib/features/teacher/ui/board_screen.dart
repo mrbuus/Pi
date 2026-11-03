@@ -13,6 +13,7 @@ import '../data/teacher_models.dart';
 import '../domain/board_logic.dart';
 import 'board_note_sheet.dart';
 import 'criteria_sheet.dart';
+import 'day_pdf_card.dart';
 import 'lesson_extras.dart';
 import 'presence_beat.dart';
 import 'teacher_widgets.dart';
@@ -182,6 +183,8 @@ class _BoardBody extends ConsumerWidget {
           LessonNotesCard(date: args.date, lessons: p.lessons),
           const SizedBox(height: AppSpace.sm),
           DismissalCard(classId: args.classId, date: args.date),
+          const SizedBox(height: AppSpace.sm),
+          DayPdfCard(classId: args.classId, date: args.date),
           if (_recorders(state).isNotEmpty) ...[
             const SizedBox(height: AppSpace.md),
             Text('Хэн тэмдэглэсэн', style: context.text.labelMedium?.copyWith(color: c.inkDim)),

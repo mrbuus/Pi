@@ -5,6 +5,7 @@ import '../../../core/network/network_providers.dart';
 import '../domain/test_run_row.dart';
 import 'teacher_extras.dart';
 import 'teacher_models.dart';
+import 'teacher_today.dart';
 
 Map<String, Object?> _map(Object? j) => (j! as Map).cast<String, Object?>();
 
@@ -141,6 +142,20 @@ class TeacherRepository {
   /// АНХААР: сервер ХАТУУ устгадаг — дуудахаас өмнө заавал баталгаажуул.
   Future<void> deleteNote(String noteId) => _api.delete<Object?>('/notes/${_enc(noteId)}');
 
+
+  /// `GET /users/:id` — сурагчийн дэлгэрэнгүй + ангийн түүх (Багш, Багш+, Админ).
+  Future<StudentDetail> studentDetail(String id) =>
+      _api.get('/users/${_enc(id)}', parse: (j) => StudentDetail.fromJson(_map(j)));
+
+  /// `PATCH /users/:id/profile` (Багш+, Админ). [fields] — зөвхөн өөрчилсөн талбар. Эрхгүй бол 403 (монгол мессежтэй).
+  Future<ProfilePatchResult> updateProfile(String id, Map<String, Object?> fields) =>
+      _api.patch('/users/${_enc(id)}/profile', body: fields, parse: ProfilePatchResult.fromJson);
+
+  // ───────── Тестийн эх PDF ─────────
+
+  /// Өдрийн хуваарийн тестүүдийн эх PDF ([classId] ангийнх). Файл нь `/files/:key`-ээр нээгдэнэ.
+  Future<List<DayTestPdf>> dayTestPdfs(String classId, String date) =>
+      _api.get('/schedule/day-plan', query: {'date': date}, parse: (j) => parseDayTestPdfs(j, classId));
 
   // ───────── Бие даасан явц ─────────
 

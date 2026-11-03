@@ -6,6 +6,7 @@ import '../../../core/time/ub_time.dart';
 import '../data/teacher_extras.dart';
 import '../data/teacher_models.dart';
 import '../data/teacher_repository.dart';
+import '../data/teacher_today.dart';
 import '../domain/test_run_row.dart';
 
 /// «Өнөөдөр» (UB). Тестэд тогтмол огноогоор солино.
@@ -52,6 +53,22 @@ final testResultsProvider = FutureProvider.autoDispose.family<List<StudentTestRe
 final testRunProvider = FutureProvider.autoDispose.family<List<TestRunRow>, String>(
   (ref, testId) => ref.watch(teacherRepositoryProvider).testRun(testId),
 );
+
+/// Сурагчийн дэлгэрэнгүй: мэдээлэл, ангийн түүх (Мэдээлэл таб).
+final studentDetailProvider = FutureProvider.autoDispose.family<StudentDetail, String>(
+  (ref, id) => ref.watch(teacherRepositoryProvider).studentDetail(id),
+);
+
+/// Ангийн тухайн өдрийн тестүүдийн эх PDF. Эрхгүй/олдоогүй (403/404) бол хоосон — самбарт саад болохгүй;
+/// сүлжээний алдаа бол карт дээр «Дахин оролдох» гарна.
+final dayTestPdfsProvider = FutureProvider.autoDispose.family<List<DayTestPdf>, ClassDay>((ref, a) async {
+  try {
+    return await ref.watch(teacherRepositoryProvider).dayTestPdfs(a.classId, a.date);
+  } on ApiError catch (e) {
+    if (e.kind == ApiErrorKind.forbidden || e.kind == ApiErrorKind.notFound) return const <DayTestPdf>[];
+    rethrow;
+  }
+});
 
 final teacherHoursProvider = FutureProvider.autoDispose.family<TeacherHours, String>(
   (ref, month) => ref.watch(teacherRepositoryProvider).teacherHours(month),

@@ -6,6 +6,7 @@ import '../../../core/format/person_name.dart';
 import '../../../core/ui/ui.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_models.dart';
+import 'class_codes_tab.dart';
 import 'teacher_widgets.dart';
 
 /// Ангиуд (`/app/classes`). Багш бүх идэвхтэй ангийг харна; «Миний анги» = ахлах эсвэл туслах багш нь би.
@@ -125,7 +126,7 @@ class _ClassTile extends StatelessWidget {
   }
 }
 
-/// Ангийн самбар (`/app/classes/:id`): өнөөдрийн ирц/даалгавар руу, онлайн даалгавар, сурагчдын жагсаалт.
+/// Ангийн самбар (`/app/classes/:id`): «Тойм» (өнөөдрийн ирц/даалгавар руу, онлайн даалгавар, сурагчид) ба «Код» (сурагч бүрийн код).
 class ClassDetailScreen extends ConsumerWidget {
   const ClassDetailScreen({super.key, required this.classId});
 
@@ -136,8 +137,13 @@ class ClassDetailScreen extends ConsumerWidget {
     final async = ref.watch(classroomDetailProvider(classId));
     final today = ref.watch(teacherTodayProvider).dateKey;
     final c = context.colors;
-    return Scaffold(
-      appBar: AppBar(title: Text(async.value?.classroom.name ?? 'Анги')),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+      appBar: AppBar(
+        title: Text(async.value?.classroom.name ?? 'Анги'),
+        bottom: const TabBar(tabs: [Tab(text: 'Тойм'), Tab(text: 'Код')]),
+      ),
       body: async.when(
         skipLoadingOnRefresh: false,
         loading: () => const LoadingState(),
@@ -150,7 +156,7 @@ class ClassDetailScreen extends ConsumerWidget {
             for (final s in d.students) (id: s.id, firstName: s.firstName, lastName: s.lastName, role: null),
           ]);
           final students = [...d.students]..sort((a, b) => (names[a.id] ?? '').compareTo(names[b.id] ?? ''));
-          return RefreshIndicator(
+          final overview = RefreshIndicator(
             onRefresh: () => ref.refresh(classroomDetailProvider(classId).future).then((_) {}, onError: (_) {}),
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -207,7 +213,9 @@ class ClassDetailScreen extends ConsumerWidget {
               ],
             ),
           );
+          return TabBarView(children: [overview, ClassCodesTab(students: d.students)]);
         },
+      ),
       ),
     );
   }
