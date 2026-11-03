@@ -216,14 +216,16 @@ void main() {
         find.descendant(of: find.byKey(const ValueKey('online-s2')), matching: find.text('8,5/10')),
         findsOneWidget,
       );
+      // Тоймд «Онлайн 1/3» (вэбийн SummaryBar).
+      expect(find.bySemanticsLabel('Онлайн 1/3'), findsOneWidget);
+      expect(find.bySemanticsLabel('Д. Анужин, онлайн гэрийн даалгавар 8,5/10, дэлгэрэнгүй'), findsOneWidget);
+      await scrollTo(tester, find.byKey(const ValueKey('online-s1')));
+      expect(find.bySemanticsLabel('Г. Сарнай, онлайнаар бодоогүй, дэлгэрэнгүй'), findsOneWidget);
+      expect(find.bySemanticsLabel('Б. Тэмүүжин, илгээсэн даалгавар харах'), findsOneWidget);
       for (final sid in ['s1', 's3']) {
         expect(find.byKey(ValueKey('online-$sid')), findsOneWidget);
         expect(find.descendant(of: find.byKey(ValueKey('online-$sid')), matching: find.byType(Text)), findsNothing);
       }
-      expect(find.bySemanticsLabel('Д. Анужин, онлайн гэрийн даалгавар 8,5/10, дэлгэрэнгүй'), findsOneWidget);
-      expect(find.bySemanticsLabel('Б. Тэмүүжин, илгээсэн даалгавар харах'), findsOneWidget);
-      expect(find.bySemanticsLabel('Г. Сарнай, онлайнаар бодоогүй, дэлгэрэнгүй'), findsOneWidget);
-      expect(find.bySemanticsLabel(RegExp(r'Ирц тэмдэглээгүй 3\nОнлайн 1/3$')), findsOneWidget);
       // 48-аас багагүй хүрэх талбай
       final size = tester.getSize(find.byKey(const ValueKey('online-s3')));
       expect(size.width, greaterThanOrEqualTo(48));

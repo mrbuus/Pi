@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
-import '../../../shared/marks/marks.dart';
 import '../data/teacher_models.dart';
 import '../domain/board_logic.dart';
 
@@ -12,10 +11,13 @@ const double teacherTap = 48;
 
 /// Хичээлийн мета: «15:00–17:00», өрөө, сэдэв (Dot-оор тусгаарласан).
 class LessonMeta extends StatelessWidget {
-  const LessonMeta({super.key, required this.lessons, this.extra = const []});
+  const LessonMeta({super.key, required this.lessons, this.extra = const [], this.showTopic = true});
 
   final List<BoardLesson> lessons;
   final List<Object?> extra;
+
+  /// Сэдвийг харуулах эсэх (самбарт сэдэв «Хичээлийн мэдээлэл»-д тусдаа).
+  final bool showTopic;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,7 @@ class LessonMeta extends StatelessWidget {
       items: [
         if (l != null) '${hm(l.startMinute)}–${hm(l.endMinute)}',
         if (l?.room != null && l!.room!.trim().isNotEmpty) '${l.room} тоот',
-        if (l?.topic != null && l!.topic!.trim().isNotEmpty) l.topic,
+        if (showTopic && l?.topic != null && l!.topic!.trim().isNotEmpty) l.topic,
         ...extra,
       ],
     );
@@ -70,49 +72,6 @@ class DayStepper extends StatelessWidget {
             child: const Text('Өнөөдөр'),
           ),
       ],
-    );
-  }
-}
-
-/// Нэг тэмдэглэгээний товч (утсан дээр зөвхөн дүрс; дэлгэц уншигч, tooltip-д үг).
-class MarkButton extends StatelessWidget {
-  const MarkButton({super.key, required this.meta, required this.selected, required this.onTap, this.label});
-
-  final MarkMeta meta;
-  final bool selected;
-  final VoidCallback onTap;
-
-  /// Дэлгэц уншигчийн бүтэн шошго («Бат, Ирсэн»).
-  final String? label;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final tone = meta.tone.color(c);
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: label ?? meta.label,
-      excludeSemantics: true,
-      child: Tooltip(
-        message: meta.label,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          child: AnimatedContainer(
-            duration: AppMotion.micro,
-            width: teacherTap,
-            height: teacherTap,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: selected ? tone.withValues(alpha: 0.12) : null,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: selected ? tone : c.line, width: selected ? 1.5 : 1),
-            ),
-            child: MarkIcon(meta.glyph, color: selected ? tone : c.inkDim, size: 22),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -167,7 +126,7 @@ class _DashedRRectPainter extends CustomPainter {
   bool shouldRepaint(_DashedRRectPainter old) => old.color != color || old.radius != radius;
 }
 
-/// Хадгалалтын төлөв: «Хадгалж байна», «Хадгалсан 15:32», «Хадгалагдсангүй».
+/// Хадгалалтын төлөв (вэбийн `SaveStatus`): «Хадгалж байна», «Хадгалагдсан 15:32», «Хадгалагдсангүй».
 class SaveStatus extends StatelessWidget {
   const SaveStatus({super.key, required this.pending, this.savedAt, this.error});
 
@@ -183,8 +142,8 @@ class SaveStatus extends StatelessWidget {
         : pending > 0
         ? (AppIcons.cloudUpload, c.inkDim, 'Хадгалж байна')
         : savedAt != null
-        ? (AppIcons.cloudCheck, c.success, 'Хадгалсан $savedAt')
-        : (AppIcons.cloudCheck, c.inkDim, 'Товшмогц хадгалагдана');
+        ? (AppIcons.cloudCheck, c.success, 'Хадгалагдсан $savedAt')
+        : (AppIcons.cloudCheck, c.inkDim, 'Автоматаар хадгалагдана');
     return Semantics(
       liveRegion: true,
       child: Row(

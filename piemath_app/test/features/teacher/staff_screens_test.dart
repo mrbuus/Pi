@@ -63,9 +63,17 @@ void main() {
       final http = http0()..json('GET', '/classrooms/c1/homework-marks/online/s2', {'date': past, 'tests': <Object?>[]});
       await pumpTeacher(tester, const BoardScreen(classId: 'c1', date: past), http: http);
       expect(http.requests.any((r) => r.path == '/makeup/classrooms/c1' && r.queryParameters['date'] == past), isTrue);
-      expect(find.text('Нөхөх хичээл: Нөхөөгүй'), findsOneWidget);
+      await reveal(tester, find.byKey(const ValueKey('card-s1')));
+      expect(
+        find.descendant(of: find.byKey(const ValueKey('card-s1')), matching: find.byTooltip('Нөхөх хичээл: Нөхөөгүй')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: find.byKey(const ValueKey('card-s1')), matching: find.text('Нөхөөгүй')),
+        findsOneWidget,
+      );
       // s2 ирсэн тул нөхөх шошго гарахгүй
-      expect(find.text('Нөхөх хичээл: Нөхсөн'), findsNothing);
+      expect(find.byTooltip('Нөхөх хичээл: Нөхсөн'), findsNothing);
       expect(find.descendant(of: find.byKey(const ValueKey('online-s2')), matching: find.text('8/10')), findsOneWidget);
       await reveal(tester, find.byKey(const ValueKey('online-s2')));
       await tester.tap(find.byKey(const ValueKey('online-s2')));

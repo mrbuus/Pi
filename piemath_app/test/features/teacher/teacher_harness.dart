@@ -82,9 +82,16 @@ Future<void> settle(WidgetTester tester, {int frames = 10}) async {
   }
 }
 
-/// Үндсэн ListView-ийг [finder] харагдтал гүйлгэнэ.
-Future<void> scrollTo(WidgetTester tester, Finder finder) => tester.scrollUntilVisible(
-  finder,
-  300,
-  scrollable: find.descendant(of: find.byType(ListView).first, matching: find.byType(Scrollable)).first,
-);
+/// Үндсэн (босоо) жагсаалтыг [finder] харагдтал гүйлгэнэ. Самбарын наалддаг тоймын доор нуугдахгүйн
+/// тулд элементийг дэлгэцийн дунд авчирна.
+Future<void> scrollTo(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    300,
+    scrollable: find
+        .byWidgetPredicate((w) => w is Scrollable && axisDirectionToAxis(w.axisDirection) == Axis.vertical)
+        .first,
+  );
+  await Scrollable.ensureVisible(tester.element(finder.first), alignment: 0.5);
+  await settle(tester, frames: 2);
+}

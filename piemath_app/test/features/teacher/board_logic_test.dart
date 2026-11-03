@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:piemath_app/features/teacher/data/staff_models.dart';
 import 'package:piemath_app/features/teacher/data/teacher_models.dart';
 import 'package:piemath_app/features/teacher/domain/board_logic.dart';
 
@@ -140,5 +141,87 @@ void main() {
     expect(hoursLabel(2160), '36 цаг');
     expect(hoursLabel(125), '2 цаг 5 мин');
     expect(hoursLabel(40), '40 мин');
+  });
+
+  group('сурагчийн карт (вэбийн StudentCard)', () {
+    const late = DayRec(att: AttendanceStatus.late, attNote: ' автобус ', hwNote: 'ойлгоогүй');
+
+    test('илгээсэн ч шалгаагүй: танхимын анги, илгээсэн, даалгавар тэмдэглээгүй', () {
+      expect(awaitingCheck(DayRec.empty, homework: true, sent: true), isTrue);
+      expect(awaitingCheck(const DayRec(hw: HomeworkStatus.done), homework: true, sent: true), isFalse);
+      expect(awaitingCheck(DayRec.empty, homework: false, sent: true), isFalse);
+      expect(awaitingCheck(DayRec.empty, homework: true, sent: false), isFalse);
+    });
+
+    test('тэмдэглэлийн товч, эрсдэлийн бичвэр, нөхөх төлөв', () {
+      expect(notePreview(late, homework: true), 'автобус, ойлгоогүй');
+      expect(notePreview(late, homework: false), 'автобус');
+      expect(notePreview(DayRec.empty, homework: true), '');
+      expect(riskText(null), '');
+      expect(
+        riskText(const [RiskFlag(kind: 'a', label: '3 удаа тасалсан'), RiskFlag(kind: 'b', label: '5 удаа хоцорсон')]),
+        '3 удаа тасалсан, 5 удаа хоцорсон',
+      );
+      expect(showsMakeup(late), isTrue);
+      expect(showsMakeup(const DayRec(att: AttendanceStatus.present)), isFalse);
+      expect(
+        [for (final s in MakeupStatus.values) makeupLabel(s)],
+        ['Нөхөөгүй', 'Хагас нөхсөн', 'Нөхсөн', 'Чөлөөлсөн'],
+      );
+    });
+
+    test('хичээл эхлээгүй: ирээдүйн өдөр, эсвэл өнөөдөр эхний хичээлээс өмнө', () {
+      const lessons = [BoardLesson(scheduleId: 'a', startMinute: 900, endMinute: 1020)];
+      expect(lessonUpcoming('2026-11-03', '2026-11-02', 0, lessons), isTrue);
+      expect(lessonUpcoming('2026-11-02', '2026-11-02', 899, lessons), isTrue);
+      expect(lessonUpcoming('2026-11-02', '2026-11-02', 900, lessons), isFalse);
+      expect(lessonUpcoming('2026-11-01', '2026-11-02', 0, lessons), isFalse);
+      expect(lessonUpcoming('2026-11-02', '2026-11-02', 0, const []), isFalse);
+    });
+
+    test('монгол цагаан толгойн дараалал: О < Ө < П, У < Ү < Ф', () {
+      final sorted = ['Үүрцайх', 'Өлзий', 'Пүрэв', 'Отгон', 'Ууганаа', 'Анужин', 'Фаина']..sort(compareMn);
+      expect(sorted, ['Анужин', 'Отгон', 'Өлзий', 'Пүрэв', 'Ууганаа', 'Үүрцайх', 'Фаина']);
+      final list = byFirstName(const [
+        BoardStudent(id: '1', firstName: 'Сарнай', lastName: 'Ганаа'),
+        BoardStudent(id: '2', firstName: 'Анужин', lastName: 'Дорж'),
+        BoardStudent(id: '3', firstName: 'Сарнай', lastName: 'Бат'),
+      ]);
+      expect(list.map((s) => s.id), ['2', '3', '1']);
+    });
+  });
+
+  group('шүүлтүүр (вэбийн BoardFilters)', () {
+    const data = BoardFilterData(
+      recs: {
+        's1': DayRec(att: AttendanceStatus.present, hw: HomeworkStatus.done),
+        's2': DayRec(att: AttendanceStatus.absent),
+      },
+      risk: {
+        's3': [RiskFlag(kind: 'lates', label: '5 удаа хоцорсон')],
+      },
+      sent: {'s2'},
+      online: {'s1'},
+    );
+    const ids = ['s1', 's2', 's3'];
+
+    test('төлөв бүрээр', () {
+      expect(data.apply(null, ids), ids);
+      expect(data.apply(BoardFilter.attPresent, ids), ['s1']);
+      expect(data.apply(BoardFilter.attAbsent, ids), ['s2']);
+      expect(data.apply(BoardFilter.attNone, ids), ['s3']);
+      expect(data.apply(BoardFilter.hwDone, ids), ['s1']);
+      expect(data.apply(BoardFilter.hwNone, ids), ['s2', 's3']);
+      expect(data.apply(BoardFilter.hwSent, ids), ['s2']);
+      expect(data.apply(BoardFilter.onlineYes, ids), ['s1']);
+      expect(data.apply(BoardFilter.onlineNo, ids), ['s2', 's3']);
+      expect(data.apply(BoardFilter.risk, ids), ['s3']);
+    });
+
+    test('төлөв → шүүлтүүр', () {
+      expect(BoardFilter.att(null), BoardFilter.attNone);
+      expect(BoardFilter.att(AttendanceStatus.excused), BoardFilter.attExcused);
+      expect(BoardFilter.hw(HomeworkStatus.notDone), BoardFilter.hwNotDone);
+    });
   });
 }

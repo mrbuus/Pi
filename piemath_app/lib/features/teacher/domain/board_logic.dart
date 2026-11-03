@@ -378,3 +378,132 @@ String onlineStamp(String? iso) {
 /// `2026-10-28` → «10.28-ны даалгавар».
 String? previousLessonLabel(String? date) =>
     date == null || date.length < 10 ? null : '${date.substring(5).replaceFirst('-', '.')}-ны даалгавар';
+
+// ───────── Сурагчийн карт (вэбийн `StudentCard`, `Board`) ─────────
+
+/// Эрсдэлийн шалтгаанууд нэг мөрөөр («5 удаа хоцорсон, …»); байхгүй бол хоосон.
+String riskText(List<RiskFlag>? flags) => flags == null ? '' : flags.map((f) => f.label).join(', ');
+
+/// Даалгавраа илгээсэн ч багш одоохондоо тэмдэглээгүй (эзэн 2026-11-03) — карт өөр өнгөөр тодорно.
+bool awaitingCheck(DayRec r, {required bool homework, required bool sent}) => homework && sent && r.hw == null;
+
+/// Хаалттай картын тэмдэглэлийн товч: ирцийн ба даалгаврын тэмдэглэл таслалаар.
+String notePreview(DayRec r, {required bool homework}) =>
+    [r.attNote.trim(), if (homework) r.hwNote.trim()].where((t) => t.isNotEmpty).join(', ');
+
+/// Нөхөх хичээлийн төлөв зөвхөн тасалсан, чөлөөтэй, хоцорсон сурагчид.
+bool showsMakeup(DayRec r) =>
+    r.att == AttendanceStatus.absent || r.att == AttendanceStatus.excused || r.att == AttendanceStatus.late;
+
+/// Нөхөх хичээлийн төлөвийн шошго (вэб `MAKEUP_LABEL`).
+String makeupLabel(MakeupStatus s) => switch (s) {
+  MakeupStatus.pending => 'Нөхөөгүй',
+  MakeupStatus.partial => 'Хагас нөхсөн',
+  MakeupStatus.done => 'Нөхсөн',
+  MakeupStatus.waived => 'Чөлөөлсөн',
+};
+
+/// Хичээл хараахан эхлээгүй (ирээдүйн өдөр, эсвэл өнөөдөр эхний хичээлээс өмнө).
+bool lessonUpcoming(String date, String today, int nowMinute, List<BoardLesson> lessons) {
+  if (date.compareTo(today) > 0) return true;
+  if (date != today || lessons.isEmpty) return false;
+  return nowMinute < lessons.map((l) => l.startMinute).reduce((a, b) => a < b ? a : b);
+}
+
+/// Монгол цагаан толгойн дараалал (Ө нь О-гийн, Ү нь У-гийн дараа) — вэбийн `localeCompare(…, "mn")`.
+const _mnAlphabet = 'абвгдеёжзийклмноөпрстуүфхцчшщъыьэюя';
+
+int _mnRank(int unit) {
+  final i = _mnAlphabet.indexOf(String.fromCharCode(unit));
+  return i < 0 ? unit : 0x10000 + i;
+}
+
+/// Монгол дарааллаар харьцуулна (том жижиг үсэг ялгахгүй).
+int compareMn(String a, String b) {
+  final x = a.toLowerCase().codeUnits;
+  final y = b.toLowerCase().codeUnits;
+  for (var i = 0; i < x.length && i < y.length; i++) {
+    final d = _mnRank(x[i]) - _mnRank(y[i]);
+    if (d != 0) return d;
+  }
+  return x.length - y.length;
+}
+
+/// Нэрээр (овгоор биш) эрэмбэлнэ, ижил нэртэй бол овгоор (вэбийн `byFirstName`).
+List<BoardStudent> byFirstName(Iterable<BoardStudent> list) => [...list]
+  ..sort((a, b) {
+    final d = compareMn(a.firstName, b.firstName);
+    return d != 0 ? d : compareMn(a.lastName ?? '', b.lastName ?? '');
+  });
+
+// ───────── Шүүлтүүр (вэбийн `BoardFilters`) ─────────
+
+/// Самбарын шүүлтүүр.
+enum BoardFilter {
+  risk,
+  attPresent,
+  attLate,
+  attAbsent,
+  attExcused,
+  attNone,
+  hwDone,
+  hwPartial,
+  hwNotDone,
+  hwNone,
+  hwSent,
+  onlineYes,
+  onlineNo;
+
+  static BoardFilter att(AttendanceStatus? s) => switch (s) {
+    AttendanceStatus.present => attPresent,
+    AttendanceStatus.late => attLate,
+    AttendanceStatus.absent => attAbsent,
+    AttendanceStatus.excused => attExcused,
+    null => attNone,
+  };
+
+  static BoardFilter hw(HomeworkStatus? s) => switch (s) {
+    HomeworkStatus.done => hwDone,
+    HomeworkStatus.partial => hwPartial,
+    HomeworkStatus.notDone => hwNotDone,
+    null => hwNone,
+  };
+}
+
+/// Шүүлтүүрт шаардлагатай өгөгдөл.
+@immutable
+class BoardFilterData {
+  const BoardFilterData({required this.recs, required this.risk, required this.sent, required this.online});
+
+  final Map<String, DayRec> recs;
+  final Map<String, List<RiskFlag>> risk;
+  final Set<String> sent;
+
+  /// Онлайнаар бодсон сурагчид.
+  final Set<String> online;
+
+  bool matches(BoardFilter f, String id) {
+    final rec = recs[id] ?? DayRec.empty;
+    return switch (f) {
+      BoardFilter.risk => (risk[id] ?? const []).isNotEmpty,
+      BoardFilter.hwSent => sent.contains(id),
+      BoardFilter.onlineYes => online.contains(id),
+      BoardFilter.onlineNo => !online.contains(id),
+      BoardFilter.attPresent ||
+      BoardFilter.attLate ||
+      BoardFilter.attAbsent ||
+      BoardFilter.attExcused ||
+      BoardFilter.attNone => BoardFilter.att(rec.att) == f,
+      BoardFilter.hwDone ||
+      BoardFilter.hwPartial ||
+      BoardFilter.hwNotDone ||
+      BoardFilter.hwNone => BoardFilter.hw(rec.hw) == f,
+    };
+  }
+
+  /// [ids]-ээс шүүлтүүрт тохирсон нь (дарааллыг хадгална).
+  List<String> apply(BoardFilter? f, Iterable<String> ids) => [
+    for (final id in ids)
+      if (f == null || matches(f, id)) id,
+  ];
+}

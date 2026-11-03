@@ -4,6 +4,7 @@ import 'package:piemath_app/core/ui/strings.dart';
 import 'package:piemath_app/features/teacher/data/teacher_extras.dart';
 import 'package:piemath_app/features/teacher/ui/board_screen.dart';
 import 'package:piemath_app/features/teacher/ui/independent_tab.dart';
+import 'package:piemath_app/features/teacher/ui/lesson_extras.dart';
 import 'package:piemath_app/features/teacher/ui/student_screen.dart';
 
 import '../../helpers/fake_http.dart';
@@ -211,8 +212,10 @@ void main() {
         ..json('GET', '/lesson-records/day', _lessonDay())
         ..on('GET', '/learning-lab/classrooms/c1/dismissal', (_) => const FakeResponse(null));
       await pumpTeacher(tester, _board, http: http);
-      await scrollTo(tester, find.text('Тэмдэглээгүй'));
-      await tester.tap(find.text('Тэмдэглээгүй'));
+      // Самбарын тоймд ч «Тэмдэглээгүй» байгаа тул тарах цагийн картаас л.
+      final unset = find.descendant(of: find.byType(DismissalCard), matching: find.text('Тэмдэглээгүй'));
+      await scrollTo(tester, unset);
+      await tester.tap(unset);
       await settle(tester);
       await tester.tap(find.text(AppStrings.save));
       await settle(tester);
@@ -327,7 +330,7 @@ void main() {
         ..json('GET', '/lesson-records/day', _lessonDay())
         ..error('POST', '/presence', 403, 'Төвийн багшийн эрх шаардлагатай');
       await pumpTeacher(tester, _board, http: http, presence: true);
-      expect(find.text('Б. Тэмүүжин'), findsOneWidget);
+      expect(find.text('Д. Анужин'), findsOneWidget);
       expect(find.textContaining('мөн энэ ангийг'), findsNothing);
       await tester.pumpWidget(const SizedBox());
       await settle(tester);

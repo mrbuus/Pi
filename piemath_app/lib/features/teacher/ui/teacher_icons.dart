@@ -19,4 +19,7 @@ abstract final class TeacherIcons {
   static const IconData circleMinus = LucideIcons.circleMinus;
   static const IconData eye = LucideIcons.eye;
   static const IconData trendingUp = LucideIcons.trendingUp;
+  static const IconData listFilter = LucideIcons.listFilter;
+  static const IconData userRoundCheck = LucideIcons.userRoundCheck;
+  static const IconData bookCheck = LucideIcons.bookCheck;
 }
