@@ -122,8 +122,14 @@ function LargeBody({ b, settled }: { b: MonthBlock; settled: boolean }) {
     case "PARTIAL":
       return (
         <span className="relative tabular-nums">
-          {shortMnt(b.paid)}
-          <span className="text-ink-dim"> / {shortMnt(b.due)}</span>
+          {b.due == null ? (
+            <CircleAlert className="h-4 w-4 text-warning" aria-hidden />
+          ) : (
+            <>
+              {shortMnt(b.paid)}
+              <span className="text-ink-dim"> / {shortMnt(b.due)}</span>
+            </>
+          )}
         </span>
       );
     case "OWED":

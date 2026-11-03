@@ -1,4 +1,4 @@
-import type { BlockState, MonthBlock, PlanKind } from "./ledgerTypes";
+import type { BlockState, LedgerRow, MonthBlock, PlanKind } from "./ledgerTypes";
 
 /** «2026-10» → 10 */
 export const monthNo = (m: string) => Number(m.slice(5, 7));
@@ -6,22 +6,35 @@ export const monthNo = (m: string) => Number(m.slice(5, 7));
 export const monthName = (m: string) => `${monthNo(m)}-р сар`;
 
 /** 350000 → «350,000₮» */
-export function mnt(n: number): string {
+// Багш+-д сервер дүнг null болгож өгнө (зөвхөн төлөв) — хоосон мөр буцаана
+export function mnt(n: number | null | undefined): string {
+  if (n == null) return "";
   return `${Math.round(n).toLocaleString("en-US")}₮`;
 }
 
 /** Блок дээрх товч дүн: 150000 → «150к», 1250000 → «1.25с» (сая) */
-export function shortMnt(n: number): string {
+export function shortMnt(n: number | null | undefined): string {
+  if (n == null) return "";
   if (n >= 1_000_000) return `${+(n / 1_000_000).toFixed(2)}с`;
   if (n >= 1000) return `${Math.round(n / 1000)}к`;
   return String(n);
 }
 
 /** Том дүнг сая-аар: 84392324 → «84.4 сая» */
-export function millions(n: number): string {
+export function millions(n: number | null | undefined): string {
+  if (n == null) return "";
   if (Math.abs(n) < 100_000) return mnt(n);
   return `${(n / 1_000_000).toFixed(1)} сая`;
 }
+
+/** Өртэй эсэх — дүн нуугдсан (Багш+) үед өртэй сарын тоогоор */
+export const isOwed = (r: LedgerRow) => (r.owedNow ?? 0) > 0 || r.owedMonths > 0;
+
+/** Жилийн гэрээ бүрэн төлөгдсөн — дүн нуугдсан үед блокийн төлөвөөр */
+export const isComplete = (r: LedgerRow) =>
+  r.remaining == null
+    ? r.blocks.every((b) => b.state === "PAID" || b.state === "OFF")
+    : r.remaining === 0;
 
 /** «2026-10-07» → «10/07» */
 export function dayLabel(iso: string | null | undefined): string {

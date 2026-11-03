@@ -107,12 +107,18 @@ function Problems({ view, onPaid }: { view: ProblemView; onPaid: () => void }) {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-ink-dim">
-          <span className="font-bold tabular-nums text-ink">{data.total}</span> сурагч, нийт өр{" "}
-          <span className="font-bold tabular-nums text-error">{millions(data.owedNow ?? 0)}</span>
+          <span className="font-bold tabular-nums text-ink">{data.total}</span> сурагч
+          {!data.amountsHidden && (
+            <>
+              , нийт өр <span className="font-bold tabular-nums text-error">{millions(data.owedNow ?? 0)}</span>
+            </>
+          )}
         </p>
-        <Button variant="outline" className="min-h-11" disabled={exporting} onClick={() => void exportCsv()}>
-          <Download aria-hidden /> {exporting ? "Татаж байна" : "CSV татах"}
-        </Button>
+        {!data.amountsHidden && (
+          <Button variant="outline" className="min-h-11" disabled={exporting} onClick={() => void exportCsv()}>
+            <Download aria-hidden /> {exporting ? "Татаж байна" : "CSV татах"}
+          </Button>
+        )}
       </div>
       <LedgerList rows={data.rows} year={data.year} current={data.month} showClass onPaid={replace} />
       {data.rows.length < data.total && (

@@ -1267,7 +1267,7 @@ export class ScheduleService {
               endMinute: s.endMinute,
               teacherId: s.teacher?.id ?? null,
               teacherName: s.teacher
-                ? `${s.teacher.firstName} ${s.teacher.lastName}`
+                ? withPlus(`${s.teacher.firstName} ${s.teacher.lastName}`, s.teacher.role)
                 : null,
               teacherRole: s.teacher?.role ?? null,
               room: s.room,
@@ -1660,7 +1660,7 @@ export class ScheduleService {
       endMinute: s.endMinute,
       teacherId: s.teacher?.id ?? null,
       teacherName: s.teacher
-        ? `${s.teacher.firstName} ${s.teacher.lastName}`
+        ? withPlus(`${s.teacher.firstName} ${s.teacher.lastName}`, s.teacher.role)
         : null,
       teacherRole: s.teacher?.role ?? null,
       room: s.room,

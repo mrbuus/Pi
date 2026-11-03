@@ -10935,7 +10935,9 @@ export const StudentNoteScalarFieldEnum = {
   updatedAt: 'updatedAt',
   resolvedAt: 'resolvedAt',
   resolvedById: 'resolvedById',
-  promisedOn: 'promisedOn'
+  promisedOn: 'promisedOn',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type StudentNoteScalarFieldEnum = (typeof StudentNoteScalarFieldEnum)[keyof typeof StudentNoteScalarFieldEnum]
@@ -11453,7 +11455,8 @@ export const StudentGoalScalarFieldEnum = {
   status: 'status',
   subject: 'subject',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type StudentGoalScalarFieldEnum = (typeof StudentGoalScalarFieldEnum)[keyof typeof StudentGoalScalarFieldEnum]

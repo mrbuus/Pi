@@ -35,6 +35,8 @@ export type StudentNoteMinAggregateOutputType = {
   resolvedAt: Date | null
   resolvedById: string | null
   promisedOn: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type StudentNoteMaxAggregateOutputType = {
@@ -48,6 +50,8 @@ export type StudentNoteMaxAggregateOutputType = {
   resolvedAt: Date | null
   resolvedById: string | null
   promisedOn: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type StudentNoteCountAggregateOutputType = {
@@ -61,6 +65,8 @@ export type StudentNoteCountAggregateOutputType = {
   resolvedAt: number
   resolvedById: number
   promisedOn: number
+  deletedAt: number
+  deletedById: number
   _all: number
 }
 
@@ -76,6 +82,8 @@ export type StudentNoteMinAggregateInputType = {
   resolvedAt?: true
   resolvedById?: true
   promisedOn?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type StudentNoteMaxAggregateInputType = {
@@ -89,6 +97,8 @@ export type StudentNoteMaxAggregateInputType = {
   resolvedAt?: true
   resolvedById?: true
   promisedOn?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type StudentNoteCountAggregateInputType = {
@@ -102,6 +112,8 @@ export type StudentNoteCountAggregateInputType = {
   resolvedAt?: true
   resolvedById?: true
   promisedOn?: true
+  deletedAt?: true
+  deletedById?: true
   _all?: true
 }
 
@@ -188,6 +200,8 @@ export type StudentNoteGroupByOutputType = {
   resolvedAt: Date | null
   resolvedById: string | null
   promisedOn: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
   _count: StudentNoteCountAggregateOutputType | null
   _min: StudentNoteMinAggregateOutputType | null
   _max: StudentNoteMaxAggregateOutputType | null
@@ -222,6 +236,8 @@ export type StudentNoteWhereInput = {
   resolvedAt?: Prisma.DateTimeNullableFilter<"StudentNote"> | Date | string | null
   resolvedById?: Prisma.StringNullableFilter<"StudentNote"> | string | null
   promisedOn?: Prisma.DateTimeNullableFilter<"StudentNote"> | Date | string | null
+  deletedAt?: Prisma.DateTimeNullableFilter<"StudentNote"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"StudentNote"> | string | null
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -236,6 +252,8 @@ export type StudentNoteOrderByWithRelationInput = {
   resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   resolvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   promisedOn?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   student?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -253,6 +271,8 @@ export type StudentNoteWhereUniqueInput = Prisma.AtLeast<{
   resolvedAt?: Prisma.DateTimeNullableFilter<"StudentNote"> | Date | string | null
   resolvedById?: Prisma.StringNullableFilter<"StudentNote"> | string | null
   promisedOn?: Prisma.DateTimeNullableFilter<"StudentNote"> | Date | string | null
+  deletedAt?: Prisma.DateTimeNullableFilter<"StudentNote"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"StudentNote"> | string | null
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
@@ -267,6 +287,8 @@ export type StudentNoteOrderByWithAggregationInput = {
   resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   resolvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   promisedOn?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.StudentNoteCountOrderByAggregateInput
   _max?: Prisma.StudentNoteMaxOrderByAggregateInput
   _min?: Prisma.StudentNoteMinOrderByAggregateInput
@@ -286,6 +308,8 @@ export type StudentNoteScalarWhereWithAggregatesInput = {
   resolvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"StudentNote"> | Date | string | null
   resolvedById?: Prisma.StringNullableWithAggregatesFilter<"StudentNote"> | string | null
   promisedOn?: Prisma.DateTimeNullableWithAggregatesFilter<"StudentNote"> | Date | string | null
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"StudentNote"> | Date | string | null
+  deletedById?: Prisma.StringNullableWithAggregatesFilter<"StudentNote"> | string | null
 }
 
 export type StudentNoteCreateInput = {
@@ -298,6 +322,8 @@ export type StudentNoteCreateInput = {
   resolvedAt?: Date | string | null
   resolvedById?: string | null
   promisedOn?: Date | string | null
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   student: Prisma.UserCreateNestedOneWithoutStudentNotesInput
 }
 
@@ -312,6 +338,8 @@ export type StudentNoteUncheckedCreateInput = {
   resolvedAt?: Date | string | null
   resolvedById?: string | null
   promisedOn?: Date | string | null
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StudentNoteUpdateInput = {
@@ -324,6 +352,8 @@ export type StudentNoteUpdateInput = {
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promisedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutStudentNotesNestedInput
 }
 
@@ -338,6 +368,8 @@ export type StudentNoteUncheckedUpdateInput = {
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promisedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudentNoteCreateManyInput = {
@@ -351,6 +383,8 @@ export type StudentNoteCreateManyInput = {
   resolvedAt?: Date | string | null
   resolvedById?: string | null
   promisedOn?: Date | string | null
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StudentNoteUpdateManyMutationInput = {
@@ -363,6 +397,8 @@ export type StudentNoteUpdateManyMutationInput = {
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promisedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudentNoteUncheckedUpdateManyInput = {
@@ -376,6 +412,8 @@ export type StudentNoteUncheckedUpdateManyInput = {
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promisedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudentNoteListRelationFilter = {
@@ -399,6 +437,8 @@ export type StudentNoteCountOrderByAggregateInput = {
   resolvedAt?: Prisma.SortOrder
   resolvedById?: Prisma.SortOrder
   promisedOn?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type StudentNoteMaxOrderByAggregateInput = {
@@ -412,6 +452,8 @@ export type StudentNoteMaxOrderByAggregateInput = {
   resolvedAt?: Prisma.SortOrder
   resolvedById?: Prisma.SortOrder
   promisedOn?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type StudentNoteMinOrderByAggregateInput = {
@@ -425,6 +467,8 @@ export type StudentNoteMinOrderByAggregateInput = {
   resolvedAt?: Prisma.SortOrder
   resolvedById?: Prisma.SortOrder
   promisedOn?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type StudentNoteCreateNestedManyWithoutStudentInput = {
@@ -483,6 +527,8 @@ export type StudentNoteCreateWithoutStudentInput = {
   resolvedAt?: Date | string | null
   resolvedById?: string | null
   promisedOn?: Date | string | null
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StudentNoteUncheckedCreateWithoutStudentInput = {
@@ -495,6 +541,8 @@ export type StudentNoteUncheckedCreateWithoutStudentInput = {
   resolvedAt?: Date | string | null
   resolvedById?: string | null
   promisedOn?: Date | string | null
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StudentNoteCreateOrConnectWithoutStudentInput = {
@@ -537,6 +585,8 @@ export type StudentNoteScalarWhereInput = {
   resolvedAt?: Prisma.DateTimeNullableFilter<"StudentNote"> | Date | string | null
   resolvedById?: Prisma.StringNullableFilter<"StudentNote"> | string | null
   promisedOn?: Prisma.DateTimeNullableFilter<"StudentNote"> | Date | string | null
+  deletedAt?: Prisma.DateTimeNullableFilter<"StudentNote"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"StudentNote"> | string | null
 }
 
 export type StudentNoteCreateManyStudentInput = {
@@ -549,6 +599,8 @@ export type StudentNoteCreateManyStudentInput = {
   resolvedAt?: Date | string | null
   resolvedById?: string | null
   promisedOn?: Date | string | null
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StudentNoteUpdateWithoutStudentInput = {
@@ -561,6 +613,8 @@ export type StudentNoteUpdateWithoutStudentInput = {
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promisedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudentNoteUncheckedUpdateWithoutStudentInput = {
@@ -573,6 +627,8 @@ export type StudentNoteUncheckedUpdateWithoutStudentInput = {
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promisedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudentNoteUncheckedUpdateManyWithoutStudentInput = {
@@ -585,6 +641,8 @@ export type StudentNoteUncheckedUpdateManyWithoutStudentInput = {
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promisedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -600,6 +658,8 @@ export type StudentNoteSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   resolvedAt?: boolean
   resolvedById?: boolean
   promisedOn?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentNote"]>
 
@@ -614,6 +674,8 @@ export type StudentNoteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   resolvedAt?: boolean
   resolvedById?: boolean
   promisedOn?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentNote"]>
 
@@ -628,6 +690,8 @@ export type StudentNoteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   resolvedAt?: boolean
   resolvedById?: boolean
   promisedOn?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentNote"]>
 
@@ -642,9 +706,11 @@ export type StudentNoteSelectScalar = {
   resolvedAt?: boolean
   resolvedById?: boolean
   promisedOn?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }
 
-export type StudentNoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "type" | "body" | "createdById" | "createdAt" | "updatedAt" | "resolvedAt" | "resolvedById" | "promisedOn", ExtArgs["result"]["studentNote"]>
+export type StudentNoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "type" | "body" | "createdById" | "createdAt" | "updatedAt" | "resolvedAt" | "resolvedById" | "promisedOn" | "deletedAt" | "deletedById", ExtArgs["result"]["studentNote"]>
 export type StudentNoteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -671,6 +737,8 @@ export type $StudentNotePayload<ExtArgs extends runtime.Types.Extensions.Interna
     resolvedAt: Date | null
     resolvedById: string | null
     promisedOn: Date | null
+    deletedAt: Date | null
+    deletedById: string | null
   }, ExtArgs["result"]["studentNote"]>
   composites: {}
 }
@@ -1105,6 +1173,8 @@ export interface StudentNoteFieldRefs {
   readonly resolvedAt: Prisma.FieldRef<"StudentNote", 'DateTime'>
   readonly resolvedById: Prisma.FieldRef<"StudentNote", 'String'>
   readonly promisedOn: Prisma.FieldRef<"StudentNote", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"StudentNote", 'DateTime'>
+  readonly deletedById: Prisma.FieldRef<"StudentNote", 'String'>
 }
     
 

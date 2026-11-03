@@ -27,6 +27,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { ACADEMIC_YEAR, todayKeyUB } from '../payments/ledger';
 import { ledgersFor } from '../payments/ledger-load';
+import { studentPaymentView } from '../payments/ledger-redact';
 import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
 import {
   BEHAVIOR_FLAGS,
@@ -1016,9 +1017,8 @@ export class ClassDashboardService {
           createdAt: f.createdAt.toISOString(),
           createdByName: markPlus(f.createdByName, f.createdById, flagPlus),
         })),
-        payment: pay
-          ? { state: pay.state, tuitionAmount: pay.tuitionAmount, paidThisMonth: pay.paidThisMonth }
-          : null,
+        // Багш+ зөвхөн төлөв (эзний хатуу дүрэм) — дүн серверээс гарахгүй
+        payment: pay ? studentPaymentView(pay, actor.role) : null,
       };
     });
 

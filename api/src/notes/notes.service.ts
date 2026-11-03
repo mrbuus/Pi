@@ -198,6 +198,7 @@ export class NotesService {
     const notes = await this.prisma.studentNote.findMany({
       where: {
         studentId,
+        deletedAt: null,
         ...(type
           ? { type }
           : financial
@@ -224,7 +225,7 @@ export class NotesService {
     const before = await this.prisma.studentNote.findUnique({
       where: { id },
     });
-    if (!before) throw new NotFoundException('Тэмдэглэл олдсонгүй');
+    if (!before || before.deletedAt) throw new NotFoundException('Тэмдэглэл олдсонгүй');
     const scope = await this.assertStudentAccess(
       before.studentId,
       userId,
@@ -277,7 +278,7 @@ export class NotesService {
 
   async remove(id: string, userId: string, role: Role) {
     const note = await this.prisma.studentNote.findUnique({ where: { id } });
-    if (!note) throw new NotFoundException('Тэмдэглэл олдсонгүй');
+    if (!note || note.deletedAt) throw new NotFoundException('Тэмдэглэл олдсонгүй');
     const scope = await this.assertStudentAccess(
       note.studentId,
       userId,
@@ -289,7 +290,11 @@ export class NotesService {
     if (role !== Role.ADMIN && note.createdById !== userId)
       throw new ForbiddenException('Зөвхөн өөрийн бичсэн тэмдэглэлийг устгана');
 
-    await this.prisma.studentNote.delete({ where: { id } });
+    // Зөөлөн устгал — прод өгөгдлийг ХЭЗЭЭ Ч устгахгүй (эзэн 2026-10-23)
+    const deleted = await this.prisma.studentNote.update({
+      where: { id },
+      data: { deletedAt: new Date(), deletedById: userId },
+    });
 
     await this.audit.record({
       actorId: userId,
@@ -298,6 +303,7 @@ export class NotesService {
       entity: 'StudentNote',
       entityId: id,
       before: note,
+      after: deleted,
     });
 
     return { deleted: true };
