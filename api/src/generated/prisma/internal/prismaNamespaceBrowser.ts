@@ -86,6 +86,7 @@ export const ModelName = {
   TestDraft: 'TestDraft',
   TestProblem: 'TestProblem',
   TestAccess: 'TestAccess',
+  StudentTestAccess: 'StudentTestAccess',
   TestAttemptSession: 'TestAttemptSession',
   TestResult: 'TestResult',
   TestItemMark: 'TestItemMark',
@@ -744,6 +745,17 @@ export const TestAccessScalarFieldEnum = {
 } as const
 
 export type TestAccessScalarFieldEnum = (typeof TestAccessScalarFieldEnum)[keyof typeof TestAccessScalarFieldEnum]
+
+
+export const StudentTestAccessScalarFieldEnum = {
+  testId: 'testId',
+  studentId: 'studentId',
+  classroomId: 'classroomId',
+  source: 'source',
+  createdAt: 'createdAt'
+} as const
+
+export type StudentTestAccessScalarFieldEnum = (typeof StudentTestAccessScalarFieldEnum)[keyof typeof StudentTestAccessScalarFieldEnum]
 
 
 export const TestAttemptSessionScalarFieldEnum = {

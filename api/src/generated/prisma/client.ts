@@ -232,6 +232,13 @@ export type TestProblem = Prisma.TestProblemModel
  */
 export type TestAccess = Prisma.TestAccessModel
 /**
+ * Model StudentTestAccess
+ * Нэг сурагчид тусгайлан нээсэн тест (эзэн 2026-11-03): нөхөх хичээл — тасалсан/чөлөөтэй сурагч
+ * ангид хийсэн A болон гэрийн B хувилбарыг шалгалтын горимоор ӨӨРӨӨ өгнө. Өмнө нь TestAccess-ээр
+ * БҮХ ангид нээгдэж байсан (бусад сурагч урьдчилан хийх боломжтой) — одоо зөвхөн тухайн сурагчид.
+ */
+export type StudentTestAccess = Prisma.StudentTestAccessModel
+/**
  * Model TestAttemptSession
  * 
  */

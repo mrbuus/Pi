@@ -120,7 +120,7 @@ export interface OnlinePayload {
   students: Record<string, { score: number; max: number; testId: string; taken: number }>;
 }
 
-export type MakeupStatus = "PENDING" | "PARTIAL" | "DONE" | "WAIVED";
+export type MakeupStatus = "PENDING" | "PARTIAL" | "SUBMITTED" | "DONE" | "WAIVED";
 export interface MakeupRow {
   studentId: string;
   status: MakeupStatus;
@@ -200,6 +200,7 @@ export const NOTE_MAX = 200;
 export const MAKEUP_LABEL: Record<MakeupStatus, string> = {
   PENDING: "Нөхөөгүй",
   PARTIAL: "Хагас нөхсөн",
+  SUBMITTED: "Илгээсэн, шалгана",
   DONE: "Нөхсөн",
   WAIVED: "Чөлөөлсөн",
 };

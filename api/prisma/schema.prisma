@@ -1089,6 +1089,21 @@ model TestAccess {
   @@id([testId, classroomId])
 }
 
+/// Нэг сурагчид тусгайлан нээсэн тест (эзэн 2026-11-03): нөхөх хичээл — тасалсан/чөлөөтэй сурагч
+/// ангид хийсэн A болон гэрийн B хувилбарыг шалгалтын горимоор ӨӨРӨӨ өгнө. Өмнө нь TestAccess-ээр
+/// БҮХ ангид нээгдэж байсан (бусад сурагч урьдчилан хийх боломжтой) — одоо зөвхөн тухайн сурагчид.
+model StudentTestAccess {
+  testId      String
+  studentId   String
+  classroomId String
+  /// Одоогоор зөвхөн «MAKEUP»
+  source      String   @default("MAKEUP")
+  createdAt   DateTime @default(now())
+
+  @@id([testId, studentId])
+  @@index([studentId])
+}
+
 // Онлайн шалгалтын session — сервер-эрхт таймер, shuffle, autosave (Шийдвэр 2).
 // Дараалал анх нэг удаа санамсаргүй үүсээд session дуустал хөлдөнө; явц нь
 // draftAnswers-т хадгалагдах тул refresh/гацалтад тэсвэртэй. Дуусмагц хөлддөг.

@@ -1,6 +1,7 @@
 import {
   decodeDecisionNote,
   encodeDecisionNote,
+  isOpenStatus,
   makeupStatus,
   normalizeVariant,
   requiredTests,
@@ -27,7 +28,7 @@ describe('нөхөх тестийн үүрэг', () => {
     ]);
     expect(
       makeupStatus({ ...base, required: r, doneTestIds: new Set(['b']), imageKeys: ['k'], submittedAt: new Date() }),
-    ).toBe('DONE');
+    ).toBe('SUBMITTED');
   });
   it('ангид B хийсэн бол хоцорсон сурагчид A үлдэнэ', () => {
     expect(requiredTests('LATE', [B], [A, B]).filter((t) => !t.inClass).map((t) => t.testId)).toEqual(['a']);
@@ -63,13 +64,24 @@ const base: StatusInput = {
 };
 
 describe('нөхөх хичээлийн төлөв', () => {
-  it('юу ч хийгээгүй → PENDING; хэсэгчлэн → PARTIAL; бүгд → DONE', () => {
+  it('юу ч хийгээгүй → PENDING; хэсэгчлэн → PARTIAL; бүгд илгээсэн → SUBMITTED (DONE биш — багш батална)', () => {
     expect(makeupStatus(base)).toBe('PENDING');
     expect(makeupStatus({ ...base, doneTestIds: new Set(['a']) })).toBe('PARTIAL');
     expect(makeupStatus({ ...base, imageKeys: ['k'], submittedAt: new Date() })).toBe('PARTIAL');
     expect(
       makeupStatus({ ...base, imageKeys: ['k'], submittedAt: new Date(), doneTestIds: new Set(['a', 'b']) }),
-    ).toBe('DONE');
+    ).toBe('SUBMITTED');
+  });
+  it('тестгүй өдөр зураг илгээхэд ч автоматаар DONE болохгүй — багш шалгана', () => {
+    const noTests = { ...base, required: [], doneTestIds: new Set<string>() };
+    expect(makeupStatus({ ...noTests, imageKeys: ['k'], submittedAt: new Date() })).toBe('SUBMITTED');
+    expect(makeupStatus({ ...noTests, imageKeys: ['k'], submittedAt: new Date(), decision: 'CONFIRMED' })).toBe('DONE');
+  });
+  it('зөвхөн PENDING, PARTIAL нь сурагчаас үйлдэл шаардана', () => {
+    expect(isOpenStatus('PENDING')).toBe(true);
+    expect(isOpenStatus('PARTIAL')).toBe(true);
+    expect(isOpenStatus('SUBMITTED')).toBe(false);
+    expect(isOpenStatus('DONE')).toBe(false);
   });
   it('ажилтны шийдвэр давамгайлна', () => {
     expect(makeupStatus({ ...base, decision: 'CONFIRMED' })).toBe('DONE');
@@ -80,7 +92,7 @@ describe('нөхөх хичээлийн төлөв', () => {
     const t1 = new Date('2026-10-11T10:00:00Z');
     const done = { ...base, imageKeys: ['k'], doneTestIds: new Set(['a', 'b']) };
     expect(makeupStatus({ ...done, submittedAt: t0, decision: 'REOPENED', decidedAt: t1 })).toBe('PARTIAL');
-    expect(makeupStatus({ ...done, submittedAt: new Date('2026-10-12T00:00:00Z'), decision: 'REOPENED', decidedAt: t1 })).toBe('DONE');
+    expect(makeupStatus({ ...done, submittedAt: new Date('2026-10-12T00:00:00Z'), decision: 'REOPENED', decidedAt: t1 })).toBe('SUBMITTED');
   });
   it('шийдвэрийн тэмдэглэл кодлох/задлах', () => {
     expect(decodeDecisionNote(encodeDecisionNote('WAIVED', ' Өвчтэй '))).toEqual({ decision: 'WAIVED', text: 'Өвчтэй' });

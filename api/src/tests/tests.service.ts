@@ -1633,6 +1633,14 @@ export class TestsService {
     if (enrollment) {
       return;
     }
+    // Нөхөх хичээл: энэ сурагчид ТУСГАЙЛАН нээсэн тест (эзэн 2026-11-03) — бусад сурагчид нээгдэхгүй
+    const own = await db.studentTestAccess.findUnique({
+      where: { testId_studentId: { testId: test.id, studentId: userId } },
+      select: { testId: true },
+    });
+    if (own) {
+      return;
+    }
 
     let bookId: string | null = null;
     if (test.chapterId) {

@@ -35,6 +35,7 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
       'lessonMakeup',
       'user',
       'testAccess',
+      'studentTestAccess',
       'lessonTopic',
       'lessonPhoto',
       'storedFile',
@@ -177,10 +178,63 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
     await expect(service.submitMakeupPhotos('s9', 'c1', '2026-10-10', [])).rejects.toMatchObject({ status: 404 });
   });
 
+  it('нөхөх тестийг ЗӨВХӨН тэр сурагчид нээнэ — ангийн TestAccess үүсгэхгүй (эзэн 2026-11-03)', async () => {
+    db.lessonMakeup.findMany.mockResolvedValue([]);
+    const res = await service.openMakeupTest(staff('s1', Role.STUDENT), 'c1', '2026-10-10', 'tB');
+    expect(res.testId).toBe('tB');
+    expect(db.studentTestAccess.upsert).toHaveBeenCalledTimes(1);
+    expect(db.studentTestAccess.upsert.mock.calls[0][0]).toMatchObject({
+      where: { testId_studentId: { testId: 'tB', studentId: 's1' } },
+      create: { testId: 'tB', studentId: 's1', classroomId: 'c1', source: 'MAKEUP' },
+    });
+    expect(db.testAccess.upsert).not.toHaveBeenCalled();
+    expect(db.testAccess.create).not.toHaveBeenCalled();
+  });
+
+  it('сурагчид тусгайлан нээсэн тест «open» гэж харагдана', async () => {
+    db.lessonMakeup.findMany.mockResolvedValue([]);
+    db.studentTestAccess.findMany.mockResolvedValue([{ testId: 'tB' }]);
+    const mine = await service.myMakeups('s1');
+    expect(mine[0].tests.find((t) => t.testId === 'tB')?.open).toBe(true);
+    expect(mine[0].tests.find((t) => t.testId === 'tA')?.open).toBe(false);
+  });
+
+  it('14 хоногийн дараа устсан файлын холбоос өгөхгүй, «устсан» гэж тэмдэглэнэ; төлөв хэвээр', async () => {
+    db.lessonMakeup.findMany.mockResolvedValue([
+      { classroomId: 'c1', studentId: 's2', date: D('2026-10-12'), imageKeys: ['gone.pdf', 'here.pdf'], submittedAt: new Date(), confirmedById: 'owner', confirmedAt: new Date(), note: 'CONFIRMED' },
+    ]);
+    db.storedFile.findMany.mockResolvedValue([{ key: 'here.pdf', mime: 'application/pdf', pages: 2 }]);
+    const rows = await service.classroomMakeups(staff('x', Role.TEACHER_PLUS), 'c1', { from: '2026-10-01', to: '2026-10-31' });
+    const r = rows.find((x) => x.studentId === 's2')!;
+    expect(r.imageKeys).toEqual(['here.pdf']);
+    expect(r.filesExpired).toBe(true);
+    expect(r.status).toBe('DONE');
+  });
+
+  it('бүх шаардлагыг илгээсэн ч «Нөхсөн» биш — багшийн шийдвэр хүртэл SUBMITTED', async () => {
+    db.lessonMakeup.findMany.mockResolvedValue([
+      { classroomId: 'c1', studentId: 's1', date: D('2026-10-10'), imageKeys: ['k.pdf'], submittedAt: new Date(), confirmedById: null, confirmedAt: null, note: null },
+    ]);
+    db.storedFile.findMany.mockResolvedValue([{ key: 'k.pdf', mime: 'application/pdf', pages: 1 }]);
+    db.testResult.findMany.mockResolvedValue([{ studentId: 's1', testId: 'tB' }]);
+    const rows = await service.classroomMakeups(staff('x', Role.TEACHER_PLUS), 'c1', { date: '2026-10-10' });
+    expect(rows.find((x) => x.studentId === 's1')?.status).toBe('SUBMITTED');
+  });
+
   describe('онолын зураг илгээх (СУРАГЧ V2, эзэн 2026-10-31)', () => {
     // УБ 2026-10-24 18:00
     beforeEach(() => jest.useFakeTimers({ now: new Date('2026-10-24T10:00:00Z'), doNotFake: ['nextTick', 'setImmediate'] }));
     afterEach(() => jest.useRealTimers());
+
+    it('хоосон жагсаалтаар илгээхэд өмнөх зураг УСТАХГҮЙ — 400 (эзэн 2026-11-03)', async () => {
+      db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
+      db.classTestSession.findFirst.mockResolvedValue({ id: 'cts' });
+      db.lessonTopic.findMany.mockResolvedValue([]);
+      db.lessonPhoto.findFirst.mockResolvedValue({ id: 'lp1', imageKeys: ['old.jpg'] });
+      db.storedFile.findMany.mockResolvedValue([]);
+      await expect(service.uploadDayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-20', [])).rejects.toMatchObject({ status: 400 });
+      expect(db.lessonPhoto.delete).not.toHaveBeenCalled();
+    });
 
     it('томилогдоогүй ч ангийн гишүүн сурагч илгээнэ; томилолт зөвхөн тэмдэг', async () => {
       db.enrollment.findFirst.mockResolvedValue({ id: 'e' });

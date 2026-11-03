@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/kit/button";
 import { api, fileUrl } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { formatMnDateTime } from "@/lib/dateMn";
-import { dayLabel, isOpen, type StaffMakeup, STATUS_CHIP, STATUS_META, testLabel } from "./types";
+import { dayLabel, isUndecided, type StaffMakeup, STATUS_CHIP, STATUS_META, testLabel } from "./types";
 
 type Action = "CONFIRM" | "WAIVE" | "REOPEN";
 
@@ -29,7 +29,8 @@ function Chip({ status }: { status: StaffMakeup["status"] }) {
   return (
     <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold", STATUS_CHIP[meta.tone])}>
       <Icon className="size-3.5" aria-hidden />
-      {meta.label}
+      {/* Багшид «Багш шалгана» биш, хийх зүйлийг нь хэлнэ */}
+      {status === "SUBMITTED" ? "Шалгах" : meta.label}
     </span>
   );
 }
@@ -145,7 +146,12 @@ function Row({ item, onSaved }: { item: StaffMakeup; onSaved: (next: StaffMakeup
                 ))}
               </>
             ) : (
-              <span className="text-ink-dim">Тэмдэглэл илгээгээгүй</span>
+              <span className="text-ink-dim">
+                {item.filesExpired ? "Зураг баталснаас 14 хоногийн дараа автоматаар устсан" : "Тэмдэглэл илгээгээгүй"}
+              </span>
+            )}
+            {item.filesExpired && item.imageKeys.length > 0 && (
+              <span className="text-xs text-ink-dim">Зарим зураг устсан</span>
             )}
           </div>
           <label className="block">
@@ -158,7 +164,7 @@ function Row({ item, onSaved }: { item: StaffMakeup; onSaved: (next: StaffMakeup
             />
           </label>
           <div className="flex flex-wrap gap-2">
-            {isOpen(item.status) ? (
+            {isUndecided(item.status) ? (
               <>
                 <Button size="sm" variant="success" disabled={!!busy} onClick={() => act("CONFIRM")}>
                   {busy === "CONFIRM" ? <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden /> : <CircleCheck aria-hidden />}
@@ -229,9 +235,14 @@ export default function MakeupPanel({
   const save = (next: StaffMakeup) =>
     setItems((prev) => (prev ?? []).map((i) => (i.studentId === next.studentId && i.date === next.date ? next : i)));
 
-  const pending = (items ?? []).filter((i) => isOpen(i.status));
-  const closed = (items ?? []).filter((i) => !isOpen(i.status));
-  const visible = showDone ? items ?? [] : pending;
+  // Багш шийдээгүй бүгд (сурагч илгээсэн ч «Нөхсөн» болоогүй) жагсаалтад үлдэнэ; шалгах ёстой нь эхэнд
+  const rank: Record<StaffMakeup["status"], number> = { SUBMITTED: 0, PENDING: 1, PARTIAL: 2, DONE: 3, WAIVED: 4 };
+  const pending = (items ?? []).filter((i) => isUndecided(i.status));
+  const closed = (items ?? []).filter((i) => !isUndecided(i.status));
+  const toCheck = pending.filter((i) => i.status === "SUBMITTED").length;
+  const visible = (showDone ? items ?? [] : pending)
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date) || rank[a.status] - rank[b.status] || a.studentName.localeCompare(b.studentName, "mn"));
   const dates = [...new Set(visible.map((i) => i.date))];
 
   return (
@@ -243,7 +254,8 @@ export default function MakeupPanel({
         </h3>
         {items && (
           <span className="text-sm tabular-nums text-ink-dim">
-            {pending.length}
+            {toCheck > 0 && <b className="mr-2 font-bold text-info">{toCheck} шалгах</b>}
+            {pending.length - toCheck}
             <span className="sr-only"> нөхөөгүй</span>
           </span>
         )}

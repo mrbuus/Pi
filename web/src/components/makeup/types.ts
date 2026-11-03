@@ -1,9 +1,10 @@
-import { CircleCheck, CircleDashed, CircleDot, CircleSlash, type LucideIcon } from "lucide-react";
+import { CircleCheck, CircleDashed, CircleDot, CircleSlash, Hourglass, type LucideIcon } from "lucide-react";
 import type { AttendanceStatus, Tone } from "@/components/attendance/marks";
 
 /** API гэрээ: docs/v2/UDRIIN-HICHEEL-REWORK.md (Агент 4) */
 export type MakeupReason = Extract<AttendanceStatus, "ABSENT" | "EXCUSED" | "LATE">;
-export type MakeupStatus = "PENDING" | "PARTIAL" | "DONE" | "WAIVED";
+/** SUBMITTED — бүгдийг илгээсэн, багш ШАЛГААГҮЙ (эзэн 2026-11-03: «Нөхсөн» болгох нь зөвхөн багшийн шийдвэр) */
+export type MakeupStatus = "PENDING" | "PARTIAL" | "SUBMITTED" | "DONE" | "WAIVED";
 
 export interface MakeupTest {
   testId: string;
@@ -28,6 +29,8 @@ export interface MyMakeup {
   status: MakeupStatus;
   photos: number;
   imageKeys: string[];
+  /** Багш баталснаас 14 хоногийн дараа зураг автоматаар устсан */
+  filesExpired?: boolean;
   submittedAt: string | null;
   resubmit: boolean;
   photosAccepted: boolean;
@@ -45,6 +48,7 @@ export interface StaffMakeup {
   tests: MakeupTest[];
   classroomId: string;
   imageKeys: string[];
+  filesExpired?: boolean;
   submittedAt: string | null;
   photosAccepted: boolean;
   decision: "CONFIRMED" | "WAIVED" | "REOPENED" | null;
@@ -68,6 +72,7 @@ export interface TheoryDay {
 export const STATUS_META: Record<MakeupStatus, { label: string; icon: LucideIcon; tone: Tone | "neutral" }> = {
   PENDING: { label: "Нөхөөгүй", icon: CircleDashed, tone: "error" },
   PARTIAL: { label: "Дутуу", icon: CircleDot, tone: "warning" },
+  SUBMITTED: { label: "Багш шалгана", icon: Hourglass, tone: "info" },
   DONE: { label: "Нөхсөн", icon: CircleCheck, tone: "success" },
   WAIVED: { label: "Чөлөөлсөн", icon: CircleSlash, tone: "neutral" },
 };
@@ -80,8 +85,14 @@ export const STATUS_CHIP: Record<Tone | "neutral", string> = {
   neutral: "bg-ink/8 text-ink-dim",
 };
 
+/** Сурагчаас үйлдэл шаардлагатай (илгээх/тест хийх) */
 export function isOpen(status: MakeupStatus) {
   return status === "PENDING" || status === "PARTIAL";
+}
+
+/** Багш шийдээгүй (Нөхсөн/Чөлөөлсөн биш) — багшийн жагсаалтад үлдэнэ */
+export function isUndecided(status: MakeupStatus) {
+  return status !== "DONE" && status !== "WAIVED";
 }
 
 const MONTHS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];

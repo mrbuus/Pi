@@ -432,6 +432,7 @@ export const ModelName = {
   TestDraft: 'TestDraft',
   TestProblem: 'TestProblem',
   TestAccess: 'TestAccess',
+  StudentTestAccess: 'StudentTestAccess',
   TestAttemptSession: 'TestAttemptSession',
   TestResult: 'TestResult',
   TestItemMark: 'TestItemMark',
@@ -539,7 +540,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3130,6 +3131,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TestAccessCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TestAccessCountAggregateOutputType> | number
+        }
+      }
+    }
+    StudentTestAccess: {
+      payload: Prisma.$StudentTestAccessPayload<ExtArgs>
+      fields: Prisma.StudentTestAccessFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StudentTestAccessFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentTestAccessPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StudentTestAccessFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentTestAccessPayload>
+        }
+        findFirst: {
+          args: Prisma.StudentTestAccessFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentTestAccessPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StudentTestAccessFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentTestAccessPayload>
+        }
+        findMany: {
+          args: Prisma.StudentTestAccessFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentTestAccessPayload>[]
+        }
+        create: {
+          args: Prisma.StudentTestAccessCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentTestAccessPayload>
+        }
+        createMany: {
+          args: Prisma.StudentTestAccessCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StudentTestAccessCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentTestAccessPayload>[]
+        }
+        delete: {
+          args: Prisma.StudentTestAccessDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentTestAccessPayload>
+        }
+        update: {
+          args: Prisma.StudentTestAccessUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentTestAccessPayload>
+        }
+        deleteMany: {
+          args: Prisma.StudentTestAccessDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StudentTestAccessUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StudentTestAccessUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentTestAccessPayload>[]
+        }
+        upsert: {
+          args: Prisma.StudentTestAccessUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentTestAccessPayload>
+        }
+        aggregate: {
+          args: Prisma.StudentTestAccessAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStudentTestAccess>
+        }
+        groupBy: {
+          args: Prisma.StudentTestAccessGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StudentTestAccessGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StudentTestAccessCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StudentTestAccessCountAggregateOutputType> | number
         }
       }
     }
@@ -10530,6 +10605,17 @@ export const TestAccessScalarFieldEnum = {
 export type TestAccessScalarFieldEnum = (typeof TestAccessScalarFieldEnum)[keyof typeof TestAccessScalarFieldEnum]
 
 
+export const StudentTestAccessScalarFieldEnum = {
+  testId: 'testId',
+  studentId: 'studentId',
+  classroomId: 'classroomId',
+  source: 'source',
+  createdAt: 'createdAt'
+} as const
+
+export type StudentTestAccessScalarFieldEnum = (typeof StudentTestAccessScalarFieldEnum)[keyof typeof StudentTestAccessScalarFieldEnum]
+
+
 export const TestAttemptSessionScalarFieldEnum = {
   id: 'id',
   testId: 'testId',
@@ -12981,6 +13067,7 @@ export type GlobalOmitConfig = {
   testDraft?: Prisma.TestDraftOmit
   testProblem?: Prisma.TestProblemOmit
   testAccess?: Prisma.TestAccessOmit
+  studentTestAccess?: Prisma.StudentTestAccessOmit
   testAttemptSession?: Prisma.TestAttemptSessionOmit
   testResult?: Prisma.TestResultOmit
   testItemMark?: Prisma.TestItemMarkOmit

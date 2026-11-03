@@ -9,7 +9,6 @@ import type { Prisma } from '../generated/prisma/client';
 import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { addDateDays, dateKey, parseDateOnly, todayUB } from '../common/date';
-import { beginRevision, commitRevision } from '../revisions/revision-store';
 import { shortName } from '../revisions/revision-snapshot';
 import {
   decisionOf,
@@ -69,7 +68,12 @@ interface MakeupItem {
   reason: MakeupReason;
   status: MakeupStatus;
   photos: number;
+  /** Одоо байгаа (устаагүй) файлын түлхүүрүүд — холбоос зөвхөн эдгээрт */
   imageKeys: string[];
+  /** Илгээсэн бүх түлхүүр (14 хоногийн дараа устсан файлыг оролцуулан) — төлөв тооцоход */
+  storedKeys: string[];
+  /** Багш баталснаас хойш 14 хоногт зураг автоматаар устсан */
+  filesExpired: boolean;
   submittedAt: Date | null;
   photosAccepted: boolean;
   tests: MakeupTestView[];
@@ -340,7 +344,20 @@ export class LessonDayService {
         date: { gte: filter.from, lte: filter.to },
       },
     });
-    const pagesBy = await this.pageCounts([...new Set(makeups.flatMap((m) => m.imageKeys))]);
+    // Багш баталснаас 14 хоногийн дараа файл автоматаар устдаг (эзэн 2026-10-22) — устсан файлын
+    // «Нээх» холбоос 404 болохгүй: зөвхөн байгаа файлыг үзүүлж, устсаныг тэмдэглэнэ
+    const storedKeys = [...new Set(makeups.flatMap((m) => m.imageKeys))];
+    const liveKeys = new Set(
+      storedKeys.length
+        ? (
+            await this.prisma.storedFile.findMany({
+              where: { key: { in: storedKeys } },
+              select: { key: true },
+            })
+          ).map((f) => f.key)
+        : [],
+    );
+    const pagesBy = await this.pageCounts([...liveKeys]);
     const makeupBy = new Map(
       makeups.map((m) => [`${m.classroomId}|${m.studentId}|${dateKey(m.date)}`, m]),
     );
@@ -360,8 +377,12 @@ export class LessonDayService {
         date: key,
         reason: a.status,
         status: 'PENDING',
-        photos: (m?.imageKeys ?? []).reduce((n, k) => n + (pagesBy.get(k) ?? 1), 0),
-        imageKeys: m?.imageKeys ?? [],
+        photos: (m?.imageKeys ?? [])
+          .filter((k) => liveKeys.has(k))
+          .reduce((n, k) => n + (pagesBy.get(k) ?? 1), 0),
+        imageKeys: (m?.imageKeys ?? []).filter((k) => liveKeys.has(k)),
+        storedKeys: m?.imageKeys ?? [],
+        filesExpired: (m?.imageKeys ?? []).some((k) => !liveKeys.has(k)),
         submittedAt: m?.submittedAt ?? null,
         photosAccepted: false,
         tests: [],
@@ -404,7 +425,7 @@ export class LessonDayService {
       const input = {
         required: reqs,
         doneTestIds: done,
-        imageKeys: item.imageKeys,
+        imageKeys: item.storedKeys,
         submittedAt: item.submittedAt,
         decision: item.decision,
         decidedAt: item.decidedAt,
@@ -512,7 +533,13 @@ export class LessonDayService {
           select: { testId: true },
         })
       : [];
-    const open = new Set(access.map((a) => a.testId));
+    const own = testIds.length
+      ? await this.prisma.studentTestAccess.findMany({
+          where: { studentId, testId: { in: testIds } },
+          select: { testId: true },
+        })
+      : [];
+    const open = new Set([...access, ...own].map((a) => a.testId));
     return items.map((i) => studentView(i, open));
   }
 
@@ -555,9 +582,8 @@ export class LessonDayService {
   }
 
   /**
-   * Нөхөх тестийг шалгалтын горимоор нээх: тест ангид оноогдоогүй бол (TestAccess)
-   * ангид онооно — зөвхөн сурагчийн жинхэнэ, хаагдаагүй үүргийн тест. Тестийн
-   * түүхэнд шалтгаантай бичигдэнэ.
+   * Нөхөх тестийг шалгалтын горимоор нээх: зөвхөн ЭНЭ сурагчид (StudentTestAccess) —
+   * сурагчийн жинхэнэ, хаагдаагүй үүргийн тест (ангид хийсэн A ба гэрийн B).
    */
   async openMakeupTest(actor: Actor, classroomId: string, dateText: string, testId: string) {
     const { item } = await this.myOpenItem(actor.userId, classroomId, dateText);
@@ -568,23 +594,12 @@ export class LessonDayService {
     if (!test.online)
       throw new BadRequestException('Энэ тестийн дүнг багш оруулна — онлайнаар өгөхгүй.');
     if (!test.done) {
-      await this.prisma.$transaction(async (tx) => {
-        const exists = await tx.testAccess.findUnique({
-          where: { testId_classroomId: { testId, classroomId } },
-          select: { testId: true },
-        });
-        if (exists) return;
-        const rev = await beginRevision(tx, 'TEST', testId);
-        await tx.testAccess.upsert({
-          where: { testId_classroomId: { testId, classroomId } },
-          create: { testId, classroomId },
-          update: {},
-        });
-        await commitRevision(tx, rev, {
-          actor: { id: actor.userId, role: actor.role },
-          action: 'UPDATE',
-          reason: `Нөхөх хичээл ${item.date}: сурагч шалгалтын горимоор нээв`,
-        });
+      // ЗӨВХӨН энэ сурагчид нээнэ (эзэн 2026-11-03) — өмнө нь ангийн TestAccess-ээр бүх ангид
+      // нээгдэж, бусад сурагч урьдчилан хийх боломжтой байсан
+      await this.prisma.studentTestAccess.upsert({
+        where: { testId_studentId: { testId, studentId: actor.userId } },
+        create: { testId, studentId: actor.userId, classroomId, source: 'MAKEUP' },
+        update: {},
       });
     }
     return { testId, href: `/app/tests/${testId}` };
@@ -732,10 +747,8 @@ export class LessonDayService {
         orderBy: { createdAt: 'asc' },
       });
       const imageKeys = await this.ownImageKeys(keys, actor.userId, mine?.imageKeys ?? [], tx);
-      if (!imageKeys.length) {
-        if (mine) await tx.lessonPhoto.delete({ where: { id: mine.id } });
-        return;
-      }
+      // Хоосон жагсаалтаар илгээж өмнөх зургаа устгахгүй (эзэн 2026-11-03; «өгөгдөл устгахгүй» дүрэм)
+      if (!imageKeys.length) throw new BadRequestException('Онолын зураг сонгоно уу.');
       if (mine)
         await tx.lessonPhoto.update({
           where: { id: mine.id },
@@ -874,6 +887,7 @@ function staffView(i: MakeupItem, names: Map<string, string>) {
     tests: i.tests.map((t) => ({ testId: t.testId, title: t.title, variant: t.variant, done: t.done, inClass: t.inClass })),
     classroomId: i.classroomId,
     imageKeys: i.imageKeys,
+    filesExpired: i.filesExpired,
     submittedAt: i.submittedAt,
     photosAccepted: i.photosAccepted,
     decision: i.decision,
@@ -893,6 +907,7 @@ function studentView(i: MakeupItem, open: Set<string>) {
     status: i.status,
     photos: i.photos,
     imageKeys: i.imageKeys,
+    filesExpired: i.filesExpired,
     submittedAt: i.submittedAt,
     /** Багш дахин илгээхийг хүссэн — өмнөх зураг тооцогдохгүй */
     resubmit: i.decision === 'REOPENED' && i.photos > 0 && !i.photosAccepted,
