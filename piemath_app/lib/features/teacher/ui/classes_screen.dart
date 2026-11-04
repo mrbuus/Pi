@@ -121,6 +121,10 @@ class _ClassesScreenState extends ConsumerState<ClassesScreen> {
                 ],
               ),
               const SizedBox(height: AppSpace.sm),
+              if (ref.watch(canManageProvider)) ...[
+                const _ManageLinks(),
+                const SizedBox(height: AppSpace.sm),
+              ],
               if (mine.isNotEmpty) ...[
                 SegmentedButton<bool>(
                   segments: [
@@ -196,6 +200,35 @@ class _ClassesScreenState extends ConsumerState<ClassesScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Багш+ / Админ: ангийн удирдлага, бүртгэл (`/app/admin/classrooms`, `/app/admin/registry`).
+class _ManageLinks extends StatelessWidget {
+  const _ManageLinks();
+
+  @override
+  Widget build(BuildContext context) {
+    final style = OutlinedButton.styleFrom(minimumSize: const Size(0, 48));
+    return Wrap(
+      spacing: AppSpace.sm,
+      runSpacing: AppSpace.sm,
+      children: [
+        OutlinedButton.icon(
+          key: const ValueKey('classes-manage'),
+          style: style,
+          onPressed: () => context.push('/app/admin/classrooms'),
+          icon: const Icon(AppIcons.settings, size: 18),
+          label: const Text('Ангиуд удирдах'),
+        ),
+        OutlinedButton.icon(
+          style: style,
+          onPressed: () => context.push('/app/admin/registry'),
+          icon: const Icon(AppIcons.idCard, size: 18),
+          label: const Text('Бүртгэл'),
+        ),
+      ],
     );
   }
 }
@@ -304,6 +337,16 @@ class ClassDetailScreen extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(async.value?.name ?? 'Анги'),
+          actions: [
+            if (async.value?.permissions.manageClass ?? false)
+              IconButton(
+                tooltip: 'Удирдах',
+                icon: const Icon(AppIcons.settings),
+                onPressed: () => context.push(
+                  '/app/admin/classrooms/${Uri.encodeComponent(classId)}',
+                ),
+              ),
+          ],
           bottom: const TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.start,
