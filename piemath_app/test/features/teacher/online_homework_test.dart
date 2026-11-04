@@ -315,7 +315,7 @@ void main() {
       await settle(tester);
       await tester.tap(_inSheet(find.text('Дүн нээх')));
       await settle(tester);
-      expect(find.text('ROUTE:/app/teacher/tests/t2/results'), findsOneWidget);
+      expect(find.text('ROUTE:/app/tests/t2/results'), findsOneWidget);
     });
 
     testWidgets('хоосон: онлайн даалгавар, зураг хоёулаа алга', (tester) async {

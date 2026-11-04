@@ -204,7 +204,7 @@ class _OnlineHomeworkSheetState extends ConsumerState<OnlineHomeworkSheet> {
                 ),
                 TextButton.icon(
                   style: TextButton.styleFrom(minimumSize: const Size(teacherTap, teacherTap)),
-                  onPressed: () => context.push('/app/teacher/tests/${Uri.encodeComponent(current.testId)}/results'),
+                  onPressed: () => context.push('/app/tests/${Uri.encodeComponent(current.testId)}/results'),
                   iconAlignment: IconAlignment.end,
                   icon: const Icon(AppIcons.externalLink, size: 14),
                   label: const Text('Дүн нээх'),

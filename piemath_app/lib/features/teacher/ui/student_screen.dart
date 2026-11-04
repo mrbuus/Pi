@@ -251,8 +251,7 @@ class _ExamsTab extends ConsumerWidget {
             return AppCard(
               onTap: testId == null || testId.isEmpty
                   ? null
-                  : () =>
-                        context.push('/app/teacher/tests/${Uri.encodeComponent(testId)}/results', extra: r.test?.title),
+                  : () => context.push('/app/tests/${Uri.encodeComponent(testId)}/results', extra: r.test?.title),
               child: Row(
                 children: [
                   Expanded(

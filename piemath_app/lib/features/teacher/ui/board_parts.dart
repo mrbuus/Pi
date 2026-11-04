@@ -396,6 +396,22 @@ class BoardLessonInfo extends StatelessWidget {
               ),
             ],
           ),
+          // Вэбийн `BoardFilters`: тест бүрийн нэр шалгалтын дүн рүү холбоостой.
+          if (hasOnline)
+            Wrap(
+              spacing: AppSpace.sm,
+              children: [
+                for (final t in marks!.tests)
+                  if (t.testId.isNotEmpty)
+                    TextButton.icon(
+                      style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                      onPressed: () =>
+                          context.push('/app/tests/${Uri.encodeComponent(t.testId)}/results', extra: t.title),
+                      icon: const Icon(AppIcons.chart, size: 16),
+                      label: Text(t.variant == null ? '${t.title} дүн' : '${t.title} ${t.variant} дүн'),
+                    ),
+              ],
+            ),
           if (hasOnline) ...[
             const SizedBox(height: 10),
             Divider(height: 1, color: c.line),
