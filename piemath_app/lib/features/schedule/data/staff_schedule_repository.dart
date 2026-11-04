@@ -4,6 +4,7 @@ import '../../../core/auth/session.dart';
 import '../../../core/auth/user_role.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_providers.dart';
+import 'lesson_plan_models.dart';
 import 'staff_schedule_models.dart';
 
 /// Ажилтны хуваарийн бүх дуудлага (вэбийн `components/schedule/*`-тэй ижил зам, бие).
@@ -153,6 +154,70 @@ class StaffScheduleRepository {
   Future<DayPublication> publishDay(String date) =>
       _api.post('/schedule/day/$date/publish', parse: (j) => DayPublication.fromJson(_map(j)));
 
+  // ---------- Төлөвлөгөө, батламж (Багш+, Админ; батлах — бүх багш) ----------
+
+  Future<PlanContext> planContext(String scheduleId, {required String date}) =>
+      _api.get('/schedule/$scheduleId/plan', query: {'date': date}, parse: (j) => PlanContext.fromJson(_map(j)));
+
+  /// Орох тест (номын дарааллаар), нэмэлт сэдэв, тарах/үлдэх, онолын зураг илгээх сурагч.
+  Future<void> putPlan(
+    String scheduleId, {
+    required String date,
+    required List<String> testIds,
+    required List<String> customTopics,
+    String? dismissMode,
+    String? photoStudentId,
+  }) => _api.put<void>(
+    '/schedule/$scheduleId/plan',
+    body: {
+      'date': date,
+      'testIds': testIds,
+      'customTopics': customTopics,
+      'dismissMode': dismissMode,
+      'photoStudentId': photoStudentId,
+    },
+  );
+
+  /// Ирцийн самбарын тэмдэглэлтэй НЭГ бичлэг. Хоосон бол сервер зөөлөн устгана (`deletedAt`).
+  Future<void> putNote(String scheduleId, {required String date, required String body}) =>
+      _api.put<void>('/lesson-records/$scheduleId/note', body: {'date': date, 'body': body});
+
+  Future<Roadmap> roadmap(String classroomId, {required String date}) =>
+      _api.get('/classrooms/$classroomId/roadmap', query: {'date': date}, parse: (j) => Roadmap.fromJson(_map(j)));
+
+  /// «Энэ ангиас хасах» (`REMOVED`). Буцаах (`null`) нь серверт мөр устгадаг тул апп-д байхгүй.
+  Future<void> removeTestFromClass(String classroomId, String testId) =>
+      _api.put<void>('/classrooms/$classroomId/tests/$testId/status', body: {'status': 'REMOVED'});
+
+  /// Өдрийн хариунд байхгүй тестийн нэр, бодлогын дараалал.
+  Future<List<PlanTest>> planTests(List<String> ids) =>
+      _api.get('/schedule/plan-tests', query: {'ids': ids.join(',')}, parse: (j) => _list(j, PlanTest.fromJson));
+
+  /// Хичээлийн дараа батлах: хийсэн тест + хассан бодлого, сэдэв, тайлбар, бодсон бодлогын дугаар.
+  Future<void> confirmLesson(
+    String scheduleId, {
+    required String date,
+    required List<({String testId, List<String> excluded})> tests,
+    String? topic,
+    String? description,
+    String? problemNumbers,
+  }) => _api.put<void>(
+    '/lesson-records/$scheduleId/confirm',
+    body: {
+      'date': date,
+      'tests': [
+        for (final t in tests) {'testId': t.testId, 'excludedProblemIds': t.excluded},
+      ],
+      'topic': topic,
+      'description': description,
+      'problemNumbers': problemNumbers,
+    },
+  );
+
+  /// Батламж цуцлах — сервер `cancelledAt` бөглөнө (зөөлөн). `delete` query авдаггүй тул огноо замд.
+  Future<void> unconfirmLesson(String scheduleId, {required String date}) =>
+      _api.delete<void>('/lesson-records/$scheduleId/confirm?date=$date');
+
   // ---------- Багшийн ажлын өдөр ----------
 
   /// Багшийн тухайн ээлжийн БҮХ гарагийг солино. [weekdays] JS дугаарлалт.
@@ -246,4 +311,14 @@ final publicationProvider = FutureProvider.family<DayPublication, String>((ref, 
 /// Түлхүүр = өнөөдөр (`YYYY-MM-DD`) — удахгүй болох онцгой өдрүүд.
 final specialDaysProvider = FutureProvider.family<List<SpecialDay>, String>(
   (ref, from) => _repo(ref).specialDays(from: from),
+);
+
+/// Түлхүүр = (анги, өдөр).
+final roadmapProvider = FutureProvider.family<Roadmap, ({String classroomId, String date})>(
+  (ref, k) => _repo(ref).roadmap(k.classroomId, date: k.date),
+);
+
+/// Түлхүүр = (хуваарь, өдөр).
+final planContextProvider = FutureProvider.family<PlanContext, ({String scheduleId, String date})>(
+  (ref, k) => _repo(ref).planContext(k.scheduleId, date: k.date),
 );

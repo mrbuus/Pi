@@ -186,6 +186,8 @@ void main() {
       await openSchedule(tester, http, UserRole.admin);
       final date = firstPlanDate(http);
       await openLesson(tester);
+      // «Төлөвлөгөө засах», «Батлах» нэмэгдсэн тул үйлдлийн хэсэг доор.
+      await scrollDetail(tester, 'Зөөх');
       await tester.tap(find.text('Зөөх'));
       await settle(tester);
       expect(find.text('Хичээл зөөх'), findsOneWidget);
@@ -205,6 +207,7 @@ void main() {
       final http = staffHttp(canPlan: true);
       await openSchedule(tester, http, UserRole.admin);
       await openLesson(tester);
+      await scrollDetail(tester, 'Танхим солих');
       await tester.tap(find.text('Танхим солих'));
       await settle(tester);
       await tester.tap(find.widgetWithText(FilledButton, 'Танхим солих'));

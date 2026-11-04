@@ -52,6 +52,9 @@ class LessonRecordInfo {
     this.absentCount = 0,
     this.enrolledCount = 0,
     this.topic,
+    this.confirmedAt,
+    this.description,
+    this.problemNumbersText,
   });
 
   factory LessonRecordInfo.fromJson(Map<String, Object?> j) => LessonRecordInfo(
@@ -60,6 +63,9 @@ class LessonRecordInfo {
     absentCount: _int(j['absentCount']),
     enrolledCount: _int(j['enrolledCount']),
     topic: _str(j['topic']),
+    confirmedAt: _str(j['confirmedAt']),
+    description: _str(j['description']),
+    problemNumbersText: _str(j['problemNumbersText']),
   );
 
   final String confirmedByName;
@@ -67,6 +73,32 @@ class LessonRecordInfo {
   final int absentCount;
   final int enrolledCount;
   final String? topic;
+
+  /// ISO агшин (UTC).
+  final String? confirmedAt;
+
+  /// Батлахад бичсэн тайлбар, бодсон бодлогын дугаар («1-12, 15»).
+  final String? description;
+  final String? problemNumbersText;
+}
+
+/// Ангид бодитоор хийсэн тест (`done[]`, `ClassTestSession`).
+class DoneTest {
+  const DoneTest({required this.sessionId, this.testId, this.manualTitle, this.excludedProblemIds = const []});
+
+  factory DoneTest.fromJson(Map<String, Object?> j) => DoneTest(
+    sessionId: _str(j['sessionId']) ?? '',
+    testId: _str(j['testId']),
+    manualTitle: _str(j['manualTitle']),
+    excludedProblemIds: [for (final p in _list(j['excludedProblemIds'])) ?_str(p)],
+  );
+
+  final String sessionId;
+  final String? testId;
+
+  /// Гараар бүртгэсэн (бодлогын сангүй) тестийн нэр.
+  final String? manualTitle;
+  final List<String> excludedProblemIds;
 }
 
 /// `GET /schedule/day-plan` — өдрийн нэг мөр (нэг хичээл).
@@ -95,6 +127,8 @@ class DayLesson {
     this.noteBody,
     this.noteBy,
     this.record,
+    this.done = const [],
+    this.photoStudentName,
   });
 
   factory DayLesson.fromJson(Map<String, Object?> j, String date) {
@@ -127,6 +161,8 @@ class DayLesson {
       noteBody: _str(note?['body']),
       noteBy: _str(note?['updatedByName']),
       record: j['record'] is Map ? LessonRecordInfo.fromJson(_map(j['record'])) : null,
+      done: [for (final d in _list(j['done'])) DoneTest.fromJson(_map(d))],
+      photoStudentName: _str(_map(plan?['photoStudent'])['name']),
     );
   }
 
@@ -160,6 +196,12 @@ class DayLesson {
   final String? noteBy;
   final LessonRecordInfo? record;
 
+  /// Ангид бодитоор хийсэн тестүүд (батлах цонхны эхний утга).
+  final List<DoneTest> done;
+
+  /// Онолын зураг илгээх сурагч (төлөвлөгөө).
+  final String? photoStudentName;
+
   bool get planned => planTestIds.isNotEmpty || topic != null || customTopics.isNotEmpty;
 
   DayLesson withStaff({StaffRef? lead, StaffRef? assistant}) => DayLesson(
@@ -186,24 +228,41 @@ class DayLesson {
     noteBody: noteBody,
     noteBy: noteBy,
     record: record,
+    done: done,
+    photoStudentName: photoStudentName,
   );
 }
 
 /// Тестийн товч мэдээлэл (`tests[testId]`).
 class PlanTest {
-  const PlanTest({required this.id, required this.title, required this.short, this.variant});
+  const PlanTest({
+    required this.id,
+    required this.title,
+    required this.short,
+    this.variant,
+    this.problemIds = const [],
+    this.sourcePdfKey,
+  });
 
   factory PlanTest.fromJson(Map<String, Object?> j) => PlanTest(
     id: _str(j['testId']) ?? '',
     title: _str(j['title']) ?? '',
     short: _str(j['short']) ?? _str(j['title']) ?? '',
     variant: _str(j['variant']),
+    problemIds: [for (final p in _list(j['problemIds'])) ?_str(p)],
+    sourcePdfKey: _str(j['sourcePdfKey']),
   );
 
   final String id;
   final String title;
   final String short;
   final String? variant;
+
+  /// Бодлогын дараалал — хассан бодлогын дугаар (1-ээс) тэмдэглэхэд.
+  final List<String> problemIds;
+
+  /// Тестийн эх PDF (бүх багш татна).
+  final String? sourcePdfKey;
 }
 
 /// `GET /schedule/day-plan?date=` — өдрийн хуваарь нэг дуудлагаар.
