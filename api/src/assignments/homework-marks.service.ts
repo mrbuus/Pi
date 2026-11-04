@@ -9,8 +9,12 @@ import { dateKey, parseDateOnly, todayUB } from '../common/date';
 import { Role } from '../generated/prisma/enums';
 import { classTeacherWhere } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
-import { homeworkVariants, normalizeVariant } from '../attendance/board-logic';
+import { addDaysKey, homeworkVariants, normalizeVariant } from '../attendance/board-logic';
 import { loadPreviousLesson } from '../attendance/lesson-dates';
+import {
+  loadDeadlineOverride,
+  ubAt,
+} from '../homework-practice/homework-deadline';
 import { loadPlanned } from '../homework-practice/planned-tests';
 import {
   correctAnswerView,
@@ -682,6 +686,11 @@ export class HomeworkMarksService {
       firstName: enrolled.student.firstName,
       lastName: enrolled.student.lastName,
     };
+    // Багшийн тохируулсан хугацаа (байвал) — «хоцорсон»-ыг үүгээр тооцно
+    const override = prev
+      ? await loadDeadlineOverride(this.prisma, classroomId, prev)
+      : null;
+    const dueAt = override?.dueAt ?? new Date(`${key}T00:00:00+08:00`);
     const photo = prev
       ? await this.prisma.homeworkPhoto.findFirst({
           where: {
@@ -699,10 +708,16 @@ export class HomeworkMarksService {
           fileKey: photo.fileKey,
           pages: photo.pages,
           uploadedAt: photo.createdAt.toISOString(),
-          // Энэ өдөр = дараагийн хичээл: өмнөх хичээлийн зургийг тэр өдрөөс хойш илгээсэн бол хоцорсон
-          late: photo.createdAt.getTime() >= new Date(`${key}T00:00:00+08:00`).getTime(),
+          // Энэ өдөр = дараагийн хичээл: өмнөх хичээлийн зургийг хугацаанаас (анхдагч нь энэ өдрийн
+          // 00:00, эсвэл багшийн тохируулсан) хойш илгээсэн бол хоцорсон
+          late: photo.createdAt.getTime() >= dueAt.getTime(),
         }
       : null;
+    const deadline = {
+      dueAt: dueAt.toISOString(),
+      allowLate: override?.allowLate ?? true,
+      custom: !!override,
+    };
     if (!prev || !pairs.length)
       return {
         date: key,
@@ -711,6 +726,7 @@ export class HomeworkMarksService {
         tests: [],
         photo: photoView,
         redos: [],
+        deadline,
       };
 
     const testIds = pairs.map((p) => p.testId);
@@ -796,8 +812,8 @@ export class HomeworkMarksService {
           checksUsed: a.checksUsed,
           late:
             !!a.submittedAt &&
-            !!a.deadlineAt &&
-            a.submittedAt.getTime() > a.deadlineAt.getTime(),
+            !!(override?.dueAt ?? a.deadlineAt) &&
+            a.submittedAt.getTime() > (override?.dueAt ?? a.deadlineAt)!.getTime(),
           score: a.score,
           total: a.total,
           items: rows.map((r, i) => ({
@@ -814,6 +830,8 @@ export class HomeworkMarksService {
         title: t?.title ?? 'Тест',
         variant: normalizeVariant(t?.variantLabel ?? null),
         problems: t?._count.problems ?? rows.length,
+        // Хариуны түлхүүр (эзэн 2026-11-05: «1-A, 2-B» багана) — сурагч бодоогүй ч багшид харагдана
+        key: rows.map((r, i) => ({ n: i + 1, answer: correctAnswerView(r) })),
         attempt,
         exam: exam ? { score: exam.totalScore, max: exam.maxScore } : null,
       };
@@ -863,6 +881,85 @@ export class HomeworkMarksService {
       tests,
       photo: photoView,
       redos,
+      deadline,
     };
+  }
+
+  /* ───────── Гэрийн даалгаврын хугацаа (эзэн 2026-11-05) ───────── */
+
+  /**
+   * Самбарын өдөр D-д шалгах даалгавар = өмнөх хичээл P-д өгсөн. Хугацааг P..D хооронд (хуанлийн
+   * өдөр бүр) сонгоно; анхдагч нь D-ийн 00:00, хоцорч илгээж болно.
+   */
+  private async deadlineWindow(
+    classroomId: string,
+    dateStr: string,
+    userId: string,
+    role: Role,
+  ) {
+    const date = this.parseDate(dateStr);
+    const key = dateKey(date);
+    await this.assertClassAccess(classroomId, userId, role, date);
+    const { prev } = await loadPreviousLesson(this.prisma, classroomId, key);
+    const days: string[] = [];
+    if (prev) for (let d = prev; d <= key; d = addDaysKey(d, 1)) days.push(d);
+    return { key, prev, days };
+  }
+
+  private deadlineView(
+    w: { key: string; prev: string | null; days: string[] },
+    row: { dueAt: Date; allowLate: boolean; updatedAt?: Date } | null,
+  ) {
+    const fallback = new Date(`${w.key}T00:00:00+08:00`);
+    return {
+      date: w.key,
+      lessonDate: w.prev,
+      days: w.days,
+      defaultDueAt: fallback.toISOString(),
+      dueAt: (row?.dueAt ?? fallback).toISOString(),
+      allowLate: row?.allowLate ?? true,
+      custom: !!row,
+    };
+  }
+
+  async getDeadline(classroomId: string, dateStr: string, userId: string, role: Role) {
+    const w = await this.deadlineWindow(classroomId, dateStr, userId, role);
+    const row = w.prev ? await loadDeadlineOverride(this.prisma, classroomId, w.prev) : null;
+    return this.deadlineView(w, row);
+  }
+
+  async setDeadline(
+    classroomId: string,
+    dto: { date: string; dueDate: string; time: string; allowLate: boolean },
+    userId: string,
+    role: Role,
+  ) {
+    const w = await this.deadlineWindow(classroomId, dto.date, userId, role);
+    if (!w.prev)
+      throw new BadRequestException('Өмнөх хичээл олдсонгүй — тохируулах даалгавар алга');
+    if (!w.days.includes(dto.dueDate))
+      throw new BadRequestException(
+        `Хугацааг ${w.prev}-аас ${w.key} хооронд сонгоно уу`,
+      );
+    const dueAt = ubAt(dto.dueDate, dto.time);
+    const lessonDate = parseDateOnly(w.prev);
+    const before = await this.prisma.homeworkDeadline.findUnique({
+      where: { classroomId_lessonDate: { classroomId, lessonDate } },
+    });
+    const row = await this.prisma.homeworkDeadline.upsert({
+      where: { classroomId_lessonDate: { classroomId, lessonDate } },
+      create: { classroomId, lessonDate, dueAt, allowLate: dto.allowLate, setById: userId },
+      update: { dueAt, allowLate: dto.allowLate, setById: userId },
+    });
+    await this.audit.record({
+      actorId: userId,
+      actorRole: role,
+      action: before ? 'UPDATE' : 'CREATE',
+      entity: 'HomeworkDeadline',
+      entityId: row.id,
+      before: before ?? null,
+      after: row,
+    });
+    return this.deadlineView(w, row);
   }
 }

@@ -735,3 +735,11 @@ export type AccountDeletionRequest = Prisma.AccountDeletionRequestModel
  * эсвэл lucide дүрсний нэрээр тэмдэглэнэ. User-тэй relation зориуд тавиагүй (AuditLog-той адил).
  */
 export type UiEvent = Prisma.UiEventModel
+/**
+ * Model HomeworkDeadline
+ * Гэрийн даалгаврын хугацааг багш гараар тохируулсан (эзэн 2026-11-05: самбарын «Онлайн гэрийн
+ * даалгавар» мөрийн ард). lessonDate = даалгавар ӨГСӨН хичээлийн өдөр. Мөр байхгүй бол хугацаа =
+ * дараагийн хичээлийн өдрийн 00:00 (УБ), хоцорч илгээж болно (хуучин дүрэм хэвээр).
+ * allowLate = false бол хугацаа өнгөрмөгц онлайн тест эхлэх/хадгалах/илгээх, зураг явуулах хаагдана.
+ */
+export type HomeworkDeadline = Prisma.HomeworkDeadlineModel

@@ -16,6 +16,8 @@ import {
 } from "@/components/attendance/marks";
 import { cn } from "@/lib/cn";
 import type { AttendanceStatus, BoardStudent, DayRec, HomeworkStatus, OnlinePayload } from "./lib";
+import { cleanTitle } from "@/components/homework-practice/lib";
+import DeadlineButton from "./DeadlineButton";
 import { RiskDot } from "./parts";
 import { scoreText, type OnlineCell } from "./StudentCard";
 
@@ -99,12 +101,16 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 /** Тухайн хичээлийн сэдэв ба онлайн гэрийн даалгавар (нэгтгэсэн тоо) */
 export function LessonInfo({
+  classId,
+  date,
   students,
   homework,
   topic,
   onlineData,
   online,
 }: {
+  classId: string;
+  date: string;
   students: BoardStudent[];
   homework: boolean;
   topic: string | null;
@@ -138,8 +144,7 @@ export function LessonInfo({
                   <span key={t.testId}>
                     {i > 0 && ", "}
                     <Link href={`/app/tests/${encodeURIComponent(t.testId)}/results`} className="font-semibold text-ink underline decoration-ink-dim/40 underline-offset-4 hover:text-brand-soft">
-                      {t.title}
-                      {t.variant ? ` ${t.variant}` : ""}
+                      {cleanTitle(t.title, t.variant)}
                     </Link>{" "}
                     <span className="whitespace-nowrap text-ink-dim">({t.problems} бодлого)</span>
                   </span>
@@ -147,6 +152,8 @@ export function LessonInfo({
               ) : (
                 <span className="text-ink-dim">алга</span>
               )}
+              {/* Хугацаа (эзэн 2026-11-05): даалгаврын нэрийн ард, дарж өдөр/цаг/хаах эсэхийг тохируулна */}
+              <DeadlineButton key={`${classId}|${date}`} classId={classId} date={date} />
             </p>
           )}
         </div>

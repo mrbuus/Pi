@@ -200,10 +200,16 @@ export class LessonPlanService {
       },
     });
     const seen = new Set<string>();
+    // Багшийн самбартай ижил: НЭРЭЭР, дараа нь овгоор. «А. Амгаланбат» бүтэн бичвэрээр
+    // эрэмбэлбэл овгийн эхний үсгээр эрэмбэлэгдэж байсан (эзэн 2026-11-05).
     return rows
       .filter((r) => !seen.has(r.studentId) && !!seen.add(r.studentId))
-      .map((r) => ({ id: r.studentId, name: studentName(r.student) }))
-      .sort((a, b) => a.name.localeCompare(b.name, 'mn'));
+      .sort(
+        (a, b) =>
+          a.student.firstName.localeCompare(b.student.firstName, 'mn') ||
+          a.student.lastName.localeCompare(b.student.lastName, 'mn'),
+      )
+      .map((r) => ({ id: r.studentId, name: studentName(r.student) }));
   }
 
   /** GET /schedule/:scheduleId/plan?date= — засварын цонхонд: төлөвлөгөө + ангийн жагсаалт + зургийн ээлж. */

@@ -44,6 +44,10 @@ export interface HwDay {
   classroomId: string;
   classroomName: string;
   deadlineAt: string | null;
+  /** false = багш «хугацаа дуусахад хаагдана» гэж тохируулсан (эзэн 2026-11-05) */
+  allowLate?: boolean;
+  /** Хаагдсан: хугацаа өнгөрсөн, хоцорч илгээхийг зөвшөөрөөгүй */
+  closed?: boolean;
   items: HwItem[];
   photo: HwPhoto | null;
   /** Багшийн тэмдэглэгээ (дараагийн хичээлийн өдөр тавьдаг) */

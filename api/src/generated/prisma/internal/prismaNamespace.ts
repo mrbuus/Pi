@@ -531,7 +531,8 @@ export const ModelName = {
   DeviceToken: 'DeviceToken',
   AppleIdentity: 'AppleIdentity',
   AccountDeletionRequest: 'AccountDeletionRequest',
-  UiEvent: 'UiEvent'
+  UiEvent: 'UiEvent',
+  HomeworkDeadline: 'HomeworkDeadline'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -547,7 +548,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -10541,6 +10542,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    HomeworkDeadline: {
+      payload: Prisma.$HomeworkDeadlinePayload<ExtArgs>
+      fields: Prisma.HomeworkDeadlineFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeworkDeadlineFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeworkDeadlineFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>
+        }
+        findFirst: {
+          args: Prisma.HomeworkDeadlineFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeworkDeadlineFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>
+        }
+        findMany: {
+          args: Prisma.HomeworkDeadlineFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>[]
+        }
+        create: {
+          args: Prisma.HomeworkDeadlineCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>
+        }
+        createMany: {
+          args: Prisma.HomeworkDeadlineCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeworkDeadlineCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>[]
+        }
+        delete: {
+          args: Prisma.HomeworkDeadlineDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>
+        }
+        update: {
+          args: Prisma.HomeworkDeadlineUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeworkDeadlineDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeworkDeadlineUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeworkDeadlineUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeworkDeadlineUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>
+        }
+        aggregate: {
+          args: Prisma.HomeworkDeadlineAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeworkDeadline>
+        }
+        groupBy: {
+          args: Prisma.HomeworkDeadlineGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkDeadlineGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeworkDeadlineCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkDeadlineCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -12653,6 +12728,20 @@ export const UiEventScalarFieldEnum = {
 export type UiEventScalarFieldEnum = (typeof UiEventScalarFieldEnum)[keyof typeof UiEventScalarFieldEnum]
 
 
+export const HomeworkDeadlineScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  lessonDate: 'lessonDate',
+  dueAt: 'dueAt',
+  allowLate: 'allowLate',
+  setById: 'setById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HomeworkDeadlineScalarFieldEnum = (typeof HomeworkDeadlineScalarFieldEnum)[keyof typeof HomeworkDeadlineScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -13811,6 +13900,7 @@ export type GlobalOmitConfig = {
   appleIdentity?: Prisma.AppleIdentityOmit
   accountDeletionRequest?: Prisma.AccountDeletionRequestOmit
   uiEvent?: Prisma.UiEventOmit
+  homeworkDeadline?: Prisma.HomeworkDeadlineOmit
 }
 
 /* Types for Logging */

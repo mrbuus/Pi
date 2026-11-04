@@ -3311,3 +3311,20 @@ model UiEvent {
   @@index([createdAt])
   @@index([role, createdAt])
 }
+
+/// Гэрийн даалгаврын хугацааг багш гараар тохируулсан (эзэн 2026-11-05: самбарын «Онлайн гэрийн
+/// даалгавар» мөрийн ард). lessonDate = даалгавар ӨГСӨН хичээлийн өдөр. Мөр байхгүй бол хугацаа =
+/// дараагийн хичээлийн өдрийн 00:00 (УБ), хоцорч илгээж болно (хуучин дүрэм хэвээр).
+/// allowLate = false бол хугацаа өнгөрмөгц онлайн тест эхлэх/хадгалах/илгээх, зураг явуулах хаагдана.
+model HomeworkDeadline {
+  id          String   @id @default(cuid())
+  classroomId String
+  lessonDate  DateTime @db.Date
+  dueAt       DateTime
+  allowLate   Boolean  @default(true)
+  setById     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([classroomId, lessonDate])
+}

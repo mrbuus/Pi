@@ -36,16 +36,6 @@ export function RiskDot() {
   return <span aria-hidden className="inline-flex size-2.5 rounded-full bg-error ring-2 ring-error/20" />;
 }
 
-/** Тухайн хичээлийн даалгаврыг илгээсэн сурагчийн жижиг тэмдэг (нэрийн ард) */
-export function SentMark({ className = "" }: { className?: string }) {
-  return (
-    <span title="Даалгавраа илгээсэн" className={cn("inline-flex shrink-0 text-brand", className)}>
-      <HwSentIcon className="size-3.5" aria-hidden />
-      <span className="sr-only">Даалгавраа илгээсэн</span>
-    </span>
-  );
-}
-
 /* ───────── Төлөв бүрийн тоо (эзэн 2026-10-22) — самбарын тойм, drawer хоёулаа ───────── */
 
 export interface CountDef {
