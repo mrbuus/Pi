@@ -63,6 +63,8 @@ function makeDb() {
     (!r?.in || r.in.some((x: Date) => x.getTime() === date.getTime()));
   const checks: Row[] = [];
   const photos: Row[] = [];
+  // Багшийн тохируулсан хугацаа (HomeworkDeadline)
+  const deadlines: Row[] = [];
   const files: Record<string, Row> = {
     'f1.pdf': { ownerId: 's1', mime: 'application/pdf', size: 1000, pages: 3, expiresAt: new Date() },
     'f2.pdf': { ownerId: 's1', mime: 'application/pdf', size: 1000, pages: 2, expiresAt: new Date() },
@@ -234,6 +236,21 @@ function makeDb() {
         return list[0] ?? null;
       }),
     },
+    homeworkDeadline: {
+      findMany: jest.fn(async ({ where }: any) =>
+        deadlines.filter(
+          (r) => where.classroomId.in.includes(r.classroomId) && inRange(r.lessonDate, where.lessonDate),
+        ),
+      ),
+      findUnique: jest.fn(async ({ where }: any) => {
+        const k = where.classroomId_lessonDate;
+        return (
+          deadlines.find(
+            (r) => r.classroomId === k.classroomId && r.lessonDate.getTime() === k.lessonDate.getTime(),
+          ) ?? null
+        );
+      }),
+    },
     homeworkPhoto: {
       findFirst: jest.fn(async ({ where }: any) =>
         photos
@@ -345,7 +362,7 @@ function makeDb() {
     chapter: { findMany: jest.fn(async () => [{ id: 'ch1', title: 'Вектор' }]) },
     $transaction: jest.fn(async (fn: any) => fn(db)),
   };
-  return { db, attempts, accesses, checks, photos, enrollments, sessions, tests, attendance, topics, records, marks, schedules, holidays };
+  return { db, attempts, accesses, checks, photos, deadlines, enrollments, sessions, tests, attendance, topics, records, marks, schedules, holidays };
 }
 
 describe('HomeworkPracticeService — танхимын сурагчийн гэрийн даалгавар', () => {
@@ -538,6 +555,32 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
       ['2026-10-27', 1],
     ]);
     expect(list.days[1].items[0].late).toBe(true);
+  });
+
+  it('багшийн хугацаа (эзэн 2026-11-05): цагаар хоцорсон тооцно; «хаагдана» бол хугацааны дараа эхлэх/илгээх/зураг 403', async () => {
+    jest.setSystemTime(new Date('2026-10-28T10:00:00Z')); // УБ 10-28 18:00
+    const { attemptId } = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
+    // Багш: 10-28 21:00 хүртэл, хоцорч илгээж болно
+    env.deadlines.push({ classroomId: 'c1', lessonDate: d('2026-10-27'), dueAt: new Date('2026-10-28T13:00:00Z'), allowLate: true });
+    jest.setSystemTime(new Date('2026-10-28T14:00:00Z')); // УБ 22:00
+    await svc.submit('s1', attemptId, { p1: 'B' });
+    let list = await svc.my('s1');
+    const day = list.days.find((x: any) => x.date === '2026-10-27')!;
+    expect(day.deadlineAt).toBe('2026-10-28T13:00:00.000Z');
+    expect(day.items[0].late).toBe(true);
+    expect(day.closed).toBe(false);
+    // «Хаагдана» болговол: хугацаа өнгөрсөн тул зураг ба шинэ оролдлого татгалзана
+    env.deadlines[0].allowLate = false;
+    list = await svc.my('s1');
+    expect(list.days.find((x: any) => x.date === '2026-10-27')!.closed).toBe(true);
+    await expect(
+      svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-27', fileKey: 'f1.pdf', pages: 3 }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    // Илгээсэн дүнгээ хаагдсан ч нээж харна
+    await expect(svc.start('s1', { testId: 'B1', date: '2026-10-27' })).resolves.toBeTruthy();
+    // Илгээгээгүй оролдлого хаагдсаны дараа эхлэхгүй
+    env.attempts.splice(0, env.attempts.length);
+    await expect(svc.start('s1', { testId: 'B1', date: '2026-10-27' })).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('хугацааны хязгаар серверт: 30 мин + 60с-ийн дараа хадгалах/шалгах 409, илгээхэд шинэ хариуг авахгүй', async () => {

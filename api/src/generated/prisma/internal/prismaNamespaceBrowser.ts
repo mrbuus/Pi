@@ -180,7 +180,8 @@ export const ModelName = {
   HomeworkAttempt: 'HomeworkAttempt',
   HomeworkCheck: 'HomeworkCheck',
   HomeworkPhoto: 'HomeworkPhoto',
-  UiEvent: 'UiEvent'
+  UiEvent: 'UiEvent',
+  HomeworkDeadline: 'HomeworkDeadline'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -2185,6 +2186,20 @@ export const UiEventScalarFieldEnum = {
 } as const
 
 export type UiEventScalarFieldEnum = (typeof UiEventScalarFieldEnum)[keyof typeof UiEventScalarFieldEnum]
+
+
+export const HomeworkDeadlineScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  lessonDate: 'lessonDate',
+  dueAt: 'dueAt',
+  allowLate: 'allowLate',
+  setById: 'setById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HomeworkDeadlineScalarFieldEnum = (typeof HomeworkDeadlineScalarFieldEnum)[keyof typeof HomeworkDeadlineScalarFieldEnum]
 
 
 export const SortOrder = {

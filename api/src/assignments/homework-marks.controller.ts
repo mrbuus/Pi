@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
@@ -16,6 +17,7 @@ import { Role } from '../generated/prisma/enums';
 import {
   BulkHomeworkMarksDto,
   PatchHomeworkMarkDto,
+  SetHomeworkDeadlineDto,
 } from './homework-marks.dto';
 import { HomeworkMarksService } from './homework-marks.service';
 
@@ -27,6 +29,28 @@ interface AuthedRequest {
 @Controller()
 export class HomeworkMarksController {
   constructor(private homeworkMarks: HomeworkMarksService) {}
+
+  // Самбарын өдөр D-д шалгах гэрийн даалгаврын хугацаа (эзэн 2026-11-05): өмнөх хичээлээс D хүртэл
+  // огноо, 24 цагийн цаг, «хоцорч илгээж болно» эсвэл «хугацаа дуусахад хаагдана»
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('classrooms/:id/homework-deadline')
+  getDeadline(
+    @Param('id') classroomId: string,
+    @Query('date') date: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.homeworkMarks.getDeadline(classroomId, date, req.user.userId, req.user.role);
+  }
+
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Put('classrooms/:id/homework-deadline')
+  setDeadline(
+    @Param('id') classroomId: string,
+    @Body() dto: SetHomeworkDeadlineDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.homeworkMarks.setDeadline(classroomId, dto, req.user.userId, req.user.role);
+  }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get('classrooms/:id/homework-marks')

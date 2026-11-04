@@ -6,6 +6,7 @@ import { FinanceController } from '../finance/finance.controller';
 import { TuitionController } from '../tuition/tuition.controller';
 import { SheetSyncController } from '../sheet-sync/sheet-sync.controller';
 import { UsageController } from '../usage/usage.controller';
+import { HomeworkMarksController } from '../assignments/homework-marks.controller';
 
 /**
  * Мөнгөний маршрутуудын эрхийн хамгаалалт — 2026-09-26 (G02–G03).
@@ -45,6 +46,13 @@ describe('Хэрэглээний бүртгэл — нэгтгэлийг зөв�
   it('controller нь JwtAuthGuard-аар хамгаалагдсан, summary — ADMIN', () => {
     expect(guardsOf(UsageController)).toContain(RolesGuard);
     expect(rolesOf(UsageController.prototype.summary)).toEqual(['ADMIN']);
+  });
+});
+
+describe('Гэрийн даалгаврын хугацаа — зөвхөн ажилтан (сурагч өөрчлөхгүй)', () => {
+  it.each(['getDeadline', 'setDeadline'] as const)('%s — ADMIN/TEACHER_PLUS/TEACHER', (name) => {
+    expect(guardsOf(HomeworkMarksController)).toContain(RolesGuard);
+    expect(rolesOf(HomeworkMarksController.prototype[name])).toEqual(['ADMIN', 'TEACHER_PLUS', 'TEACHER']);
   });
 });
 

@@ -5,7 +5,7 @@ import { AttPresentIcon, HwDoneIcon } from "@/components/attendance/marks";
 import { cn } from "@/lib/cn";
 import type { AttendanceStatus, BoardStudent, DayRec, HomeworkStatus, LateRangeValue, MakeupStatus } from "./lib";
 import MakeupChip from "./MakeupChip";
-import { Legend, LegendItem, RiskDot, SentMark } from "./parts";
+import { Legend, LegendItem, RiskDot } from "./parts";
 import StudentCard, { type OnlineCell } from "./StudentCard";
 
 /** «Бүгд …» товчоор өөрчилсөн нүднүүд (буцаахад яг эдгээрийг л) */
@@ -94,10 +94,9 @@ export default function MarkView(p: Props) {
 
       <Legend label="Тэмдгийн тайлбар" className="px-1">
         <LegendItem icon={<RiskDot />}>Шалгуур хангаагүй</LegendItem>
-        {p.sent.size > 0 && <LegendItem icon={<SentMark />}>Даалгавраа илгээсэн</LegendItem>}
         {p.homework && p.sent.size > 0 && (
           <LegendItem icon={<span aria-hidden className="size-3.5 rounded border border-brand-bright/60 bg-brand-bright/10" />}>
-            Илгээсэн ч шалгаагүй, тэмдэглэмэгц энгийн болно
+            Даалгавраа илгээсэн ч шалгаагүй, тэмдэглэмэгц энгийн болно
           </LegendItem>
         )}
         {p.homework && p.onlineTests && (

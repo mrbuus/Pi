@@ -521,6 +521,8 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
         ) : (
           <>
             <LessonInfo
+              classId={cls.id}
+              date={date}
               students={students}
               homework={homework}
               topic={cls.lessons.map((l) => l.topic).find(Boolean) ?? null}
@@ -597,6 +599,8 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
           date={date}
           hw={recs.get(onlineStudent.id)?.hw ?? null}
           hwNote={recs.get(onlineStudent.id)?.hwNote ?? ""}
+          onHw={onHw}
+          onHwNote={board.onHwNote}
           onClose={() => setOnlineId(null)}
         />
       )}

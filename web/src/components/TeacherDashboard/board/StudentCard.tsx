@@ -7,6 +7,7 @@ import {
   ATTENDANCE_ORDER,
   HOMEWORK_MARKS,
   HOMEWORK_ORDER,
+  HwSentIcon,
   RiskMark,
   TONE_SELECTED,
   TONE_TEXT,
@@ -28,7 +29,6 @@ import {
   type MakeupStatus,
 } from "./lib";
 import MakeupChip from "./MakeupChip";
-import { SentMark } from "./parts";
 
 /** Ирц ба даалгаврын мөр ижил багануудтай — хоёр мөр босоогоор тэгширнэ */
 const COLS = "grid-cols-[1.5rem_repeat(4,minmax(0,1fr))] sm:grid-cols-[5.75rem_repeat(4,minmax(0,1fr))]";
@@ -198,8 +198,8 @@ function StudentCardImpl({
           >
             {name}
           </button>
-          {sent && <SentMark />}
-          {awaiting && <span className="shrink-0 rounded-full bg-brand-bright/15 px-1.5 py-0.5 text-[10px] font-bold text-brand-soft">Шалгаагүй</span>}
+          {/* Илгээсэн эсэхийг нэрийн ард давтахгүй (эзэн 2026-11-05) — картын өнгө, «Онлайн» товч хангалттай */}
+          {awaiting && <span className="sr-only">, даалгавраа илгээсэн, шалгаагүй</span>}
         </div>
         {makeup && (
           <span className="shrink-0 sm:pl-[2.625rem]">
@@ -265,14 +265,24 @@ function StudentCardImpl({
                     : "border-dashed border-line bg-transparent text-ink-dim/70 hover:border-ink/30 hover:text-ink",
                 )}
               >
-                <span className="inline-flex items-center gap-1">
-                  <Laptop className={cn("size-4 shrink-0", !online && !sent && "opacity-50")} aria-hidden />
-                  <span className="hidden sm:inline">Онлайн</span>
-                </span>
-                {online ? (
-                  <span className="max-w-full truncate font-bold tabular-nums">{scoreText(online.score, online.max)}</span>
+                {!online && sent ? (
+                  // Зураг илгээсэн, онлайн оноогүй — «Илгээсэн» гэж л (эзэн 2026-11-05)
+                  <span className="inline-flex min-w-0 items-center gap-1 font-semibold">
+                    <HwSentIcon className="size-4 shrink-0" aria-hidden />
+                    <span className="hidden truncate sm:inline">Илгээсэн</span>
+                  </span>
                 ) : (
-                  <Minus className="size-3.5 shrink-0 opacity-60" aria-hidden />
+                  <>
+                    <span className="inline-flex items-center gap-1">
+                      <Laptop className={cn("size-4 shrink-0", !online && "opacity-50")} aria-hidden />
+                      <span className="hidden sm:inline">Онлайн</span>
+                    </span>
+                    {online ? (
+                      <span className="max-w-full truncate font-bold tabular-nums">{scoreText(online.score, online.max)}</span>
+                    ) : (
+                      <Minus className="size-3.5 shrink-0 opacity-60" aria-hidden />
+                    )}
+                  </>
                 )}
               </button>
             ) : (
