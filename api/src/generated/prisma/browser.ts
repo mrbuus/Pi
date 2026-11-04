@@ -727,3 +727,11 @@ export type AppleIdentity = Prisma.AppleIdentityModel
  * 
  */
 export type AccountDeletionRequest = Prisma.AccountDeletionRequestModel
+/**
+ * Model UiEvent
+ * Аппын хэрэглээний бүртгэл (эзэн 2026-11-04: «хүмүүс аль товч дээр илүү дарж, ямар ажил
+ * хийж байгааг судлах»). Хуудас нээх, товч дарах — нэг мөр. Агуулга (нэр, хариу, оноо,
+ * хайлтын үг) ХАДГАЛАХГҮЙ: замын ID-г «:id» болгож, товчийг зөвхөн data-track, холбоосын зам
+ * эсвэл lucide дүрсний нэрээр тэмдэглэнэ. User-тэй relation зориуд тавиагүй (AuditLog-той адил).
+ */
+export type UiEvent = Prisma.UiEventModel

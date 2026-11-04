@@ -34,8 +34,20 @@ async function main() {
   require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required with --commit');
   const { PrismaPg } = require('@prisma/adapter-pg');
+  // dist/-ийн клиентийг ашиглана (nest build-ийн гаралт). Build хийгээгүй эсвэл
+  // хуучирсан бол шинэ хүснэгт олдохгүй тул «undefined.upsert» гэсэн ойлгомжгүй
+  // алдаа гардаг байв — оронд нь юу хийхийг шууд хэлнэ.
+  const clientPath = path.join(__dirname, '..', 'dist', 'src', 'generated', 'prisma', 'client');
+  if (!fs.existsSync(clientPath) && !fs.existsSync(clientPath + '.js')) {
+    throw new Error('dist/ дотор Prisma клиент алга. Эхлээд «npm run build» ажиллуул.');
+  }
   const { PrismaClient } = require('../dist/src/generated/prisma/client');
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
+  if (!prisma.formulaSection) {
+    throw new Error(
+      'dist/ доторх Prisma клиент хуучирсан (FormulaSection алга). «npx prisma generate && npm run build» ажиллуулаад дахин оролд.',
+    );
+  }
   try {
     await prisma.$transaction(async (tx) => {
       for (const section of sections.values()) {

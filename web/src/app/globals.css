@@ -258,6 +258,9 @@ body {
   line-height: var(--leading-body);
   overflow-x: hidden;
   transition: background-color 0.2s ease, color 0.2s ease;
+  /* viewport-fit=cover (app/layout.tsx): утсыг хэвтүүлэхэд агуулга «нүд»-ний ард орохгүй */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 /* Эзний хүсэлт: текст сонголтыг үндсэндээ унтраана (санамсаргүй сонгогдох,

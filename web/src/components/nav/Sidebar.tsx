@@ -6,6 +6,7 @@ import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import LogoMark from "@/components/LogoMark";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/kit/drawer";
 import { NavIcon } from "./icons";
+import MoreGrid from "./MoreGrid";
 import NavList from "./NavList";
 import { getRoleNav } from "./nav-data";
 
@@ -127,10 +128,7 @@ export default function Sidebar({ role, pathname, mobileOpen, onMobileOpenChange
       <Drawer open={mobileOpen} onOpenChange={onMobileOpenChange}>
         <DrawerContent id="app-mobile-nav" aria-describedby={undefined} className="md:hidden">
           <div className="flex h-12 shrink-0 items-center justify-between border-b border-line px-4">
-            <Link href="/" onClick={() => onMobileOpenChange(false)} aria-label="Нүүр хуудас" className="flex min-h-11 items-center">
-              <LogoMark variant="full" size={26} />
-            </Link>
-            <DrawerTitle className="sr-only">Бүх цэс</DrawerTitle>
+            <DrawerTitle className="text-base font-bold text-ink">Бусад цэс</DrawerTitle>
             <button
               type="button"
               onClick={() => onMobileOpenChange(false)}
@@ -140,8 +138,8 @@ export default function Sidebar({ role, pathname, mobileOpen, onMobileOpenChange
               <NavIcon name="x" />
             </button>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3" data-vaul-no-drag>
-            <NavList home={home} main={main} groups={groups} pathname={pathname} openActive onNavigate={() => onMobileOpenChange(false)} />
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4" data-vaul-no-drag>
+            {role && <MoreGrid role={role} pathname={pathname} onNavigate={() => onMobileOpenChange(false)} />}
           </div>
         </DrawerContent>
       </Drawer>

@@ -184,7 +184,8 @@ export const ModelName = {
   HomeworkPhoto: 'HomeworkPhoto',
   DeviceToken: 'DeviceToken',
   AppleIdentity: 'AppleIdentity',
-  AccountDeletionRequest: 'AccountDeletionRequest'
+  AccountDeletionRequest: 'AccountDeletionRequest',
+  UiEvent: 'UiEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -2254,6 +2255,20 @@ export const AccountDeletionRequestScalarFieldEnum = {
 } as const
 
 export type AccountDeletionRequestScalarFieldEnum = (typeof AccountDeletionRequestScalarFieldEnum)[keyof typeof AccountDeletionRequestScalarFieldEnum]
+
+
+export const UiEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  role: 'role',
+  kind: 'kind',
+  path: 'path',
+  target: 'target',
+  device: 'device',
+  createdAt: 'createdAt'
+} as const
+
+export type UiEventScalarFieldEnum = (typeof UiEventScalarFieldEnum)[keyof typeof UiEventScalarFieldEnum]
 
 
 export const SortOrder = {

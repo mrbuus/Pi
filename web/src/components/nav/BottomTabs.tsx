@@ -44,6 +44,7 @@ export default function BottomTabs({
             <li key={t.href} className="min-w-0">
               <Link
                 href={t.href}
+                data-track={`tab:${t.short}`}
                 aria-current={active ? "page" : undefined}
                 className={`flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[11px] font-semibold leading-tight transition-colors ${
                   active ? "text-brand-soft" : "text-ink-dim hover:text-ink"
@@ -64,6 +65,7 @@ export default function BottomTabs({
         <li className="min-w-0">
           <button
             type="button"
+            data-track="tab:Бусад"
             onClick={onMore}
             aria-expanded={moreOpen}
             aria-controls="app-mobile-nav"
