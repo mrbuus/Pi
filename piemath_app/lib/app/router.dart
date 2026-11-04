@@ -7,6 +7,7 @@ import '../core/auth/user_role.dart';
 import '../features/auth/auth_routes.dart';
 import '../features/books/books_routes.dart';
 import '../features/buyer/buyer_routes.dart';
+import '../features/classrooms_admin/classrooms_admin_routes.dart';
 import '../features/exam/exam_routes.dart';
 import '../features/homework/homework_routes.dart';
 import '../features/homework/ui/homework_screen.dart' show HomeworkAppBarActions;
@@ -15,6 +16,7 @@ import '../features/my_class/my_class_routes.dart';
 import '../features/notifications/notifications_routes.dart';
 import '../features/parent/parent_routes.dart';
 import '../features/payments/payments_routes.dart';
+import '../features/planner/planner_routes.dart';
 import '../features/scan/scan_routes.dart';
 import '../features/schedule/schedule_routes.dart';
 import '../features/student_home/student_home_routes.dart';
@@ -22,6 +24,7 @@ import '../features/support/support_routes.dart';
 import '../features/teacher/teacher_routes.dart';
 import '../features/theory/theory_routes.dart';
 import '../features/tools/tools_routes.dart';
+import '../features/tuition/tuition_routes.dart';
 import 'feature_routes.dart';
 import 'nav/nav_data.dart';
 import 'redirect.dart';
@@ -52,6 +55,9 @@ final allFeatureRoutes = <FeatureRoutes>[
   teacherRoutes,
   learningRoutes,
   supportRoutes,
+  plannerRoutes,
+  tuitionRoutes,
+  classroomsAdminRoutes,
   _manageRoutes,
 ];
 

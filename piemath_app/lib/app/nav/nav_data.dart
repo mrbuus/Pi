@@ -108,6 +108,9 @@ abstract final class NavData {
   static const _placement = NavLink('/app/admin/placement', 'Түвшин тогтоох', AppIcons.goal, short: 'Түвшин');
   static const _sorilsTab = NavLink('/app/admin/sorils', 'Жишиг сорил', AppIcons.tests, short: 'Сорил');
   static const _financeTab = NavLink('/app/admin/finance', 'Санхүү', AppIcons.payments, short: 'Санхүү');
+  static const _classroomsAdmin = NavLink('/app/admin/classrooms', 'Ангиуд удирдах', AppIcons.myClass);
+  static const _dismissalTab = NavLink('/app/dismissal', 'Анги тарах цаг', AppIcons.time, short: 'Тарах цаг');
+  static const _dismissal = NavLink('/app/dismissal', 'Анги тарах цаг', AppIcons.time);
   static const _smsTab = NavLink('/app/sms', 'Дугаарлуу мессеж', AppIcons.message, short: 'Мессеж');
   static const _libraryTab = NavLink('/app/library', 'Бодлогын сан', AppIcons.library, short: 'Сан');
   static const _videosTab = NavLink('/app/videos', 'Онлайн хичээл', AppIcons.video, short: 'Видео');
@@ -160,7 +163,7 @@ abstract final class NavData {
     ],
     UserRole.teacher: [
       NavSection('home', NavLink('/app/teacher', 'Багшийн самбар', AppIcons.home, short: 'Нүүр')),
-      NavSection('schedule', _schedule, pages: [..._staffSchedule, _studentsTab]),
+      NavSection('schedule', _schedule, pages: [..._staffSchedule, _studentsTab, _dismissalTab]),
       NavSection('library', _library, title: 'Сургалтын сан', pages: [_libraryTab, _videosTab, _theoryTab, _toolsTab]),
       NavSection('tests', _tests),
     ],
@@ -231,8 +234,10 @@ abstract final class NavData {
       NavLink('/app/videos', 'Онлайн хичээл', AppIcons.video),
       NavLink('/app/goals', 'Миний зорилго', AppIcons.goal),
     ],
-    UserRole.teacher: [_library, _videos, _tests, _schedule, _classes, _students, _adminTheory, _tools],
+    UserRole.teacher: [_library, _videos, _tests, _schedule, _classes, _students, _adminTheory, _tools, _dismissal],
     UserRole.teacherPlus: [
+      _classroomsAdmin,
+      _dismissal,
       _internal,
       _import,
       _library,
@@ -252,6 +257,8 @@ abstract final class NavData {
       _tools,
     ],
     UserRole.admin: [
+      _classroomsAdmin,
+      _dismissal,
       NavLink('/app/admin/v2', 'v2 ажлын хяналт', AppIcons.tests),
       NavLink('/app/admin/capabilities', 'Эрхийн матриц', AppIcons.shield),
       _internal,
@@ -307,6 +314,8 @@ abstract final class NavData {
     '/app/my-class': NavGroup.classes,
     '/app/theory': NavGroup.learn,
     '/app/classes': NavGroup.classes,
+    '/app/admin/classrooms': NavGroup.classes,
+    '/app/dismissal': NavGroup.classes,
     '/app/admin/finance': NavGroup.finance,
     '/app/admin/passes': NavGroup.admin,
     '/app/admin/store': NavGroup.finance,
@@ -435,6 +444,7 @@ abstract final class NavData {
     ('Санхүү', [_financeTab, _tuitionTab, _reconcile, _storeAdmin]),
     ('Элсэлт', [_leads, _enrollment, _placement, _sorils, _registry, _sms, _onlineTab]),
     ('Агуулга', [_content, _adminTheory, _internal, _import, _loginText]),
+    ('Анги', [_classroomsAdmin, _dismissal]),
     ('Багш', [_teacherHours]),
   ];
 
