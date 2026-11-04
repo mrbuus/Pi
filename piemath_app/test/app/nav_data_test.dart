@@ -107,11 +107,12 @@ void main() {
       '/app/schedule',
       '/app/planner',
       '/app/classes',
+      '/app/lesson-flow',
       '/app/admin/students',
       '/app/dismissal',
     ]);
     for (final role in [UserRole.teacherPlus, UserRole.admin]) {
-      expect(pages(role, 'schedule'), ['/app/schedule', '/app/planner', '/app/classes', '/app/teacher-hours']);
+      expect(pages(role, 'schedule'), ['/app/schedule', '/app/planner', '/app/classes', '/app/lesson-flow', '/app/teacher-hours']);
       expect(pages(role, 'students'), [
         '/app/admin/students',
         '/app/admin/leads',

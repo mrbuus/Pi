@@ -9,9 +9,11 @@ import '../features/books/books_routes.dart';
 import '../features/buyer/buyer_routes.dart';
 import '../features/classrooms_admin/classrooms_admin_routes.dart';
 import '../features/exam/exam_routes.dart';
+import '../features/groups/groups_routes.dart';
 import '../features/homework/homework_routes.dart';
 import '../features/homework/ui/homework_screen.dart' show HomeworkAppBarActions;
 import '../features/learning/learning_routes.dart';
+import '../features/lesson_flow/lesson_flow_routes.dart';
 import '../features/my_class/my_class_routes.dart';
 import '../features/notifications/notifications_routes.dart';
 import '../features/parent/parent_routes.dart';
@@ -60,6 +62,8 @@ final allFeatureRoutes = <FeatureRoutes>[
   tuitionRoutes,
   classroomsAdminRoutes,
   studentsAdminRoutes,
+  lessonFlowRoutes,
+  groupsRoutes,
   _manageRoutes,
 ];
 

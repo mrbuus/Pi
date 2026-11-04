@@ -109,6 +109,7 @@ abstract final class NavData {
   static const _sorilsTab = NavLink('/app/admin/sorils', 'Жишиг сорил', AppIcons.tests, short: 'Сорил');
   static const _financeTab = NavLink('/app/admin/finance', 'Санхүү', AppIcons.payments, short: 'Санхүү');
   static const _classroomsAdmin = NavLink('/app/admin/classrooms', 'Ангиуд удирдах', AppIcons.myClass);
+  static const _lessonFlowTab = NavLink('/app/lesson-flow', 'Хичээлийн урсгал', AppIcons.classes, short: 'Урсгал');
   static const _dismissalTab = NavLink('/app/dismissal', 'Анги тарах цаг', AppIcons.time, short: 'Тарах цаг');
   static const _dismissal = NavLink('/app/dismissal', 'Анги тарах цаг', AppIcons.time);
   static const _smsTab = NavLink('/app/sms', 'Дугаарлуу мессеж', AppIcons.message, short: 'Мессеж');
@@ -163,13 +164,13 @@ abstract final class NavData {
     ],
     UserRole.teacher: [
       NavSection('home', NavLink('/app/teacher', 'Багшийн самбар', AppIcons.home, short: 'Нүүр')),
-      NavSection('schedule', _schedule, pages: [..._staffSchedule, _studentsTab, _dismissalTab]),
+      NavSection('schedule', _schedule, pages: [..._staffSchedule, _lessonFlowTab, _studentsTab, _dismissalTab]),
       NavSection('library', _library, title: 'Сургалтын сан', pages: [_libraryTab, _videosTab, _theoryTab, _toolsTab]),
       NavSection('tests', _tests),
     ],
     UserRole.teacherPlus: [
       NavSection('home', NavLink('/app/teacher', 'Багшийн самбар', AppIcons.home, short: 'Нүүр')),
-      NavSection('schedule', _schedule, pages: [..._staffSchedule, _teacherHours]),
+      NavSection('schedule', _schedule, pages: [..._staffSchedule, _lessonFlowTab, _teacherHours]),
       // Санхүү зөвхөн Админд (вэбийн RequireRole ADMIN) — эрх өөрчлөхгүй.
       NavSection('payments', _payments, pages: [_payments, _tuitionTab, _reconcileTab, _storeAdminTab]),
       NavSection(
@@ -181,7 +182,7 @@ abstract final class NavData {
     // Админ багшийн самбараас эхэлнэ (эзэн 2026-11-04); удирдлагын хуудсууд нүүрний «Удирдлага» товчоор
     UserRole.admin: [
       NavSection('home', NavLink('/app/teacher', 'Багшийн самбар', AppIcons.home, short: 'Нүүр')),
-      NavSection('schedule', _schedule, pages: [..._staffSchedule, _teacherHours]),
+      NavSection('schedule', _schedule, pages: [..._staffSchedule, _lessonFlowTab, _teacherHours]),
       NavSection('payments', _payments, pages: [_payments, _tuitionTab, _financeTab, _reconcileTab, _storeAdminTab]),
       NavSection(
         'students',
