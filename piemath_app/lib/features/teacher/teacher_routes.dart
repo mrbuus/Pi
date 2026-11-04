@@ -11,7 +11,6 @@ import 'ui/pending_actions_screen.dart';
 import 'ui/student_screen.dart';
 import 'ui/teacher_home_screen.dart';
 import 'ui/teacher_hours_screen.dart';
-import 'ui/test_run_screen.dart';
 
 /// `teacher` feature-ийн маршрутууд. Энэ файлыг ЗӨВХӨН энэ feature-ийн эзэн засна.
 ///
@@ -24,7 +23,7 @@ import 'ui/test_run_screen.dart';
 /// - `/app/teacher-hours` — цагийн бүртгэл.
 /// - `/app/classes`, `/app/classes/:id` — ангиуд, ангийн самбар.
 /// - `/app/classes/:id/assignments[/:assignmentId]` — онлайн даалгавар шалгах.
-/// - `/app/teacher/tests/:id/results` — шалгалтын дүн + бүрэн бүтэн байдлын тоо (`extra` = шалгалтын нэр).
+/// - `/app/teacher/tests/:id/results` — хуучин холбоос, `/app/tests/:id/results` руу шилжинэ.
 /// - `/app/students/:id` — сурагчийн хуудас (`extra` = харуулах нэр).
 final teacherRoutes = FeatureRoutes(
   shell: [
@@ -58,12 +57,10 @@ final teacherRoutes = FeatureRoutes(
         title: s.extra is String ? s.extra! as String : null,
       ),
     ),
+    // Хуучин зам — бүрэн дүнгийн дэлгэц `/app/tests/:id/results` (features/results) руу.
     GoRoute(
       path: '/app/teacher/tests/:id/results',
-      builder: (_, s) => TestRunScreen(
-        testId: s.pathParameters['id'] ?? '',
-        title: s.extra is String ? s.extra! as String : null,
-      ),
+      redirect: (_, s) => '/app/tests/${Uri.encodeComponent(s.pathParameters['id'] ?? '')}/results',
     ),
     GoRoute(
       path: '/app/students/:id',
