@@ -16,9 +16,11 @@ import '../features/learning/learning_routes.dart';
 import '../features/lesson_flow/lesson_flow_routes.dart';
 import '../features/my_class/my_class_routes.dart';
 import '../features/notifications/notifications_routes.dart';
+import '../features/online_students/online_routes.dart';
 import '../features/parent/parent_routes.dart';
 import '../features/payments/payments_routes.dart';
 import '../features/planner/planner_routes.dart';
+import '../features/results/results_routes.dart';
 import '../features/scan/scan_routes.dart';
 import '../features/schedule/schedule_routes.dart';
 import '../features/student_home/student_home_routes.dart';
@@ -64,6 +66,8 @@ final allFeatureRoutes = <FeatureRoutes>[
   studentsAdminRoutes,
   lessonFlowRoutes,
   groupsRoutes,
+  resultsRoutes,
+  onlineRoutes,
   _manageRoutes,
 ];
 
