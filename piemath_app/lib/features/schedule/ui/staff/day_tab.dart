@@ -10,6 +10,7 @@ import '../../../../shared/native/native.dart';
 import '../../data/schedule_repository.dart';
 import '../../data/staff_schedule_models.dart';
 import '../../data/staff_schedule_repository.dart';
+import '../../domain/agenda_scroll.dart';
 import '../../domain/day_overlay.dart';
 import '../../domain/staff_schedule_logic.dart';
 import 'lesson_detail.dart';
@@ -80,6 +81,7 @@ class _StaffDayTabState extends ConsumerState<StaffDayTab> {
               child: _DayPage(
                 key: ValueKey('staff-day:${_day.dateKey}'),
                 date: _day,
+                now: widget.today ?? UbDateTime.now(),
                 filter: widget.filter,
                 perms: widget.perms,
                 listMode: _listMode,
@@ -119,6 +121,7 @@ class _DayPage extends ConsumerWidget {
   const _DayPage({
     super.key,
     required this.date,
+    required this.now,
     required this.filter,
     required this.perms,
     required this.listMode,
@@ -129,6 +132,9 @@ class _DayPage extends ConsumerWidget {
   });
 
   final UbDateTime date;
+
+  /// Нээх үеийн «одоо» — хуваарийг явж буй хичээл эсвэл эхний хичээл рүү гүйлгэнэ.
+  final UbDateTime now;
   final ScheduleFilter filter;
   final StaffPermissions perms;
   final bool listMode;
@@ -164,8 +170,13 @@ class _DayPage extends ConsumerWidget {
     } else if (listMode) {
       body = _LessonList(lessons: lessons, onOpen: onOpen, selectedId: selectedId);
     } else {
-      body = DayAgenda(
+      body = _AutoScrollAgenda(
         key: ValueKey('agenda:$key'),
+        initialOffset: agendaScrollOffset(
+          day: date,
+          now: now,
+          lessons: [for (final l in lessons) (start: l.startMinute, end: l.endMinute)],
+        ),
         day: date,
         events: [
           for (final l in lessons)
@@ -196,6 +207,59 @@ class _DayPage extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// [DayAgenda]-г нээхэд явж буй хичээл («одоо») эсвэл өдрийн эхний хичээл рүү гүйлгэнэ
+/// ([agendaScrollOffset]). Өдөр бүр шинэ түлхүүртэй тул өдөр солиход дахин тооцогдоно; шүүлтүүр солиход,
+/// доош татаж шинэчлэхэд хэрэглэгчийн гүйлгэсэн байрлал хэвээр.
+class _AutoScrollAgenda extends StatefulWidget {
+  const _AutoScrollAgenda({
+    super.key,
+    required this.initialOffset,
+    required this.day,
+    required this.events,
+    this.onEventTap,
+    this.onSlotTap,
+  });
+
+  final double initialOffset;
+  final UbDateTime day;
+  final List<AgendaEvent> events;
+  final ValueChanged<AgendaEvent>? onEventTap;
+  final ValueChanged<UbDateTime>? onSlotTap;
+
+  @override
+  State<_AutoScrollAgenda> createState() => _AutoScrollAgendaState();
+}
+
+class _AutoScrollAgendaState extends State<_AutoScrollAgenda> {
+  late final _scroll = ScrollController(initialScrollOffset: widget.initialOffset);
+
+  @override
+  void initState() {
+    super.initState();
+    // Өдрийн төгсгөлийн хичээл: зорилтот зай нь гүйлгэх хязгаараас хэтэрч болно — хязгаарт хавчина.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scroll.hasClients) return;
+      final max = _scroll.position.maxScrollExtent;
+      if (_scroll.offset > max) _scroll.jumpTo(max);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => DayAgenda(
+    day: widget.day,
+    events: widget.events,
+    controller: _scroll,
+    onEventTap: widget.onEventTap,
+    onSlotTap: widget.onSlotTap,
+  );
 }
 
 class _DayHeader extends ConsumerWidget {
