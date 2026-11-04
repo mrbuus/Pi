@@ -291,6 +291,9 @@ abstract final class AppIcons {
   /// Илгээх
   static const IconData send = LucideIcons.send;
 
+  /// Хуваалцах (файл)
+  static const IconData share = LucideIcons.share2;
+
   /// Шалгуур
   static const IconData slidersHorizontal = LucideIcons.slidersHorizontal;
 

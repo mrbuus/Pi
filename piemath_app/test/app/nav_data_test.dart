@@ -99,4 +99,62 @@ void main() {
       }
     }
   });
+
+  test('NATIVE-PLAN §2: ажилтны хэсгийн дэд табууд', () {
+    List<String> pages(UserRole role, String id) =>
+        NavData.sections(role).firstWhere((s) => s.id == id).pages.map((p) => p.path).toList();
+    expect(pages(UserRole.teacher, 'schedule'), [
+      '/app/schedule',
+      '/app/planner',
+      '/app/classes',
+      '/app/admin/students',
+    ]);
+    for (final role in [UserRole.teacherPlus, UserRole.admin]) {
+      expect(pages(role, 'schedule'), ['/app/schedule', '/app/planner', '/app/classes', '/app/teacher-hours']);
+      expect(pages(role, 'students'), [
+        '/app/admin/students',
+        '/app/admin/leads',
+        '/app/admin/enrollment',
+        '/app/admin/placement',
+        '/app/admin/sorils',
+        '/app/sms',
+        '/app/online',
+      ]);
+    }
+    // Санхүү зөвхөн Админд (вэбийн эрх) — Багш+-т нэмэхгүй.
+    expect(pages(UserRole.teacherPlus, 'payments'), [
+      '/app/payments',
+      '/app/tuition',
+      '/app/admin/reconcile',
+      '/app/admin/store',
+    ]);
+    expect(pages(UserRole.admin, 'payments'), [
+      '/app/payments',
+      '/app/tuition',
+      '/app/admin/finance',
+      '/app/admin/reconcile',
+      '/app/admin/store',
+    ]);
+  });
+
+  test('админы «Удирдлага»-д шинэ хуудсууд бий', () {
+    final paths = NavData.manageGroups.expand((g) => g.$2).map((l) => l.path).toSet();
+    expect(
+      paths,
+      containsAll([
+        '/app/admin/content',
+        '/app/admin/registry',
+        '/app/admin/deletion-requests',
+        '/app/admin/login-text',
+        '/app/insights',
+        '/app/tuition',
+        '/app/online',
+      ]),
+    );
+    for (final (_, links) in NavData.manageGroups) {
+      for (final l in links) {
+        expect(l.label.endsWith('.'), isFalse, reason: l.path);
+      }
+    }
+  });
 }

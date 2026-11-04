@@ -283,12 +283,27 @@ void main() {
 
     // Role бүрийн дэд таб: deep link (go) нь зөв доод таб + зөв дэд таб нээнэ.
     const deepLinks = <UserRole, List<(String, int, int)>>{
-      UserRole.student: [('/app/tests', 1, 1), ('/app/homework', 1, 0), ('/app/study', 3, 0), ('/app/theory', 3, 1), ('/app/library', 3, 2)],
+      UserRole.student: [
+        ('/app/tests', 1, 1),
+        ('/app/homework', 1, 0),
+        ('/app/study', 3, 0),
+        ('/app/theory', 3, 1),
+        ('/app/library', 3, 2),
+      ],
       UserRole.teacher: [('/app/admin/students', 1, 3), ('/app/videos', 2, 1), ('/app/tools', 2, 3)],
-      UserRole.teacherPlus: [('/app/admin/reconcile', 2, 1), ('/app/admin/leads', 3, 1), ('/app/sms', 3, 5)],
-      UserRole.admin: [
-        ('/app/admin/finance', 2, 1),
+      UserRole.teacherPlus: [
+        ('/app/admin/reconcile', 2, 2),
+        ('/app/tuition', 2, 1),
+        ('/app/admin/leads', 3, 1),
         ('/app/sms', 3, 5),
+        ('/app/online', 3, 6),
+        ('/app/teacher-hours', 1, 3),
+      ],
+      UserRole.admin: [
+        ('/app/admin/finance', 2, 2),
+        ('/app/tuition', 2, 1),
+        ('/app/sms', 3, 5),
+        ('/app/online', 3, 6),
         ('/app/admin/placement', 3, 3),
         ('/app/teacher-hours', 1, 3),
       ],
