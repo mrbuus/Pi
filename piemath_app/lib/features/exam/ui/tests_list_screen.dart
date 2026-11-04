@@ -7,6 +7,7 @@ import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
+import '../../test_authoring/ui/staff_tests_screen.dart';
 import '../data/exam_models.dart';
 import '../data/exam_repository.dart';
 import '../data/ranking_models.dart';
@@ -68,6 +69,9 @@ class _TestsListScreenState extends ConsumerState<TestsListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Ажилтан: тестийн жагсаалт + «Шинэ тест», «Засах» (test_authoring) — сурагчийн API дуудахгүй.
+    final session = ref.watch(sessionProvider);
+    if (session is SignedIn && session.role.isStaff) return const StaffTestsScreen();
     final hub = ref.watch(testsHubProvider);
     final initial = _tabs.indexOf(widget.initialTab ?? '');
     return DefaultTabController(
