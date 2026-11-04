@@ -19,6 +19,10 @@ services:
     runtime: node
     # ⚠️ free нь идэвхгүй үед унтардаг → starter руу сайжруулна
     plan: free
+    # 2026-11-04: Прод AWS (EC2 + RDS) руу шилжсэн, ажлын салбар `main` боллоо. Render
+    # main-ээс автоматаар deploy хийж хуучин Supabase сан дээр migration ажиллуулахгүйн тулд
+    # унтраав. Энэ сервисийг Render dashboard-оос бүрмөсөн Suspend хийх нь зөв.
+    autoDeploy: false
     rootDir: api
     buildCommand: npm ci && npx prisma generate && npm run build
     startCommand: npx prisma migrate deploy && npm run start:prod
