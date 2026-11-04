@@ -91,7 +91,7 @@ export async function loadPlanned(
     where: {
       date: range,
       testIds: { isEmpty: false },
-      schedule: { classroomId: { in: classroomIds } },
+      schedule: { deletedAt: null, classroomId: { in: classroomIds } },
     },
     select: {
       scheduleId: true,

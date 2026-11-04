@@ -101,7 +101,7 @@ export class LessonRecordsService {
   /** Тухайн хуваарийн тухайн өдрийн БОДИТ (зөөгдсөн/цуцлагдсаныг тооцсон) хичээл. */
   async resolveEntry(scheduleId: string, key: string) {
     const schedule = await this.prisma.classSchedule.findUnique({
-      where: { id: scheduleId },
+      where: { id: scheduleId, deletedAt: null },
       select: {
         classroomId: true,
         teacherId: true,
@@ -470,7 +470,7 @@ export class LessonRecordsService {
     const { date, key } = this.parseDate(dateStr);
     const text = normalizeNote(body);
     const exists = await this.prisma.classSchedule.count({
-      where: { id: scheduleId },
+      where: { id: scheduleId, deletedAt: null },
     });
     if (!exists) throw new NotFoundException('Хуваарь олдсонгүй');
     const where = { scheduleId_date: { scheduleId, date } };

@@ -8,6 +8,8 @@ import { CentreHelpModule } from './centre-help/centre-help.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { DocumentImportModule } from './document-import/document-import.module';
 import { LearningLabModule } from './learning-lab/learning-lab.module';
+import { AccountDeletionModule } from './account-deletion/account-deletion.module';
+import { DevicesModule } from './devices/devices.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
@@ -60,6 +62,7 @@ import { TestsModule } from './tests/tests.module';
 import { ThousandModule } from './thousand/thousand.module';
 import { HomeworkPracticeModule } from './homework-practice/homework-practice.module';
 import { StudentHubModule } from './student-hub/student-hub.module';
+import { ScanModule } from './scan/scan.module';
 import { UsersModule } from './users/users.module';
 import { VideosModule } from './videos/videos.module';
 import { TuitionModule } from './tuition/tuition.module';
@@ -138,6 +141,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     ThousandModule,
     HomeworkPracticeModule,
     StudentHubModule,
+    ScanModule,
     AttemptsModule,
     StorageModule,
     PassesModule,
@@ -195,6 +199,9 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     ClassChecksModule,
     // «Дотоод» — нийтлэхээс өмнөх бодлого/тестийн ноорог (эзэн 2026-10-13)
     InternalDraftsModule,
+    // Piemath гар утасны апп: push токен, бүртгэл устгах хүсэлт
+    DevicesModule,
+    AccountDeletionModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

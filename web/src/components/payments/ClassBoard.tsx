@@ -11,7 +11,7 @@ import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import { SkeletonCard, SkeletonRows } from "@/components/ui/Skeleton";
 import LedgerList from "./LedgerList";
 import { BlockLegend } from "./MonthBlocks";
-import { millions, mnt, monthName } from "./ledgerFormat";
+import { isOwed, millions, mnt, monthName } from "./ledgerFormat";
 import { downloadLedgerCsv } from "./ledgerCsv";
 import { errMsg } from "./paymentHelpers";
 import type { LedgerBoard, LedgerRow } from "./ledgerTypes";
@@ -42,19 +42,25 @@ export default function ClassBoard({ id }: { id: string }) {
     const idx = data.year.months.indexOf(data.month);
     let expected = 0;
     let covered = 0;
+    let active = 0;
+    let paid = 0;
     for (const r of data.rows) {
       const b = r.blocks[idx];
       if (b && b.state !== "OFF") {
-        expected += b.due;
-        covered += b.paid;
+        expected += b.due ?? 0;
+        covered += b.paid ?? 0;
+        active++;
+        if (b.state === "PAID") paid++;
       }
     }
-    const owed = data.rows.filter((r) => r.owedNow > 0);
+    const owed = data.rows.filter(isOwed);
     return {
       expected,
       covered,
+      active,
+      paid,
       owed: owed.length,
-      owedNow: owed.reduce((s, r) => s + r.owedNow, 0),
+      owedNow: owed.reduce((s, r) => s + (r.owedNow ?? 0), 0),
       notes: data.rows.filter((r) => r.notes.count > 0).length,
     };
   }, [data]);
@@ -70,7 +76,7 @@ export default function ClassBoard({ id }: { id: string }) {
 
   const rows =
     filter === "owed"
-      ? data.rows.filter((r) => r.owedNow > 0)
+      ? data.rows.filter(isOwed)
       : filter === "notes"
         ? data.rows.filter((r) => r.notes.count > 0)
         : data.rows;
@@ -99,12 +105,15 @@ export default function ClassBoard({ id }: { id: string }) {
           <div>
             <dt className="text-xs text-ink-dim">{monthName(data.month)}</dt>
             <dd className="font-bold tabular-nums text-ink">
-              {millions(stats.covered)} <span className="font-normal text-ink-dim">/ {millions(stats.expected)}</span>
+              {data.amountsHidden ? stats.paid : millions(stats.covered)}{" "}
+              <span className="font-normal text-ink-dim">/ {data.amountsHidden ? `${stats.active} төлсөн` : millions(stats.expected)}</span>
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-ink-dim">Нийт өр</dt>
-            <dd className={`font-bold tabular-nums ${stats.owedNow ? "text-error" : "text-ink"}`}>{mnt(stats.owedNow)}</dd>
+            <dt className="text-xs text-ink-dim">{data.amountsHidden ? "Өртэй" : "Нийт өр"}</dt>
+            <dd className={`font-bold tabular-nums ${stats.owed ? "text-error" : "text-ink"}`}>
+              {data.amountsHidden ? `${stats.owed} сурагч` : mnt(stats.owedNow)}
+            </dd>
           </div>
         </dl>
       </header>
@@ -126,14 +135,17 @@ export default function ClassBoard({ id }: { id: string }) {
             </button>
           ))}
         </div>
-        <Button
-          variant="outline"
-          className="ml-auto min-h-11"
-          disabled={rows.length === 0}
-          onClick={() => downloadLedgerCsv(rows, data.year, "tolbor-angi")}
-        >
-          <Download aria-hidden /> CSV татах
-        </Button>
+        {/* Багш+ — дүнгүй тул CSV (сарын дүнтэй) татахгүй */}
+        {!data.amountsHidden && (
+          <Button
+            variant="outline"
+            className="ml-auto min-h-11"
+            disabled={rows.length === 0}
+            onClick={() => downloadLedgerCsv(rows, data.year, "tolbor-angi")}
+          >
+            <Download aria-hidden /> CSV татах
+          </Button>
+        )}
         <InfoHint label="Блокийн тайлбар">
           <BlockLegend />
         </InfoHint>

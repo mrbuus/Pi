@@ -29,11 +29,23 @@ const ASSIGNEE_USER_SELECT = {
   role: true,
 } satisfies Prisma.UserSelect;
 
+// Зөөлөн устгал (эзний дүрэм 2026-10-23): deletedAt-тай даалгавар ямар ч
+// уншилтад орохгүй.
+const NOT_DELETED = { deletedAt: null } satisfies Prisma.StaffTaskWhereInput;
+
+// Дээд түвшний даалгавар: эцэггүй, ЭСВЭЛ эцэг нь (зөөлөн) устсан. Хуучин хатуу
+// устгалд onDelete: SetNull дэд даалгаврыг бие даасан болгодог байсан —
+// parentTaskId-г дарж бичихгүйгээр ижил зан төлөвийг хадгална.
+const TOP_LEVEL = {
+  OR: [{ parentTaskId: null }, { parentTask: { deletedAt: { not: null } } }],
+} satisfies Prisma.StaffTaskWhereInput;
+
 const TASK_INCLUDE = {
   createdBy: { select: { id: true, firstName: true, lastName: true } },
   classroom: { select: { id: true, name: true } },
   assignees: { include: { user: { select: ASSIGNEE_USER_SELECT } } },
   subtasks: {
+    where: NOT_DELETED,
     orderBy: { orderIndex: 'asc' as const },
     include: {
       assignees: { include: { user: { select: ASSIGNEE_USER_SELECT } } },
@@ -98,11 +110,16 @@ export class TasksService {
 
   private async assertParentIsTopLevel(parentTaskId: string) {
     const parent = await this.prisma.staffTask.findUnique({
-      where: { id: parentTaskId },
-      select: { id: true, parentTaskId: true },
+      where: { id: parentTaskId, ...NOT_DELETED },
+      select: {
+        id: true,
+        parentTaskId: true,
+        parentTask: { select: { deletedAt: true } },
+      },
     });
     if (!parent) throw new NotFoundException('Эцэг даалгавар олдсонгүй');
-    if (parent.parentTaskId) {
+    // Эцэг нь устсан дэд даалгавар дээд түвшинд тооцогдоно (TOP_LEVEL)
+    if (parent.parentTaskId && !parent.parentTask?.deletedAt) {
       throw new BadRequestException(
         'Дэд даалгаварт дахин дэд даалгавар нэмэх боломжгүй (нэг л түвшин дэмждэг)',
       );
@@ -144,8 +161,11 @@ export class TasksService {
     const match = this.buildFilterWhere(q);
     return this.prisma.staffTask.findMany({
       where: {
-        parentTaskId: null,
-        OR: [match, { subtasks: { some: match } }],
+        ...NOT_DELETED,
+        AND: [
+          TOP_LEVEL,
+          { OR: [match, { subtasks: { some: { ...match, ...NOT_DELETED } } }] },
+        ],
       },
       orderBy: [{ orderIndex: 'asc' }, { createdAt: 'asc' }],
       include: TASK_INCLUDE,
@@ -154,7 +174,7 @@ export class TasksService {
 
   async findOne(id: string) {
     const task = await this.prisma.staffTask.findUnique({
-      where: { id },
+      where: { id, ...NOT_DELETED },
       include: TASK_INCLUDE,
     });
     if (!task) throw new NotFoundException('Даалгавар олдсонгүй');
@@ -163,7 +183,7 @@ export class TasksService {
 
   private async findRaw(id: string) {
     const task = await this.prisma.staffTask.findUnique({
-      where: { id },
+      where: { id, ...NOT_DELETED },
       include: { assignees: true },
     });
     if (!task) throw new NotFoundException('Даалгавар олдсонгүй');
@@ -250,9 +270,14 @@ export class TasksService {
     });
   }
 
-  async remove(id: string) {
+  // ЗӨӨЛӨН устгал: мөр, оноолт, дэд даалгаврын холбоос DB-д үлдэнэ. Дэд
+  // даалгаварууд TOP_LEVEL-ээр бие даасан даалгавар болж харагдана.
+  async remove(id: string, actorId?: string) {
     await this.findRaw(id);
-    await this.prisma.staffTask.delete({ where: { id } });
+    await this.prisma.staffTask.update({
+      where: { id },
+      data: { deletedAt: new Date(), deletedById: actorId ?? null },
+    });
     return { id };
   }
 
@@ -294,7 +319,6 @@ export class TasksService {
   // АЧААЛАЛ харагдац: ажилтан бүрийн муж дахь даалгаврын тоо (төлөв тус бүрээр)
   // болон нийт тооцоолсон цагийг буцаана — хэн хэт ачаалалтай байгааг харуулна.
   async workload(q: WorkloadQueryDto) {
-    const where = this.dateRangeWhere(q.from, q.to);
 
     const staff = await this.prisma.user.findMany({
       where: { role: { in: STAFF_ROLES } },
@@ -303,7 +327,7 @@ export class TasksService {
     });
 
     const tasks = await this.prisma.staffTask.findMany({
-      where,
+      where: { ...this.dateRangeWhere(q.from, q.to), ...NOT_DELETED },
       select: {
         status: true,
         estimateHours: true,

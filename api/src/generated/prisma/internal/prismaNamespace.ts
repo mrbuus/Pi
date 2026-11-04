@@ -488,6 +488,8 @@ export const ModelName = {
   GoogleLoginExchange: 'GoogleLoginExchange',
   StoredFile: 'StoredFile',
   FormulaReview: 'FormulaReview',
+  ProblemReview: 'ProblemReview',
+  StudyWeeklyGoal: 'StudyWeeklyGoal',
   FormulaReviewDay: 'FormulaReviewDay',
   FormulaReviewAttempt: 'FormulaReviewAttempt',
   Feedback: 'Feedback',
@@ -526,6 +528,9 @@ export const ModelName = {
   HomeworkAttempt: 'HomeworkAttempt',
   HomeworkCheck: 'HomeworkCheck',
   HomeworkPhoto: 'HomeworkPhoto',
+  DeviceToken: 'DeviceToken',
+  AppleIdentity: 'AppleIdentity',
+  AccountDeletionRequest: 'AccountDeletionRequest',
   UiEvent: 'UiEvent'
 } as const
 
@@ -542,7 +547,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "uiEvent"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -7280,6 +7285,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ProblemReview: {
+      payload: Prisma.$ProblemReviewPayload<ExtArgs>
+      fields: Prisma.ProblemReviewFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProblemReviewFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProblemReviewFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>
+        }
+        findFirst: {
+          args: Prisma.ProblemReviewFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProblemReviewFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>
+        }
+        findMany: {
+          args: Prisma.ProblemReviewFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>[]
+        }
+        create: {
+          args: Prisma.ProblemReviewCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>
+        }
+        createMany: {
+          args: Prisma.ProblemReviewCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProblemReviewCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>[]
+        }
+        delete: {
+          args: Prisma.ProblemReviewDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>
+        }
+        update: {
+          args: Prisma.ProblemReviewUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProblemReviewDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProblemReviewUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProblemReviewUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProblemReviewUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProblemReviewPayload>
+        }
+        aggregate: {
+          args: Prisma.ProblemReviewAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProblemReview>
+        }
+        groupBy: {
+          args: Prisma.ProblemReviewGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProblemReviewGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProblemReviewCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProblemReviewCountAggregateOutputType> | number
+        }
+      }
+    }
+    StudyWeeklyGoal: {
+      payload: Prisma.$StudyWeeklyGoalPayload<ExtArgs>
+      fields: Prisma.StudyWeeklyGoalFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StudyWeeklyGoalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StudyWeeklyGoalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>
+        }
+        findFirst: {
+          args: Prisma.StudyWeeklyGoalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StudyWeeklyGoalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>
+        }
+        findMany: {
+          args: Prisma.StudyWeeklyGoalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>[]
+        }
+        create: {
+          args: Prisma.StudyWeeklyGoalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>
+        }
+        createMany: {
+          args: Prisma.StudyWeeklyGoalCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StudyWeeklyGoalCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>[]
+        }
+        delete: {
+          args: Prisma.StudyWeeklyGoalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>
+        }
+        update: {
+          args: Prisma.StudyWeeklyGoalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>
+        }
+        deleteMany: {
+          args: Prisma.StudyWeeklyGoalDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StudyWeeklyGoalUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StudyWeeklyGoalUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>[]
+        }
+        upsert: {
+          args: Prisma.StudyWeeklyGoalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudyWeeklyGoalPayload>
+        }
+        aggregate: {
+          args: Prisma.StudyWeeklyGoalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStudyWeeklyGoal>
+        }
+        groupBy: {
+          args: Prisma.StudyWeeklyGoalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StudyWeeklyGoalGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StudyWeeklyGoalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StudyWeeklyGoalCountAggregateOutputType> | number
+        }
+      }
+    }
     FormulaReviewDay: {
       payload: Prisma.$FormulaReviewDayPayload<ExtArgs>
       fields: Prisma.FormulaReviewDayFieldRefs
@@ -10092,6 +10245,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DeviceToken: {
+      payload: Prisma.$DeviceTokenPayload<ExtArgs>
+      fields: Prisma.DeviceTokenFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DeviceTokenFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceTokenPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DeviceTokenFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceTokenPayload>
+        }
+        findFirst: {
+          args: Prisma.DeviceTokenFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceTokenPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DeviceTokenFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceTokenPayload>
+        }
+        findMany: {
+          args: Prisma.DeviceTokenFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceTokenPayload>[]
+        }
+        create: {
+          args: Prisma.DeviceTokenCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceTokenPayload>
+        }
+        createMany: {
+          args: Prisma.DeviceTokenCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DeviceTokenCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceTokenPayload>[]
+        }
+        delete: {
+          args: Prisma.DeviceTokenDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceTokenPayload>
+        }
+        update: {
+          args: Prisma.DeviceTokenUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceTokenPayload>
+        }
+        deleteMany: {
+          args: Prisma.DeviceTokenDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DeviceTokenUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DeviceTokenUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceTokenPayload>[]
+        }
+        upsert: {
+          args: Prisma.DeviceTokenUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceTokenPayload>
+        }
+        aggregate: {
+          args: Prisma.DeviceTokenAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDeviceToken>
+        }
+        groupBy: {
+          args: Prisma.DeviceTokenGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DeviceTokenGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DeviceTokenCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DeviceTokenCountAggregateOutputType> | number
+        }
+      }
+    }
+    AppleIdentity: {
+      payload: Prisma.$AppleIdentityPayload<ExtArgs>
+      fields: Prisma.AppleIdentityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AppleIdentityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppleIdentityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AppleIdentityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppleIdentityPayload>
+        }
+        findFirst: {
+          args: Prisma.AppleIdentityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppleIdentityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AppleIdentityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppleIdentityPayload>
+        }
+        findMany: {
+          args: Prisma.AppleIdentityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppleIdentityPayload>[]
+        }
+        create: {
+          args: Prisma.AppleIdentityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppleIdentityPayload>
+        }
+        createMany: {
+          args: Prisma.AppleIdentityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AppleIdentityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppleIdentityPayload>[]
+        }
+        delete: {
+          args: Prisma.AppleIdentityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppleIdentityPayload>
+        }
+        update: {
+          args: Prisma.AppleIdentityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppleIdentityPayload>
+        }
+        deleteMany: {
+          args: Prisma.AppleIdentityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AppleIdentityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AppleIdentityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppleIdentityPayload>[]
+        }
+        upsert: {
+          args: Prisma.AppleIdentityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppleIdentityPayload>
+        }
+        aggregate: {
+          args: Prisma.AppleIdentityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAppleIdentity>
+        }
+        groupBy: {
+          args: Prisma.AppleIdentityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppleIdentityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AppleIdentityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppleIdentityCountAggregateOutputType> | number
+        }
+      }
+    }
+    AccountDeletionRequest: {
+      payload: Prisma.$AccountDeletionRequestPayload<ExtArgs>
+      fields: Prisma.AccountDeletionRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AccountDeletionRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountDeletionRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AccountDeletionRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountDeletionRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.AccountDeletionRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountDeletionRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AccountDeletionRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountDeletionRequestPayload>
+        }
+        findMany: {
+          args: Prisma.AccountDeletionRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountDeletionRequestPayload>[]
+        }
+        create: {
+          args: Prisma.AccountDeletionRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountDeletionRequestPayload>
+        }
+        createMany: {
+          args: Prisma.AccountDeletionRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AccountDeletionRequestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountDeletionRequestPayload>[]
+        }
+        delete: {
+          args: Prisma.AccountDeletionRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountDeletionRequestPayload>
+        }
+        update: {
+          args: Prisma.AccountDeletionRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountDeletionRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.AccountDeletionRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AccountDeletionRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AccountDeletionRequestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountDeletionRequestPayload>[]
+        }
+        upsert: {
+          args: Prisma.AccountDeletionRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountDeletionRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.AccountDeletionRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAccountDeletionRequest>
+        }
+        groupBy: {
+          args: Prisma.AccountDeletionRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AccountDeletionRequestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AccountDeletionRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AccountDeletionRequestCountAggregateOutputType> | number
+        }
+      }
+    }
     UiEvent: {
       payload: Prisma.$UiEventPayload<ExtArgs>
       fields: Prisma.UiEventFieldRefs
@@ -10596,6 +10971,7 @@ export const ProblemScalarFieldEnum = {
   attemptCount: 'attemptCount',
   correctRate: 'correctRate',
   youtubeUrl: 'youtubeUrl',
+  scanCode: 'scanCode',
   scoringGroups: 'scoringGroups',
   version: 'version',
   updatedAt: 'updatedAt',
@@ -10945,7 +11321,9 @@ export const StudentNoteScalarFieldEnum = {
   updatedAt: 'updatedAt',
   resolvedAt: 'resolvedAt',
   resolvedById: 'resolvedById',
-  promisedOn: 'promisedOn'
+  promisedOn: 'promisedOn',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type StudentNoteScalarFieldEnum = (typeof StudentNoteScalarFieldEnum)[keyof typeof StudentNoteScalarFieldEnum]
@@ -11318,7 +11696,9 @@ export const StaffTaskScalarFieldEnum = {
   estimateHours: 'estimateHours',
   orderIndex: 'orderIndex',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type StaffTaskScalarFieldEnum = (typeof StaffTaskScalarFieldEnum)[keyof typeof StaffTaskScalarFieldEnum]
@@ -11344,7 +11724,9 @@ export const ClassScheduleScalarFieldEnum = {
   subject: 'subject',
   effectiveFrom: 'effectiveFrom',
   effectiveTo: 'effectiveTo',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type ClassScheduleScalarFieldEnum = (typeof ClassScheduleScalarFieldEnum)[keyof typeof ClassScheduleScalarFieldEnum]
@@ -11459,7 +11841,9 @@ export const AcademicCalendarDayScalarFieldEnum = {
   title: 'title',
   note: 'note',
   createdById: 'createdById',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type AcademicCalendarDayScalarFieldEnum = (typeof AcademicCalendarDayScalarFieldEnum)[keyof typeof AcademicCalendarDayScalarFieldEnum]
@@ -11482,7 +11866,8 @@ export const StudentGoalScalarFieldEnum = {
   status: 'status',
   subject: 'subject',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type StudentGoalScalarFieldEnum = (typeof StudentGoalScalarFieldEnum)[keyof typeof StudentGoalScalarFieldEnum]
@@ -11565,6 +11950,39 @@ export const FormulaReviewScalarFieldEnum = {
 } as const
 
 export type FormulaReviewScalarFieldEnum = (typeof FormulaReviewScalarFieldEnum)[keyof typeof FormulaReviewScalarFieldEnum]
+
+
+export const ProblemReviewScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  problemId: 'problemId',
+  dueAt: 'dueAt',
+  intervalDays: 'intervalDays',
+  ease: 'ease',
+  reps: 'reps',
+  lapses: 'lapses',
+  lastResult: 'lastResult',
+  source: 'source',
+  sourceTestId: 'sourceTestId',
+  sourceRefId: 'sourceRefId',
+  lastEventAt: 'lastEventAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProblemReviewScalarFieldEnum = (typeof ProblemReviewScalarFieldEnum)[keyof typeof ProblemReviewScalarFieldEnum]
+
+
+export const StudyWeeklyGoalScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  daysPerWeek: 'daysPerWeek',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StudyWeeklyGoalScalarFieldEnum = (typeof StudyWeeklyGoalScalarFieldEnum)[keyof typeof StudyWeeklyGoalScalarFieldEnum]
 
 
 export const FormulaReviewDayScalarFieldEnum = {
@@ -12177,6 +12595,48 @@ export const HomeworkPhotoScalarFieldEnum = {
 } as const
 
 export type HomeworkPhotoScalarFieldEnum = (typeof HomeworkPhotoScalarFieldEnum)[keyof typeof HomeworkPhotoScalarFieldEnum]
+
+
+export const DeviceTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token',
+  platform: 'platform',
+  appVersion: 'appVersion',
+  lastSeenAt: 'lastSeenAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DeviceTokenScalarFieldEnum = (typeof DeviceTokenScalarFieldEnum)[keyof typeof DeviceTokenScalarFieldEnum]
+
+
+export const AppleIdentityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  appleSubject: 'appleSubject',
+  email: 'email',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppleIdentityScalarFieldEnum = (typeof AppleIdentityScalarFieldEnum)[keyof typeof AppleIdentityScalarFieldEnum]
+
+
+export const AccountDeletionRequestScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  reason: 'reason',
+  status: 'status',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  reviewNote: 'reviewNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AccountDeletionRequestScalarFieldEnum = (typeof AccountDeletionRequestScalarFieldEnum)[keyof typeof AccountDeletionRequestScalarFieldEnum]
 
 
 export const UiEventScalarFieldEnum = {
@@ -13307,6 +13767,8 @@ export type GlobalOmitConfig = {
   googleLoginExchange?: Prisma.GoogleLoginExchangeOmit
   storedFile?: Prisma.StoredFileOmit
   formulaReview?: Prisma.FormulaReviewOmit
+  problemReview?: Prisma.ProblemReviewOmit
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalOmit
   formulaReviewDay?: Prisma.FormulaReviewDayOmit
   formulaReviewAttempt?: Prisma.FormulaReviewAttemptOmit
   feedback?: Prisma.FeedbackOmit
@@ -13345,6 +13807,9 @@ export type GlobalOmitConfig = {
   homeworkAttempt?: Prisma.HomeworkAttemptOmit
   homeworkCheck?: Prisma.HomeworkCheckOmit
   homeworkPhoto?: Prisma.HomeworkPhotoOmit
+  deviceToken?: Prisma.DeviceTokenOmit
+  appleIdentity?: Prisma.AppleIdentityOmit
+  accountDeletionRequest?: Prisma.AccountDeletionRequestOmit
   uiEvent?: Prisma.UiEventOmit
 }
 

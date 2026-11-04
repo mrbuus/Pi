@@ -291,7 +291,7 @@ function makeDb() {
         topics
           .filter(
             (t) =>
-              (!where.schedule || where.schedule.classroomId.in.includes(t.classroomId)) &&
+              (!where.schedule?.classroomId || where.schedule.classroomId.in.includes(t.classroomId)) &&
               inRange(t.date, where.date) &&
               // Төлөвлөсөн тест (planned-tests) — testIds хоосон биш мөр л
               (where.testIds?.isEmpty !== false || (t.testIds ?? []).length > 0) &&
@@ -306,7 +306,7 @@ function makeDb() {
       findFirst: jest.fn(async ({ where }: any) =>
         topics.find(
           (t) =>
-            (!where.schedule || t.classroomId === where.schedule.classroomId) &&
+            (!where.schedule?.classroomId || t.classroomId === where.schedule.classroomId) &&
             (t.testIds ?? []).includes(where.testIds.has) &&
             (!where.date?.gte || t.date >= where.date.gte) &&
             (!where.date?.gt || t.date > where.date.gt),
@@ -526,6 +526,28 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
     });
   });
 
+  it('илгээх: буруу бодлогыг хугацаатай давталтад өгнө, дүн өөрчлөгдөхгүй', async () => {
+    const reviews = { recordWrongInBackground: jest.fn() };
+    const hooked = new HomeworkPracticeService(env.db, reviews as never);
+    const { attemptId } = await hooked.start('s1', { testId: 'B1', date: '2026-10-27' });
+    const res = await hooked.submit('s1', attemptId, { p1: 'B', p2: 'D' });
+    expect(res.score).toEqual({ correct: 1, total: 2 });
+    expect(reviews.recordWrongInBackground).toHaveBeenCalledTimes(1);
+    expect(reviews.recordWrongInBackground.mock.calls[0][0]).toEqual([
+      {
+        studentId: 's1',
+        problemId: 'p2',
+        source: 'HOMEWORK',
+        occurredAt: expect.any(Date),
+        sourceTestId: 'B1',
+        sourceRefId: attemptId,
+      },
+    ]);
+    // Давтан илгээлт (аль хэдийн SUBMITTED) дахин бүртгэхгүй
+    await hooked.submit('s1', attemptId, { p1: 'A' });
+    expect(reviews.recordWrongInBackground).toHaveBeenCalledTimes(1);
+  });
+
   it('хоцорсон: хугацаа (дараагийн хичээлийн 00:00) өнгөрсний дараа илгээвэл late', async () => {
     jest.setSystemTime(new Date('2026-10-28T10:00:00Z')); // УБ 10-28 18:00
     const { attemptId } = await svc.start('s1', { testId: 'B1', date: '2026-10-27' });
@@ -710,7 +732,7 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
       expect(dates).not.toContain('2026-10-16');
       expect(my.days.find((x: any) => x.date === '2026-10-19')).toMatchObject({ topic: 'Зөөгдсөн' });
       const q = env.db.scheduleException.findMany.mock.calls[0][0];
-      expect(q.where.schedule).toEqual({ classroomId: { in: ['c1'] } });
+      expect(q.where.schedule).toEqual({ deletedAt: null, classroomId: { in: ['c1'] } });
     });
 
     it('GET /homework/my: B-гүй өдөр items: [], markComment ба topic, хуучин талбарууд хэвээр', async () => {
@@ -826,7 +848,7 @@ describe('Багшийн самбар «Онлайн» — илгээсэн гэ
       { testId: 'B1', studentId: 's1', score: 1, total: 2 },
       { testId: 'B1', studentId: 's2', score: 0, total: 2 }, // TestResult байгаа — тоологдохгүй
     ]);
-    const svc = new HomeworkMarksService(db, { record: jest.fn() } as never);
+    const svc = new HomeworkMarksService(db, { record: jest.fn(), recordMany: jest.fn() } as never);
     const res = await svc.online('c1', '2026-10-29', 'admin', Role.ADMIN);
     expect(res.previousLessonDate).toBe('2026-10-27');
     expect(res.tests.map((t) => t.testId)).toContain('B1');

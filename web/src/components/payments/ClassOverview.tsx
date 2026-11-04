@@ -8,14 +8,22 @@ import { millions, monthName } from "./ledgerFormat";
 import type { ClassStat, LedgerOverview } from "./ledgerTypes";
 
 /** Энэ сарын төлөвийн зурвас: төлсөн | хугацаа хэтэрсэн | болоогүй. */
-export function MonthBar({ s, className = "h-2" }: { s: Pick<ClassStat, "expected" | "covered" | "late">; className?: string }) {
+type Fmt = (n: number) => string;
+
+/** Багш+ — сервер дүнг хассан (amountsHidden): зурвасыг сурагчдын тоогоор */
+function countView(s: ClassStat): ClassStat {
+  return { ...s, expected: s.activeStudents ?? s.students, covered: s.paidStudents ?? 0, late: s.lateStudents ?? 0 };
+}
+const countFmt: Fmt = (n) => `${n} сурагч`;
+
+export function MonthBar({ s, className = "h-2", fmt = millions }: { s: Pick<ClassStat, "expected" | "covered" | "late">; className?: string; fmt?: Fmt }) {
   const total = Math.max(1, s.expected);
   const pct = (n: number) => `${Math.max(0, Math.min(100, (n / total) * 100))}%`;
   const rest = Math.max(0, s.expected - s.covered - s.late);
   return (
     <div
       role="img"
-      aria-label={`Төлсөн ${millions(s.covered)}, хугацаа хэтэрсэн ${millions(s.late)}, болоогүй ${millions(rest)}`}
+      aria-label={`Төлсөн ${fmt(s.covered)}, хугацаа хэтэрсэн ${fmt(s.late)}, болоогүй ${fmt(rest)}`}
       className={`flex w-full overflow-hidden rounded-full bg-ink/10 ${className}`}
     >
       <span className="bg-success" style={{ width: pct(s.covered) }} />
@@ -24,7 +32,7 @@ export function MonthBar({ s, className = "h-2" }: { s: Pick<ClassStat, "expecte
   );
 }
 
-function Legend({ s }: { s: ClassStat }) {
+function Legend({ s, fmt }: { s: ClassStat; fmt: Fmt }) {
   const rest = Math.max(0, s.expected - s.covered - s.late);
   const items = [
     { cls: "bg-success", label: "Төлсөн", v: s.covered },
@@ -39,7 +47,7 @@ function Legend({ s }: { s: ClassStat }) {
             <span aria-hidden className={`h-2 w-2 rounded-full ${i.cls}`} />
             {i.label}
           </dt>
-          <dd className="font-bold tabular-nums text-ink">{millions(i.v)}</dd>
+          <dd className="font-bold tabular-nums text-ink">{fmt(i.v)}</dd>
         </div>
       ))}
     </dl>
@@ -58,18 +66,22 @@ export default function ClassOverview({
   onShowPromises: () => void;
   onShowPending: () => void;
 }) {
+  const hidden = !!data.amountsHidden;
+  const fmt: Fmt = hidden ? countFmt : millions;
+  const view = (s: ClassStat) => (hidden ? countView(s) : s);
   const t = data.totals;
+  const tv = view(t);
   return (
     <div className="space-y-4">
       <section className="chunky space-y-4 p-4 sm:p-5">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-bold text-ink">{monthName(data.month)}</h2>
           <p className="text-sm text-ink-dim">
-            <span className="font-bold tabular-nums text-ink">{millions(t.covered)}</span> / {millions(t.expected)}
+            <span className="font-bold tabular-nums text-ink">{hidden ? tv.covered : millions(t.covered)}</span> / {fmt(tv.expected)}
           </p>
         </div>
-        <MonthBar s={t} className="h-3" />
-        <Legend s={t} />
+        <MonthBar s={tv} className="h-3" fmt={fmt} />
+        <Legend s={tv} fmt={fmt} />
         <div className="grid gap-2 sm:grid-cols-3">
           <button
             type="button"
@@ -132,9 +144,9 @@ export default function ClassOverview({
                 </span>
               </span>
               <span className="order-3 col-span-2 sm:order-none sm:col-span-1">
-                <MonthBar s={c} />
+                <MonthBar s={view(c)} fmt={fmt} />
                 <span className="mt-1 block text-xs tabular-nums text-ink-dim">
-                  {millions(c.covered)} / {millions(c.expected)}
+                  {hidden ? view(c).covered : millions(c.covered)} / {fmt(view(c).expected)}
                 </span>
               </span>
               <span className="text-right text-sm">

@@ -371,6 +371,8 @@ export type UserWhereInput = {
   formulaReviews?: Prisma.FormulaReviewListRelationFilter
   formulaReviewDays?: Prisma.FormulaReviewDayListRelationFilter
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptListRelationFilter
+  problemReviews?: Prisma.ProblemReviewListRelationFilter
+  studyWeeklyGoal?: Prisma.XOR<Prisma.StudyWeeklyGoalNullableScalarRelationFilter, Prisma.StudyWeeklyGoalWhereInput> | null
   staffCapabilities?: Prisma.StaffCapabilityGrantListRelationFilter
   feedback?: Prisma.FeedbackListRelationFilter
   studentProfile?: Prisma.XOR<Prisma.StudentProfileNullableScalarRelationFilter, Prisma.StudentProfileWhereInput> | null
@@ -417,6 +419,9 @@ export type UserWhereInput = {
   googleIdentity?: Prisma.XOR<Prisma.GoogleIdentityNullableScalarRelationFilter, Prisma.GoogleIdentityWhereInput> | null
   googleOAuthStates?: Prisma.GoogleOAuthStateListRelationFilter
   googleLoginExchanges?: Prisma.GoogleLoginExchangeListRelationFilter
+  deviceTokens?: Prisma.DeviceTokenListRelationFilter
+  appleIdentity?: Prisma.XOR<Prisma.AppleIdentityNullableScalarRelationFilter, Prisma.AppleIdentityWhereInput> | null
+  accountDeletionRequests?: Prisma.AccountDeletionRequestListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   notificationPreference?: Prisma.XOR<Prisma.NotificationPreferenceNullableScalarRelationFilter, Prisma.NotificationPreferenceWhereInput> | null
   notificationDeliveries?: Prisma.NotificationDeliveryListRelationFilter
@@ -461,6 +466,8 @@ export type UserOrderByWithRelationInput = {
   formulaReviews?: Prisma.FormulaReviewOrderByRelationAggregateInput
   formulaReviewDays?: Prisma.FormulaReviewDayOrderByRelationAggregateInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptOrderByRelationAggregateInput
+  problemReviews?: Prisma.ProblemReviewOrderByRelationAggregateInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalOrderByWithRelationInput
   staffCapabilities?: Prisma.StaffCapabilityGrantOrderByRelationAggregateInput
   feedback?: Prisma.FeedbackOrderByRelationAggregateInput
   studentProfile?: Prisma.StudentProfileOrderByWithRelationInput
@@ -507,6 +514,9 @@ export type UserOrderByWithRelationInput = {
   googleIdentity?: Prisma.GoogleIdentityOrderByWithRelationInput
   googleOAuthStates?: Prisma.GoogleOAuthStateOrderByRelationAggregateInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeOrderByRelationAggregateInput
+  deviceTokens?: Prisma.DeviceTokenOrderByRelationAggregateInput
+  appleIdentity?: Prisma.AppleIdentityOrderByWithRelationInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   notificationPreference?: Prisma.NotificationPreferenceOrderByWithRelationInput
   notificationDeliveries?: Prisma.NotificationDeliveryOrderByRelationAggregateInput
@@ -554,6 +564,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   formulaReviews?: Prisma.FormulaReviewListRelationFilter
   formulaReviewDays?: Prisma.FormulaReviewDayListRelationFilter
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptListRelationFilter
+  problemReviews?: Prisma.ProblemReviewListRelationFilter
+  studyWeeklyGoal?: Prisma.XOR<Prisma.StudyWeeklyGoalNullableScalarRelationFilter, Prisma.StudyWeeklyGoalWhereInput> | null
   staffCapabilities?: Prisma.StaffCapabilityGrantListRelationFilter
   feedback?: Prisma.FeedbackListRelationFilter
   studentProfile?: Prisma.XOR<Prisma.StudentProfileNullableScalarRelationFilter, Prisma.StudentProfileWhereInput> | null
@@ -600,6 +612,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   googleIdentity?: Prisma.XOR<Prisma.GoogleIdentityNullableScalarRelationFilter, Prisma.GoogleIdentityWhereInput> | null
   googleOAuthStates?: Prisma.GoogleOAuthStateListRelationFilter
   googleLoginExchanges?: Prisma.GoogleLoginExchangeListRelationFilter
+  deviceTokens?: Prisma.DeviceTokenListRelationFilter
+  appleIdentity?: Prisma.XOR<Prisma.AppleIdentityNullableScalarRelationFilter, Prisma.AppleIdentityWhereInput> | null
+  accountDeletionRequests?: Prisma.AccountDeletionRequestListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   notificationPreference?: Prisma.XOR<Prisma.NotificationPreferenceNullableScalarRelationFilter, Prisma.NotificationPreferenceWhereInput> | null
   notificationDeliveries?: Prisma.NotificationDeliveryListRelationFilter
@@ -706,6 +721,8 @@ export type UserCreateInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -752,6 +769,9 @@ export type UserCreateInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -796,6 +816,8 @@ export type UserUncheckedCreateInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -842,6 +864,9 @@ export type UserUncheckedCreateInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -886,6 +911,8 @@ export type UserUpdateInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -932,6 +959,9 @@ export type UserUpdateInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -976,6 +1006,8 @@ export type UserUncheckedUpdateInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -1022,6 +1054,9 @@ export type UserUncheckedUpdateInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -2054,6 +2089,34 @@ export type UserUpdateOneRequiredWithoutFormulaReviewsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFormulaReviewsInput, Prisma.UserUpdateWithoutFormulaReviewsInput>, Prisma.UserUncheckedUpdateWithoutFormulaReviewsInput>
 }
 
+export type UserCreateNestedOneWithoutProblemReviewsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProblemReviewsInput, Prisma.UserUncheckedCreateWithoutProblemReviewsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProblemReviewsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutProblemReviewsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProblemReviewsInput, Prisma.UserUncheckedCreateWithoutProblemReviewsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProblemReviewsInput
+  upsert?: Prisma.UserUpsertWithoutProblemReviewsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProblemReviewsInput, Prisma.UserUpdateWithoutProblemReviewsInput>, Prisma.UserUncheckedUpdateWithoutProblemReviewsInput>
+}
+
+export type UserCreateNestedOneWithoutStudyWeeklyGoalInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStudyWeeklyGoalInput, Prisma.UserUncheckedCreateWithoutStudyWeeklyGoalInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStudyWeeklyGoalInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutStudyWeeklyGoalNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStudyWeeklyGoalInput, Prisma.UserUncheckedCreateWithoutStudyWeeklyGoalInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStudyWeeklyGoalInput
+  upsert?: Prisma.UserUpsertWithoutStudyWeeklyGoalInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStudyWeeklyGoalInput, Prisma.UserUpdateWithoutStudyWeeklyGoalInput>, Prisma.UserUncheckedUpdateWithoutStudyWeeklyGoalInput>
+}
+
 export type UserCreateNestedOneWithoutFormulaReviewDaysInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutFormulaReviewDaysInput, Prisma.UserUncheckedCreateWithoutFormulaReviewDaysInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutFormulaReviewDaysInput
@@ -2152,6 +2215,48 @@ export type UserUpdateOneRequiredWithoutMockRegistrationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMockRegistrationsInput, Prisma.UserUpdateWithoutMockRegistrationsInput>, Prisma.UserUncheckedUpdateWithoutMockRegistrationsInput>
 }
 
+export type UserCreateNestedOneWithoutDeviceTokensInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDeviceTokensInput, Prisma.UserUncheckedCreateWithoutDeviceTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDeviceTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDeviceTokensNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDeviceTokensInput, Prisma.UserUncheckedCreateWithoutDeviceTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDeviceTokensInput
+  upsert?: Prisma.UserUpsertWithoutDeviceTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDeviceTokensInput, Prisma.UserUpdateWithoutDeviceTokensInput>, Prisma.UserUncheckedUpdateWithoutDeviceTokensInput>
+}
+
+export type UserCreateNestedOneWithoutAppleIdentityInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAppleIdentityInput, Prisma.UserUncheckedCreateWithoutAppleIdentityInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAppleIdentityInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAppleIdentityNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAppleIdentityInput, Prisma.UserUncheckedCreateWithoutAppleIdentityInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAppleIdentityInput
+  upsert?: Prisma.UserUpsertWithoutAppleIdentityInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAppleIdentityInput, Prisma.UserUpdateWithoutAppleIdentityInput>, Prisma.UserUncheckedUpdateWithoutAppleIdentityInput>
+}
+
+export type UserCreateNestedOneWithoutAccountDeletionRequestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAccountDeletionRequestsInput, Prisma.UserUncheckedCreateWithoutAccountDeletionRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAccountDeletionRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAccountDeletionRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAccountDeletionRequestsInput, Prisma.UserUncheckedCreateWithoutAccountDeletionRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAccountDeletionRequestsInput
+  upsert?: Prisma.UserUpsertWithoutAccountDeletionRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAccountDeletionRequestsInput, Prisma.UserUpdateWithoutAccountDeletionRequestsInput>, Prisma.UserUncheckedUpdateWithoutAccountDeletionRequestsInput>
+}
+
 export type UserCreateWithoutPasswordResetTokensInput = {
   id?: string
   phone?: string | null
@@ -2180,6 +2285,8 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -2225,6 +2332,9 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -2269,6 +2379,8 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -2314,6 +2426,9 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -2374,6 +2489,8 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -2419,6 +2536,9 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -2463,6 +2583,8 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -2508,6 +2630,9 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -2552,6 +2677,8 @@ export type UserCreateWithoutSmsMessagesAsRecipientInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -2598,6 +2725,9 @@ export type UserCreateWithoutSmsMessagesAsRecipientInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -2641,6 +2771,8 @@ export type UserUncheckedCreateWithoutSmsMessagesAsRecipientInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -2687,6 +2819,9 @@ export type UserUncheckedCreateWithoutSmsMessagesAsRecipientInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -2735,6 +2870,8 @@ export type UserCreateWithoutSmsMessagesAsCreatorInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -2781,6 +2918,9 @@ export type UserCreateWithoutSmsMessagesAsCreatorInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -2824,6 +2964,8 @@ export type UserUncheckedCreateWithoutSmsMessagesAsCreatorInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -2870,6 +3012,9 @@ export type UserUncheckedCreateWithoutSmsMessagesAsCreatorInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -2929,6 +3074,8 @@ export type UserUpdateWithoutSmsMessagesAsRecipientInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -2975,6 +3122,9 @@ export type UserUpdateWithoutSmsMessagesAsRecipientInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -3018,6 +3168,8 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsRecipientInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -3064,6 +3216,9 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsRecipientInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -3118,6 +3273,8 @@ export type UserUpdateWithoutSmsMessagesAsCreatorInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -3164,6 +3321,9 @@ export type UserUpdateWithoutSmsMessagesAsCreatorInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -3207,6 +3367,8 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsCreatorInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -3253,6 +3415,9 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsCreatorInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -3296,6 +3461,8 @@ export type UserCreateWithoutSmsBatchesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -3342,6 +3509,9 @@ export type UserCreateWithoutSmsBatchesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -3385,6 +3555,8 @@ export type UserUncheckedCreateWithoutSmsBatchesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -3431,6 +3603,9 @@ export type UserUncheckedCreateWithoutSmsBatchesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -3490,6 +3665,8 @@ export type UserUpdateWithoutSmsBatchesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -3536,6 +3713,9 @@ export type UserUpdateWithoutSmsBatchesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -3579,6 +3759,8 @@ export type UserUncheckedUpdateWithoutSmsBatchesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -3625,6 +3807,9 @@ export type UserUncheckedUpdateWithoutSmsBatchesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -3668,6 +3853,8 @@ export type UserCreateWithoutSmsTemplatesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -3714,6 +3901,9 @@ export type UserCreateWithoutSmsTemplatesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -3757,6 +3947,8 @@ export type UserUncheckedCreateWithoutSmsTemplatesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -3803,6 +3995,9 @@ export type UserUncheckedCreateWithoutSmsTemplatesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -3862,6 +4057,8 @@ export type UserUpdateWithoutSmsTemplatesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -3908,6 +4105,9 @@ export type UserUpdateWithoutSmsTemplatesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -3951,6 +4151,8 @@ export type UserUncheckedUpdateWithoutSmsTemplatesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -3997,6 +4199,9 @@ export type UserUncheckedUpdateWithoutSmsTemplatesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -4040,6 +4245,8 @@ export type UserCreateWithoutStudentProfileInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
@@ -4085,6 +4292,9 @@ export type UserCreateWithoutStudentProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -4129,6 +4339,8 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -4174,6 +4386,9 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -4234,6 +4449,8 @@ export type UserUpdateWithoutStudentProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
@@ -4279,6 +4496,9 @@ export type UserUpdateWithoutStudentProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -4323,6 +4543,8 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -4368,6 +4590,9 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -4412,6 +4637,8 @@ export type UserCreateWithoutTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -4457,6 +4684,9 @@ export type UserCreateWithoutTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -4501,6 +4731,8 @@ export type UserUncheckedCreateWithoutTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -4546,6 +4778,9 @@ export type UserUncheckedCreateWithoutTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -4606,6 +4841,8 @@ export type UserUpdateWithoutTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -4651,6 +4888,9 @@ export type UserUpdateWithoutTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -4695,6 +4935,8 @@ export type UserUncheckedUpdateWithoutTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -4740,6 +4982,9 @@ export type UserUncheckedUpdateWithoutTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -4784,6 +5029,8 @@ export type UserCreateWithoutExternalTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -4829,6 +5076,9 @@ export type UserCreateWithoutExternalTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -4873,6 +5123,8 @@ export type UserUncheckedCreateWithoutExternalTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -4918,6 +5170,9 @@ export type UserUncheckedCreateWithoutExternalTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -4978,6 +5233,8 @@ export type UserUpdateWithoutExternalTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -5023,6 +5280,9 @@ export type UserUpdateWithoutExternalTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -5067,6 +5327,8 @@ export type UserUncheckedUpdateWithoutExternalTeacherProfileInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -5112,6 +5374,9 @@ export type UserUncheckedUpdateWithoutExternalTeacherProfileInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -5156,6 +5421,8 @@ export type UserCreateWithoutParentLinksInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -5201,6 +5468,9 @@ export type UserCreateWithoutParentLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -5245,6 +5515,8 @@ export type UserUncheckedCreateWithoutParentLinksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -5290,6 +5562,9 @@ export type UserUncheckedCreateWithoutParentLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -5339,6 +5614,8 @@ export type UserCreateWithoutChildLinksInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -5384,6 +5661,9 @@ export type UserCreateWithoutChildLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -5428,6 +5708,8 @@ export type UserUncheckedCreateWithoutChildLinksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -5473,6 +5755,9 @@ export type UserUncheckedCreateWithoutChildLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -5533,6 +5818,8 @@ export type UserUpdateWithoutParentLinksInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -5578,6 +5865,9 @@ export type UserUpdateWithoutParentLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -5622,6 +5912,8 @@ export type UserUncheckedUpdateWithoutParentLinksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -5667,6 +5959,9 @@ export type UserUncheckedUpdateWithoutParentLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -5722,6 +6017,8 @@ export type UserUpdateWithoutChildLinksInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -5767,6 +6064,9 @@ export type UserUpdateWithoutChildLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -5811,6 +6111,8 @@ export type UserUncheckedUpdateWithoutChildLinksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -5856,6 +6158,9 @@ export type UserUncheckedUpdateWithoutChildLinksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -5900,6 +6205,8 @@ export type UserCreateWithoutOwnedClassroomsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -5945,6 +6252,9 @@ export type UserCreateWithoutOwnedClassroomsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -5989,6 +6299,8 @@ export type UserUncheckedCreateWithoutOwnedClassroomsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -6034,6 +6346,9 @@ export type UserUncheckedCreateWithoutOwnedClassroomsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -6083,6 +6398,8 @@ export type UserCreateWithoutAssistedClassroomsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -6128,6 +6445,9 @@ export type UserCreateWithoutAssistedClassroomsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -6172,6 +6492,8 @@ export type UserUncheckedCreateWithoutAssistedClassroomsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -6217,6 +6539,9 @@ export type UserUncheckedCreateWithoutAssistedClassroomsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -6277,6 +6602,8 @@ export type UserUpdateWithoutOwnedClassroomsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -6322,6 +6649,9 @@ export type UserUpdateWithoutOwnedClassroomsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -6366,6 +6696,8 @@ export type UserUncheckedUpdateWithoutOwnedClassroomsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -6411,6 +6743,9 @@ export type UserUncheckedUpdateWithoutOwnedClassroomsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -6466,6 +6801,8 @@ export type UserUpdateWithoutAssistedClassroomsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -6511,6 +6848,9 @@ export type UserUpdateWithoutAssistedClassroomsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -6555,6 +6895,8 @@ export type UserUncheckedUpdateWithoutAssistedClassroomsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -6600,6 +6942,9 @@ export type UserUncheckedUpdateWithoutAssistedClassroomsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -6644,6 +6989,8 @@ export type UserCreateWithoutTeacherGroupsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -6689,6 +7036,9 @@ export type UserCreateWithoutTeacherGroupsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -6733,6 +7083,8 @@ export type UserUncheckedCreateWithoutTeacherGroupsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -6778,6 +7130,9 @@ export type UserUncheckedCreateWithoutTeacherGroupsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -6838,6 +7193,8 @@ export type UserUpdateWithoutTeacherGroupsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -6883,6 +7240,9 @@ export type UserUpdateWithoutTeacherGroupsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -6927,6 +7287,8 @@ export type UserUncheckedUpdateWithoutTeacherGroupsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -6972,6 +7334,9 @@ export type UserUncheckedUpdateWithoutTeacherGroupsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -7016,6 +7381,8 @@ export type UserCreateWithoutTeacherGroupMembershipsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -7061,6 +7428,9 @@ export type UserCreateWithoutTeacherGroupMembershipsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -7105,6 +7475,8 @@ export type UserUncheckedCreateWithoutTeacherGroupMembershipsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -7150,6 +7522,9 @@ export type UserUncheckedCreateWithoutTeacherGroupMembershipsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -7210,6 +7585,8 @@ export type UserUpdateWithoutTeacherGroupMembershipsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -7255,6 +7632,9 @@ export type UserUpdateWithoutTeacherGroupMembershipsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -7299,6 +7679,8 @@ export type UserUncheckedUpdateWithoutTeacherGroupMembershipsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -7344,6 +7726,9 @@ export type UserUncheckedUpdateWithoutTeacherGroupMembershipsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -7388,6 +7773,8 @@ export type UserCreateWithoutEnrollmentsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -7433,6 +7820,9 @@ export type UserCreateWithoutEnrollmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -7477,6 +7867,8 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -7522,6 +7914,9 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -7582,6 +7977,8 @@ export type UserUpdateWithoutEnrollmentsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -7627,6 +8024,9 @@ export type UserUpdateWithoutEnrollmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -7671,6 +8071,8 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -7716,6 +8118,9 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -7760,6 +8165,8 @@ export type UserCreateWithoutAttendancesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -7805,6 +8212,9 @@ export type UserCreateWithoutAttendancesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -7849,6 +8259,8 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -7894,6 +8306,9 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -7954,6 +8369,8 @@ export type UserUpdateWithoutAttendancesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -7999,6 +8416,9 @@ export type UserUpdateWithoutAttendancesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -8043,6 +8463,8 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -8088,6 +8510,9 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -8132,6 +8557,8 @@ export type UserCreateWithoutSubmissionsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -8177,6 +8604,9 @@ export type UserCreateWithoutSubmissionsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -8221,6 +8651,8 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -8266,6 +8698,9 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -8326,6 +8761,8 @@ export type UserUpdateWithoutSubmissionsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -8371,6 +8808,9 @@ export type UserUpdateWithoutSubmissionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -8415,6 +8855,8 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -8460,6 +8902,9 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -8504,6 +8949,8 @@ export type UserCreateWithoutDailyHomeworkMarksInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -8549,6 +8996,9 @@ export type UserCreateWithoutDailyHomeworkMarksInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -8593,6 +9043,8 @@ export type UserUncheckedCreateWithoutDailyHomeworkMarksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -8638,6 +9090,9 @@ export type UserUncheckedCreateWithoutDailyHomeworkMarksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -8698,6 +9153,8 @@ export type UserUpdateWithoutDailyHomeworkMarksInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -8743,6 +9200,9 @@ export type UserUpdateWithoutDailyHomeworkMarksInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -8787,6 +9247,8 @@ export type UserUncheckedUpdateWithoutDailyHomeworkMarksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -8832,6 +9294,9 @@ export type UserUncheckedUpdateWithoutDailyHomeworkMarksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -8876,6 +9341,8 @@ export type UserCreateWithoutTestDraftsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -8921,6 +9388,9 @@ export type UserCreateWithoutTestDraftsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -8965,6 +9435,8 @@ export type UserUncheckedCreateWithoutTestDraftsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -9010,6 +9482,9 @@ export type UserUncheckedCreateWithoutTestDraftsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -9070,6 +9545,8 @@ export type UserUpdateWithoutTestDraftsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -9115,6 +9592,9 @@ export type UserUpdateWithoutTestDraftsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -9159,6 +9639,8 @@ export type UserUncheckedUpdateWithoutTestDraftsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -9204,6 +9686,9 @@ export type UserUncheckedUpdateWithoutTestDraftsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -9248,6 +9733,8 @@ export type UserCreateWithoutTestAccessesReviewOpenedInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -9294,6 +9781,9 @@ export type UserCreateWithoutTestAccessesReviewOpenedInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -9337,6 +9827,8 @@ export type UserUncheckedCreateWithoutTestAccessesReviewOpenedInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -9383,6 +9875,9 @@ export type UserUncheckedCreateWithoutTestAccessesReviewOpenedInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -9442,6 +9937,8 @@ export type UserUpdateWithoutTestAccessesReviewOpenedInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -9488,6 +9985,9 @@ export type UserUpdateWithoutTestAccessesReviewOpenedInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -9531,6 +10031,8 @@ export type UserUncheckedUpdateWithoutTestAccessesReviewOpenedInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -9577,6 +10079,9 @@ export type UserUncheckedUpdateWithoutTestAccessesReviewOpenedInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -9620,6 +10125,8 @@ export type UserCreateWithoutAttemptSessionsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -9665,6 +10172,9 @@ export type UserCreateWithoutAttemptSessionsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -9709,6 +10219,8 @@ export type UserUncheckedCreateWithoutAttemptSessionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -9754,6 +10266,9 @@ export type UserUncheckedCreateWithoutAttemptSessionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -9814,6 +10329,8 @@ export type UserUpdateWithoutAttemptSessionsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -9859,6 +10376,9 @@ export type UserUpdateWithoutAttemptSessionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -9903,6 +10423,8 @@ export type UserUncheckedUpdateWithoutAttemptSessionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -9948,6 +10470,9 @@ export type UserUncheckedUpdateWithoutAttemptSessionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -9992,6 +10517,8 @@ export type UserCreateWithoutTestResultsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -10037,6 +10564,9 @@ export type UserCreateWithoutTestResultsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -10081,6 +10611,8 @@ export type UserUncheckedCreateWithoutTestResultsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -10126,6 +10658,9 @@ export type UserUncheckedCreateWithoutTestResultsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -10186,6 +10721,8 @@ export type UserUpdateWithoutTestResultsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -10231,6 +10768,9 @@ export type UserUpdateWithoutTestResultsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -10275,6 +10815,8 @@ export type UserUncheckedUpdateWithoutTestResultsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -10320,6 +10862,9 @@ export type UserUncheckedUpdateWithoutTestResultsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -10364,6 +10909,8 @@ export type UserCreateWithoutTestItemMarksInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -10410,6 +10957,9 @@ export type UserCreateWithoutTestItemMarksInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -10453,6 +11003,8 @@ export type UserUncheckedCreateWithoutTestItemMarksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -10499,6 +11051,9 @@ export type UserUncheckedCreateWithoutTestItemMarksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -10558,6 +11113,8 @@ export type UserUpdateWithoutTestItemMarksInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -10604,6 +11161,9 @@ export type UserUpdateWithoutTestItemMarksInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -10647,6 +11207,8 @@ export type UserUncheckedUpdateWithoutTestItemMarksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -10693,6 +11255,9 @@ export type UserUncheckedUpdateWithoutTestItemMarksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -10736,6 +11301,8 @@ export type UserCreateWithoutTestAbsencesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -10782,6 +11349,9 @@ export type UserCreateWithoutTestAbsencesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -10825,6 +11395,8 @@ export type UserUncheckedCreateWithoutTestAbsencesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -10871,6 +11443,9 @@ export type UserUncheckedCreateWithoutTestAbsencesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -10930,6 +11505,8 @@ export type UserUpdateWithoutTestAbsencesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -10976,6 +11553,9 @@ export type UserUpdateWithoutTestAbsencesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -11019,6 +11599,8 @@ export type UserUncheckedUpdateWithoutTestAbsencesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -11065,6 +11647,9 @@ export type UserUncheckedUpdateWithoutTestAbsencesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -11108,6 +11693,8 @@ export type UserCreateWithoutResultAcknowledgementsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -11154,6 +11741,9 @@ export type UserCreateWithoutResultAcknowledgementsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -11197,6 +11787,8 @@ export type UserUncheckedCreateWithoutResultAcknowledgementsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -11243,6 +11835,9 @@ export type UserUncheckedCreateWithoutResultAcknowledgementsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -11302,6 +11897,8 @@ export type UserUpdateWithoutResultAcknowledgementsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -11348,6 +11945,9 @@ export type UserUpdateWithoutResultAcknowledgementsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -11391,6 +11991,8 @@ export type UserUncheckedUpdateWithoutResultAcknowledgementsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -11437,6 +12039,9 @@ export type UserUncheckedUpdateWithoutResultAcknowledgementsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -11480,6 +12085,8 @@ export type UserCreateWithoutEmailOtpsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -11526,6 +12133,9 @@ export type UserCreateWithoutEmailOtpsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -11569,6 +12179,8 @@ export type UserUncheckedCreateWithoutEmailOtpsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -11615,6 +12227,9 @@ export type UserUncheckedCreateWithoutEmailOtpsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -11674,6 +12289,8 @@ export type UserUpdateWithoutEmailOtpsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -11720,6 +12337,9 @@ export type UserUpdateWithoutEmailOtpsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -11763,6 +12383,8 @@ export type UserUncheckedUpdateWithoutEmailOtpsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -11809,6 +12431,9 @@ export type UserUncheckedUpdateWithoutEmailOtpsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -11852,6 +12477,8 @@ export type UserCreateWithoutAttemptsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -11897,6 +12524,9 @@ export type UserCreateWithoutAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -11941,6 +12571,8 @@ export type UserUncheckedCreateWithoutAttemptsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -11986,6 +12618,9 @@ export type UserUncheckedCreateWithoutAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -12046,6 +12681,8 @@ export type UserUpdateWithoutAttemptsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -12091,6 +12728,9 @@ export type UserUpdateWithoutAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -12135,6 +12775,8 @@ export type UserUncheckedUpdateWithoutAttemptsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -12180,6 +12822,9 @@ export type UserUncheckedUpdateWithoutAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -12224,6 +12869,8 @@ export type UserCreateWithoutMistakeEntriesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -12269,6 +12916,9 @@ export type UserCreateWithoutMistakeEntriesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -12313,6 +12963,8 @@ export type UserUncheckedCreateWithoutMistakeEntriesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -12358,6 +13010,9 @@ export type UserUncheckedCreateWithoutMistakeEntriesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -12418,6 +13073,8 @@ export type UserUpdateWithoutMistakeEntriesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -12463,6 +13120,9 @@ export type UserUpdateWithoutMistakeEntriesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -12507,6 +13167,8 @@ export type UserUncheckedUpdateWithoutMistakeEntriesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -12552,6 +13214,9 @@ export type UserUncheckedUpdateWithoutMistakeEntriesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -12596,6 +13261,8 @@ export type UserCreateWithoutPredictionsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -12641,6 +13308,9 @@ export type UserCreateWithoutPredictionsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -12685,6 +13355,8 @@ export type UserUncheckedCreateWithoutPredictionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -12730,6 +13402,9 @@ export type UserUncheckedCreateWithoutPredictionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -12790,6 +13465,8 @@ export type UserUpdateWithoutPredictionsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -12835,6 +13512,9 @@ export type UserUpdateWithoutPredictionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -12879,6 +13559,8 @@ export type UserUncheckedUpdateWithoutPredictionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -12924,6 +13606,9 @@ export type UserUncheckedUpdateWithoutPredictionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -12968,6 +13653,8 @@ export type UserCreateWithoutColorTagsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -13013,6 +13700,9 @@ export type UserCreateWithoutColorTagsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -13057,6 +13747,8 @@ export type UserUncheckedCreateWithoutColorTagsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -13102,6 +13794,9 @@ export type UserUncheckedCreateWithoutColorTagsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -13162,6 +13857,8 @@ export type UserUpdateWithoutColorTagsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -13207,6 +13904,9 @@ export type UserUpdateWithoutColorTagsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -13251,6 +13951,8 @@ export type UserUncheckedUpdateWithoutColorTagsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -13296,6 +13998,9 @@ export type UserUncheckedUpdateWithoutColorTagsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -13340,6 +14045,8 @@ export type UserCreateWithoutStudentNotesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -13385,6 +14092,9 @@ export type UserCreateWithoutStudentNotesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -13429,6 +14139,8 @@ export type UserUncheckedCreateWithoutStudentNotesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -13474,6 +14186,9 @@ export type UserUncheckedCreateWithoutStudentNotesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -13534,6 +14249,8 @@ export type UserUpdateWithoutStudentNotesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -13579,6 +14296,9 @@ export type UserUpdateWithoutStudentNotesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -13623,6 +14343,8 @@ export type UserUncheckedUpdateWithoutStudentNotesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -13668,6 +14390,9 @@ export type UserUncheckedUpdateWithoutStudentNotesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -13712,6 +14437,8 @@ export type UserCreateWithoutUserPassesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -13757,6 +14484,9 @@ export type UserCreateWithoutUserPassesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -13801,6 +14531,8 @@ export type UserUncheckedCreateWithoutUserPassesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -13846,6 +14578,9 @@ export type UserUncheckedCreateWithoutUserPassesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -13906,6 +14641,8 @@ export type UserUpdateWithoutUserPassesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -13951,6 +14688,9 @@ export type UserUpdateWithoutUserPassesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -13995,6 +14735,8 @@ export type UserUncheckedUpdateWithoutUserPassesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -14040,6 +14782,9 @@ export type UserUncheckedUpdateWithoutUserPassesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -14084,6 +14829,8 @@ export type UserCreateWithoutBankTransactionsMatchedInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -14130,6 +14877,9 @@ export type UserCreateWithoutBankTransactionsMatchedInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -14173,6 +14923,8 @@ export type UserUncheckedCreateWithoutBankTransactionsMatchedInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -14219,6 +14971,9 @@ export type UserUncheckedCreateWithoutBankTransactionsMatchedInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -14267,6 +15022,8 @@ export type UserCreateWithoutBankTransactionsImportedInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -14313,6 +15070,9 @@ export type UserCreateWithoutBankTransactionsImportedInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -14356,6 +15116,8 @@ export type UserUncheckedCreateWithoutBankTransactionsImportedInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -14402,6 +15164,9 @@ export type UserUncheckedCreateWithoutBankTransactionsImportedInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -14461,6 +15226,8 @@ export type UserUpdateWithoutBankTransactionsMatchedInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -14507,6 +15274,9 @@ export type UserUpdateWithoutBankTransactionsMatchedInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -14550,6 +15320,8 @@ export type UserUncheckedUpdateWithoutBankTransactionsMatchedInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -14596,6 +15368,9 @@ export type UserUncheckedUpdateWithoutBankTransactionsMatchedInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -14650,6 +15425,8 @@ export type UserUpdateWithoutBankTransactionsImportedInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -14696,6 +15473,9 @@ export type UserUpdateWithoutBankTransactionsImportedInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -14739,6 +15519,8 @@ export type UserUncheckedUpdateWithoutBankTransactionsImportedInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -14785,6 +15567,9 @@ export type UserUncheckedUpdateWithoutBankTransactionsImportedInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -14828,6 +15613,8 @@ export type UserCreateWithoutPaymentsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -14873,6 +15660,9 @@ export type UserCreateWithoutPaymentsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -14917,6 +15707,8 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -14962,6 +15754,9 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -15022,6 +15817,8 @@ export type UserUpdateWithoutPaymentsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -15067,6 +15864,9 @@ export type UserUpdateWithoutPaymentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -15111,6 +15911,8 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -15156,6 +15958,9 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -15200,6 +16005,8 @@ export type UserCreateWithoutPurchasesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -15245,6 +16052,9 @@ export type UserCreateWithoutPurchasesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -15289,6 +16099,8 @@ export type UserUncheckedCreateWithoutPurchasesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -15334,6 +16146,9 @@ export type UserUncheckedCreateWithoutPurchasesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -15394,6 +16209,8 @@ export type UserUpdateWithoutPurchasesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -15439,6 +16256,9 @@ export type UserUpdateWithoutPurchasesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -15483,6 +16303,8 @@ export type UserUncheckedUpdateWithoutPurchasesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -15528,6 +16350,9 @@ export type UserUncheckedUpdateWithoutPurchasesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -15572,6 +16397,8 @@ export type UserCreateWithoutTuitionRefundsAsStudentInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -15617,6 +16444,9 @@ export type UserCreateWithoutTuitionRefundsAsStudentInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -15661,6 +16491,8 @@ export type UserUncheckedCreateWithoutTuitionRefundsAsStudentInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -15706,6 +16538,9 @@ export type UserUncheckedCreateWithoutTuitionRefundsAsStudentInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -15755,6 +16590,8 @@ export type UserCreateWithoutCreatedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -15800,6 +16637,9 @@ export type UserCreateWithoutCreatedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -15844,6 +16684,8 @@ export type UserUncheckedCreateWithoutCreatedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -15889,6 +16731,9 @@ export type UserUncheckedCreateWithoutCreatedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -15938,6 +16783,8 @@ export type UserCreateWithoutApprovedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -15983,6 +16830,9 @@ export type UserCreateWithoutApprovedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -16027,6 +16877,8 @@ export type UserUncheckedCreateWithoutApprovedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -16072,6 +16924,9 @@ export type UserUncheckedCreateWithoutApprovedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -16121,6 +16976,8 @@ export type UserCreateWithoutPaidTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -16166,6 +17023,9 @@ export type UserCreateWithoutPaidTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -16210,6 +17070,8 @@ export type UserUncheckedCreateWithoutPaidTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -16255,6 +17117,9 @@ export type UserUncheckedCreateWithoutPaidTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -16304,6 +17169,8 @@ export type UserCreateWithoutCancelledTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -16349,6 +17216,9 @@ export type UserCreateWithoutCancelledTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -16393,6 +17263,8 @@ export type UserUncheckedCreateWithoutCancelledTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -16438,6 +17310,9 @@ export type UserUncheckedCreateWithoutCancelledTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -16498,6 +17373,8 @@ export type UserUpdateWithoutTuitionRefundsAsStudentInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -16543,6 +17420,9 @@ export type UserUpdateWithoutTuitionRefundsAsStudentInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -16587,6 +17467,8 @@ export type UserUncheckedUpdateWithoutTuitionRefundsAsStudentInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -16632,6 +17514,9 @@ export type UserUncheckedUpdateWithoutTuitionRefundsAsStudentInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -16687,6 +17572,8 @@ export type UserUpdateWithoutCreatedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -16732,6 +17619,9 @@ export type UserUpdateWithoutCreatedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -16776,6 +17666,8 @@ export type UserUncheckedUpdateWithoutCreatedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -16821,6 +17713,9 @@ export type UserUncheckedUpdateWithoutCreatedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -16876,6 +17771,8 @@ export type UserUpdateWithoutApprovedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -16921,6 +17818,9 @@ export type UserUpdateWithoutApprovedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -16965,6 +17865,8 @@ export type UserUncheckedUpdateWithoutApprovedTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -17010,6 +17912,9 @@ export type UserUncheckedUpdateWithoutApprovedTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -17065,6 +17970,8 @@ export type UserUpdateWithoutPaidTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -17110,6 +18017,9 @@ export type UserUpdateWithoutPaidTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -17154,6 +18064,8 @@ export type UserUncheckedUpdateWithoutPaidTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -17199,6 +18111,9 @@ export type UserUncheckedUpdateWithoutPaidTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -17254,6 +18169,8 @@ export type UserUpdateWithoutCancelledTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -17299,6 +18216,9 @@ export type UserUpdateWithoutCancelledTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -17343,6 +18263,8 @@ export type UserUncheckedUpdateWithoutCancelledTuitionRefundsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -17388,6 +18310,9 @@ export type UserUncheckedUpdateWithoutCancelledTuitionRefundsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -17432,6 +18357,8 @@ export type UserCreateWithoutNotificationsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -17478,6 +18405,9 @@ export type UserCreateWithoutNotificationsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
@@ -17521,6 +18451,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -17567,6 +18499,9 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
@@ -17626,6 +18561,8 @@ export type UserUpdateWithoutNotificationsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -17672,6 +18609,9 @@ export type UserUpdateWithoutNotificationsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
@@ -17715,6 +18655,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -17761,6 +18703,9 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -17804,6 +18749,8 @@ export type UserCreateWithoutNotificationPreferenceInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -17850,6 +18797,9 @@ export type UserCreateWithoutNotificationPreferenceInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
@@ -17893,6 +18843,8 @@ export type UserUncheckedCreateWithoutNotificationPreferenceInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -17939,6 +18891,9 @@ export type UserUncheckedCreateWithoutNotificationPreferenceInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
@@ -17998,6 +18953,8 @@ export type UserUpdateWithoutNotificationPreferenceInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -18044,6 +19001,9 @@ export type UserUpdateWithoutNotificationPreferenceInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
@@ -18087,6 +19047,8 @@ export type UserUncheckedUpdateWithoutNotificationPreferenceInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -18133,6 +19095,9 @@ export type UserUncheckedUpdateWithoutNotificationPreferenceInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -18176,6 +19141,8 @@ export type UserCreateWithoutNotificationDeliveriesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -18222,6 +19189,9 @@ export type UserCreateWithoutNotificationDeliveriesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
@@ -18265,6 +19235,8 @@ export type UserUncheckedCreateWithoutNotificationDeliveriesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -18311,6 +19283,9 @@ export type UserUncheckedCreateWithoutNotificationDeliveriesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
@@ -18370,6 +19345,8 @@ export type UserUpdateWithoutNotificationDeliveriesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -18416,6 +19393,9 @@ export type UserUpdateWithoutNotificationDeliveriesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
@@ -18459,6 +19439,8 @@ export type UserUncheckedUpdateWithoutNotificationDeliveriesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -18505,6 +19487,9 @@ export type UserUncheckedUpdateWithoutNotificationDeliveriesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -18548,6 +19533,8 @@ export type UserCreateWithoutLearningEventsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -18593,6 +19580,9 @@ export type UserCreateWithoutLearningEventsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -18637,6 +19627,8 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -18682,6 +19674,9 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -18742,6 +19737,8 @@ export type UserUpdateWithoutLearningEventsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -18787,6 +19784,9 @@ export type UserUpdateWithoutLearningEventsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -18831,6 +19831,8 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -18876,6 +19878,9 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -18920,6 +19925,8 @@ export type UserCreateWithoutCreatedStaffTasksInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -18965,6 +19972,9 @@ export type UserCreateWithoutCreatedStaffTasksInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -19009,6 +20019,8 @@ export type UserUncheckedCreateWithoutCreatedStaffTasksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -19054,6 +20066,9 @@ export type UserUncheckedCreateWithoutCreatedStaffTasksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -19114,6 +20129,8 @@ export type UserUpdateWithoutCreatedStaffTasksInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -19159,6 +20176,9 @@ export type UserUpdateWithoutCreatedStaffTasksInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -19203,6 +20223,8 @@ export type UserUncheckedUpdateWithoutCreatedStaffTasksInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -19248,6 +20270,9 @@ export type UserUncheckedUpdateWithoutCreatedStaffTasksInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -19292,6 +20317,8 @@ export type UserCreateWithoutStaffTaskAssignmentsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -19337,6 +20364,9 @@ export type UserCreateWithoutStaffTaskAssignmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -19381,6 +20411,8 @@ export type UserUncheckedCreateWithoutStaffTaskAssignmentsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -19426,6 +20458,9 @@ export type UserUncheckedCreateWithoutStaffTaskAssignmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -19486,6 +20521,8 @@ export type UserUpdateWithoutStaffTaskAssignmentsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -19531,6 +20568,9 @@ export type UserUpdateWithoutStaffTaskAssignmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -19575,6 +20615,8 @@ export type UserUncheckedUpdateWithoutStaffTaskAssignmentsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -19620,6 +20662,9 @@ export type UserUncheckedUpdateWithoutStaffTaskAssignmentsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -19664,6 +20709,8 @@ export type UserCreateWithoutTaughtSchedulesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -19709,6 +20756,9 @@ export type UserCreateWithoutTaughtSchedulesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -19753,6 +20803,8 @@ export type UserUncheckedCreateWithoutTaughtSchedulesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -19798,6 +20850,9 @@ export type UserUncheckedCreateWithoutTaughtSchedulesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -19858,6 +20913,8 @@ export type UserUpdateWithoutTaughtSchedulesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -19903,6 +20960,9 @@ export type UserUpdateWithoutTaughtSchedulesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -19947,6 +21007,8 @@ export type UserUncheckedUpdateWithoutTaughtSchedulesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -19992,6 +21054,9 @@ export type UserUncheckedUpdateWithoutTaughtSchedulesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -20036,6 +21101,8 @@ export type UserCreateWithoutTeacherWorkDaysInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -20081,6 +21148,9 @@ export type UserCreateWithoutTeacherWorkDaysInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -20125,6 +21195,8 @@ export type UserUncheckedCreateWithoutTeacherWorkDaysInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -20170,6 +21242,9 @@ export type UserUncheckedCreateWithoutTeacherWorkDaysInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -20230,6 +21305,8 @@ export type UserUpdateWithoutTeacherWorkDaysInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -20275,6 +21352,9 @@ export type UserUpdateWithoutTeacherWorkDaysInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -20319,6 +21399,8 @@ export type UserUncheckedUpdateWithoutTeacherWorkDaysInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -20364,6 +21446,9 @@ export type UserUncheckedUpdateWithoutTeacherWorkDaysInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -20408,6 +21493,8 @@ export type UserCreateWithoutTeacherWorkExceptionsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -20453,6 +21540,9 @@ export type UserCreateWithoutTeacherWorkExceptionsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -20497,6 +21587,8 @@ export type UserUncheckedCreateWithoutTeacherWorkExceptionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -20542,6 +21634,9 @@ export type UserUncheckedCreateWithoutTeacherWorkExceptionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -20602,6 +21697,8 @@ export type UserUpdateWithoutTeacherWorkExceptionsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -20647,6 +21744,9 @@ export type UserUpdateWithoutTeacherWorkExceptionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -20691,6 +21791,8 @@ export type UserUncheckedUpdateWithoutTeacherWorkExceptionsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -20736,6 +21838,9 @@ export type UserUncheckedUpdateWithoutTeacherWorkExceptionsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -20780,6 +21885,8 @@ export type UserCreateWithoutStudentGoalsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -20825,6 +21932,9 @@ export type UserCreateWithoutStudentGoalsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -20869,6 +21979,8 @@ export type UserUncheckedCreateWithoutStudentGoalsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -20914,6 +22026,9 @@ export type UserUncheckedCreateWithoutStudentGoalsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -20974,6 +22089,8 @@ export type UserUpdateWithoutStudentGoalsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -21019,6 +22136,9 @@ export type UserUpdateWithoutStudentGoalsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -21063,6 +22183,8 @@ export type UserUncheckedUpdateWithoutStudentGoalsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -21108,6 +22230,9 @@ export type UserUncheckedUpdateWithoutStudentGoalsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -21152,6 +22277,8 @@ export type UserCreateWithoutStreakFreezesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -21197,6 +22324,9 @@ export type UserCreateWithoutStreakFreezesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -21241,6 +22371,8 @@ export type UserUncheckedCreateWithoutStreakFreezesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -21286,6 +22418,9 @@ export type UserUncheckedCreateWithoutStreakFreezesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -21346,6 +22481,8 @@ export type UserUpdateWithoutStreakFreezesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -21391,6 +22528,9 @@ export type UserUpdateWithoutStreakFreezesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -21435,6 +22575,8 @@ export type UserUncheckedUpdateWithoutStreakFreezesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -21480,6 +22622,9 @@ export type UserUncheckedUpdateWithoutStreakFreezesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -21524,6 +22669,8 @@ export type UserCreateWithoutGoogleIdentityInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -21569,6 +22716,9 @@ export type UserCreateWithoutGoogleIdentityInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -21613,6 +22763,8 @@ export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -21658,6 +22810,9 @@ export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -21718,6 +22873,8 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -21763,6 +22920,9 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -21807,6 +22967,8 @@ export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -21852,6 +23014,9 @@ export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -21896,6 +23061,8 @@ export type UserCreateWithoutGoogleOAuthStatesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -21941,6 +23108,9 @@ export type UserCreateWithoutGoogleOAuthStatesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -21985,6 +23155,8 @@ export type UserUncheckedCreateWithoutGoogleOAuthStatesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -22030,6 +23202,9 @@ export type UserUncheckedCreateWithoutGoogleOAuthStatesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -22090,6 +23265,8 @@ export type UserUpdateWithoutGoogleOAuthStatesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -22135,6 +23312,9 @@ export type UserUpdateWithoutGoogleOAuthStatesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -22179,6 +23359,8 @@ export type UserUncheckedUpdateWithoutGoogleOAuthStatesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -22224,6 +23406,9 @@ export type UserUncheckedUpdateWithoutGoogleOAuthStatesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -22268,6 +23453,8 @@ export type UserCreateWithoutGoogleLoginExchangesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -22313,6 +23500,9 @@ export type UserCreateWithoutGoogleLoginExchangesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -22357,6 +23547,8 @@ export type UserUncheckedCreateWithoutGoogleLoginExchangesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -22402,6 +23594,9 @@ export type UserUncheckedCreateWithoutGoogleLoginExchangesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -22462,6 +23657,8 @@ export type UserUpdateWithoutGoogleLoginExchangesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -22507,6 +23704,9 @@ export type UserUpdateWithoutGoogleLoginExchangesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -22551,6 +23751,8 @@ export type UserUncheckedUpdateWithoutGoogleLoginExchangesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -22596,6 +23798,9 @@ export type UserUncheckedUpdateWithoutGoogleLoginExchangesInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -22639,6 +23844,8 @@ export type UserCreateWithoutFormulaReviewsInput = {
   archiveReason?: string | null
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -22685,6 +23892,9 @@ export type UserCreateWithoutFormulaReviewsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -22728,6 +23938,8 @@ export type UserUncheckedCreateWithoutFormulaReviewsInput = {
   archiveReason?: string | null
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -22774,6 +23986,9 @@ export type UserUncheckedCreateWithoutFormulaReviewsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -22833,6 +24048,8 @@ export type UserUpdateWithoutFormulaReviewsInput = {
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -22879,6 +24096,9 @@ export type UserUpdateWithoutFormulaReviewsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -22922,6 +24142,8 @@ export type UserUncheckedUpdateWithoutFormulaReviewsInput = {
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -22968,6 +24190,9 @@ export type UserUncheckedUpdateWithoutFormulaReviewsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -22984,7 +24209,7 @@ export type UserUncheckedUpdateWithoutFormulaReviewsInput = {
   testAbsences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutStudentNestedInput
 }
 
-export type UserCreateWithoutFormulaReviewDaysInput = {
+export type UserCreateWithoutProblemReviewsInput = {
   id?: string
   phone?: string | null
   email?: string | null
@@ -23010,7 +24235,9 @@ export type UserCreateWithoutFormulaReviewDaysInput = {
   archivedById?: string | null
   archiveReason?: string | null
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -23057,6 +24284,9 @@ export type UserCreateWithoutFormulaReviewDaysInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -23073,7 +24303,7 @@ export type UserCreateWithoutFormulaReviewDaysInput = {
   testAbsences?: Prisma.TestAbsenceCreateNestedManyWithoutStudentInput
 }
 
-export type UserUncheckedCreateWithoutFormulaReviewDaysInput = {
+export type UserUncheckedCreateWithoutProblemReviewsInput = {
   id?: string
   phone?: string | null
   email?: string | null
@@ -23099,7 +24329,9 @@ export type UserUncheckedCreateWithoutFormulaReviewDaysInput = {
   archivedById?: string | null
   archiveReason?: string | null
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -23146,6 +24378,793 @@ export type UserUncheckedCreateWithoutFormulaReviewDaysInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpUncheckedCreateNestedManyWithoutUserInput
+  testAccessesReviewOpened?: Prisma.TestAccessUncheckedCreateNestedManyWithoutReviewOpenedByInput
+  testItemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutStudentInput
+  testAbsences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutProblemReviewsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutProblemReviewsInput, Prisma.UserUncheckedCreateWithoutProblemReviewsInput>
+}
+
+export type UserUpsertWithoutProblemReviewsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutProblemReviewsInput, Prisma.UserUncheckedUpdateWithoutProblemReviewsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutProblemReviewsInput, Prisma.UserUncheckedCreateWithoutProblemReviewsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutProblemReviewsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutProblemReviewsInput, Prisma.UserUncheckedUpdateWithoutProblemReviewsInput>
+}
+
+export type UserUpdateWithoutProblemReviewsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  assistedClassrooms?: Prisma.ClassroomUpdateManyWithoutAssistantTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUpdateManyWithoutUserNestedInput
+  testAccessesReviewOpened?: Prisma.TestAccessUpdateManyWithoutReviewOpenedByNestedInput
+  testItemMarks?: Prisma.TestItemMarkUpdateManyWithoutStudentNestedInput
+  testAbsences?: Prisma.TestAbsenceUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutProblemReviewsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  assistedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutAssistantTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUncheckedUpdateManyWithoutUserNestedInput
+  testAccessesReviewOpened?: Prisma.TestAccessUncheckedUpdateManyWithoutReviewOpenedByNestedInput
+  testItemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testAbsences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutStudentNestedInput
+}
+
+export type UserCreateWithoutStudyWeeklyGoalInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  lastSeenAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  assistedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutAssistantTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpCreateNestedManyWithoutUserInput
+  testAccessesReviewOpened?: Prisma.TestAccessCreateNestedManyWithoutReviewOpenedByInput
+  testItemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutStudentInput
+  testAbsences?: Prisma.TestAbsenceCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutStudyWeeklyGoalInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  lastSeenAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  assistedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutAssistantTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpUncheckedCreateNestedManyWithoutUserInput
+  testAccessesReviewOpened?: Prisma.TestAccessUncheckedCreateNestedManyWithoutReviewOpenedByInput
+  testItemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutStudentInput
+  testAbsences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutStudyWeeklyGoalInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStudyWeeklyGoalInput, Prisma.UserUncheckedCreateWithoutStudyWeeklyGoalInput>
+}
+
+export type UserUpsertWithoutStudyWeeklyGoalInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStudyWeeklyGoalInput, Prisma.UserUncheckedUpdateWithoutStudyWeeklyGoalInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStudyWeeklyGoalInput, Prisma.UserUncheckedCreateWithoutStudyWeeklyGoalInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutStudyWeeklyGoalInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStudyWeeklyGoalInput, Prisma.UserUncheckedUpdateWithoutStudyWeeklyGoalInput>
+}
+
+export type UserUpdateWithoutStudyWeeklyGoalInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  assistedClassrooms?: Prisma.ClassroomUpdateManyWithoutAssistantTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUpdateManyWithoutUserNestedInput
+  testAccessesReviewOpened?: Prisma.TestAccessUpdateManyWithoutReviewOpenedByNestedInput
+  testItemMarks?: Prisma.TestItemMarkUpdateManyWithoutStudentNestedInput
+  testAbsences?: Prisma.TestAbsenceUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStudyWeeklyGoalInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  assistedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutAssistantTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUncheckedUpdateManyWithoutUserNestedInput
+  testAccessesReviewOpened?: Prisma.TestAccessUncheckedUpdateManyWithoutReviewOpenedByNestedInput
+  testItemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testAbsences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutStudentNestedInput
+}
+
+export type UserCreateWithoutFormulaReviewDaysInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  lastSeenAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  assistedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutAssistantTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpCreateNestedManyWithoutUserInput
+  testAccessesReviewOpened?: Prisma.TestAccessCreateNestedManyWithoutReviewOpenedByInput
+  testItemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutStudentInput
+  testAbsences?: Prisma.TestAbsenceCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutFormulaReviewDaysInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  lastSeenAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  assistedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutAssistantTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -23205,6 +25224,8 @@ export type UserUpdateWithoutFormulaReviewDaysInput = {
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -23251,6 +25272,9 @@ export type UserUpdateWithoutFormulaReviewDaysInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -23294,6 +25318,8 @@ export type UserUncheckedUpdateWithoutFormulaReviewDaysInput = {
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -23340,6 +25366,9 @@ export type UserUncheckedUpdateWithoutFormulaReviewDaysInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -23383,6 +25412,8 @@ export type UserCreateWithoutFormulaReviewAttemptsInput = {
   archiveReason?: string | null
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -23429,6 +25460,9 @@ export type UserCreateWithoutFormulaReviewAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -23472,6 +25506,8 @@ export type UserUncheckedCreateWithoutFormulaReviewAttemptsInput = {
   archiveReason?: string | null
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -23518,6 +25554,9 @@ export type UserUncheckedCreateWithoutFormulaReviewAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -23577,6 +25616,8 @@ export type UserUpdateWithoutFormulaReviewAttemptsInput = {
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -23623,6 +25664,9 @@ export type UserUpdateWithoutFormulaReviewAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -23666,6 +25710,8 @@ export type UserUncheckedUpdateWithoutFormulaReviewAttemptsInput = {
   archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -23712,6 +25758,9 @@ export type UserUncheckedUpdateWithoutFormulaReviewAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -23756,6 +25805,8 @@ export type UserCreateWithoutFeedbackInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
@@ -23801,6 +25852,9 @@ export type UserCreateWithoutFeedbackInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -23845,6 +25899,8 @@ export type UserUncheckedCreateWithoutFeedbackInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -23890,6 +25946,9 @@ export type UserUncheckedCreateWithoutFeedbackInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -23950,6 +26009,8 @@ export type UserUpdateWithoutFeedbackInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
@@ -23995,6 +26056,9 @@ export type UserUpdateWithoutFeedbackInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -24039,6 +26103,8 @@ export type UserUncheckedUpdateWithoutFeedbackInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -24084,6 +26150,9 @@ export type UserUncheckedUpdateWithoutFeedbackInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -24128,6 +26197,8 @@ export type UserCreateWithoutStaffCapabilitiesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
@@ -24173,6 +26244,9 @@ export type UserCreateWithoutStaffCapabilitiesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -24217,6 +26291,8 @@ export type UserUncheckedCreateWithoutStaffCapabilitiesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -24262,6 +26338,9 @@ export type UserUncheckedCreateWithoutStaffCapabilitiesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -24322,6 +26401,8 @@ export type UserUpdateWithoutStaffCapabilitiesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
@@ -24367,6 +26448,9 @@ export type UserUpdateWithoutStaffCapabilitiesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -24411,6 +26495,8 @@ export type UserUncheckedUpdateWithoutStaffCapabilitiesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -24456,6 +26542,9 @@ export type UserUncheckedUpdateWithoutStaffCapabilitiesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -24500,6 +26589,8 @@ export type UserCreateWithoutStudyReviewRunsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -24545,6 +26636,9 @@ export type UserCreateWithoutStudyReviewRunsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -24589,6 +26683,8 @@ export type UserUncheckedCreateWithoutStudyReviewRunsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -24634,6 +26730,9 @@ export type UserUncheckedCreateWithoutStudyReviewRunsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -24694,6 +26793,8 @@ export type UserUpdateWithoutStudyReviewRunsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -24739,6 +26840,9 @@ export type UserUpdateWithoutStudyReviewRunsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -24783,6 +26887,8 @@ export type UserUncheckedUpdateWithoutStudyReviewRunsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -24828,6 +26934,9 @@ export type UserUncheckedUpdateWithoutStudyReviewRunsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -24872,6 +26981,8 @@ export type UserCreateWithoutStudyReviewResponsesInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -24917,6 +27028,9 @@ export type UserCreateWithoutStudyReviewResponsesInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -24961,6 +27075,8 @@ export type UserUncheckedCreateWithoutStudyReviewResponsesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -25006,6 +27122,9 @@ export type UserUncheckedCreateWithoutStudyReviewResponsesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -25066,6 +27185,8 @@ export type UserUpdateWithoutStudyReviewResponsesInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -25111,6 +27232,9 @@ export type UserUpdateWithoutStudyReviewResponsesInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -25155,6 +27279,8 @@ export type UserUncheckedUpdateWithoutStudyReviewResponsesInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -25200,6 +27326,9 @@ export type UserUncheckedUpdateWithoutStudyReviewResponsesInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -25244,6 +27373,8 @@ export type UserCreateWithoutMockRegistrationsInput = {
   formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
@@ -25289,6 +27420,9 @@ export type UserCreateWithoutMockRegistrationsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
@@ -25333,6 +27467,8 @@ export type UserUncheckedCreateWithoutMockRegistrationsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
@@ -25378,6 +27514,9 @@ export type UserUncheckedCreateWithoutMockRegistrationsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
@@ -25438,6 +27577,8 @@ export type UserUpdateWithoutMockRegistrationsInput = {
   formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
@@ -25483,6 +27624,9 @@ export type UserUpdateWithoutMockRegistrationsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
@@ -25527,6 +27671,8 @@ export type UserUncheckedUpdateWithoutMockRegistrationsInput = {
   formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
   formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -25572,6 +27718,1185 @@ export type UserUncheckedUpdateWithoutMockRegistrationsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUncheckedUpdateManyWithoutUserNestedInput
+  testAccessesReviewOpened?: Prisma.TestAccessUncheckedUpdateManyWithoutReviewOpenedByNestedInput
+  testItemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testAbsences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutStudentNestedInput
+}
+
+export type UserCreateWithoutDeviceTokensInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  lastSeenAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  assistedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutAssistantTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpCreateNestedManyWithoutUserInput
+  testAccessesReviewOpened?: Prisma.TestAccessCreateNestedManyWithoutReviewOpenedByInput
+  testItemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutStudentInput
+  testAbsences?: Prisma.TestAbsenceCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutDeviceTokensInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  lastSeenAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  assistedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutAssistantTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpUncheckedCreateNestedManyWithoutUserInput
+  testAccessesReviewOpened?: Prisma.TestAccessUncheckedCreateNestedManyWithoutReviewOpenedByInput
+  testItemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutStudentInput
+  testAbsences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutDeviceTokensInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDeviceTokensInput, Prisma.UserUncheckedCreateWithoutDeviceTokensInput>
+}
+
+export type UserUpsertWithoutDeviceTokensInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDeviceTokensInput, Prisma.UserUncheckedUpdateWithoutDeviceTokensInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDeviceTokensInput, Prisma.UserUncheckedCreateWithoutDeviceTokensInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDeviceTokensInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDeviceTokensInput, Prisma.UserUncheckedUpdateWithoutDeviceTokensInput>
+}
+
+export type UserUpdateWithoutDeviceTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  assistedClassrooms?: Prisma.ClassroomUpdateManyWithoutAssistantTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUpdateManyWithoutUserNestedInput
+  testAccessesReviewOpened?: Prisma.TestAccessUpdateManyWithoutReviewOpenedByNestedInput
+  testItemMarks?: Prisma.TestItemMarkUpdateManyWithoutStudentNestedInput
+  testAbsences?: Prisma.TestAbsenceUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDeviceTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  assistedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutAssistantTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUncheckedUpdateManyWithoutUserNestedInput
+  testAccessesReviewOpened?: Prisma.TestAccessUncheckedUpdateManyWithoutReviewOpenedByNestedInput
+  testItemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testAbsences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutStudentNestedInput
+}
+
+export type UserCreateWithoutAppleIdentityInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  lastSeenAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  assistedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutAssistantTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpCreateNestedManyWithoutUserInput
+  testAccessesReviewOpened?: Prisma.TestAccessCreateNestedManyWithoutReviewOpenedByInput
+  testItemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutStudentInput
+  testAbsences?: Prisma.TestAbsenceCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutAppleIdentityInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  lastSeenAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  assistedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutAssistantTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpUncheckedCreateNestedManyWithoutUserInput
+  testAccessesReviewOpened?: Prisma.TestAccessUncheckedCreateNestedManyWithoutReviewOpenedByInput
+  testItemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutStudentInput
+  testAbsences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutAppleIdentityInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAppleIdentityInput, Prisma.UserUncheckedCreateWithoutAppleIdentityInput>
+}
+
+export type UserUpsertWithoutAppleIdentityInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAppleIdentityInput, Prisma.UserUncheckedUpdateWithoutAppleIdentityInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAppleIdentityInput, Prisma.UserUncheckedCreateWithoutAppleIdentityInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAppleIdentityInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAppleIdentityInput, Prisma.UserUncheckedUpdateWithoutAppleIdentityInput>
+}
+
+export type UserUpdateWithoutAppleIdentityInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  assistedClassrooms?: Prisma.ClassroomUpdateManyWithoutAssistantTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUpdateManyWithoutUserNestedInput
+  testAccessesReviewOpened?: Prisma.TestAccessUpdateManyWithoutReviewOpenedByNestedInput
+  testItemMarks?: Prisma.TestItemMarkUpdateManyWithoutStudentNestedInput
+  testAbsences?: Prisma.TestAbsenceUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAppleIdentityInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  assistedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutAssistantTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUncheckedUpdateManyWithoutUserNestedInput
+  testAccessesReviewOpened?: Prisma.TestAccessUncheckedUpdateManyWithoutReviewOpenedByNestedInput
+  testItemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testAbsences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutStudentNestedInput
+}
+
+export type UserCreateWithoutAccountDeletionRequestsInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  lastSeenAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  assistedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutAssistantTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpCreateNestedManyWithoutUserInput
+  testAccessesReviewOpened?: Prisma.TestAccessCreateNestedManyWithoutReviewOpenedByInput
+  testItemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutStudentInput
+  testAbsences?: Prisma.TestAbsenceCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutAccountDeletionRequestsInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  lastSeenAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  assistedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutAssistantTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpUncheckedCreateNestedManyWithoutUserInput
+  testAccessesReviewOpened?: Prisma.TestAccessUncheckedCreateNestedManyWithoutReviewOpenedByInput
+  testItemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutStudentInput
+  testAbsences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutAccountDeletionRequestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAccountDeletionRequestsInput, Prisma.UserUncheckedCreateWithoutAccountDeletionRequestsInput>
+}
+
+export type UserUpsertWithoutAccountDeletionRequestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAccountDeletionRequestsInput, Prisma.UserUncheckedUpdateWithoutAccountDeletionRequestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAccountDeletionRequestsInput, Prisma.UserUncheckedCreateWithoutAccountDeletionRequestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAccountDeletionRequestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAccountDeletionRequestsInput, Prisma.UserUncheckedUpdateWithoutAccountDeletionRequestsInput>
+}
+
+export type UserUpdateWithoutAccountDeletionRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  assistedClassrooms?: Prisma.ClassroomUpdateManyWithoutAssistantTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUpdateManyWithoutUserNestedInput
+  testAccessesReviewOpened?: Prisma.TestAccessUpdateManyWithoutReviewOpenedByNestedInput
+  testItemMarks?: Prisma.TestItemMarkUpdateManyWithoutStudentNestedInput
+  testAbsences?: Prisma.TestAbsenceUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAccountDeletionRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  assistedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutAssistantTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
@@ -25597,6 +28922,7 @@ export type UserCountOutputType = {
   formulaReviews: number
   formulaReviewDays: number
   formulaReviewAttempts: number
+  problemReviews: number
   staffCapabilities: number
   feedback: number
   mockRegistrations: number
@@ -25639,6 +28965,8 @@ export type UserCountOutputType = {
   passwordResetTokens: number
   googleOAuthStates: number
   googleLoginExchanges: number
+  deviceTokens: number
+  accountDeletionRequests: number
   notifications: number
   notificationDeliveries: number
   smsMessagesAsRecipient: number
@@ -25658,6 +28986,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   formulaReviews?: boolean | UserCountOutputTypeCountFormulaReviewsArgs
   formulaReviewDays?: boolean | UserCountOutputTypeCountFormulaReviewDaysArgs
   formulaReviewAttempts?: boolean | UserCountOutputTypeCountFormulaReviewAttemptsArgs
+  problemReviews?: boolean | UserCountOutputTypeCountProblemReviewsArgs
   staffCapabilities?: boolean | UserCountOutputTypeCountStaffCapabilitiesArgs
   feedback?: boolean | UserCountOutputTypeCountFeedbackArgs
   mockRegistrations?: boolean | UserCountOutputTypeCountMockRegistrationsArgs
@@ -25700,6 +29029,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
   googleOAuthStates?: boolean | UserCountOutputTypeCountGoogleOAuthStatesArgs
   googleLoginExchanges?: boolean | UserCountOutputTypeCountGoogleLoginExchangesArgs
+  deviceTokens?: boolean | UserCountOutputTypeCountDeviceTokensArgs
+  accountDeletionRequests?: boolean | UserCountOutputTypeCountAccountDeletionRequestsArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   notificationDeliveries?: boolean | UserCountOutputTypeCountNotificationDeliveriesArgs
   smsMessagesAsRecipient?: boolean | UserCountOutputTypeCountSmsMessagesAsRecipientArgs
@@ -25744,6 +29075,13 @@ export type UserCountOutputTypeCountFormulaReviewDaysArgs<ExtArgs extends runtim
  */
 export type UserCountOutputTypeCountFormulaReviewAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.FormulaReviewAttemptWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountProblemReviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProblemReviewWhereInput
 }
 
 /**
@@ -26043,6 +29381,20 @@ export type UserCountOutputTypeCountGoogleLoginExchangesArgs<ExtArgs extends run
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountDeviceTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DeviceTokenWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAccountDeletionRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AccountDeletionRequestWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.NotificationWhereInput
 }
@@ -26160,6 +29512,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   formulaReviews?: boolean | Prisma.User$formulaReviewsArgs<ExtArgs>
   formulaReviewDays?: boolean | Prisma.User$formulaReviewDaysArgs<ExtArgs>
   formulaReviewAttempts?: boolean | Prisma.User$formulaReviewAttemptsArgs<ExtArgs>
+  problemReviews?: boolean | Prisma.User$problemReviewsArgs<ExtArgs>
+  studyWeeklyGoal?: boolean | Prisma.User$studyWeeklyGoalArgs<ExtArgs>
   staffCapabilities?: boolean | Prisma.User$staffCapabilitiesArgs<ExtArgs>
   feedback?: boolean | Prisma.User$feedbackArgs<ExtArgs>
   studentProfile?: boolean | Prisma.User$studentProfileArgs<ExtArgs>
@@ -26206,6 +29560,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   googleIdentity?: boolean | Prisma.User$googleIdentityArgs<ExtArgs>
   googleOAuthStates?: boolean | Prisma.User$googleOAuthStatesArgs<ExtArgs>
   googleLoginExchanges?: boolean | Prisma.User$googleLoginExchangesArgs<ExtArgs>
+  deviceTokens?: boolean | Prisma.User$deviceTokensArgs<ExtArgs>
+  appleIdentity?: boolean | Prisma.User$appleIdentityArgs<ExtArgs>
+  accountDeletionRequests?: boolean | Prisma.User$accountDeletionRequestsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   notificationPreference?: boolean | Prisma.User$notificationPreferenceArgs<ExtArgs>
   notificationDeliveries?: boolean | Prisma.User$notificationDeliveriesArgs<ExtArgs>
@@ -26309,6 +29666,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   formulaReviews?: boolean | Prisma.User$formulaReviewsArgs<ExtArgs>
   formulaReviewDays?: boolean | Prisma.User$formulaReviewDaysArgs<ExtArgs>
   formulaReviewAttempts?: boolean | Prisma.User$formulaReviewAttemptsArgs<ExtArgs>
+  problemReviews?: boolean | Prisma.User$problemReviewsArgs<ExtArgs>
+  studyWeeklyGoal?: boolean | Prisma.User$studyWeeklyGoalArgs<ExtArgs>
   staffCapabilities?: boolean | Prisma.User$staffCapabilitiesArgs<ExtArgs>
   feedback?: boolean | Prisma.User$feedbackArgs<ExtArgs>
   studentProfile?: boolean | Prisma.User$studentProfileArgs<ExtArgs>
@@ -26355,6 +29714,9 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   googleIdentity?: boolean | Prisma.User$googleIdentityArgs<ExtArgs>
   googleOAuthStates?: boolean | Prisma.User$googleOAuthStatesArgs<ExtArgs>
   googleLoginExchanges?: boolean | Prisma.User$googleLoginExchangesArgs<ExtArgs>
+  deviceTokens?: boolean | Prisma.User$deviceTokensArgs<ExtArgs>
+  appleIdentity?: boolean | Prisma.User$appleIdentityArgs<ExtArgs>
+  accountDeletionRequests?: boolean | Prisma.User$accountDeletionRequestsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   notificationPreference?: boolean | Prisma.User$notificationPreferenceArgs<ExtArgs>
   notificationDeliveries?: boolean | Prisma.User$notificationDeliveriesArgs<ExtArgs>
@@ -26380,6 +29742,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     formulaReviews: Prisma.$FormulaReviewPayload<ExtArgs>[]
     formulaReviewDays: Prisma.$FormulaReviewDayPayload<ExtArgs>[]
     formulaReviewAttempts: Prisma.$FormulaReviewAttemptPayload<ExtArgs>[]
+    problemReviews: Prisma.$ProblemReviewPayload<ExtArgs>[]
+    studyWeeklyGoal: Prisma.$StudyWeeklyGoalPayload<ExtArgs> | null
     staffCapabilities: Prisma.$StaffCapabilityGrantPayload<ExtArgs>[]
     feedback: Prisma.$FeedbackPayload<ExtArgs>[]
     studentProfile: Prisma.$StudentProfilePayload<ExtArgs> | null
@@ -26426,6 +29790,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     googleIdentity: Prisma.$GoogleIdentityPayload<ExtArgs> | null
     googleOAuthStates: Prisma.$GoogleOAuthStatePayload<ExtArgs>[]
     googleLoginExchanges: Prisma.$GoogleLoginExchangePayload<ExtArgs>[]
+    deviceTokens: Prisma.$DeviceTokenPayload<ExtArgs>[]
+    appleIdentity: Prisma.$AppleIdentityPayload<ExtArgs> | null
+    accountDeletionRequests: Prisma.$AccountDeletionRequestPayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     notificationPreference: Prisma.$NotificationPreferencePayload<ExtArgs> | null
     notificationDeliveries: Prisma.$NotificationDeliveryPayload<ExtArgs>[]
@@ -26863,6 +30230,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   formulaReviews<T extends Prisma.User$formulaReviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$formulaReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FormulaReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   formulaReviewDays<T extends Prisma.User$formulaReviewDaysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$formulaReviewDaysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FormulaReviewDayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   formulaReviewAttempts<T extends Prisma.User$formulaReviewAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$formulaReviewAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FormulaReviewAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  problemReviews<T extends Prisma.User$problemReviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$problemReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProblemReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  studyWeeklyGoal<T extends Prisma.User$studyWeeklyGoalArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studyWeeklyGoalArgs<ExtArgs>>): Prisma.Prisma__StudyWeeklyGoalClient<runtime.Types.Result.GetResult<Prisma.$StudyWeeklyGoalPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   staffCapabilities<T extends Prisma.User$staffCapabilitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$staffCapabilitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffCapabilityGrantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   feedback<T extends Prisma.User$feedbackArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$feedbackArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FeedbackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   studentProfile<T extends Prisma.User$studentProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studentProfileArgs<ExtArgs>>): Prisma.Prisma__StudentProfileClient<runtime.Types.Result.GetResult<Prisma.$StudentProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -26909,6 +30278,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   googleIdentity<T extends Prisma.User$googleIdentityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$googleIdentityArgs<ExtArgs>>): Prisma.Prisma__GoogleIdentityClient<runtime.Types.Result.GetResult<Prisma.$GoogleIdentityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   googleOAuthStates<T extends Prisma.User$googleOAuthStatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$googleOAuthStatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GoogleOAuthStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   googleLoginExchanges<T extends Prisma.User$googleLoginExchangesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$googleLoginExchangesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GoogleLoginExchangePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  deviceTokens<T extends Prisma.User$deviceTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$deviceTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  appleIdentity<T extends Prisma.User$appleIdentityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$appleIdentityArgs<ExtArgs>>): Prisma.Prisma__AppleIdentityClient<runtime.Types.Result.GetResult<Prisma.$AppleIdentityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  accountDeletionRequests<T extends Prisma.User$accountDeletionRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountDeletionRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountDeletionRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notificationPreference<T extends Prisma.User$notificationPreferenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationPreferenceArgs<ExtArgs>>): Prisma.Prisma__NotificationPreferenceClient<runtime.Types.Result.GetResult<Prisma.$NotificationPreferencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   notificationDeliveries<T extends Prisma.User$notificationDeliveriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationDeliveriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationDeliveryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -27438,6 +30810,49 @@ export type User$formulaReviewAttemptsArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   distinct?: Prisma.FormulaReviewAttemptScalarFieldEnum | Prisma.FormulaReviewAttemptScalarFieldEnum[]
+}
+
+/**
+ * User.problemReviews
+ */
+export type User$problemReviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProblemReview
+   */
+  select?: Prisma.ProblemReviewSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProblemReview
+   */
+  omit?: Prisma.ProblemReviewOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProblemReviewInclude<ExtArgs> | null
+  where?: Prisma.ProblemReviewWhereInput
+  orderBy?: Prisma.ProblemReviewOrderByWithRelationInput | Prisma.ProblemReviewOrderByWithRelationInput[]
+  cursor?: Prisma.ProblemReviewWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProblemReviewScalarFieldEnum | Prisma.ProblemReviewScalarFieldEnum[]
+}
+
+/**
+ * User.studyWeeklyGoal
+ */
+export type User$studyWeeklyGoalArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StudyWeeklyGoal
+   */
+  select?: Prisma.StudyWeeklyGoalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StudyWeeklyGoal
+   */
+  omit?: Prisma.StudyWeeklyGoalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StudyWeeklyGoalInclude<ExtArgs> | null
+  where?: Prisma.StudyWeeklyGoalWhereInput
 }
 
 /**
@@ -28522,6 +31937,73 @@ export type User$googleLoginExchangesArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.GoogleLoginExchangeScalarFieldEnum | Prisma.GoogleLoginExchangeScalarFieldEnum[]
+}
+
+/**
+ * User.deviceTokens
+ */
+export type User$deviceTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DeviceToken
+   */
+  select?: Prisma.DeviceTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DeviceToken
+   */
+  omit?: Prisma.DeviceTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceTokenInclude<ExtArgs> | null
+  where?: Prisma.DeviceTokenWhereInput
+  orderBy?: Prisma.DeviceTokenOrderByWithRelationInput | Prisma.DeviceTokenOrderByWithRelationInput[]
+  cursor?: Prisma.DeviceTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DeviceTokenScalarFieldEnum | Prisma.DeviceTokenScalarFieldEnum[]
+}
+
+/**
+ * User.appleIdentity
+ */
+export type User$appleIdentityArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AppleIdentity
+   */
+  select?: Prisma.AppleIdentitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AppleIdentity
+   */
+  omit?: Prisma.AppleIdentityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AppleIdentityInclude<ExtArgs> | null
+  where?: Prisma.AppleIdentityWhereInput
+}
+
+/**
+ * User.accountDeletionRequests
+ */
+export type User$accountDeletionRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AccountDeletionRequest
+   */
+  select?: Prisma.AccountDeletionRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AccountDeletionRequest
+   */
+  omit?: Prisma.AccountDeletionRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AccountDeletionRequestInclude<ExtArgs> | null
+  where?: Prisma.AccountDeletionRequestWhereInput
+  orderBy?: Prisma.AccountDeletionRequestOrderByWithRelationInput | Prisma.AccountDeletionRequestOrderByWithRelationInput[]
+  cursor?: Prisma.AccountDeletionRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AccountDeletionRequestScalarFieldEnum | Prisma.AccountDeletionRequestScalarFieldEnum[]
 }
 
 /**

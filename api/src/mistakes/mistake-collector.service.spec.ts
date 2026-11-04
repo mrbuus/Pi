@@ -30,7 +30,8 @@ function makeHarness() {
     },
     test: { findUnique: jest.fn() },
   };
-  return { collector: new MistakeCollector(prisma as any), prisma, tx, get row() { return row; }, set row(value: Record<string, any> | null) { row = value; } };
+  const reviews = { recordWrong: jest.fn(async () => true) };
+  return { collector: new MistakeCollector(prisma as any, reviews as any), reviews, prisma, tx, get row() { return row; }, set row(value: Record<string, any> | null) { row = value; } };
 }
 
 const base = {
@@ -128,5 +129,25 @@ describe('MistakeCollector', () => {
         source: 'PRACTICE', sourceRefId: 'practice-attempt', sourceOccurredAt: createdAt,
       }),
     }));
+  });
+
+  it('schedules spaced review of the wrong problem after the mistake commits (idempotency is the scheduler\'s)', async () => {
+    const h = makeHarness();
+    await expect(h.collector.collect({ ...base, sourceRefId: 'attempt-1' })).resolves.toBe(true);
+    expect(h.reviews.recordWrong).toHaveBeenCalledWith({
+      studentId: 'learner-1',
+      problemId: 'problem-1',
+      source: 'TEST',
+      occurredAt: base.sourceOccurredAt,
+      sourceTestId: null,
+      sourceRefId: 'attempt-1',
+    });
+  });
+
+  it('a failed mistake transaction does not schedule a review', async () => {
+    const h = makeHarness();
+    h.prisma.$transaction.mockRejectedValueOnce(new Error('db down'));
+    await expect(h.collector.collect({ ...base, sourceRefId: 'attempt-1' })).resolves.toBe(false);
+    expect(h.reviews.recordWrong).not.toHaveBeenCalled();
   });
 });

@@ -10,6 +10,9 @@ export interface ResultRow {
   student: { id: string; firstName: string; lastName: string };
   // Шалгалтын горимоос (таб/апп) гарсан тоо — анти-читийн дохио (Шийдвэр Е)
   leaveCount?: number | null;
+  // Гар утасны апп: дэлгэцийн зураг / бичлэг эхлүүлсэн тоо (null = session байхгүй)
+  screenshotCount?: number | null;
+  recordingCount?: number | null;
 }
 
 export interface RosterStudent {

@@ -74,8 +74,8 @@ export class TasksController {
 
   @Delete(':id')
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
-  remove(@Param('id') id: string) {
-    return this.tasks.remove(id);
+  remove(@Param('id') id: string, @Req() req: AuthedRequest) {
+    return this.tasks.remove(id, req.user.userId);
   }
 
   @Post(':id/assignees')

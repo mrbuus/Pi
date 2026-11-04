@@ -5,6 +5,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { FinanceController } from '../finance/finance.controller';
 import { TuitionController } from '../tuition/tuition.controller';
 import { SheetSyncController } from '../sheet-sync/sheet-sync.controller';
+import { ScanController } from '../scan/scan.controller';
 import { UsageController } from '../usage/usage.controller';
 
 /**
@@ -163,5 +164,114 @@ describe('Night-1 route guards across six roles', () => {
       console.info(
         `Night-1 pending sibling contracts: ${missing.length}; run NIGHT1_COMPLETE=1 after integrating listed PR dependencies.`,
       );
+  });
+});
+
+describe('Номын QR (scan) — нэвтэрсэн хэрэглэгч, бодолтыг scan-gate шийднэ', () => {
+  it('JwtAuthGuard + RolesGuard, бүх нэвтэрсэн role', () => {
+    expect(guardsOf(ScanController)).toEqual(expect.arrayContaining([JwtAuthGuard, RolesGuard]));
+    expect(rolesOf(ScanController.prototype.lookup)?.sort()).toEqual(
+      ['ADMIN', 'BUYER', 'PARENT', 'STUDENT', 'TEACHER', 'TEACHER_PLUS'],
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Piemath гар утасны апп (2026-11-02): push токен, native нэвтрэлт, бүртгэл
+// устгах ХҮСЭЛТ. Маршрут бүр guard + role-той; нэвтрэх маршрут нээлттэй.
+// ---------------------------------------------------------------------------
+import { DevicesController } from '../devices/devices.controller';
+import { NativeAuthController } from './native/native-auth.controller';
+import {
+  AccountDeletionController,
+  AdminDeletionRequestsController,
+} from '../account-deletion/account-deletion.controller';
+// @nestjs/throttler-ийн THROTTLER_LIMIT метадатын түлхүүр
+const THROTTLER_LIMIT = 'THROTTLER:LIMIT';
+
+const ALL_SIX = ['ADMIN', 'BUYER', 'PARENT', 'STUDENT', 'TEACHER', 'TEACHER_PLUS'];
+
+function routeOf(controller: object, handler: object) {
+  const prefix = String(Reflect.getMetadata(PATH_METADATA, controller) ?? '');
+  const path = String(Reflect.getMetadata(PATH_METADATA, handler) ?? '');
+  const method = RequestMethod[Reflect.getMetadata(METHOD_METADATA, handler)];
+  const parts = [prefix, path].map((p) => p.replace(/^\/+|\/+$/g, '')).filter(Boolean);
+  return `${method} /api/${parts.join('/')}`;
+}
+
+function expectRoleMatrix(controller: object, handler: object, allowed: string[]) {
+  for (const role of [undefined, ...Object.values(Role)]) {
+    const context = {
+      getHandler: () => handler,
+      getClass: () => controller,
+      switchToHttp: () => ({
+        getRequest: () => ({ user: role ? { userId: 'synthetic-user', role } : undefined }),
+      }),
+    } as unknown as ExecutionContext;
+    expect(roleGuard.canActivate(context)).toBe(!!role && allowed.includes(role));
+  }
+}
+
+describe('Гар утасны апп — шинэ маршрутын эрх', () => {
+  const guarded: [string, object, object, string[]][] = [
+    ['POST /api/devices', DevicesController, DevicesController.prototype.register, ALL_SIX],
+    ['DELETE /api/devices/:token', DevicesController, DevicesController.prototype.unregister, ALL_SIX],
+    ['POST /api/auth/google/native/link', NativeAuthController, NativeAuthController.prototype.googleLink, ALL_SIX],
+    ['POST /api/auth/apple/link', NativeAuthController, NativeAuthController.prototype.appleLink, ALL_SIX],
+    ['POST /api/me/deletion-request', AccountDeletionController, AccountDeletionController.prototype.create, ALL_SIX],
+    ['GET /api/me/deletion-request', AccountDeletionController, AccountDeletionController.prototype.mine, ALL_SIX],
+    ['GET /api/admin/deletion-requests', AdminDeletionRequestsController, AdminDeletionRequestsController.prototype.list, ['ADMIN']],
+    ['PATCH /api/admin/deletion-requests/:id', AdminDeletionRequestsController, AdminDeletionRequestsController.prototype.review, ['ADMIN']],
+  ];
+
+  it.each(guarded)('%s — JwtAuthGuard + RolesGuard + role матриц', (route, controller, handler, roles) => {
+    expect(routeOf(controller, handler)).toBe(route);
+    const guards = [...guardsOf(controller), ...guardsOf(handler)];
+    expect(guards).toEqual(expect.arrayContaining([JwtAuthGuard, RolesGuard]));
+    expect([...(rolesOf(handler) ?? rolesOf(controller) ?? [])].sort()).toEqual([...roles].sort());
+    expectRoleMatrix(controller, handler, roles);
+  });
+
+  it.each([
+    ['POST /api/auth/google/native', NativeAuthController.prototype.google],
+    ['POST /api/auth/apple', NativeAuthController.prototype.apple],
+  ])('%s — нэвтрээгүй хүнд нээлттэй, login-той ижил чанга хязгаар', (route, handler) => {
+    expect(routeOf(NativeAuthController, handler)).toBe(route);
+    expect([...guardsOf(NativeAuthController), ...guardsOf(handler)]).not.toContain(JwtAuthGuard);
+    expect(Reflect.getMetadata(THROTTLER_LIMIT + 'default', handler)).toBe(10);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Бие даан суралцах (2026-11-04): алдсан бодлогын хугацаатай давталт, 7 хоногийн
+// зорилго, сэдвээр дасгал. Сурагч зөвхөн ӨӨРИЙНХӨӨ — userId токеноос, параметрээр
+// өөр сурагчийн ID авдаггүй. Бусад role 403.
+// ---------------------------------------------------------------------------
+import { ProblemReviewController } from '../mistakes/problem-review.controller';
+import { WeeklyGoalController } from '../activity/weekly-goal.controller';
+import { RecommendController } from '../recommend/recommend.controller';
+import { ActivityController } from '../activity/activity.controller';
+
+describe('Бие даан суралцах — шинэ маршрутын эрх (сурагч өөрөө)', () => {
+  const routes: [string, object, object, string[]][] = [
+    ['GET /api/review/problems/due', ProblemReviewController, ProblemReviewController.prototype.due, ['STUDENT']],
+    ['POST /api/review/problems/:id/answer', ProblemReviewController, ProblemReviewController.prototype.answer, ['STUDENT']],
+    ['GET /api/study/weekly-goal', WeeklyGoalController, WeeklyGoalController.prototype.get, ['STUDENT']],
+    ['PUT /api/study/weekly-goal', WeeklyGoalController, WeeklyGoalController.prototype.set, ['STUDENT']],
+    ['GET /api/recommend/chapter-match', RecommendController, RecommendController.prototype.chapterMatch, ['STUDENT', 'BUYER']],
+    ['GET /api/recommend/next', RecommendController, RecommendController.prototype.next, ['STUDENT', 'BUYER']],
+    ['GET /api/activity/streak', ActivityController, ActivityController.prototype.streak, ['STUDENT']],
+  ];
+
+  it.each(routes)('%s — JwtAuthGuard + RolesGuard + role матриц', (route, controller, handler, roles) => {
+    expect(routeOf(controller, handler)).toBe(route);
+    const guards = [...guardsOf(controller), ...guardsOf(handler)];
+    expect(guards).toEqual(expect.arrayContaining([JwtAuthGuard, RolesGuard]));
+    expect([...(rolesOf(handler) ?? rolesOf(controller) ?? [])].sort()).toEqual([...roles].sort());
+    expectRoleMatrix(controller, handler, roles);
+  });
+
+  it('маршрутын замд сурагчийн ID байхгүй (өөр сурагчийн өгөгдөл уншиж болохгүй)', () => {
+    for (const [route] of routes) expect(route).not.toMatch(/student|userId|:studentId/i);
   });
 });

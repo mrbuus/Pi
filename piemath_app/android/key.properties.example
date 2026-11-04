@@ -1,0 +1,6 @@
+# Release гарын үсгийн жишээ. Хуулж `key.properties` болго (gitignore-д) — ХЭЗЭЭ Ч commit хийхгүй.
+# Keystore файлыг репоноос гадна хадгал (жишээ: ~/keys/piemath-upload.jks).
+storePassword=
+keyPassword=
+keyAlias=upload
+storeFile=/абсолют/зам/piemath-upload.jks

@@ -142,6 +142,8 @@ export const ModelName = {
   GoogleLoginExchange: 'GoogleLoginExchange',
   StoredFile: 'StoredFile',
   FormulaReview: 'FormulaReview',
+  ProblemReview: 'ProblemReview',
+  StudyWeeklyGoal: 'StudyWeeklyGoal',
   FormulaReviewDay: 'FormulaReviewDay',
   FormulaReviewAttempt: 'FormulaReviewAttempt',
   Feedback: 'Feedback',
@@ -180,6 +182,9 @@ export const ModelName = {
   HomeworkAttempt: 'HomeworkAttempt',
   HomeworkCheck: 'HomeworkCheck',
   HomeworkPhoto: 'HomeworkPhoto',
+  DeviceToken: 'DeviceToken',
+  AppleIdentity: 'AppleIdentity',
+  AccountDeletionRequest: 'AccountDeletionRequest',
   UiEvent: 'UiEvent'
 } as const
 
@@ -590,6 +595,7 @@ export const ProblemScalarFieldEnum = {
   attemptCount: 'attemptCount',
   correctRate: 'correctRate',
   youtubeUrl: 'youtubeUrl',
+  scanCode: 'scanCode',
   scoringGroups: 'scoringGroups',
   version: 'version',
   updatedAt: 'updatedAt',
@@ -939,7 +945,9 @@ export const StudentNoteScalarFieldEnum = {
   updatedAt: 'updatedAt',
   resolvedAt: 'resolvedAt',
   resolvedById: 'resolvedById',
-  promisedOn: 'promisedOn'
+  promisedOn: 'promisedOn',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type StudentNoteScalarFieldEnum = (typeof StudentNoteScalarFieldEnum)[keyof typeof StudentNoteScalarFieldEnum]
@@ -1312,7 +1320,9 @@ export const StaffTaskScalarFieldEnum = {
   estimateHours: 'estimateHours',
   orderIndex: 'orderIndex',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type StaffTaskScalarFieldEnum = (typeof StaffTaskScalarFieldEnum)[keyof typeof StaffTaskScalarFieldEnum]
@@ -1338,7 +1348,9 @@ export const ClassScheduleScalarFieldEnum = {
   subject: 'subject',
   effectiveFrom: 'effectiveFrom',
   effectiveTo: 'effectiveTo',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type ClassScheduleScalarFieldEnum = (typeof ClassScheduleScalarFieldEnum)[keyof typeof ClassScheduleScalarFieldEnum]
@@ -1453,7 +1465,9 @@ export const AcademicCalendarDayScalarFieldEnum = {
   title: 'title',
   note: 'note',
   createdById: 'createdById',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type AcademicCalendarDayScalarFieldEnum = (typeof AcademicCalendarDayScalarFieldEnum)[keyof typeof AcademicCalendarDayScalarFieldEnum]
@@ -1476,7 +1490,8 @@ export const StudentGoalScalarFieldEnum = {
   status: 'status',
   subject: 'subject',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type StudentGoalScalarFieldEnum = (typeof StudentGoalScalarFieldEnum)[keyof typeof StudentGoalScalarFieldEnum]
@@ -1559,6 +1574,39 @@ export const FormulaReviewScalarFieldEnum = {
 } as const
 
 export type FormulaReviewScalarFieldEnum = (typeof FormulaReviewScalarFieldEnum)[keyof typeof FormulaReviewScalarFieldEnum]
+
+
+export const ProblemReviewScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  problemId: 'problemId',
+  dueAt: 'dueAt',
+  intervalDays: 'intervalDays',
+  ease: 'ease',
+  reps: 'reps',
+  lapses: 'lapses',
+  lastResult: 'lastResult',
+  source: 'source',
+  sourceTestId: 'sourceTestId',
+  sourceRefId: 'sourceRefId',
+  lastEventAt: 'lastEventAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProblemReviewScalarFieldEnum = (typeof ProblemReviewScalarFieldEnum)[keyof typeof ProblemReviewScalarFieldEnum]
+
+
+export const StudyWeeklyGoalScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  daysPerWeek: 'daysPerWeek',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StudyWeeklyGoalScalarFieldEnum = (typeof StudyWeeklyGoalScalarFieldEnum)[keyof typeof StudyWeeklyGoalScalarFieldEnum]
 
 
 export const FormulaReviewDayScalarFieldEnum = {
@@ -2171,6 +2219,48 @@ export const HomeworkPhotoScalarFieldEnum = {
 } as const
 
 export type HomeworkPhotoScalarFieldEnum = (typeof HomeworkPhotoScalarFieldEnum)[keyof typeof HomeworkPhotoScalarFieldEnum]
+
+
+export const DeviceTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token',
+  platform: 'platform',
+  appVersion: 'appVersion',
+  lastSeenAt: 'lastSeenAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DeviceTokenScalarFieldEnum = (typeof DeviceTokenScalarFieldEnum)[keyof typeof DeviceTokenScalarFieldEnum]
+
+
+export const AppleIdentityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  appleSubject: 'appleSubject',
+  email: 'email',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppleIdentityScalarFieldEnum = (typeof AppleIdentityScalarFieldEnum)[keyof typeof AppleIdentityScalarFieldEnum]
+
+
+export const AccountDeletionRequestScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  reason: 'reason',
+  status: 'status',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  reviewNote: 'reviewNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AccountDeletionRequestScalarFieldEnum = (typeof AccountDeletionRequestScalarFieldEnum)[keyof typeof AccountDeletionRequestScalarFieldEnum]
 
 
 export const UiEventScalarFieldEnum = {

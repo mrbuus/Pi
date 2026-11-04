@@ -4,11 +4,14 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { addDaysKey, ubDateKey } from '../attendance/board-logic';
 import { dateKey, parseDateOnly, todayUB } from '../common/date';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { ProblemReviewService } from '../mistakes/problem-review.service';
+import { reservedAnywhere } from './answer-gates';
 import {
   currentClass,
   loadLessonDays,
@@ -132,7 +135,10 @@ function asRecord(v: unknown): Record<string, unknown> {
  */
 @Injectable()
 export class HomeworkPracticeService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Optional() private readonly reviews?: ProblemReviewService,
+  ) {}
 
   private problemsCache = new Map<
     string,
@@ -310,7 +316,7 @@ export class HomeworkPracticeService {
     const rows = await this.prisma.lessonTopic.findMany({
       where: {
         testIds: { hasSome: siblingIds },
-        schedule: { classroomId: { in: classroomIds } },
+        schedule: { deletedAt: null, classroomId: { in: classroomIds } },
       },
       select: {
         date: true,
@@ -403,7 +409,7 @@ export class HomeworkPracticeService {
       this.prisma.lessonTopic.findFirst({
         where: {
           testIds: { has: attempt.testId },
-          schedule: { classroomId: attempt.classroomId },
+          schedule: { deletedAt: null, classroomId: attempt.classroomId },
         },
         select: { id: true },
       }),
@@ -870,6 +876,7 @@ export class HomeworkPracticeService {
         where: {
           testIds: { hasSome: ids },
           date: { gte: parseDateOnly(addDaysKey(today, -14)) },
+          schedule: { deletedAt: null },
         },
         select: {
           date: true,
@@ -1171,32 +1178,9 @@ export class HomeworkPracticeService {
     };
   }
 
-  /**
-   * Тест ангийн хуваарьт (өнөөдөр/ирээдүйд) ямар ч ангид бодогдох, эсвэл ирээдүйд оноогдох уу —
-   * тэгвэл зөв хариуг ХЭЗЭЭ Ч нээхгүй (хариу бусад ангид дамжих эрсдэл; аюулгүй байдлын шалгалт).
-   */
-  private async reservedAnywhere(testId: string): Promise<boolean> {
-    const today = todayUB();
-    const [session, topic, access] = await Promise.all([
-      this.prisma.classTestSession.findFirst({
-        where: { testId, date: { gte: today } },
-        select: { id: true },
-      }),
-      this.prisma.lessonTopic.findFirst({
-        // Анхны огноо 14 хоногийн өмнөөс — хичээл ирээдүй рүү ЗӨӨГДСӨН (ScheduleException.newDate)
-        // байж болно; зөөлтийг тусад нь тайлахгүй, хамгаалах талаар барина
-        where: {
-          testIds: { has: testId },
-          date: { gte: new Date(today.getTime() - 14 * 86_400_000) },
-        },
-        select: { id: true },
-      }),
-      this.prisma.testAccess.findFirst({
-        where: { testId, assignedAt: { gt: new Date() } },
-        select: { testId: true },
-      }),
-    ]);
-    return !!(session || topic || access);
+  /** Ангид бодогдох тест бол хариу нээхгүй — `answer-gates.ts` (хугацаатай давталт ч ашиглана). */
+  private reservedAnywhere(testId: string): Promise<boolean> {
+    return reservedAnywhere(this.prisma, testId);
   }
 
   /**
@@ -1410,6 +1394,19 @@ export class HomeworkPracticeService {
       if (fresh?.status === 'SUBMITTED') return this.submittedView(fresh);
       throw new ConflictException('Гэрийн даалгаврыг илгээж чадсангүй');
     }
+    // Хугацаатай давталт: буруу бодлогууд маргааш давтагдана (commit-ийн дараа, дүнг өөрчлөхгүй)
+    this.reviews?.recordWrongInBackground(
+      Object.entries(graded.results)
+        .filter(([, result]) => result === 'WRONG')
+        .map(([problemId]) => ({
+          studentId,
+          problemId,
+          source: 'HOMEWORK' as const,
+          occurredAt: submittedAt,
+          sourceTestId: attempt.testId,
+          sourceRefId: attempt.id,
+        })),
+    );
     return {
       score: { correct: graded.correct, total: graded.total },
       results: graded.results,

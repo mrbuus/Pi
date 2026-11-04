@@ -136,7 +136,7 @@ export class PaymentsLedgerService {
         },
       }),
       this.prisma.studentNote.findMany({
-        where: { studentId: { in: ids }, type: StudentNoteType.PAYMENT },
+        where: { studentId: { in: ids }, type: StudentNoteType.PAYMENT, deletedAt: null },
         orderBy: { createdAt: 'desc' },
         select: {
           studentId: true,
@@ -275,6 +275,12 @@ export class PaymentsLedgerService {
       covered: number;
       /** Энэ сарын хугацаа нь болсон ч төлөгдөөгүй хэсэг */
       late: number;
+      /** Энэ сард төлөх ёстой сурагчдын тоо (Багш+-ийн дүнгүй зурваст) */
+      activeStudents: number;
+      /** Энэ сарын блок бүрэн төлөгдсөн сурагч */
+      paidStudents: number;
+      /** Энэ сарын хугацаа болсон ч дутуу сурагч */
+      lateStudents: number;
       owedStudents: number;
       owedNow: number;
       brokenPromises: number;
@@ -287,6 +293,9 @@ export class PaymentsLedgerService {
       expected: 0,
       covered: 0,
       late: 0,
+      activeStudents: 0,
+      paidStudents: 0,
+      lateStudents: 0,
       owedStudents: 0,
       owedNow: 0,
       brokenPromises: 0,
@@ -309,6 +318,9 @@ export class PaymentsLedgerService {
           s.expected += b.due;
           s.covered += b.paid;
           if (b.dueOn && b.dueOn <= today) s.late += b.due - b.paid;
+          s.activeStudents++;
+          if (b.state === 'PAID') s.paidStudents++;
+          else if (b.dueOn && b.dueOn <= today && b.paid < b.due) s.lateStudents++;
         }
         if (r.owedNow > 0) {
           s.owedStudents++;
@@ -454,7 +466,7 @@ export class PaymentsLedgerService {
         },
       }),
       this.prisma.studentNote.findMany({
-        where: { studentId: id, type: StudentNoteType.PAYMENT },
+        where: { studentId: id, type: StudentNoteType.PAYMENT, deletedAt: null },
         orderBy: { createdAt: 'desc' },
         select: {
           id: true,

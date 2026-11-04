@@ -406,7 +406,7 @@ export class ScheduleController {
   @Delete('schedule/:id')
   async remove(@Param('id') id: string, @Req() req: AuthedRequest) {
     await this.access.manageSchedule(req.user, id);
-    return this.schedule.remove(id);
+    return this.schedule.remove(id, req.user.userId, req.user.role);
   }
 
   // ---------- /calendar ----------
@@ -459,6 +459,10 @@ export class ScheduleController {
   async removeCalendarDay(@Param('id') id: string, @Req() req: AuthedRequest) {
     const existing = await this.schedule.findCalendarDay(id);
     await this.manageCalendar(req.user, existing.classroomIds);
-    return this.schedule.removeCalendarDay(id);
+    return this.schedule.removeCalendarDay(
+      id,
+      req.user.userId,
+      req.user.role,
+    );
   }
 }

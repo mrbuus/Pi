@@ -1,0 +1,10 @@
+# Үүсгэх: dart run flutter_launcher_icons  (эх зураг: assets/branding/, make_branding.py)
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/branding/icon-ios.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#273F74"
+  adaptive_icon_foreground: "assets/branding/icon-foreground.png"
+  adaptive_icon_monochrome: "assets/branding/icon-monochrome.png"
+  min_sdk_android: 24

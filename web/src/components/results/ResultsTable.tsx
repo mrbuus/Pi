@@ -7,7 +7,7 @@
  * ========================================================================== */
 
 import { useMemo, useState } from "react";
-import { Download, Check, ChevronDown, ChevronUp, ChevronsUpDown, TriangleAlert, X } from "lucide-react";
+import { Download, Camera, Check, ChevronDown, ChevronUp, ChevronsUpDown, Info, LogOut, TriangleAlert, Video, X } from "lucide-react";
 import type { ResultRow } from "./types";
 import { scorePercent, sourceLabel } from "./types";
 
@@ -17,6 +17,33 @@ type SortDir = "asc" | "desc";
 function csvEscape(v: string | number): string {
   const s = String(v);
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+const INTEGRITY_KINDS = [
+  { key: "leaveCount", label: "Гарсан", Icon: LogOut, hint: "Шалгалтын горимоос (таб/апп) гарсан тоо" },
+  { key: "screenshotCount", label: "Скриншот", Icon: Camera, hint: "Дэлгэцийн зураг авсан тоо (апп)" },
+  { key: "recordingCount", label: "Бичлэг", Icon: Video, hint: "Дэлгэц бичлэг эхлүүлсэн тоо (апп)" },
+] as const;
+
+// Тоо > 0 үед л харагдана; бүртгэгдсэн үйл явдал — автомат дүгнэлт биш. Анхааруулах өнгө зөвхөн дүрсэнд
+function IntegrityBadges({ row }: { row: ResultRow }) {
+  const items = INTEGRITY_KINDS.filter((k) => (row[k.key] ?? 0) > 0);
+  if (items.length === 0) return null;
+  return (
+    <span className="inline-flex flex-wrap items-center gap-3">
+      {items.map(({ key, label, Icon, hint }) => (
+        <span
+          key={key}
+          title={`${hint}. Бүртгэгдсэн үйл явдал — автомат дүгнэлт биш`}
+          aria-label={`${label} ${row[key]}`}
+          className="inline-flex cursor-help items-center gap-1 text-sm text-ink-dim"
+        >
+          <Icon className="h-4 w-4 text-warning" aria-hidden />
+          {label} {row[key]}
+        </span>
+      ))}
+    </span>
+  );
 }
 
 export default function ResultsTable({
@@ -77,7 +104,7 @@ export default function ResultsTable({
   }, [rows]);
 
   function exportCsv() {
-    const header = ["№", "Нэр", "Оноо", "Нийт", "Хувь", "Эх сурвалж", "Горимоос гарсан тоо"];
+    const header = ["№", "Нэр", "Оноо", "Нийт", "Хувь", "Эх сурвалж", "Горимоос гарсан тоо", "Скриншот", "Бичлэг"];
     const lines = [header.map(csvEscape).join(",")];
     sorted.forEach(({ r, pct }, i) => {
       lines.push(
@@ -89,6 +116,8 @@ export default function ResultsTable({
           pct ?? "",
           sourceLabel(r.source),
           r.leaveCount ?? 0,
+          r.screenshotCount ?? 0,
+          r.recordingCount ?? 0,
         ]
           .map(csvEscape)
           .join(","),
@@ -208,18 +237,7 @@ export default function ResultsTable({
                   {r.student.firstName} {r.student.lastName}
                 </span>
                 <span className="text-sm text-ink-dim">{sourceLabel(r.source)}</span>
-                {(r.leaveCount ?? 0) > 0 && (
-                  <button
-                    type="button"
-                    tabIndex={0}
-                    aria-label={`Шалгалтын горимоос ${r.leaveCount} удаа гарсан — анти-чит дохио. Тасалбар (таб) эсвэл апп-аас гарсан тоог харуулна; өндөр тоо хуулах гэж оролдсоныг илтгэж болно.`}
-                    title="Шалгалтын горимоос (таб/апп) хэдэн удаа гарснаа — өндөр тоо магадгүй хуулах гэж оролдсоныг илтгэнэ"
-                    className="inline-flex items-center gap-1 cursor-help rounded-lg bg-warning/15 px-2 py-1 text-sm font-bold text-warning"
-                  >
-                    <TriangleAlert className="h-4 w-4" aria-hidden />
-                    {r.leaveCount}
-                  </button>
-                )}
+                <IntegrityBadges row={r} />
                 <span className="w-28 text-right font-bold text-ink">
                   {r.totalScore}/{r.maxScore}
                 </span>
@@ -239,6 +257,13 @@ export default function ResultsTable({
               </div>
             ))}
           </div>
+          <p className="mt-4 flex items-start gap-2 text-sm text-ink-dim">
+            <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+            <span>
+              Гарсан, скриншот, бичлэгийн тоо нь шалгалтын үед бүртгэгдсэн үйл явдал бөгөөд багш өөрөө хянаж үзэх
+              зорилготой. Эдгээр нь хууран мэхэлсэн гэсэн автомат дүгнэлт биш
+            </span>
+          </p>
         </>
       )}
     </section>

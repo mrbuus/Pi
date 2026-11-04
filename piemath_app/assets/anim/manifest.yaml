@@ -1,0 +1,135 @@
+# Анимацын слотууд — docs/RESEARCH-2026-11.md §4, заавар: assets/anim/README.md
+#
+# Слот бүр (lib/shared/anim/anim_slot.dart-ийн AnimSlot) энд НЭГ мөртэй байна — тест шалгана.
+# Файл байхгүй бол апп одоогийн дүрсээ (fallback) харуулна; файл хуулбал код өөрчлөхгүй.
+#
+#   kind          lottie | video | rive
+#   file          үндсэн файл (assets/-ээр эхэлбэл бүтэн зам, эс бөгөөс assets/anim/-ээс)
+#   dark          харанхуй горимын хувилбар (заавал биш)
+#   poster        эхний кадр, хөдөлгөөн багасгах горим ба хуучин утсанд (заавал биш, зөвлөнө)
+#   poster_dark   харанхуй горимын poster (заавал биш)
+#   loop          давтагдах эсэх (нэг удаад ганц давталттай слот тоглоно)
+#   seconds       зорилтот урт
+#   max_kb        файлын дээд хэмжээ (тест шалгана)
+#   poster_max_kb poster-ын дээд хэмжээ (өгөгдмөл 40)
+
+slots:
+  login_hero:
+    kind: video
+    file: assets/login_hero/hero.mp4
+    dark: assets/login_hero/hero_dark.mp4
+    poster: assets/login_hero/poster.webp
+    poster_dark: assets/login_hero/poster_dark.webp
+    loop: true
+    seconds: 6
+    max_kb: 1536
+    poster_max_kb: 150
+
+  onboarding_1:
+    kind: lottie
+    file: onboarding_1.json
+    dark: onboarding_1.dark.json
+    poster: onboarding_1.poster.webp
+    poster_dark: onboarding_1.poster.dark.webp
+    loop: true
+    seconds: 3
+    max_kb: 80
+
+  onboarding_2:
+    kind: lottie
+    file: onboarding_2.json
+    dark: onboarding_2.dark.json
+    poster: onboarding_2.poster.webp
+    poster_dark: onboarding_2.poster.dark.webp
+    loop: true
+    seconds: 3
+    max_kb: 80
+
+  onboarding_3:
+    kind: lottie
+    file: onboarding_3.json
+    dark: onboarding_3.dark.json
+    poster: onboarding_3.poster.webp
+    poster_dark: onboarding_3.poster.dark.webp
+    loop: true
+    seconds: 3
+    max_kb: 80
+
+  correct_burst:
+    kind: lottie
+    file: correct_burst.json
+    dark: correct_burst.dark.json
+    poster: correct_burst.poster.webp
+    poster_dark: correct_burst.poster.dark.webp
+    loop: false
+    seconds: 0.8
+    max_kb: 40
+
+  exam_complete:
+    kind: lottie
+    file: exam_complete.json
+    dark: exam_complete.dark.json
+    poster: exam_complete.poster.webp
+    poster_dark: exam_complete.poster.dark.webp
+    loop: false
+    seconds: 2.5
+    max_kb: 120
+
+  streak_up:
+    kind: lottie
+    file: streak_up.json
+    dark: streak_up.dark.json
+    poster: streak_up.poster.webp
+    poster_dark: streak_up.poster.dark.webp
+    loop: false
+    seconds: 1.5
+    max_kb: 60
+
+  empty_homework:
+    kind: lottie
+    file: empty_homework.json
+    dark: empty_homework.dark.json
+    poster: empty_homework.poster.webp
+    poster_dark: empty_homework.poster.dark.webp
+    loop: true
+    seconds: 3
+    max_kb: 50
+
+  empty_notifications:
+    kind: lottie
+    file: empty_notifications.json
+    dark: empty_notifications.dark.json
+    poster: empty_notifications.poster.webp
+    poster_dark: empty_notifications.poster.dark.webp
+    loop: true
+    seconds: 3
+    max_kb: 50
+
+  payment_success:
+    kind: lottie
+    file: payment_success.json
+    dark: payment_success.dark.json
+    poster: payment_success.poster.webp
+    poster_dark: payment_success.poster.dark.webp
+    loop: false
+    seconds: 1.5
+    max_kb: 60
+
+  offline:
+    kind: lottie
+    file: offline.json
+    dark: offline.dark.json
+    poster: offline.poster.webp
+    poster_dark: offline.poster.dark.webp
+    loop: true
+    seconds: 3
+    max_kb: 50
+
+  # Дараа: Rive сан нэмэгдээгүй (APK ~+15MB-ийг шалгасны дараа). Одоо зөвхөн poster.
+  mascot:
+    kind: rive
+    file: mascot.riv
+    poster: mascot.poster.webp
+    poster_dark: mascot.poster.dark.webp
+    loop: true
+    max_kb: 150

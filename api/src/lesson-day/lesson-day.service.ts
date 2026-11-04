@@ -637,7 +637,7 @@ export class LessonDayService {
       }),
       // dismissMode-ийг ХЭЗЭЭ Ч сонгохгүй (зөвхөн багшид)
       this.prisma.lessonTopic.findMany({
-        where: { date, schedule: { classroomId } },
+        where: { date, schedule: { deletedAt: null, classroomId } },
         select: { testIds: true, photoStudentId: true, title: true, chapterId: true },
       }),
       this.prisma.classTestSession.findMany({
@@ -801,7 +801,7 @@ export class LessonDayService {
     const className = new Map(enrollments.map((e) => [e.classroomId, e.classroom.name]));
     const [topics, photos, sessions] = await Promise.all([
       this.prisma.lessonTopic.findMany({
-        where: { date: { gte: from, lte: to }, schedule: { classroomId: { in: classIds } } },
+        where: { date: { gte: from, lte: to }, schedule: { deletedAt: null, classroomId: { in: classIds } } },
         select: { date: true, testIds: true, photoStudentId: true, schedule: { select: { classroomId: true } } },
       }),
       this.prisma.lessonPhoto.findMany({

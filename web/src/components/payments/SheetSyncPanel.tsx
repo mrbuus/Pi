@@ -144,22 +144,23 @@ export default function SheetSyncPanel() {
   }, [load]);
 
   // Гараар татахад сервер шууд хариулна; дуустал 3 секунд тутам төлөв шалгана
-  const waitUntilDone = useCallback(
-    (tries = 0) => {
+  const waitUntilDone = useCallback(() => {
+    // Өөрийгөө дуудах дотоод функц: useCallback-ийн хувьсагчийг зарлахаас өмнө ашиглахгүй
+    function check(tries: number) {
       poll.current = setTimeout(() => {
         api<SyncStatus>("/sheet-sync/status")
           .then((d) => {
             setStatus(d);
-            if (d.running && tries < 40) return waitUntilDone(tries + 1);
+            if (d.running && tries < 40) return check(tries + 1);
             setRefresh((n) => n + 1);
             if (d.lastRun?.ok) toast.success("Шийтээс татаж дууслаа");
             else if (d.lastRun) toast.error("Шийтээс татаж чадсангүй");
           })
           .catch(() => undefined);
       }, 3000);
-    },
-    [],
-  );
+    }
+    check(0);
+  }, []);
   async function runNow() {
     try {
       const r = await api<{ started: boolean }>("/sheet-sync/run", { method: "POST" });

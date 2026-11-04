@@ -712,6 +712,13 @@ export class AssignmentsService {
             : 'Даалгавар засварлах шаардлагатай',
         body: dto.note ? `${assignment.title}: ${dto.note}` : assignment.title,
         link: '/app/student',
+        // Push-д багшийн тэмдэглэл/даалгаврын нэр оруулахгүй
+        push: {
+          body:
+            dto.action === ReviewAction.APPROVE
+              ? 'Багш даалгаврыг дүгнэлээ'
+              : 'Багш даалгаврыг засварлуулахаар буцаалаа',
+        },
       });
     }
 

@@ -93,7 +93,7 @@ function setup(initial: Partial<Row>[] = []) {
     attendance,
     $transaction: jest.fn((fn: (tx: unknown) => unknown) => fn(db)),
   };
-  const audit = { record: jest.fn() };
+  const audit = { record: jest.fn(), recordMany: jest.fn() };
   return {
     db,
     rows,
@@ -323,7 +323,7 @@ describe('Даалгаврын тэмдэглэгээ — нөхцөлт бич�
       },
       user: { findUnique: jest.fn().mockResolvedValue({ firstName: 'Анар', lastName: 'Ам' }) },
     };
-    const svc = new HomeworkMarksService(db, { record: jest.fn() } as never);
+    const svc = new HomeworkMarksService(db, { record: jest.fn(), recordMany: jest.fn() } as never);
     const res = await svc.setMark(
       'class',
       's1',

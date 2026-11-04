@@ -115,6 +115,7 @@ export class CalendarIcsService {
     }
     const range = feedRange(from, to);
     const activeRange = {
+      deletedAt: null,
       effectiveFrom: { lte: range.to },
       AND: [
         { OR: [{ effectiveTo: null }, { effectiveTo: { gte: range.from } }] },
@@ -189,7 +190,7 @@ export class CalendarIcsService {
         },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { date: { gte: range.from, lte: range.to } },
+        where: { date: { gte: range.from, lte: range.to }, deletedAt: null },
         include: { classrooms: { select: { classroomId: true } } },
       }),
       this.prisma.lessonTopic.findMany({

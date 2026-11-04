@@ -1,0 +1,4 @@
+# Golden тест Linux дээр үүсгэсэн зурагтай харьцуулна. Mac дээр фонтын растер
+# ялгаатай тул: `flutter test -x golden` (эсвэл `--update-goldens` локалд).
+tags:
+  golden:

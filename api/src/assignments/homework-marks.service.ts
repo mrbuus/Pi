@@ -435,18 +435,16 @@ export class HomeworkMarksService {
       return { applied, skipped, changes };
     });
 
-    await Promise.all(
-      result.changes.map((c) =>
-        this.audit.record({
-          actorId: userId,
-          actorRole: role,
-          action: c.before ? 'UPDATE' : 'CREATE',
-          entity: 'DailyHomeworkMark',
-          entityId: c.after.id,
-          before: c.before,
-          after: c.after,
-        }),
-      ),
+    await this.audit.recordMany(
+      result.changes.map((c) => ({
+        actorId: userId,
+        actorRole: role,
+        action: c.before ? 'UPDATE' : 'CREATE',
+        entity: 'DailyHomeworkMark',
+        entityId: c.after.id,
+        before: c.before,
+        after: c.after,
+      })),
     );
 
     const rows = await this.prisma.dailyHomeworkMark.findMany({

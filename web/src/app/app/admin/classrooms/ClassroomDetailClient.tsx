@@ -25,6 +25,35 @@ interface UnassignedStudent { id: string; firstName: string; lastName: string; w
 interface TeacherOption { id: string; firstName: string; lastName: string; role: string; }
 type Intent = { kind: 'remove'; student: Student } | { kind: 'transfer'; student: Student } | { kind: 'archive' } | { kind: 'add' } | { kind: 'edit' };
 
+type ClassroomForm = { name: string; type: ClassroomType; grade: string; subject: ClassroomSubject; teacherId: string; assistantTeacherId: string };
+
+function formFrom(classroom: Classroom): ClassroomForm {
+  return {
+    name: classroom.name,
+    type: classroom.type,
+    grade: classroom.grade == null ? '' : String(classroom.grade),
+    // API-аас ирсэн бодит хичээл (null = Математик)
+    subject: classroom.subject ?? 'MATH',
+    teacherId: classroom.teacherId ?? '',
+    assistantTeacherId: classroom.assistantTeacherId ?? '',
+  };
+}
+
+// Зөвхөн ӨӨРЧЛӨГДСӨН талбарыг илгээнэ — хэрэглэгчийн хүрээгүй талбар (ж: хичээл)
+// анхдагч утгаар дарж бичигдэхгүй.
+function changedFields(initial: ClassroomForm, next: ClassroomForm) {
+  const body: Record<string, string | number | null> = {};
+  const name = next.name.trim();
+  if (name !== initial.name) body.name = name;
+  if (next.type !== initial.type) body.type = next.type;
+  if (next.grade.trim() !== initial.grade) body.grade = next.grade.trim() ? Number(next.grade) : null;
+  // Математик = null (анхдагч, одоо байгаа бүх анги)
+  if (next.subject !== initial.subject) body.subject = next.subject === 'MATH' ? null : next.subject;
+  if (next.teacherId !== initial.teacherId) body.teacherId = next.teacherId;
+  if (next.assistantTeacherId !== initial.assistantTeacherId) body.assistantTeacherId = next.assistantTeacherId;
+  return body;
+}
+
 function messageFor(error: unknown) { return error instanceof Error ? error.message : 'Үйлдэл амжилтгүй боллоо.'; }
 
 function dateLabel(value: string) {
@@ -53,7 +82,7 @@ export default function ClassroomDetailClient({ classroomId }: { classroomId: st
   const [notice, setNotice] = useState('');
   const [actionError, setActionError] = useState('');
 
-  const [form, setForm] = useState({ name: '', type: 'IN_PERSON' as ClassroomType, grade: '', subject: 'MATH' as ClassroomSubject, teacherId: '', assistantTeacherId: '' });
+  const [form, setForm] = useState<ClassroomForm>({ name: '', type: 'IN_PERSON', grade: '', subject: 'MATH', teacherId: '', assistantTeacherId: '' });
   const [teachers, setTeachers] = useState<TeacherOption[]>([]);
   const [teachersLoading, setTeachersLoading] = useState(false);
   const [teachersError, setTeachersError] = useState('');
@@ -79,14 +108,7 @@ export default function ClassroomDetailClient({ classroomId }: { classroomId: st
     try {
       const response = await api<ClassroomDetail>(`/classrooms/${encodeURIComponent(classroomId)}`);
       setDetail(response);
-      setForm({
-        name: response.classroom.name,
-        type: response.classroom.type,
-        grade: response.classroom.grade == null ? '' : String(response.classroom.grade),
-        subject: response.classroom.subject ?? 'MATH',
-        teacherId: response.classroom.teacherId ?? '',
-        assistantTeacherId: response.classroom.assistantTeacherId ?? '',
-      });
+      setForm(formFrom(response.classroom));
     } catch (err) {
       setError(messageFor(err));
     } finally {
@@ -189,21 +211,15 @@ export default function ClassroomDetailClient({ classroomId }: { classroomId: st
 
   async function saveClassroom() {
     if (!detail || !isAdmin || busy) return;
+    const body = changedFields(formFrom(detail.classroom), form);
+    if (Object.keys(body).length === 0) {
+      setIntent(null);
+      return;
+    }
     setBusy(true);
     setActionError('');
     try {
-      await api(`/classrooms/${encodeURIComponent(classroomId)}`, {
-        method: 'PATCH',
-        body: {
-          name: form.name.trim(),
-          type: form.type,
-          grade: form.grade.trim() ? Number(form.grade) : null,
-          // Математик = null (анхдагч, одоо байгаа бүх анги)
-          subject: form.subject === 'MATH' ? null : form.subject,
-          teacherId: form.teacherId,
-          assistantTeacherId: form.assistantTeacherId,
-        },
-      });
+      await api(`/classrooms/${encodeURIComponent(classroomId)}`, { method: 'PATCH', body });
       setIntent(null);
       setNotice('Ангийн мэдээллийг хадгаллаа.');
       await load();

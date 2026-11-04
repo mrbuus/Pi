@@ -362,7 +362,7 @@ export class ClassSessionsService {
       before
         ? this.prisma.lessonTopic.findMany({
             where: {
-              schedule: { classroomId },
+              schedule: { deletedAt: null, classroomId },
               date: { lt: before, gte: addDateDays(before, -60) },
               NOT: { testIds: { isEmpty: true } },
             },

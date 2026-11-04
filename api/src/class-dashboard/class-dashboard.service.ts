@@ -27,6 +27,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { ACADEMIC_YEAR, todayKeyUB } from '../payments/ledger';
 import { ledgersFor } from '../payments/ledger-load';
+import { studentPaymentView } from '../payments/ledger-redact';
 import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
 import {
   BEHAVIOR_FLAGS,
@@ -133,6 +134,7 @@ export class ClassDashboardService {
       }),
       this.prisma.classSchedule.findMany({
         where: {
+          deletedAt: null,
           teacherId: actor.userId,
           OR: [{ effectiveTo: null }, { effectiveTo: { gte: today } }],
         },
@@ -141,6 +143,7 @@ export class ClassDashboardService {
       this.prisma.lessonStaffing.findMany({
         where: {
           date: { gte: daysAgo(STAFFING_DAYS) },
+          schedule: { deletedAt: null },
           OR: [
             { leadTeacherId: actor.userId },
             { assistantTeacherId: actor.userId },
@@ -318,6 +321,7 @@ export class ClassDashboardService {
       }),
       this.prisma.classSchedule.findMany({
         where: {
+          deletedAt: null,
           classroomId: { in: classIds },
           OR: [{ effectiveTo: null }, { effectiveTo: { gte: today } }],
           teacherId: { not: null },
@@ -522,7 +526,7 @@ export class ClassDashboardService {
       : null;
     if (!chapterId) {
       const topic = await this.prisma.lessonTopic.findFirst({
-        where: { schedule: { classroomId }, chapterId: { not: null } },
+        where: { schedule: { deletedAt: null, classroomId }, chapterId: { not: null } },
         orderBy: { date: 'desc' },
         select: { chapterId: true },
       });
@@ -792,6 +796,7 @@ export class ClassDashboardService {
       }),
       this.prisma.classSchedule.findMany({
         where: {
+          deletedAt: null,
           classroomId,
           OR: [{ effectiveTo: null }, { effectiveTo: { gte: today } }],
         },
@@ -808,7 +813,7 @@ export class ClassDashboardService {
         },
       }),
       this.prisma.lessonStaffing.findMany({
-        where: { schedule: { classroomId }, date: { gte: daysAgo(STAFFING_DAYS) } },
+        where: { schedule: { deletedAt: null, classroomId }, date: { gte: daysAgo(STAFFING_DAYS) } },
         select: { leadTeacherId: true, assistantTeacherId: true },
       }),
       coverageP.then((c) =>
@@ -1016,9 +1021,8 @@ export class ClassDashboardService {
           createdAt: f.createdAt.toISOString(),
           createdByName: markPlus(f.createdByName, f.createdById, flagPlus),
         })),
-        payment: pay
-          ? { state: pay.state, tuitionAmount: pay.tuitionAmount, paidThisMonth: pay.paidThisMonth }
-          : null,
+        // Багш+ зөвхөн төлөв (эзний хатуу дүрэм) — дүн серверээс гарахгүй
+        payment: pay ? studentPaymentView(pay, actor.role) : null,
       };
     });
 
@@ -1226,6 +1230,7 @@ export class ClassDashboardService {
         }),
         this.prisma.classSchedule.findMany({
           where: {
+            deletedAt: null,
             classroomId,
             effectiveFrom: { lte: resolveEnd },
             OR: [{ effectiveTo: null }, { effectiveTo: { gte: firstDate } }],
@@ -1243,7 +1248,7 @@ export class ClassDashboardService {
           },
         }),
         this.prisma.academicCalendarDay.findMany({
-          where: { date: { gte: firstDate, lte: resolveEnd } },
+          where: { date: { gte: firstDate, lte: resolveEnd }, deletedAt: null },
           select: {
             date: true,
             type: true,

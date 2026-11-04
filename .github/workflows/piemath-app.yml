@@ -1,0 +1,127 @@
+name: Piemath апп
+
+# Flutter апп (piemath_app/) — api/, web/-ийн ci.yml-ээс тусдаа: зөвхөн апп-ын файл
+# өөрчлөгдөхөд ажиллана. PLAN.md M0.6.
+on:
+  push:
+    paths:
+      - "piemath_app/**"
+      - ".github/workflows/piemath-app.yml"
+  pull_request:
+    paths:
+      - "piemath_app/**"
+      - ".github/workflows/piemath-app.yml"
+  # iOS build-ийг (macOS runner, төлбөртэй минут) зөвхөн гараар — эзэн зөвшөөрсний дараа.
+  workflow_dispatch:
+    inputs:
+      ios:
+        description: "iOS debug build (macOS runner) ажиллуулах"
+        type: boolean
+        default: false
+      update_goldens:
+        description: "Golden PNG-г Linux дээр шинээр үүсгэж artifact болгон гаргах (commit хийхгүй)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: piemath-app-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.47.9"
+
+jobs:
+  android:
+    name: analyze, test, Android debug build
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: piemath_app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Сангууд
+        run: flutter pub get
+
+      - name: Статик шинжилгээ (0 асуудал)
+        run: flutter analyze
+
+      # Golden зураг Linux дээр үүсгэгдсэн тул энд (ubuntu) бүгдийг, golden-ыг ч ажиллуулна.
+      - name: Тест (unit, widget, golden)
+        run: flutter test
+
+      - name: Android debug APK
+        run: flutter build apk --debug
+
+  # Golden зургийн эх нь Linux (фонтын растер платформоор ялгаатай). Mac дээр хөгжүүлэхэд
+  # шинэ/өөрчлөгдсөн golden-ыг энд үүсгээд `gh run download -n goldens`-ээр татаж commit хийнэ.
+  goldens:
+    name: Golden шинэчлэх (Linux)
+    if: github.event_name == 'workflow_dispatch' && inputs.update_goldens
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: piemath_app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Сангууд
+        run: flutter pub get
+
+      - name: Golden үүсгэх
+        run: flutter test --tags golden --update-goldens
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: goldens
+          path: piemath_app/test/goldens/*.png
+          retention-days: 7
+
+  ios:
+    name: iOS debug build (codesign-гүй)
+    if: github.event_name == 'workflow_dispatch' && inputs.ios
+    runs-on: macos-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: piemath_app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Сангууд
+        run: flutter pub get
+
+      # Golden нь Linux-д үүссэн — macOS-д фонтын растер өөр тул алгасна.
+      - name: Тест (golden-гүй)
+        run: flutter test -x golden
+
+      - name: iOS debug build
+        run: flutter build ios --debug --no-codesign

@@ -24,6 +24,7 @@ function makeStreakPrisma(opts: {
       findMany: async () =>
         (opts.holidayDates ?? []).map((d) => ({ date: new Date(d) })),
     },
+    studyWeeklyGoal: { findFirst: async () => null },
   } as any;
 }
 
@@ -42,7 +43,7 @@ describe('ActivityService.streak — стрийкийн дүрэм', () => {
   it('огт идэвх байхгүй бол бүгд 0', async () => {
     const service = new ActivityService(makeStreakPrisma({ activeDates: [] }));
     const result = await service.streak('s1');
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       currentStreak: 0,
       longestStreak: 0,
       totalActiveDays: 0,

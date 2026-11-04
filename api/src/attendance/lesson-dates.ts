@@ -17,6 +17,7 @@ export async function loadPreviousLesson(
   const [patterns, sessions] = await Promise.all([
     prisma.classSchedule.findMany({
       where: {
+        deletedAt: null,
         classroomId,
         effectiveFrom: { lte: date },
         OR: [{ effectiveTo: null }, { effectiveTo: { gte: lookFrom } }],
@@ -38,6 +39,7 @@ export async function loadPreviousLesson(
       : Promise.resolve([]),
     prisma.academicCalendarDay.findMany({
       where: {
+        deletedAt: null,
         date: { gte: lookFrom, lt: date },
         OR: [
           { classrooms: { none: {} } },

@@ -436,6 +436,7 @@ export class TuitionService {
     // Schedule модулаас амралтын өдрүүдийг авна
     const calendars = await this.prisma.academicCalendarDay.findMany({
       where: {
+        deletedAt: null,
         type: 'HOLIDAY',
         // Зөвхөн БҮХ ангид хамаарах амралт (зарим ангийн онцгой өдөр биш)
         classrooms: { none: {} },

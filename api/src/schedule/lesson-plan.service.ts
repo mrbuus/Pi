@@ -222,7 +222,7 @@ export class LessonPlanService {
       this.roster(schedule.classroomId),
       this.prisma.lessonTopic.findMany({
         where: {
-          schedule: { classroomId: schedule.classroomId },
+          schedule: { deletedAt: null, classroomId: schedule.classroomId },
           photoStudentId: { not: null },
           date: { lt: parseDateOnly(occurrenceDate) },
         },
@@ -703,7 +703,10 @@ export class LessonPlanService {
     if (test.type === TestType.EESH_MOCK || test.type === TestType.THOUSAND)
       throw new ForbiddenException('Энэ шалгалтын хариуг харах эрхгүй');
     const [planned, done, assigned] = await Promise.all([
-      this.prisma.lessonTopic.findFirst({ where: { testIds: { has: testId } }, select: { id: true } }),
+      this.prisma.lessonTopic.findFirst({
+        where: { testIds: { has: testId }, schedule: { deletedAt: null } },
+        select: { id: true },
+      }),
       this.prisma.classTestSession.findFirst({ where: { testId }, select: { id: true } }),
       this.prisma.testAccess.findFirst({
         where: {
