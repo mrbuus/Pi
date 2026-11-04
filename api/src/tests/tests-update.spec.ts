@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   NotFoundException,
@@ -19,6 +20,7 @@ function setup(
     sessionCount?: number;
     activeSessionCount?: number;
     timeLimitMin?: number | null;
+    answerlessProblems?: boolean;
   } = {},
 ) {
   const events: string[] = [];
@@ -115,7 +117,7 @@ function setup(
           id,
           format: 'CHOICE',
           choices: ['A', 'B'],
-          correctAnswer: 'A',
+          correctAnswer: options.answerlessProblems ? null : 'A',
           choiceOptions: [],
         })),
       ),
@@ -157,7 +159,7 @@ function setup(
           id,
           format: 'CHOICE',
           choices: ['A', 'B'],
-          correctAnswer: 'A',
+          correctAnswer: options.answerlessProblems ? null : 'A',
           choiceOptions: [],
         })),
       ),
@@ -238,6 +240,21 @@ describe('TestsService.updateTest', () => {
     await expect(
       service.updateTest('test-1', { problems: [] }, 'teacher-1', Role.TEACHER),
     ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('аль хэдийн ангид оноосон тестийн шинэ бодлогын хариуны түлхүүрийг шалгана', async () => {
+    const { service, prisma, tx } = setup({ answerlessProblems: true });
+    await expect(
+      service.updateTest(
+        'test-1',
+        { problems: [{ problemId: 'problem-2', order: 1 }] },
+        'teacher-1',
+        Role.TEACHER,
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(tx.problem.findMany).toHaveBeenCalled();
+    expect(prisma.problem.findMany).not.toHaveBeenCalled();
+    expect(tx.testProblem.deleteMany).not.toHaveBeenCalled();
   });
 
   it('өөр багш өөр хүний тестийг засахад 403 буцаана', async () => {
@@ -323,5 +340,13 @@ describe('TestsService.updateTest', () => {
     const dto = plainToInstance(UpdateTestDto, { problems });
     const errors = await validate(dto);
     expect(errors.some((error) => error.property === 'problems')).toBe(true);
+  });
+
+  it('ангийн ID давхардахад DTO-г хүчингүй болгоно', async () => {
+    const dto = plainToInstance(UpdateTestDto, {
+      classroomIds: ['class-1', 'class-1'],
+    });
+    const errors = await validate(dto);
+    expect(errors.some((error) => error.property === 'classroomIds')).toBe(true);
   });
 });
