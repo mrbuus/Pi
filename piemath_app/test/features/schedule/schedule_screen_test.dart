@@ -50,7 +50,10 @@ void main() {
     await tester.scrollUntilVisible(find.byTooltip('Өмнөх 7 хоног'), 300);
     await tester.tap(find.byTooltip('Өмнөх 7 хоног'));
     await settle(tester);
-    final weeks = http.requests.where((r) => r.path == '/schedule/week').map((r) => r.queryParameters['start']! as String).toList();
+    final weeks = http.requests
+        .where((r) => r.path == '/schedule/week')
+        .map((r) => r.queryParameters['start']! as String)
+        .toList();
     expect(weeks.length, 2);
     final a = DateTime.parse(first), b = DateTime.parse(weeks.last);
     expect(a.difference(b).inDays, 7);
@@ -85,11 +88,11 @@ void main() {
     expect(http.count('GET', '/schedule/me'), 0);
   });
 
-  testWidgets('ажилтан: вэбээр нээх тайлбар', (tester) async {
+  testWidgets('ажилтан: вэбийн холбоосгүй, натив хуваарь', (tester) async {
     await pumpStudentRoute(tester, http: scheduleHttp(), location: '/app/schedule', role: UserRole.teacher);
     await settle(tester);
-    expect(find.text('Ажилтны хуваарь удахгүй апп-д нэмэгдэнэ'), findsOneWidget);
-    expect(find.text('Вэбээр нээх'), findsOneWidget);
+    expect(find.text('Вэбээр нээх'), findsNothing);
+    expect(find.text('Өдрийн хуваарь'), findsOneWidget);
   });
 
   testWidgets('хурууны хүрэх талбай ≥ 44dp (7 хоногийн сум)', (tester) async {

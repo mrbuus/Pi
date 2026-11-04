@@ -5,9 +5,7 @@ import 'ui/schedule_screen.dart';
 
 /// `schedule` feature-ийн маршрутууд. Энэ файлыг ЗӨВХӨН энэ feature-ийн эзэн засна.
 ///
-/// shell: /app/schedule (сурагч, эцэг эх; ажилтанд «вэбээр»).
+/// shell: /app/schedule (сурагч, эцэг эх; ажилтанд бүтэн натив хуваарь).
 final scheduleRoutes = FeatureRoutes(
-  shell: [
-    GoRoute(path: '/app/schedule', builder: (context, state) => const ScheduleScreen()),
-  ],
+  shell: [GoRoute(path: '/app/schedule', builder: (context, state) => const ScheduleScreen())],
 );
