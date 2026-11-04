@@ -15,43 +15,74 @@ import 'teacher_widgets.dart';
 
 /// Сурагчийн хуудас (`/app/students/:id`): Ангийн явц, Шалгалт, Тэмдэглэл, Бие даасан явц, Мэдээлэл (ангийн түүх, засах).
 /// Төлбөрөөс зөвхөн «хэдий хүртэл төлсөн» төлөв (энгийн багш мөнгөн дүн харахгүй).
+///
+/// Удирдлагын хувилбар (`features/students_admin`, Багш+/Админ) энэ хуудсыг ДАВХАРДУУЛАХГҮЙ — [header]
+/// (төлөв, үйлдэл), [extraTabs] (Төлбөр, Гарсан тооцоо)-оор өргөтгөнө. [embedded] = таблетын баруун тал.
 class StudentScreen extends StatelessWidget {
-  const StudentScreen({super.key, required this.studentId, this.name});
+  const StudentScreen({
+    super.key,
+    required this.studentId,
+    this.name,
+    this.header,
+    this.extraTabs = const [],
+    this.embedded = false,
+  });
 
   final String studentId;
   final String? name;
 
+  /// Табын дээрх хэсэг (удирдлагын төлөв, товч).
+  final Widget? header;
+
+  /// «Мэдээлэл»-ийн өмнө нэмэгдэх табууд.
+  final List<StudentExtraTab> extraTabs;
+
+  /// Жагсаалтын хажууд (таблет) — AppBar-т буцах сум харуулахгүй.
+  final bool embedded;
+
   @override
   Widget build(BuildContext context) {
+    final tabs = <(String, Widget)>[
+      ('Ангийн явц', _ProgressTab(studentId: studentId)),
+      ('Шалгалт', _ExamsTab(studentId: studentId)),
+      ('Тэмдэглэл', StudentNotesTab(studentId: studentId)),
+      ('Бие даасан явц', IndependentTab(studentId: studentId)),
+      for (final t in extraTabs) (t.label, t.child),
+      ('Мэдээлэл', StudentInfoTab(studentId: studentId)),
+    ];
+    final view = TabBarView(children: [for (final t in tabs) t.$2]);
     return DefaultTabController(
-      length: 5,
+      length: tabs.length,
       child: Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: !embedded,
           title: Text(name ?? 'Сурагч'),
-          bottom: const TabBar(
+          bottom: TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.start,
-            tabs: [
-              Tab(text: 'Ангийн явц'),
-              Tab(text: 'Шалгалт'),
-              Tab(text: 'Тэмдэглэл'),
-              Tab(text: 'Бие даасан явц'),
-              Tab(text: 'Мэдээлэл'),
-            ],
+            tabs: [for (final t in tabs) Tab(text: t.$1)],
           ),
         ),
-        body: TabBarView(
-          children: [
-            _ProgressTab(studentId: studentId),
-            _ExamsTab(studentId: studentId),
-            StudentNotesTab(studentId: studentId),
-            IndependentTab(studentId: studentId),
-            StudentInfoTab(studentId: studentId),
-          ],
-        ),
+        body: header == null
+            ? view
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  header!,
+                  Expanded(child: view),
+                ],
+              ),
       ),
     );
   }
+}
+
+/// [StudentScreen]-ийн нэмэлт таб.
+class StudentExtraTab {
+  const StudentExtraTab(this.label, this.child);
+
+  final String label;
+  final Widget child;
 }
 
 /// Сүүлийн 30 хоногийн ирц ба даалгавар (өдрөөр, шинэ нь дээр).
