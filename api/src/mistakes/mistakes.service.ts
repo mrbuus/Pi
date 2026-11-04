@@ -140,6 +140,36 @@ function serializeEntry(entry: EntryWithProblem) {
   };
 }
 
+/** Хариу нээх хаалга — `ProblemReviewService.revealGate`-тэй ижил хэлбэр (тойрог хамаарлаас зайлсхийж callback). */
+export type MistakeRevealGate = (row: {
+  problemId: string;
+  source: string;
+}) => Promise<{ locked: boolean; answer: boolean; solution: boolean }>;
+
+const OPEN_GATE = { locked: false, answer: true, solution: true };
+
+/**
+ * Дахин бодсон бодлогын хариу/бодолт жагсаалтад гарна — хаалттай бол (ангид бодогдох тест,
+ * шалгалтын түвшин) хасна. Хариу нээгдээгүй мөрт хаалга дуудахгүй.
+ */
+async function gateItems(
+  entries: Parameters<typeof serializeEntry>[0][],
+  gate: MistakeRevealGate | undefined,
+) {
+  const out: ReturnType<typeof serializeEntry>[] = [];
+  for (const entry of entries) {
+    const item: Partial<Record<'correctAnswer' | 'solutionOutline', unknown>> & ReturnType<typeof serializeEntry> =
+      serializeEntry(entry);
+    if (gate && ('correctAnswer' in item || 'solutionOutline' in item)) {
+      const reveal = await gate({ problemId: entry.problemId, source: entry.source });
+      if (reveal.locked || !reveal.answer) delete item.correctAnswer;
+      if (reveal.locked || !reveal.solution) delete item.solutionOutline;
+    }
+    out.push(item);
+  }
+  return out;
+}
+
 @Injectable()
 export class MistakesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -189,7 +219,7 @@ export class MistakesService {
     };
   }
 
-  async list(userId: string, query: MistakeQueryDto) {
+  async list(userId: string, query: MistakeQueryDto, gate?: MistakeRevealGate) {
     const chapterAccess = await this.accessibleChapterWhere(userId);
     const accessibleProblem: Prisma.MistakeEntryWhereInput['problem'] = {
       deletedAt: null,
@@ -251,7 +281,7 @@ export class MistakesService {
     return {
       counts,
       byTopic: topicCounts,
-      items: page.map((entry) => serializeEntry(entry)),
+      items: await gateItems(page, gate),
       nextCursor: hasMore ? page[page.length - 1].id : null,
     };
   }
@@ -272,7 +302,11 @@ export class MistakesService {
     });
   }
 
-  async retry(userId: string, id: string, answer: unknown) {
+  /**
+   * `gate` — давтлагын хаалга (`ProblemReviewService.revealGate`): ангид бодогдох тест,
+   * шалгалтын түвшин. Хаалттай бол дүгнэхгүй (зөв/буруугаар түлхүүр таах боломжгүй), хариу ч нээхгүй.
+   */
+  async retry(userId: string, id: string, answer: unknown, gate?: MistakeRevealGate) {
     if (answer === undefined || answer === null || answer === '') {
       throw new BadRequestException('Хариултаа оруулна уу');
     }
@@ -295,6 +329,10 @@ export class MistakesService {
         },
       });
       if (!row) throw new NotFoundException('Алдаа олдсонгүй');
+      const reveal = gate ? await gate({ problemId: row.problemId, source: row.source }) : OPEN_GATE;
+      if (reveal.locked) {
+        throw new ConflictException('Энэ бодлогын тест ангид бодогдож дуусаагүй тул түр хаалттай');
+      }
       const gradableProblem: GradableProblem = {
         id: row.problem.id,
         format: row.problem.format,
@@ -334,19 +372,19 @@ export class MistakesService {
 
       return {
         correct: grade.correct,
-        correctAnswer: publicCorrectAnswer(gradableProblem),
+        correctAnswer: reveal.answer ? publicCorrectAnswer(gradableProblem) : null,
         status: state.status,
         retryCount: state.retryCount,
         nextRetryAt: state.nextRetryAt,
         solutionOutline:
-          row.problem.analysis?.status === 'VERIFIED'
+          reveal.solution && row.problem.analysis?.status === 'VERIFIED'
             ? row.problem.analysis.solutionOutline
             : null,
       };
     });
   }
 
-  async today(userId: string) {
+  async today(userId: string, gate?: MistakeRevealGate) {
     const now = new Date();
     const chapterAccess = await this.accessibleChapterWhere(userId);
     const due = await this.prisma.mistakeEntry.findMany({
@@ -358,9 +396,16 @@ export class MistakesService {
       },
       include: ENTRY_INCLUDE,
       orderBy: [{ nextRetryAt: 'asc' }, { updatedAt: 'asc' }],
-      take: 5,
+      // Хаалттай бодлого хасагдах тул нөөцтэй уншина
+      take: gate ? 20 : 5,
     });
-    return due.map((entry) => serializeEntry(entry));
+    const open: typeof due = [];
+    for (const entry of due) {
+      if (open.length === 5) break;
+      if (gate && (await gate({ problemId: entry.problemId, source: entry.source })).locked) continue;
+      open.push(entry);
+    }
+    return open.map((entry) => serializeEntry(entry));
   }
 
   async student(studentId: string, actor: { userId: string; role: Role }) {

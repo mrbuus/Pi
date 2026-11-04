@@ -1,4 +1,4 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { MistakesService } from './mistakes.service';
 import { ProblemFormat, Prisma } from '../generated/prisma/client';
 
@@ -174,5 +174,62 @@ describe('MistakesService authorization', () => {
       id: 'm1', userId: 'learner-a', retryCount: 0, status: 'NEW',
       sourceRefId: 'test-1', sourceOccurredAt,
     } }));
+  });
+});
+
+describe('MistakesService reveal gate (ангид бодогдох тестийн хариу задрахгүй)', () => {
+  const row = { id: 'm1', userId: 'learner-a', problemId: 'p1', source: 'TEST', sourceRefId: 'test-1', sourceOccurredAt: null, status: 'NEW', retryCount: 0, consecutiveCorrect: 0, lastCorrectAt: null, problem: { id: 'p1', format: ProblemFormat.CHOICE, choices: ['A', 'B'], correctAnswer: 'B', choiceOptions: [], analysis: { status: 'VERIFIED', solutionOutline: 'outline' } } };
+  function setup() {
+    const tx = { mistakeEntry: { findFirst: jest.fn().mockResolvedValue(row), updateMany: jest.fn().mockResolvedValue({ count: 1 }) } };
+    const prisma = { ...mockOpenContentAccess(), $transaction: jest.fn((fn: (client: typeof tx) => unknown) => fn(tx)) };
+    return { tx, service: new MistakesService(prisma as any) };
+  }
+
+  it('refuses to grade a locked problem and writes nothing', async () => {
+    const { tx, service } = setup();
+    const gate = jest.fn().mockResolvedValue({ locked: true, answer: false, solution: false });
+    await expect(service.retry('learner-a', 'm1', 'B', gate)).rejects.toBeInstanceOf(ConflictException);
+    expect(gate).toHaveBeenCalledWith({ problemId: 'p1', source: 'TEST' });
+    expect(tx.mistakeEntry.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('grades but hides the answer key when the gate allows only practice', async () => {
+    const { service } = setup();
+    const gate = jest.fn().mockResolvedValue({ locked: false, answer: false, solution: false });
+    const result = await service.retry('learner-a', 'm1', 'A', gate);
+    expect(result.correct).toBe(false);
+    expect(result.correctAnswer).toBeNull();
+    expect(result.solutionOutline).toBeNull();
+  });
+
+  it('reveals answer and verified solution when the gate is open', async () => {
+    const { service } = setup();
+    const gate = jest.fn().mockResolvedValue({ locked: false, answer: true, solution: true });
+    const result = await service.retry('learner-a', 'm1', 'A', gate);
+    expect(result.correctAnswer).toBe('B');
+    expect(result.solutionOutline).toBe('outline');
+  });
+
+  it('leaves locked problems out of today', async () => {
+    const entry = (id: string, problemId: string) => ({ ...row, id, problemId, nextRetryAt: null, givenAnswer: 'A', reason: null, note: null, lastRetryAt: null, testTitle: null, createdAt: new Date(), updatedAt: new Date(), problem: { ...row.problem, id: problemId, statementText: 'q', imageKey: null, chapter: { topic: { name: 'Алгебр' } }, formulas: [] } });
+    const prisma = { ...mockOpenContentAccess(), mistakeEntry: { findMany: jest.fn().mockResolvedValue([entry('m1', 'p-locked'), entry('m2', 'p-open')]) } };
+    const service = new MistakesService(prisma as any);
+    const gate = jest.fn(async ({ problemId }: { problemId: string }) => ({ locked: problemId === 'p-locked', answer: true, solution: true }));
+    const today = await service.today('learner-a', gate);
+    expect(today.map((t: { id: string }) => t.id)).toEqual(['m2']);
+  });
+
+  it('strips a revealed answer from the list when the gate is closed', async () => {
+    const retried = { ...row, nextRetryAt: null, givenAnswer: 'A', reason: null, note: null, testTitle: null, createdAt: new Date(), updatedAt: new Date(),
+      retryCount: 1, lastRetryAt: new Date('2026-10-01T00:00:00Z'), sourceOccurredAt: new Date('2026-09-01T00:00:00Z'),
+      problem: { ...row.problem, statementText: 'q', imageKey: null, chapter: { topic: { name: 'Алгебр' } }, formulas: [] } };
+    const prisma = { ...mockOpenContentAccess(), $queryRaw: jest.fn().mockResolvedValue([]), mistakeEntry: { groupBy: jest.fn().mockResolvedValue([]), findMany: jest.fn().mockResolvedValue([retried]) } };
+    const service = new MistakesService(prisma as any);
+    const open = (await service.list('learner-a', {})).items[0];
+    expect(open).toHaveProperty('correctAnswer');
+    const gate = jest.fn().mockResolvedValue({ locked: true, answer: false, solution: false });
+    const closed = (await service.list('learner-a', {}, gate)).items[0];
+    expect(closed).not.toHaveProperty('correctAnswer');
+    expect(closed).not.toHaveProperty('solutionOutline');
   });
 });
