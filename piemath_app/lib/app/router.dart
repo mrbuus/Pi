@@ -27,6 +27,7 @@ import '../features/student_home/student_home_routes.dart';
 import '../features/students_admin/students_admin_routes.dart';
 import '../features/support/support_routes.dart';
 import '../features/teacher/teacher_routes.dart';
+import '../features/test_authoring/test_authoring_routes.dart';
 import '../features/theory/theory_routes.dart';
 import '../features/tools/tools_routes.dart';
 import '../features/tuition/tuition_routes.dart';
@@ -50,6 +51,8 @@ final allFeatureRoutes = <FeatureRoutes>[
   myClassRoutes,
   homeworkRoutes,
   theoryRoutes,
+  // `/app/tests/new` нь `/app/tests/:id`-ээс өмнө таарах ёстой
+  testAuthoringRoutes,
   examRoutes,
   scheduleRoutes,
   notificationsRoutes,

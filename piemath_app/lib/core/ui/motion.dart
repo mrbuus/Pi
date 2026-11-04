@@ -59,6 +59,8 @@ class _PressableScaleState extends State<PressableScale> with SingleTickerProvid
   late final Animation<double> _scale = _c.drive(Tween(begin: 1, end: widget.scale));
 
   void _to(double target) {
+    // Чирж байх үед карт салгагдвал (reorderable жагсаалт) pointer-up нь салгагдсаны дараа ирж болно
+    if (!mounted) return;
     if (!widget.enabled || AppMotion.reduced(context)) {
       _c.value = 0;
       return;
