@@ -185,3 +185,9 @@ final canManageProvider = Provider<bool>((ref) {
   final r = ref.watch(teacherRoleProvider);
   return r == UserRole.admin || r == UserRole.teacherPlus;
 });
+
+/// Админ эсэх — багшийн самбарт «Удирдлага» товч харуулна.
+final isAdminProvider = Provider<bool>((ref) {
+  final s = ref.watch(sessionProvider);
+  return s is SignedIn && s.role == UserRole.admin;
+});

@@ -27,6 +27,7 @@ import 'nav/nav_data.dart';
 import 'redirect.dart';
 import 'shell/app_shell.dart';
 import 'shell/branch_stack.dart';
+import 'shell/manage_screen.dart';
 import 'shell/more_screen.dart';
 import 'shell/pending_screen.dart';
 import 'shell/section_screen.dart';
@@ -51,7 +52,13 @@ final allFeatureRoutes = <FeatureRoutes>[
   teacherRoutes,
   learningRoutes,
   supportRoutes,
+  _manageRoutes,
 ];
+
+/// Админы «Удирдлага» төв
+final _manageRoutes = FeatureRoutes(
+  shell: [GoRoute(path: '/app/admin', builder: (_, _) => const ManageScreen())],
+);
 
 /// Зөвшөөрлийн шалгалт — M1 (`features/auth`) override хийнэ.
 final consentCheckProvider = Provider<ConsentCheck?>((ref) => null);

@@ -107,6 +107,7 @@ abstract final class NavData {
   static const _enrollment = NavLink('/app/admin/enrollment', 'Элсэлтийн удирдлага', AppIcons.enroll, short: 'Элсэлт');
   static const _placement = NavLink('/app/admin/placement', 'Түвшин тогтоох', AppIcons.goal, short: 'Түвшин');
   static const _sorilsTab = NavLink('/app/admin/sorils', 'Жишиг сорил', AppIcons.tests, short: 'Сорил');
+  static const _financeTab = NavLink('/app/admin/finance', 'Санхүү', AppIcons.payments, short: 'Санхүү');
   static const _smsTab = NavLink('/app/sms', 'Дугаарлуу мессеж', AppIcons.message, short: 'Мессеж');
   static const _libraryTab = NavLink('/app/library', 'Бодлогын сан', AppIcons.library, short: 'Сан');
   static const _videosTab = NavLink('/app/videos', 'Онлайн хичээл', AppIcons.video, short: 'Видео');
@@ -160,33 +161,12 @@ abstract final class NavData {
       NavSection('payments', _payments, pages: [_payments, _reconcileTab, _storeAdminTab]),
       NavSection('students', _students, pages: [_studentsTab, _leadsTab, _enrollment, _placement, _sorilsTab, _smsTab]),
     ],
+    // Админ багшийн самбараас эхэлнэ (эзэн 2026-11-04); удирдлагын хуудсууд нүүрний «Удирдлага» товчоор
     UserRole.admin: [
-      NavSection(
-        'home',
-        // Админы самбар апп-д хийгдээгүй тул эхний дэд таб нь ажилладаг өнөөдрийн хичээл
-        NavLink('/app/teacher', 'Удирдлага', AppIcons.home, short: 'Нүүр'),
-        pages: [
-          NavLink('/app/teacher', 'Өнөөдрийн хичээл', AppIcons.classes, short: 'Өнөөдөр'),
-          NavLink('/app/admin', 'Удирдлага', AppIcons.home, short: 'Самбар'),
-          NavLink('/app/admin/analytics', 'Аналитик', AppIcons.chart, short: 'Аналитик'),
-          NavLink('/app/admin/finance', 'Санхүү', AppIcons.payments, short: 'Санхүү'),
-          _reconcileTab,
-          NavLink('/app/admin/passes', 'Эрхийн удирдлага', AppIcons.key, short: 'Эрх'),
-          NavLink('/app/admin/audit', 'Аудит', AppIcons.shield, short: 'Аудит'),
-        ],
-      ),
-      NavSection('students', _students, pages: [_studentsTab, _smsTab]),
-      NavSection(
-        'enroll',
-        _leads,
-        pages: [
-          _leadsTab,
-          NavLink('/app/admin/enrollment', 'Элсэлтийн удирдлага', AppIcons.enroll, short: 'Удирдлага'),
-          _placement,
-          _sorilsTab,
-        ],
-      ),
+      NavSection('home', NavLink('/app/teacher', 'Багшийн самбар', AppIcons.home, short: 'Нүүр')),
       NavSection('schedule', _schedule, pages: [..._staffSchedule, _teacherHours]),
+      NavSection('payments', _payments, pages: [_payments, _financeTab, _reconcileTab, _storeAdminTab]),
+      NavSection('students', _students, pages: [_studentsTab, _leadsTab, _enrollment, _placement, _sorilsTab, _smsTab]),
     ],
     UserRole.buyer: [
       NavSection('home', NavLink('/app/buyer', 'Миний эрхүүд', AppIcons.home, short: 'Нүүр')),
@@ -401,6 +381,29 @@ abstract final class NavData {
     }
     return best;
   }
+
+  /// Админы «Удирдлага» төв (`/app/admin`) — багшийн самбарын дээд товчоор нээгдэнэ.
+  static const manageGroups = <(String, List<NavLink>)>[
+    (
+      'Хяналт',
+      [
+        NavLink('/app/admin/analytics', 'Аналитик', AppIcons.chart),
+        NavLink('/app/admin/audit', 'Аудит', AppIcons.shield),
+        NavLink('/app/admin/v2', 'v2 ажлын хяналт', AppIcons.tests),
+      ],
+    ),
+    (
+      'Эрх',
+      [
+        NavLink('/app/admin/passes', 'Эрхийн удирдлага', AppIcons.key),
+        NavLink('/app/admin/capabilities', 'Эрхийн матриц', AppIcons.shield),
+      ],
+    ),
+    ('Санхүү', [_financeTab, _reconcile, _storeAdmin]),
+    ('Элсэлт', [_leads, _enrollment, _placement, _sorils, _sms]),
+    ('Агуулга', [_adminTheory, _internal, _import]),
+    ('Багш', [_teacherHours]),
+  ];
 
   /// «Бусад» дэлгэцийн бүлгүүд — хэсэгт ороогүй БҮХ холбоос (нэг ч цэс хасагдахгүй) + хувийн.
   static List<(NavGroup, List<NavLink>)> moreGroups(UserRole role) {

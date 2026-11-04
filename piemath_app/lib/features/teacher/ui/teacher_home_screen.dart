@@ -31,7 +31,21 @@ class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
     final key = date.dateKey;
     final async = ref.watch(dayBoardProvider(key));
     return Scaffold(
-      appBar: AppBar(title: const Text('Багшийн самбар')),
+      appBar: AppBar(
+        title: const Text('Багшийн самбар'),
+        actions: [
+          // Админ: удирдлагын хуудсууд нэг товчоор (эзэн 2026-11-04)
+          if (ref.watch(isAdminProvider))
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpace.sm),
+              child: TextButton.icon(
+                onPressed: () => context.push('/app/admin'),
+                icon: const Icon(AppIcons.settings, size: 20),
+                label: const Text('Удирдлага'),
+              ),
+            ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(dayBoardProvider(key).future).then((_) {}, onError: (_) {}),
         child: ListView(
