@@ -10,6 +10,7 @@ import '../../data/staff_schedule_models.dart';
 import '../../data/staff_schedule_repository.dart';
 import '../../domain/day_overlay.dart';
 import '../../domain/staff_schedule_logic.dart';
+import 'plan_sheets.dart';
 import 'staff_actions.dart';
 
 /// Хичээлийн дэлгэрэнгүйг доороос гарах хуудсаар (утас).
@@ -215,11 +216,31 @@ class _Body extends StatelessWidget {
             label: l.noteBy == null ? 'Тэмдэглэл' : 'Тэмдэглэл, ${l.noteBy}',
             text: l.noteBody!,
           ),
+        if (l.photoStudentName != null)
+          _Line(icon: AppIcons.camera, label: 'Онолын зураг илгээх', text: l.photoStudentName!),
         if (l.record != null)
           _Line(
             icon: AppIcons.checklist,
             label: 'Батлагдсан, ${l.record!.confirmedByName}',
-            text: 'Ирсэн ${l.record!.presentCount}, тасалсан ${l.record!.absentCount}',
+            text: [
+              'Ирсэн ${l.record!.presentCount}, тасалсан ${l.record!.absentCount}',
+              if (l.record!.problemNumbersText != null) 'Бодлого ${l.record!.problemNumbersText}',
+            ].join(', '),
+          ),
+        if (perms.canPlan)
+          _ActionTile(
+            icon: AppIcons.pencilLine,
+            label: 'Төлөвлөгөө засах',
+            subtitle: 'Тест, сэдэв, тарах цаг, онолын зураг, тэмдэглэл',
+            onTap: () => showPlanEditor(context, lesson: l, date: date),
+          ),
+        if (plan.canConfirm && date.compareTo(plan.today) <= 0)
+          _ActionTile(
+            icon: l.record != null ? AppIcons.badgeCheck : AppIcons.checklist,
+            label: l.record != null ? 'Батламж засах' : 'Батлах',
+            subtitle: 'Хийсэн тест, хассан бодлого, бодсон дугаар',
+            onTap: () =>
+                showConfirmSheet(context, lesson: l, date: date, tests: plan.tests, canRemoveTests: perms.canPlan),
           ),
         if (manage) ...[
           const _Section(title: 'Зөвхөн энэ өдөр'),
