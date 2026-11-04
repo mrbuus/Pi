@@ -232,4 +232,16 @@ describe('MistakesService reveal gate (ангид бодогдох тестий�
     expect(closed).not.toHaveProperty('correctAnswer');
     expect(closed).not.toHaveProperty('solutionOutline');
   });
+
+  it('strips the answer from today when the gate allows practice only', async () => {
+    const retried = { ...row, nextRetryAt: null, givenAnswer: 'A', reason: null, note: null, testTitle: null, createdAt: new Date(), updatedAt: new Date(),
+      retryCount: 1, lastRetryAt: new Date('2026-10-01T00:00:00Z'), sourceOccurredAt: new Date('2026-09-01T00:00:00Z'),
+      problem: { ...row.problem, statementText: 'q', imageKey: null, chapter: { topic: { name: 'Алгебр' } }, formulas: [] } };
+    const prisma = { ...mockOpenContentAccess(), mistakeEntry: { findMany: jest.fn().mockResolvedValue([retried]) } };
+    const service = new MistakesService(prisma as any);
+    const gate = jest.fn().mockResolvedValue({ locked: false, answer: false, solution: false });
+    const [item] = await service.today('learner-a', gate);
+    expect(item).not.toHaveProperty('correctAnswer');
+    expect(item).not.toHaveProperty('solutionOutline');
+  });
 });

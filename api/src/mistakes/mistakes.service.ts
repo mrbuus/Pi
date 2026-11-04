@@ -405,7 +405,8 @@ export class MistakesService {
       if (gate && (await gate({ problemId: entry.problemId, source: entry.source })).locked) continue;
       open.push(entry);
     }
-    return open.map((entry) => serializeEntry(entry));
+    // Түгжээгүй ч хариу нээгдэхгүй бодлогын хариу, бодолтыг хасна
+    return gateItems(open, gate);
   }
 
   async student(studentId: string, actor: { userId: string; role: Role }) {
