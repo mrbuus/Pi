@@ -47,6 +47,7 @@ dependencies:
   lottie: ^3.8.2
   # assets/anim/manifest.yaml-ийг унших (цэвэр Dart, өмнө нь transitive байсан).
   yaml: ^3.1.4
+  file_selector: ^1.1.0
 
 dev_dependencies:
   flutter_test:

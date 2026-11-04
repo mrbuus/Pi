@@ -351,7 +351,12 @@ void main() {
     });
 
     testWidgets('файл сонгох сан байхгүй үед тайлбар', (tester) async {
-      await _pump(tester, const StudentImportScreen(), http: importHttp());
+      await _pump(
+        tester,
+        const StudentImportScreen(),
+        http: importHttp(),
+        extra: [xlsxPickerProvider.overrideWithValue(const UnavailableXlsxPicker())],
+      );
       await tester.tap(find.byKey(const ValueKey('import-pick')));
       await settle(tester);
       expect(find.textContaining('файл сонгох боломж хараахан алга'), findsOneWidget);

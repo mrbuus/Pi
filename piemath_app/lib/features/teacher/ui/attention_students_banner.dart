@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/ui/ui.dart';
 import '../application/staff_providers.dart';
-import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
 
 /// Анхаарах сурагчид (Багш+, Админ; вэбийн `AttentionBanner`): ангид хуваарилагдаагүй эсвэл хичээлдээ ирэхгүй
-/// байгаа хүүхэд. Эрхгүй, алдаа, хоосон үед өөрөө нуугдана. Унших л (анги оноох нь вэбээр).
+/// байгаа хүүхэд. Эрхгүй, алдаа, хоосон үед өөрөө нуугдана. «Анги оноох» сурагчдын удирдлага руу.
 class AttentionStudentsBanner extends ConsumerStatefulWidget {
   const AttentionStudentsBanner({super.key});
 
@@ -78,14 +78,14 @@ class _AttentionStudentsBannerState extends ConsumerState<AttentionStudentsBanne
                       ),
                     if (nA > _rows) Text('ба өөр ${nA - _rows} хүүхэд', style: context.text.bodySmall),
                     const SizedBox(height: AppSpace.xs),
-                    Row(
-                      children: [
-                        Icon(TeacherIcons.eye, size: 14, color: c.inkDim),
-                        const SizedBox(width: AppSpace.xs),
-                        Expanded(
-                          child: Text('Анги оноох нь вэбээр', style: context.text.bodySmall?.copyWith(color: c.inkDim)),
-                        ),
-                      ],
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        // Анги оноох апп дотор — сурагчдын удирдлага (вэб рүү заахгүй, эзэн 2026-11-04)
+                        onPressed: () => context.push('/app/admin/students'),
+                        icon: const Icon(AppIcons.forward, size: 16),
+                        label: const Text('Анги оноох'),
+                      ),
                     ),
                   ],
                 ),

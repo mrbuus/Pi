@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,7 +40,29 @@ class UnavailableXlsxPicker extends XlsxPicker {
   Future<PickedFile?> pick() async => null;
 }
 
-final xlsxPickerProvider = Provider<XlsxPicker>((ref) => const UnavailableXlsxPicker());
+/// Утасны файл сонгогч (`file_selector`, Flutter-ийн албан ёсны сан): Android — MIME, iOS — UTI.
+class FileSelectorXlsxPicker extends XlsxPicker {
+  const FileSelectorXlsxPicker();
+
+  static const _group = XTypeGroup(
+    label: 'Excel',
+    extensions: ['xlsx'],
+    mimeTypes: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+    uniformTypeIdentifiers: ['org.openxmlformats.spreadsheetml.sheet'],
+  );
+
+  @override
+  bool get available => true;
+
+  @override
+  Future<PickedFile?> pick() async {
+    final file = await openFile(acceptedTypeGroups: const [_group]);
+    if (file == null) return null;
+    return PickedFile(name: file.name, bytes: await file.readAsBytes());
+  }
+}
+
+final xlsxPickerProvider = Provider<XlsxPicker>((ref) => const FileSelectorXlsxPicker());
 
 /// Серверийн хязгаар (`FileInterceptor` 5 MB).
 const maxImportBytes = 5 * 1024 * 1024;
