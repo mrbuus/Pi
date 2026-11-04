@@ -295,7 +295,7 @@ export class StudentHubService {
     const ids = [...new Set(enrollments.map((e) => e.classroomId))];
     if (!ids.length) return bundle;
     const inIds = { in: ids };
-    const ofClasses = { schedule: { classroomId: inIds } };
+    const ofClasses = { schedule: { deletedAt: null, classroomId: inIds } };
     const [
       names,
       scheduleRows,
@@ -309,7 +309,7 @@ export class StudentHubService {
       this.classNames(ids),
       // dismissMode-ийг ХЭЗЭЭ Ч сонгохгүй
       this.prisma.classSchedule.findMany({
-        where: { classroomId: inIds },
+        where: { classroomId: inIds, deletedAt: null },
         select: {
           id: true,
           classroomId: true,
@@ -600,17 +600,17 @@ export class StudentHubService {
         },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { date: todayDate },
+        where: { date: todayDate, deletedAt: null },
         select: { id: true, type: true, title: true },
       }),
       this.prisma.academicCalendarDayClassroom.findMany({
-        where: { calendarDay: { date: todayDate } },
+        where: { calendarDay: { date: todayDate, deletedAt: null } },
         select: { calendarDayId: true, classroomId: true },
       }),
     ]);
     const ids = [...new Set(enrollments.map((e) => e.classroomId))];
     const inIds = { in: ids };
-    const ofClasses = { schedule: { classroomId: inIds } };
+    const ofClasses = { schedule: { deletedAt: null, classroomId: inIds } };
     const markKey = latest?.status ? dateKey(latest.date) : null;
     // 2-р давалгаа: classroomId IN (…) — хуваарь, exception, сэдэв, өнөөдрийн бүртгэл,
     // сүүлийн тэмдэглэгээний D (нэг жижиг асуулга)
@@ -620,6 +620,7 @@ export class StudentHubService {
             this.classNames(ids),
             this.prisma.classSchedule.findMany({
               where: {
+                deletedAt: null,
                 classroomId: inIds,
                 effectiveFrom: { lte: todayDate },
                 OR: [
@@ -795,6 +796,7 @@ export class StudentHubService {
           LEFT JOIN "ScheduleException" x
             ON x."scheduleId" = t."scheduleId" AND x."date" = t."date"
           WHERE cs."classroomId" = ${classroomId}
+            AND cs."deletedAt" IS NULL
             AND t."date" BETWEEN ${from}::date AND ${to}::date
             AND (x."kind" IS NULL OR x."kind" <> 'CANCELLED')
       ) u WHERE u.d BETWEEN ${from}::date AND ${to}::date`;

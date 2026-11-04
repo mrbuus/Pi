@@ -111,7 +111,7 @@ export class ActivityService {
         _count: { _all: true },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} } },
+        where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} }, deletedAt: null },
         select: { date: true },
       }),
     ]);
@@ -170,7 +170,7 @@ export class ActivityService {
         select: { date: true },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} } },
+        where: { type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} }, deletedAt: null },
         select: { date: true },
       }),
       this.prisma.studyWeeklyGoal.findFirst({
@@ -277,7 +277,7 @@ export class ActivityService {
     }
 
     const calendarDays = await this.prisma.academicCalendarDay.findMany({
-      where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} } },
+      where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} }, deletedAt: null },
       select: { date: true },
     });
     const nonClassDates = new Set(calendarDays.map((c) => dateKey(c.date)));

@@ -579,7 +579,7 @@ export class AttendanceService {
       : new Set(
           (
             await this.prisma.classSchedule.findMany({
-              where: { teacherId: userId },
+              where: { teacherId: userId, deletedAt: null },
               select: { classroomId: true },
             })
           ).map((s) => s.classroomId),
@@ -1035,7 +1035,9 @@ export class AttendanceService {
     beforeDate: Date,
   ): Promise<{ dates: string[]; source: 'schedule' | 'attendance-fallback' }> {
     const hasSchedule =
-      (await this.prisma.classSchedule.count({ where: { classroomId } })) > 0;
+      (await this.prisma.classSchedule.count({
+        where: { classroomId, deletedAt: null },
+      })) > 0;
 
     if (hasSchedule) {
       const to = addDateDays(beforeDate, -1);

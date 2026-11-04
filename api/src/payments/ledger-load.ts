@@ -51,6 +51,7 @@ export async function classDays(
   if (!classroomIds.length) return out;
   const rows = await prisma.classSchedule.findMany({
     where: {
+      deletedAt: null,
       classroomId: { in: [...new Set(classroomIds)] },
       OR: [{ effectiveTo: null }, { effectiveTo: { gt: now } }],
     },

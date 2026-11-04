@@ -30,7 +30,7 @@ export async function loadLessonTopics(
     prisma.lessonTopic.findMany({
       where: {
         date: { in: dates },
-        schedule: { classroomId: { in: classroomIds } },
+        schedule: { deletedAt: null, classroomId: { in: classroomIds } },
       },
       select: {
         date: true,

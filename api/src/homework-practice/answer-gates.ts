@@ -23,6 +23,7 @@ export async function reservedAnywhere(
       where: {
         testIds: { has: testId },
         date: { gte: new Date(today.getTime() - 14 * 86_400_000) },
+        schedule: { deletedAt: null },
       },
       select: { id: true },
     }),

@@ -52,6 +52,8 @@ export type StaffTaskMinAggregateOutputType = {
   orderIndex: number | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type StaffTaskMaxAggregateOutputType = {
@@ -70,6 +72,8 @@ export type StaffTaskMaxAggregateOutputType = {
   orderIndex: number | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type StaffTaskCountAggregateOutputType = {
@@ -88,6 +92,8 @@ export type StaffTaskCountAggregateOutputType = {
   orderIndex: number
   createdAt: number
   updatedAt: number
+  deletedAt: number
+  deletedById: number
   _all: number
 }
 
@@ -118,6 +124,8 @@ export type StaffTaskMinAggregateInputType = {
   orderIndex?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type StaffTaskMaxAggregateInputType = {
@@ -136,6 +144,8 @@ export type StaffTaskMaxAggregateInputType = {
   orderIndex?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type StaffTaskCountAggregateInputType = {
@@ -154,6 +164,8 @@ export type StaffTaskCountAggregateInputType = {
   orderIndex?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
   _all?: true
 }
 
@@ -259,6 +271,8 @@ export type StaffTaskGroupByOutputType = {
   orderIndex: number
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
+  deletedById: string | null
   _count: StaffTaskCountAggregateOutputType | null
   _avg: StaffTaskAvgAggregateOutputType | null
   _sum: StaffTaskSumAggregateOutputType | null
@@ -300,6 +314,8 @@ export type StaffTaskWhereInput = {
   orderIndex?: Prisma.IntFilter<"StaffTask"> | number
   createdAt?: Prisma.DateTimeFilter<"StaffTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"StaffTask"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"StaffTask"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"StaffTask"> | string | null
   parentTask?: Prisma.XOR<Prisma.StaffTaskNullableScalarRelationFilter, Prisma.StaffTaskWhereInput> | null
   subtasks?: Prisma.StaffTaskListRelationFilter
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -323,6 +339,8 @@ export type StaffTaskOrderByWithRelationInput = {
   orderIndex?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   parentTask?: Prisma.StaffTaskOrderByWithRelationInput
   subtasks?: Prisma.StaffTaskOrderByRelationAggregateInput
   createdBy?: Prisma.UserOrderByWithRelationInput
@@ -349,6 +367,8 @@ export type StaffTaskWhereUniqueInput = Prisma.AtLeast<{
   orderIndex?: Prisma.IntFilter<"StaffTask"> | number
   createdAt?: Prisma.DateTimeFilter<"StaffTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"StaffTask"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"StaffTask"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"StaffTask"> | string | null
   parentTask?: Prisma.XOR<Prisma.StaffTaskNullableScalarRelationFilter, Prisma.StaffTaskWhereInput> | null
   subtasks?: Prisma.StaffTaskListRelationFilter
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -372,6 +392,8 @@ export type StaffTaskOrderByWithAggregationInput = {
   orderIndex?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.StaffTaskCountOrderByAggregateInput
   _avg?: Prisma.StaffTaskAvgOrderByAggregateInput
   _max?: Prisma.StaffTaskMaxOrderByAggregateInput
@@ -398,6 +420,8 @@ export type StaffTaskScalarWhereWithAggregatesInput = {
   orderIndex?: Prisma.IntWithAggregatesFilter<"StaffTask"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"StaffTask"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"StaffTask"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"StaffTask"> | Date | string | null
+  deletedById?: Prisma.StringNullableWithAggregatesFilter<"StaffTask"> | string | null
 }
 
 export type StaffTaskCreateInput = {
@@ -413,6 +437,8 @@ export type StaffTaskCreateInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   parentTask?: Prisma.StaffTaskCreateNestedOneWithoutSubtasksInput
   subtasks?: Prisma.StaffTaskCreateNestedManyWithoutParentTaskInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedStaffTasksInput
@@ -436,6 +462,8 @@ export type StaffTaskUncheckedCreateInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   subtasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutParentTaskInput
   assignees?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
 }
@@ -453,6 +481,8 @@ export type StaffTaskUpdateInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentTask?: Prisma.StaffTaskUpdateOneWithoutSubtasksNestedInput
   subtasks?: Prisma.StaffTaskUpdateManyWithoutParentTaskNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedStaffTasksNestedInput
@@ -476,6 +506,8 @@ export type StaffTaskUncheckedUpdateInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subtasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutParentTaskNestedInput
   assignees?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
 }
@@ -496,6 +528,8 @@ export type StaffTaskCreateManyInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StaffTaskUpdateManyMutationInput = {
@@ -511,6 +545,8 @@ export type StaffTaskUpdateManyMutationInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffTaskUncheckedUpdateManyInput = {
@@ -529,6 +565,8 @@ export type StaffTaskUncheckedUpdateManyInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffTaskListRelationFilter = {
@@ -562,6 +600,8 @@ export type StaffTaskCountOrderByAggregateInput = {
   orderIndex?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type StaffTaskAvgOrderByAggregateInput = {
@@ -585,6 +625,8 @@ export type StaffTaskMaxOrderByAggregateInput = {
   orderIndex?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type StaffTaskMinOrderByAggregateInput = {
@@ -603,6 +645,8 @@ export type StaffTaskMinOrderByAggregateInput = {
   orderIndex?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type StaffTaskSumOrderByAggregateInput = {
@@ -792,6 +836,8 @@ export type StaffTaskCreateWithoutCreatedByInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   parentTask?: Prisma.StaffTaskCreateNestedOneWithoutSubtasksInput
   subtasks?: Prisma.StaffTaskCreateNestedManyWithoutParentTaskInput
   classroom?: Prisma.ClassroomCreateNestedOneWithoutStaffTasksInput
@@ -813,6 +859,8 @@ export type StaffTaskUncheckedCreateWithoutCreatedByInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   subtasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutParentTaskInput
   assignees?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
 }
@@ -862,6 +910,8 @@ export type StaffTaskScalarWhereInput = {
   orderIndex?: Prisma.IntFilter<"StaffTask"> | number
   createdAt?: Prisma.DateTimeFilter<"StaffTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"StaffTask"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"StaffTask"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"StaffTask"> | string | null
 }
 
 export type StaffTaskCreateWithoutClassroomInput = {
@@ -877,6 +927,8 @@ export type StaffTaskCreateWithoutClassroomInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   parentTask?: Prisma.StaffTaskCreateNestedOneWithoutSubtasksInput
   subtasks?: Prisma.StaffTaskCreateNestedManyWithoutParentTaskInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedStaffTasksInput
@@ -898,6 +950,8 @@ export type StaffTaskUncheckedCreateWithoutClassroomInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   subtasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutParentTaskInput
   assignees?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
 }
@@ -941,6 +995,8 @@ export type StaffTaskCreateWithoutSubtasksInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   parentTask?: Prisma.StaffTaskCreateNestedOneWithoutSubtasksInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedStaffTasksInput
   classroom?: Prisma.ClassroomCreateNestedOneWithoutStaffTasksInput
@@ -963,6 +1019,8 @@ export type StaffTaskUncheckedCreateWithoutSubtasksInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   assignees?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
 }
 
@@ -984,6 +1042,8 @@ export type StaffTaskCreateWithoutParentTaskInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   subtasks?: Prisma.StaffTaskCreateNestedManyWithoutParentTaskInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedStaffTasksInput
   classroom?: Prisma.ClassroomCreateNestedOneWithoutStaffTasksInput
@@ -1005,6 +1065,8 @@ export type StaffTaskUncheckedCreateWithoutParentTaskInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   subtasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutParentTaskInput
   assignees?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
 }
@@ -1043,6 +1105,8 @@ export type StaffTaskUpdateWithoutSubtasksInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentTask?: Prisma.StaffTaskUpdateOneWithoutSubtasksNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedStaffTasksNestedInput
   classroom?: Prisma.ClassroomUpdateOneWithoutStaffTasksNestedInput
@@ -1065,6 +1129,8 @@ export type StaffTaskUncheckedUpdateWithoutSubtasksInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignees?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
 }
 
@@ -1097,6 +1163,8 @@ export type StaffTaskCreateWithoutAssigneesInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   parentTask?: Prisma.StaffTaskCreateNestedOneWithoutSubtasksInput
   subtasks?: Prisma.StaffTaskCreateNestedManyWithoutParentTaskInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedStaffTasksInput
@@ -1119,6 +1187,8 @@ export type StaffTaskUncheckedCreateWithoutAssigneesInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   subtasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutParentTaskInput
 }
 
@@ -1151,6 +1221,8 @@ export type StaffTaskUpdateWithoutAssigneesInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentTask?: Prisma.StaffTaskUpdateOneWithoutSubtasksNestedInput
   subtasks?: Prisma.StaffTaskUpdateManyWithoutParentTaskNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedStaffTasksNestedInput
@@ -1173,6 +1245,8 @@ export type StaffTaskUncheckedUpdateWithoutAssigneesInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subtasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutParentTaskNestedInput
 }
 
@@ -1191,6 +1265,8 @@ export type StaffTaskCreateManyCreatedByInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StaffTaskUpdateWithoutCreatedByInput = {
@@ -1206,6 +1282,8 @@ export type StaffTaskUpdateWithoutCreatedByInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentTask?: Prisma.StaffTaskUpdateOneWithoutSubtasksNestedInput
   subtasks?: Prisma.StaffTaskUpdateManyWithoutParentTaskNestedInput
   classroom?: Prisma.ClassroomUpdateOneWithoutStaffTasksNestedInput
@@ -1227,6 +1305,8 @@ export type StaffTaskUncheckedUpdateWithoutCreatedByInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subtasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutParentTaskNestedInput
   assignees?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
 }
@@ -1246,6 +1326,8 @@ export type StaffTaskUncheckedUpdateManyWithoutCreatedByInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffTaskCreateManyClassroomInput = {
@@ -1263,6 +1345,8 @@ export type StaffTaskCreateManyClassroomInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StaffTaskUpdateWithoutClassroomInput = {
@@ -1278,6 +1362,8 @@ export type StaffTaskUpdateWithoutClassroomInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentTask?: Prisma.StaffTaskUpdateOneWithoutSubtasksNestedInput
   subtasks?: Prisma.StaffTaskUpdateManyWithoutParentTaskNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedStaffTasksNestedInput
@@ -1299,6 +1385,8 @@ export type StaffTaskUncheckedUpdateWithoutClassroomInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subtasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutParentTaskNestedInput
   assignees?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
 }
@@ -1318,6 +1406,8 @@ export type StaffTaskUncheckedUpdateManyWithoutClassroomInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffTaskCreateManyParentTaskInput = {
@@ -1335,6 +1425,8 @@ export type StaffTaskCreateManyParentTaskInput = {
   orderIndex?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StaffTaskUpdateWithoutParentTaskInput = {
@@ -1350,6 +1442,8 @@ export type StaffTaskUpdateWithoutParentTaskInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subtasks?: Prisma.StaffTaskUpdateManyWithoutParentTaskNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedStaffTasksNestedInput
   classroom?: Prisma.ClassroomUpdateOneWithoutStaffTasksNestedInput
@@ -1371,6 +1465,8 @@ export type StaffTaskUncheckedUpdateWithoutParentTaskInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subtasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutParentTaskNestedInput
   assignees?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
 }
@@ -1390,6 +1486,8 @@ export type StaffTaskUncheckedUpdateManyWithoutParentTaskInput = {
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1448,6 +1546,8 @@ export type StaffTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   orderIndex?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   parentTask?: boolean | Prisma.StaffTask$parentTaskArgs<ExtArgs>
   subtasks?: boolean | Prisma.StaffTask$subtasksArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1472,6 +1572,8 @@ export type StaffTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   orderIndex?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   parentTask?: boolean | Prisma.StaffTask$parentTaskArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   classroom?: boolean | Prisma.StaffTask$classroomArgs<ExtArgs>
@@ -1493,6 +1595,8 @@ export type StaffTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   orderIndex?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   parentTask?: boolean | Prisma.StaffTask$parentTaskArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   classroom?: boolean | Prisma.StaffTask$classroomArgs<ExtArgs>
@@ -1514,9 +1618,11 @@ export type StaffTaskSelectScalar = {
   orderIndex?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }
 
-export type StaffTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "status" | "priority" | "startDate" | "dueDate" | "parentTaskId" | "createdById" | "classroomId" | "subject" | "estimateHours" | "orderIndex" | "createdAt" | "updatedAt", ExtArgs["result"]["staffTask"]>
+export type StaffTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "status" | "priority" | "startDate" | "dueDate" | "parentTaskId" | "createdById" | "classroomId" | "subject" | "estimateHours" | "orderIndex" | "createdAt" | "updatedAt" | "deletedAt" | "deletedById", ExtArgs["result"]["staffTask"]>
 export type StaffTaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   parentTask?: boolean | Prisma.StaffTask$parentTaskArgs<ExtArgs>
   subtasks?: boolean | Prisma.StaffTask$subtasksArgs<ExtArgs>
@@ -1561,6 +1667,8 @@ export type $StaffTaskPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     orderIndex: number
     createdAt: Date
     updatedAt: Date
+    deletedAt: Date | null
+    deletedById: string | null
   }, ExtArgs["result"]["staffTask"]>
   composites: {}
 }
@@ -2004,6 +2112,8 @@ export interface StaffTaskFieldRefs {
   readonly orderIndex: Prisma.FieldRef<"StaffTask", 'Int'>
   readonly createdAt: Prisma.FieldRef<"StaffTask", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"StaffTask", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"StaffTask", 'DateTime'>
+  readonly deletedById: Prisma.FieldRef<"StaffTask", 'String'>
 }
     
 

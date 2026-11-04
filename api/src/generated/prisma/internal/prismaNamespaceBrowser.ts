@@ -1320,7 +1320,9 @@ export const StaffTaskScalarFieldEnum = {
   estimateHours: 'estimateHours',
   orderIndex: 'orderIndex',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type StaffTaskScalarFieldEnum = (typeof StaffTaskScalarFieldEnum)[keyof typeof StaffTaskScalarFieldEnum]
@@ -1346,7 +1348,9 @@ export const ClassScheduleScalarFieldEnum = {
   subject: 'subject',
   effectiveFrom: 'effectiveFrom',
   effectiveTo: 'effectiveTo',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type ClassScheduleScalarFieldEnum = (typeof ClassScheduleScalarFieldEnum)[keyof typeof ClassScheduleScalarFieldEnum]
@@ -1461,7 +1465,9 @@ export const AcademicCalendarDayScalarFieldEnum = {
   title: 'title',
   note: 'note',
   createdById: 'createdById',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type AcademicCalendarDayScalarFieldEnum = (typeof AcademicCalendarDayScalarFieldEnum)[keyof typeof AcademicCalendarDayScalarFieldEnum]

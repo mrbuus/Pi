@@ -66,7 +66,7 @@ export class AttendanceDaySummaryService {
   private async theoryByClass(ids: string[], date: Date) {
     const [topics, photos] = await Promise.all([
       this.prisma.lessonTopic.findMany({
-        where: { date, photoStudentId: { not: null }, schedule: { classroomId: { in: ids } } },
+        where: { date, photoStudentId: { not: null }, schedule: { deletedAt: null, classroomId: { in: ids } } },
         select: { schedule: { select: { classroomId: true } } },
       }),
       this.prisma.lessonPhoto.findMany({

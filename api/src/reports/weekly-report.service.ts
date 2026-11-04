@@ -112,7 +112,7 @@ export class WeeklyReportService {
     const assignmentItems = assignments.filter((assignment) => enrollments.some((enrollment) => enrollment.classroomId === assignment.classroomId && enrollment.joinedAt <= assignment.createdAt && (!enrollment.leftAt || enrollment.leftAt >= assignment.createdAt))).map((assignment) => ({ title: assignment.title, dueDate: assignment.dueDate, done: ['DONE_ONLINE', 'DONE_IN_CLASS'].includes(assignment.submissions[0]?.state ?? '') }));
 
     const schedules = nextClassroomIds.length ? await this.prisma.classSchedule.findMany({
-      where: { classroomId: { in: nextClassroomIds } },
+      where: { classroomId: { in: nextClassroomIds }, deletedAt: null },
       select: { id: true, classroomId: true, weekday: true, startMinute: true, endMinute: true, effectiveFrom: true, effectiveTo: true, room: true, exceptions: { where: { OR: [{ date: { gte: end, lt: nextEnd } }, { newDate: { gte: end, lt: nextEnd } }] }, select: { date: true, kind: true, newDate: true, newStartMinute: true, newEndMinute: true, newRoom: true } } },
     }) : [];
     const scheduled = new Map<string, { date: string; startMinute: number; endMinute: number; room: string | null; classroom: string }>();

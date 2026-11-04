@@ -42,14 +42,14 @@ export async function staffDays(
   if (isClassTeacher(classroom, actor.userId)) return 'ALL';
   if (
     (await db.classSchedule.count({
-      where: { classroomId, teacherId: actor.userId },
+      where: { classroomId, teacherId: actor.userId, deletedAt: null },
     })) > 0
   )
     return 'ALL';
   const rows = await db.lessonStaffing.findMany({
     where: {
       date: { gte: from, lte: to },
-      schedule: { classroomId },
+      schedule: { deletedAt: null, classroomId },
       OR: [{ leadTeacherId: actor.userId }, { assistantTeacherId: actor.userId }],
     },
     select: { date: true },

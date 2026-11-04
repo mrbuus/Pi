@@ -1,7 +1,9 @@
 generator client {
-  provider     = "prisma-client"
-  output       = "../src/generated/prisma"
-  moduleFormat = "cjs"
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  moduleFormat    = "cjs"
+  // ClassSchedule-ийн зөөлөн устгалтай UNIQUE (зөвхөн deletedAt IS NULL мөрүүд)
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
@@ -2082,11 +2084,17 @@ model StaffTask {
   orderIndex    Int          @default(0)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): «устгах» = deletedAt бөглөнө,
+  // мөр DB-д үлдэнэ; уншилт бүрээс хасагдана. Устсан эцгийн дэд даалгавар
+  // дээд түвшний бие даасан даалгавар болж харагдана (хуучин SetNull-тэй ижил).
+  deletedAt     DateTime?
+  deletedById   String?
 
   assignees StaffTaskAssignee[]
 
   @@index([status, dueDate])
   @@index([dueDate])
+  @@index([deletedAt])
 }
 
 // Нэг даалгавар дээр олон ажилтан хамтарч болно (олон-олон холбоос).
@@ -2122,13 +2130,21 @@ model ClassSchedule {
   effectiveFrom DateTime
   effectiveTo   DateTime?
   createdAt     DateTime  @default(now())
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): «устгах» = deletedAt бөглөнө,
+  // мөр (сэдэв, онцгой тохиолдол, багшийн оноолт) DB-д үлдэнэ; хуваарийн
+  // хөдөлгүүр, жагсаалт, тоолол бүрээс хасагдана.
+  deletedAt     DateTime?
+  deletedById   String?
 
   exceptions ScheduleException[]
   topics     LessonTopic[]
   staffing   LessonStaffing[]
 
-  @@unique([classroomId, weekday, startMinute, effectiveFrom])
+  // Зөвхөн ИДЭВХТЭЙ мөрүүд дунд давтагдашгүй — устгасан хичээлийг ижил
+  // түлхүүрээр дахин үүсгэх боломжтой (20261104140000 миграци).
+  @@unique([classroomId, weekday, startMinute, effectiveFrom], where: { deletedAt: null })
   @@index([classroomId, weekday])
+  @@index([deletedAt])
 }
 
 // Тухайн долоо хоногийн НЭГ тохиолдол (occurrence) өөрчлөгдөх нь — цуцлагдах
@@ -2284,10 +2300,15 @@ model AcademicCalendarDay {
   note        String?
   createdById String
   createdAt   DateTime        @default(now())
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): «устгах» = deletedAt бөглөнө;
+  // хуваарийн хөдөлгүүр, ирц, төлбөр, хуанли бүрээс хасагдана.
+  deletedAt   DateTime?
+  deletedById String?
 
   classrooms AcademicCalendarDayClassroom[]
 
   @@index([date])
+  @@index([deletedAt])
 }
 
 // Онцгой өдөр (амралт/шалгалт) аль ангид хамаарахыг заана. Мөр байхгүй бол

@@ -181,6 +181,9 @@ export class ClassroomsService {
         teacher: classroom.teacher,
         assistantTeacherId: classroom.assistantTeacherId,
         assistantTeacher: classroom.assistantTeacher,
+        // Засах маягт бодит хичээлийг харуулна (эс бөгөөс «Математик» гэж
+        // анхдагчаар орж, Нийгмийн ухааны ангийг хадгалахад чимээгүй солигдоно)
+        subject: classroom.subject,
       },
       students: classroom.enrollments.map((enrollment) => ({
         ...enrollment.student,
@@ -188,6 +191,40 @@ export class ClassroomsService {
       })),
       permissions: { canManageStudents },
     };
+  }
+
+  /**
+   * GET /classrooms/registry — «Бүртгэл» хуудас (web/components/registry):
+   * архивлаагүй сурагч бүрийн БҮХ элсэлт (идэвхтэй = leftAt null, түүх = leftAt-тэй).
+   * Вэб идэвхтэй ростер, ангийн тоо, сурагчийн ангийн түүхийг эндээс бодно;
+   * ангигүй сурагчдыг /classrooms/unassigned-students өгнө. Зөвхөн байгаа
+   * өгөгдлийг уншина — утас зэрэг хувийн талбаргүй.
+   */
+  async registry() {
+    return this.prisma.enrollment.findMany({
+      where: { student: { role: Role.STUDENT, archivedAt: null } },
+      orderBy: [{ joinedAt: 'desc' }, { id: 'asc' }],
+      select: {
+        id: true,
+        joinedAt: true,
+        leftAt: true,
+        movedById: true,
+        student: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            studentCode: true,
+            studentProfile: {
+              select: { grade: true, branch: true, school: true },
+            },
+          },
+        },
+        classroom: {
+          select: { id: true, name: true, grade: true, type: true },
+        },
+      },
+    });
   }
 
   // Идэвхжсэн ч ангид ороогүй танхимын сурагчид (SPEC §6.3)

@@ -291,7 +291,7 @@ function makeDb() {
         topics
           .filter(
             (t) =>
-              (!where.schedule || where.schedule.classroomId.in.includes(t.classroomId)) &&
+              (!where.schedule?.classroomId || where.schedule.classroomId.in.includes(t.classroomId)) &&
               inRange(t.date, where.date) &&
               // Төлөвлөсөн тест (planned-tests) — testIds хоосон биш мөр л
               (where.testIds?.isEmpty !== false || (t.testIds ?? []).length > 0) &&
@@ -306,7 +306,7 @@ function makeDb() {
       findFirst: jest.fn(async ({ where }: any) =>
         topics.find(
           (t) =>
-            (!where.schedule || t.classroomId === where.schedule.classroomId) &&
+            (!where.schedule?.classroomId || t.classroomId === where.schedule.classroomId) &&
             (t.testIds ?? []).includes(where.testIds.has) &&
             (!where.date?.gte || t.date >= where.date.gte) &&
             (!where.date?.gt || t.date > where.date.gt),
@@ -732,7 +732,7 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
       expect(dates).not.toContain('2026-10-16');
       expect(my.days.find((x: any) => x.date === '2026-10-19')).toMatchObject({ topic: 'Зөөгдсөн' });
       const q = env.db.scheduleException.findMany.mock.calls[0][0];
-      expect(q.where.schedule).toEqual({ classroomId: { in: ['c1'] } });
+      expect(q.where.schedule).toEqual({ deletedAt: null, classroomId: { in: ['c1'] } });
     });
 
     it('GET /homework/my: B-гүй өдөр items: [], markComment ба topic, хуучин талбарууд хэвээр', async () => {
