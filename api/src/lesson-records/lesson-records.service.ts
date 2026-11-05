@@ -7,6 +7,7 @@ import {
 import { Prisma } from '../generated/prisma/client';
 import { Role } from '../generated/prisma/enums';
 import { dateKey, parseDateOnly, todayUB } from '../common/date';
+import { classTeacherWhere } from '../common/class-teachers';
 import { markPlus, teacherPlusIds } from '../common/teacher-plus';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleService } from '../schedule/schedule.service';
@@ -600,11 +601,14 @@ export class LessonRecordsService {
   async studentHistory(actor: Actor, studentId: string, limit = 60) {
     this.assertStaff(actor);
     if (actor.role === Role.TEACHER) {
-      const active = await this.prisma.enrollment.findFirst({
-        where: { studentId, leftAt: null },
-        select: { classroom: { select: { teacherId: true } } },
+      // Сурагчийн АЛЬ Ч идэвхтэй ангид үндсэн/туслах багш бол харна (2026-11-05 аудит): өмнө нь
+      // зөвхөн эхний элсэлтийн үндсэн багшийг шалгадаг байсан тул хоёр ангид суудаг сурагчийн
+      // хоёр дахь ангийн багш, туслах багш нар буруу хориглогддог байв.
+      const mine = await this.prisma.enrollment.findFirst({
+        where: { studentId, leftAt: null, classroom: classTeacherWhere(actor.userId) },
+        select: { id: true },
       });
-      if (active?.classroom.teacherId !== actor.userId)
+      if (!mine)
         throw new ForbiddenException(
           'Зөвхөн өөрийн ангийн сурагчийг харах эрхтэй',
         );

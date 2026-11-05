@@ -22,6 +22,12 @@ import { TryService } from './try.service';
 // мэдээлэл (анги/бүлэг жагсаалт) тул Cache-Control тавьж Cloudflare-д edge
 // hit болгоно — Render/Postgres хүртэл огт хүрэхгүй болно. ETag-ийг Express
 // автоматаар (weak, анхдагчаар идэвхтэй) нэмдэг тул нэмэлт код шаардлагагүй.
+/** Үнэгүй тест шалгах throttle-ийн түлхүүр: IP + тестийн ID */
+function tryGradeTracker(req: Record<string, any>): Promise<string> {
+  const id = typeof req.params?.id === 'string' ? req.params.id.slice(0, 80) : '';
+  return Promise.resolve(`try-grade:${req.ip ?? 'unknown'}|${id}`);
+}
+
 @Controller('catalog')
 export class CatalogController {
   constructor(
@@ -51,7 +57,9 @@ export class CatalogController {
     return this.tryService.view(id);
   }
 
-  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  // Бодлого бүрийн зөв/бурууг буцаадаг тул олон удаа илгээж түлхүүр гаргахыг хязгаарлаж «IP + тест»
+  // тус бүрд цагт 20 (2026-11-05 аудит) — нэг Wi-Fi-аас бүтэн анги хийхэд хүрэлцэнэ.
+  @Throttle({ default: { limit: 20, ttl: 3_600_000, getTracker: tryGradeTracker } })
   @Post('try/tests/:id/grade')
   tryGrade(@Param('id') id: string, @Body() body: { answers?: unknown }) {
     return this.tryService.grade(id, body?.answers);

@@ -22,36 +22,24 @@ export class ParentsService {
     private emailOtp: EmailOtpService,
   ) {}
 
+  /**
+   * Эцэг эх хүүхдийн утсаар холболт хүсэх. Аюулгүй байдал (2026-11-05 аудит): хариу нь сурагч
+   * олдсон эсэхээс үл хамааран ИЖИЛ — нэр, утас, «олдсонгүй» гэсэн ялгаа буцаахгүй (утасны
+   * дугаараар сурагч хайх oracle байсан). Хүүхдийн мэдээлэл зөвхөн ажилтан баталгаажуулсны дараа.
+   */
   async requestLink(parentId: string, studentPhone: string) {
     const student = await this.prisma.user.findUnique({
       where: { phone: studentPhone },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        phone: true,
-        role: true,
-      },
+      select: { id: true, role: true },
     });
-    if (!student || student.role !== Role.STUDENT) {
-      throw new NotFoundException('Ийм утасны дугаартай сурагч олдсонгүй');
+    if (student && student.role === Role.STUDENT) {
+      await this.prisma.parentLink.upsert({
+        where: { parentId_studentId: { parentId, studentId: student.id } },
+        create: { parentId, studentId: student.id },
+        update: {},
+      });
     }
-
-    return this.prisma.parentLink.upsert({
-      where: { parentId_studentId: { parentId, studentId: student.id } },
-      create: { parentId, studentId: student.id },
-      update: {},
-      include: {
-        student: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            phone: true,
-          },
-        },
-      },
-    });
+    return { requested: true };
   }
 
   private async assertVerifiedChild(parentId: string, studentId: string) {
@@ -66,8 +54,10 @@ export class ParentsService {
 
   async myChildren(parentId: string) {
     // First read only identity + verification. Pending links never query pupil records.
+    // Баталгаажаагүй холболтыг харуулахгүй — эс бөгөөс жагсаалтаар утасны дугаар оршин буйг
+    // (мөн нэрийг) тааж болдог байсан (2026-11-05 аудит)
     const links = await this.prisma.parentLink.findMany({
-      where: { parentId },
+      where: { parentId, verifiedAt: { not: null } },
       select: {
         id: true,
         verifiedAt: true,
