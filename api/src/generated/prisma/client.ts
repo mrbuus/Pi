@@ -740,3 +740,11 @@ export type UiEvent = Prisma.UiEventModel
  * allowLate = false бол хугацаа өнгөрмөгц онлайн тест эхлэх/хадгалах/илгээх, зураг явуулах хаагдана.
  */
 export type HomeworkDeadline = Prisma.HomeworkDeadlineModel
+/**
+ * Model HomeworkComment
+ * Гэрийн даалгавар дээрх СУРАГЧИД ХАРАГДАХ сэтгэгдэл (эзэн 2026-11-05). Багшийн дотоод тэмдэглэл
+ * (DailyHomeworkMark.comment)-ээс тусдаа. Нэг сурагч × анги × даалгавар өгсөн хичээлийн өдөр = нэг яриа:
+ * багш алдааг нь бичнэ, сурагч хариулж болно. ХЭЗЭЭ Ч устгахгүй (deletedAt зөвхөн зохиогч өөрөө нуухад).
+ * kind: NOTE — энгийн, RETURN — «Буцаах» дарахад бичсэн шалтгаан.
+ */
+export type HomeworkComment = Prisma.HomeworkCommentModel

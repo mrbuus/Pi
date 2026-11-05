@@ -462,7 +462,7 @@ describe('StudentHubService', () => {
         attendance: null,
         homework: {
           status: 'PARTIAL',
-          comment: 'Дутуу',
+          comment: null, // багшийн дотоод тэмдэглэл сурагчид очихгүй (2026-11-05)
           checkedOn: '2026-10-27',
         },
         theory: { count: 3, mine: true, canUpload: true, assignedToMe: true },
@@ -510,7 +510,7 @@ describe('StudentHubService', () => {
       ]);
       expect(k1.homework).toEqual({
         status: 'DONE',
-        comment: 'Сайн',
+        comment: null,
         checkedOn: '2026-10-25',
       });
     });
@@ -732,7 +732,7 @@ describe('StudentHubService', () => {
         latestMark: {
           date: '2026-10-30',
           status: 'PARTIAL',
-          comment: 'Дутуу',
+          comment: null,
           classroomId: 'c1',
           lessonDate: '2026-10-27',
         },

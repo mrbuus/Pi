@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check } from "lucide-react";
 import { api } from "@/lib/api";
 import {
   paymentAttempt,
@@ -15,7 +14,8 @@ import {
 } from "@/components/ui/StateBlock";
 import { getBookMeta } from "@/lib/bookMeta";
 import { Meta } from "@/components/ui/Meta";
-import { BANK, TUITION, bankAccountPlain, formatMnt } from "@/lib/orgInfo";
+import { TUITION, formatMnt } from "@/lib/orgInfo";
+import BankTransferInfo from "@/components/payments/BankTransferInfo";
 
 interface UserPass {
   id: string;
@@ -101,7 +101,6 @@ export default function BuyerDashboard() {
   );
   const [msg, setMsg] = useState("");
   const [messageError, setMessageError] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [paying, setPaying] = useState(false);
 
   const myPasses = passesQ.data ?? [];
@@ -113,12 +112,6 @@ export default function BuyerDashboard() {
     setDesc(p.name);
     if (p.price) setAmount(p.price.toLocaleString("en-US"));
     setMsg("");
-  }
-
-  function copyAccount() {
-    navigator.clipboard?.writeText(bankAccountPlain());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   }
 
   /** Төлбөрийн багц сонгоход дүн болон утга автоматаар бөглөгдөнө */
@@ -452,52 +445,8 @@ export default function BuyerDashboard() {
           ))}
         </div>
 
-        {/* Дансны мэдээлэл (зөвхөн дансны төлбөрт) */}
-        {method === "BANK_TRANSFER" && (
-          <div className="mt-4 rounded-xl border border-line bg-surface p-4">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-ink-dim">
-              Дараах данс руу шилжүүлээрэй
-            </p>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-ink-dim">Банк</span>
-                <span className="font-medium">{BANK.name}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-ink-dim">Дансны дугаар</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-base font-semibold">
-                    {BANK.account}
-                  </span>
-                  <button
-                    onClick={copyAccount}
-                    className="inline-flex items-center gap-1 rounded-md border border-line px-2 py-1 text-xs text-ink-dim transition hover:text-ink"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="h-3 w-3" aria-hidden /> Хууллаа
-                      </>
-                    ) : (
-                      "Хуулах"
-                    )}
-                  </button>
-                </div>
-              </div>
-              <div className="flex items-center justify-between gap-2">
-                <span className="shrink-0 text-ink-dim">IBAN</span>
-                <span className="truncate font-mono text-xs">{BANK.iban}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-ink-dim">Хүлээн авагч</span>
-                <span className="font-medium">{BANK.holder}</span>
-              </div>
-            </div>
-            <p className="mt-3 text-xs text-ink-dim">
-              Гүйлгээний утга дээр <b>өөрийн утасны дугаар</b>-аа бичээрэй —
-              баталгаажуулахад хялбар болно.
-            </p>
-          </div>
-        )}
+        {/* Дансны мэдээлэл (зөвхөн дансны төлбөрт) — хуулах гүйлгээний утгатай (тестэрийн санал 2026-11-05) */}
+        {method === "BANK_TRANSFER" && <BankTransferInfo className="mt-4" />}
 
         {/* Дүн ба тайлбар */}
         <div className="mt-4 space-y-3">

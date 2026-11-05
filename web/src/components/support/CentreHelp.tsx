@@ -2,12 +2,19 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowUpRight, BookOpen, MessageCircle, Send } from "lucide-react";
+import { ArrowUpRight, BookOpen, MapPin, MessageCircle, Send } from "lucide-react";
 import MathText from "@/components/MathText";
 import { Button } from "@/components/ui/kit/button";
 import { api } from "@/lib/api";
 
-type Answer = { id: string; question: string; answer: string; source: { label: string; href: string } };
+type Answer = {
+  id: string;
+  question: string;
+  answer: string;
+  source: { label: string; href: string };
+  /** Салбар бүрийн газрын зураг г.м. — байвал source-ийн оронд (2026-11-05) */
+  links?: { label: string; href: string }[];
+};
 type Reply = { version: string; mode: string; matches: Answer[]; fallback: string | null };
 const QUICK = ["Гэрийн даалгаврын зураг яаж илгээх вэ?", "Онол, бодолтоо хаанаас үзэх вэ?", "Эцэг эх хүүхдийн явцыг яаж харах вэ?", "Танхимын ангид яаж бүртгүүлэх вэ?"];
 
@@ -52,7 +59,19 @@ export default function CentreHelp() {
               {position > 0 && <p className="mb-2 text-xs font-semibold text-ink-dim">Холбоотой мэдээлэл</p>}
               <h2 className="text-sm font-bold text-ink">{match.question}</h2>
               <div className="mt-2 text-sm leading-relaxed text-ink-dim"><MathText>{match.answer}</MathText></div>
-              <Link href={match.source.href} className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand"><BookOpen aria-hidden className="h-4 w-4" />{match.source.label}<ArrowUpRight aria-hidden className="h-4 w-4" /></Link>
+              {match.links?.length ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {match.links.map((l) => (
+                    <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line px-3 text-sm font-semibold text-brand hover:border-brand-bright">
+                      <MapPin aria-hidden className="h-4 w-4" />
+                      {l.label}
+                      <ArrowUpRight aria-hidden className="h-4 w-4" />
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <Link href={match.source.href} className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand"><BookOpen aria-hidden className="h-4 w-4" />{match.source.label}<ArrowUpRight aria-hidden className="h-4 w-4" /></Link>
+              )}
             </div>)}
           </article>
         ))}

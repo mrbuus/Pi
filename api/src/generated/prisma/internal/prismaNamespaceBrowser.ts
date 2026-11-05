@@ -181,7 +181,8 @@ export const ModelName = {
   HomeworkCheck: 'HomeworkCheck',
   HomeworkPhoto: 'HomeworkPhoto',
   UiEvent: 'UiEvent',
-  HomeworkDeadline: 'HomeworkDeadline'
+  HomeworkDeadline: 'HomeworkDeadline',
+  HomeworkComment: 'HomeworkComment'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -2167,6 +2168,9 @@ export const HomeworkPhotoScalarFieldEnum = {
   lessonDate: 'lessonDate',
   fileKey: 'fileKey',
   pages: 'pages',
+  caption: 'caption',
+  returnedAt: 'returnedAt',
+  returnedById: 'returnedById',
   createdAt: 'createdAt',
   deletedAt: 'deletedAt'
 } as const
@@ -2200,6 +2204,22 @@ export const HomeworkDeadlineScalarFieldEnum = {
 } as const
 
 export type HomeworkDeadlineScalarFieldEnum = (typeof HomeworkDeadlineScalarFieldEnum)[keyof typeof HomeworkDeadlineScalarFieldEnum]
+
+
+export const HomeworkCommentScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  studentId: 'studentId',
+  lessonDate: 'lessonDate',
+  authorId: 'authorId',
+  authorRole: 'authorRole',
+  kind: 'kind',
+  body: 'body',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type HomeworkCommentScalarFieldEnum = (typeof HomeworkCommentScalarFieldEnum)[keyof typeof HomeworkCommentScalarFieldEnum]
 
 
 export const SortOrder = {

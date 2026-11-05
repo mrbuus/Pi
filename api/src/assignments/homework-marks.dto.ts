@@ -12,6 +12,7 @@ import {
   IsOptional,
   IsString,
   Matches,
+  MaxLength,
   ValidateNested,
 } from 'class-validator';
 import { HomeworkMarkStatus } from '../generated/prisma/enums';
@@ -78,4 +79,9 @@ export class SetHomeworkDeadlineDto {
   @ApiProperty({ description: 'true = хугацаа өнгөрсөн ч илгээж болно (хоцорсон гэж тэмдэглэнэ)' })
   @IsBoolean()
   allowLate: boolean;
+}
+
+/** Сурагчид харагдах сэтгэгдэл / «Буцаах» шалтгаан (эзэн 2026-11-05) */
+export class HomeworkCommentDto {
+  @ApiProperty() @IsString() @IsNotEmpty() @MaxLength(1000) body!: string;
 }

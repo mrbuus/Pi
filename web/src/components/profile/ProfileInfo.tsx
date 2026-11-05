@@ -126,13 +126,17 @@ export default function ProfileInfo({ me, role }: { me: ProfileInfoMe; role: str
           placeholder="Утасны дугаар холбогдоогүй"
           href={me.phone ? `tel:${me.phone}` : undefined}
         />
-        <FieldRow
-          icon={<Mail className="h-4 w-4" aria-hidden="true" strokeWidth={1.7} />}
-          label="Имэйл"
-          value={me.email}
-          placeholder="Имэйл холбогдоогүй"
-          href={me.email ? `mailto:${me.email}` : undefined}
-        />
+        {/* Имэйл хоосон бол мөрийг харуулахгүй — Gmail-ийн холболтыг доорх «Google бүртгэл» хэсэг
+            ганцаараа харуулна (тестэр 2026-11-05: «Холбогдсон» + «Имэйл холбогдоогүй» давхар гарч байсан) */}
+        {me.email && (
+          <FieldRow
+            icon={<Mail className="h-4 w-4" aria-hidden="true" strokeWidth={1.7} />}
+            label="Имэйл"
+            value={me.email}
+            placeholder=""
+            href={`mailto:${me.email}`}
+          />
+        )}
       </div>
     </section>
   );

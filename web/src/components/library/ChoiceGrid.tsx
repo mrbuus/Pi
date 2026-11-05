@@ -34,7 +34,17 @@ function columnOptions(n: number): number[] {
   return [...new Set(opts)];
 }
 
-export default function ChoiceGrid({ choices, showCorrect = false }: { choices: DisplayChoice[]; showCorrect?: boolean }) {
+export default function ChoiceGrid({
+  choices,
+  showCorrect = false,
+  selectable = false,
+}: {
+  choices: DisplayChoice[];
+  showCorrect?: boolean;
+  /** Сурагч хариугаа дарж тэмдэглэнэ — зөвхөн дэлгэц дээр, санд бичихгүй, дүгнэхгүй (тестэр 2026-11-05) */
+  selectable?: boolean;
+}) {
+  const [picked, setPicked] = useState<string | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
   const [cols, setCols] = useState(choices.length);
@@ -73,18 +83,36 @@ export default function ChoiceGrid({ choices, showCorrect = false }: { choices: 
       <ul className="grid gap-x-3 gap-y-2" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
         {choices.map((c) => {
           const correct = showCorrect && c.isCorrect;
+          const body = (
+            <>
+              <span className={`shrink-0 font-mono font-bold ${correct ? "text-success" : picked === c.label ? "text-brand" : "text-ink-dim"}`}>{c.label}.</span>
+              <span className="min-w-0">
+                <ChoiceContent text={c.text} image={c.imageKey} imageClassName="max-h-40" />
+              </span>
+            </>
+          );
           return (
             <li key={c.label} className="min-w-0">
-              <span
-                className={`inline-flex max-w-full items-start gap-1.5 rounded-lg px-2 py-0.5 text-sm ${
-                  correct ? "bg-success/15 ring-1 ring-success/40" : ""
-                }`}
-              >
-                <span className={`shrink-0 font-mono font-bold ${correct ? "text-success" : "text-ink-dim"}`}>{c.label}.</span>
-                <span className="min-w-0">
-                  <ChoiceContent text={c.text} image={c.imageKey} imageClassName="max-h-40" />
+              {selectable ? (
+                <button
+                  type="button"
+                  aria-pressed={picked === c.label}
+                  onClick={() => setPicked((cur) => (cur === c.label ? null : c.label))}
+                  className={`inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-lg px-2 py-0.5 text-left text-sm transition-colors ${
+                    picked === c.label ? "bg-brand/15 ring-1 ring-brand/50" : "hover:bg-surface-interactive"
+                  }`}
+                >
+                  {body}
+                </button>
+              ) : (
+                <span
+                  className={`inline-flex max-w-full items-start gap-1.5 rounded-lg px-2 py-0.5 text-sm ${
+                    correct ? "bg-success/15 ring-1 ring-success/40" : ""
+                  }`}
+                >
+                  {body}
                 </span>
-              </span>
+              )}
             </li>
           );
         })}

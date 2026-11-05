@@ -527,7 +527,8 @@ export const ModelName = {
   HomeworkCheck: 'HomeworkCheck',
   HomeworkPhoto: 'HomeworkPhoto',
   UiEvent: 'UiEvent',
-  HomeworkDeadline: 'HomeworkDeadline'
+  HomeworkDeadline: 'HomeworkDeadline',
+  HomeworkComment: 'HomeworkComment'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -543,7 +544,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "uiEvent" | "homeworkDeadline"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "uiEvent" | "homeworkDeadline" | "homeworkComment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -10241,6 +10242,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    HomeworkComment: {
+      payload: Prisma.$HomeworkCommentPayload<ExtArgs>
+      fields: Prisma.HomeworkCommentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeworkCommentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeworkCommentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>
+        }
+        findFirst: {
+          args: Prisma.HomeworkCommentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeworkCommentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>
+        }
+        findMany: {
+          args: Prisma.HomeworkCommentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>[]
+        }
+        create: {
+          args: Prisma.HomeworkCommentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>
+        }
+        createMany: {
+          args: Prisma.HomeworkCommentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeworkCommentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>[]
+        }
+        delete: {
+          args: Prisma.HomeworkCommentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>
+        }
+        update: {
+          args: Prisma.HomeworkCommentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeworkCommentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeworkCommentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeworkCommentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeworkCommentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>
+        }
+        aggregate: {
+          args: Prisma.HomeworkCommentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeworkComment>
+        }
+        groupBy: {
+          args: Prisma.HomeworkCommentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkCommentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeworkCommentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkCommentCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -12247,6 +12322,9 @@ export const HomeworkPhotoScalarFieldEnum = {
   lessonDate: 'lessonDate',
   fileKey: 'fileKey',
   pages: 'pages',
+  caption: 'caption',
+  returnedAt: 'returnedAt',
+  returnedById: 'returnedById',
   createdAt: 'createdAt',
   deletedAt: 'deletedAt'
 } as const
@@ -12280,6 +12358,22 @@ export const HomeworkDeadlineScalarFieldEnum = {
 } as const
 
 export type HomeworkDeadlineScalarFieldEnum = (typeof HomeworkDeadlineScalarFieldEnum)[keyof typeof HomeworkDeadlineScalarFieldEnum]
+
+
+export const HomeworkCommentScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  studentId: 'studentId',
+  lessonDate: 'lessonDate',
+  authorId: 'authorId',
+  authorRole: 'authorRole',
+  kind: 'kind',
+  body: 'body',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type HomeworkCommentScalarFieldEnum = (typeof HomeworkCommentScalarFieldEnum)[keyof typeof HomeworkCommentScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -13436,6 +13530,7 @@ export type GlobalOmitConfig = {
   homeworkPhoto?: Prisma.HomeworkPhotoOmit
   uiEvent?: Prisma.UiEventOmit
   homeworkDeadline?: Prisma.HomeworkDeadlineOmit
+  homeworkComment?: Prisma.HomeworkCommentOmit
 }
 
 /* Types for Logging */

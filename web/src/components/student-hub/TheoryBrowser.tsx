@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import DatePickerButton from "@/components/ui/DatePickerButton";
 import { CalendarDays, Camera, ChevronRight, Images, Search, SearchX, X } from "lucide-react";
 import { dayLabel } from "@/components/makeup/types";
 import { todayKeyUB } from "@/components/homework-practice/lib";
@@ -291,18 +292,16 @@ export default function TheoryBrowser() {
           >
             Өчигдөр
           </button>
-          <label className={cn(chip(customDate), "relative cursor-pointer")}>
+          <DatePickerButton
+            value={dateFilter}
+            max={today}
+            onChange={(v) => setDateFilter(isDateKey(v) ? v : "")}
+            ariaLabel="Огноо сонгох"
+            className={chip(customDate)}
+          >
             <CalendarDays className="size-4" aria-hidden />
             <span>{customDate ? dayLabel(dateFilter, false) : "Огноо"}</span>
-            <input
-              type="date"
-              value={dateFilter}
-              max={today}
-              onChange={(e) => setDateFilter(isDateKey(e.target.value) ? e.target.value : "")}
-              aria-label="Огноо сонгох"
-              className="absolute inset-0 cursor-pointer opacity-0"
-            />
-          </label>
+          </DatePickerButton>
         </div>
       </div>
 

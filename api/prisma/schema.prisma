@@ -3154,6 +3154,11 @@ model HomeworkPhoto {
   lessonDate  DateTime  @db.Date
   fileKey     String
   pages       Int
+  /// Сурагчийн бичсэн тайлбар (илгээхээс өмнө, ≤500 тэмдэгт) — файл 7 хоногт устсан ч мөр, тайлбар үлдэнэ
+  caption     String?
+  /// Багш «Буцаах» дарсан (эзэн 2026-11-05) — сурагч хугацаа хаагдсан ч дахин илгээж болно
+  returnedAt   DateTime?
+  returnedById String?
   createdAt   DateTime  @default(now())
   deletedAt   DateTime?
 
@@ -3195,4 +3200,24 @@ model HomeworkDeadline {
   updatedAt   DateTime @updatedAt
 
   @@unique([classroomId, lessonDate])
+}
+
+/// Гэрийн даалгавар дээрх СУРАГЧИД ХАРАГДАХ сэтгэгдэл (эзэн 2026-11-05). Багшийн дотоод тэмдэглэл
+/// (DailyHomeworkMark.comment)-ээс тусдаа. Нэг сурагч × анги × даалгавар өгсөн хичээлийн өдөр = нэг яриа:
+/// багш алдааг нь бичнэ, сурагч хариулж болно. ХЭЗЭЭ Ч устгахгүй (deletedAt зөвхөн зохиогч өөрөө нуухад).
+/// kind: NOTE — энгийн, RETURN — «Буцаах» дарахад бичсэн шалтгаан.
+model HomeworkComment {
+  id          String    @id @default(cuid())
+  classroomId String
+  studentId   String
+  lessonDate  DateTime  @db.Date
+  authorId    String
+  authorRole  Role
+  kind        String    @default("NOTE")
+  body        String
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+
+  @@index([studentId, classroomId, lessonDate])
+  @@index([classroomId, lessonDate])
 }
