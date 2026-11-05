@@ -83,6 +83,8 @@ export const loginAttempts = new LoginAttempts();
  * өөр нэрээр нэг бүртгэлийг оролдсон ч нэг тоолуурт орно. Түгжээ нь loginAttempts-д.
  */
 export const accountAttempts = new LoginAttempts();
+/** Бүртгэл + IP («userId|ip») — нэг эх сурвалжаас өөр нэвтрэх нэрээр ээлжлэн оролдохыг түгжинэ */
+export const accountSourceAttempts = new LoginAttempts();
 
 /**
  * Нэг IP-аас нэвтрэх оролдлогын нийт тоо (2026-11-05 аудит). Нэвтрэх маршрутын throttle нь «IP +

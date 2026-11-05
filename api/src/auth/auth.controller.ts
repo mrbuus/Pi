@@ -54,7 +54,7 @@ export class AuthController {
         'Хэт олон оролдлого. Хэсэг хугацааны дараа дахин оролдоно уу.',
         HttpStatus.TOO_MANY_REQUESTS,
       );
-    return this.auth.login(dto);
+    return this.auth.login(dto, ip || 'unknown');
   }
 
   @UseGuards(JwtAuthGuard)
