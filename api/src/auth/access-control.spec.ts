@@ -7,6 +7,8 @@ import { TuitionController } from '../tuition/tuition.controller';
 import { SheetSyncController } from '../sheet-sync/sheet-sync.controller';
 import { UsageController } from '../usage/usage.controller';
 import { HomeworkMarksController } from '../assignments/homework-marks.controller';
+import { TeacherGroupsController } from '../teacher-groups/teacher-groups.controller';
+import { ParentsController } from '../parents/parents.controller';
 
 /**
  * Мөнгөний маршрутуудын эрхийн хамгаалалт — 2026-09-26 (G02–G03).
@@ -53,6 +55,17 @@ describe('Гэрийн даалгаврын хугацаа — зөвхөн аж
   it.each(['getDeadline', 'setDeadline'] as const)('%s — ADMIN/TEACHER_PLUS/TEACHER', (name) => {
     expect(guardsOf(HomeworkMarksController)).toContain(RolesGuard);
     expect(rolesOf(HomeworkMarksController.prototype[name])).toEqual(['ADMIN', 'TEACHER_PLUS', 'TEACHER']);
+  });
+});
+
+describe('Аюулгүй байдлын аудит 2026-11-05', () => {
+  it('гадны багш бүртгэх — зөвхөн ADMIN (нэвтрээгүй хүн TEACHER эрх авахгүй)', () => {
+    const h = TeacherGroupsController.prototype.registerExternalTeacher;
+    expect(guardsOf(h)).toContain(RolesGuard);
+    expect(rolesOf(h)).toEqual(['ADMIN']);
+  });
+  it('эцэг эхийн холболт хүсэх — PARENT', () => {
+    expect(rolesOf(ParentsController.prototype.requestLink)).toEqual(['PARENT']);
   });
 });
 

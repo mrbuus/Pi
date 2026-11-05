@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
       { key: "X-Frame-Options", value: "DENY" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+      // 2026-11-05 аудит: юу ч эвдэхгүй CSP хэсгүүд (скрипт/зураг/фонт/PDF-ийг хязгаарлахгүй) — <base>
+      // шошго, өөр сайтын iframe-ээр халдахыг хаана. object-src-ыг хаагаагүй: онолын уншигч PDF-ийг
+      // <object>-оор (S3 рүү чиглэнэ) харуулдаг. Бүрэн CSP (script-src) тусдаа шалгалттай.
+      { key: "Content-Security-Policy", value: "base-uri 'self'; frame-ancestors 'none'" },
+      // Вэбийн хариунд HSTS байгаагүй (зөвхөн API-д). Дэд домэйнд хүрэхгүй.
+      { key: "Strict-Transport-Security", value: "max-age=31536000" },
     ] },
     // Нүүрний амжилтын зураг (эзэн 2026-10-22: «орох болгонд татаж серверийн төлбөр өсгөхгүй»):
     // хөтөч 30 хоног хадгална, CDN (Vercel/Cloudflare) дахин татахгүй. Ижил нэрээр зураг солих бол

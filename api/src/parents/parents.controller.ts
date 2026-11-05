@@ -8,6 +8,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -25,6 +26,8 @@ interface AuthedRequest {
 export class ParentsController {
   constructor(private parents: ParentsService) {}
 
+  // Нэг эцэг эх цагт 10 хүсэлт — дугаар таах оролдлогыг хязгаарлана
+  @Throttle({ default: { limit: 10, ttl: 3_600_000 } })
   @Roles(Role.PARENT)
   @Post('links')
   requestLink(@Body() dto: RequestParentLinkDto, @Req() req: AuthedRequest) {

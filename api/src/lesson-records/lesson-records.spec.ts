@@ -539,12 +539,23 @@ describe('Сурагчийн хичээлийн түүх (ажилтан)', () =
 
   it('Багш — зөвхөн өөрийн ангийн сурагч; сурагч/эцэг эх — хориотой', async () => {
     const { service, prisma } = makeService();
-    prisma.enrollment.findFirst = jest.fn(async () => ({
-      classroom: { teacherId: 'tch' },
-    }));
-    await expect(
-      service.studentHistory({ userId: 'tch', role: Role.TEACHER }, 'st1'),
-    ).resolves.toEqual([]);
+    // Сурагч хоёр ангид: c1 (үндсэн tch), c2 (үндсэн tch2, туслах asst) — аль ч ангийн багш харна
+    const enrolled = [
+      { classroom: { teacherId: 'tch', assistantTeacherId: null } },
+      { classroom: { teacherId: 'tch2', assistantTeacherId: 'asst' } },
+    ];
+    prisma.enrollment.findFirst = jest.fn(async ({ where }: any) => {
+      const [a, b] = where.classroom.OR;
+      return (
+        enrolled.find(
+          (e) => e.classroom.teacherId === a.teacherId || e.classroom.assistantTeacherId === b.assistantTeacherId,
+        ) ?? null
+      );
+    });
+    for (const id of ['tch', 'tch2', 'asst'])
+      await expect(
+        service.studentHistory({ userId: id, role: Role.TEACHER }, 'st1'),
+      ).resolves.toEqual([]);
     await expect(
       service.studentHistory({ userId: 'other', role: Role.TEACHER }, 'st1'),
     ).rejects.toThrow();

@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Ip,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -9,7 +19,16 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResetPasswordLinkDto } from './dto/reset-password-link.dto';
 import { SetAvatarDto } from './dto/set-avatar.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { loginIpWindow } from './login-attempts';
 import { PasswordResetService } from './password-reset.service';
+
+/** Нэвтрэх throttle-ийн түлхүүр: IP + нэвтрэх нэр (жижиг үсэг, хоосон зайгүй) */
+function loginTracker(req: Record<string, any>): Promise<string> {
+  const body = (req.body ?? {}) as { identifier?: unknown; phone?: unknown };
+  const raw = typeof body.identifier === 'string' ? body.identifier : typeof body.phone === 'string' ? body.phone : '';
+  const id = raw.toLowerCase().replace(/\s+/g, '').slice(0, 120);
+  return Promise.resolve(`login:${req.ip ?? 'unknown'}|${id}`);
+}
 
 @Controller('auth')
 export class AuthController {
@@ -25,9 +44,16 @@ export class AuthController {
     return this.auth.register(dto);
   }
 
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  // «IP + нэвтрэх нэр»-ээр 10/мин (нэг Wi-Fi-аас олон хүүхэд зэрэг нэвтэрнэ) + нэг IP-аас нийт
+  // 60/мин (олон бүртгэлийг дараалан оролдохыг барина) — 2026-11-05 аудит
+  @Throttle({ default: { limit: 10, ttl: 60_000, getTracker: loginTracker } })
   @Post('login')
-  login(@Body() dto: LoginDto) {
+  login(@Body() dto: LoginDto, @Ip() ip: string) {
+    if (!loginIpWindow.hit(ip || 'unknown'))
+      throw new HttpException(
+        'Хэт олон оролдлого. Хэсэг хугацааны дараа дахин оролдоно уу.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     return this.auth.login(dto);
   }
 
