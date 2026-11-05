@@ -276,14 +276,6 @@ export class AuthService {
         'Нэвтрэх мэдээлэл эсвэл нууц үг буруу байна',
       );
     }
-    // Бүртгэлээр (userId) түгжинэ — утас/имэйл/нэрийг ээлжлэн оролдож нэвтрэх нэрийн түгжээг
-    // тойрохоос сэргийлнэ (2026-11-05 аудит). Мессеж нь нэвтрэх нэрийн түгжээтэй ижил.
-    if (accountAttempts.isLocked(user.id)) {
-      throw new HttpException(
-        'Олон удаа буруу оролдсон тул 15 минутын дараа дахин оролдоно уу. Нууц үгээ мартсан бол «Нууц үг сэргээх»-ийг ашиглана уу.',
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
-    }
     const ok = await bcrypt.compare(dto.password, user.passwordHash);
     if (!ok) {
       loginAttempts.failure(identifier);
