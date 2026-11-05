@@ -866,16 +866,19 @@ function ProblemList({
           key={p.id}
           className="relative flex items-start gap-3 rounded-xl border border-line p-3"
         >
-          {/* «Нүд»: сурагч, худалдан авагчид яг хэрхэн харагдахыг шалгах (баруун дээд булан) */}
-          <button
-            type="button"
-            onClick={() => setPreviewFor(p)}
-            aria-label="Сурагчид харагдах байдал"
-            title="Сурагчид харагдах байдал"
-            className={`absolute right-2 top-2 ${ICON_BTN}`}
-          >
-            <Eye className="h-4 w-4" aria-hidden />
-          </button>
+          {/* «Нүд»: сурагч, худалдан авагчид яг хэрхэн харагдахыг шалгах — зөвхөн ажилтанд (тестэрийн
+              санал 2026-11-05: сурагч/худалдан авагчид энэ товч утгагүй тул харуулахгүй) */}
+          {canEdit && (
+            <button
+              type="button"
+              onClick={() => setPreviewFor(p)}
+              aria-label="Сурагчид харагдах байдал"
+              title="Сурагчид харагдах байдал"
+              className={`absolute right-2 top-2 ${ICON_BTN}`}
+            >
+              <Eye className="h-4 w-4" aria-hidden />
+            </button>
+          )}
           <span
             className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${tone.soft} ${tone.text}`}
           >
@@ -889,7 +892,7 @@ function ProblemList({
               isStaffView={canEdit}
               variant="stacked"
             >
-              <p className="pr-8 text-sm">
+              <p className={`text-sm ${canEdit ? "pr-8" : ""}`}>
                 <MathText>{p.statementText ?? ""}</MathText>
               </p>
             </ProblemFigure>
@@ -900,7 +903,7 @@ function ProblemList({
                 isCorrect ирсэн үед л гарна. */}
             {p.format === "CHOICE" && displayChoicesOf(p).length > 0 && (
               // Зөв хариу: зөвхөн ногоон хайрцгаар (багш) — нэмэлт «Зөв»/«Хариу» тэмдэггүй
-              <ChoiceGrid choices={displayChoicesOf(p)} showCorrect={!!canEdit} />
+              <ChoiceGrid choices={displayChoicesOf(p)} showCorrect={!!canEdit} selectable={!canEdit} />
             )}
 
             {/* Доод мөр: зүүн талд төрөл · оноо (бүдэг бичвэр), баруун талд дүрс товчнууд.

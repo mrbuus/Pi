@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import DatePickerButton from "@/components/ui/DatePickerButton";
 import { Building2, CalendarDays, CalendarOff, ChevronLeft, ChevronRight, Palmtree } from "lucide-react";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -264,16 +265,14 @@ export default function WeekBuilder() {
         >
           <ChevronRight className="size-5" aria-hidden />
         </button>
-        <label className="relative inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-ink/5">
+        <DatePickerButton
+          value={day}
+          onChange={(v) => v && setDay(v)}
+          ariaLabel="Өдөр сонгох"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-ink/5"
+        >
           <CalendarDays className="size-5" aria-hidden />
-          <span className="sr-only">Өдөр сонгох</span>
-          <input
-            type="date"
-            value={day}
-            onChange={(e) => e.target.value && setDay(e.target.value)}
-            className="absolute inset-0 cursor-pointer opacity-0"
-          />
-        </label>
+        </DatePickerButton>
       </nav>
 
       {data && total > 0 && (

@@ -14,6 +14,7 @@ import { cn } from "@/lib/cn";
 import { formatMnDate } from "@/lib/dateMn";
 import HomeworkPhotoPanel from "@/components/student-hub/HomeworkPhotoPanel";
 import { HOMEWORK_WINDOW_DAYS, dayDiff } from "@/components/student-hub/photo-types";
+import HomeworkComments, { type HwComment } from "./HomeworkComments";
 import HomeworkRedo from "./HomeworkRedo";
 import { cleanTitle, solveHref, todayKeyUB } from "./lib";
 import type { HwDay, HwItem, HwMyResponse, HwPhoto } from "./types";
@@ -187,7 +188,11 @@ function DayCard({
   canSend: boolean;
   onPhoto: (p: HwPhoto | null) => void;
 }) {
-  const comment = day.markComment?.trim();
+  const [comments, setComments] = useState(day.comments ?? []);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- серверийн шинэ жагсаалтыг дагана
+    setComments(day.comments ?? []);
+  }, [day.comments]);
   return (
     <article
       id={dayId(day)}
@@ -215,12 +220,6 @@ function DayCard({
           <span>{day.classroomName}</span>
           {day.deadlineAt && !day.upcoming && <DeadlineChip iso={day.deadlineAt} allowLate={day.allowLate} />}
         </div>
-        {comment && (
-          <p className="flex items-start gap-1.5 rounded-lg bg-panel px-3 py-2 text-sm text-ink">
-            <MessageSquareText className="mt-0.5 size-4 shrink-0 text-ink-dim" aria-label="Багшийн тайлбар" />
-            <span className="min-w-0 break-words">{comment}</span>
-          </p>
-        )}
       </header>
 
       <HomeworkPhotoPanel
@@ -230,6 +229,27 @@ function DayCard({
         canSend={canSend}
         onChange={onPhoto}
       />
+
+      {/* Багшийн сэтгэгдэл (эзэн 2026-11-05) — тухайн даалгавар дээр, сурагч хариулж болно */}
+      {comments.length > 0 && (
+        <section aria-label="Багшийн сэтгэгдэл" className="rounded-xl border border-brand-bright/40 p-3">
+          <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-ink">
+            <MessageSquareText className="size-4 text-brand-soft" aria-hidden />
+            Багшийн сэтгэгдэл
+          </h3>
+          <HomeworkComments
+            comments={comments}
+            placeholder="Багшид хариулах"
+            onSend={async (body) => {
+              const r = await api<{ comments: HwComment[] }>("/homework/comments", {
+                method: "POST",
+                body: { classroomId: day.classroomId, date: day.date, body },
+              });
+              setComments(r.comments);
+            }}
+          />
+        </section>
+      )}
 
       {day.items.length > 0 && (
         <div>
@@ -354,8 +374,9 @@ export default function HomeworkList() {
     };
   }, [sorted, todayKey]);
 
+  // Багш буцаасан бол хугацаа хаагдсан ч дахин илгээнэ (сервер мөн зөвшөөрнө)
   const canSendDay = (d: HwDay) =>
-    !d.closed &&
+    (!d.closed || !!d.photo?.returnedAt) &&
     (!!d.upcoming || (dayDiff(todayKey, d.date) >= 0 && dayDiff(todayKey, d.date) < HOMEWORK_WINDOW_DAYS));
   // Өмнөх өдрүүдээс зураг нь илгээгдээгүй, одоо ч илгээж болох — товчон дээр сануулна
   const missed = groups.older.filter((d) => !d.photo && canSendDay(d)).length;

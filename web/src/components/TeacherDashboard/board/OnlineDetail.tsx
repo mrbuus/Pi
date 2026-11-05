@@ -1,8 +1,9 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { CircleCheck, CircleX, Clock, FileImage, Laptop, LoaderCircle, MessageSquareText, X } from "lucide-react";
+import { CircleCheck, CircleX, Clock, EyeOff, FileImage, Laptop, LoaderCircle, MessageSquareText, Undo2, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import HomeworkComments, { type HwComment } from "@/components/homework-practice/HomeworkComments";
 import { cleanTitle } from "@/components/homework-practice/lib";
 import PagesReader from "@/components/student-hub/PagesReader";
 import { HOMEWORK_MARKS, HOMEWORK_ORDER, TONE_SELECTED, type HomeworkStatus } from "@/components/attendance/marks";
@@ -65,7 +66,19 @@ interface Detail {
   previousLessonDate: string | null;
   student: { id: string; firstName: string; lastName: string };
   tests: DetailTest[];
-  photo: { fileKey: string; pages: number; uploadedAt: string; late?: boolean } | null;
+  photo: {
+    id?: string;
+    fileKey: string;
+    pages: number;
+    uploadedAt: string;
+    late?: boolean;
+    /** Сурагчийн бичсэн тайлбар */
+    caption?: string | null;
+    /** Багш «Буцаах» дарсан цаг */
+    returnedAt?: string | null;
+  } | null;
+  /** Сурагчид харагдах сэтгэгдэл (дотоод тэмдэглэлээс тусдаа) */
+  comments?: HwComment[];
   redos?: DetailRedo[];
   deadline?: { dueAt: string; allowLate: boolean; custom: boolean };
 }
@@ -128,6 +141,40 @@ export default function OnlineDetail({
   const [retry, setRetry] = useState(0);
   const [pick, setPick] = useState<string | null>(null);
   const [note, setNote] = useState(hwNote);
+  // «Буцаах»: шалтгаан бичих мөр нээлттэй эсэх
+  const [returning, setReturning] = useState(false);
+  const [reason, setReason] = useState("");
+  const [returnBusy, setReturnBusy] = useState(false);
+  const [returnError, setReturnError] = useState("");
+  const base = `/classrooms/${encodeURIComponent(classId)}/homework-marks/online/${encodeURIComponent(studentId)}`;
+
+  async function sendComment(body: string) {
+    const r = await api<{ comments: HwComment[] }>(`${base}/comments?date=${date}`, {
+      method: "POST",
+      body: { body },
+    });
+    setData((d) => (d ? { ...d, comments: r.comments } : d));
+  }
+
+  async function confirmReturn() {
+    const body = reason.trim();
+    if (!body || returnBusy) return;
+    setReturnBusy(true);
+    setReturnError("");
+    try {
+      const r = await api<{ returnedAt: string; comments: HwComment[] }>(`${base}/return?date=${date}`, {
+        method: "POST",
+        body: { body },
+      });
+      setData((d) => (d ? { ...d, comments: r.comments, photo: d.photo ? { ...d.photo, returnedAt: r.returnedAt } : d.photo } : d));
+      setReturning(false);
+      setReason("");
+    } catch (e) {
+      setReturnError(e instanceof Error && e.message ? e.message : "Буцааж чадсангүй");
+    } finally {
+      setReturnBusy(false);
+    }
+  }
 
   useEffect(() => {
     let alive = true;
@@ -222,6 +269,12 @@ export default function OnlineDetail({
                     <>
                       Зураг илгээсэн <b className="tabular-nums text-ink">{stamp(data.photo.uploadedAt)}</b>
                       {data.photo.late && <b className="text-error">Хоцорсон</b>}
+                      {data.photo.returnedAt && (
+                        <b className="inline-flex items-center gap-0.5 text-error">
+                          <Undo2 className="size-3.5" aria-hidden />
+                          Буцаасан {stamp(data.photo.returnedAt)}
+                        </b>
+                      )}
                     </>
                   ) : (
                     "Зураг илгээгээгүй"
@@ -248,6 +301,12 @@ export default function OnlineDetail({
                     {!data.deadline.allowLate && "(дараа нь хаагдана)"}
                   </span>
                 )}
+              </p>
+            )}
+            {data?.photo?.caption && (
+              <p className="flex items-start gap-1.5 rounded-lg bg-panel px-3 py-1.5 text-sm text-ink">
+                <MessageSquareText className="mt-0.5 size-4 shrink-0 text-ink-dim" aria-label="Сурагчийн тайлбар" />
+                <span className="selectable min-w-0 whitespace-pre-wrap break-words">{data.photo.caption}</span>
               </p>
             )}
             {a && (
@@ -333,7 +392,7 @@ export default function OnlineDetail({
 
           {/* ── Доод: үнэлгээ + сэтгэгдэл, үргэлж харагдана ── */}
           <footer className="shrink-0 space-y-2 border-t border-line bg-surface px-3 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4">
-            <div className="grid grid-cols-3 gap-2" role="group" aria-label={`Даалгавар, ${name}`}>
+            <div className={cn("grid gap-2", data?.photo ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3")} role="group" aria-label={`Даалгавар, ${name}`}>
               {HOMEWORK_ORDER.map((v) => {
                 const m = HOMEWORK_MARKS[v];
                 const Icon = m.icon;
@@ -354,18 +413,92 @@ export default function OnlineDetail({
                   </button>
                 );
               })}
+              {/* «Буцаах» (эзэн 2026-11-05): даалгавар хангалтгүй — шалтгаан сурагчид харагдана,
+                  сурагч хугацаа хаагдсан ч дахин илгээнэ */}
+              {data?.photo && (
+                <button
+                  type="button"
+                  aria-expanded={returning}
+                  disabled={!!data.photo.returnedAt}
+                  onClick={() => setReturning((v) => !v)}
+                  className={cn(
+                    "inline-flex min-h-12 items-center justify-center gap-1.5 rounded-xl border text-sm font-bold transition-colors active:opacity-80",
+                    data.photo.returnedAt
+                      ? "border-error/40 bg-error/[0.07] text-error"
+                      : returning
+                        ? "border-error bg-error/10 text-error"
+                        : "border-line bg-surface text-ink hover:border-error/60 hover:text-error",
+                  )}
+                >
+                  <Undo2 className="size-4 shrink-0" aria-hidden />
+                  {data.photo.returnedAt ? "Буцаасан" : "Буцаах"}
+                </button>
+              )}
             </div>
+            {returning && data?.photo && !data.photo.returnedAt && (
+              <div className="space-y-2 rounded-xl border border-error/40 bg-error/[0.05] p-2">
+                <label className="block">
+                  <span className="text-xs font-semibold text-ink">Юу дутуу байгааг бичнэ үү — сурагчид харагдана</span>
+                  <textarea
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    maxLength={1000}
+                    rows={2}
+                    autoFocus
+                    placeholder="Жишээ нь: 3, 4-р бодлогын бодолт алга, зураг бүдэг байна"
+                    className="mt-1 block min-h-11 w-full resize-none rounded-lg border border-line bg-bg px-3 py-2 text-base text-ink outline-none placeholder:text-ink-dim focus:border-brand-bright sm:text-sm"
+                  />
+                </label>
+                {returnError && <p role="alert" className="text-xs text-error">{returnError}</p>}
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setReturning(false)}
+                    className="min-h-11 rounded-lg border border-line px-4 text-sm font-semibold text-ink"
+                  >
+                    Болих
+                  </button>
+                  <button
+                    type="button"
+                    onClick={confirmReturn}
+                    disabled={!reason.trim() || returnBusy}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-error px-4 text-sm font-bold text-white disabled:opacity-40"
+                  >
+                    {returnBusy ? <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" aria-hidden /> : <Undo2 className="size-4" aria-hidden />}
+                    Буцаах
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Сурагчид харагдах сэтгэгдэл — тухайн даалгавар дээрх яриа, хадгалагдаж үлдэнэ */}
+            {data && (
+              <section aria-label="Сурагчид бичих" className="rounded-xl border border-brand-bright/40 p-2">
+                <h3 className="mb-1 flex items-center gap-1.5 text-xs font-bold text-brand-soft">
+                  <MessageSquareText className="size-3.5" aria-hidden />
+                  Сурагчид харагдах сэтгэгдэл
+                </h3>
+                <HomeworkComments
+                  compact
+                  comments={data.comments ?? []}
+                  onSend={sendComment}
+                  placeholder="Сурагчид бичих: алдаа, зөвлөгөө"
+                />
+              </section>
+            )}
+
+            {/* Багшийн дотоод тэмдэглэл — сурагчид харагдахгүй (самбарын ⋯ тэмдэглэлтэй нэг) */}
             <label className="flex items-start gap-2 rounded-xl border border-line bg-bg px-3 py-2 focus-within:border-brand-bright">
-              <MessageSquareText className="mt-1 size-4 shrink-0 text-ink-dim" aria-hidden />
-              <span className="sr-only">Сэтгэгдэл</span>
+              <EyeOff className="mt-1 size-4 shrink-0 text-ink-dim" aria-hidden />
+              <span className="sr-only">Багшийн тэмдэглэл, сурагчид харагдахгүй</span>
               <textarea
                 value={note}
                 onChange={(e) => {
                   setNote(e.target.value);
                   onHwNote(studentId, e.target.value, true);
                 }}
-                rows={2}
-                placeholder="Сэтгэгдэл бичих"
+                rows={1}
+                placeholder="Багшийн тэмдэглэл — сурагчид харагдахгүй"
                 className="min-h-11 w-full resize-none bg-transparent text-base text-ink outline-none placeholder:text-ink-dim sm:text-sm"
               />
             </label>

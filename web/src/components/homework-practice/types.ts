@@ -29,6 +29,8 @@ export interface HwItem {
   late: boolean;
 }
 
+import type { HwComment } from "./HomeworkComments";
+
 export interface HwPhoto {
   id: string;
   fileKey: string;
@@ -36,6 +38,10 @@ export interface HwPhoto {
   uploadedAt: string;
   /** Дараагийн хичээлээс хойш илгээсэн */
   late?: boolean;
+  /** Сурагчийн бичсэн тайлбар (эзэн 2026-11-05) */
+  caption?: string | null;
+  /** Багш «Буцаах» дарсан — засаад дахин илгээнэ */
+  returnedAt?: string | null;
 }
 
 /** V2 (SURAGCH-V2-GEREE): хичээлийн ӨДӨР БҮР ирнэ, `items` хоосон байж болно */
@@ -52,8 +58,8 @@ export interface HwDay {
   photo: HwPhoto | null;
   /** Багшийн тэмдэглэгээ (дараагийн хичээлийн өдөр тавьдаг) */
   mark: HomeworkStatus | null;
-  /** Багшийн тайлбар (V2) */
-  markComment?: string | null;
+  /** Сурагчид харагдах сэтгэгдэл (багш ↔ сурагч, эзэн 2026-11-05). Багшийн дотоод тэмдэглэл ирэхгүй */
+  comments?: HwComment[];
   /** Сэдэв (V2) */
   topic?: string | null;
   /** Ирэх 7 хоногийн хичээл — зургаа урьдчилан илгээнэ (эзэн 2026-10-31) */

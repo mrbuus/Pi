@@ -275,7 +275,6 @@ export class StudentHubService {
               classroomId: true,
               date: true,
               status: true,
-              comment: true,
             },
           })
         : Promise.resolve([]),
@@ -447,7 +446,8 @@ export class StudentHubService {
       if (current.has(m.classroomId))
         bundle.marks.set(dayKey(m.classroomId, dateKey(m.date)), {
           status: m.status,
-          comment: m.comment,
+          // Багшийн дотоод тэмдэглэл сурагчид харагдахгүй (эзэн 2026-11-05)
+          comment: null,
         });
     for (const t of topics) {
       const at = lessonKey(t.scheduleId, t.date);
@@ -596,7 +596,6 @@ export class StudentHubService {
           classroomId: true,
           date: true,
           status: true,
-          comment: true,
         },
       }),
       this.prisma.academicCalendarDay.findMany({
@@ -757,7 +756,7 @@ export class StudentHubService {
           ? {
               date: dateKey(latest.date),
               status: latest.status,
-              comment: latest.comment,
+              comment: null, // багшийн дотоод тэмдэглэл — сурагчид илгээхгүй
               classroomId: latest.classroomId,
               lessonDate,
             }

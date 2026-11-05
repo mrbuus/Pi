@@ -59,6 +59,12 @@ import {
 } from './homework-logic';
 import { youtubeOf } from '../exams/exam-data';
 import { loadPlanned } from './planned-tests';
+import {
+  COMMENT_MAX,
+  cleanCaption,
+  cleanText,
+  loadHomeworkComments,
+} from './homework-comments';
 
 const PDF_MAX_BYTES = 25 * 1024 * 1024;
 const MAX_PAGES = 6;
@@ -590,6 +596,8 @@ export class HomeworkPracticeService {
           fileKey: true,
           pages: true,
           createdAt: true,
+          caption: true,
+          returnedAt: true,
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -622,6 +630,12 @@ export class HomeworkPracticeService {
         addDaysKey(today, ADVANCE_DAYS),
       ),
     ]);
+    // Сурагчид харагдах сэтгэгдэл (багшийн дотоод тэмдэглэл БИШ) — өдөр бүрийн яриа
+    const comments = await loadHomeworkComments(
+      this.prisma,
+      { studentId, lessonDate: { gte: parseDateOnly(fromKey) } },
+      studentId,
+    );
     const now = Date.now();
     return {
       days: list.map((row) => {
@@ -682,12 +696,18 @@ export class HomeworkPracticeService {
                 fileKey: photo.fileKey,
                 pages: photo.pages,
                 uploadedAt: photo.createdAt.toISOString(),
+                caption: photo.caption,
+                returnedAt: photo.returnedAt?.toISOString() ?? null,
                 // Дараагийн хичээлийн өдрөөс хойш илгээсэн бол хоцорсон
                 late: isLate(photo.createdAt, deadlineAt),
               }
             : null,
           mark: mark?.status ?? null,
-          markComment: mark?.comment ?? null,
+          // DailyHomeworkMark.comment = багшийн ДОТООД тэмдэглэл — сурагчид илгээхгүй (эзэн 2026-11-05).
+          // Сурагчид зориулсан бичвэр зөвхөн `comments`-оор.
+          comments: comments
+            .filter((c) => c.classroomId === row.classroomId && c.lessonDate === row.date)
+            .map((c) => c.view),
           upcoming: !!row.upcoming,
           topic: lessons.topics.get(dayKey(row.classroomId, row.date)) ?? null,
         };
@@ -1502,8 +1522,9 @@ export class HomeworkPracticeService {
 
   async addPhoto(
     studentId: string,
-    body: { classroomId?: unknown; date?: unknown; fileKey?: unknown; pages?: unknown },
+    body: { classroomId?: unknown; date?: unknown; fileKey?: unknown; pages?: unknown; caption?: unknown },
   ) {
+    const caption = cleanCaption(body?.caption);
     if (typeof body?.classroomId !== 'string' || !body.classroomId)
       throw new BadRequestException('classroomId шаардлагатай');
     if (typeof body.fileKey !== 'string' || !body.fileKey)
@@ -1520,7 +1541,19 @@ export class HomeworkPracticeService {
       throw new ForbiddenException('Энэ өдрийн гэрийн даалгавар нээгдээгүй байна');
     if (!(await this.photoDayAllowed(studentId, body.classroomId, date, today)))
       throw new ForbiddenException('Энэ өдрийн гэрийн даалгавар нээгдээгүй байна');
-    this.assertNotClosed(await loadDeadlineOverride(this.prisma, body.classroomId, date));
+    // Багш «Буцаах» дарсан бол хугацаа хаагдсан ч дахин илгээнэ (эзэн 2026-11-05)
+    const returned = await this.prisma.homeworkPhoto.findFirst({
+      where: {
+        studentId,
+        classroomId: body.classroomId,
+        lessonDate: parseDateOnly(date),
+        deletedAt: null,
+        returnedAt: { not: null },
+      },
+      select: { id: true },
+    });
+    if (!returned)
+      this.assertNotClosed(await loadDeadlineOverride(this.prisma, body.classroomId, date));
 
     // Файл: өөрийн байршуулсан, «homework» зорилготой (7 хоног хадгалах), PDF
     const file = await this.prisma.storedFile.findUnique({
@@ -1544,7 +1577,12 @@ export class HomeworkPracticeService {
         where: { studentId, classroomId: body.classroomId as string, lessonDate, deletedAt: null },
         orderBy: { createdAt: 'desc' },
       });
-      if (current && current.fileKey === body.fileKey) return current; // давтан дуудалт
+      if (current && current.fileKey === body.fileKey) {
+        // давтан дуудалт — тайлбарыг л шинэчилнэ
+        if (caption !== current.caption)
+          return tx.homeworkPhoto.update({ where: { id: current.id }, data: { caption } });
+        return current;
+      }
       await tx.homeworkPhoto.updateMany({
         where: { studentId, classroomId: body.classroomId as string, lessonDate, deletedAt: null },
         data: { deletedAt: new Date() },
@@ -1556,6 +1594,7 @@ export class HomeworkPracticeService {
           lessonDate,
           fileKey: body.fileKey as string,
           pages: realPages,
+          caption,
         },
       });
     });
@@ -1565,6 +1604,39 @@ export class HomeworkPracticeService {
       fileKey: photo.fileKey,
       pages: photo.pages,
       uploadedAt: photo.createdAt.toISOString(),
+      caption: photo.caption,
+      returnedAt: photo.returnedAt?.toISOString() ?? null,
+    };
+  }
+
+  /** Сурагч багшийн сэтгэгдэлд хариулна — өөрийн ангийн, нээгдсэн өдрийн даалгавар дээр */
+  async addComment(studentId: string, body: { classroomId?: unknown; date?: unknown; body?: unknown }) {
+    if (typeof body?.classroomId !== 'string' || !body.classroomId)
+      throw new BadRequestException('classroomId шаардлагатай');
+    const text = cleanText(body.body, COMMENT_MAX, 'Сэтгэгдэл');
+    const date = this.parseDate(body.date);
+    const today = dateKey(todayUB());
+    if (!(await this.photoDayAllowed(studentId, body.classroomId, date, today)))
+      throw new ForbiddenException('Энэ өдрийн гэрийн даалгавар олдсонгүй');
+    const lessonDate = parseDateOnly(date);
+    await this.prisma.homeworkComment.create({
+      data: {
+        classroomId: body.classroomId,
+        studentId,
+        lessonDate,
+        authorId: studentId,
+        authorRole: 'STUDENT',
+        body: text,
+      },
+    });
+    return {
+      comments: (
+        await loadHomeworkComments(
+          this.prisma,
+          { studentId, classroomId: body.classroomId, lessonDate },
+          studentId,
+        )
+      ).map((c) => c.view),
     };
   }
 

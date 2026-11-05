@@ -17,6 +17,11 @@ import {
 } from '../homework-practice/homework-deadline';
 import { loadPlanned } from '../homework-practice/planned-tests';
 import {
+  COMMENT_MAX,
+  cleanText,
+  loadHomeworkComments,
+} from '../homework-practice/homework-comments';
+import {
   correctAnswerView,
   gradeHomework,
   myAnswerView,
@@ -700,13 +705,26 @@ export class HomeworkMarksService {
             deletedAt: null,
           },
           orderBy: { createdAt: 'desc' },
-          select: { fileKey: true, pages: true, createdAt: true },
+          select: { id: true, fileKey: true, pages: true, createdAt: true, caption: true, returnedAt: true },
         })
       : null;
+    // Сурагчид харагдах сэтгэгдэл (багшийн дотоод тэмдэглэлээс тусдаа) — даалгавар өгсөн өдрөөр
+    const comments = prev
+      ? (
+          await loadHomeworkComments(
+            this.prisma,
+            { studentId, classroomId, lessonDate: parseDateOnly(prev) },
+            userId,
+          )
+        ).map((c) => c.view)
+      : [];
     const photoView = photo
       ? {
+          id: photo.id,
           fileKey: photo.fileKey,
           pages: photo.pages,
+          caption: photo.caption,
+          returnedAt: photo.returnedAt?.toISOString() ?? null,
           uploadedAt: photo.createdAt.toISOString(),
           // Энэ өдөр = дараагийн хичээл: өмнөх хичээлийн зургийг хугацаанаас (анхдагч нь энэ өдрийн
           // 00:00, эсвэл багшийн тохируулсан) хойш илгээсэн бол хоцорсон
@@ -725,6 +743,7 @@ export class HomeworkMarksService {
         student,
         tests: [],
         photo: photoView,
+        comments,
         redos: [],
         deadline,
       };
@@ -880,6 +899,7 @@ export class HomeworkMarksService {
       student,
       tests,
       photo: photoView,
+      comments,
       redos,
       deadline,
     };
@@ -961,5 +981,108 @@ export class HomeworkMarksService {
       after: row,
     });
     return this.deadlineView(w, row);
+  }
+
+  /* ───────── Сурагчид харагдах сэтгэгдэл, «Буцаах» (эзэн 2026-11-05) ───────── */
+
+  /** Самбарын өдөр D → даалгавар өгсөн өмнөх хичээл; сурагч ангид байх ёстой */
+  private async homeworkThread(
+    classroomId: string,
+    dateStr: string,
+    studentId: string,
+    userId: string,
+    role: Role,
+  ) {
+    const date = this.parseDate(dateStr);
+    await this.assertClassAccess(classroomId, userId, role, date);
+    const enrolled = await this.prisma.enrollment.findFirst({
+      where: { classroomId, studentId, leftAt: null },
+      select: { id: true },
+    });
+    if (!enrolled) throw new NotFoundException('Сурагч энэ ангид алга байна');
+    const { prev } = await loadPreviousLesson(this.prisma, classroomId, dateKey(date));
+    if (!prev) throw new BadRequestException('Энэ өдрийн өмнө хичээл олдсонгүй');
+    return parseDateOnly(prev);
+  }
+
+  private async threadView(classroomId: string, studentId: string, lessonDate: Date, userId: string) {
+    return (
+      await loadHomeworkComments(this.prisma, { studentId, classroomId, lessonDate }, userId)
+    ).map((c) => c.view);
+  }
+
+  async addComment(
+    classroomId: string,
+    dateStr: string,
+    studentId: string,
+    bodyRaw: unknown,
+    userId: string,
+    role: Role,
+  ) {
+    const body = cleanText(bodyRaw, COMMENT_MAX, 'Сэтгэгдэл');
+    const lessonDate = await this.homeworkThread(classroomId, dateStr, studentId, userId, role);
+    await this.prisma.homeworkComment.create({
+      data: { classroomId, studentId, lessonDate, authorId: userId, authorRole: role, body },
+    });
+    return { comments: await this.threadView(classroomId, studentId, lessonDate, userId) };
+  }
+
+  /**
+   * «Буцаах»: даалгавар хангалтгүй — шалтгааныг сурагчид харагдах сэтгэгдэл болгон бичиж, сүүлийн
+   * зургийг буцаасан гэж тэмдэглэнэ. Сурагч хугацаа хаагдсан ч дахин илгээж чадна. Зураг устгахгүй.
+   */
+  async returnPhoto(
+    classroomId: string,
+    dateStr: string,
+    studentId: string,
+    reasonRaw: unknown,
+    userId: string,
+    role: Role,
+  ) {
+    const body = cleanText(reasonRaw, COMMENT_MAX, 'Буцаах шалтгаан');
+    const lessonDate = await this.homeworkThread(classroomId, dateStr, studentId, userId, role);
+    const photo = await this.prisma.homeworkPhoto.findFirst({
+      where: { studentId, classroomId, lessonDate, deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, returnedAt: true },
+    });
+    if (!photo) throw new NotFoundException('Сурагч энэ даалгаврын зураг илгээгээгүй байна');
+    const now = new Date();
+    await this.prisma.$transaction([
+      this.prisma.homeworkPhoto.update({
+        where: { id: photo.id },
+        data: { returnedAt: now, returnedById: userId },
+      }),
+      this.prisma.homeworkComment.create({
+        data: { classroomId, studentId, lessonDate, authorId: userId, authorRole: role, kind: 'RETURN', body },
+      }),
+    ]);
+    await this.audit.record({
+      actorId: userId,
+      actorRole: role,
+      action: 'UPDATE',
+      entity: 'HomeworkPhoto',
+      entityId: photo.id,
+      before: { returnedAt: photo.returnedAt },
+      after: { returnedAt: now, returnedById: userId },
+    });
+    return {
+      returnedAt: now.toISOString(),
+      comments: await this.threadView(classroomId, studentId, lessonDate, userId),
+    };
+  }
+
+  /** Өөрийн бичсэн сэтгэгдлийг нууна (мөр үлдэнэ) */
+  async hideComment(id: string, userId: string) {
+    const row = await this.prisma.homeworkComment.findUnique({
+      where: { id },
+      select: { authorId: true },
+    });
+    if (!row || row.authorId !== userId) throw new NotFoundException('Сэтгэгдэл олдсонгүй');
+    await this.prisma.homeworkComment.updateMany({
+      where: { id, deletedAt: null },
+      data: { deletedAt: new Date() },
+    });
+    return { hidden: true };
   }
 }
