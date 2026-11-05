@@ -266,7 +266,7 @@ function makeDb() {
           .slice(-1)[0] ?? null,
       ),
       update: jest.fn(async ({ where, data }: any) => {
-        const row = photos.find((p) => p.id === where.id);
+        const row = photos.find((p) => p.id === where.id)!;
         Object.assign(row, data);
         return row;
       }),
