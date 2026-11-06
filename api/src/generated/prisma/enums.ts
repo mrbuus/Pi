@@ -336,6 +336,27 @@ export const BankMatchStatus = {
 export type BankMatchStatus = (typeof BankMatchStatus)[keyof typeof BankMatchStatus]
 
 
+export const BankDirection = {
+  CREDIT: 'CREDIT',
+  DEBIT: 'DEBIT'
+} as const
+
+export type BankDirection = (typeof BankDirection)[keyof typeof BankDirection]
+
+
+export const BankAllocKind = {
+  TUITION: 'TUITION',
+  BOOK: 'BOOK',
+  ANSWER_SHEET: 'ANSWER_SHEET',
+  STAFF_FINE: 'STAFF_FINE',
+  TRANSFER: 'TRANSFER',
+  EXPENSE: 'EXPENSE',
+  OTHER: 'OTHER'
+} as const
+
+export type BankAllocKind = (typeof BankAllocKind)[keyof typeof BankAllocKind]
+
+
 export const ProductKind = {
   TEST: 'TEST',
   BOOK: 'BOOK',

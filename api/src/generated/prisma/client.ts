@@ -324,6 +324,21 @@ export type UserPass = Prisma.UserPassModel
  */
 export type BankTransaction = Prisma.BankTransactionModel
 /**
+ * Model BankAllocation
+ * 
+ */
+export type BankAllocation = Prisma.BankAllocationModel
+/**
+ * Model BankPayerHint
+ * 
+ */
+export type BankPayerHint = Prisma.BankPayerHintModel
+/**
+ * Model BankCursor
+ * 
+ */
+export type BankCursor = Prisma.BankCursorModel
+/**
  * Model StudentCodeLegacy
  * 
  */

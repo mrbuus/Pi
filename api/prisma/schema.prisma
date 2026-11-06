@@ -1544,6 +1544,11 @@ enum BankMatchStatus {
   IGNORED // төлбөр биш гүйлгээ (цалин, түрээс…) — админ нуусан
 }
 
+enum BankDirection {
+  CREDIT // орлого
+  DEBIT // зарлага
+}
+
 model BankTransaction {
   id      String @id @default(cuid())
   // Банкны журналын дугаар — ИДЕМПОТЕНТ байдлын түлхүүр: ижил хуулгыг дахин
@@ -1551,10 +1556,19 @@ model BankTransaction {
   bankRef String @unique
 
   bookedAt     DateTime // гүйлгээ хийгдсэн огноо (хуулгаас)
-  amount       Int // ₮, зөвхөн ОРЛОГО (кредит) импортлоно
+  amount       Int // ₮, үргэлж эерэг; чиглэл нь direction-д
+  direction    BankDirection @default(CREDIT)
   description  String // гүйлгээний утга — утасны дугаар эндээс хайна
-  accountNo    String? // хүлээн авсан данс
-  counterparty String? // шилжүүлэгчийн нэр/данс (хуулгад байвал)
+  accountNo    String? // хуулгын данс (IBAN) — «бүрэн шийдсэн өдөр» данс бүрээр
+  counterparty String? // харьцсан данс (илгээгчийн данс) — «сурсан данс»-ны түлхүүр
+  closingBalance String? // гүйлгээний дараах үлдэгдэл (хуулгаас, түлхүүрт орсон)
+
+  // Тулгалтын санал (импорт ба гараар шийдвэр гарах бүрд дахин тооцно):
+  // { lane, kind, decision, candidates: [{ studentId, signals }], split?, reason }
+  suggestion   Json?
+  resolvedAt   DateTime? // бүх дүн хуваарилагдсан (эсвэл төлбөр биш гэж ангилагдсан) мөч
+  resolvedById String? // null + resolvedAt = систем автоматаар
+  allocations  BankAllocation[]
 
   matchStatus   BankMatchStatus @default(UNMATCHED)
   matchedUserId String?
@@ -1570,6 +1584,65 @@ model BankTransaction {
 
   @@index([matchStatus, bookedAt])
   @@index([matchedUserId])
+  @@index([accountNo, bookedAt])
+}
+
+// Нэг банкны гүйлгээ → нэг буюу хэд хэдэн хэсэг (эзэн 2026-11-05): ах дүүгийн
+// хамтын шилжүүлэг, «сургалт + ном» хольсон төлбөр. Хэсгүүдийн нийлбэр =
+// гүйлгээний дүн. Устгахгүй: буцаахад revokedAt (TUITION-ийн Payment REVERSED).
+enum BankAllocKind {
+  TUITION // сургалтын төлбөр → Payment CONFIRMED
+  BOOK // ном (E1, E2, Хавтгайн геометр…)
+  ANSWER_SHEET // шалгалтын хариултын хуудас (1,000₮/ш)
+  STAFF_FINE // ажилтны заалны торгууль
+  TRANSFER // өөрийн данс хоорондын шилжүүлэг
+  EXPENSE // зарлага (дебит)
+  OTHER // бусад
+}
+
+model BankAllocation {
+  id        String          @id @default(cuid())
+  bankTxId  String
+  bankTx    BankTransaction @relation(fields: [bankTxId], references: [id])
+  kind      BankAllocKind
+  amount    Int // ₮
+  studentId String? // хүүхэдтэй холбоотой хэсэгт (сургалт, ном, хариултын хуудас)
+  paymentId String?         @unique // TUITION-ээс үүссэн төлбөр
+  note      String?
+  auto      Boolean         @default(false) // систем автоматаар хуваарилсан
+  createdById String? // null = систем
+  createdAt DateTime        @default(now())
+  revokedAt DateTime?
+  revokedById String?
+
+  @@index([bankTxId])
+  @@index([studentId])
+}
+
+// Гараар баталсан шийдвэрээс «сурсан» холбоос: илгээгчийн данс эсвэл утас →
+// хүүхэд. Дараагийн удаа тэр данснаас ирсэн гүйлгээ нэмэлт шүүлтүүргүй орно
+// (ах дүүгүй, утгад өөр хүүхдийн нэр байхгүй үед л — huulga-match.ts).
+model BankPayerHint {
+  id        String   @id @default(cuid())
+  kind      String // 'ACCOUNT' | 'PHONE'
+  value     String
+  studentId String
+  count     Int      @default(1)
+  lastAt    DateTime @default(now())
+
+  @@unique([kind, value, studentId])
+  @@index([kind, value])
+}
+
+// «Бүрэн шийдсэн өдөр» (эзэн 2026-11-05): тэр өдрийг хүртэлх бүх гүйлгээ
+// шийдэгдсэн. Дараагийн импорт түүнээс өмнөх мөрийг алгасна.
+model BankCursor {
+  accountNo      String   @id
+  settledThrough String // 'YYYY-MM-DD' (УБ)
+  // Импортлосон хуулгуудын бүтэн хамарсан сүүлийн өдөр: хуулгын сүүлийн өдөр
+  // бүтэн биш байж болох тул (14:00-д татсан) settledThrough түүнээс давахгүй.
+  coveredThrough String
+  updatedAt      DateTime @updatedAt
 }
 
 // Хуучин SIE- кодын архив — шинэ формат руу шилжүүлэхэд эх кодыг хадгална

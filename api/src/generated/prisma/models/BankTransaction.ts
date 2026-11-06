@@ -39,9 +39,13 @@ export type BankTransactionMinAggregateOutputType = {
   bankRef: string | null
   bookedAt: Date | null
   amount: number | null
+  direction: $Enums.BankDirection | null
   description: string | null
   accountNo: string | null
   counterparty: string | null
+  closingBalance: string | null
+  resolvedAt: Date | null
+  resolvedById: string | null
   matchStatus: $Enums.BankMatchStatus | null
   matchedUserId: string | null
   paymentId: string | null
@@ -54,9 +58,13 @@ export type BankTransactionMaxAggregateOutputType = {
   bankRef: string | null
   bookedAt: Date | null
   amount: number | null
+  direction: $Enums.BankDirection | null
   description: string | null
   accountNo: string | null
   counterparty: string | null
+  closingBalance: string | null
+  resolvedAt: Date | null
+  resolvedById: string | null
   matchStatus: $Enums.BankMatchStatus | null
   matchedUserId: string | null
   paymentId: string | null
@@ -69,9 +77,14 @@ export type BankTransactionCountAggregateOutputType = {
   bankRef: number
   bookedAt: number
   amount: number
+  direction: number
   description: number
   accountNo: number
   counterparty: number
+  closingBalance: number
+  suggestion: number
+  resolvedAt: number
+  resolvedById: number
   matchStatus: number
   matchedUserId: number
   paymentId: number
@@ -95,9 +108,13 @@ export type BankTransactionMinAggregateInputType = {
   bankRef?: true
   bookedAt?: true
   amount?: true
+  direction?: true
   description?: true
   accountNo?: true
   counterparty?: true
+  closingBalance?: true
+  resolvedAt?: true
+  resolvedById?: true
   matchStatus?: true
   matchedUserId?: true
   paymentId?: true
@@ -110,9 +127,13 @@ export type BankTransactionMaxAggregateInputType = {
   bankRef?: true
   bookedAt?: true
   amount?: true
+  direction?: true
   description?: true
   accountNo?: true
   counterparty?: true
+  closingBalance?: true
+  resolvedAt?: true
+  resolvedById?: true
   matchStatus?: true
   matchedUserId?: true
   paymentId?: true
@@ -125,9 +146,14 @@ export type BankTransactionCountAggregateInputType = {
   bankRef?: true
   bookedAt?: true
   amount?: true
+  direction?: true
   description?: true
   accountNo?: true
   counterparty?: true
+  closingBalance?: true
+  suggestion?: true
+  resolvedAt?: true
+  resolvedById?: true
   matchStatus?: true
   matchedUserId?: true
   paymentId?: true
@@ -228,9 +254,14 @@ export type BankTransactionGroupByOutputType = {
   bankRef: string
   bookedAt: Date
   amount: number
+  direction: $Enums.BankDirection
   description: string
   accountNo: string | null
   counterparty: string | null
+  closingBalance: string | null
+  suggestion: runtime.JsonValue | null
+  resolvedAt: Date | null
+  resolvedById: string | null
   matchStatus: $Enums.BankMatchStatus
   matchedUserId: string | null
   paymentId: string | null
@@ -267,15 +298,21 @@ export type BankTransactionWhereInput = {
   bankRef?: Prisma.StringFilter<"BankTransaction"> | string
   bookedAt?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
   amount?: Prisma.IntFilter<"BankTransaction"> | number
+  direction?: Prisma.EnumBankDirectionFilter<"BankTransaction"> | $Enums.BankDirection
   description?: Prisma.StringFilter<"BankTransaction"> | string
   accountNo?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   counterparty?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  closingBalance?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  suggestion?: Prisma.JsonNullableFilter<"BankTransaction">
+  resolvedAt?: Prisma.DateTimeNullableFilter<"BankTransaction"> | Date | string | null
+  resolvedById?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   matchStatus?: Prisma.EnumBankMatchStatusFilter<"BankTransaction"> | $Enums.BankMatchStatus
   matchedUserId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   paymentId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   importedById?: Prisma.StringFilter<"BankTransaction"> | string
   importedAt?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
   rawRow?: Prisma.JsonFilter<"BankTransaction">
+  allocations?: Prisma.BankAllocationListRelationFilter
   matchedUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   importedBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
@@ -285,15 +322,21 @@ export type BankTransactionOrderByWithRelationInput = {
   bankRef?: Prisma.SortOrder
   bookedAt?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
   description?: Prisma.SortOrder
   accountNo?: Prisma.SortOrderInput | Prisma.SortOrder
   counterparty?: Prisma.SortOrderInput | Prisma.SortOrder
+  closingBalance?: Prisma.SortOrderInput | Prisma.SortOrder
+  suggestion?: Prisma.SortOrderInput | Prisma.SortOrder
+  resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  resolvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   matchStatus?: Prisma.SortOrder
   matchedUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentId?: Prisma.SortOrderInput | Prisma.SortOrder
   importedById?: Prisma.SortOrder
   importedAt?: Prisma.SortOrder
   rawRow?: Prisma.SortOrder
+  allocations?: Prisma.BankAllocationOrderByRelationAggregateInput
   matchedUser?: Prisma.UserOrderByWithRelationInput
   importedBy?: Prisma.UserOrderByWithRelationInput
 }
@@ -307,14 +350,20 @@ export type BankTransactionWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.BankTransactionWhereInput | Prisma.BankTransactionWhereInput[]
   bookedAt?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
   amount?: Prisma.IntFilter<"BankTransaction"> | number
+  direction?: Prisma.EnumBankDirectionFilter<"BankTransaction"> | $Enums.BankDirection
   description?: Prisma.StringFilter<"BankTransaction"> | string
   accountNo?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   counterparty?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  closingBalance?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  suggestion?: Prisma.JsonNullableFilter<"BankTransaction">
+  resolvedAt?: Prisma.DateTimeNullableFilter<"BankTransaction"> | Date | string | null
+  resolvedById?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   matchStatus?: Prisma.EnumBankMatchStatusFilter<"BankTransaction"> | $Enums.BankMatchStatus
   matchedUserId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   importedById?: Prisma.StringFilter<"BankTransaction"> | string
   importedAt?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
   rawRow?: Prisma.JsonFilter<"BankTransaction">
+  allocations?: Prisma.BankAllocationListRelationFilter
   matchedUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   importedBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "bankRef" | "paymentId">
@@ -324,9 +373,14 @@ export type BankTransactionOrderByWithAggregationInput = {
   bankRef?: Prisma.SortOrder
   bookedAt?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
   description?: Prisma.SortOrder
   accountNo?: Prisma.SortOrderInput | Prisma.SortOrder
   counterparty?: Prisma.SortOrderInput | Prisma.SortOrder
+  closingBalance?: Prisma.SortOrderInput | Prisma.SortOrder
+  suggestion?: Prisma.SortOrderInput | Prisma.SortOrder
+  resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  resolvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   matchStatus?: Prisma.SortOrder
   matchedUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -348,9 +402,14 @@ export type BankTransactionScalarWhereWithAggregatesInput = {
   bankRef?: Prisma.StringWithAggregatesFilter<"BankTransaction"> | string
   bookedAt?: Prisma.DateTimeWithAggregatesFilter<"BankTransaction"> | Date | string
   amount?: Prisma.IntWithAggregatesFilter<"BankTransaction"> | number
+  direction?: Prisma.EnumBankDirectionWithAggregatesFilter<"BankTransaction"> | $Enums.BankDirection
   description?: Prisma.StringWithAggregatesFilter<"BankTransaction"> | string
   accountNo?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
   counterparty?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
+  closingBalance?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
+  suggestion?: Prisma.JsonNullableWithAggregatesFilter<"BankTransaction">
+  resolvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"BankTransaction"> | Date | string | null
+  resolvedById?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
   matchStatus?: Prisma.EnumBankMatchStatusWithAggregatesFilter<"BankTransaction"> | $Enums.BankMatchStatus
   matchedUserId?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
   paymentId?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
@@ -364,13 +423,19 @@ export type BankTransactionCreateInput = {
   bankRef: string
   bookedAt: Date | string
   amount: number
+  direction?: $Enums.BankDirection
   description: string
   accountNo?: string | null
   counterparty?: string | null
+  closingBalance?: string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Date | string | null
+  resolvedById?: string | null
   matchStatus?: $Enums.BankMatchStatus
   paymentId?: string | null
   importedAt?: Date | string
   rawRow: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  allocations?: Prisma.BankAllocationCreateNestedManyWithoutBankTxInput
   matchedUser?: Prisma.UserCreateNestedOneWithoutBankTransactionsMatchedInput
   importedBy: Prisma.UserCreateNestedOneWithoutBankTransactionsImportedInput
 }
@@ -380,15 +445,21 @@ export type BankTransactionUncheckedCreateInput = {
   bankRef: string
   bookedAt: Date | string
   amount: number
+  direction?: $Enums.BankDirection
   description: string
   accountNo?: string | null
   counterparty?: string | null
+  closingBalance?: string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Date | string | null
+  resolvedById?: string | null
   matchStatus?: $Enums.BankMatchStatus
   matchedUserId?: string | null
   paymentId?: string | null
   importedById: string
   importedAt?: Date | string
   rawRow: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  allocations?: Prisma.BankAllocationUncheckedCreateNestedManyWithoutBankTxInput
 }
 
 export type BankTransactionUpdateInput = {
@@ -396,13 +467,19 @@ export type BankTransactionUpdateInput = {
   bankRef?: Prisma.StringFieldUpdateOperationsInput | string
   bookedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  direction?: Prisma.EnumBankDirectionFieldUpdateOperationsInput | $Enums.BankDirection
   description?: Prisma.StringFieldUpdateOperationsInput | string
   accountNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   counterparty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingBalance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rawRow?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  allocations?: Prisma.BankAllocationUpdateManyWithoutBankTxNestedInput
   matchedUser?: Prisma.UserUpdateOneWithoutBankTransactionsMatchedNestedInput
   importedBy?: Prisma.UserUpdateOneRequiredWithoutBankTransactionsImportedNestedInput
 }
@@ -412,15 +489,21 @@ export type BankTransactionUncheckedUpdateInput = {
   bankRef?: Prisma.StringFieldUpdateOperationsInput | string
   bookedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  direction?: Prisma.EnumBankDirectionFieldUpdateOperationsInput | $Enums.BankDirection
   description?: Prisma.StringFieldUpdateOperationsInput | string
   accountNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   counterparty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingBalance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   matchedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedById?: Prisma.StringFieldUpdateOperationsInput | string
   importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rawRow?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  allocations?: Prisma.BankAllocationUncheckedUpdateManyWithoutBankTxNestedInput
 }
 
 export type BankTransactionCreateManyInput = {
@@ -428,9 +511,14 @@ export type BankTransactionCreateManyInput = {
   bankRef: string
   bookedAt: Date | string
   amount: number
+  direction?: $Enums.BankDirection
   description: string
   accountNo?: string | null
   counterparty?: string | null
+  closingBalance?: string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Date | string | null
+  resolvedById?: string | null
   matchStatus?: $Enums.BankMatchStatus
   matchedUserId?: string | null
   paymentId?: string | null
@@ -444,9 +532,14 @@ export type BankTransactionUpdateManyMutationInput = {
   bankRef?: Prisma.StringFieldUpdateOperationsInput | string
   bookedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  direction?: Prisma.EnumBankDirectionFieldUpdateOperationsInput | $Enums.BankDirection
   description?: Prisma.StringFieldUpdateOperationsInput | string
   accountNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   counterparty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingBalance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -458,9 +551,14 @@ export type BankTransactionUncheckedUpdateManyInput = {
   bankRef?: Prisma.StringFieldUpdateOperationsInput | string
   bookedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  direction?: Prisma.EnumBankDirectionFieldUpdateOperationsInput | $Enums.BankDirection
   description?: Prisma.StringFieldUpdateOperationsInput | string
   accountNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   counterparty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingBalance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   matchedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -484,9 +582,14 @@ export type BankTransactionCountOrderByAggregateInput = {
   bankRef?: Prisma.SortOrder
   bookedAt?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
   description?: Prisma.SortOrder
   accountNo?: Prisma.SortOrder
   counterparty?: Prisma.SortOrder
+  closingBalance?: Prisma.SortOrder
+  suggestion?: Prisma.SortOrder
+  resolvedAt?: Prisma.SortOrder
+  resolvedById?: Prisma.SortOrder
   matchStatus?: Prisma.SortOrder
   matchedUserId?: Prisma.SortOrder
   paymentId?: Prisma.SortOrder
@@ -504,9 +607,13 @@ export type BankTransactionMaxOrderByAggregateInput = {
   bankRef?: Prisma.SortOrder
   bookedAt?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
   description?: Prisma.SortOrder
   accountNo?: Prisma.SortOrder
   counterparty?: Prisma.SortOrder
+  closingBalance?: Prisma.SortOrder
+  resolvedAt?: Prisma.SortOrder
+  resolvedById?: Prisma.SortOrder
   matchStatus?: Prisma.SortOrder
   matchedUserId?: Prisma.SortOrder
   paymentId?: Prisma.SortOrder
@@ -519,9 +626,13 @@ export type BankTransactionMinOrderByAggregateInput = {
   bankRef?: Prisma.SortOrder
   bookedAt?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
   description?: Prisma.SortOrder
   accountNo?: Prisma.SortOrder
   counterparty?: Prisma.SortOrder
+  closingBalance?: Prisma.SortOrder
+  resolvedAt?: Prisma.SortOrder
+  resolvedById?: Prisma.SortOrder
   matchStatus?: Prisma.SortOrder
   matchedUserId?: Prisma.SortOrder
   paymentId?: Prisma.SortOrder
@@ -531,6 +642,11 @@ export type BankTransactionMinOrderByAggregateInput = {
 
 export type BankTransactionSumOrderByAggregateInput = {
   amount?: Prisma.SortOrder
+}
+
+export type BankTransactionScalarRelationFilter = {
+  is?: Prisma.BankTransactionWhereInput
+  isNot?: Prisma.BankTransactionWhereInput
 }
 
 export type BankTransactionCreateNestedManyWithoutMatchedUserInput = {
@@ -617,8 +733,26 @@ export type BankTransactionUncheckedUpdateManyWithoutImportedByNestedInput = {
   deleteMany?: Prisma.BankTransactionScalarWhereInput | Prisma.BankTransactionScalarWhereInput[]
 }
 
+export type EnumBankDirectionFieldUpdateOperationsInput = {
+  set?: $Enums.BankDirection
+}
+
 export type EnumBankMatchStatusFieldUpdateOperationsInput = {
   set?: $Enums.BankMatchStatus
+}
+
+export type BankTransactionCreateNestedOneWithoutAllocationsInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutAllocationsInput, Prisma.BankTransactionUncheckedCreateWithoutAllocationsInput>
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutAllocationsInput
+  connect?: Prisma.BankTransactionWhereUniqueInput
+}
+
+export type BankTransactionUpdateOneRequiredWithoutAllocationsNestedInput = {
+  create?: Prisma.XOR<Prisma.BankTransactionCreateWithoutAllocationsInput, Prisma.BankTransactionUncheckedCreateWithoutAllocationsInput>
+  connectOrCreate?: Prisma.BankTransactionCreateOrConnectWithoutAllocationsInput
+  upsert?: Prisma.BankTransactionUpsertWithoutAllocationsInput
+  connect?: Prisma.BankTransactionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BankTransactionUpdateToOneWithWhereWithoutAllocationsInput, Prisma.BankTransactionUpdateWithoutAllocationsInput>, Prisma.BankTransactionUncheckedUpdateWithoutAllocationsInput>
 }
 
 export type BankTransactionCreateWithoutMatchedUserInput = {
@@ -626,13 +760,19 @@ export type BankTransactionCreateWithoutMatchedUserInput = {
   bankRef: string
   bookedAt: Date | string
   amount: number
+  direction?: $Enums.BankDirection
   description: string
   accountNo?: string | null
   counterparty?: string | null
+  closingBalance?: string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Date | string | null
+  resolvedById?: string | null
   matchStatus?: $Enums.BankMatchStatus
   paymentId?: string | null
   importedAt?: Date | string
   rawRow: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  allocations?: Prisma.BankAllocationCreateNestedManyWithoutBankTxInput
   importedBy: Prisma.UserCreateNestedOneWithoutBankTransactionsImportedInput
 }
 
@@ -641,14 +781,20 @@ export type BankTransactionUncheckedCreateWithoutMatchedUserInput = {
   bankRef: string
   bookedAt: Date | string
   amount: number
+  direction?: $Enums.BankDirection
   description: string
   accountNo?: string | null
   counterparty?: string | null
+  closingBalance?: string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Date | string | null
+  resolvedById?: string | null
   matchStatus?: $Enums.BankMatchStatus
   paymentId?: string | null
   importedById: string
   importedAt?: Date | string
   rawRow: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  allocations?: Prisma.BankAllocationUncheckedCreateNestedManyWithoutBankTxInput
 }
 
 export type BankTransactionCreateOrConnectWithoutMatchedUserInput = {
@@ -666,13 +812,19 @@ export type BankTransactionCreateWithoutImportedByInput = {
   bankRef: string
   bookedAt: Date | string
   amount: number
+  direction?: $Enums.BankDirection
   description: string
   accountNo?: string | null
   counterparty?: string | null
+  closingBalance?: string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Date | string | null
+  resolvedById?: string | null
   matchStatus?: $Enums.BankMatchStatus
   paymentId?: string | null
   importedAt?: Date | string
   rawRow: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  allocations?: Prisma.BankAllocationCreateNestedManyWithoutBankTxInput
   matchedUser?: Prisma.UserCreateNestedOneWithoutBankTransactionsMatchedInput
 }
 
@@ -681,14 +833,20 @@ export type BankTransactionUncheckedCreateWithoutImportedByInput = {
   bankRef: string
   bookedAt: Date | string
   amount: number
+  direction?: $Enums.BankDirection
   description: string
   accountNo?: string | null
   counterparty?: string | null
+  closingBalance?: string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Date | string | null
+  resolvedById?: string | null
   matchStatus?: $Enums.BankMatchStatus
   matchedUserId?: string | null
   paymentId?: string | null
   importedAt?: Date | string
   rawRow: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  allocations?: Prisma.BankAllocationUncheckedCreateNestedManyWithoutBankTxInput
 }
 
 export type BankTransactionCreateOrConnectWithoutImportedByInput = {
@@ -725,9 +883,14 @@ export type BankTransactionScalarWhereInput = {
   bankRef?: Prisma.StringFilter<"BankTransaction"> | string
   bookedAt?: Prisma.DateTimeFilter<"BankTransaction"> | Date | string
   amount?: Prisma.IntFilter<"BankTransaction"> | number
+  direction?: Prisma.EnumBankDirectionFilter<"BankTransaction"> | $Enums.BankDirection
   description?: Prisma.StringFilter<"BankTransaction"> | string
   accountNo?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   counterparty?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  closingBalance?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  suggestion?: Prisma.JsonNullableFilter<"BankTransaction">
+  resolvedAt?: Prisma.DateTimeNullableFilter<"BankTransaction"> | Date | string | null
+  resolvedById?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   matchStatus?: Prisma.EnumBankMatchStatusFilter<"BankTransaction"> | $Enums.BankMatchStatus
   matchedUserId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   paymentId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
@@ -752,14 +915,119 @@ export type BankTransactionUpdateManyWithWhereWithoutImportedByInput = {
   data: Prisma.XOR<Prisma.BankTransactionUpdateManyMutationInput, Prisma.BankTransactionUncheckedUpdateManyWithoutImportedByInput>
 }
 
+export type BankTransactionCreateWithoutAllocationsInput = {
+  id?: string
+  bankRef: string
+  bookedAt: Date | string
+  amount: number
+  direction?: $Enums.BankDirection
+  description: string
+  accountNo?: string | null
+  counterparty?: string | null
+  closingBalance?: string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Date | string | null
+  resolvedById?: string | null
+  matchStatus?: $Enums.BankMatchStatus
+  paymentId?: string | null
+  importedAt?: Date | string
+  rawRow: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  matchedUser?: Prisma.UserCreateNestedOneWithoutBankTransactionsMatchedInput
+  importedBy: Prisma.UserCreateNestedOneWithoutBankTransactionsImportedInput
+}
+
+export type BankTransactionUncheckedCreateWithoutAllocationsInput = {
+  id?: string
+  bankRef: string
+  bookedAt: Date | string
+  amount: number
+  direction?: $Enums.BankDirection
+  description: string
+  accountNo?: string | null
+  counterparty?: string | null
+  closingBalance?: string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Date | string | null
+  resolvedById?: string | null
+  matchStatus?: $Enums.BankMatchStatus
+  matchedUserId?: string | null
+  paymentId?: string | null
+  importedById: string
+  importedAt?: Date | string
+  rawRow: Prisma.JsonNullValueInput | runtime.InputJsonValue
+}
+
+export type BankTransactionCreateOrConnectWithoutAllocationsInput = {
+  where: Prisma.BankTransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.BankTransactionCreateWithoutAllocationsInput, Prisma.BankTransactionUncheckedCreateWithoutAllocationsInput>
+}
+
+export type BankTransactionUpsertWithoutAllocationsInput = {
+  update: Prisma.XOR<Prisma.BankTransactionUpdateWithoutAllocationsInput, Prisma.BankTransactionUncheckedUpdateWithoutAllocationsInput>
+  create: Prisma.XOR<Prisma.BankTransactionCreateWithoutAllocationsInput, Prisma.BankTransactionUncheckedCreateWithoutAllocationsInput>
+  where?: Prisma.BankTransactionWhereInput
+}
+
+export type BankTransactionUpdateToOneWithWhereWithoutAllocationsInput = {
+  where?: Prisma.BankTransactionWhereInput
+  data: Prisma.XOR<Prisma.BankTransactionUpdateWithoutAllocationsInput, Prisma.BankTransactionUncheckedUpdateWithoutAllocationsInput>
+}
+
+export type BankTransactionUpdateWithoutAllocationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bankRef?: Prisma.StringFieldUpdateOperationsInput | string
+  bookedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  direction?: Prisma.EnumBankDirectionFieldUpdateOperationsInput | $Enums.BankDirection
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  accountNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterparty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingBalance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
+  paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rawRow?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  matchedUser?: Prisma.UserUpdateOneWithoutBankTransactionsMatchedNestedInput
+  importedBy?: Prisma.UserUpdateOneRequiredWithoutBankTransactionsImportedNestedInput
+}
+
+export type BankTransactionUncheckedUpdateWithoutAllocationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bankRef?: Prisma.StringFieldUpdateOperationsInput | string
+  bookedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  direction?: Prisma.EnumBankDirectionFieldUpdateOperationsInput | $Enums.BankDirection
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  accountNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterparty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingBalance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
+  matchedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  importedById?: Prisma.StringFieldUpdateOperationsInput | string
+  importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rawRow?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+}
+
 export type BankTransactionCreateManyMatchedUserInput = {
   id?: string
   bankRef: string
   bookedAt: Date | string
   amount: number
+  direction?: $Enums.BankDirection
   description: string
   accountNo?: string | null
   counterparty?: string | null
+  closingBalance?: string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Date | string | null
+  resolvedById?: string | null
   matchStatus?: $Enums.BankMatchStatus
   paymentId?: string | null
   importedById: string
@@ -772,9 +1040,14 @@ export type BankTransactionCreateManyImportedByInput = {
   bankRef: string
   bookedAt: Date | string
   amount: number
+  direction?: $Enums.BankDirection
   description: string
   accountNo?: string | null
   counterparty?: string | null
+  closingBalance?: string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Date | string | null
+  resolvedById?: string | null
   matchStatus?: $Enums.BankMatchStatus
   matchedUserId?: string | null
   paymentId?: string | null
@@ -787,13 +1060,19 @@ export type BankTransactionUpdateWithoutMatchedUserInput = {
   bankRef?: Prisma.StringFieldUpdateOperationsInput | string
   bookedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  direction?: Prisma.EnumBankDirectionFieldUpdateOperationsInput | $Enums.BankDirection
   description?: Prisma.StringFieldUpdateOperationsInput | string
   accountNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   counterparty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingBalance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rawRow?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  allocations?: Prisma.BankAllocationUpdateManyWithoutBankTxNestedInput
   importedBy?: Prisma.UserUpdateOneRequiredWithoutBankTransactionsImportedNestedInput
 }
 
@@ -802,14 +1081,20 @@ export type BankTransactionUncheckedUpdateWithoutMatchedUserInput = {
   bankRef?: Prisma.StringFieldUpdateOperationsInput | string
   bookedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  direction?: Prisma.EnumBankDirectionFieldUpdateOperationsInput | $Enums.BankDirection
   description?: Prisma.StringFieldUpdateOperationsInput | string
   accountNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   counterparty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingBalance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedById?: Prisma.StringFieldUpdateOperationsInput | string
   importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rawRow?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  allocations?: Prisma.BankAllocationUncheckedUpdateManyWithoutBankTxNestedInput
 }
 
 export type BankTransactionUncheckedUpdateManyWithoutMatchedUserInput = {
@@ -817,9 +1102,14 @@ export type BankTransactionUncheckedUpdateManyWithoutMatchedUserInput = {
   bankRef?: Prisma.StringFieldUpdateOperationsInput | string
   bookedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  direction?: Prisma.EnumBankDirectionFieldUpdateOperationsInput | $Enums.BankDirection
   description?: Prisma.StringFieldUpdateOperationsInput | string
   accountNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   counterparty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingBalance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -832,13 +1122,19 @@ export type BankTransactionUpdateWithoutImportedByInput = {
   bankRef?: Prisma.StringFieldUpdateOperationsInput | string
   bookedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  direction?: Prisma.EnumBankDirectionFieldUpdateOperationsInput | $Enums.BankDirection
   description?: Prisma.StringFieldUpdateOperationsInput | string
   accountNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   counterparty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingBalance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rawRow?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  allocations?: Prisma.BankAllocationUpdateManyWithoutBankTxNestedInput
   matchedUser?: Prisma.UserUpdateOneWithoutBankTransactionsMatchedNestedInput
 }
 
@@ -847,14 +1143,20 @@ export type BankTransactionUncheckedUpdateWithoutImportedByInput = {
   bankRef?: Prisma.StringFieldUpdateOperationsInput | string
   bookedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  direction?: Prisma.EnumBankDirectionFieldUpdateOperationsInput | $Enums.BankDirection
   description?: Prisma.StringFieldUpdateOperationsInput | string
   accountNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   counterparty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingBalance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   matchedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rawRow?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  allocations?: Prisma.BankAllocationUncheckedUpdateManyWithoutBankTxNestedInput
 }
 
 export type BankTransactionUncheckedUpdateManyWithoutImportedByInput = {
@@ -862,9 +1164,14 @@ export type BankTransactionUncheckedUpdateManyWithoutImportedByInput = {
   bankRef?: Prisma.StringFieldUpdateOperationsInput | string
   bookedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  direction?: Prisma.EnumBankDirectionFieldUpdateOperationsInput | $Enums.BankDirection
   description?: Prisma.StringFieldUpdateOperationsInput | string
   accountNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   counterparty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingBalance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   matchedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -873,23 +1180,59 @@ export type BankTransactionUncheckedUpdateManyWithoutImportedByInput = {
 }
 
 
+/**
+ * Count Type BankTransactionCountOutputType
+ */
+
+export type BankTransactionCountOutputType = {
+  allocations: number
+}
+
+export type BankTransactionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  allocations?: boolean | BankTransactionCountOutputTypeCountAllocationsArgs
+}
+
+/**
+ * BankTransactionCountOutputType without action
+ */
+export type BankTransactionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BankTransactionCountOutputType
+   */
+  select?: Prisma.BankTransactionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * BankTransactionCountOutputType without action
+ */
+export type BankTransactionCountOutputTypeCountAllocationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BankAllocationWhereInput
+}
+
 
 export type BankTransactionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   bankRef?: boolean
   bookedAt?: boolean
   amount?: boolean
+  direction?: boolean
   description?: boolean
   accountNo?: boolean
   counterparty?: boolean
+  closingBalance?: boolean
+  suggestion?: boolean
+  resolvedAt?: boolean
+  resolvedById?: boolean
   matchStatus?: boolean
   matchedUserId?: boolean
   paymentId?: boolean
   importedById?: boolean
   importedAt?: boolean
   rawRow?: boolean
+  allocations?: boolean | Prisma.BankTransaction$allocationsArgs<ExtArgs>
   matchedUser?: boolean | Prisma.BankTransaction$matchedUserArgs<ExtArgs>
   importedBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.BankTransactionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["bankTransaction"]>
 
 export type BankTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -897,9 +1240,14 @@ export type BankTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   bankRef?: boolean
   bookedAt?: boolean
   amount?: boolean
+  direction?: boolean
   description?: boolean
   accountNo?: boolean
   counterparty?: boolean
+  closingBalance?: boolean
+  suggestion?: boolean
+  resolvedAt?: boolean
+  resolvedById?: boolean
   matchStatus?: boolean
   matchedUserId?: boolean
   paymentId?: boolean
@@ -915,9 +1263,14 @@ export type BankTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   bankRef?: boolean
   bookedAt?: boolean
   amount?: boolean
+  direction?: boolean
   description?: boolean
   accountNo?: boolean
   counterparty?: boolean
+  closingBalance?: boolean
+  suggestion?: boolean
+  resolvedAt?: boolean
+  resolvedById?: boolean
   matchStatus?: boolean
   matchedUserId?: boolean
   paymentId?: boolean
@@ -933,9 +1286,14 @@ export type BankTransactionSelectScalar = {
   bankRef?: boolean
   bookedAt?: boolean
   amount?: boolean
+  direction?: boolean
   description?: boolean
   accountNo?: boolean
   counterparty?: boolean
+  closingBalance?: boolean
+  suggestion?: boolean
+  resolvedAt?: boolean
+  resolvedById?: boolean
   matchStatus?: boolean
   matchedUserId?: boolean
   paymentId?: boolean
@@ -944,10 +1302,12 @@ export type BankTransactionSelectScalar = {
   rawRow?: boolean
 }
 
-export type BankTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bankRef" | "bookedAt" | "amount" | "description" | "accountNo" | "counterparty" | "matchStatus" | "matchedUserId" | "paymentId" | "importedById" | "importedAt" | "rawRow", ExtArgs["result"]["bankTransaction"]>
+export type BankTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bankRef" | "bookedAt" | "amount" | "direction" | "description" | "accountNo" | "counterparty" | "closingBalance" | "suggestion" | "resolvedAt" | "resolvedById" | "matchStatus" | "matchedUserId" | "paymentId" | "importedById" | "importedAt" | "rawRow", ExtArgs["result"]["bankTransaction"]>
 export type BankTransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  allocations?: boolean | Prisma.BankTransaction$allocationsArgs<ExtArgs>
   matchedUser?: boolean | Prisma.BankTransaction$matchedUserArgs<ExtArgs>
   importedBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.BankTransactionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type BankTransactionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   matchedUser?: boolean | Prisma.BankTransaction$matchedUserArgs<ExtArgs>
@@ -961,6 +1321,7 @@ export type BankTransactionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Ty
 export type $BankTransactionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "BankTransaction"
   objects: {
+    allocations: Prisma.$BankAllocationPayload<ExtArgs>[]
     matchedUser: Prisma.$UserPayload<ExtArgs> | null
     importedBy: Prisma.$UserPayload<ExtArgs>
   }
@@ -969,9 +1330,14 @@ export type $BankTransactionPayload<ExtArgs extends runtime.Types.Extensions.Int
     bankRef: string
     bookedAt: Date
     amount: number
+    direction: $Enums.BankDirection
     description: string
     accountNo: string | null
     counterparty: string | null
+    closingBalance: string | null
+    suggestion: runtime.JsonValue | null
+    resolvedAt: Date | null
+    resolvedById: string | null
     matchStatus: $Enums.BankMatchStatus
     matchedUserId: string | null
     paymentId: string | null
@@ -1372,6 +1738,7 @@ readonly fields: BankTransactionFieldRefs;
  */
 export interface Prisma__BankTransactionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  allocations<T extends Prisma.BankTransaction$allocationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BankTransaction$allocationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BankAllocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   matchedUser<T extends Prisma.BankTransaction$matchedUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BankTransaction$matchedUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   importedBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
@@ -1407,9 +1774,14 @@ export interface BankTransactionFieldRefs {
   readonly bankRef: Prisma.FieldRef<"BankTransaction", 'String'>
   readonly bookedAt: Prisma.FieldRef<"BankTransaction", 'DateTime'>
   readonly amount: Prisma.FieldRef<"BankTransaction", 'Int'>
+  readonly direction: Prisma.FieldRef<"BankTransaction", 'BankDirection'>
   readonly description: Prisma.FieldRef<"BankTransaction", 'String'>
   readonly accountNo: Prisma.FieldRef<"BankTransaction", 'String'>
   readonly counterparty: Prisma.FieldRef<"BankTransaction", 'String'>
+  readonly closingBalance: Prisma.FieldRef<"BankTransaction", 'String'>
+  readonly suggestion: Prisma.FieldRef<"BankTransaction", 'Json'>
+  readonly resolvedAt: Prisma.FieldRef<"BankTransaction", 'DateTime'>
+  readonly resolvedById: Prisma.FieldRef<"BankTransaction", 'String'>
   readonly matchStatus: Prisma.FieldRef<"BankTransaction", 'BankMatchStatus'>
   readonly matchedUserId: Prisma.FieldRef<"BankTransaction", 'String'>
   readonly paymentId: Prisma.FieldRef<"BankTransaction", 'String'>
@@ -1814,6 +2186,30 @@ export type BankTransactionDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
    * Limit how many BankTransactions to delete.
    */
   limit?: number
+}
+
+/**
+ * BankTransaction.allocations
+ */
+export type BankTransaction$allocationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BankAllocation
+   */
+  select?: Prisma.BankAllocationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BankAllocation
+   */
+  omit?: Prisma.BankAllocationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BankAllocationInclude<ExtArgs> | null
+  where?: Prisma.BankAllocationWhereInput
+  orderBy?: Prisma.BankAllocationOrderByWithRelationInput | Prisma.BankAllocationOrderByWithRelationInput[]
+  cursor?: Prisma.BankAllocationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BankAllocationScalarFieldEnum | Prisma.BankAllocationScalarFieldEnum[]
 }
 
 /**
