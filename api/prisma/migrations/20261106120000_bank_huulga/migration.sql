@@ -31,7 +31,10 @@ CREATE TABLE IF NOT EXISTS "BankAllocation" (
     "revokedById" TEXT,
     CONSTRAINT "BankAllocation_pkey" PRIMARY KEY ("id")
 );
-CREATE UNIQUE INDEX IF NOT EXISTS "BankAllocation_paymentId_key" ON "BankAllocation"("paymentId");
+CREATE INDEX IF NOT EXISTS "BankAllocation_paymentId_idx" ON "BankAllocation"("paymentId");
+-- Нэг төлбөр нэг л ИДЭВХТЭЙ хэсэгтэй (зэрэг ажиллалт давхар холбохоос ӨС түвшинд хамгаална);
+-- буцаасан хэсэг түүхэнд үлдэх тул бүтэн unique биш (схемд @@unique(..., where), partialIndexes).
+CREATE UNIQUE INDEX IF NOT EXISTS "BankAllocation_active_paymentId_key" ON "BankAllocation"("paymentId") WHERE ("revokedAt" IS NULL);
 CREATE INDEX IF NOT EXISTS "BankAllocation_bankTxId_idx" ON "BankAllocation"("bankTxId");
 CREATE INDEX IF NOT EXISTS "BankAllocation_studentId_idx" ON "BankAllocation"("studentId");
 DO $$ BEGIN

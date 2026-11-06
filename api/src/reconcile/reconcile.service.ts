@@ -9,7 +9,7 @@
 // Ачаалал: хуулга нь хэдэн зуун мөр; тулгалт санах ойд (~800 сурагч), бичилт нь
 // хэдхэн бөөн асуулга — сард хэдхэн удаа ажиллана.
 
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { Prisma } from '../generated/prisma/client';
 import { BankMatchStatus, PaymentMethod, PaymentStatus } from '../generated/prisma/enums';
@@ -80,6 +80,8 @@ const chunks = <T>(xs: T[], n: number) => Array.from({ length: Math.ceil(xs.leng
 
 @Injectable()
 export class ReconcileService {
+  private readonly logger = new Logger(ReconcileService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
@@ -229,9 +231,17 @@ export class ReconcileService {
       else toSuggest.push({ id: row.id, s: parts ? { ...s, unrecorded: true, reason: `${s.reason}: шийтэд бүртгэгдээгүй` } : { ...s, unrecorded: undefined } });
     }
     for (const part of chunks(toSuggest, 500)) await this.bulkSetSuggestion(part);
-    for (const part of chunks(toAllocate, 200))
-      await this.prisma.$transaction(async (tx) => this.writeAllocations(tx, part, actor, true), { timeout: 60_000 });
-    return { resolved: toAllocate.length, open: toSuggest.length };
+    let resolved = 0;
+    for (const part of chunks(toAllocate, 200)) {
+      try {
+        resolved += await this.prisma.$transaction(async (tx) => this.writeAllocations(tx, part, actor, true), { timeout: 60_000 });
+      } catch (e) {
+        // Зэрэг ажиллалт (өөр хүн яг тэр мөрийг шийдсэн, төлбөр өөр хэсэгт холбогдсон) — энэ
+        // багцыг бүхэлд нь буцаана; мөрүүд шийдэгдээгүй хэвээр, дараагийн ажиллалтад дахин.
+        this.logger.warn(`Автомат хуваарилалтын багц алгасагдлаа: ${e instanceof Error ? e.message : e}`);
+      }
+    }
+    return { resolved, open: toSuggest.length };
   }
 
   /**
@@ -326,7 +336,17 @@ export class ReconcileService {
     items: { row: OpenRow; s?: RowSuggestion; parts: Part[] }[],
     actor: ReconcileActor,
     auto: boolean,
-  ) {
+  ): Promise<number> {
+    if (auto) {
+      // Санал тооцсоноос хойш өөр хүн/ажиллалт шийдсэн мөрийг алгасна (давхар хуваарилалтгүй)
+      const ids = items.map((i) => i.row.id);
+      const stillOpen = new Set(
+        (await tx.$queryRaw<{ id: string }[]>`
+          SELECT id FROM "BankTransaction" WHERE id IN (${Prisma.join(ids)}) AND "resolvedAt" IS NULL FOR UPDATE`).map((r) => r.id),
+      );
+      items = items.filter((i) => stillOpen.has(i.row.id));
+      if (!items.length) return 0;
+    }
     const payments: Prisma.PaymentCreateManyInput[] = [];
     const allocs: Prisma.BankAllocationCreateManyInput[] = [];
     const rowUpdates: { id: string; s: RowSuggestion | null; status: BankMatchStatus; uid: string | null }[] = [];
@@ -364,14 +384,17 @@ export class ReconcileService {
     const values = Prisma.join(
       rowUpdates.map((u) => Prisma.sql`(${u.id}, ${u.s ? JSON.stringify(u.s) : null}::jsonb, ${u.status}, ${u.uid})`),
     );
-    await tx.$executeRaw`
+    const updated = await tx.$executeRaw`
       UPDATE "BankTransaction" t SET
         "resolvedAt" = NOW(),
         "resolvedById" = ${auto ? null : actor.id},
         "matchStatus" = v.status::"BankMatchStatus",
         "matchedUserId" = v.uid,
         "suggestion" = COALESCE(v.s, t."suggestion")
-      FROM (VALUES ${values}) AS v(id, s, status, uid) WHERE t.id = v.id`;
+      FROM (VALUES ${values}) AS v(id, s, status, uid)
+      WHERE t.id = v.id AND (${!auto} OR t."resolvedAt" IS NULL)`;
+    if (updated !== rowUpdates.length) throw new Error(`Хуваарилалт зөрлөө (${updated}/${rowUpdates.length}) — буцаалаа`);
+    return updated;
   }
 
   // ── Гараар ────────────────────────────────────────────────────────────────

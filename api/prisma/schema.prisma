@@ -1607,7 +1607,10 @@ model BankAllocation {
   kind      BankAllocKind
   amount    Int // ₮
   studentId String? // хүүхэдтэй холбоотой хэсэгт (сургалт, ном, хариултын хуудас)
-  paymentId String?         @unique // TUITION-ээс үүссэн төлбөр
+  // TUITION-ийн төлбөр (хуулгаас үүссэн `bank_…` эсвэл шийтээс орсонтой холбосон). Нэг
+  // төлбөр нэг л ИДЭВХТЭЙ хэсэгтэй (зэрэг ажиллалтаас ӨС түвшинд) — буцаасан хэсэг
+  // түүхэнд үлдэж, тэр төлбөрийг дахин холбож болно.
+  paymentId String?
   note      String?
   auto      Boolean         @default(false) // систем автоматаар хуваарилсан
   createdById String? // null = систем
@@ -1617,6 +1620,8 @@ model BankAllocation {
 
   @@index([bankTxId])
   @@index([studentId])
+  @@index([paymentId])
+  @@unique([paymentId], map: "BankAllocation_active_paymentId_key", where: { revokedAt: null })
 }
 
 // Гараар баталсан шийдвэрээс «сурсан» холбоос: илгээгчийн данс эсвэл утас →
