@@ -132,6 +132,7 @@ export class ReconcileService {
     });
 
     const auto = await this.resolveOpen(actor);
+    const inSheet = await this.applySheetThrough(actor);
     const settled = await this.recomputeCursor(accountNo);
     const summary = {
       rows: rows.length,
@@ -139,7 +140,8 @@ export class ReconcileService {
       duplicates: fresh.length - inserted,
       beforeSettled: rows.length - fresh.length,
       autoResolved: auto.resolved,
-      open: auto.open,
+      inSheet,
+      open: auto.open - inSheet,
       settledThrough: settled,
       from: info.from,
       to: info.to,
@@ -453,7 +455,7 @@ export class ReconcileService {
       const held = { ...((row.suggestion as unknown as RowSuggestion) ?? {}), held: true };
       await tx.bankTransaction.update({
         where: { id },
-        data: { resolvedAt: null, resolvedById: null, matchStatus: BankMatchStatus.UNMATCHED, matchedUserId: null, suggestion: held as unknown as Prisma.InputJsonValue },
+        data: { resolvedAt: null, resolvedById: null, inSheet: false, matchStatus: BankMatchStatus.UNMATCHED, matchedUserId: null, suggestion: held as unknown as Prisma.InputJsonValue },
       });
       return r;
     });
@@ -494,6 +496,41 @@ export class ReconcileService {
         });
   }
 
+  // ── «Шийтэд хөтлөгдсөн» (шилжилтийн үе, эзэн 2026-11-06) ──────────────────
+  //
+  // Вэб ажиллаж эхлэхээс өмнөх гүйлгээг ажилтан шийтэд аль хэдийн бүртгэсэн. Систем
+  // тэдгээрийг шийтийн төлбөртэй тулгаж чадаагүй бол (дүн хувааж/нийлүүлж, өөр
+  // өдрөөр бичсэн) «Шийдэх»-д дахин харуулахгүй. Шийтэд ижил дүнтэй ±3 хоногийн
+  // бүртгэл огт олдоогүйг `sheetMissing` гэж тэмдэглэнэ — мартагдсан төлбөр нуугдахгүй.
+
+  async markSheetThrough(through: string, actor: ReconcileActor) {
+    if (through > todayKeyUB()) throw new BadRequestException('Ирээдүйн өдөр сонгох боломжгүй');
+    const res = await this.prisma.bankCursor.updateMany({ data: { sheetThrough: through } });
+    if (!res.count) throw new BadRequestException('Эхлээд хуулга оруулна уу');
+    const marked = await this.applySheetThrough(actor);
+    for (const c of await this.prisma.bankCursor.findMany({ select: { accountNo: true } })) await this.recomputeCursor(c.accountNo);
+    await this.audit.record({ actorId: actor.id, actorRole: actor.role, action: 'SHEET_THROUGH', entity: 'BankCursor', entityId: through, after: { through, marked } });
+    return { marked };
+  }
+
+  private async applySheetThrough(actor: ReconcileActor): Promise<number> {
+    let total = 0;
+    for (const c of await this.prisma.bankCursor.findMany({ where: { sheetThrough: { not: null } } })) {
+      const bound = new Date(`${shiftDay(c.sheetThrough!, 1)}T00:00:00+08:00`);
+      total += await this.prisma.$executeRaw`
+        UPDATE "BankTransaction" t SET
+          "resolvedAt" = NOW(), "resolvedById" = ${actor.id}, "inSheet" = true,
+          "matchStatus" = 'IGNORED'::"BankMatchStatus",
+          "suggestion" = COALESCE(t."suggestion", '{}'::jsonb) || jsonb_build_object('sheetMissing', t.direction = 'CREDIT' AND NOT EXISTS (
+            SELECT 1 FROM "Payment" p
+            WHERE p.amount = t.amount AND p.status = 'CONFIRMED' AND p."storePurchaseId" IS NULL AND p.id NOT LIKE 'bank_%'
+              AND p."paidAt" BETWEEN t."bookedAt" - interval '3 days' AND t."bookedAt" + interval '3 days'))
+        WHERE t."resolvedAt" IS NULL AND t."accountNo" = ${c.accountNo} AND t."bookedAt" < ${bound}
+          AND COALESCE((t."suggestion"->>'held')::boolean, false) = false`;
+    }
+    return total;
+  }
+
   // ── «Бүрэн шийдсэн өдөр» ──────────────────────────────────────────────────
 
   /** Хамгийн эртний шийдэгдээгүй мөрийн өмнөх өдөр, хуулгын бүтэн хамарсан өдрөөс хэтрэхгүй. */
@@ -514,17 +551,18 @@ export class ReconcileService {
   // ── Унших ─────────────────────────────────────────────────────────────────
 
   async overview() {
-    const [cursors, manual, tuition, other, expense, last] = await Promise.all([
+    const [cursors, manual, tuition, other, expense, sheet, last] = await Promise.all([
       this.prisma.bankCursor.findMany({ orderBy: { accountNo: 'asc' } }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('manual') }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('tuition') }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('other') }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('expense') }),
+      this.prisma.bankTransaction.count({ where: this.laneWhere('sheet') }),
       this.prisma.bankTransaction.findFirst({ orderBy: { importedAt: 'desc' }, select: { importedAt: true } }),
     ]);
     return {
-      cursors: cursors.map((c) => ({ accountNo: c.accountNo, settledThrough: c.settledThrough, coveredThrough: c.coveredThrough })),
-      counts: { manual, tuition, other, expense },
+      cursors: cursors.map((c) => ({ accountNo: c.accountNo, settledThrough: c.settledThrough, coveredThrough: c.coveredThrough, sheetThrough: c.sheetThrough })),
+      counts: { manual, tuition, other, expense, sheet },
       lastImportAt: last?.importedAt ?? null,
     };
   }
@@ -537,9 +575,11 @@ export class ReconcileService {
       case 'tuition':
         return { resolvedAt: { not: null }, allocations: tuitionAlloc };
       case 'other':
-        return { resolvedAt: { not: null }, direction: 'CREDIT', allocations: { none: { kind: 'TUITION', revokedAt: null } } };
+        return { resolvedAt: { not: null }, inSheet: false, direction: 'CREDIT', allocations: { none: { kind: 'TUITION', revokedAt: null } } };
       case 'expense':
-        return { resolvedAt: { not: null }, direction: 'DEBIT' };
+        return { resolvedAt: { not: null }, inSheet: false, direction: 'DEBIT' };
+      case 'sheet':
+        return { inSheet: true };
     }
   }
 
@@ -567,6 +607,7 @@ export class ReconcileService {
           suggestion: true,
           resolvedAt: true,
           resolvedById: true,
+          inSheet: true,
           allocations: { where: { revokedAt: null }, select: { id: true, kind: true, amount: true, studentId: true, auto: true, paymentId: true } },
         },
       }),
@@ -590,6 +631,8 @@ export class ReconcileService {
           counterparty: r.counterparty,
           resolvedAt: r.resolvedAt,
           resolvedBySystem: !!r.resolvedAt && !r.resolvedById,
+          inSheet: r.inSheet,
+          sheetMissing: r.inSheet && !!(r.suggestion as { sheetMissing?: boolean } | null)?.sheetMissing,
           suggestion: s && {
             decision: s.decision,
             kind: s.kind,

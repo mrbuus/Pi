@@ -1,8 +1,8 @@
 import { Type } from 'class-transformer';
-import { ArrayMaxSize, ArrayMinSize, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min, ValidateNested } from 'class-validator';
+import { ArrayMaxSize, ArrayMinSize, IsIn, IsInt, IsOptional, IsString, Matches, Max, MaxLength, Min, ValidateNested } from 'class-validator';
 
 export const ALLOC_KINDS = ['TUITION', 'BOOK', 'ANSWER_SHEET', 'STAFF_FINE', 'TRANSFER', 'EXPENSE', 'OTHER'] as const;
-export const ROW_LANES = ['manual', 'tuition', 'other', 'expense'] as const;
+export const ROW_LANES = ['manual', 'tuition', 'other', 'expense', 'sheet'] as const;
 export type RowLane = (typeof ROW_LANES)[number];
 
 export class AllocPartDto {
@@ -61,4 +61,10 @@ export class StudentSearchQueryDto {
   @IsString()
   @MaxLength(60)
   q!: string;
+}
+
+/** Ажилтан энэ өдрийг хүртэлх гүйлгээг шийтэд хөтөлсөн (шилжилтийн үе) */
+export class SheetThroughDto {
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Огноо YYYY-MM-DD хэлбэртэй байх ёстой' })
+  through!: string;
 }

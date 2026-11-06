@@ -14,6 +14,7 @@ ALTER TABLE "BankTransaction" ADD COLUMN IF NOT EXISTS "closingBalance" TEXT;
 ALTER TABLE "BankTransaction" ADD COLUMN IF NOT EXISTS "suggestion" JSONB;
 ALTER TABLE "BankTransaction" ADD COLUMN IF NOT EXISTS "resolvedAt" TIMESTAMP(3);
 ALTER TABLE "BankTransaction" ADD COLUMN IF NOT EXISTS "resolvedById" TEXT;
+ALTER TABLE "BankTransaction" ADD COLUMN IF NOT EXISTS "inSheet" BOOLEAN NOT NULL DEFAULT false;
 CREATE INDEX IF NOT EXISTS "BankTransaction_accountNo_bookedAt_idx" ON "BankTransaction"("accountNo", "bookedAt");
 
 CREATE TABLE IF NOT EXISTS "BankAllocation" (
@@ -60,6 +61,7 @@ CREATE TABLE IF NOT EXISTS "BankCursor" (
     "accountNo" TEXT NOT NULL,
     "settledThrough" TEXT NOT NULL,
     "coveredThrough" TEXT NOT NULL,
+    "sheetThrough" TEXT,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "BankCursor_pkey" PRIMARY KEY ("accountNo")
 );

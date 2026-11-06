@@ -1,14 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CalendarCheck2, FileUp, Inbox, Search } from "lucide-react";
+import { CalendarCheck2, FileSpreadsheet, FileUp, Inbox, Search } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/kit/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/kit/tabs";
 import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import { SkeletonRows } from "@/components/ui/Skeleton";
-import { inputCls } from "@/components/payments/LedgerDialog";
+import LedgerDialog, { Field, inputCls } from "@/components/payments/LedgerDialog";
 import { dayLabel } from "@/components/payments/ledgerFormat";
 import { errMsg } from "@/components/payments/paymentHelpers";
 import RowCard from "./RowCard";
@@ -19,6 +19,7 @@ const LANES: { key: Lane; label: string; empty: string }[] = [
   { key: "tuition", label: "Сургалтын төлбөр", empty: "Сургалтын төлбөр хараахан ороогүй" },
   { key: "other", label: "Бусад орлого", empty: "Ном, хариултын хуудас, торгууль энд харагдана" },
   { key: "expense", label: "Зарлага", empty: "Зарлага хараахан ороогүй" },
+  { key: "sheet", label: "Шийтэд хөтлөгдсөн", empty: "Ажилтны шийтэд хөтөлсөн гэж тэмдэглэсэн гүйлгээ энд харагдана" },
 ];
 const PAGE = 50;
 
@@ -31,7 +32,12 @@ export function ReconcilePageClient() {
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
   const [lastImport, setLastImport] = useState<ImportSummary | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetDate, setSheetDate] = useState("");
+  const [sheetSaving, setSheetSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const rowsRef = useRef<BankRow[] | null>(null);
+  rowsRef.current = rows;
 
   const loadOverview = useCallback(async () => {
     try {
@@ -41,23 +47,24 @@ export function ReconcilePageClient() {
     }
   }, []);
 
+  /** append — «Цааш үзэх»; soft — жагсаалтыг арилгахгүйгээр (байрлал үсрэхгүй) шинэчилнэ */
   const loadRows = useCallback(
-    async (append = false) => {
+    async (mode: "reset" | "append" | "soft" = "reset") => {
       setError(null);
-      if (!append) setRows(null);
+      if (mode === "reset") setRows(null);
       try {
-        const offset = append ? (rows?.length ?? 0) : 0;
+        const have = rowsRef.current?.length ?? 0;
+        const offset = mode === "append" ? have : 0;
+        const limit = mode === "soft" ? Math.max(PAGE, have) : PAGE;
         const res = await api<{ items: BankRow[]; total: number }>(
-          `/reconcile/rows?lane=${lane}&limit=${PAGE}&offset=${offset}${q.trim() ? `&q=${encodeURIComponent(q.trim())}` : ""}`,
+          `/reconcile/rows?lane=${lane}&limit=${Math.min(limit, 200)}&offset=${offset}${q.trim() ? `&q=${encodeURIComponent(q.trim())}` : ""}`,
         );
         setTotal(res.total);
-        setRows((prev) => (append ? [...(prev ?? []), ...res.items] : res.items));
+        setRows((prev) => (mode === "append" ? [...(prev ?? []), ...res.items] : res.items));
       } catch (e) {
-        setError(errMsg(e));
+        if (mode !== "soft") setError(errMsg(e));
       }
     },
-    // rows-ийг зөвхөн «Цааш үзэх»-д уншина
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [lane, q],
   );
 
@@ -65,14 +72,19 @@ export function ReconcilePageClient() {
     loadOverview();
   }, [loadOverview]);
   useEffect(() => {
-    const t = setTimeout(() => loadRows(false), q ? 300 : 0);
+    const t = setTimeout(() => loadRows("reset"), q ? 300 : 0);
     return () => clearTimeout(t);
   }, [loadRows, q]);
 
-  const refresh = (alsoResolved?: number) => {
-    if (alsoResolved) toast.success(`Өмнө оноосон данс, утсаар өөр ${alsoResolved} гүйлгээ автоматаар орлоо`);
+  /** Хуваарилсан/буцаасан мөр л жагсаалтаас гарна — хуудас дахин ачаалахгүй */
+  const onDone = (rowId: string, alsoResolved?: number) => {
+    setRows((prev) => prev?.filter((r) => r.id !== rowId) ?? prev);
+    setTotal((t) => Math.max(0, t - 1));
     loadOverview();
-    loadRows(false);
+    if (alsoResolved) {
+      toast.success(`Өмнө оноосон данс, утсаар өөр ${alsoResolved} гүйлгээ автоматаар орлоо`);
+      loadRows("soft");
+    }
   };
 
   async function onFile(file: File | undefined) {
@@ -85,7 +97,8 @@ export function ReconcilePageClient() {
       setLastImport(res);
       toast.success(`${res.newRows} шинэ гүйлгээ орлоо`);
       setLane("manual");
-      refresh();
+      loadOverview();
+      loadRows("reset");
     } catch (e) {
       toast.error(errMsg(e));
     } finally {
@@ -94,27 +107,64 @@ export function ReconcilePageClient() {
     }
   }
 
+  async function saveSheetThrough() {
+    setSheetSaving(true);
+    try {
+      const res = await api<{ marked: number }>("/reconcile/sheet-through", { method: "POST", body: { through: sheetDate } });
+      toast.success(`${res.marked} гүйлгээ «Шийтэд хөтлөгдсөн» жагсаалт руу шилжлээ`);
+      setSheetOpen(false);
+      loadOverview();
+      loadRows("reset");
+    } catch (e) {
+      toast.error(errMsg(e));
+    } finally {
+      setSheetSaving(false);
+    }
+  }
+
   const cursor = overview?.cursors[0];
   return (
     <div className="space-y-5">
-      <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4">
-        <div className="flex items-start gap-3">
-          <CalendarCheck2 className="mt-0.5 size-5 shrink-0 text-success" aria-hidden />
-          <div>
-            <p className="font-semibold text-ink">
-              {cursor ? `${dayLabel(cursor.settledThrough)} хүртэл бүрэн шийдэгдсэн` : "Хуулга хараахан ороогүй"}
-            </p>
-            <p className="text-sm text-ink-dim">
-              {cursor
-                ? `Дараагийн хуулгаас ${dayLabel(cursor.settledThrough)}-ээс хойшхи гүйлгээ л орно. Хуулга ${dayLabel(cursor.coveredThrough)} хүртэл бүтэн`
-                : "Хаан банкны интернэт банкнаас «Дансны хуулга»-г Excel-ээр татаж оруулна"}
-            </p>
+      <section className="space-y-3 rounded-2xl border border-line bg-surface p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <CalendarCheck2 className="mt-0.5 size-5 shrink-0 text-success" aria-hidden />
+            <div>
+              <p className="font-semibold text-ink">
+                {cursor ? `${dayLabel(cursor.settledThrough)} хүртэл бүрэн шийдэгдсэн` : "Хуулга хараахан ороогүй"}
+              </p>
+              <p className="text-sm text-ink-dim">
+                {cursor
+                  ? `Дараагийн хуулгаас ${dayLabel(cursor.settledThrough)}-ээс хойшхи гүйлгээ л орно. Хуулга ${dayLabel(cursor.coveredThrough)} хүртэл бүтэн`
+                  : "Хаан банкны интернэт банкнаас «Дансны хуулга»-г Excel-ээр татаж оруулна"}
+              </p>
+            </div>
           </div>
+          <input ref={fileRef} type="file" accept=".xlsx" className="hidden" onChange={(e) => onFile(e.target.files?.[0])} />
+          <Button onClick={() => fileRef.current?.click()} disabled={importing}>
+            <FileUp /> {importing ? "Уншиж байна" : "Хуулга оруулах"}
+          </Button>
         </div>
-        <input ref={fileRef} type="file" accept=".xlsx" className="hidden" onChange={(e) => onFile(e.target.files?.[0])} />
-        <Button onClick={() => fileRef.current?.click()} disabled={importing}>
-          <FileUp /> {importing ? "Уншиж байна" : "Хуулга оруулах"}
-        </Button>
+        {cursor && (
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
+            <p className="flex items-center gap-2 text-sm text-ink-dim">
+              <FileSpreadsheet className="size-4 shrink-0 text-info" aria-hidden />
+              {cursor.sheetThrough
+                ? `${dayLabel(cursor.sheetThrough)} хүртэлх гүйлгээг ажилтан шийтэд хөтөлсөн`
+                : "Ажилтан шийтэд аль хэдийн хөтөлсөн гүйлгээг «Шийдэх»-ээс нууж болно"}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSheetDate(cursor.sheetThrough ?? cursor.coveredThrough);
+                setSheetOpen(true);
+              }}
+            >
+              {cursor.sheetThrough ? "Өдрийг өөрчлөх" : "Шийтэд хөтлөгдсөн өдөр"}
+            </Button>
+          </div>
+        )}
       </section>
 
       {lastImport && (
@@ -151,7 +201,13 @@ export function ReconcilePageClient() {
       </div>
 
       {error ? (
-        <ErrorState message={error} onRetry={() => refresh()} />
+        <ErrorState
+          message={error}
+          onRetry={() => {
+            loadOverview();
+            loadRows("reset");
+          }}
+        />
       ) : rows === null ? (
         <SkeletonRows rows={5} />
       ) : rows.length === 0 ? (
@@ -159,15 +215,36 @@ export function ReconcilePageClient() {
       ) : (
         <div className="space-y-3">
           {rows.map((r) => (
-            <RowCard key={r.id} row={r} onChanged={refresh} />
+            <RowCard key={r.id} row={r} onDone={onDone} />
           ))}
           {rows.length < total && (
-            <Button variant="outline" className="w-full" onClick={() => loadRows(true)}>
+            <Button variant="outline" className="w-full" onClick={() => loadRows("append")}>
               Цааш үзэх ({total - rows.length})
             </Button>
           )}
         </div>
       )}
+
+      <LedgerDialog
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        title="Шийтэд хөтлөгдсөн өдөр"
+        description="Энэ өдрийг хүртэлх, систем тулгаж чадаагүй гүйлгээг ажилтан шийтэд аль хэдийн бүртгэсэн гэж үзээд «Шийдэх»-ээс нууна"
+        footer={
+          <Button onClick={saveSheetThrough} disabled={sheetSaving || !sheetDate} className="w-full sm:w-auto">
+            {sheetSaving ? "Хадгалж байна" : "Тэмдэглэх"}
+          </Button>
+        }
+      >
+        <div className="space-y-3">
+          <Field label="Хүртэлх өдөр" htmlFor="sheet-through">
+            <input id="sheet-through" type="date" value={sheetDate} onChange={(e) => setSheetDate(e.target.value)} className={inputCls} />
+          </Field>
+          <p className="text-sm text-ink-dim">
+            Тэдгээр гүйлгээ «Шийтэд хөтлөгдсөн» жагсаалтад харагдана. Шийтэд ижил дүнтэй бүртгэл олдоогүйг «шалгана уу» гэж тэмдэглэнэ
+          </p>
+        </div>
+      </LedgerDialog>
     </div>
   );
 }

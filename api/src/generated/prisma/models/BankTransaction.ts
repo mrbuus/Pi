@@ -46,6 +46,7 @@ export type BankTransactionMinAggregateOutputType = {
   closingBalance: string | null
   resolvedAt: Date | null
   resolvedById: string | null
+  inSheet: boolean | null
   matchStatus: $Enums.BankMatchStatus | null
   matchedUserId: string | null
   paymentId: string | null
@@ -65,6 +66,7 @@ export type BankTransactionMaxAggregateOutputType = {
   closingBalance: string | null
   resolvedAt: Date | null
   resolvedById: string | null
+  inSheet: boolean | null
   matchStatus: $Enums.BankMatchStatus | null
   matchedUserId: string | null
   paymentId: string | null
@@ -85,6 +87,7 @@ export type BankTransactionCountAggregateOutputType = {
   suggestion: number
   resolvedAt: number
   resolvedById: number
+  inSheet: number
   matchStatus: number
   matchedUserId: number
   paymentId: number
@@ -115,6 +118,7 @@ export type BankTransactionMinAggregateInputType = {
   closingBalance?: true
   resolvedAt?: true
   resolvedById?: true
+  inSheet?: true
   matchStatus?: true
   matchedUserId?: true
   paymentId?: true
@@ -134,6 +138,7 @@ export type BankTransactionMaxAggregateInputType = {
   closingBalance?: true
   resolvedAt?: true
   resolvedById?: true
+  inSheet?: true
   matchStatus?: true
   matchedUserId?: true
   paymentId?: true
@@ -154,6 +159,7 @@ export type BankTransactionCountAggregateInputType = {
   suggestion?: true
   resolvedAt?: true
   resolvedById?: true
+  inSheet?: true
   matchStatus?: true
   matchedUserId?: true
   paymentId?: true
@@ -262,6 +268,7 @@ export type BankTransactionGroupByOutputType = {
   suggestion: runtime.JsonValue | null
   resolvedAt: Date | null
   resolvedById: string | null
+  inSheet: boolean
   matchStatus: $Enums.BankMatchStatus
   matchedUserId: string | null
   paymentId: string | null
@@ -306,6 +313,7 @@ export type BankTransactionWhereInput = {
   suggestion?: Prisma.JsonNullableFilter<"BankTransaction">
   resolvedAt?: Prisma.DateTimeNullableFilter<"BankTransaction"> | Date | string | null
   resolvedById?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  inSheet?: Prisma.BoolFilter<"BankTransaction"> | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFilter<"BankTransaction"> | $Enums.BankMatchStatus
   matchedUserId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   paymentId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
@@ -330,6 +338,7 @@ export type BankTransactionOrderByWithRelationInput = {
   suggestion?: Prisma.SortOrderInput | Prisma.SortOrder
   resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   resolvedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  inSheet?: Prisma.SortOrder
   matchStatus?: Prisma.SortOrder
   matchedUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -358,6 +367,7 @@ export type BankTransactionWhereUniqueInput = Prisma.AtLeast<{
   suggestion?: Prisma.JsonNullableFilter<"BankTransaction">
   resolvedAt?: Prisma.DateTimeNullableFilter<"BankTransaction"> | Date | string | null
   resolvedById?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  inSheet?: Prisma.BoolFilter<"BankTransaction"> | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFilter<"BankTransaction"> | $Enums.BankMatchStatus
   matchedUserId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   importedById?: Prisma.StringFilter<"BankTransaction"> | string
@@ -381,6 +391,7 @@ export type BankTransactionOrderByWithAggregationInput = {
   suggestion?: Prisma.SortOrderInput | Prisma.SortOrder
   resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   resolvedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  inSheet?: Prisma.SortOrder
   matchStatus?: Prisma.SortOrder
   matchedUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -410,6 +421,7 @@ export type BankTransactionScalarWhereWithAggregatesInput = {
   suggestion?: Prisma.JsonNullableWithAggregatesFilter<"BankTransaction">
   resolvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"BankTransaction"> | Date | string | null
   resolvedById?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
+  inSheet?: Prisma.BoolWithAggregatesFilter<"BankTransaction"> | boolean
   matchStatus?: Prisma.EnumBankMatchStatusWithAggregatesFilter<"BankTransaction"> | $Enums.BankMatchStatus
   matchedUserId?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
   paymentId?: Prisma.StringNullableWithAggregatesFilter<"BankTransaction"> | string | null
@@ -431,6 +443,7 @@ export type BankTransactionCreateInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Date | string | null
   resolvedById?: string | null
+  inSheet?: boolean
   matchStatus?: $Enums.BankMatchStatus
   paymentId?: string | null
   importedAt?: Date | string
@@ -453,6 +466,7 @@ export type BankTransactionUncheckedCreateInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Date | string | null
   resolvedById?: string | null
+  inSheet?: boolean
   matchStatus?: $Enums.BankMatchStatus
   matchedUserId?: string | null
   paymentId?: string | null
@@ -475,6 +489,7 @@ export type BankTransactionUpdateInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inSheet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -497,6 +512,7 @@ export type BankTransactionUncheckedUpdateInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inSheet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   matchedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -519,6 +535,7 @@ export type BankTransactionCreateManyInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Date | string | null
   resolvedById?: string | null
+  inSheet?: boolean
   matchStatus?: $Enums.BankMatchStatus
   matchedUserId?: string | null
   paymentId?: string | null
@@ -540,6 +557,7 @@ export type BankTransactionUpdateManyMutationInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inSheet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -559,6 +577,7 @@ export type BankTransactionUncheckedUpdateManyInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inSheet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   matchedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -590,6 +609,7 @@ export type BankTransactionCountOrderByAggregateInput = {
   suggestion?: Prisma.SortOrder
   resolvedAt?: Prisma.SortOrder
   resolvedById?: Prisma.SortOrder
+  inSheet?: Prisma.SortOrder
   matchStatus?: Prisma.SortOrder
   matchedUserId?: Prisma.SortOrder
   paymentId?: Prisma.SortOrder
@@ -614,6 +634,7 @@ export type BankTransactionMaxOrderByAggregateInput = {
   closingBalance?: Prisma.SortOrder
   resolvedAt?: Prisma.SortOrder
   resolvedById?: Prisma.SortOrder
+  inSheet?: Prisma.SortOrder
   matchStatus?: Prisma.SortOrder
   matchedUserId?: Prisma.SortOrder
   paymentId?: Prisma.SortOrder
@@ -633,6 +654,7 @@ export type BankTransactionMinOrderByAggregateInput = {
   closingBalance?: Prisma.SortOrder
   resolvedAt?: Prisma.SortOrder
   resolvedById?: Prisma.SortOrder
+  inSheet?: Prisma.SortOrder
   matchStatus?: Prisma.SortOrder
   matchedUserId?: Prisma.SortOrder
   paymentId?: Prisma.SortOrder
@@ -768,6 +790,7 @@ export type BankTransactionCreateWithoutMatchedUserInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Date | string | null
   resolvedById?: string | null
+  inSheet?: boolean
   matchStatus?: $Enums.BankMatchStatus
   paymentId?: string | null
   importedAt?: Date | string
@@ -789,6 +812,7 @@ export type BankTransactionUncheckedCreateWithoutMatchedUserInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Date | string | null
   resolvedById?: string | null
+  inSheet?: boolean
   matchStatus?: $Enums.BankMatchStatus
   paymentId?: string | null
   importedById: string
@@ -820,6 +844,7 @@ export type BankTransactionCreateWithoutImportedByInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Date | string | null
   resolvedById?: string | null
+  inSheet?: boolean
   matchStatus?: $Enums.BankMatchStatus
   paymentId?: string | null
   importedAt?: Date | string
@@ -841,6 +866,7 @@ export type BankTransactionUncheckedCreateWithoutImportedByInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Date | string | null
   resolvedById?: string | null
+  inSheet?: boolean
   matchStatus?: $Enums.BankMatchStatus
   matchedUserId?: string | null
   paymentId?: string | null
@@ -891,6 +917,7 @@ export type BankTransactionScalarWhereInput = {
   suggestion?: Prisma.JsonNullableFilter<"BankTransaction">
   resolvedAt?: Prisma.DateTimeNullableFilter<"BankTransaction"> | Date | string | null
   resolvedById?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
+  inSheet?: Prisma.BoolFilter<"BankTransaction"> | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFilter<"BankTransaction"> | $Enums.BankMatchStatus
   matchedUserId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
   paymentId?: Prisma.StringNullableFilter<"BankTransaction"> | string | null
@@ -928,6 +955,7 @@ export type BankTransactionCreateWithoutAllocationsInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Date | string | null
   resolvedById?: string | null
+  inSheet?: boolean
   matchStatus?: $Enums.BankMatchStatus
   paymentId?: string | null
   importedAt?: Date | string
@@ -949,6 +977,7 @@ export type BankTransactionUncheckedCreateWithoutAllocationsInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Date | string | null
   resolvedById?: string | null
+  inSheet?: boolean
   matchStatus?: $Enums.BankMatchStatus
   matchedUserId?: string | null
   paymentId?: string | null
@@ -986,6 +1015,7 @@ export type BankTransactionUpdateWithoutAllocationsInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inSheet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1007,6 +1037,7 @@ export type BankTransactionUncheckedUpdateWithoutAllocationsInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inSheet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   matchedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1028,6 +1059,7 @@ export type BankTransactionCreateManyMatchedUserInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Date | string | null
   resolvedById?: string | null
+  inSheet?: boolean
   matchStatus?: $Enums.BankMatchStatus
   paymentId?: string | null
   importedById: string
@@ -1048,6 +1080,7 @@ export type BankTransactionCreateManyImportedByInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Date | string | null
   resolvedById?: string | null
+  inSheet?: boolean
   matchStatus?: $Enums.BankMatchStatus
   matchedUserId?: string | null
   paymentId?: string | null
@@ -1068,6 +1101,7 @@ export type BankTransactionUpdateWithoutMatchedUserInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inSheet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1089,6 +1123,7 @@ export type BankTransactionUncheckedUpdateWithoutMatchedUserInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inSheet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1110,6 +1145,7 @@ export type BankTransactionUncheckedUpdateManyWithoutMatchedUserInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inSheet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1130,6 +1166,7 @@ export type BankTransactionUpdateWithoutImportedByInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inSheet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   importedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1151,6 +1188,7 @@ export type BankTransactionUncheckedUpdateWithoutImportedByInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inSheet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   matchedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1172,6 +1210,7 @@ export type BankTransactionUncheckedUpdateManyWithoutImportedByInput = {
   suggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resolvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inSheet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   matchStatus?: Prisma.EnumBankMatchStatusFieldUpdateOperationsInput | $Enums.BankMatchStatus
   matchedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1223,6 +1262,7 @@ export type BankTransactionSelect<ExtArgs extends runtime.Types.Extensions.Inter
   suggestion?: boolean
   resolvedAt?: boolean
   resolvedById?: boolean
+  inSheet?: boolean
   matchStatus?: boolean
   matchedUserId?: boolean
   paymentId?: boolean
@@ -1248,6 +1288,7 @@ export type BankTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   suggestion?: boolean
   resolvedAt?: boolean
   resolvedById?: boolean
+  inSheet?: boolean
   matchStatus?: boolean
   matchedUserId?: boolean
   paymentId?: boolean
@@ -1271,6 +1312,7 @@ export type BankTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   suggestion?: boolean
   resolvedAt?: boolean
   resolvedById?: boolean
+  inSheet?: boolean
   matchStatus?: boolean
   matchedUserId?: boolean
   paymentId?: boolean
@@ -1294,6 +1336,7 @@ export type BankTransactionSelectScalar = {
   suggestion?: boolean
   resolvedAt?: boolean
   resolvedById?: boolean
+  inSheet?: boolean
   matchStatus?: boolean
   matchedUserId?: boolean
   paymentId?: boolean
@@ -1302,7 +1345,7 @@ export type BankTransactionSelectScalar = {
   rawRow?: boolean
 }
 
-export type BankTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bankRef" | "bookedAt" | "amount" | "direction" | "description" | "accountNo" | "counterparty" | "closingBalance" | "suggestion" | "resolvedAt" | "resolvedById" | "matchStatus" | "matchedUserId" | "paymentId" | "importedById" | "importedAt" | "rawRow", ExtArgs["result"]["bankTransaction"]>
+export type BankTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bankRef" | "bookedAt" | "amount" | "direction" | "description" | "accountNo" | "counterparty" | "closingBalance" | "suggestion" | "resolvedAt" | "resolvedById" | "inSheet" | "matchStatus" | "matchedUserId" | "paymentId" | "importedById" | "importedAt" | "rawRow", ExtArgs["result"]["bankTransaction"]>
 export type BankTransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   allocations?: boolean | Prisma.BankTransaction$allocationsArgs<ExtArgs>
   matchedUser?: boolean | Prisma.BankTransaction$matchedUserArgs<ExtArgs>
@@ -1338,6 +1381,7 @@ export type $BankTransactionPayload<ExtArgs extends runtime.Types.Extensions.Int
     suggestion: runtime.JsonValue | null
     resolvedAt: Date | null
     resolvedById: string | null
+    inSheet: boolean
     matchStatus: $Enums.BankMatchStatus
     matchedUserId: string | null
     paymentId: string | null
@@ -1782,6 +1826,7 @@ export interface BankTransactionFieldRefs {
   readonly suggestion: Prisma.FieldRef<"BankTransaction", 'Json'>
   readonly resolvedAt: Prisma.FieldRef<"BankTransaction", 'DateTime'>
   readonly resolvedById: Prisma.FieldRef<"BankTransaction", 'String'>
+  readonly inSheet: Prisma.FieldRef<"BankTransaction", 'Boolean'>
   readonly matchStatus: Prisma.FieldRef<"BankTransaction", 'BankMatchStatus'>
   readonly matchedUserId: Prisma.FieldRef<"BankTransaction", 'String'>
   readonly paymentId: Prisma.FieldRef<"BankTransaction", 'String'>

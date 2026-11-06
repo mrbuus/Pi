@@ -290,6 +290,7 @@ POST /api/recommend/attempt
 POST /api/reconcile/import
 POST /api/reconcile/rows/:id/allocate
 POST /api/reconcile/rows/:id/undo
+POST /api/reconcile/sheet-through
 POST /api/schedule
 POST /api/schedule/:id/exceptions
 POST /api/schedule/:id/split

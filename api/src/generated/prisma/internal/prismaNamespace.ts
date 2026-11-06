@@ -11775,6 +11775,7 @@ export const BankTransactionScalarFieldEnum = {
   suggestion: 'suggestion',
   resolvedAt: 'resolvedAt',
   resolvedById: 'resolvedById',
+  inSheet: 'inSheet',
   matchStatus: 'matchStatus',
   matchedUserId: 'matchedUserId',
   paymentId: 'paymentId',
@@ -11820,6 +11821,7 @@ export const BankCursorScalarFieldEnum = {
   accountNo: 'accountNo',
   settledThrough: 'settledThrough',
   coveredThrough: 'coveredThrough',
+  sheetThrough: 'sheetThrough',
   updatedAt: 'updatedAt'
 } as const
 

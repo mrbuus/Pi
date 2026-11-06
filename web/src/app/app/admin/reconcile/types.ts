@@ -1,7 +1,7 @@
 // API: /reconcile/* (api/src/reconcile/reconcile.service.ts)
 
 export type AllocKind = "TUITION" | "BOOK" | "ANSWER_SHEET" | "STAFF_FINE" | "TRANSFER" | "EXPENSE" | "OTHER";
-export type Lane = "manual" | "tuition" | "other" | "expense";
+export type Lane = "manual" | "tuition" | "other" | "expense" | "sheet";
 
 export const KIND_LABEL: Record<AllocKind, string> = {
   TUITION: "Сургалтын төлбөр",
@@ -64,12 +64,16 @@ export interface BankRow {
   counterparty: string | null;
   resolvedAt: string | null;
   resolvedBySystem: boolean;
+  /** Ажилтан шийтэд хөтөлсөн гэж тэмдэглэгдсэн (хуваарилалтгүй) */
+  inSheet: boolean;
+  /** Шийтэд ижил дүнтэй ±3 хоногийн бүртгэл олдсонгүй — шалгах */
+  sheetMissing: boolean;
   suggestion: Suggestion | null;
   allocations: Allocation[];
 }
 
 export interface Overview {
-  cursors: { accountNo: string; settledThrough: string; coveredThrough: string }[];
+  cursors: { accountNo: string; settledThrough: string; coveredThrough: string; sheetThrough: string | null }[];
   counts: Record<Lane, number>;
   lastImportAt: string | null;
 }
@@ -80,6 +84,7 @@ export interface ImportSummary {
   duplicates: number;
   beforeSettled: number;
   autoResolved: number;
+  inSheet: number;
   open: number;
   settledThrough: string | null;
   from: string | null;
@@ -100,3 +105,10 @@ export const SIGNAL_LABEL: Record<MatchSignal, string> = {
   NAME: "Нэр",
   SURNAME: "Овог",
 };
+
+/** Хаан банк утганд илгээгчийг залгадаг: «… ХААНААС: 150000 НЭР ОВОГ» — утга ба илгээгчийг салгана */
+export function splitSender(text: string): { main: string; sender: string | null } {
+  const m = /ХААНААС:?\s*\d*\s*/iu.exec(text);
+  if (!m) return { main: text.trim(), sender: null };
+  return { main: text.slice(0, m.index).trim(), sender: text.slice(m.index + m[0].length).trim() || null };
+}

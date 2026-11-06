@@ -19,7 +19,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ReconcileService } from './reconcile.service';
-import { AllocateDto, ListRowsQueryDto, StudentSearchQueryDto } from './reconcile.dto';
+import { AllocateDto, ListRowsQueryDto, SheetThroughDto, StudentSearchQueryDto } from './reconcile.dto';
 
 // JwtStrategy.validate() нь { userId, role } буцаадаг — sub БИШ
 interface UserPayload {
@@ -74,6 +74,13 @@ export class ReconcileController {
   @HttpCode(200)
   allocate(@Param('id') id: string, @Body() dto: AllocateDto, @CurrentUser() user: UserPayload) {
     return this.reconcile.allocate(id, dto, { id: user.userId, role: user.role });
+  }
+
+  /** POST /reconcile/sheet-through — «энэ өдрийг хүртэл ажилтан шийтэд хөтөлсөн»: тулгагдаагүйг «Шийдэх»-ээс нууна */
+  @Post('sheet-through')
+  @HttpCode(200)
+  sheetThrough(@Body() dto: SheetThroughDto, @CurrentUser() user: UserPayload) {
+    return this.reconcile.markSheetThrough(dto.through, { id: user.userId, role: user.role });
   }
 
   /** POST /reconcile/rows/:id/undo — хуваарилалтыг буцаах (устгахгүй, төлбөр REVERSED) */

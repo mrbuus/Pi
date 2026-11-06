@@ -1568,6 +1568,9 @@ model BankTransaction {
   suggestion   Json?
   resolvedAt   DateTime? // бүх дүн хуваарилагдсан (эсвэл төлбөр биш гэж ангилагдсан) мөч
   resolvedById String? // null + resolvedAt = систем автоматаар
+  // Ажилтан шийтэд аль хэдийн хөтөлсөн (BankCursor.sheetThrough-ээс өмнөх, систем тулгаж
+  // чадаагүй) — хуваарилалтгүйгээр «шийдэгдсэн»; «Шийдэх»-д харагдахгүй (эзэн 2026-11-06)
+  inSheet      Boolean   @default(false)
   allocations  BankAllocation[]
 
   matchStatus   BankMatchStatus @default(UNMATCHED)
@@ -1647,6 +1650,8 @@ model BankCursor {
   // Импортлосон хуулгуудын бүтэн хамарсан сүүлийн өдөр: хуулгын сүүлийн өдөр
   // бүтэн биш байж болох тул (14:00-д татсан) settledThrough түүнээс давахгүй.
   coveredThrough String
+  // Ажилтан энэ өдрийг хүртэлх гүйлгээг шийтэд хөтөлсөн (шилжилтийн үе) — эзэн тэмдэглэнэ
+  sheetThrough   String?
   updatedAt      DateTime @updatedAt
 }
 

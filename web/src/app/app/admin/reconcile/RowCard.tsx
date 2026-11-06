@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, CircleAlert, FileSpreadsheet, Split, Undo2, Users } from "lucide-react";
+import { Check, CircleAlert, FileSpreadsheet, Landmark, Split, Undo2, UserRound, Users } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
@@ -11,7 +11,7 @@ import LedgerDialog from "@/components/payments/LedgerDialog";
 import { mnt, stampLabel } from "@/components/payments/ledgerFormat";
 import { errMsg } from "@/components/payments/paymentHelpers";
 import AllocateDialog from "./AllocateDialog";
-import { SIGNAL_LABEL, STUDENT_KINDS, type AllocPart, type BankRow, type Candidate } from "./types";
+import { SIGNAL_LABEL, STUDENT_KINDS, splitSender, type AllocPart, type BankRow, type Candidate } from "./types";
 
 const signals = (c: Candidate) => [...new Set(c.signals.map((s) => SIGNAL_LABEL[s]))].join(" + ");
 
@@ -23,19 +23,21 @@ const DECISION_HINT: Record<string, string> = {
 };
 
 /** Банкны нэг гүйлгээ: шийдэгдээгүй бол санал + товч, шийдэгдсэн бол хуваарилалт + «Буцаах». */
-export default function RowCard({ row, onChanged }: { row: BankRow; onChanged: (alsoResolved?: number) => void }) {
+/** onDone: тэр мөр жагсаалтаас гарна (хуудас дахин ачаалахгүй); alsoResolved — сурсан данс/утсаар нэмж шийдэгдсэн */
+export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId: string, alsoResolved?: number) => void }) {
   const [dialog, setDialog] = useState(false);
   const [confirmUndo, setConfirmUndo] = useState(false);
   const [busy, setBusy] = useState(false);
   const s = row.suggestion;
   const open = !row.resolvedAt;
+  const { main, sender } = splitSender(row.description);
 
   async function quick(parts: AllocPart[]) {
     setBusy(true);
     try {
       const res = await api<{ alsoResolved: number }>(`/reconcile/rows/${encodeURIComponent(row.id)}/allocate`, { method: "POST", body: { parts } });
       toast.success("Хуваарилагдлаа");
-      onChanged(res.alsoResolved);
+      onDone(row.id, res.alsoResolved);
     } catch (e) {
       toast.error(errMsg(e));
     } finally {
@@ -49,7 +51,7 @@ export default function RowCard({ row, onChanged }: { row: BankRow; onChanged: (
       await api(`/reconcile/rows/${encodeURIComponent(row.id)}/undo`, { method: "POST" });
       toast.success("Буцаалаа — «Шийдэх» жагсаалтад орлоо");
       setConfirmUndo(false);
-      onChanged();
+      onDone(row.id);
     } catch (e) {
       toast.error(errMsg(e));
     } finally {
@@ -72,7 +74,27 @@ export default function RowCard({ row, onChanged }: { row: BankRow; onChanged: (
         </span>
         <span className="text-sm tabular-nums text-ink-dim">{stampLabel(row.bookedAt)}</span>
       </header>
-      <p className="break-words text-sm text-ink">{row.description || <span className="text-ink-dim">Утгагүй гүйлгээ</span>}</p>
+      <p className="break-words text-base font-semibold leading-snug text-ink">
+        {main || <span className="font-normal text-ink-dim">Утгагүй гүйлгээ</span>}
+      </p>
+      {(sender || row.counterparty) && (
+        <dl className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-dim">
+          {sender && (
+            <div className="flex items-center gap-1.5">
+              <UserRound className="size-4 shrink-0" aria-hidden />
+              <dt className="sr-only">Илгээгч</dt>
+              <dd className="font-medium text-ink">{sender}</dd>
+            </div>
+          )}
+          {row.counterparty && (
+            <div className="flex items-center gap-1.5">
+              <Landmark className="size-4 shrink-0" aria-hidden />
+              <dt>Данс</dt>
+              <dd className="tabular-nums text-ink">{row.counterparty}</dd>
+            </div>
+          )}
+        </dl>
+      )}
 
       {open && s && (
         <div className="space-y-2">
@@ -118,7 +140,16 @@ export default function RowCard({ row, onChanged }: { row: BankRow; onChanged: (
         </div>
       )}
 
-      {!open && (
+      {row.inSheet && (
+        <p className="flex items-start gap-1.5 text-sm text-ink-dim">
+          <FileSpreadsheet className={`mt-0.5 size-4 shrink-0 ${row.sheetMissing ? "text-error" : "text-info"}`} aria-hidden />
+          {row.sheetMissing
+            ? "Шийтэд хөтлөгдсөн гэж тэмдэглэсэн ч ижил дүнтэй бүртгэл олдсонгүй — шалгана уу"
+            : "Ажилтан шийтэд хөтөлсөн"}
+        </p>
+      )}
+
+      {!open && !row.inSheet && (
         <ul className="space-y-1">
           {row.allocations.map((a) => (
             <li key={a.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
@@ -156,7 +187,7 @@ export default function RowCard({ row, onChanged }: { row: BankRow; onChanged: (
         )}
         {!open && (
           <Button size="sm" variant="ghost" onClick={() => setConfirmUndo(true)} disabled={busy}>
-            <Undo2 /> Буцаах
+            <Undo2 /> {row.inSheet ? "Буцааж шийдэх" : "Буцаах"}
           </Button>
         )}
         {open && !s && (
@@ -166,7 +197,7 @@ export default function RowCard({ row, onChanged }: { row: BankRow; onChanged: (
         )}
       </footer>
 
-      <AllocateDialog row={row} open={dialog} onOpenChange={setDialog} onSaved={(n) => onChanged(n)} />
+      <AllocateDialog row={row} open={dialog} onOpenChange={setDialog} onSaved={(n) => onDone(row.id, n)} />
       <LedgerDialog
         open={confirmUndo}
         onOpenChange={setConfirmUndo}

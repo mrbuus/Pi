@@ -28,6 +28,7 @@ export type BankCursorMinAggregateOutputType = {
   accountNo: string | null
   settledThrough: string | null
   coveredThrough: string | null
+  sheetThrough: string | null
   updatedAt: Date | null
 }
 
@@ -35,6 +36,7 @@ export type BankCursorMaxAggregateOutputType = {
   accountNo: string | null
   settledThrough: string | null
   coveredThrough: string | null
+  sheetThrough: string | null
   updatedAt: Date | null
 }
 
@@ -42,6 +44,7 @@ export type BankCursorCountAggregateOutputType = {
   accountNo: number
   settledThrough: number
   coveredThrough: number
+  sheetThrough: number
   updatedAt: number
   _all: number
 }
@@ -51,6 +54,7 @@ export type BankCursorMinAggregateInputType = {
   accountNo?: true
   settledThrough?: true
   coveredThrough?: true
+  sheetThrough?: true
   updatedAt?: true
 }
 
@@ -58,6 +62,7 @@ export type BankCursorMaxAggregateInputType = {
   accountNo?: true
   settledThrough?: true
   coveredThrough?: true
+  sheetThrough?: true
   updatedAt?: true
 }
 
@@ -65,6 +70,7 @@ export type BankCursorCountAggregateInputType = {
   accountNo?: true
   settledThrough?: true
   coveredThrough?: true
+  sheetThrough?: true
   updatedAt?: true
   _all?: true
 }
@@ -145,6 +151,7 @@ export type BankCursorGroupByOutputType = {
   accountNo: string
   settledThrough: string
   coveredThrough: string
+  sheetThrough: string | null
   updatedAt: Date
   _count: BankCursorCountAggregateOutputType | null
   _min: BankCursorMinAggregateOutputType | null
@@ -173,6 +180,7 @@ export type BankCursorWhereInput = {
   accountNo?: Prisma.StringFilter<"BankCursor"> | string
   settledThrough?: Prisma.StringFilter<"BankCursor"> | string
   coveredThrough?: Prisma.StringFilter<"BankCursor"> | string
+  sheetThrough?: Prisma.StringNullableFilter<"BankCursor"> | string | null
   updatedAt?: Prisma.DateTimeFilter<"BankCursor"> | Date | string
 }
 
@@ -180,6 +188,7 @@ export type BankCursorOrderByWithRelationInput = {
   accountNo?: Prisma.SortOrder
   settledThrough?: Prisma.SortOrder
   coveredThrough?: Prisma.SortOrder
+  sheetThrough?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -190,6 +199,7 @@ export type BankCursorWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.BankCursorWhereInput | Prisma.BankCursorWhereInput[]
   settledThrough?: Prisma.StringFilter<"BankCursor"> | string
   coveredThrough?: Prisma.StringFilter<"BankCursor"> | string
+  sheetThrough?: Prisma.StringNullableFilter<"BankCursor"> | string | null
   updatedAt?: Prisma.DateTimeFilter<"BankCursor"> | Date | string
 }, "accountNo">
 
@@ -197,6 +207,7 @@ export type BankCursorOrderByWithAggregationInput = {
   accountNo?: Prisma.SortOrder
   settledThrough?: Prisma.SortOrder
   coveredThrough?: Prisma.SortOrder
+  sheetThrough?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.BankCursorCountOrderByAggregateInput
   _max?: Prisma.BankCursorMaxOrderByAggregateInput
@@ -210,6 +221,7 @@ export type BankCursorScalarWhereWithAggregatesInput = {
   accountNo?: Prisma.StringWithAggregatesFilter<"BankCursor"> | string
   settledThrough?: Prisma.StringWithAggregatesFilter<"BankCursor"> | string
   coveredThrough?: Prisma.StringWithAggregatesFilter<"BankCursor"> | string
+  sheetThrough?: Prisma.StringNullableWithAggregatesFilter<"BankCursor"> | string | null
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"BankCursor"> | Date | string
 }
 
@@ -217,6 +229,7 @@ export type BankCursorCreateInput = {
   accountNo: string
   settledThrough: string
   coveredThrough: string
+  sheetThrough?: string | null
   updatedAt?: Date | string
 }
 
@@ -224,6 +237,7 @@ export type BankCursorUncheckedCreateInput = {
   accountNo: string
   settledThrough: string
   coveredThrough: string
+  sheetThrough?: string | null
   updatedAt?: Date | string
 }
 
@@ -231,6 +245,7 @@ export type BankCursorUpdateInput = {
   accountNo?: Prisma.StringFieldUpdateOperationsInput | string
   settledThrough?: Prisma.StringFieldUpdateOperationsInput | string
   coveredThrough?: Prisma.StringFieldUpdateOperationsInput | string
+  sheetThrough?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -238,6 +253,7 @@ export type BankCursorUncheckedUpdateInput = {
   accountNo?: Prisma.StringFieldUpdateOperationsInput | string
   settledThrough?: Prisma.StringFieldUpdateOperationsInput | string
   coveredThrough?: Prisma.StringFieldUpdateOperationsInput | string
+  sheetThrough?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -245,6 +261,7 @@ export type BankCursorCreateManyInput = {
   accountNo: string
   settledThrough: string
   coveredThrough: string
+  sheetThrough?: string | null
   updatedAt?: Date | string
 }
 
@@ -252,6 +269,7 @@ export type BankCursorUpdateManyMutationInput = {
   accountNo?: Prisma.StringFieldUpdateOperationsInput | string
   settledThrough?: Prisma.StringFieldUpdateOperationsInput | string
   coveredThrough?: Prisma.StringFieldUpdateOperationsInput | string
+  sheetThrough?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -259,6 +277,7 @@ export type BankCursorUncheckedUpdateManyInput = {
   accountNo?: Prisma.StringFieldUpdateOperationsInput | string
   settledThrough?: Prisma.StringFieldUpdateOperationsInput | string
   coveredThrough?: Prisma.StringFieldUpdateOperationsInput | string
+  sheetThrough?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -266,6 +285,7 @@ export type BankCursorCountOrderByAggregateInput = {
   accountNo?: Prisma.SortOrder
   settledThrough?: Prisma.SortOrder
   coveredThrough?: Prisma.SortOrder
+  sheetThrough?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -273,6 +293,7 @@ export type BankCursorMaxOrderByAggregateInput = {
   accountNo?: Prisma.SortOrder
   settledThrough?: Prisma.SortOrder
   coveredThrough?: Prisma.SortOrder
+  sheetThrough?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -280,6 +301,7 @@ export type BankCursorMinOrderByAggregateInput = {
   accountNo?: Prisma.SortOrder
   settledThrough?: Prisma.SortOrder
   coveredThrough?: Prisma.SortOrder
+  sheetThrough?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -289,6 +311,7 @@ export type BankCursorSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   accountNo?: boolean
   settledThrough?: boolean
   coveredThrough?: boolean
+  sheetThrough?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["bankCursor"]>
 
@@ -296,6 +319,7 @@ export type BankCursorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   accountNo?: boolean
   settledThrough?: boolean
   coveredThrough?: boolean
+  sheetThrough?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["bankCursor"]>
 
@@ -303,6 +327,7 @@ export type BankCursorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   accountNo?: boolean
   settledThrough?: boolean
   coveredThrough?: boolean
+  sheetThrough?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["bankCursor"]>
 
@@ -310,10 +335,11 @@ export type BankCursorSelectScalar = {
   accountNo?: boolean
   settledThrough?: boolean
   coveredThrough?: boolean
+  sheetThrough?: boolean
   updatedAt?: boolean
 }
 
-export type BankCursorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"accountNo" | "settledThrough" | "coveredThrough" | "updatedAt", ExtArgs["result"]["bankCursor"]>
+export type BankCursorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"accountNo" | "settledThrough" | "coveredThrough" | "sheetThrough" | "updatedAt", ExtArgs["result"]["bankCursor"]>
 
 export type $BankCursorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "BankCursor"
@@ -322,6 +348,7 @@ export type $BankCursorPayload<ExtArgs extends runtime.Types.Extensions.Internal
     accountNo: string
     settledThrough: string
     coveredThrough: string
+    sheetThrough: string | null
     updatedAt: Date
   }, ExtArgs["result"]["bankCursor"]>
   composites: {}
@@ -749,6 +776,7 @@ export interface BankCursorFieldRefs {
   readonly accountNo: Prisma.FieldRef<"BankCursor", 'String'>
   readonly settledThrough: Prisma.FieldRef<"BankCursor", 'String'>
   readonly coveredThrough: Prisma.FieldRef<"BankCursor", 'String'>
+  readonly sheetThrough: Prisma.FieldRef<"BankCursor", 'String'>
   readonly updatedAt: Prisma.FieldRef<"BankCursor", 'DateTime'>
 }
     
