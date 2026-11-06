@@ -20,6 +20,7 @@ import { CreateClassroomStudentDto } from './dto/create-classroom-student.dto';
 import { parseDateOnly, todayUB } from '../common/date';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { toNationalMn } from '../notifications/phone';
+import { validatePasswordStrength } from '../auth/password-policy';
 import { buildRegistrationWorkbook, type RegistrationRow } from './registration-standard';
 import {
   nextSevenDigitStudentCode,
@@ -1299,6 +1300,55 @@ export class UsersService {
     });
 
     return { ...result, passwordFollowedPhone };
+  }
+
+  // Админ: хэрэглэгчийн нэвтрэх нууц үгийг шинээр тохируулна. Хадгалсан нууц үг
+  // bcrypt hash тул ХАРАХ боломжгүй — оронд нь шинийг тавина. Нууц үг өгөөгүй бол
+  // одоогийн утасны дугаар руу буцаана (анхны дүрэм). Хуучин сесс бүгд тасарна.
+  async setPasswordByAdmin(
+    targetId: string,
+    password: string | undefined,
+    actorId: string,
+    actorRole: Role,
+  ) {
+    const target = await this.prisma.user.findUnique({
+      where: { id: targetId },
+      select: { id: true, phone: true },
+    });
+    if (!target) throw new NotFoundException('Хэрэглэгч олдсонгүй');
+
+    let next = password;
+    if (next === undefined) {
+      if (!target.phone) {
+        throw new BadRequestException(
+          'Утасны дугаар байхгүй тул нууц үгийг утас руу буцаах боломжгүй. Нууц үгээ бичнэ үү',
+        );
+      }
+      next = target.phone;
+    } else {
+      const weak = validatePasswordStrength(next);
+      if (weak) throw new BadRequestException(weak);
+    }
+
+    await this.prisma.user.update({
+      where: { id: targetId },
+      data: {
+        passwordHash: await bcrypt.hash(next, 10),
+        passwordChangedAt: new Date(),
+      },
+    });
+    // Нууц үгийн утгыг аудитад бичихгүй
+    const resetTo = password === undefined ? 'phone' : 'custom';
+    await this.audit.record({
+      actorId,
+      actorRole,
+      action: 'UPDATE',
+      entity: 'User',
+      entityId: targetId,
+      before: {},
+      after: { passwordReset: true, resetTo },
+    });
+    return { changed: true, resetTo };
   }
 
   // Ажилтанд зориулсан дэлгэрэнгүй харагдац: профайл + идэвхтэй анги + код +
