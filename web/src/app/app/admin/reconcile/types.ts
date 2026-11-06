@@ -30,6 +30,8 @@ export interface Candidate {
   score: number;
   signals: MatchSignal[];
   student: StudentCard | null;
+  /** Энэ хүүхдэд шийтэд бүртгэгдсэн, ±3 хоногийн, хуулгатай холбогдоогүй төлбөр */
+  sheetPays: { amount: number; date: string }[];
 }
 
 export interface Suggestion {
@@ -75,6 +77,8 @@ export interface BankRow {
 export interface Overview {
   cursors: { accountNo: string; settledThrough: string; coveredThrough: string; sheetThrough: string | null }[];
   counts: Record<Lane, number>;
+  /** Шийтэд хөтлөгдсөн гэж нуусан ч шийтэд байгааг баталж чадаагүй */
+  sheetCheck: number;
   lastImportAt: string | null;
 }
 

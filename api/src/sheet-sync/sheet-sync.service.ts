@@ -8,6 +8,7 @@ import { PaymentsService } from '../payments/payments.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { parseClassroomLabel } from '../users/student-import';
 import { UsersService } from '../users/users.service';
+import { claimBankPayments } from './bank-claim';
 import { cellSlot, reconcileStudent } from './cell-reconcile';
 import {
   assignRowKeys,
@@ -516,6 +517,24 @@ export class SheetSyncService {
       }
     }
 
+    // c2) Банкны хуулгаас аль хэдийн баталсан төлбөр (`bank_…`, нүдгүй) бол шинээр
+    // бичихгүй, нүдтэй холбоно — ажилтан шийтэд давхар бичсэн ч мөнгө давхардахгүй
+    // (bank-claim.ts, эзэн 2026-11-06).
+    let claimed = 0;
+    if (inserts.length) {
+      const bankPays = await this.prisma.$queryRaw<{ id: string; userId: string; amount: number; paidOn: string }[]>`
+        SELECT p.id, p."userId", p.amount, to_char(p."paidAt" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ulaanbaatar', 'YYYY-MM-DD') AS "paidOn"
+        FROM "Payment" p
+        WHERE left(p.id, 5) = 'bank_' AND p.status = 'CONFIRMED' AND p."paidAt" IS NOT NULL
+          AND NOT EXISTS (SELECT 1 FROM "SheetPayment" s WHERE s."paymentId" = p.id)`;
+      const { keep, links } = claimBankPayments(inserts, bankPays);
+      if (links.length) {
+        claimed = links.length;
+        inserts.splice(0, inserts.length, ...keep);
+        if (!dryRun) await this.prisma.sheetPayment.createMany({ data: links, skipDuplicates: true });
+      }
+    }
+
     // d) Бичих — нэг транзакц, гүйлгээ + нүдний холбоос хамт
     let inserted = 0;
     if (inserts.length && !dryRun) {
@@ -564,6 +583,7 @@ export class SheetSyncService {
     }
     return {
       linkedLegacy: newLinks.length,
+      claimedFromBank: claimed,
       planned: inserts.length,
       inserted: dryRun ? 0 : inserted,
       amount: inserts.reduce((t, i) => t + i.amount, 0),

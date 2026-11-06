@@ -504,29 +504,66 @@ export class ReconcileService {
   // бүртгэл огт олдоогүйг `sheetMissing` гэж тэмдэглэнэ — мартагдсан төлбөр нуугдахгүй.
 
   async markSheetThrough(through: string, actor: ReconcileActor) {
+    // Бодит огноо эсэх (2026-02-31 биш) — хадгалахаас ӨМНӨ
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(through) || new Date(`${through}T00:00:00Z`).toISOString().slice(0, 10) !== through)
+      throw new BadRequestException('Огноо буруу байна');
     if (through > todayKeyUB()) throw new BadRequestException('Ирээдүйн өдөр сонгох боломжгүй');
-    const res = await this.prisma.bankCursor.updateMany({ data: { sheetThrough: through } });
-    if (!res.count) throw new BadRequestException('Эхлээд хуулга оруулна уу');
+    const cursors = await this.prisma.bankCursor.findMany();
+    if (!cursors.length) throw new BadRequestException('Эхлээд хуулга оруулна уу');
+    // Өдрийг өмнө рүү нь өөрчилбөл түүнээс хойш «шийтэд хөтлөгдсөн» гэж нуусныг буцааж нээнэ
+    const bound = new Date(`${shiftDay(through, 1)}T00:00:00+08:00`);
+    const reopened = await this.prisma.bankTransaction.updateMany({
+      where: { inSheet: true, bookedAt: { gte: bound } },
+      data: { inSheet: false, resolvedAt: null, resolvedById: null, matchStatus: BankMatchStatus.UNMATCHED },
+    });
+    await this.prisma.bankCursor.updateMany({ data: { sheetThrough: through } });
+    if (reopened.count) await this.resolveOpen(actor);
     const marked = await this.applySheetThrough(actor);
-    for (const c of await this.prisma.bankCursor.findMany({ select: { accountNo: true } })) await this.recomputeCursor(c.accountNo);
-    await this.audit.record({ actorId: actor.id, actorRole: actor.role, action: 'SHEET_THROUGH', entity: 'BankCursor', entityId: through, after: { through, marked } });
-    return { marked };
+    for (const c of cursors) await this.recomputeCursor(c.accountNo);
+    await this.audit.record({ actorId: actor.id, actorRole: actor.role, action: 'SHEET_THROUGH', entity: 'BankCursor', entityId: through, after: { through, marked, reopened: reopened.count } });
+    return { marked, reopened: reopened.count };
   }
 
+  /**
+   * sheetThrough хүртэлх шийдэгдээгүй мөрийг «шийтэд хөтлөгдсөн» болгоно. Шийтэд
+   * байгааг БАТАЛСАН эсэх: санал болгосон хүүхдийн ижил дүнтэй, ±3 хоногийн,
+   * хуулгатай холбогдоогүй төлбөр (нэг төлбөр нэг л мөрт). Баталж чадаагүйг
+   * `sheetMissing` — «шалгана уу» (өөр хүүхдийн ижил дүн тооцогдохгүй).
+   */
   private async applySheetThrough(actor: ReconcileActor): Promise<number> {
     let total = 0;
     for (const c of await this.prisma.bankCursor.findMany({ where: { sheetThrough: { not: null } } })) {
       const bound = new Date(`${shiftDay(c.sheetThrough!, 1)}T00:00:00+08:00`);
-      total += await this.prisma.$executeRaw`
-        UPDATE "BankTransaction" t SET
-          "resolvedAt" = NOW(), "resolvedById" = ${actor.id}, "inSheet" = true,
-          "matchStatus" = 'IGNORED'::"BankMatchStatus",
-          "suggestion" = COALESCE(t."suggestion", '{}'::jsonb) || jsonb_build_object('sheetMissing', t.direction = 'CREDIT' AND NOT EXISTS (
-            SELECT 1 FROM "Payment" p
-            WHERE p.amount = t.amount AND p.status = 'CONFIRMED' AND p."storePurchaseId" IS NULL AND p.id NOT LIKE 'bank_%'
-              AND p."paidAt" BETWEEN t."bookedAt" - interval '3 days' AND t."bookedAt" + interval '3 days'))
-        WHERE t."resolvedAt" IS NULL AND t."accountNo" = ${c.accountNo} AND t."bookedAt" < ${bound}
-          AND COALESCE((t."suggestion"->>'held')::boolean, false) = false`;
+      const rows = (
+        await this.prisma.bankTransaction.findMany({
+          where: { resolvedAt: null, accountNo: c.accountNo, bookedAt: { lt: bound } },
+          orderBy: { bookedAt: 'asc' },
+          select: { id: true, amount: true, bookedAt: true, direction: true, suggestion: true },
+        })
+      ).filter((r) => !(r.suggestion as RowSuggestion | null)?.held);
+      if (!rows.length) continue;
+      const kidsOf = (r: (typeof rows)[number]) => ((r.suggestion as RowSuggestion | null)?.candidates ?? []).map((x) => x.studentId);
+      const pool = await this.existingPayments(rows.flatMap(kidsOf));
+      const confirmed: string[] = [];
+      const missing: string[] = [];
+      for (const r of rows) {
+        const kids = new Set(kidsOf(r));
+        const t = r.bookedAt.getTime();
+        const i = r.direction === 'CREDIT' ? pool.findIndex((p) => kids.has(p.userId) && p.amount === r.amount && Math.abs(p.at - t) <= LINK_WINDOW_MS) : -1;
+        if (i >= 0 || r.direction === 'DEBIT') {
+          if (i >= 0) pool.splice(i, 1);
+          confirmed.push(r.id);
+        } else missing.push(r.id);
+      }
+      for (const [ids, miss] of [[confirmed, false], [missing, true]] as const) {
+        if (!ids.length) continue;
+        total += await this.prisma.$executeRaw`
+          UPDATE "BankTransaction" t SET
+            "resolvedAt" = NOW(), "resolvedById" = ${actor.id}, "inSheet" = true,
+            "matchStatus" = 'IGNORED'::"BankMatchStatus",
+            "suggestion" = COALESCE(t."suggestion", '{}'::jsonb) || jsonb_build_object('sheetMissing', ${miss}::boolean)
+          WHERE t.id IN (${Prisma.join(ids)}) AND t."resolvedAt" IS NULL`;
+      }
     }
     return total;
   }
@@ -551,18 +588,21 @@ export class ReconcileService {
   // ── Унших ─────────────────────────────────────────────────────────────────
 
   async overview() {
-    const [cursors, manual, tuition, other, expense, sheet, last] = await Promise.all([
+    const [cursors, manual, tuition, other, expense, sheet, sheetCheck, last] = await Promise.all([
       this.prisma.bankCursor.findMany({ orderBy: { accountNo: 'asc' } }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('manual') }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('tuition') }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('other') }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('expense') }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('sheet') }),
+      this.prisma.bankTransaction.count({ where: { inSheet: true, suggestion: { path: ['sheetMissing'], equals: true } } }),
       this.prisma.bankTransaction.findFirst({ orderBy: { importedAt: 'desc' }, select: { importedAt: true } }),
     ]);
     return {
       cursors: cursors.map((c) => ({ accountNo: c.accountNo, settledThrough: c.settledThrough, coveredThrough: c.coveredThrough, sheetThrough: c.sheetThrough })),
       counts: { manual, tuition, other, expense, sheet },
+      /** Шийтэд хөтлөгдсөн гэж нуусан ч шийтэд байгааг баталж чадаагүй — шалгах */
+      sheetCheck,
       lastImportAt: last?.importedAt ?? null,
     };
   }
@@ -588,6 +628,7 @@ export class ReconcileService {
     const amount = q && /^[\d,.\s]+$/.test(q) ? parseInt(q.replace(/\D/g, ''), 10) : null;
     const where: Prisma.BankTransactionWhereInput = {
       ...this.laneWhere(query.lane),
+      ...(query.lane === 'sheet' && query.check ? { suggestion: { path: ['sheetMissing'], equals: true } } : {}),
       ...(q ? (amount ? { amount } : { description: { contains: q, mode: 'insensitive' } }) : {}),
     };
     const [total, rows] = await Promise.all([
@@ -618,6 +659,13 @@ export class ReconcileService {
       for (const c of (r.suggestion as RowSuggestion | null)?.candidates ?? []) ids.add(c.studentId);
     }
     const students = await this.studentCards([...ids]);
+    // Хүүхэд бүрийн шийтэд бүртгэгдсэн, хуулгатай холбогдоогүй ойрын төлбөр — хуваахдаа харна
+    const open = rows.filter((r) => !r.resolvedAt);
+    const pool = open.length ? await this.existingPayments(open.flatMap((r) => ((r.suggestion as RowSuggestion | null)?.candidates ?? []).map((c) => c.studentId))) : [];
+    const nearby = (studentId: string, at: Date) =>
+      pool
+        .filter((p) => p.userId === studentId && Math.abs(p.at - at.getTime()) <= LINK_WINDOW_MS)
+        .map((p) => ({ amount: p.amount, date: ubDay(new Date(p.at)) }));
     return {
       total,
       items: rows.map((r) => {
@@ -641,7 +689,11 @@ export class ReconcileService {
             split: s.split ?? null,
             reason: s.reason,
             unrecorded: !!s.unrecorded,
-            candidates: s.candidates.map((c) => ({ ...c, student: students.get(c.studentId) ?? null })),
+            candidates: s.candidates.map((c) => ({
+              ...c,
+              student: students.get(c.studentId) ?? null,
+              sheetPays: r.resolvedAt ? [] : nearby(c.studentId, r.bookedAt),
+            })),
           },
           allocations: r.allocations.map(({ paymentId, ...a }) => ({
             ...a,

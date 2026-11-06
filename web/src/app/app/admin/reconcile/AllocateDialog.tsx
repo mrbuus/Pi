@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { FileSpreadsheet, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/kit/button";
 import LedgerDialog, { inputCls } from "@/components/payments/LedgerDialog";
-import { mnt } from "@/components/payments/ledgerFormat";
+import { dayLabel, mnt } from "@/components/payments/ledgerFormat";
 import { errMsg } from "@/components/payments/paymentHelpers";
 import StudentPicker from "./StudentPicker";
 import { KIND_LABEL, STUDENT_KINDS, type AllocKind, type BankRow, type StudentCard } from "./types";
@@ -17,20 +17,31 @@ let seq = 0;
 const draft = (kind: AllocKind, amount: number, student: StudentCard | null = null): Draft => ({ key: ++seq, kind, amount: String(amount), student });
 
 /**
- * Саналаас эхлэх хуваалт: «сургалт + ном» хольсон бол хоёр хэсэг, ах дүүгийн хамтын
- * шилжүүлэг бол хүүхэд бүрд тэнцүү (1,000-аар бүхэлчилж үлдэгдлийг сүүлд) —
- * хүн дүнг нь засна (жишээ нь 3,400,000 = 1,500,000 + 1,900,000).
+ * Саналаас эхлэх хуваалт. Ах дүүгийн хамтын шилжүүлэгт ажилтан шийтэд бүртгэсэн
+ * дүнгүүд байвал тэдгээрээр (жишээ нь 270,000 + 350,000); үгүй бол тэнцүү хувааж
+ * «санал» гэж тэмдэглэнэ — хүн бодит дүнгээ оруулна.
  */
-export function initialDrafts(row: BankRow): Draft[] {
+export function initialDrafts(row: BankRow): { drafts: Draft[]; guessed: boolean } {
   const s = row.suggestion;
-  const kids = (s?.candidates ?? []).map((c) => c.student).filter((x): x is StudentCard => !!x);
-  if (s?.split?.length) return s.split.map((p) => draft(p.kind, p.amount, STUDENT_KINDS.includes(p.kind) ? kids[0] ?? null : null));
+  const cands = (s?.candidates ?? []).filter((c) => !!c.student);
+  const kids = cands.map((c) => c.student!);
+  if (s?.split?.length)
+    return { drafts: s.split.map((p) => draft(p.kind, p.amount, STUDENT_KINDS.includes(p.kind) ? kids[0] ?? null : null)), guessed: false };
   if (s?.decision === "SPLIT" && kids.length >= 2) {
+    const sheet = cands.map((c) => (c.sheetPays.length === 1 ? c.sheetPays[0].amount : null));
+    if (sheet.every((x) => x != null)) {
+      const sum = sheet.reduce((t, x) => t + x!, 0);
+      if (sum <= row.amount) {
+        const drafts = cands.map((c, i) => draft("TUITION", sheet[i]!, c.student));
+        if (row.amount - sum > 0) drafts.push(draft("OTHER", row.amount - sum));
+        return { drafts, guessed: false };
+      }
+    }
     const each = Math.floor(row.amount / kids.length / 1000) * 1000;
-    return kids.map((k, i) => draft("TUITION", i === kids.length - 1 ? row.amount - each * (kids.length - 1) : each, k));
+    return { drafts: kids.map((k, i) => draft("TUITION", i === kids.length - 1 ? row.amount - each * (kids.length - 1) : each, k)), guessed: true };
   }
   const kind: AllocKind = row.direction === "DEBIT" ? "EXPENSE" : s?.kind ?? "TUITION";
-  return [draft(kind, row.amount, STUDENT_KINDS.includes(kind) && kids.length === 1 ? kids[0] : null)];
+  return { drafts: [draft(kind, row.amount, STUDENT_KINDS.includes(kind) && kids.length === 1 ? kids[0] : null)], guessed: false };
 }
 
 export default function AllocateDialog({
@@ -44,12 +55,15 @@ export default function AllocateDialog({
   onOpenChange: (open: boolean) => void;
   onSaved: (alsoResolved: number) => void;
 }) {
-  const [parts, setParts] = useState<Draft[]>(() => initialDrafts(row));
+  const [parts, setParts] = useState<Draft[]>(() => initialDrafts(row).drafts);
+  const [guessed, setGuessed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     if (open) {
-      setParts(initialDrafts(row));
+      const init = initialDrafts(row);
+      setParts(init.drafts);
+      setGuessed(init.guessed);
       setError(null);
     }
   }, [open, row]);
@@ -59,6 +73,7 @@ export default function AllocateDialog({
   const rest = row.amount - sum;
   const missingKid = parts.some((p) => p.kind === "TUITION" && !p.student);
   const suggested = (row.suggestion?.candidates ?? []).map((c) => c.student).filter((x): x is StudentCard => !!x);
+  const sheetOf = (studentId: string | undefined) => row.suggestion?.candidates.find((c) => c.studentId === studentId)?.sheetPays ?? [];
   const update = (key: number, patch: Partial<Draft>) => setParts((ps) => ps.map((p) => (p.key === key ? { ...p, ...patch } : p)));
 
   async function save() {
@@ -138,6 +153,12 @@ export default function AllocateDialog({
             {STUDENT_KINDS.includes(p.kind) && (
               <StudentPicker id={`kid-${p.key}`} value={p.student} onChange={(s) => update(p.key, { student: s })} suggestions={suggested} />
             )}
+            {p.student && sheetOf(p.student.id).length > 0 && (
+              <p className="flex items-center gap-1.5 text-sm text-ink-dim">
+                <FileSpreadsheet className="size-4 shrink-0 text-info" aria-hidden />
+                Шийтэд: {sheetOf(p.student.id).map((x) => `${mnt(x.amount)} (${dayLabel(x.date)})`).join(", ")}
+              </p>
+            )}
           </fieldset>
         ))}
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -153,6 +174,7 @@ export default function AllocateDialog({
             {rest === 0 ? "Дүн таарч байна" : rest > 0 ? `${mnt(rest)} хуваарилагдаагүй` : `${mnt(-rest)} илүү`}
           </span>
         </div>
+        {guessed && <p className="text-sm text-ink-dim">Дүнг тэнцүү хувааж санал болгосон — бодит дүнгээ оруулна уу</p>}
         {missingKid && <p className="text-sm text-ink-dim">Сургалтын төлбөрт хүүхэд сонгоно уу</p>}
         {error && (
           <p role="alert" className="rounded-xl bg-error/10 px-3 py-2 text-sm text-error">

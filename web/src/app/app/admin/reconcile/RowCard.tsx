@@ -131,7 +131,9 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
                       <Check className="size-4 text-success" aria-hidden />
                       <Meta items={[c.student?.name ?? "Хүүхэд", c.student?.classroom, c.student?.archived ? "Гарсан" : null]} />
                     </span>
-                    <span className="text-xs text-ink-dim">{signals(c)}</span>
+                    <span className="text-xs text-ink-dim">
+                      <Meta items={[signals(c), c.sheetPays.length ? `Шийтэд ${c.sheetPays.map((x) => mnt(x.amount)).join(", ")}` : null]} />
+                    </span>
                   </button>
                 </li>
               ))}
@@ -144,7 +146,7 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
         <p className="flex items-start gap-1.5 text-sm text-ink-dim">
           <FileSpreadsheet className={`mt-0.5 size-4 shrink-0 ${row.sheetMissing ? "text-error" : "text-info"}`} aria-hidden />
           {row.sheetMissing
-            ? "Шийтэд хөтлөгдсөн гэж тэмдэглэсэн ч ижил дүнтэй бүртгэл олдсонгүй — шалгана уу"
+            ? "Шийтэд байгааг баталж чадсангүй (энэ хүүхдэд ижил дүнтэй бүртгэл олдсонгүй) — шалгана уу"
             : "Ажилтан шийтэд хөтөлсөн"}
         </p>
       )}

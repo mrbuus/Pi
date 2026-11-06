@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/kit/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/kit/tabs";
 import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import { SkeletonRows } from "@/components/ui/Skeleton";
-import LedgerDialog, { Field, inputCls } from "@/components/payments/LedgerDialog";
+import LedgerDialog, { Field, Segmented, inputCls } from "@/components/payments/LedgerDialog";
 import { dayLabel } from "@/components/payments/ledgerFormat";
 import { errMsg } from "@/components/payments/paymentHelpers";
 import RowCard from "./RowCard";
@@ -27,6 +27,7 @@ export function ReconcilePageClient() {
   const [overview, setOverview] = useState<Overview | null>(null);
   const [lane, setLane] = useState<Lane>("manual");
   const [q, setQ] = useState("");
+  const [checkOnly, setCheckOnly] = useState(false);
   const [rows, setRows] = useState<BankRow[] | null>(null);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +58,7 @@ export function ReconcilePageClient() {
         const offset = mode === "append" ? have : 0;
         const limit = mode === "soft" ? Math.max(PAGE, have) : PAGE;
         const res = await api<{ items: BankRow[]; total: number }>(
-          `/reconcile/rows?lane=${lane}&limit=${Math.min(limit, 200)}&offset=${offset}${q.trim() ? `&q=${encodeURIComponent(q.trim())}` : ""}`,
+          `/reconcile/rows?lane=${lane}&limit=${Math.min(limit, 200)}&offset=${offset}${lane === "sheet" && checkOnly ? "&check=1" : ""}${q.trim() ? `&q=${encodeURIComponent(q.trim())}` : ""}`,
         );
         setTotal(res.total);
         setRows((prev) => (mode === "append" ? [...(prev ?? []), ...res.items] : res.items));
@@ -65,7 +66,7 @@ export function ReconcilePageClient() {
         if (mode !== "soft") setError(errMsg(e));
       }
     },
-    [lane, q],
+    [lane, q, checkOnly],
   );
 
   useEffect(() => {
@@ -152,6 +153,16 @@ export function ReconcilePageClient() {
               {cursor.sheetThrough
                 ? `${dayLabel(cursor.sheetThrough)} хүртэлх гүйлгээг ажилтан шийтэд хөтөлсөн`
                 : "Ажилтан шийтэд аль хэдийн хөтөлсөн гүйлгээг «Шийдэх»-ээс нууж болно"}
+              {cursor.sheetThrough && overview && overview.sheetCheck > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCheckOnly(true);
+                    setLane("sheet");
+                  }} className="font-semibold text-ink underline underline-offset-2">
+                  {overview.sheetCheck} нь шийтэд баталгаажаагүй — харах
+                </button>
+              )}
             </p>
             <Button
               variant="outline"
@@ -174,7 +185,13 @@ export function ReconcilePageClient() {
         </p>
       )}
 
-      <Tabs value={lane} onValueChange={(v) => setLane(v as Lane)}>
+      <Tabs
+        value={lane}
+        onValueChange={(v) => {
+          setCheckOnly(false);
+          setLane(v as Lane);
+        }}
+      >
         <TabsList aria-label="Гүйлгээний жагсаалт">
           {LANES.map((l) => (
             <TabsTrigger key={l.key} value={l.key} className="group">
@@ -188,6 +205,18 @@ export function ReconcilePageClient() {
           ))}
         </TabsList>
       </Tabs>
+
+      {lane === "sheet" && overview && overview.sheetCheck > 0 && (
+        <Segmented
+          label="Шийтэд хөтлөгдсөн гүйлгээ"
+          value={checkOnly ? "check" : "all"}
+          onChange={(v) => setCheckOnly(v === "check")}
+          options={[
+            { value: "all", label: `Бүгд (${overview.counts.sheet})` },
+            { value: "check", label: `Шалгах (${overview.sheetCheck})` },
+          ]}
+        />
+      )}
 
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-dim" aria-hidden />

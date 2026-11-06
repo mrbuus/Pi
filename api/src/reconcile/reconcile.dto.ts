@@ -43,6 +43,11 @@ export class ListRowsQueryDto {
   @MaxLength(100)
   q?: string;
 
+  /** «Шийтэд хөтлөгдсөн»-өөс зөвхөн шийтэд баталгаажаагүйг ('1') */
+  @IsOptional()
+  @IsIn(['1'])
+  check?: '1';
+
   @IsOptional()
   @Type(() => Number)
   @IsInt()
