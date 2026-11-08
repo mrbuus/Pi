@@ -549,6 +549,21 @@ export type LessonRotation = Prisma.LessonRotationModel
  */
 export type StaffCapabilityGrant = Prisma.StaffCapabilityGrantModel
 /**
+ * Model TeacherWorkHours
+ * 
+ */
+export type TeacherWorkHours = Prisma.TeacherWorkHoursModel
+/**
+ * Model TeacherBankAccount
+ * 
+ */
+export type TeacherBankAccount = Prisma.TeacherBankAccountModel
+/**
+ * Model TeacherPayRate
+ * 
+ */
+export type TeacherPayRate = Prisma.TeacherPayRateModel
+/**
  * Model StudyReviewRun
  * 
  */

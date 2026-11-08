@@ -153,6 +153,9 @@ export const ModelName = {
   LessonPhotoTurn: 'LessonPhotoTurn',
   LessonRotation: 'LessonRotation',
   StaffCapabilityGrant: 'StaffCapabilityGrant',
+  TeacherWorkHours: 'TeacherWorkHours',
+  TeacherBankAccount: 'TeacherBankAccount',
+  TeacherPayRate: 'TeacherPayRate',
   StudyReviewRun: 'StudyReviewRun',
   StudyReviewItem: 'StudyReviewItem',
   StudyReviewResponse: 'StudyReviewResponse',
@@ -1734,6 +1737,45 @@ export const StaffCapabilityGrantScalarFieldEnum = {
 } as const
 
 export type StaffCapabilityGrantScalarFieldEnum = (typeof StaffCapabilityGrantScalarFieldEnum)[keyof typeof StaffCapabilityGrantScalarFieldEnum]
+
+
+export const TeacherWorkHoursScalarFieldEnum = {
+  id: 'id',
+  teacherId: 'teacherId',
+  date: 'date',
+  hundredths: 'hundredths',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeacherWorkHoursScalarFieldEnum = (typeof TeacherWorkHoursScalarFieldEnum)[keyof typeof TeacherWorkHoursScalarFieldEnum]
+
+
+export const TeacherBankAccountScalarFieldEnum = {
+  teacherId: 'teacherId',
+  bankName: 'bankName',
+  accountNumber: 'accountNumber',
+  holderName: 'holderName',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeacherBankAccountScalarFieldEnum = (typeof TeacherBankAccountScalarFieldEnum)[keyof typeof TeacherBankAccountScalarFieldEnum]
+
+
+export const TeacherPayRateScalarFieldEnum = {
+  id: 'id',
+  teacherId: 'teacherId',
+  effectiveFrom: 'effectiveFrom',
+  ratePerHour: 'ratePerHour',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type TeacherPayRateScalarFieldEnum = (typeof TeacherPayRateScalarFieldEnum)[keyof typeof TeacherPayRateScalarFieldEnum]
 
 
 export const StudyReviewRunScalarFieldEnum = {

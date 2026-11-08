@@ -56,6 +56,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { StoreModule } from './store/store.module';
 import { ScheduleModule as ClassScheduleModule } from './schedule/schedule.module';
+import { TeacherHoursModule } from './teacher-hours/teacher-hours.module';
 import { StorageModule } from './storage/storage.module';
 import { TasksModule } from './tasks/tasks.module';
 import { TestsModule } from './tests/tests.module';
@@ -166,6 +167,8 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     ProgressModule,
     TasksModule,
     ClassScheduleModule,
+    // Багшийн ажилласан цагийн хүснэгт, данс, хөлс (эзэн 2026-11-08)
+    TeacherHoursModule,
     AuditModule,
     NotesModule,
     GoalsModule,

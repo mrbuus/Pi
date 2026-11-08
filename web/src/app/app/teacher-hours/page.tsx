@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import TeacherHoursClient from "@/components/teacher-hours/TeacherHoursClient";
+import TeacherHoursTabs from "@/components/teacher-hours/TeacherHoursTabs";
 
 export const metadata: Metadata = {
-  title: "Хуваарийн тооцоолсон цаг | Шинэ Ирээдүйн Эзэд",
-  description: "Багш бүрийн сарын хичээлийн цаг — хуваариас автоматаар.",
+  title: "Ажилласан цаг | Шинэ Ирээдүйн Эзэд",
+  description: "Багш бүрийн хагас сарын ажилласан цаг, цалингийн данс.",
 };
 
 export default function TeacherHoursPage() {
-  return <TeacherHoursClient />;
+  return <TeacherHoursTabs />;
 }

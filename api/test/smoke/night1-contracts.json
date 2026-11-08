@@ -1611,5 +1611,77 @@
     "roles": [
       "STUDENT"
     ]
+  },
+  {
+    "gap": "TEACHER-HOURS",
+    "file": "teacher-hours/work-sheet.controller",
+    "controller": "WorkSheetController",
+    "method": "GET",
+    "path": "/api/teacher-hours/sheet",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "TEACHER-HOURS",
+    "file": "teacher-hours/work-sheet.controller",
+    "controller": "WorkSheetController",
+    "method": "PUT",
+    "path": "/api/teacher-hours/sheet/cell",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "TEACHER-HOURS",
+    "file": "teacher-hours/work-sheet.controller",
+    "controller": "WorkSheetController",
+    "method": "GET",
+    "path": "/api/teacher-hours/accounts/:teacherId",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "TEACHER-HOURS",
+    "file": "teacher-hours/work-sheet.controller",
+    "controller": "WorkSheetController",
+    "method": "PUT",
+    "path": "/api/teacher-hours/accounts/:teacherId",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "TEACHER-HOURS",
+    "file": "teacher-hours/work-sheet.controller",
+    "controller": "WorkSheetController",
+    "method": "GET",
+    "path": "/api/teacher-hours/pay",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "TEACHER-HOURS",
+    "file": "teacher-hours/work-sheet.controller",
+    "controller": "WorkSheetController",
+    "method": "PUT",
+    "path": "/api/teacher-hours/pay/rate",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
   }
 ]

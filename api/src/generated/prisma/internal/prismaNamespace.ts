@@ -499,6 +499,9 @@ export const ModelName = {
   LessonPhotoTurn: 'LessonPhotoTurn',
   LessonRotation: 'LessonRotation',
   StaffCapabilityGrant: 'StaffCapabilityGrant',
+  TeacherWorkHours: 'TeacherWorkHours',
+  TeacherBankAccount: 'TeacherBankAccount',
+  TeacherPayRate: 'TeacherPayRate',
   StudyReviewRun: 'StudyReviewRun',
   StudyReviewItem: 'StudyReviewItem',
   StudyReviewResponse: 'StudyReviewResponse',
@@ -549,7 +552,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "teacherWorkHours" | "teacherBankAccount" | "teacherPayRate" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -8101,6 +8104,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TeacherWorkHours: {
+      payload: Prisma.$TeacherWorkHoursPayload<ExtArgs>
+      fields: Prisma.TeacherWorkHoursFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TeacherWorkHoursFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TeacherWorkHoursFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>
+        }
+        findFirst: {
+          args: Prisma.TeacherWorkHoursFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TeacherWorkHoursFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>
+        }
+        findMany: {
+          args: Prisma.TeacherWorkHoursFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>[]
+        }
+        create: {
+          args: Prisma.TeacherWorkHoursCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>
+        }
+        createMany: {
+          args: Prisma.TeacherWorkHoursCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TeacherWorkHoursCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>[]
+        }
+        delete: {
+          args: Prisma.TeacherWorkHoursDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>
+        }
+        update: {
+          args: Prisma.TeacherWorkHoursUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>
+        }
+        deleteMany: {
+          args: Prisma.TeacherWorkHoursDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TeacherWorkHoursUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TeacherWorkHoursUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>[]
+        }
+        upsert: {
+          args: Prisma.TeacherWorkHoursUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>
+        }
+        aggregate: {
+          args: Prisma.TeacherWorkHoursAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTeacherWorkHours>
+        }
+        groupBy: {
+          args: Prisma.TeacherWorkHoursGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherWorkHoursGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TeacherWorkHoursCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherWorkHoursCountAggregateOutputType> | number
+        }
+      }
+    }
+    TeacherBankAccount: {
+      payload: Prisma.$TeacherBankAccountPayload<ExtArgs>
+      fields: Prisma.TeacherBankAccountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TeacherBankAccountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TeacherBankAccountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>
+        }
+        findFirst: {
+          args: Prisma.TeacherBankAccountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TeacherBankAccountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>
+        }
+        findMany: {
+          args: Prisma.TeacherBankAccountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>[]
+        }
+        create: {
+          args: Prisma.TeacherBankAccountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>
+        }
+        createMany: {
+          args: Prisma.TeacherBankAccountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TeacherBankAccountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>[]
+        }
+        delete: {
+          args: Prisma.TeacherBankAccountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>
+        }
+        update: {
+          args: Prisma.TeacherBankAccountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>
+        }
+        deleteMany: {
+          args: Prisma.TeacherBankAccountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TeacherBankAccountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TeacherBankAccountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>[]
+        }
+        upsert: {
+          args: Prisma.TeacherBankAccountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>
+        }
+        aggregate: {
+          args: Prisma.TeacherBankAccountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTeacherBankAccount>
+        }
+        groupBy: {
+          args: Prisma.TeacherBankAccountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherBankAccountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TeacherBankAccountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherBankAccountCountAggregateOutputType> | number
+        }
+      }
+    }
+    TeacherPayRate: {
+      payload: Prisma.$TeacherPayRatePayload<ExtArgs>
+      fields: Prisma.TeacherPayRateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TeacherPayRateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TeacherPayRateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>
+        }
+        findFirst: {
+          args: Prisma.TeacherPayRateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TeacherPayRateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>
+        }
+        findMany: {
+          args: Prisma.TeacherPayRateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>[]
+        }
+        create: {
+          args: Prisma.TeacherPayRateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>
+        }
+        createMany: {
+          args: Prisma.TeacherPayRateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TeacherPayRateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>[]
+        }
+        delete: {
+          args: Prisma.TeacherPayRateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>
+        }
+        update: {
+          args: Prisma.TeacherPayRateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>
+        }
+        deleteMany: {
+          args: Prisma.TeacherPayRateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TeacherPayRateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TeacherPayRateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>[]
+        }
+        upsert: {
+          args: Prisma.TeacherPayRateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>
+        }
+        aggregate: {
+          args: Prisma.TeacherPayRateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTeacherPayRate>
+        }
+        groupBy: {
+          args: Prisma.TeacherPayRateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherPayRateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TeacherPayRateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherPayRateCountAggregateOutputType> | number
+        }
+      }
+    }
     StudyReviewRun: {
       payload: Prisma.$StudyReviewRunPayload<ExtArgs>
       fields: Prisma.StudyReviewRunFieldRefs
@@ -12260,6 +12485,45 @@ export const StaffCapabilityGrantScalarFieldEnum = {
 export type StaffCapabilityGrantScalarFieldEnum = (typeof StaffCapabilityGrantScalarFieldEnum)[keyof typeof StaffCapabilityGrantScalarFieldEnum]
 
 
+export const TeacherWorkHoursScalarFieldEnum = {
+  id: 'id',
+  teacherId: 'teacherId',
+  date: 'date',
+  hundredths: 'hundredths',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeacherWorkHoursScalarFieldEnum = (typeof TeacherWorkHoursScalarFieldEnum)[keyof typeof TeacherWorkHoursScalarFieldEnum]
+
+
+export const TeacherBankAccountScalarFieldEnum = {
+  teacherId: 'teacherId',
+  bankName: 'bankName',
+  accountNumber: 'accountNumber',
+  holderName: 'holderName',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeacherBankAccountScalarFieldEnum = (typeof TeacherBankAccountScalarFieldEnum)[keyof typeof TeacherBankAccountScalarFieldEnum]
+
+
+export const TeacherPayRateScalarFieldEnum = {
+  id: 'id',
+  teacherId: 'teacherId',
+  effectiveFrom: 'effectiveFrom',
+  ratePerHour: 'ratePerHour',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type TeacherPayRateScalarFieldEnum = (typeof TeacherPayRateScalarFieldEnum)[keyof typeof TeacherPayRateScalarFieldEnum]
+
+
 export const StudyReviewRunScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -13961,6 +14225,9 @@ export type GlobalOmitConfig = {
   lessonPhotoTurn?: Prisma.LessonPhotoTurnOmit
   lessonRotation?: Prisma.LessonRotationOmit
   staffCapabilityGrant?: Prisma.StaffCapabilityGrantOmit
+  teacherWorkHours?: Prisma.TeacherWorkHoursOmit
+  teacherBankAccount?: Prisma.TeacherBankAccountOmit
+  teacherPayRate?: Prisma.TeacherPayRateOmit
   studyReviewRun?: Prisma.StudyReviewRunOmit
   studyReviewItem?: Prisma.StudyReviewItemOmit
   studyReviewResponse?: Prisma.StudyReviewResponseOmit

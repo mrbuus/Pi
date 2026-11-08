@@ -144,7 +144,7 @@ export default function TeacherHoursClient() {
 
   return (
     <div className="space-y-6">
-      <h1 className="sr-only">Хуваарийн тооцоолсон цаг</h1>
+      <h2 className="sr-only">Хуваарийн тооцоолсон цаг</h2>
 
       <section className="chunky p-4 sm:p-6">
         <p className="mb-4 text-sm text-ink-dim">
