@@ -204,6 +204,14 @@ export interface HomeworkView {
   comment: string | null;
   /** D' — багш тэмдэглэх (тэмдэглэсэн) өдөр; хараахан болоогүй бол null */
   checkedOn: string | null;
+  /** D' өдөр шалгалтаар шалгасан бол оноо (эзэн 2026-11-08 19:08); байхгүй бол талбаргүй */
+  quiz?: QuizMark;
+}
+
+/** Шалгалтаар даалгавар шалгасан оноо (homework-quiz) — сурагчид харагдана */
+export interface QuizMark {
+  score: number;
+  problemCount: number;
 }
 
 /**
@@ -215,14 +223,17 @@ export function homeworkFor(
   date: string,
   classDays: readonly string[],
   marks: Map<string, MarkRow>,
+  quizzes?: Map<string, QuizMark>,
 ): HomeworkView {
   const next = nextLessonDay(classDays, date);
   if (!next) return { status: null, comment: null, checkedOn: null };
   const m = marks.get(dayKey(classroomId, next));
+  const q = quizzes?.get(dayKey(classroomId, next));
   return {
     status: m?.status ?? null,
     comment: m?.comment ?? null,
     checkedOn: next,
+    ...(q ? { quiz: q } : {}),
   };
 }
 

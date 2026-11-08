@@ -31,6 +31,7 @@ describe('parent pupil authorization', () => {
       resultAcknowledgement: { upsert: jest.fn(async () => ({ id: 'ack' })) },
       attempt: { groupBy: list(), findMany: list() },
       learningEvent: { count: jest.fn(async () => 0), findMany: list() },
+      homeworkQuizScore: { findMany: jest.fn().mockResolvedValue([]) },
       dailyHomeworkMark: { findMany: list() },
       submission: { findMany: list() },
       attendance: { findMany: list() },

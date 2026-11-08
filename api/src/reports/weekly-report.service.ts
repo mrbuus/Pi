@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { loadStudentQuizzes } from '../homework-quiz/student-quizzes';
 
 const UB_OFFSET_MS = 8 * 60 * 60 * 1000;
 const QUERY_PAGE = 500;
@@ -150,6 +151,8 @@ export class WeeklyReportService {
         }
       }
     }
+    // Шалгалтаар даалгавар шалгасан оноо (эзэн 2026-11-08 19:08) — энэ долоо хоногийн, тухайн ангиудын
+    const quizzes = (await loadStudentQuizzes(this.prisma, studentId, { from: start, to: new Date(end.getTime() - 86400000), classroomIds })).reverse();
     const scheduleItems = [...scheduled.values()].sort((a, b) => a.date.localeCompare(b.date) || a.startMinute - b.startMinute);
     const dailyMarks = {
       done: marks.filter((item) => item.status === 'DONE' && enrollments.some((enrollment) => enrollment.classroomId === item.classroomId && ubDateKey(enrollment.joinedAt) <= dateKey(item.date) && (!enrollment.leftAt || ubDateKey(enrollment.leftAt) >= dateKey(item.date)))).length,
@@ -166,7 +169,7 @@ export class WeeklyReportService {
       testResultLimit: resultCount > 500 || classTestCount > 500 || classTestResultCount > 500 ? 500 : null,
       snapshotAt: new Date().toISOString(),
       practiceCount,
-      homework: { assignments: { done: assignmentItems.filter((item) => item.done).length, notDone: assignmentItems.filter((item) => !item.done).length, items: assignmentItems }, dailyMarks },
+      homework: { assignments: { done: assignmentItems.filter((item) => item.done).length, notDone: assignmentItems.filter((item) => !item.done).length, items: assignmentItems }, dailyMarks, quizzes },
       topics: { best: rankedTopics[0] ?? null, weakest: rankedTopics.length ? rankedTopics[rankedTopics.length - 1] : null, complete: topicComplete, sampleLimit: topicComplete ? null : MAX_TOPIC_ATTEMPTS },
       nextWeekSchedule: scheduleItems,
     };

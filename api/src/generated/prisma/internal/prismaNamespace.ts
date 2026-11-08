@@ -14339,6 +14339,20 @@ export type EnumHomeworkAttemptStatusFieldRefInput<$PrismaModel> = FieldRefInput
 export type ListEnumHomeworkAttemptStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HomeworkAttemptStatus[]'>
     
 
+
+/**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal[]'
+ */
+export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */

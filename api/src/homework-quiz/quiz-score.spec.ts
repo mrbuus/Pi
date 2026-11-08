@@ -17,10 +17,10 @@ describe.each(impls)('quizScore (%s)', (_name, q) => {
       // [оноо, бодлого, өнгө]
       [0, 10, 'error'],
       [4, 10, 'error'], // 40%
-      [4.999, 10, 'error'], // 49,99%
+      [4.99, 10, 'error'], // 49,9% (оноо 2 хүртэл оронтой)
       [5, 10, 'warning'], // 50%
       [7, 10, 'warning'], // 70%
-      [7.999, 10, 'warning'], // 79,99%
+      [7.99, 10, 'warning'], // 79,9%
       [8, 10, 'success'], // 80%
       [10, 10, 'success'], // 100%
       [4999, 10000, 'error'], // 49,99%
@@ -51,6 +51,37 @@ describe.each(impls)('quizScore (%s)', (_name, q) => {
       expect(q.quizTone(NaN, 10)).toBeNull();
       expect(q.quizTone(5, 0)).toBeNull();
       expect(q.quizTone(5, -3)).toBeNull();
+    });
+
+    it.each([
+      // Бутархай оноо (эзэн 2026-11-08 19:08): 100 бодлогоос 49,99 / 50 / 79,99 / 80
+      [49.99, 100, 'error'],
+      [50, 100, 'warning'],
+      [79.99, 100, 'warning'],
+      [80, 100, 'success'],
+      [4.99, 10, 'error'],
+      [4.5, 9, 'warning'], // яг 50%
+      [7.5, 10, 'warning'],
+      [8.5, 10, 'success'],
+      [0.5, 1, 'warning'],
+      [0.49, 1, 'error'],
+      [0.8, 1, 'success'],
+      [0.79, 1, 'warning'],
+      // 0.1+0.2 маягийн хөвөгч урхи: 2.4/3 = 80% яг (2.4·5 = 12 = 4·3)
+      [2.4, 3, 'success'],
+      [1.5, 3, 'warning'],
+    ])('бутархай %p/%p → %p', (score, count, tone) => {
+      expect(q.quizTone(score, count)).toBe(tone);
+    });
+
+    it('бутархай: бодлого 1..20, оноо 0,01 алхамтай бүх утгад мужтай таарна', () => {
+      for (let n = 1; n <= 20; n++) {
+        for (let s = 0; s <= n * 100; s++) {
+          // s = зууны нэг; хувь = s/n
+          const want = s < 50 * n ? 'error' : s < 80 * n ? 'warning' : 'success';
+          expect(q.quizTone(s / 100, n)).toBe(want);
+        }
+      }
     });
 
     it('бодлого 1..200, оноо 0..тоо бүх хослолд хувийн мужтай таарна', () => {
@@ -98,6 +129,15 @@ describe.each(impls)('quizScore (%s)', (_name, q) => {
       expect(a.pct).toBe(50);
       expect(a.tone).toBe('warning');
     });
+    it('бутархай оноотой дундаж: 7,5 ба 8,5 → 80% ногоон, 7,5 ба 8,49 → 79,95% улбар шар', () => {
+      expect(q.quizAverage([7.5, 8.5], 10)).toMatchObject({ pct: 80, tone: 'success' });
+      const a = q.quizAverage([7.5, 8.49], 10)!;
+      expect(a.tone).toBe('warning');
+      expect(q.formatPercent(a.pct)).toBe('79%');
+      // 0.1 + 0.2 хөвөгч урхи: 0.1·3 = 0.30000000000000004 — дундаж яг 50% болохгүй байх ёсгүй
+      expect(q.quizAverage([0.1, 0.2, 1.2], 1)!.tone).toBe('warning'); // 1.5/3 = 50%
+    });
+
     it('хилийн дундаж: 79,99% улбар шар, 80% ногоон (бүхэл тоогоор)', () => {
       // 3 сурагч × 10 бодлого: 8+8+7 = 23/30 = 76,7% → улбар шар; 8+8+8 = 80% → ногоон
       expect(q.quizAverage([8, 8, 7], 10)!.tone).toBe('warning');
@@ -147,13 +187,53 @@ describe.each(impls)('quizScore (%s)', (_name, q) => {
       expect(q.parseScoreInput('', 10)).toEqual({ ok: true, value: null });
       expect(q.parseScoreInput('   ', 10)).toEqual({ ok: true, value: null });
     });
-    it('бүхэл 0..max', () => {
+    it('0..max, бутархай таслал эсвэл цэгээр, 2 хүртэл орон', () => {
       expect(q.parseScoreInput('0', 10)).toEqual({ ok: true, value: 0 });
       expect(q.parseScoreInput('08', 10)).toEqual({ ok: true, value: 8 });
       expect(q.parseScoreInput(' 10 ', 10)).toEqual({ ok: true, value: 10 });
+      expect(q.parseScoreInput('7,5', 10)).toEqual({ ok: true, value: 7.5 });
+      expect(q.parseScoreInput('7.5', 10)).toEqual({ ok: true, value: 7.5 });
+      expect(q.parseScoreInput('7,25', 10)).toEqual({ ok: true, value: 7.25 });
+      expect(q.parseScoreInput('10,00', 10)).toEqual({ ok: true, value: 10 });
+      expect(q.parseScoreInput('0,5', 1)).toEqual({ ok: true, value: 0.5 });
     });
-    it.each(['11', '-1', '7.5', '7,5', 'abc', '1e1', '+3', '12345'])('%p — буруу', (t) => {
+    it.each(['11', '10,01', '-1', '7.255', '7,', ',5', '7,5,1', 'abc', '1e1', '+3', '12345'])('%p — буруу', (t) => {
       expect(q.parseScoreInput(t, 10).ok).toBe(false);
+    });
+  });
+
+  describe('formatScore', () => {
+    it.each([
+      [8, '8'],
+      [7.5, '7,5'],
+      [7.25, '7,25'],
+      [0.1 + 0.2, '0,3'],
+    ])('%p → %p', (s, t) => {
+      expect(q.formatScore(s)).toBe(t);
+    });
+  });
+
+  describe('quizBelow — «Асуудалтай» (шалгуурын minQuiz)', () => {
+    it.each([
+      // [оноо, тоо, босго, асуудалтай]
+      [49.99, 100, 50, true],
+      [50, 100, 50, false],
+      [4.99, 10, 50, true],
+      [5, 10, 50, false],
+      [4.5, 9, 50, false], // яг 50%
+      [4.49, 9, 50, true],
+      [2, 5, 40, false], // яг 40%
+      [1.99, 5, 40, true],
+      [0, 10, 5, true],
+      [0, 10, 0, false], // босго 0 = унтарсан
+      [9, 10, 100, true],
+      [10, 10, 100, false],
+    ])('%p/%p, босго %p%% → %p', (s, n, m, want) => {
+      expect(q.quizBelow(s, n, m)).toBe(want);
+    });
+    it('өнгөний улаантай давхцана (босго 50 үед)', () => {
+      for (let n = 1; n <= 15; n++)
+        for (let s = 0; s <= n * 100; s++) expect(q.quizBelow(s / 100, n, 50)).toBe(q.quizTone(s / 100, n) === 'error');
     });
   });
 

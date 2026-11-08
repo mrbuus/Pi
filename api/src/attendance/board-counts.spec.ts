@@ -90,6 +90,7 @@ describe('Хэн тэмдэглэсэн (эзэн 2026-10-22)', () => {
           ),
         ),
       },
+      homeworkQuizScore: { findMany: jest.fn().mockResolvedValue([]) },
       dailyHomeworkMark: {
         findMany: jest.fn(({ select }: { select: Record<string, boolean> }) =>
           Promise.resolve(
@@ -176,6 +177,7 @@ describe('Сурагчийн drawer — бүх ирц/даалгавар, сар
         findMany: jest.fn().mockResolvedValue([{ id: 't', firstName: 'Марал', lastName: 'Батаа' }]),
       },
       attendance: { findMany: jest.fn().mockResolvedValue(att) },
+      homeworkQuizScore: { findMany: jest.fn().mockResolvedValue([]) },
       dailyHomeworkMark: { findMany: jest.fn().mockResolvedValue(hw) },
       submission: { count: jest.fn().mockResolvedValue(4) },
     };

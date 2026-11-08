@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { TONE_SELECTED } from "@/components/attendance/marks";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
-import { formatPercent, meanPercent, percentTone, quizPercent, quizTone } from "@/lib/quizScore";
+import { formatPercent, formatScore, meanPercent, percentTone, quizPercent, quizTone } from "@/lib/quizScore";
 
 /** Сурагчийн drawer-ийн сарын хайрцагт шалгалтын оноо (эзэн 2026-11-08) */
 export interface QuizDayRow {
@@ -48,7 +48,7 @@ export function QuizPctBadge({ row }: { row: QuizDayRow }) {
 /** Дэлгэц уншигч / title-д: «шалгалт 8/10, 80%» */
 export function quizDayText(row: QuizDayRow): string {
   const pct = quizPercent(row.score, row.problemCount);
-  return `шалгалт ${row.score}/${row.problemCount}${pct === null ? "" : `, ${formatPercent(pct)}`}`;
+  return `шалгалт ${formatScore(row.score)}/${row.problemCount}${pct === null ? "" : `, ${formatPercent(pct)}`}`;
 }
 
 /** Сарын «Даалгавар» мөрийн төгсгөлд: «Шалгалт 3 удаа, дундаж 76%» */
