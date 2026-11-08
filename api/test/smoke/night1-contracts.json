@@ -1888,5 +1888,29 @@
       "TEACHER",
       "STUDENT"
     ]
+  },
+  {
+    "gap": "SURAGCH-HUANLI",
+    "file": "student-calendar/student-calendar.controller",
+    "controller": "StudentCalendarController",
+    "method": "GET",
+    "path": "/api/students/:id/lesson-days",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SURAGCH-HUANLI",
+    "file": "student-calendar/student-calendar.controller",
+    "controller": "StudentCalendarController",
+    "method": "GET",
+    "path": "/api/students/:id/syllabus",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
   }
 ]

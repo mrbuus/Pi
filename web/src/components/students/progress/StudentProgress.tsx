@@ -24,16 +24,18 @@ import ClassProgressTab from "./ClassProgressTab";
 import IndependentProgressTab from "./IndependentProgressTab";
 import StudentOverview, { type ClassSummary } from "../hub/StudentOverview";
 import LessonHistoryTab from "../hub/LessonHistoryTab";
+import SyllabusTab from "../calendar/SyllabusTab";
 import WithdrawalTab from "../withdrawal/WithdrawalTab";
 import PaymentsTab from "../hub/PaymentsTab";
 import StudentInfoTab from "../hub/StudentInfoTab";
 
-type TabKey = "class" | "exams" | "lessons" | "payments" | "withdrawal" | "notes" | "independent" | "info";
-const ALL_TABS: TabKey[] = ["class", "exams", "lessons", "payments", "withdrawal", "notes", "independent", "info"];
+type TabKey = "class" | "exams" | "lessons" | "syllabus" | "payments" | "withdrawal" | "notes" | "independent" | "info";
+const ALL_TABS: TabKey[] = ["class", "exams", "lessons", "syllabus", "payments", "withdrawal", "notes", "independent", "info"];
 const TAB_LABELS: Record<TabKey, string> = {
   class: "Ангийн явц",
   exams: "Шалгалт",
   lessons: "Хичээлийн түүх",
+  syllabus: "Сэдэв хөтөлбөр",
   payments: "Төлбөр",
   withdrawal: "Гарсан тооцоо",
   notes: "Тэмдэглэл",
@@ -152,6 +154,7 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
         {tab === "class" && <ClassProgressTab studentId={studentId} />}
         {tab === "independent" && <IndependentProgressTab studentId={studentId} />}
         {tab === "lessons" && <LessonHistoryTab studentId={studentId} />}
+        {tab === "syllabus" && <SyllabusTab studentId={studentId} />}
         {tab === "exams" &&
           (status === "loading" ? (
             <LoadingState rows={4} label="Шалгалт" />
