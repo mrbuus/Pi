@@ -1,13 +1,12 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Minus, Phone, StickyNote, TriangleAlert, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Phone, StickyNote, TriangleAlert, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import {
   ATTENDANCE_MARKS,
   HOMEWORK_MARKS,
-  TONE_TEXT,
   type AttendanceStatus,
   type HomeworkStatus,
 } from "@/components/attendance/marks";
@@ -15,7 +14,6 @@ import { SkeletonLine } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
-import { cn } from "@/lib/cn";
 import {
   LATE_RANGE_SHORT,
   addMonths,
@@ -32,7 +30,8 @@ import {
   type StatusCounts,
 } from "./lib";
 import { CountGrid, CountRow, attendanceCounts, homeworkCounts } from "./parts";
-import { QuizMonthItem, QuizPctBadge, quizDayText, useQuizMonth, type QuizDayRow } from "./QuizDay";
+import DayBox from "./DayBox";
+import { QuizMonthItem, quizDayText, useQuizMonth, type QuizDayRow } from "./QuizDay";
 import { quizCoveredDays } from "@/lib/quizScore";
 import MakeupHistory from "@/components/makeup-visits/MakeupHistory";
 import RefundEstimateRow from "@/components/students/RefundEstimate";
@@ -409,8 +408,6 @@ function MonthSection({
               const h = homework ? hw.get(k) : undefined;
               const am = a ? ATTENDANCE_MARKS[a.status] : null;
               const hm = h?.status ? HOMEWORK_MARKS[h.status] : null;
-              const AttIcon = am?.icon;
-              const HwIcon = hm?.icon;
               const q = qz.get(k);
               const muted = !a && !hm && !q && (k > today || k < m.classJoinedOn);
               const attText = a
@@ -424,37 +421,19 @@ function MonthSection({
               const where = a?.classroom ?? h?.classroom ?? null;
               const label = [dayLabel(k), attText, hwText, q ? quizDayText(q) : "", where ? `${where} анги` : ""].filter(Boolean).join(", ");
               return (
-                <li
-                  key={k}
-                  title={label}
-                  className={cn(
-                    "flex w-10 flex-col items-center justify-center gap-0.5 rounded-lg border py-1 text-[11px] tabular-nums",
-                    // Шалгалттай сард бүх хайрцаг нэг мөр өндөр — дүрс бүр ижил байрлалд
-                    homework ? (hasQuiz ? "h-[4.75rem]" : "h-[3.75rem]") : "h-12",
-                    muted ? "border-dashed border-line text-ink-dim/60" : "border-line bg-surface text-ink",
-                    where && "border-info/50",
-                    k === date && "ring-2 ring-brand-bright ring-offset-1 ring-offset-surface",
-                  )}
-                >
-                  <span className="font-semibold leading-none">{fromKey(k).getDate()}</span>
-                  {AttIcon && am ? (
-                    <AttIcon className={cn("size-3.5", TONE_TEXT[am.tone])} aria-hidden />
-                  ) : muted ? (
-                    <span className="h-3.5" />
-                  ) : (
-                    <Minus className="size-3.5 text-ink-dim/60" aria-hidden />
-                  )}
-                  {homework &&
-                    (HwIcon && hm ? (
-                      <HwIcon className={cn("size-3.5", TONE_TEXT[hm.tone])} aria-hidden />
-                    ) : muted || q ? (
-                      // Шалгалтын оноотой бол «тэмдэглээгүй» зураас тавихгүй
-                      <span className="h-3.5" />
-                    ) : (
-                      <Minus className="size-3.5 text-ink-dim/60" aria-hidden />
-                    ))}
-                  {hasQuiz && (q ? <QuizPctBadge row={q} /> : <span className="h-3.5" />)}
-                  <span className="sr-only">{label}</span>
+                <li key={k}>
+                  <DayBox
+                    dayOfMonth={fromKey(k).getDate()}
+                    attendance={a?.status ?? null}
+                    homework={h?.status ?? null}
+                    showHomework={homework}
+                    quiz={q ?? null}
+                    quizRow={hasQuiz}
+                    muted={muted}
+                    otherClass={!!where}
+                    selected={k === date}
+                    label={label}
+                  />
                 </li>
               );
             })}

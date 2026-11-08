@@ -6,11 +6,12 @@ import {
 } from '@nestjs/common';
 import { loadCoverageCatalog } from '../class-dashboard/class-coverage.data';
 import { bookRank } from '../class-dashboard/class-coverage.logic';
-import { shortTestName } from '../class-sessions/roadmap.logic';
+import { ROADMAP_BOOK_CODES, shortTestName } from '../class-sessions/roadmap.logic';
 import { classTeacherWhere } from '../common/class-teachers';
 import { addDateDays, dateKey, parseDateOnly, todayUB } from '../common/date';
 import { groupTestNames } from '../common/test-names';
 import { ClassroomType, Role } from '../generated/prisma/enums';
+import { loadStudentQuizzes } from '../homework-quiz/student-quizzes';
 import { MakeupVisitsService, type MakeupHistoryItem } from '../makeup-visits/makeup-visits.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { shortName } from '../revisions/revision-snapshot';
@@ -212,11 +213,8 @@ export class StudentCalendarService {
         },
         include: { students: { where: { studentId, removedAt: null }, select: { id: true } } },
       }),
-      // Шалгалтын оноо — homework-quiz-ийн хүснэгтээс зөвхөн уншина (оноо бутархай болж магадгүй тул Number())
-      this.prisma.homeworkQuizScore.findMany({
-        where: { studentId, deletedAt: null, quiz: { deletedAt: null, date: dateIn } },
-        select: { score: true, quiz: { select: { classroomId: true, date: true, problemCount: true } } },
-      }),
+      // Шалгалтын оноо — homework-quiz-ийн нийтлэг уншигч (бутархай оноо Number болсон)
+      loadStudentQuizzes(this.prisma, studentId, { from: fromD, to: toD }),
       this.makeups.coveredByStudent(studentId, { from, to }),
       this.prisma.attendance.findFirst({ where: { studentId }, orderBy: { date: 'asc' }, select: { date: true } }),
     ]);
@@ -270,7 +268,7 @@ export class StudentCalendarService {
         ...attendance.map((a) => a.classroomId),
         ...homework.map((h) => h.classroomId),
         ...records.map((r) => r.classroomId),
-        ...quiz.map((q) => q.quiz.classroomId),
+        ...quiz.map((q) => q.classroomId),
       ]),
     ]);
     const testById = new Map(tests.map((t) => [t.id, t]));
@@ -359,12 +357,7 @@ export class StudentCalendarService {
         confirmedBy: names.get(r.confirmedById) ?? r.confirmedByName,
         studentListed: r.students.length > 0,
       })),
-      quiz: quiz.map((q) => ({
-        classroomId: q.quiz.classroomId,
-        date: dateKey(q.quiz.date),
-        score: Number(q.score),
-        problemCount: q.quiz.problemCount,
-      })),
+      quiz: quiz.map((q) => ({ classroomId: q.classroomId, date: q.date, score: q.score, problemCount: q.problemCount })),
       notes: notes.flatMap((n) => {
         const classroomId = scheduleClass.get(n.scheduleId);
         return classroomId
@@ -538,7 +531,13 @@ export class StudentCalendarService {
               }),
           })),
       }))
-      .filter((b) => b.chapters.length > 0);
+      // Хөтөлбөр = үндсэн дараалал (100V3 → 200V3); бусад ном зөвхөн хийсэн/дутуу тесттэй бол
+      .filter(
+        (b) =>
+          b.chapters.length > 0 &&
+          ((ROADMAP_BOOK_CODES as readonly string[]).includes(b.code) ||
+            b.chapters.some((c) => c.tests.some((t) => t.status !== 'TODO'))),
+      );
 
     // Каталогт ороогүй: өөр номын/ноорог тест эсвэл гараар бичсэн сэдэв
     const leftover = [...state.keys()].filter((k) => !usedKeys.has(k));

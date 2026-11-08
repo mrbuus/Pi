@@ -53,11 +53,7 @@ export default function MakeupHistory({
 
 function HistoryRow({ v, studentId }: { v: MakeupHistoryItem; studentId: string }) {
   const [open, setOpen] = useState(false);
-  const [answers, setAnswers] = useState<string | null>(null);
-  const staff = getRole() !== "STUDENT";
   const Icon = v.place.kind === "ROOM_406" ? DoorOpen : ArrowRightLeft;
-  const att = v.attendance.status ? ATTENDANCE_MARKS[v.attendance.status] : null;
-  const hw = v.homework.status ? HOMEWORK_MARKS[v.homework.status] : null;
   return (
     <li className="rounded-lg border border-brand-bright/40 bg-brand-bright/[0.04]">
       <button
@@ -77,74 +73,87 @@ function HistoryRow({ v, studentId }: { v: MakeupHistoryItem; studentId: string 
         <ChevronDown className={cn("size-4 shrink-0 text-ink-dim transition", open && "rotate-180")} aria-hidden />
       </button>
       {open && (
-        <div className="space-y-2 border-t border-brand-bright/20 px-2.5 py-2 text-sm">
-          <p className="text-xs text-ink-dim">
-            <Meta
-              items={[
-                fullDate(v.date),
-                `${v.teacher.name} бүртгэсэн, ${ubParts(v.createdAt).time}`,
-                v.homeClassroom ? `өөрийн анги ${shortClass(v.homeClassroom.name)}` : null,
-              ]}
-            />
-          </p>
-          {(att || hw) && (
-            <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
-              {att && (
-                <span className={cn("font-semibold", TONE_TEXT[att.tone])}>
-                  Ирц: {att.label}
-                  {v.attendance.lateRange ? `, ${LATE_RANGE_SHORT[v.attendance.lateRange]}` : ""}
-                </span>
-              )}
-              {hw && <span className={cn("font-semibold", TONE_TEXT[hw.tone])}>Даалгавар: {hw.label}</span>}
-            </p>
-          )}
-          {v.tests.length === 0 ? (
-            <p className="text-xs text-ink-dim">
-              {v.place.kind === "ROOM_406" ? "Нөхсөн сэдэв сонгоогүй" : "Тэр хичээлийн тест бүртгэгдээгүй"}
-            </p>
-          ) : (
-            <ul className="space-y-1">
-              {v.tests.map((t) => (
-                <li key={t.id ?? `${t.testId}|${t.title}`}>
-                  <div className="flex min-h-9 flex-wrap items-center gap-x-2 gap-y-1">
-                    {!t.testId && <NotebookPen className="size-3.5 shrink-0 text-ink-dim" aria-hidden />}
-                    <span className="font-semibold text-ink">{t.title}</span>
-                    {SOURCE_HINT[t.source] && <span className="text-xs text-ink-dim">{SOURCE_HINT[t.source]}</span>}
-                    {t.result ? (
-                      <span className="rounded-md bg-ink/[0.06] px-1.5 text-xs font-bold tabular-nums text-ink">
-                        {t.result.score}/{t.result.max}
-                      </span>
-                    ) : (
-                      t.testId && <span className="text-xs text-ink-dim">онлайнаар өгөөгүй</span>
-                    )}
-                    {t.testId && t.result && staff && (
-                      <button
-                        type="button"
-                        onClick={() => setAnswers((a) => (a === t.testId ? null : t.testId))}
-                        aria-expanded={answers === t.testId}
-                        className="inline-flex min-h-9 items-center rounded-lg px-2 text-xs font-bold text-brand-soft hover:bg-brand-bright/10"
-                      >
-                        {answers === t.testId ? "Хариуг хаах" : "Хариу харах"}
-                      </button>
-                    )}
-                    {t.testId && t.result && !staff && (
-                      <Link
-                        href={`/app/tests/${encodeURIComponent(t.testId)}/result`}
-                        className="inline-flex min-h-9 items-center gap-1 rounded-lg px-2 text-xs font-bold text-brand-soft hover:bg-brand-bright/10"
-                      >
-                        Хариу харах
-                        <ExternalLink className="size-3.5" aria-hidden />
-                      </Link>
-                    )}
-                  </div>
-                  {answers === t.testId && t.testId && <StudentSummary testId={t.testId} studentId={studentId} />}
-                </li>
-              ))}
-            </ul>
-          )}
-          {v.comment && <p className="rounded-md bg-panel px-2 py-1.5 text-sm text-ink">{v.comment}</p>}
+        <div className="border-t border-brand-bright/20 px-2.5 py-2">
+          <MakeupVisitBody v={v} studentId={studentId} />
         </div>
       )}
     </li>
+  );
+}
+
+/** Нэг нөхөлтийн дэлгэрэнгүй (огноо, багш, ирц, тест, хариу, тайлбар) — түүхийн мөр ба сурагчийн хуанлийн цонх */
+export function MakeupVisitBody({ v, studentId }: { v: MakeupHistoryItem; studentId: string }) {
+  const [answers, setAnswers] = useState<string | null>(null);
+  const staff = getRole() !== "STUDENT";
+  const att = v.attendance.status ? ATTENDANCE_MARKS[v.attendance.status] : null;
+  const hw = v.homework.status ? HOMEWORK_MARKS[v.homework.status] : null;
+  return (
+    <div className="space-y-2 text-sm">
+      <p className="text-xs text-ink-dim">
+        <Meta
+          items={[
+            fullDate(v.date),
+            `${v.teacher.name} бүртгэсэн, ${ubParts(v.createdAt).time}`,
+            v.homeClassroom ? `өөрийн анги ${shortClass(v.homeClassroom.name)}` : null,
+          ]}
+        />
+      </p>
+      {(att || hw) && (
+        <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+          {att && (
+            <span className={cn("font-semibold", TONE_TEXT[att.tone])}>
+              Ирц: {att.label}
+              {v.attendance.lateRange ? `, ${LATE_RANGE_SHORT[v.attendance.lateRange]}` : ""}
+            </span>
+          )}
+          {hw && <span className={cn("font-semibold", TONE_TEXT[hw.tone])}>Даалгавар: {hw.label}</span>}
+        </p>
+      )}
+      {v.tests.length === 0 ? (
+        <p className="text-xs text-ink-dim">
+          {v.place.kind === "ROOM_406" ? "Нөхсөн сэдэв сонгоогүй" : "Тэр хичээлийн тест бүртгэгдээгүй"}
+        </p>
+      ) : (
+        <ul className="space-y-1">
+          {v.tests.map((t) => (
+            <li key={t.id ?? `${t.testId}|${t.title}`}>
+              <div className="flex min-h-9 flex-wrap items-center gap-x-2 gap-y-1">
+                {!t.testId && <NotebookPen className="size-3.5 shrink-0 text-ink-dim" aria-hidden />}
+                <span className="font-semibold text-ink">{t.title}</span>
+                {SOURCE_HINT[t.source] && <span className="text-xs text-ink-dim">{SOURCE_HINT[t.source]}</span>}
+                {t.result ? (
+                  <span className="rounded-md bg-ink/[0.06] px-1.5 text-xs font-bold tabular-nums text-ink">
+                    {t.result.score}/{t.result.max}
+                  </span>
+                ) : (
+                  t.testId && <span className="text-xs text-ink-dim">онлайнаар өгөөгүй</span>
+                )}
+                {t.testId && t.result && staff && (
+                  <button
+                    type="button"
+                    onClick={() => setAnswers((a) => (a === t.testId ? null : t.testId))}
+                    aria-expanded={answers === t.testId}
+                    className="inline-flex min-h-9 items-center rounded-lg px-2 text-xs font-bold text-brand-soft hover:bg-brand-bright/10"
+                  >
+                    {answers === t.testId ? "Хариуг хаах" : "Хариу харах"}
+                  </button>
+                )}
+                {t.testId && t.result && !staff && (
+                  <Link
+                    href={`/app/tests/${encodeURIComponent(t.testId)}/result`}
+                    className="inline-flex min-h-9 items-center gap-1 rounded-lg px-2 text-xs font-bold text-brand-soft hover:bg-brand-bright/10"
+                  >
+                    Хариу харах
+                    <ExternalLink className="size-3.5" aria-hidden />
+                  </Link>
+                )}
+              </div>
+              {answers === t.testId && t.testId && <StudentSummary testId={t.testId} studentId={studentId} />}
+            </li>
+          ))}
+        </ul>
+      )}
+      {v.comment && <p className="rounded-md bg-panel px-2 py-1.5 text-sm text-ink">{v.comment}</p>}
+    </div>
   );
 }
