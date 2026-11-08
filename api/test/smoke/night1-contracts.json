@@ -331,6 +331,18 @@
   },
   {
     "gap": "G26",
+    "file": "tuition/withdrawal.controller",
+    "controller": "RefundEstimateController",
+    "method": "GET",
+    "path": "/api/tuition/refund-estimate/:studentId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "G26",
     "file": "tuition/tuition.controller",
     "controller": "TuitionController",
     "method": "GET",
