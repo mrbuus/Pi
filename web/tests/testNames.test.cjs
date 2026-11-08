@@ -15,7 +15,7 @@ function load() {
   vm.runInNewContext(compiled, context);
   return context.exports;
 }
-const { groupTestNames, regroupTopicText } = load();
+const { groupTestNames, regroupTopicText, groupTestItems } = load();
 
 test('нэг сэдвийн дугаартай тестүүд нэг бүлэг', () => {
   assert.equal(
@@ -86,4 +86,18 @@ test('хуучин «, »-тэй гарчгийг товчилно, чөлөөт
   assert.equal(regroupTopicText('Урвуу функц 1, 2'), 'Урвуу функц 1, 2');
   assert.equal(regroupTopicText(null), '');
   assert.equal(regroupTopicText('Сэдэв'), 'Сэдэв');
+});
+
+test('groupTestItems: бүлгийн гишүүн бүр өөрийн зүйлтэй (хассан дугаар зурахад)', () => {
+  const items = [
+    { n: 'А 1', x: [2] },
+    { n: 'Б', x: [] },
+    { n: 'А 2', x: [] },
+    { n: 'А 2', x: [9] },
+  ];
+  const g = JSON.parse(JSON.stringify(groupTestItems(items, (i) => i.n)));
+  assert.deepEqual(g, [
+    { base: 'А', members: [{ num: '1', item: items[0] }, { num: '2', item: items[2] }] },
+    { base: 'Б', members: [{ num: null, item: items[1] }] },
+  ]);
 });

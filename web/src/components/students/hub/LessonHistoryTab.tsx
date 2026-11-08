@@ -6,6 +6,7 @@ import { Meta } from "@/components/ui/Meta";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { formatMnDate } from "@/lib/dateMn";
 import { useSection } from "../progress/useSection";
+import { regroupTopicText } from "@/lib/testNames";
 
 // api/src/lesson-records/lesson-records.service.ts studentHistory()-тэй тохирно
 interface LessonRow {
@@ -69,7 +70,7 @@ export default function LessonHistoryTab({ studentId }: { studentId: string }) {
                 <p className="text-xs tabular-nums text-ink-dim">{hhmm(r.startMinute)}</p>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-ink">{r.topic || r.classroomName}</p>
+                <p className="truncate text-sm font-semibold text-ink">{(r.topic && regroupTopicText(r.topic)) || r.classroomName}</p>
                 <Meta
                   className="text-xs text-ink-dim"
                   items={[r.topic ? r.classroomName : null, r.leadTeacherName, r.room, r.testCount > 0 && `${r.testCount} тест`]}

@@ -53,6 +53,41 @@ export function groupTestNameParts(names: readonly string[]): TestNameGroup[] {
   return groups;
 }
 
+/**
+ * Зүйлсийг (тест, хассан дугаартай г.м.) нэрээр нь бүлэглэнэ — UI-д бүлгийн доторх
+ * тоо бүрийн хажууд нэмэлт тэмдэг (хассан бодлого) зурахад. `groupTestNameParts`-тай ижил дүрэм;
+ * давхардсан нэр нэг л удаа (эхнийх нь).
+ */
+export function groupTestItems<T>(
+  items: readonly T[],
+  nameOf: (item: T) => string,
+): { base: string; members: { num: string | null; item: T }[] }[] {
+  const groups: { base: string; members: { num: string | null; item: T }[] }[] = [];
+  const numbered = new Map<string, (typeof groups)[number]>();
+  const plain = new Set<string>();
+  for (const item of items) {
+    const name = clean(nameOf(item));
+    if (!name) continue;
+    const m = name.match(TRAILING_NUMBER);
+    if (!m) {
+      if (plain.has(name)) continue;
+      plain.add(name);
+      groups.push({ base: name, members: [{ num: null, item }] });
+      continue;
+    }
+    const [, base, num] = m;
+    const g = numbered.get(base);
+    if (g) {
+      if (!g.members.some((x) => x.num === num)) g.members.push({ num, item });
+      continue;
+    }
+    const fresh = { base, members: [{ num, item }] };
+    numbered.set(base, fresh);
+    groups.push(fresh);
+  }
+  return groups;
+}
+
 /** Нэг бүлгийн бичвэр: «Квадрат тэгшитгэл 1, 2, 3» эсвэл «Иррац шалгалт». */
 export function testNameGroupText(g: TestNameGroup): string {
   return g.numbers.length ? `${g.base} ${g.numbers.join(", ")}` : g.base;

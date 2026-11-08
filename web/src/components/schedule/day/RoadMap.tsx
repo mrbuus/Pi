@@ -3,9 +3,10 @@
 import { ArrowRight, Check, NotebookPen } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { cn } from "@/lib/cn";
+import { groupTestItems, regroupTopicText } from "@/lib/testNames";
 import { fullTestTitle, type DayEntry, type TestInfo } from "./types";
 
-interface Item {
+export interface Item {
   key: string;
   short: string;
   full: string;
@@ -25,6 +26,31 @@ export function Excluded({ numbers }: { numbers: number[] }) {
       <span className="sr-only">хассан бодлого </span>
       {numbers.join(",")}
     </span>
+  );
+}
+
+/**
+ * Нэг сэдвийн тестүүдийг товчилж харуулна (эзэн 2026-11-08): «Квадрат тэгшитгэл 1, 2², 3»
+ * — тоо бүрийн хажууд өөрийн хассан бодлого; өөр сэдвүүд «;»-оор.
+ */
+export function GroupedItems({ items, className }: { items: Item[]; className?: string }) {
+  const groups = groupTestItems(items, (x) => x.short);
+  return (
+    <>
+      {groups.map((g, gi) => (
+        <span key={g.members[0].item.key} className={cn("min-w-0", className)}>
+          {g.base}
+          {g.members.map((m, mi) => (
+            <span key={m.item.key} className="whitespace-nowrap">
+              {m.num !== null && (mi === 0 ? " " : ", ")}
+              {m.num}
+              <Excluded numbers={m.item.excluded} />
+            </span>
+          ))}
+          {gi < groups.length - 1 && ";"}
+        </span>
+      ))}
+    </>
   );
 }
 
@@ -134,12 +160,7 @@ export default function RoadMap({
         <>
           <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 text-ink-dim">
             <span className="sr-only">Өмнөх хичээл:</span>
-            {previous.map((x) => (
-              <span key={x.key} className="whitespace-nowrap">
-                {x.short}
-                <Excluded numbers={x.excluded} />
-              </span>
-            ))}
+            <GroupedItems items={previous} />
           </span>
           <ArrowRight className="size-3.5 shrink-0 text-ink-dim" aria-label="дараа нь" />
         </>
@@ -147,13 +168,8 @@ export default function RoadMap({
       {today.length > 0 || topics.length > 0 ? (
         <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 font-semibold text-ink">
           <span className="sr-only">{doneToday ? "Хийсэн:" : "Өнөөдөр:"}</span>
-          {today.map((x) => (
-            <span key={x.key} className="inline-flex items-center gap-0.5 whitespace-nowrap">
-              {doneToday && <Check className="size-3.5 text-success" aria-hidden />}
-              {x.short}
-              <Excluded numbers={x.excluded} />
-            </span>
-          ))}
+          {doneToday && today.length > 0 && <Check className="size-3.5 shrink-0 text-success" aria-hidden />}
+          <GroupedItems items={today} />
           {topics.map((t) => (
             <span key={`topic-${t}`} className="inline-flex min-w-0 items-center gap-1" title="Бодлогын санд байхгүй сэдэв">
               <NotebookPen className="size-3.5 shrink-0 text-ink-dim" aria-hidden />
@@ -162,7 +178,7 @@ export default function RoadMap({
           ))}
         </span>
       ) : entry.topic ? (
-        <span className="font-semibold text-ink">{entry.topic}</span>
+        <span className="font-semibold text-ink">{regroupTopicText(entry.topic)}</span>
       ) : (
         <span className="text-ink-dim">{emptyLabel}</span>
       )}

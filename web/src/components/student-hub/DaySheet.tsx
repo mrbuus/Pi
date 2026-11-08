@@ -14,6 +14,7 @@ import TheoryDayPanel from "./TheoryDayPanel";
 import { AttendanceMark, HomeworkMark } from "./Marks";
 import { dayKey, dayShort, dayTitle, loadMonth, timeRange, useMonthDays } from "./lib";
 import type { HubDay, HubDayTest } from "./types";
+import { regroupTopicText } from "@/lib/testNames";
 
 /**
  * Нэг хичээлийн өдрийн БҮХ мэдээлэл нэг цонхонд (SURAGCH-V2-GEREE): сэдэв, багш, бодлого,
@@ -111,7 +112,7 @@ function DayBody({ day, onChange }: { day: HubDay; onChange: () => void }) {
     <>
       <section className="border-b border-line px-4 py-3.5">
         {day.topic ? (
-          <p className="cyrillic-heading text-base font-bold text-ink">{day.topic}</p>
+          <p className="cyrillic-heading text-base font-bold text-ink">{regroupTopicText(day.topic)}</p>
         ) : (
           <p className="text-sm text-ink-dim">Сэдэв оруулаагүй</p>
         )}

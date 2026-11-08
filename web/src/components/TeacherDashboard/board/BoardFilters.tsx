@@ -20,6 +20,7 @@ import { cleanTitle } from "@/components/homework-practice/lib";
 import DeadlineButton from "./DeadlineButton";
 import { RiskDot } from "./parts";
 import { scoreText, type OnlineCell } from "./StudentCard";
+import { regroupTopicText } from "@/lib/testNames";
 
 /**
  * Самбарын шүүлтүүр ба хичээлийн мэдээлэл (эзэн 2026-11-03: «Хяналт», «Тэмдэглэх» хоёр таб нэг
@@ -134,7 +135,7 @@ export function LessonInfo({
         <div className="min-w-0 flex-1 space-y-1 text-sm">
           <p>
             <span className="text-ink-dim">Хичээлийн сэдэв: </span>
-            <span className="font-semibold text-ink">{topic || "Тавиагүй"}</span>
+            <span className="font-semibold text-ink">{(topic && regroupTopicText(topic)) || "Тавиагүй"}</span>
           </p>
           {homework && (
             <p>
