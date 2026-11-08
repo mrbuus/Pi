@@ -7,6 +7,7 @@ import type { AttendanceStatus, BoardStudent, DayRec, HomeworkStatus, LateRangeV
 import MakeupChip from "./MakeupChip";
 import { Legend, LegendItem, RiskDot } from "./parts";
 import StudentCard, { type OnlineCell } from "./StudentCard";
+import type { QuizCellState } from "./useHomeworkQuiz";
 
 /** «Бүгд …» товчоор өөрчилсөн нүднүүд (буцаахад яг эдгээрийг л) */
 export interface BulkState {
@@ -45,6 +46,19 @@ interface Props {
   onHwNote: (id: string, text: string, typed: boolean) => void;
   onDrawer: (id: string) => void;
   onOnline: (id: string) => void;
+  /** Шалгалтаар даалгавар шалгах (QuizBar, эзэн 2026-11-08) */
+  quiz?: QuizCardProps;
+}
+
+/** Шалгалтын онооны талбарт хэрэгтэй бүх зүйл (useHomeworkQuiz-ээс) */
+export interface QuizCardProps {
+  /** Харагдаж буй үед бодлогын тоо; нуусан/шалгалтгүй бол null */
+  max: number | null;
+  scores: Map<string, number>;
+  cells: Map<string, QuizCellState>;
+  onScore: (id: string, value: number | null, now?: boolean) => void;
+  onFlush: (id: string) => void;
+  onInvalid: (id: string, invalid: boolean) => void;
 }
 
 const NO_FLAGS: string[] = [];
@@ -86,6 +100,14 @@ export default function MarkView(p: Props) {
             onHwNote={p.onHwNote}
             onDrawer={p.onDrawer}
             onOnline={p.onOnline}
+            {...(p.quiz && {
+              quizMax: p.quiz.max,
+              quizScore: p.quiz.scores.get(s.id) ?? null,
+              quizState: p.quiz.cells.get(s.id) ?? null,
+              onQuizScore: p.quiz.onScore,
+              onQuizFlush: p.quiz.onFlush,
+              onQuizInvalid: p.quiz.onInvalid,
+            })}
           />
         ))}
       </ul>

@@ -32,6 +32,8 @@ import {
   type StatusCounts,
 } from "./lib";
 import { CountGrid, CountRow, attendanceCounts, homeworkCounts } from "./parts";
+import { QuizMonthItem, QuizPctBadge, quizDayText, useQuizMonth, type QuizDayRow } from "./QuizDay";
+import { quizCoveredDays } from "@/lib/quizScore";
 
 interface MonthAtt {
   date: string;
@@ -147,6 +149,8 @@ export default function StudentDrawer({
 
   const data = card?.data ?? null;
   const s = data?.student;
+  // Шалгалтын оноо (эзэн 2026-11-08) — тусдаа хүсэлт, алдаа гарвал хоосон
+  const quizRows = useQuizMonth(classId, studentId, month, homework);
 
   return (
     <Dialog.Root open onOpenChange={(o) => !o && onClose()}>
@@ -249,6 +253,7 @@ export default function StudentDrawer({
                   today={today}
                   homework={homework}
                   currentClass={className}
+                  quiz={quizRows}
                 />
                 <NotesSection studentId={studentId} today={today} />
                 <FactsSection data={data} today={today} />
@@ -302,6 +307,7 @@ function MonthSection({
   today,
   homework,
   currentClass,
+  quiz,
 }: {
   data: StudentCardData;
   month: string;
@@ -313,6 +319,8 @@ function MonthSection({
   today: string;
   homework: boolean;
   currentClass: string;
+  /** Энэ ангийн тухайн сарын шалгалтын оноо (QuizDay.tsx) */
+  quiz: QuizDayRow[];
 }) {
   const headingId = useId();
   // Хамгийн эхний бичлэг (эсвэл элссэн сар) ба өнөөдөр/сонгосон өдрийн сар хооронд
@@ -325,8 +333,26 @@ function MonthSection({
   const m = data.month;
   const att = new Map(m.attendance.map((a) => [a.date, a]));
   const hw = new Map(m.homework.map((h) => [h.date, h]));
+  // Шалгалтын оноо: хайрцагт хувь, «Тэмдэглээгүй»-ээс хасна (эзэн 2026-11-08). Сар солих үед хуучин
+  // сарын мөр ирсэн бол тоолохгүй.
+  const quizRows = homework ? quiz.filter((r) => r.date.startsWith(month)) : [];
+  const qz = new Map(quizRows.map((r) => [r.date, r]));
+  const hasQuiz = qz.size > 0;
+  const covered = quizCoveredDays(
+    m.lessonDays.filter((k) => k >= m.classJoinedOn && k <= today),
+    m.homework.filter((h) => h.status).map((h) => h.date),
+    quizRows.map((r) => r.date),
+  );
+  const counts = covered
+    ? { ...m.counts, homework: { ...m.counts.homework, unmarked: Math.max(0, m.counts.homework.unmarked - covered) } }
+    : m.counts;
   const days = [
-    ...new Set([...m.lessonDays, ...m.attendance.map((a) => a.date), ...(homework ? m.homework.filter((h) => h.status).map((h) => h.date) : [])]),
+    ...new Set([
+      ...m.lessonDays,
+      ...m.attendance.map((a) => a.date),
+      ...(homework ? m.homework.filter((h) => h.status).map((h) => h.date) : []),
+      ...qz.keys(),
+    ]),
   ].sort();
   // Өдрийн тайлбар: ирцийн тайлбар, даалгаврын тайлбар, өөр ангид тэмдэглэсэн (шинэ нь дээр)
   const remarks = days
@@ -374,7 +400,8 @@ function MonthSection({
               const hm = h?.status ? HOMEWORK_MARKS[h.status] : null;
               const AttIcon = am?.icon;
               const HwIcon = hm?.icon;
-              const muted = !a && !hm && (k > today || k < m.classJoinedOn);
+              const q = qz.get(k);
+              const muted = !a && !hm && !q && (k > today || k < m.classJoinedOn);
               const attText = a
                 ? `${am!.label}${a.lateRange ? ` ${LATE_RANGE_SHORT[a.lateRange]}` : ""}`
                 : k > today
@@ -382,16 +409,17 @@ function MonthSection({
                   : k < m.classJoinedOn
                     ? "элсэхээс өмнө"
                     : "ирц тэмдэглээгүй";
-              const hwText = homework ? (hm ? `даалгавар ${hm.label.toLowerCase()}` : "даалгавар тэмдэглээгүй") : "";
+              const hwText = homework ? (hm ? `даалгавар ${hm.label.toLowerCase()}` : q ? "" : "даалгавар тэмдэглээгүй") : "";
               const where = a?.classroom ?? h?.classroom ?? null;
-              const label = [dayLabel(k), attText, hwText, where ? `${where} анги` : ""].filter(Boolean).join(", ");
+              const label = [dayLabel(k), attText, hwText, q ? quizDayText(q) : "", where ? `${where} анги` : ""].filter(Boolean).join(", ");
               return (
                 <li
                   key={k}
                   title={label}
                   className={cn(
                     "flex w-10 flex-col items-center justify-center gap-0.5 rounded-lg border py-1 text-[11px] tabular-nums",
-                    homework ? "h-[3.75rem]" : "h-12",
+                    // Шалгалттай сард бүх хайрцаг нэг мөр өндөр — дүрс бүр ижил байрлалд
+                    homework ? (hasQuiz ? "h-[4.75rem]" : "h-[3.75rem]") : "h-12",
                     muted ? "border-dashed border-line text-ink-dim/60" : "border-line bg-surface text-ink",
                     where && "border-info/50",
                     k === date && "ring-2 ring-brand-bright ring-offset-1 ring-offset-surface",
@@ -408,11 +436,13 @@ function MonthSection({
                   {homework &&
                     (HwIcon && hm ? (
                       <HwIcon className={cn("size-3.5", TONE_TEXT[hm.tone])} aria-hidden />
-                    ) : muted ? (
+                    ) : muted || q ? (
+                      // Шалгалтын оноотой бол «тэмдэглээгүй» зураас тавихгүй
                       <span className="h-3.5" />
                     ) : (
                       <Minus className="size-3.5 text-ink-dim/60" aria-hidden />
                     ))}
+                  {hasQuiz && (q ? <QuizPctBadge row={q} /> : <span className="h-3.5" />)}
                   <span className="sr-only">{label}</span>
                 </li>
               );
@@ -420,8 +450,14 @@ function MonthSection({
           </ul>
 
           <CountGrid className="mt-2.5 gap-y-1">
-            <CountRow label="Ирц" items={attendanceCounts(m.counts, { unmarked: true })} />
-            {homework && <CountRow label="Даалгавар" items={homeworkCounts(m.counts, { unmarked: true })} />}
+            <CountRow label="Ирц" items={attendanceCounts(counts, { unmarked: true })} />
+            {homework && (
+              <CountRow
+                label="Даалгавар"
+                items={homeworkCounts(counts, { unmarked: true })}
+                extra={hasQuiz ? <QuizMonthItem rows={quizRows} /> : undefined}
+              />
+            )}
           </CountGrid>
 
           {remarks.length > 0 && (

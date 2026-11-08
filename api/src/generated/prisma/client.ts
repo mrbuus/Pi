@@ -788,3 +788,15 @@ export type HomeworkDeadline = Prisma.HomeworkDeadlineModel
  * kind: NOTE — энгийн, RETURN — «Буцаах» дарахад бичсэн шалтгаан.
  */
 export type HomeworkComment = Prisma.HomeworkCommentModel
+/**
+ * Model HomeworkQuiz
+ * Гэрийн даалгаврыг ангид богино шалгалтаар шалгах (эзэн 2026-11-08): ижил төрлийн, өөр тоотой
+ * бодлого. Нэг анги × нэг өдөр = нэг шалгалт. «Устгах» = deletedAt (оноонууд мөн deletedAt-тай нуугдана);
+ * дахин эхлүүлбэл ижил мөр сэргэж, оноо хоосноос эхэлнэ. Зөвхөн ажилтан харна.
+ */
+export type HomeworkQuiz = Prisma.HomeworkQuizModel
+/**
+ * Model HomeworkQuizScore
+ * Шалгалтын нэг сурагчийн оноо (бүхэл тоо 0..problemCount). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
+ */
+export type HomeworkQuizScore = Prisma.HomeworkQuizScoreModel

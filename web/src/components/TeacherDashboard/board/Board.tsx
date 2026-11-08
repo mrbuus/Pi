@@ -11,7 +11,9 @@ import ClassPicker from "./ClassPicker";
 import CriteriaButton from "./CriteriaButton";
 import DateStrip, { type YearMonth } from "./DateStrip";
 import LessonNoteBox from "./LessonNoteBox";
-import MarkView, { type BulkState } from "./MarkView";
+import MarkView, { type BulkState, type QuizCardProps } from "./MarkView";
+import QuizBar from "./QuizBar";
+import { useHomeworkQuiz } from "./useHomeworkQuiz";
 import { BoardFilters, LessonInfo, matchesFilter, type FilterKey } from "./BoardFilters";
 import OtherInfo from "./OtherInfo";
 import RecordedByLine from "./RecordedBy";
@@ -317,6 +319,20 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
   const board = useBoard(cls.id, date);
   const { data, recs } = board;
   const homework = cls.type !== "ONLINE";
+  // Шалгалтаар даалгавар шалгах (эзэн 2026-11-08) — QuizBar.tsx, useHomeworkQuiz.ts
+  const quiz = useHomeworkQuiz(cls.id, date, homework);
+  const quizScored = useMemo(() => new Set(quiz.scores.keys()), [quiz.scores]);
+  const quizCard = useMemo<QuizCardProps>(
+    () => ({
+      max: quiz.quiz && !quiz.hidden ? quiz.quiz.problemCount : null,
+      scores: quiz.scores,
+      cells: quiz.cells,
+      onScore: quiz.setScore,
+      onFlush: quiz.flush,
+      onInvalid: quiz.markInvalid,
+    }),
+    [quiz.quiz, quiz.hidden, quiz.scores, quiz.cells, quiz.setScore, quiz.flush, quiz.markInvalid],
+  );
   const [ui, setUi] = useState<Ui>(EMPTY_UI);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [filter, setFilter] = useState<FilterKey | null>(null);
@@ -388,10 +404,11 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
               flags: flags.get(s.id) ?? [],
               online: online[s.id] ?? null,
               sent: sentSet.has(s.id),
+              quiz: quizScored.has(s.id),
             }),
           )
         : students,
-    [filter, students, recs, flags, online, sentSet],
+    [filter, students, recs, flags, online, sentSet, quizScored],
   );
   const flaggedCount = useMemo(() => [...flags.values()].filter((f) => f.length > 0).length, [flags]);
 
@@ -434,12 +451,13 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
   const doneIds = students
     .filter((s) => {
       const r = recs.get(s.id);
-      return r && r.hw === null && (r.att === "PRESENT" || r.att === "LATE");
+      // Шалгалтын оноотой сурагчийг «үлдсэн»-д тооцохгүй (даалгаврыг нь шалгасан)
+      return r && r.hw === null && !quizScored.has(s.id) && (r.att === "PRESENT" || r.att === "LATE");
     })
     .map((s) => s.id);
   const hwSkipped = students.filter((s) => {
     const r = recs.get(s.id);
-    return r && r.hw === null && r.att !== "PRESENT" && r.att !== "LATE";
+    return r && r.hw === null && !quizScored.has(s.id) && r.att !== "PRESENT" && r.att !== "LATE";
   }).length;
 
   const bulk = async (fn: () => Promise<void>) => {
@@ -480,6 +498,8 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
     students.map((s) => s.id),
     recs,
   );
+  // Тэмдэглээгүй ч шалгалтын оноотой бол «Тэмдэглээгүй»-д тоолохгүй (эзэн 2026-11-08)
+  counts.homework.unmarked -= students.filter((s) => recs.get(s.id)?.hw == null && quizScored.has(s.id)).length;
   const hasOnline = homework && !!onlineData && onlineData.tests.length > 0;
   const firstStart = Math.min(...cls.lessons.map((l) => l.startMinute));
   const upcoming = date > today || (date === today && ubNowMinute() < firstStart);
@@ -541,7 +561,9 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
               filter={filter}
               onFilter={setFilter}
               shown={shownStudents.length}
+              quizScored={quizScored}
             />
+            {homework && <QuizBar q={quiz} studentIds={students.map((s) => s.id)} />}
             {shownStudents.length > 0 ? (
               <MarkView
                 students={shownStudents}
@@ -572,6 +594,7 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
                 onHwNote={board.onHwNote}
                 onDrawer={openDrawer}
                 onOnline={openOnline}
+                quiz={homework ? quizCard : undefined}
               />
             ) : (
               <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-line px-4 py-8 text-center text-sm text-ink-dim">

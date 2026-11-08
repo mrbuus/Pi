@@ -1683,5 +1683,65 @@
       "TEACHER",
       "TEACHER_PLUS"
     ]
+  },
+  {
+    "gap": "HW-QUIZ",
+    "file": "homework-quiz/homework-quiz.controller",
+    "controller": "HomeworkQuizController",
+    "method": "GET",
+    "path": "/api/classrooms/:id/homework-quiz",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "HW-QUIZ",
+    "file": "homework-quiz/homework-quiz.controller",
+    "controller": "HomeworkQuizController",
+    "method": "PUT",
+    "path": "/api/classrooms/:id/homework-quiz",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "HW-QUIZ",
+    "file": "homework-quiz/homework-quiz.controller",
+    "controller": "HomeworkQuizController",
+    "method": "DELETE",
+    "path": "/api/classrooms/:id/homework-quiz",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "HW-QUIZ",
+    "file": "homework-quiz/homework-quiz.controller",
+    "controller": "HomeworkQuizController",
+    "method": "PUT",
+    "path": "/api/classrooms/:id/homework-quiz/scores/:studentId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "HW-QUIZ",
+    "file": "homework-quiz/homework-quiz.controller",
+    "controller": "HomeworkQuizController",
+    "method": "GET",
+    "path": "/api/classrooms/:id/homework-quiz/students/:studentId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
   }
 ]

@@ -190,7 +190,9 @@ export const ModelName = {
   AccountDeletionRequest: 'AccountDeletionRequest',
   UiEvent: 'UiEvent',
   HomeworkDeadline: 'HomeworkDeadline',
-  HomeworkComment: 'HomeworkComment'
+  HomeworkComment: 'HomeworkComment',
+  HomeworkQuiz: 'HomeworkQuiz',
+  HomeworkQuizScore: 'HomeworkQuizScore'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -2352,6 +2354,35 @@ export const HomeworkCommentScalarFieldEnum = {
 } as const
 
 export type HomeworkCommentScalarFieldEnum = (typeof HomeworkCommentScalarFieldEnum)[keyof typeof HomeworkCommentScalarFieldEnum]
+
+
+export const HomeworkQuizScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  date: 'date',
+  problemCount: 'problemCount',
+  createdById: 'createdById',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type HomeworkQuizScalarFieldEnum = (typeof HomeworkQuizScalarFieldEnum)[keyof typeof HomeworkQuizScalarFieldEnum]
+
+
+export const HomeworkQuizScoreScalarFieldEnum = {
+  id: 'id',
+  quizId: 'quizId',
+  studentId: 'studentId',
+  score: 'score',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type HomeworkQuizScoreScalarFieldEnum = (typeof HomeworkQuizScoreScalarFieldEnum)[keyof typeof HomeworkQuizScoreScalarFieldEnum]
 
 
 export const SortOrder = {

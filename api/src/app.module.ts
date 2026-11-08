@@ -23,6 +23,7 @@ import { AnnouncementsModule } from './announcements/announcements.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AssignmentsModule } from './assignments/assignments.module';
+import { HomeworkQuizModule } from './homework-quiz/homework-quiz.module';
 import { TeacherGroupsModule } from './teacher-groups/teacher-groups.module';
 import { AuditModule } from './audit/audit.module';
 import { ClassSessionsModule } from './class-sessions/class-sessions.module';
@@ -137,6 +138,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     ClassroomsModule,
     AttendanceModule,
     AssignmentsModule,
+    HomeworkQuizModule,
     ContentModule,
     TestsModule,
     ThousandModule,

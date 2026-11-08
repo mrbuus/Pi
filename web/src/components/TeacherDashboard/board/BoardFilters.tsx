@@ -38,9 +38,12 @@ export interface FilterCtx {
   flags: string[];
   online: OnlineCell | null;
   sent: boolean;
+  /** Энэ өдрийн шалгалтын оноотой — даалгаврыг «Тэмдэглээгүй»-д тоолохгүй (эзэн 2026-11-08) */
+  quiz?: boolean;
 }
 
-export function matchesFilter(f: FilterKey, { rec, flags, online, sent }: FilterCtx): boolean {
+export function matchesFilter(f: FilterKey, { rec, flags, online, sent, quiz }: FilterCtx): boolean {
+  if (f === "hw:none") return rec.hw === null && !quiz;
   if (f === "risk") return flags.length > 0;
   if (f === "hw:sent") return sent;
   if (f === "online:yes") return !!online;
@@ -183,6 +186,7 @@ export function BoardFilters({
   filter,
   onFilter,
   shown,
+  quizScored,
 }: {
   students: BoardStudent[];
   recs: Map<string, DayRec>;
@@ -195,6 +199,8 @@ export function BoardFilters({
   onFilter: (f: FilterKey | null) => void;
   /** Шүүлтүүрт тохирсон сурагчийн тоо */
   shown: number;
+  /** Энэ өдрийн шалгалтын оноотой сурагчид */
+  quizScored?: ReadonlySet<string>;
 }) {
   const [open, setOpen] = useState(false);
   const ctxOf = (s: BoardStudent): FilterCtx => ({
@@ -202,6 +208,7 @@ export function BoardFilters({
     flags: flags.get(s.id) ?? [],
     online: online[s.id] ?? null,
     sent: sent.has(s.id),
+    quiz: quizScored?.has(s.id),
   });
   const count = (f: FilterKey) => students.filter((s) => matchesFilter(f, ctxOf(s))).length;
 
