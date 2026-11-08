@@ -515,6 +515,41 @@ export function amountThrough(blocks: MonthBlock[], month: MonthKey): number {
   return sum;
 }
 
+/**
+ * Сар бүрийг аль төлбөр дүүргэснийг (computeLedger-ийн waterfall-тай ижил: энэ жилд
+ * тооцогдох төлбөрийг огноогоор нь хуучнаас, сарыг дарааллаар) тодорхойлно. Сар дээр
+ * дарахад «хэзээ, ямар төлбөрөөр» гэдгийг харуулна. Нэг төлбөр хэд хэдэн сарыг (бүтэн
+ * жил), нэг сарыг хэд хэдэн төлбөр (дутуу + нэмэлт) дүүргэж болно.
+ */
+export function blockSources(
+  blocks: MonthBlock[],
+  payments: (LedgerPayment & { id: string })[],
+  kind: ResolvedPlan['kind'],
+  startDate: DateKey | null,
+  year: AcademicYear = ACADEMIC_YEAR,
+): Record<MonthKey, { paymentId: string; amount: number }[]> {
+  const queue = payments
+    .filter((p) => countsForYear(p, kind, startDate, year))
+    .map((p) => ({ id: p.id, left: Math.max(0, Math.round(p.amount)), on: p.paidOn ?? (p.forMonth ? `${p.forMonth}-01` : null) }))
+    .sort((a, b) => (a.on ?? '9999').localeCompare(b.on ?? '9999'));
+  const out: Record<MonthKey, { paymentId: string; amount: number }[]> = {};
+  let i = 0;
+  for (const b of blocks) {
+    if (b.state === 'OFF' || b.paid <= 0) continue;
+    let need = b.paid;
+    const parts: { paymentId: string; amount: number }[] = [];
+    while (need > 0 && i < queue.length) {
+      const take = Math.min(need, queue[i].left);
+      if (take > 0) parts.push({ paymentId: queue[i].id, amount: take });
+      need -= take;
+      queue[i].left -= take;
+      if (queue[i].left <= 0) i++;
+    }
+    out[b.month] = parts;
+  }
+  return out;
+}
+
 export type PromiseState = 'UPCOMING' | 'BROKEN' | 'KEPT';
 
 /**

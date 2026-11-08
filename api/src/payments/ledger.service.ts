@@ -14,6 +14,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import {
   ACADEMIC_YEAR,
+  blockSources,
   computeLedger,
   promiseState,
   tierFor,
@@ -517,7 +518,17 @@ export class PaymentsLedgerService {
       .map((p) => dateKey(p.paidAt ?? p.createdAt)!);
     const daysPerWeek = row.classroom ? (days.get(row.classroom.id) ?? null) : null;
     const { tier } = tierFor(profile?.grade, row.classroom?.name, daysPerWeek);
+    // Сар бүрийг дүүргэсэн төлбөр — ledger-load-ийн адил зөвхөн баталгаажсан, paidAt-ийн өдрөөр
+    const sources = blockSources(
+      row.blocks,
+      payments
+        .filter((p) => p.status === PaymentStatus.CONFIRMED)
+        .map((p) => ({ id: p.id, amount: p.amount, forMonth: p.forMonth, paidOn: dateKey(p.paidAt) })),
+      row.plan.kind,
+      row.startDate,
+    );
     return {
+      sources,
       year: this.yearView(),
       today,
       month: this.currentMonth(today),

@@ -11,9 +11,9 @@ import { ErrorState } from "@/components/ui/StateBlock";
 import { SkeletonRows } from "@/components/ui/Skeleton";
 import LedgerDialog from "@/components/payments/LedgerDialog";
 import { BlockLegend, LargeBlocks } from "@/components/payments/MonthBlocks";
-import { dayLabel, mnt, monthName, PLAN_LABEL, stampLabel } from "@/components/payments/ledgerFormat";
+import { dayLabel, mnt, monthName, PLAN_LABEL, stampLabel, STATE_LABEL } from "@/components/payments/ledgerFormat";
 import { METHOD_LABEL, errMsg } from "@/components/payments/paymentHelpers";
-import type { StudentLedger } from "@/components/payments/ledgerTypes";
+import type { MonthBlock, StudentLedger } from "@/components/payments/ledgerTypes";
 import type { StudentDetail } from "./types";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -38,6 +38,82 @@ function PhoneLine({ label, value }: { label: string; value: string | null }) {
   );
 }
 
+/** Дарсан сарын төлбөр: аль төлбөр(үүд) дүүргэсэн, хэзээ, ямар данснаас, хэн илгээсэн */
+function MonthDetail({ block, ledger, detail }: { block: MonthBlock; ledger: StudentLedger; detail: StudentDetail }) {
+  const hidden = !!ledger.amountsHidden;
+  const parts = ledger.sources?.[block.month] ?? [];
+  return (
+    <div className="space-y-2 rounded-xl border border-brand/30 bg-brand-bright/5 p-3 text-sm">
+      <p className="font-bold text-ink">
+        <Meta
+          items={[
+            monthName(block.month),
+            STATE_LABEL[block.state],
+            !hidden && block.due ? `ногдох ${mnt(block.due)}` : null,
+            !hidden && block.paid ? `төлсөн ${mnt(block.paid)}` : null,
+          ]}
+        />
+      </p>
+      {block.paidOn && (
+        <p className="text-ink-dim">
+          {dayLabel(block.paidOn)}-нд бүрэн төлөгдсөн{block.lateDays > 0 ? `, ${block.lateDays} хоног хоцорсон` : ""}
+        </p>
+      )}
+      {parts.length === 0 ? (
+        <p className="text-ink-dim">{block.dueOn ? `Төлбөр ороогүй — төлөх өдөр ${dayLabel(block.dueOn)}` : "Төлбөр ороогүй"}</p>
+      ) : (
+        <ul className="space-y-2">
+          {parts.map((part) => {
+            const pay = ledger.payments.find((p) => p.id === part.paymentId);
+            const bank = detail.bank.find((b) => b.paymentId === part.paymentId);
+            const whole = pay?.amount ?? null;
+            return (
+              <li key={part.paymentId} className="space-y-1 rounded-lg bg-surface px-3 py-2">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                  <span className="font-bold tabular-nums text-ink">
+                    {part.amount != null ? mnt(part.amount) : "Төлсөн"}
+                    {part.amount != null && whole != null && whole > part.amount && (
+                      <span className="font-normal text-ink-dim"> ({mnt(whole)} төлбөрөөс)</span>
+                    )}
+                  </span>
+                  <span className="tabular-nums text-ink-dim">
+                    {bank ? stampLabel(bank.bookedAt) : pay ? stampLabel(pay.paidAt ?? pay.createdAt) : ""}
+                  </span>
+                </div>
+                {bank ? (
+                  <>
+                    <p className="break-words font-medium text-ink">{bank.description || "Утгагүй гүйлгээ"}</p>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-ink-dim">
+                      {bank.counterparty && (
+                        <span className="flex items-center gap-1.5">
+                          <Landmark className="size-4 shrink-0" aria-hidden />
+                          Данс <span className="tabular-nums text-ink">{bank.counterparty}</span>
+                        </span>
+                      )}
+                      {bank.sender && (
+                        <span className="flex items-center gap-1.5">
+                          <UserRound className="size-4 shrink-0" aria-hidden />
+                          <span className="text-ink">{bank.sender}</span>
+                        </span>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  pay && (
+                    <p className="text-ink-dim">
+                      <Meta items={[METHOD_LABEL[pay.method] ?? pay.method, pay.description, "банкны хуулгад холбогдоогүй"]} />
+                    </p>
+                  )
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 /**
  * «⋯» — хүүхдийг сонгохоос өмнө шалгах дэлгэрэнгүй: холбоо барих утас, сар бүрийн
  * төлбөрийн блок (шийтийн сарын бүлэгтэй ижил), бүх төлбөр, хуулгаас орсон
@@ -59,6 +135,8 @@ export default function StudentDetailDialog({
   const [ledger, setLedger] = useState<StudentLedger | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  /** Дарсан сар — тэр сарын төлбөрийн эх сурвалж */
+  const [month, setMonth] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open || !studentId) return;
@@ -66,6 +144,7 @@ export default function StudentDetailDialog({
     setDetail(null);
     setLedger(null);
     setError(null);
+    setMonth(null);
     const id = encodeURIComponent(studentId);
     Promise.all([
       api<StudentDetail>(`/reconcile/students/${id}`),
@@ -132,7 +211,19 @@ export default function StudentDetailDialog({
                   <BlockLegend />
                 </InfoHint>
               </div>
-              <LargeBlocks blocks={row.blocks} settled={row.plan.settled} gridClass="grid grid-cols-3 gap-2 sm:grid-cols-5" />
+              <LargeBlocks
+                blocks={row.blocks}
+                settled={row.plan.settled}
+                gridClass="grid grid-cols-3 gap-2 sm:grid-cols-5"
+                pickAll
+                current={month ?? undefined}
+                onPick={(m) => setMonth((cur) => (cur === m ? null : m))}
+              />
+              {month && row.blocks.some((b) => b.month === month) ? (
+                <MonthDetail block={row.blocks.find((b) => b.month === month)!} ledger={ledger!} detail={detail} />
+              ) : (
+                <p className="text-sm text-ink-dim">Сар дээр дарж тухайн сарын төлбөр хэзээ, ямар данснаас орсныг харна</p>
+              )}
             </Section>
           )}
 

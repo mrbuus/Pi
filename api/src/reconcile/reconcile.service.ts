@@ -850,6 +850,7 @@ export class ReconcileService {
             sender: sender.trim() || null,
             counterparty: a.bankTx.counterparty,
             auto: a.auto,
+            paymentId: a.paymentId,
             inSheet: !!a.paymentId && !a.paymentId.startsWith('bank_'),
           };
         }),

@@ -166,5 +166,7 @@ export interface StudentLedger {
   payments: LedgerPayment[];
   notes: LedgerNote[];
   refunds: LedgerRefund[];
+  /** Сар бүрийг дүүргэсэн төлбөр (огноогоор хуучнаас) — Багш+-д дүн null */
+  sources?: Record<string, { paymentId: string; amount: number | null }[]>;
   amountsHidden?: boolean;
 }

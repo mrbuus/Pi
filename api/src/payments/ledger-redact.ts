@@ -71,6 +71,7 @@ export function redactStudent(s: Student) {
     profile: s.profile ? { ...s.profile, tuitionAmount: null } : null,
     // description нь гүйлгээний утга — дүн агуулж болно
     payments: s.payments.map((p) => ({ ...p, amount: null, description: null })),
+    sources: Object.fromEntries(Object.entries(s.sources ?? {}).map(([m, xs]) => [m, xs.map((x) => ({ ...x, amount: null }))])),
     settlement: s.settlement ? { ...s.settlement, note: null } : null,
     refunds: s.refunds.map((r) => ({ ...r, refundAmount: null, shortfall: null })),
     amountsHidden: true as const,

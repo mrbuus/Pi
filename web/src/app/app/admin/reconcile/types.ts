@@ -142,6 +142,7 @@ export interface StudentDetail {
     sender: string | null;
     counterparty: string | null;
     auto: boolean;
+    paymentId: string | null;
     inSheet: boolean;
   }[];
   /** Энэ хүүхдэд оноосноор системийн сурсан данс, утас */
