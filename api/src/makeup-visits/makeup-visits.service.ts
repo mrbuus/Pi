@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { assertMarkAccess } from '../attendance/marking-access';
 import { AuditService } from '../audit/audit.service';
+import { ClassSessionsService } from '../class-sessions/class-sessions.service';
 import { shortTestName } from '../class-sessions/roadmap.logic';
 import { dateKey, parseDateOnly, todayUB } from '../common/date';
 import { Prisma } from '../generated/prisma/client';
@@ -90,6 +91,7 @@ export class MakeupVisitsService {
     private prisma: PrismaService,
     private schedule: ScheduleService,
     private audit: AuditService,
+    private sessions: ClassSessionsService,
   ) {}
 
   /* ───────── Туслах ───────── */
@@ -200,6 +202,18 @@ export class MakeupVisitsService {
           a.firstName.localeCompare(b.firstName, 'mn') || a.lastName.localeCompare(b.lastName, 'mn'),
       )
       .map((s) => ({ id: s.id, firstName: s.firstName, lastName: s.lastName, classroom: cls }));
+  }
+
+  /**
+   * 406-д тест сонгох: сурагчийн ангийн номын дарааллын замын зураг (хийсэн тест
+   * «Хийсэн» гэж). Ямар ч багш (ангийн багш биш ч) — зөвхөн унших.
+   */
+  async roadmap(actor: Actor, classroomId: string | undefined, dateStr?: string) {
+    this.assertStaff(actor);
+    if (!classroomId) throw new BadRequestException('Анги заавал');
+    const cls = await this.prisma.classroom.findFirst({ where: { id: classroomId, archived: false }, select: { id: true } });
+    if (!cls) throw new NotFoundException('Анги олдсонгүй');
+    return this.sessions.roadmapData(classroomId, dateStr);
   }
 
   /* ───────── Самбар: жагсаалт ───────── */

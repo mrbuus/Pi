@@ -71,7 +71,7 @@ function setup(opts: { hasLesson?: boolean } = {}) {
     })),
   };
   const audit: any = { record: jest.fn(), recordMany: jest.fn() };
-  return { svc: new MakeupVisitsService(prisma, schedule, audit), prisma, audit };
+  return { svc: new MakeupVisitsService(prisma, schedule, audit, {} as any), prisma, audit };
 }
 
 describe('MakeupVisitsService.create', () => {

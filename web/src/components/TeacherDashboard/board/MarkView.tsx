@@ -5,6 +5,7 @@ import { AttPresentIcon, HwDoneIcon } from "@/components/attendance/marks";
 import { cn } from "@/lib/cn";
 import type { AttendanceStatus, BoardStudent, DayRec, HomeworkStatus, LateRangeValue, MakeupStatus } from "./lib";
 import MakeupChip from "./MakeupChip";
+import type { VisitNote } from "@/components/makeup-visits/VisitNoteChip";
 import { Legend, LegendItem, RiskDot } from "./parts";
 import StudentCard, { type OnlineCell } from "./StudentCard";
 
@@ -45,6 +46,10 @@ interface Props {
   onHwNote: (id: string, text: string, typed: boolean) => void;
   onDrawer: (id: string) => void;
   onOnline: (id: string) => void;
+  /** Нөхөлт: сурагч → «12-6 ангид нөхөж суусан» (makeup-visits) */
+  visitNotes?: Map<string, VisitNote>;
+  /** «Үлдсэнийг нэг дор»-ын доор (нөхөж суусан сурагчид, нэмэх товч) */
+  after?: React.ReactNode;
 }
 
 const NO_FLAGS: string[] = [];
@@ -86,11 +91,13 @@ export default function MarkView(p: Props) {
             onHwNote={p.onHwNote}
             onDrawer={p.onDrawer}
             onOnline={p.onOnline}
+            visitNote={p.visitNotes?.get(s.id)}
           />
         ))}
       </ul>
 
       <BulkActions {...p} />
+      {p.after}
 
       <Legend label="Тэмдгийн тайлбар" className="px-1">
         <LegendItem icon={<RiskDot />}>Шалгуур хангаагүй</LegendItem>

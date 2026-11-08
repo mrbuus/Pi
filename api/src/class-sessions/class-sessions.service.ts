@@ -319,6 +319,14 @@ export class ClassSessionsService {
    */
   async roadmap(classroomId: string, userId: string, role: Role, dateStr?: string) {
     await this.assertClassAccess(classroomId, userId, role);
+    return this.roadmapData(classroomId, dateStr);
+  }
+
+  /**
+   * Эрх шалгахгүй замын зураг — дуудагч өөрөө шалгана (нөхөлтийн 406 өрөөнд ЯМАР Ч
+   * багш сурагчийн ангийн хийсэн тестийг харж сонгоно, makeup-visits).
+   */
+  async roadmapData(classroomId: string, dateStr?: string) {
     let before: Date | null = null;
     if (dateStr) {
       try {

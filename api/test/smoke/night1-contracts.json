@@ -1665,6 +1665,18 @@
     "file": "makeup-visits/makeup-visits.controller",
     "controller": "MakeupVisitsController",
     "method": "GET",
+    "path": "/api/makeup-visits/roadmap",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
     "path": "/api/makeup-visits/home",
     "roles": [
       "ADMIN",

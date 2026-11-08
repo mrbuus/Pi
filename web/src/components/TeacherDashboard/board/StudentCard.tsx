@@ -29,6 +29,7 @@ import {
   type MakeupStatus,
 } from "./lib";
 import MakeupChip from "./MakeupChip";
+import VisitNoteChip, { type VisitNote } from "@/components/makeup-visits/VisitNoteChip";
 
 /** Ирц ба даалгаврын мөр ижил багануудтай — хоёр мөр босоогоор тэгширнэ */
 const COLS = "grid-cols-[1.5rem_repeat(4,minmax(0,1fr))] sm:grid-cols-[5.75rem_repeat(4,minmax(0,1fr))]";
@@ -135,6 +136,8 @@ export interface CardProps {
   onDrawer: (id: string) => void;
   /** «Онлайн» дэлгэрэнгүй (оноо, хугацаа, хариу, зураг) */
   onOnline: (id: string) => void;
+  /** Нөхөлт: «12-6 ангид нөхөж суусан» (makeup-visits) — нэрийн доор */
+  visitNote?: VisitNote;
 }
 
 function StudentCardImpl({
@@ -157,6 +160,7 @@ function StudentCardImpl({
   onHwNote,
   onDrawer,
   onOnline,
+  visitNote,
 }: CardProps) {
   const detailId = `note-${id}`;
   const preview = [rec.attNote.trim(), homework ? rec.hwNote.trim() : ""].filter(Boolean).join(", ");
@@ -206,6 +210,7 @@ function StudentCardImpl({
             <MakeupChip status={makeup} />
           </span>
         )}
+        {visitNote && <VisitNoteChip note={visitNote} />}
         {!open && preview && (
           <button
             type="button"

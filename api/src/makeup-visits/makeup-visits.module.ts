@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service';
+import { ClassSessionsModule } from '../class-sessions/class-sessions.module';
 import { ScheduleModule } from '../schedule/schedule.module';
 import { MakeupVisitsController } from './makeup-visits.controller';
 import { MakeupVisitsService } from './makeup-visits.service';
@@ -10,7 +11,7 @@ import { MakeupVisitsService } from './makeup-visits.service';
  * экспортолно — сурагчийн хөтөлбөр `coveredByStudent()`-ийг дуудна.
  */
 @Module({
-  imports: [ScheduleModule],
+  imports: [ScheduleModule, ClassSessionsModule],
   controllers: [MakeupVisitsController],
   providers: [MakeupVisitsService, AuditService],
   exports: [MakeupVisitsService],

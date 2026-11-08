@@ -51,6 +51,13 @@ export class MakeupVisitsController {
     return this.visits.classroomStudents(req.user, classroomId);
   }
 
+  // 406: тест сонгох — сурагчийн ангийн замын зураг (ямар ч багш, зөвхөн унших)
+  @Roles(...STAFF)
+  @Get('makeup-visits/roadmap')
+  roadmap(@Req() req: RequestWithUser, @Query('classroomId') classroomId?: string, @Query('date') date?: string) {
+    return this.visits.roadmap(req.user, classroomId, date);
+  }
+
   // Самбар: тэр өдөр тэр газарт (ангийн id эсвэл «406») нөхсөн сурагчид
   @Roles(...STAFF)
   @Get('makeup-visits')

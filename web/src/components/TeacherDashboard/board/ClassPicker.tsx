@@ -1,8 +1,9 @@
 "use client";
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { Check, ChevronDown, Users } from "lucide-react";
+import { Check, ChevronDown, DoorOpen, Users } from "lucide-react";
 import { Dot } from "@/components/ui/Meta";
+import { ROOM406_ID } from "@/components/makeup-visits/types";
 import { hm, type DayClass } from "./lib";
 
 /**
@@ -54,10 +55,11 @@ export default function ClassPicker({
           className="elev-3 z-50 max-h-[min(70dvh,var(--radix-dropdown-menu-content-available-height))] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-line bg-surface p-1.5 text-ink"
         >
           <DropdownMenu.Label className="px-3 pb-1 pt-2 text-xs font-semibold text-ink-dim">Энэ өдөр хичээлтэй</DropdownMenu.Label>
+          <DropdownMenu.RadioGroup value={value ?? ""} onValueChange={onChange}>
           {classes.length === 0 ? (
             <p className="px-3 py-3 text-sm text-ink-dim">Энэ өдөр танд хичээлтэй анги алга</p>
           ) : (
-            <DropdownMenu.RadioGroup value={value ?? ""} onValueChange={onChange}>
+            <>
               {classes.map((c) => (
                 <DropdownMenu.RadioItem
                   key={c.id}
@@ -78,8 +80,26 @@ export default function ClassPicker({
                   </span>
                 </DropdownMenu.RadioItem>
               ))}
-            </DropdownMenu.RadioGroup>
+            </>
           )}
+            {/* 406 нөхөх өрөө — хуваарьгүй, ӨДӨР БҮР (эзэн 2026-11-08) */}
+            <DropdownMenu.Separator className="my-1 h-px bg-line" />
+            <DropdownMenu.RadioItem
+              value={ROOM406_ID}
+              className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg px-3 py-1 data-[highlighted]:bg-ink/5 sm:min-h-9"
+            >
+              <DoorOpen className="size-4 shrink-0 text-brand" aria-hidden />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold">406</span>
+                <span className="block text-xs text-ink-dim">Нөхөх өрөө, хуваарьгүй</span>
+              </span>
+              <span className="flex size-4 shrink-0 items-center justify-center">
+                <DropdownMenu.ItemIndicator>
+                  <Check className="size-4 text-brand" aria-hidden />
+                </DropdownMenu.ItemIndicator>
+              </span>
+            </DropdownMenu.RadioItem>
+          </DropdownMenu.RadioGroup>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>

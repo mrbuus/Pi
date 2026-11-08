@@ -32,6 +32,7 @@ import {
   type StatusCounts,
 } from "./lib";
 import { CountGrid, CountRow, attendanceCounts, homeworkCounts } from "./parts";
+import MakeupHistory from "@/components/makeup-visits/MakeupHistory";
 
 interface MonthAtt {
   date: string;
@@ -249,6 +250,15 @@ export default function StudentDrawer({
                   today={today}
                   homework={homework}
                   currentClass={className}
+                />
+                {/* Нөхөлт: өөр ангид суусан, 406-д нөхсөн (байхгүй бол хэсэг гарахгүй) */}
+                <MakeupHistory
+                  studentId={studentId}
+                  wrap={(list, n) => (
+                    <Section title="Нөхөлт" hint={`${n} удаа`}>
+                      {list}
+                    </Section>
+                  )}
                 />
                 <NotesSection studentId={studentId} today={today} />
                 <FactsSection data={data} today={today} />

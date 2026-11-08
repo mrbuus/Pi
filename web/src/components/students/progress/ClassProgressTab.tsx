@@ -11,6 +11,7 @@ import { cn } from "@/lib/cn";
 import { monthRangeFor } from "./dateRange";
 import { SectionEmpty, SectionError, SectionLoading } from "./ProgressSectionStatus";
 import { useSection } from "./useSection";
+import MakeupHistory from "@/components/makeup-visits/MakeupHistory";
 
 // api/src/attendance/attendance.service.ts byStudent()-тэй яг тохирсон хэлбэр
 interface AttendanceRow {
@@ -268,6 +269,16 @@ export default function ClassProgressTab({ studentId }: { studentId: string }) {
               </ul>
             </section>
           )}
+
+          <MakeupHistory
+            studentId={studentId}
+            wrap={(list, n) => (
+              <section className="chunky p-4 md:p-6">
+                <h2 className="mb-3 font-bold text-brand-soft">Нөхөлт, {n} удаа</h2>
+                {list}
+              </section>
+            )}
+          />
 
           <section className="chunky p-4 md:p-6">
             <h2 className="mb-3 font-bold text-brand-soft">Хичээл бүрээр</h2>
