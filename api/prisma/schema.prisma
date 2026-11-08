@@ -2618,6 +2618,53 @@ model StaffCapabilityGrant {
   @@index([userId, revokedAt, expiresAt])
 }
 
+// ============ Багшийн ажилласан цаг, данс, цагийн хөлс (эзэн 2026-11-08) ============
+// Эзний Excel «Цаг»-ийн веб хувилбар: хагас сар бүр (1–15, 16–сүүл) багш
+// бүрийн өдөр тутмын цаг. teacherId-г энгийн мөр болгож хадгална (LessonStaffing-
+// ийн конвенц) — багш архивлагдсан ч түүх үлдэнэ. Логик: src/teacher-hours/.
+
+// Нэг багшийн нэг өдрийн цаг. hundredths = цаг × 100 (7.5 цаг = 750) — бүхэл тоо
+// тул нийлбэрт хөвөгч цэгийн алдаа орохгүй. null = нүдийг арилгасан (мөр, аудит үлдэнэ).
+model TeacherWorkHours {
+  id          String   @id @default(cuid())
+  teacherId   String
+  date        DateTime @db.Date
+  hundredths  Int?
+  updatedById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([teacherId, date])
+  @@index([date])
+}
+
+// Багшийн цалингийн данс. Бүх ажилтан харна; багш өөрийнхөө дансыг, цаг бөглөх
+// эрхтэй (teacher-hours.edit) хүн бүх багшийнхыг засна. Аудитад дугаар нууцлагдана.
+model TeacherBankAccount {
+  teacherId     String   @id
+  bankName      String
+  accountNumber String
+  holderName    String
+  updatedById   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Цагийн хөлс (₮/цаг) — ЗӨВХӨН О. Баасанжав харж, тавина (teacher-hours/pay-rate-owner.ts).
+// effectiveFrom = хагас сарын эхний өдөр; тэр үеэс хойш өвлөгдөнө. Солиход хуучин
+// мөр deletedAt-аар хаагдаж шинэ мөр нэмэгдэнэ — түүх устахгүй.
+model TeacherPayRate {
+  id            String    @id @default(cuid())
+  teacherId     String
+  effectiveFrom DateTime  @db.Date
+  ratePerHour   Int
+  createdById   String
+  createdAt     DateTime  @default(now())
+  deletedAt     DateTime?
+
+  @@index([teacherId, effectiveFrom])
+}
+
 
 // Self-selected reviews are independent of official TestResults and rankings.
 enum StudyReviewStatus {
