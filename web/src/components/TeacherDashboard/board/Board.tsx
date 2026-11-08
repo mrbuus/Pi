@@ -320,7 +320,7 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
   const { data, recs } = board;
   const homework = cls.type !== "ONLINE";
   // Шалгалтаар даалгавар шалгах (эзэн 2026-11-08) — QuizBar.tsx, useHomeworkQuiz.ts
-  const quiz = useHomeworkQuiz(cls.id, date, homework);
+  const quiz = useHomeworkQuiz(cls.id, date, homework, board.poll);
   const quizScored = useMemo(() => new Set(quiz.scores.keys()), [quiz.scores]);
   const quizCard = useMemo<QuizCardProps>(
     () => ({

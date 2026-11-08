@@ -5,6 +5,7 @@ import { useState } from "react";
 import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import { cn } from "@/lib/cn";
+import QuizScoreChip from "@/components/homework-quiz/QuizScoreChip";
 import { AttendanceMark, HomeworkMark } from "./Marks";
 import { currentMonth, dayKey, dayTitle, loadMonth, monthTitle, todayKey, useMonthDays, weekdayShort } from "./lib";
 import type { HubDay } from "./types";
@@ -136,7 +137,9 @@ export function DayRow({
       </span>
       <span className="flex shrink-0 items-center gap-2.5 sm:gap-4">
         <AttendanceMark att={day.attendance} compact="sm" />
-        <HomeworkMark status={day.homework.status} compact="sm" />
+        {/* Шалгалтын оноотой бол «Шалгаагүй» зураасны оронд хувь (эзэн 2026-11-08 19:08) */}
+        {!(day.homework.quiz && !day.homework.status) && <HomeworkMark status={day.homework.status} compact="sm" />}
+        {day.homework.quiz && <QuizScoreChip score={day.homework.quiz.score} problemCount={day.homework.quiz.problemCount} compact />}
       </span>
       <ChevronRight className="size-4 shrink-0 text-ink-dim" aria-hidden />
     </button>

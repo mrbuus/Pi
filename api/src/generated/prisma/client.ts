@@ -782,6 +782,7 @@ export type HomeworkComment = Prisma.HomeworkCommentModel
 export type HomeworkQuiz = Prisma.HomeworkQuizModel
 /**
  * Model HomeworkQuizScore
- * Шалгалтын нэг сурагчийн оноо (бүхэл тоо 0..problemCount). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
+ * Шалгалтын нэг сурагчийн оноо 0..problemCount, бутархай 2 хүртэл орон (7.5 — эзэн 2026-11-08 19:08;
+ * Decimal тул хөвөгч тооны алдаагүй). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
  */
 export type HomeworkQuizScore = Prisma.HomeworkQuizScoreModel

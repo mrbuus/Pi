@@ -6,7 +6,7 @@ import { dateKey, parseDateOnly } from '../common/date';
 import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { shortName } from '../revisions/revision-snapshot';
-import { QUIZ_MAX_PROBLEMS } from './quiz-score';
+import { QUIZ_MAX_PROBLEMS, toHundredths } from './quiz-score';
 
 export interface QuizView {
   date: string;
@@ -62,7 +62,7 @@ export class HomeworkQuizService {
         updatedAt: quiz.updatedAt,
         updatedBy: shortName(by),
       },
-      scores: quiz.scores,
+      scores: quiz.scores.map((s) => ({ ...s, score: Number(s.score) })),
     };
   }
 
@@ -162,8 +162,18 @@ export class HomeworkQuizService {
       throw new NotFoundException('Энэ өдрийн шалгалт алга. Эхлээд бодлогын тоог оруулна уу');
     }
     const score = dto.score;
-    if (score !== null && (!Number.isInteger(score) || score < 0 || score > quiz.problemCount)) {
-      throw new BadRequestException(`Оноо 0-ээс ${quiz.problemCount} хүртэл бүхэл тоо байна`);
+    // Бутархай 2 хүртэл орон (7.5); харьцуулалт зууны нэгээр бүхэл тоогоор
+    if (
+      score !== null &&
+      (typeof score !== 'number' ||
+        !Number.isFinite(score) ||
+        Math.abs(score * 100 - toHundredths(score)) > 1e-6 ||
+        score < 0 ||
+        toHundredths(score) > quiz.problemCount * 100)
+    ) {
+      throw new BadRequestException(
+        `Оноо 0-ээс ${quiz.problemCount} хүртэл, бутархай нь 2 хүртэл оронтой байна`,
+      );
     }
     const enrolled = await this.prisma.enrollment.findFirst({
       where: { classroomId, studentId, leftAt: null, student: { archivedAt: null } },
@@ -191,13 +201,14 @@ export class HomeworkQuizService {
       });
       return { studentId, score: null, updatedAt: row.updatedAt };
     }
-    if (active && active.score === score) {
-      return { studentId, score, updatedAt: active.updatedAt };
+    const exact = (toHundredths(score) / 100).toFixed(2); // Decimal-д мөрөөр — хөвөгч алдаагүй
+    if (active && toHundredths(Number(active.score)) === toHundredths(score)) {
+      return { studentId, score: Number(active.score), updatedAt: active.updatedAt };
     }
     const row = await this.prisma.homeworkQuizScore.upsert({
       where,
-      create: { quizId: quiz.id, studentId, score, updatedById: userId },
-      update: { score, updatedById: userId, deletedAt: null },
+      create: { quizId: quiz.id, studentId, score: exact, updatedById: userId },
+      update: { score: exact, updatedById: userId, deletedAt: null },
     });
     await this.audit.record({
       actorId: userId,
@@ -208,7 +219,7 @@ export class HomeworkQuizService {
       before: before ?? null,
       after: row,
     });
-    return { studentId, score: row.score, updatedAt: row.updatedAt };
+    return { studentId, score: Number(row.score), updatedAt: row.updatedAt };
   }
 
   /** Сурагчийн drawer: энэ ангийн тухайн сарын шалгалтын оноо (өдөр бүр) */
@@ -227,7 +238,7 @@ export class HomeworkQuizService {
       select: { score: true, quiz: { select: { date: true, problemCount: true } } },
     });
     return rows
-      .map((r) => ({ date: dateKey(r.quiz.date), score: r.score, problemCount: r.quiz.problemCount }))
+      .map((r) => ({ date: dateKey(r.quiz.date), score: Number(r.score), problemCount: r.quiz.problemCount }))
       .sort((a, b) => a.date.localeCompare(b.date));
   }
 }

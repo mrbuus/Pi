@@ -405,7 +405,7 @@ export class AttendanceService {
     const upTo = key < today ? key : today;
     const from = addDaysKey(upTo, -criteria.windowDays);
     const range = { gte: this.parseDate(from), lte: this.parseDate(upTo) };
-    const [att, hw] = await Promise.all([
+    const [att, hw, quiz] = await Promise.all([
       this.prisma.attendance.findMany({
         where: { classroomId, date: range, studentId: { in: studentIds } },
         select: { studentId: true, date: true, status: true },
@@ -419,12 +419,31 @@ export class AttendanceService {
         },
         select: { studentId: true, date: true, status: true },
       }),
+      // Шалгалтаар даалгавар шалгасан оноо (homework-quiz, эзэн 2026-11-08 19:08) — шалгуурын minQuiz
+      this.prisma.homeworkQuizScore.findMany({
+        where: {
+          studentId: { in: studentIds },
+          deletedAt: null,
+          quiz: { classroomId, deletedAt: null, date: range },
+        },
+        select: {
+          studentId: true,
+          score: true,
+          quiz: { select: { date: true, problemCount: true } },
+        },
+      }),
     ]);
     const flags = computeRisk(
       studentIds,
       att.map((r) => ({ ...r, date: dateKey(r.date) })),
       hw.map((r) => ({ ...r, date: dateKey(r.date) })),
       criteria,
+      quiz.map((r) => ({
+        studentId: r.studentId,
+        date: dateKey(r.quiz.date),
+        score: Number(r.score),
+        problemCount: r.quiz.problemCount,
+      })),
     );
     return { criteria, flags };
   }

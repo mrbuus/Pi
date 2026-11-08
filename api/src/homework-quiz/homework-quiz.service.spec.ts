@@ -81,10 +81,11 @@ function makeFake(enrolled = ['s1', 's2', 's3']) {
       upsert: async ({ where, create, update }: any) => {
         const s = findScore(where);
         if (s) {
-          Object.assign(s, update, { updatedAt: new Date() });
+          // Decimal баганыг дуурайна: мөр ("7.50") → тоо
+          Object.assign(s, update, { score: Number(update.score), updatedAt: new Date() });
           return { ...s };
         }
-        const row = { id: `sc${++seq}`, ...create, updatedAt: new Date(), deletedAt: null };
+        const row = { id: `sc${++seq}`, ...create, score: Number(create.score), updatedAt: new Date(), deletedAt: null };
         scores.push(row);
         return { ...row };
       },
@@ -145,7 +146,17 @@ describe('HomeworkQuizService', () => {
     await expect(service.setScore('c1', 's1', { date: D, score: 3 }, 'u1', T)).rejects.toBeInstanceOf(NotFoundException);
   });
 
-  it.each([11, -1, 2.5])('оноо %p — 0..бодлогын тоо бүхэл биш бол татгалзана', async (score) => {
+  it('бутархай оноо (7.5, 9.99) хадгалагдана, Decimal-д 2 оронтой мөрөөр бичнэ', async () => {
+    const { service, scores } = makeFake();
+    await service.set('c1', { date: D, problemCount: 10 }, 'u1', T);
+    expect((await service.setScore('c1', 's1', { date: D, score: 7.5 }, 'u1', T)).score).toBe(7.5);
+    expect((await service.setScore('c1', 's2', { date: D, score: 9.99 }, 'u1', T)).score).toBe(9.99);
+    expect(scores.map((s) => s.score)).toEqual([7.5, 9.99]);
+    // 7.5 → 8 болгоход тоо 8-аас бага болгох оролдлого саадтай (9.99 > 9)
+    await expect(service.set('c1', { date: D, problemCount: 9 }, 'u1', T)).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it.each([11, 10.01, -1, 2.555, 7.001])('оноо %p — 0..бодлогын тоо, 2 оронгүй бол татгалзана', async (score) => {
     const { service } = makeFake();
     await service.set('c1', { date: D, problemCount: 10 }, 'u1', T);
     await expect(service.setScore('c1', 's1', { date: D, score }, 'u1', T)).rejects.toBeInstanceOf(BadRequestException);

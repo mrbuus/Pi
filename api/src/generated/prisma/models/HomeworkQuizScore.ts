@@ -14,7 +14,8 @@ import type * as Prisma from "../internal/prismaNamespace.js"
 
 /**
  * Model HomeworkQuizScore
- * Шалгалтын нэг сурагчийн оноо (бүхэл тоо 0..problemCount). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
+ * Шалгалтын нэг сурагчийн оноо 0..problemCount, бутархай 2 хүртэл орон (7.5 — эзэн 2026-11-08 19:08;
+ * Decimal тул хөвөгч тооны алдаагүй). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
  */
 export type HomeworkQuizScoreModel = runtime.Types.Result.DefaultSelection<Prisma.$HomeworkQuizScorePayload>
 
@@ -27,18 +28,18 @@ export type AggregateHomeworkQuizScore = {
 }
 
 export type HomeworkQuizScoreAvgAggregateOutputType = {
-  score: number | null
+  score: runtime.Decimal | null
 }
 
 export type HomeworkQuizScoreSumAggregateOutputType = {
-  score: number | null
+  score: runtime.Decimal | null
 }
 
 export type HomeworkQuizScoreMinAggregateOutputType = {
   id: string | null
   quizId: string | null
   studentId: string | null
-  score: number | null
+  score: runtime.Decimal | null
   updatedById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -49,7 +50,7 @@ export type HomeworkQuizScoreMaxAggregateOutputType = {
   id: string | null
   quizId: string | null
   studentId: string | null
-  score: number | null
+  score: runtime.Decimal | null
   updatedById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -201,7 +202,7 @@ export type HomeworkQuizScoreGroupByOutputType = {
   id: string
   quizId: string
   studentId: string
-  score: number
+  score: runtime.Decimal
   updatedById: string
   createdAt: Date
   updatedAt: Date
@@ -235,7 +236,7 @@ export type HomeworkQuizScoreWhereInput = {
   id?: Prisma.StringFilter<"HomeworkQuizScore"> | string
   quizId?: Prisma.StringFilter<"HomeworkQuizScore"> | string
   studentId?: Prisma.StringFilter<"HomeworkQuizScore"> | string
-  score?: Prisma.IntFilter<"HomeworkQuizScore"> | number
+  score?: Prisma.DecimalFilter<"HomeworkQuizScore"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById?: Prisma.StringFilter<"HomeworkQuizScore"> | string
   createdAt?: Prisma.DateTimeFilter<"HomeworkQuizScore"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"HomeworkQuizScore"> | Date | string
@@ -263,7 +264,7 @@ export type HomeworkQuizScoreWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.HomeworkQuizScoreWhereInput | Prisma.HomeworkQuizScoreWhereInput[]
   quizId?: Prisma.StringFilter<"HomeworkQuizScore"> | string
   studentId?: Prisma.StringFilter<"HomeworkQuizScore"> | string
-  score?: Prisma.IntFilter<"HomeworkQuizScore"> | number
+  score?: Prisma.DecimalFilter<"HomeworkQuizScore"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById?: Prisma.StringFilter<"HomeworkQuizScore"> | string
   createdAt?: Prisma.DateTimeFilter<"HomeworkQuizScore"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"HomeworkQuizScore"> | Date | string
@@ -294,7 +295,7 @@ export type HomeworkQuizScoreScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"HomeworkQuizScore"> | string
   quizId?: Prisma.StringWithAggregatesFilter<"HomeworkQuizScore"> | string
   studentId?: Prisma.StringWithAggregatesFilter<"HomeworkQuizScore"> | string
-  score?: Prisma.IntWithAggregatesFilter<"HomeworkQuizScore"> | number
+  score?: Prisma.DecimalWithAggregatesFilter<"HomeworkQuizScore"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById?: Prisma.StringWithAggregatesFilter<"HomeworkQuizScore"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"HomeworkQuizScore"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"HomeworkQuizScore"> | Date | string
@@ -304,7 +305,7 @@ export type HomeworkQuizScoreScalarWhereWithAggregatesInput = {
 export type HomeworkQuizScoreCreateInput = {
   id?: string
   studentId: string
-  score: number
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -316,7 +317,7 @@ export type HomeworkQuizScoreUncheckedCreateInput = {
   id?: string
   quizId: string
   studentId: string
-  score: number
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -326,7 +327,7 @@ export type HomeworkQuizScoreUncheckedCreateInput = {
 export type HomeworkQuizScoreUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
-  score?: Prisma.IntFieldUpdateOperationsInput | number
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -338,7 +339,7 @@ export type HomeworkQuizScoreUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quizId?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
-  score?: Prisma.IntFieldUpdateOperationsInput | number
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -349,7 +350,7 @@ export type HomeworkQuizScoreCreateManyInput = {
   id?: string
   quizId: string
   studentId: string
-  score: number
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -359,7 +360,7 @@ export type HomeworkQuizScoreCreateManyInput = {
 export type HomeworkQuizScoreUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
-  score?: Prisma.IntFieldUpdateOperationsInput | number
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -370,7 +371,7 @@ export type HomeworkQuizScoreUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quizId?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
-  score?: Prisma.IntFieldUpdateOperationsInput | number
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -475,10 +476,18 @@ export type HomeworkQuizScoreUncheckedUpdateManyWithoutQuizNestedInput = {
   deleteMany?: Prisma.HomeworkQuizScoreScalarWhereInput | Prisma.HomeworkQuizScoreScalarWhereInput[]
 }
 
+export type DecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
 export type HomeworkQuizScoreCreateWithoutQuizInput = {
   id?: string
   studentId: string
-  score: number
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -488,7 +497,7 @@ export type HomeworkQuizScoreCreateWithoutQuizInput = {
 export type HomeworkQuizScoreUncheckedCreateWithoutQuizInput = {
   id?: string
   studentId: string
-  score: number
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -528,7 +537,7 @@ export type HomeworkQuizScoreScalarWhereInput = {
   id?: Prisma.StringFilter<"HomeworkQuizScore"> | string
   quizId?: Prisma.StringFilter<"HomeworkQuizScore"> | string
   studentId?: Prisma.StringFilter<"HomeworkQuizScore"> | string
-  score?: Prisma.IntFilter<"HomeworkQuizScore"> | number
+  score?: Prisma.DecimalFilter<"HomeworkQuizScore"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById?: Prisma.StringFilter<"HomeworkQuizScore"> | string
   createdAt?: Prisma.DateTimeFilter<"HomeworkQuizScore"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"HomeworkQuizScore"> | Date | string
@@ -538,7 +547,7 @@ export type HomeworkQuizScoreScalarWhereInput = {
 export type HomeworkQuizScoreCreateManyQuizInput = {
   id?: string
   studentId: string
-  score: number
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -548,7 +557,7 @@ export type HomeworkQuizScoreCreateManyQuizInput = {
 export type HomeworkQuizScoreUpdateWithoutQuizInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
-  score?: Prisma.IntFieldUpdateOperationsInput | number
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -558,7 +567,7 @@ export type HomeworkQuizScoreUpdateWithoutQuizInput = {
 export type HomeworkQuizScoreUncheckedUpdateWithoutQuizInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
-  score?: Prisma.IntFieldUpdateOperationsInput | number
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -568,7 +577,7 @@ export type HomeworkQuizScoreUncheckedUpdateWithoutQuizInput = {
 export type HomeworkQuizScoreUncheckedUpdateManyWithoutQuizInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
-  score?: Prisma.IntFieldUpdateOperationsInput | number
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -644,7 +653,7 @@ export type $HomeworkQuizScorePayload<ExtArgs extends runtime.Types.Extensions.I
     id: string
     quizId: string
     studentId: string
-    score: number
+    score: runtime.Decimal
     updatedById: string
     createdAt: Date
     updatedAt: Date
@@ -1076,7 +1085,7 @@ export interface HomeworkQuizScoreFieldRefs {
   readonly id: Prisma.FieldRef<"HomeworkQuizScore", 'String'>
   readonly quizId: Prisma.FieldRef<"HomeworkQuizScore", 'String'>
   readonly studentId: Prisma.FieldRef<"HomeworkQuizScore", 'String'>
-  readonly score: Prisma.FieldRef<"HomeworkQuizScore", 'Int'>
+  readonly score: Prisma.FieldRef<"HomeworkQuizScore", 'Decimal'>
   readonly updatedById: Prisma.FieldRef<"HomeworkQuizScore", 'String'>
   readonly createdAt: Prisma.FieldRef<"HomeworkQuizScore", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"HomeworkQuizScore", 'DateTime'>

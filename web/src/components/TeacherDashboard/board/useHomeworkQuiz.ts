@@ -30,7 +30,29 @@ const SAVE_MS = 600;
 const hiddenKey = (quizId: string) => `hw_quiz_hidden:${quizId}`;
 const errText = (e: unknown) => (e instanceof Error && e.message ? e.message : "Хадгалж чадсангүй");
 
-export function useHomeworkQuiz(classId: string, date: string, enabled: boolean) {
+/**
+ * `onSaved` — оноо хадгалагдсаны дараа (1,5 с нэгтгэж) дуудна: самбарын «Асуудалтай»/улаан цэгийг
+ * (шалгуурын minQuiz) шинэчлэхэд (useBoard.poll).
+ */
+export function useHomeworkQuiz(classId: string, date: string, enabled: boolean, onSaved?: () => void) {
+  const savedCb = useRef(onSaved);
+  useEffect(() => {
+    savedCb.current = onSaved;
+  });
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const notifySaved = useCallback(() => {
+    if (savedTimer.current) clearTimeout(savedTimer.current);
+    savedTimer.current = setTimeout(() => {
+      savedTimer.current = null;
+      savedCb.current?.();
+    }, 1_500);
+  }, []);
+  useEffect(
+    () => () => {
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+    },
+    [],
+  );
   const [status, setStatus] = useState<"loading" | "ready" | "error">(enabled ? "loading" : "ready");
   const [quiz, setQuiz] = useState<QuizInfo | null>(null);
   const [scores, setScores] = useState<Map<string, number>>(() => new Map());
@@ -99,6 +121,7 @@ export function useHomeworkQuiz(classId: string, date: string, enabled: boolean)
           // Энэ хооронд дахин бичсэн бол «хадгалж байна» хэвээр
           if (!pending.current.has(id)) setCell(id, null);
           setSavedAt(Date.now());
+          notifySaved();
         } catch (e) {
           if (!alive.current) return;
           setCell(id, "error");
@@ -107,7 +130,7 @@ export function useHomeworkQuiz(classId: string, date: string, enabled: boolean)
       });
       queue.current.set(id, run);
     },
-    [classId, date, setCell],
+    [classId, date, setCell, notifySaved],
   );
 
   /** Оноо бичигдэх бүрт: өнгө, дундаж шууд; хадгалалт SAVE_MS-ийн дараа (now=true бол шууд) */
@@ -183,11 +206,12 @@ export function useHomeworkQuiz(classId: string, date: string, enabled: boolean)
           writeStore(hiddenKey(p.quiz.id), "0");
           setHiddenState(false);
         }
+        notifySaved();
       } finally {
         setBusy(false);
       }
     },
-    [quizUrl, date],
+    [quizUrl, date, notifySaved],
   );
 
   const remove = useCallback(async () => {
@@ -199,10 +223,11 @@ export function useHomeworkQuiz(classId: string, date: string, enabled: boolean)
       await Promise.all([...queue.current.values()]);
       const p = await api<QuizPayload>(`${quizUrl}?date=${date}`, { method: "DELETE" });
       apply(p);
+      notifySaved();
     } finally {
       setBusy(false);
     }
-  }, [quizUrl, date, apply]);
+  }, [quizUrl, date, apply, notifySaved]);
 
   const setHidden = useCallback(
     (h: boolean) => {

@@ -4,7 +4,7 @@ import { LoaderCircle, TriangleAlert } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { TONE_SELECTED } from "@/components/attendance/marks";
 import { cn } from "@/lib/cn";
-import { formatPercent, parseScoreInput, quizPercent, quizTone } from "@/lib/quizScore";
+import { formatPercent, formatScore, parseScoreInput, quizPercent, quizTone, toHundredths } from "@/lib/quizScore";
 import type { QuizCellState } from "./useHomeworkQuiz";
 
 /** Дараагийн/өмнөх сурагчийн онооны талбар (жагсаалтын дарааллаар, шүүлтүүрт харагдаж буйгаар) */
@@ -19,7 +19,7 @@ function focusSibling(from: HTMLInputElement, dir: 1 | -1): boolean {
 
 /**
  * Шалгалтын оноо (эзэн 2026-11-08): «Онлайн» товчны оронд. Утсан дээр зөвхөн тоон гар
- * (inputMode=numeric), Enter/«Дараах» → дараагийн сурагч. Хувийг бичихгүй — хайрцгийн өнгө нь
+ * (inputMode=decimal, бутархай 7,5), Enter/«Дараах» → дараагийн сурагч. Хувийг бичихгүй — хайрцгийн өнгө нь
  * хувиар: улаан < 50 ≤ улбар шар < 80 ≤ ногоон. Оноогүй бол өнгөгүй.
  */
 export default function QuizScoreInput({
@@ -42,15 +42,16 @@ export default function QuizScoreInput({
   onFlush: (id: string) => void;
   onInvalid: (id: string, invalid: boolean) => void;
 }) {
-  const [text, setText] = useState(score === null ? "" : String(score));
+  const [text, setText] = useState(score === null ? "" : formatScore(score));
   const [focused, setFocused] = useState(false);
   const ref = useRef<HTMLInputElement>(null);
 
   // Өөр газраас (бодлогын тоо засах, дахин ачаалах) ирсэн утгыг бичиж байх үед дарахгүй
   // (рендерийн үеийн тохируулга — effect-гүй)
-  const shownScore = text.trim() === "" ? null : Number(text);
-  if (!focused && state !== "invalid" && state !== "saving" && shownScore !== score) {
-    setText(score === null ? "" : String(score));
+  const shownScore = text.trim() === "" ? null : Number(text.replace(",", "."));
+  const sameAsShown = shownScore === null || score === null ? shownScore === score : toHundredths(shownScore) === toHundredths(score);
+  if (!focused && state !== "invalid" && state !== "saving" && !sameAsShown) {
+    setText(score === null ? "" : formatScore(score));
   }
 
   // Бодлогын тоо өөрчлөгдөхөд бичсэн утгыг дахин шалгана (ж: 12 → 10 болсон)
@@ -70,6 +71,8 @@ export default function QuizScoreInput({
 
   const commit = () => {
     if (!parsed.ok) return;
+    // «3.5» → «3,5», «08» → «8» — нэг ижил бичлэгээр
+    if (parsed.value !== null && text !== formatScore(parsed.value)) setText(formatScore(parsed.value));
     if (state === "error") onScore(id, parsed.value, true);
     else onFlush(id);
   };
@@ -77,7 +80,7 @@ export default function QuizScoreInput({
   const label = `${name}, шалгалтын оноо, ${max} бодлогоос`;
   const status =
     state === "invalid"
-      ? `0-ээс ${max} хүртэл бүхэл тоо бичнэ үү`
+      ? `0-ээс ${max} хүртэл, бутархай нь 2 хүртэл оронтой (7,5)`
       : state === "error"
         ? "Хадгалагдсангүй, дахин оролдоно уу"
         : state === "saving"
@@ -98,11 +101,11 @@ export default function QuizScoreInput({
         ref={ref}
         data-quiz-input
         type="text"
-        inputMode="numeric"
-        pattern="[0-9]*"
+        // Утсан дээр тоон гар + бутархайн тэмдэг (7,5 — эзэн 2026-11-08 19:08)
+        inputMode="decimal"
         enterKeyHint="next"
         autoComplete="off"
-        maxLength={3}
+        maxLength={6}
         value={text}
         aria-label={label}
         aria-invalid={invalid || undefined}
@@ -115,8 +118,11 @@ export default function QuizScoreInput({
           commit();
         }}
         onChange={(e) => {
-          // Компьютер дээр үсэг бичсэн ч зөвхөн цифр үлдэнэ
-          const t = e.target.value.replace(/\D/g, "").slice(0, 3);
+          // Компьютер дээр үсэг бичсэн ч зөвхөн цифр ба ганц таслал/цэг үлдэнэ
+          const t = e.target.value
+            .replace(/[^\d.,]/g, "")
+            .replace(/^([^.,]*[.,])(.*)$/, (_m, a: string, b: string) => a + b.replace(/[.,]/g, ""))
+            .slice(0, 6);
           setText(t);
           const r = parseScoreInput(t, max);
           if (r.ok) onScore(id, r.value);

@@ -4,8 +4,9 @@
  * ижил эсэхийг шалгана). Энэ файлд `@/` импорт БҮҮ нэм — api-ийн jest шууд уншдаг.
  *
  * Өнгөний муж (эзэн): 0 <= улаан < 50 <= улбар шар < 80 <= ногоон <= 100.
- * 49,99% улаан, 50% улбар шар, 79,99% улбар шар, 80% ногоон. Хувийг хөвөгч тоогоор бус,
- * бүхэл тоон тэнцэтгэл бишээр харьцуулна (score/count*100 < 50 <=> 2*score < count).
+ * 49,99% улаан, 50% улбар шар, 79,99% улбар шар, 80% ногоон. Оноо бутархай байж болно (7,5 —
+ * зууны нэг хүртэл, эзэн 2026-11-08 19:08). Хувийг хөвөгч тоогоор бус, ЗУУНЫ НЭГЭЭР бүхэл
+ * болгоод харьцуулна: s = оноо*100 (бүхэл), хувь = s/тоо, хувь < 50 <=> 2*s < 100*тоо.
  */
 
 /** marks.tsx-ийн Tone-той ижил нэр: улаан = error, улбар шар = warning («Хоцорсон», «Дутуу»), ногоон = success */
@@ -14,12 +15,24 @@ export type QuizTone = "error" | "warning" | "success";
 /** Нэг шалгалтын бодлогын дээд тоо */
 export const QUIZ_MAX_PROBLEMS = 200;
 
+/** «Асуудалтай» болгох анхдагч хувь (шалгуурын minQuiz, эзэн 2026-11-08 19:08) */
+export const DEFAULT_MIN_QUIZ = 50;
+
+/** Оноог зууны нэгээр бүхэл тоо болгоно (7.5 → 750). Оноо 2-оос олон оронгүй тул яг таарна */
+export function toHundredths(x: number): number {
+  return Math.round(x * 100);
+}
+
+const valid = (score: number | null | undefined, problemCount: number): score is number =>
+  score !== null && score !== undefined && Number.isFinite(score) && Number.isFinite(problemCount) && problemCount > 0;
+
 /** Оноо → өнгө. Оноогүй (null) эсвэл буруу бодлогын тоо → null (өнгөгүй) */
 export function quizTone(score: number | null | undefined, problemCount: number): QuizTone | null {
-  if (score === null || score === undefined || !Number.isFinite(score)) return null;
-  if (!Number.isFinite(problemCount) || problemCount <= 0) return null;
-  if (2 * score < problemCount) return "error"; // < 50%
-  if (5 * score < 4 * problemCount) return "warning"; // < 80%
+  if (!valid(score, problemCount)) return null;
+  const s = toHundredths(score);
+  const c = toHundredths(problemCount);
+  if (2 * s < c) return "error"; // < 50%
+  if (5 * s < 4 * c) return "warning"; // < 80%
   return "success";
 }
 
@@ -33,14 +46,22 @@ export function percentTone(pct: number | null | undefined): QuizTone | null {
 
 /** Оноо → хувь (0..100); оноогүй бол null */
 export function quizPercent(score: number | null | undefined, problemCount: number): number | null {
-  if (score === null || score === undefined || !Number.isFinite(score)) return null;
-  if (!Number.isFinite(problemCount) || problemCount <= 0) return null;
-  return (score * 100) / problemCount;
+  if (!valid(score, problemCount)) return null;
+  return (toHundredths(score) * 100) / toHundredths(problemCount);
+}
+
+/**
+ * «Асуудалтай» (шалгуурын minQuiz): хувь < minPct эсэх — бүхэл тоогоор (s/тоо < m <=> s < m*тоо).
+ * minPct = 0 бол хэзээ ч үгүй (шалгуур унтарсан).
+ */
+export function quizBelow(score: number, problemCount: number, minPct: number): boolean {
+  if (!valid(score, problemCount) || !(minPct > 0)) return false;
+  return toHundredths(score) * 100 < minPct * toHundredths(problemCount);
 }
 
 /**
  * Ангийн дундаж: ЗӨВХӨН оноо оруулсан сурагчдаар (хоосон нь тоонд орохгүй). Бүгд ижил бодлогын
- * тоотой тул дундаж хувь = Σоноо·100 / (n·тоо); өнгийг бүхэл тоогоор (quizTone(Σ, n·тоо)).
+ * тоотой тул дундаж хувь = Σоноо·100 / (n·тоо); өнгийг бүхэл тоогоор (Σ зууны нэгээр).
  */
 export function quizAverage(
   scores: ReadonlyArray<number | null | undefined>,
@@ -48,9 +69,10 @@ export function quizAverage(
 ): { pct: number; tone: QuizTone; count: number } | null {
   const list = scores.filter((s): s is number => s !== null && s !== undefined && Number.isFinite(s));
   if (!list.length || !Number.isFinite(problemCount) || problemCount <= 0) return null;
-  const sum = list.reduce((a, s) => a + s, 0);
-  const total = list.length * problemCount;
-  return { pct: (sum * 100) / total, tone: quizTone(sum, total)!, count: list.length };
+  const sum = list.reduce((a, s) => a + toHundredths(s), 0);
+  const total = list.length * toHundredths(problemCount);
+  const tone: QuizTone = 2 * sum < total ? "error" : 5 * sum < 4 * total ? "warning" : "success";
+  return { pct: (sum * 100) / total, tone, count: list.length };
 }
 
 /**
@@ -71,16 +93,24 @@ export function formatPercent(pct: number): string {
   return `${Math.floor(pct + 1e-9)}%`;
 }
 
+/** Оноог монгол бичлэгээр: 7.5 → «7,5», 8 → «8», 7.25 → «7,25» */
+export function formatScore(score: number): string {
+  return String(toHundredths(score) / 100).replace(".", ",");
+}
+
 export type ParseResult = { ok: true; value: number | null } | { ok: false; error: string };
 
-/** Багшийн бичсэн оноо: хоосон = цэвэрлэх; зөвхөн бүхэл тоо 0..max (хагас оноо үгүй — эзэн «зөвхөн тоо») */
+/**
+ * Багшийн бичсэн оноо: хоосон = цэвэрлэх; 0..max, бутархай нь таслал эсвэл цэгээр, 2 хүртэл орон
+ * («7,5», «7.5», «7,25»).
+ */
 export function parseScoreInput(text: string, max: number): ParseResult {
   const t = text.trim();
   if (t === "") return { ok: true, value: null };
-  if (!/^\d{1,4}$/.test(t)) return { ok: false, error: "Зөвхөн бүхэл тоо" };
-  const n = Number(t);
-  if (n > max) return { ok: false, error: `0-ээс ${max} хүртэл` };
-  return { ok: true, value: n };
+  if (!/^\d{1,3}([.,]\d{1,2})?$/.test(t)) return { ok: false, error: "Тоо, бутархай нь 2 хүртэл оронтой (7,5)" };
+  const n = Number(t.replace(",", "."));
+  if (toHundredths(n) > toHundredths(max)) return { ok: false, error: `0-ээс ${max} хүртэл` };
+  return { ok: true, value: toHundredths(n) / 100 };
 }
 
 /** Бодлогын тоо: бүхэл 1..QUIZ_MAX_PROBLEMS */
