@@ -85,7 +85,10 @@ describe('homework lesson label (эзэн 2026-10-27)', () => {
         testTitles: ['Логарифм  1', 'Логарифм 2'],
         recordTopic: null,
       }),
-    ).toBe('Логарифм 1, Логарифм 2');
+    ).toBe('Логарифм 1, 2');
+    // Хуучин «, »-тэй гарчиг ч товчлогдоно, чөлөөт бичвэр хэвээр (эзэн 2026-11-08)
+    expect(resolveLessonTopic({ recordTopic: 'Логарифм 1, Логарифм 2' })).toBe('Логарифм 1, 2');
+    expect(resolveLessonTopic({ planTitle: 'Давталт, шалгалт' })).toBe('Давталт, шалгалт');
     expect(resolveLessonTopic({})).toBeNull();
   });
 
