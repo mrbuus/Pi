@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, CircleAlert, FileSpreadsheet, Split, Undo2, Users } from "lucide-react";
+import { Check, CircleAlert, CircleCheck, FileSpreadsheet, Split, Undo2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
@@ -97,6 +97,12 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
             <p className="flex items-start gap-1.5 text-sm text-ink-dim">
               <FileSpreadsheet className="mt-0.5 size-4 shrink-0 text-info" aria-hidden />
               Шийтэд бүртгэгдээгүй — батлахад шинэ төлбөр болж нэмэгдэнэ
+            </p>
+          )}
+          {s.hiddenPaidUp > 0 && (
+            <p className="flex items-start gap-1.5 text-sm text-ink-dim">
+              <CircleCheck className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />
+              Жилийн төлбөрөө бүрэн төлсөн {s.hiddenPaidUp} хүүхдийг санал болгосонгүй
             </p>
           )}
           {s.decision === "SPLIT" && (

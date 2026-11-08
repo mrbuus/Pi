@@ -15,7 +15,8 @@ import { Prisma } from '../generated/prisma/client';
 import { BankMatchStatus, PaymentMethod, PaymentStatus } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
-import { primaryEnrollment } from '../payments/ledger-load';
+import { ledgersFor, primaryEnrollment } from '../payments/ledger-load';
+import { dropPaidUp, paidUpOn } from './huulga-paidup';
 import { todayKeyUB } from '../payments/ledger';
 import { coveredThrough, parseKhanStatement, readXlsxGrid, shiftDay, StatementFormatError } from './khan-statement';
 import {
@@ -49,6 +50,8 @@ export interface RowSuggestion {
   held?: boolean;
   /** Хүүхэд тодорхой ч шийтэд ийм төлбөр алга — хүн «шинээр нэмэх»-ийг батална */
   unrecorded?: boolean;
+  /** Жилийн төлбөрөө аль хэдийн бүрэн төлсөн тул саналаас хассан хүүхдийн тоо */
+  hiddenPaidUp?: number;
 }
 
 type OpenRow = {
@@ -192,6 +195,22 @@ export class ReconcileService {
     return { decision: match.decision, candidates: match.candidates, ...c, ...(prev?.held ? { held: true } : {}) };
   }
 
+  /** Ажилтан шийтэд энэ хүүхдэд гүйлгээний ±3 хоногт, хуулгатай холбогдоогүй төлбөр бүртгэсэн эсэх */
+  private recordedNear(pool: ExistingPayment[], studentId: string, at: Date): boolean {
+    return pool.some((p) => p.userId === studentId && Math.abs(p.at - at.getTime()) <= LINK_WINDOW_MS);
+  }
+
+  /** Жилийн төлбөрөө бүрэн төлсөн хүүхэд → бүрэн болсон өдөр (huulga-paidup.ts) */
+  private async paidUp(ids: string[]): Promise<Map<string, string>> {
+    const out = new Map<string, string>();
+    const ledgers = await ledgersFor(this.prisma, [...new Set(ids)], todayKeyUB());
+    for (const [id, r] of ledgers) {
+      const on = paidUpOn(r);
+      if (on) out.set(id, on);
+    }
+    return out;
+  }
+
   /** Санал → автоматаар хуваарилах хэсгүүд (итгэлтэй үед л), үгүй бол null. */
   private autoParts(row: OpenRow, s: RowSuggestion): Part[] | null {
     if (s.held || !s.confident) return null;
@@ -214,13 +233,13 @@ export class ReconcileService {
     });
     if (!open.length) return { resolved: 0, open: 0 };
     const idx = await this.matchIndex();
-    const planned: { row: OpenRow; s: RowSuggestion; parts: Part[] | null }[] = open.map((row) => {
-      const s = this.suggest(row, idx);
-      return { row, s, parts: this.autoParts(row, s) };
+    const raw = open.map((row) => ({ row, s: this.suggest(row, idx) }));
+    const kidIds = raw.flatMap(({ s }) => s.candidates.map((c) => c.studentId));
+    const [paidUp, pool] = await Promise.all([this.paidUp(kidIds), this.existingPayments(kidIds)]);
+    const planned: { row: OpenRow; s: RowSuggestion; parts: Part[] | null }[] = raw.map(({ row, s }) => {
+      const f = dropPaidUp(s, ubDay(row.bookedAt), paidUp, (id) => this.recordedNear(pool, id, row.bookedAt));
+      return { row, s: f, parts: this.autoParts(row, f) };
     });
-    const pool = await this.existingPayments(
-      planned.flatMap((p) => [...(p.parts ?? []).map((x) => x.studentId), ...p.s.candidates.map((c) => c.studentId)]).filter((x): x is string => !!x),
-    );
     const toAllocate: { row: OpenRow; s: RowSuggestion; parts: Part[] }[] = [];
     const toSuggest: { id: string; s: RowSuggestion }[] = [];
     for (const { row, s, parts } of planned) {
@@ -654,6 +673,13 @@ export class ReconcileService {
         },
       }),
     ]);
+    // Санал хадгалагдсанаас хойш хүүхэд бүрэн төлсөн байж болно — харуулахдаа дахин шүүнэ
+    const open = rows.filter((r) => !r.resolvedAt);
+    const openIds = open.flatMap((r) => ((r.suggestion as RowSuggestion | null)?.candidates ?? []).map((c) => c.studentId));
+    const [paidUp, pool] = openIds.length ? await Promise.all([this.paidUp(openIds), this.existingPayments(openIds)]) : [new Map<string, string>(), []];
+    for (const r of open)
+      if (r.suggestion)
+        r.suggestion = dropPaidUp(r.suggestion as unknown as RowSuggestion, ubDay(r.bookedAt), paidUp, (id) => this.recordedNear(pool, id, r.bookedAt)) as never;
     const ids = new Set<string>();
     for (const r of rows) {
       for (const a of r.allocations) if (a.studentId) ids.add(a.studentId);
@@ -662,9 +688,7 @@ export class ReconcileService {
     const accounts = await this.accountInfo([...new Set(rows.map((r) => r.counterparty).filter((a): a is string => !!a))]);
     for (const a of accounts.values()) for (const id of a.studentIds) ids.add(id);
     const students = await this.studentCards([...ids]);
-    // Хүүхэд бүрийн шийтэд бүртгэгдсэн, хуулгатай холбогдоогүй ойрын төлбөр — хуваахдаа харна
-    const open = rows.filter((r) => !r.resolvedAt);
-    const pool = open.length ? await this.existingPayments(open.flatMap((r) => ((r.suggestion as RowSuggestion | null)?.candidates ?? []).map((c) => c.studentId))) : [];
+    // Хүүхэд бүрийн шийтэд бүртгэгдсэн, хуулгатай холбогдоогүй ойрын төлбөр (дээрх pool) — хуваахдаа харна
     const nearby = (studentId: string, at: Date) =>
       pool
         .filter((p) => p.userId === studentId && Math.abs(p.at - at.getTime()) <= LINK_WINDOW_MS)
@@ -696,6 +720,7 @@ export class ReconcileService {
             split: s.split ?? null,
             reason: s.reason,
             unrecorded: !!s.unrecorded,
+            hiddenPaidUp: s.hiddenPaidUp ?? 0,
             candidates: s.candidates.map((c) => ({
               ...c,
               student: students.get(c.studentId) ?? null,
@@ -738,8 +763,14 @@ export class ReconcileService {
       orderBy: [{ archivedAt: { sort: 'desc', nulls: 'first' } }, { firstName: 'asc' }],
       select: { id: true },
     });
-    const cards = await this.studentCards(users.map((u) => u.id));
-    return { items: users.map((u) => cards.get(u.id)).filter(Boolean) };
+    const [cards, paidUp] = await Promise.all([this.studentCards(users.map((u) => u.id)), this.paidUp(users.map((u) => u.id))]);
+    // Жилийн төлбөрөө бүрэн төлсөн хүүхэд хайлтад гарна (ном гэх мэт), гэхдээ тэмдэгтэй, доор нь
+    const items = users
+      .map((u) => cards.get(u.id))
+      .filter((c): c is NonNullable<typeof c> => !!c)
+      .map((c) => ({ ...c, paidUp: paidUp.has(c.id) }))
+      .sort((a, b) => Number(a.paidUp) - Number(b.paidUp));
+    return { items };
   }
 
   /**

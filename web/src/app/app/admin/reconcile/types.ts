@@ -21,6 +21,8 @@ export interface StudentCard {
   name: string;
   classroom: string | null;
   archived: boolean;
+  /** Хайлтад: жилийн сургалтын төлбөрөө бүрэн төлсөн */
+  paidUp?: boolean;
 }
 
 export type MatchSignal = "PHONE" | "PHONE_LEARNED" | "ACCOUNT" | "ACCOUNT_LEARNED" | "NAME" | "SURNAME";
@@ -42,6 +44,8 @@ export interface Suggestion {
   split: { kind: AllocKind; amount: number }[] | null;
   reason: string;
   unrecorded: boolean;
+  /** Жилийн төлбөрөө бүрэн төлсөн тул саналаас хассан хүүхдийн тоо */
+  hiddenPaidUp: number;
   candidates: Candidate[];
 }
 

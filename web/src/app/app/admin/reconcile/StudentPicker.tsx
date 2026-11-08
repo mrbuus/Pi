@@ -109,7 +109,7 @@ export default function StudentPicker({
                 onClick={() => onChange(s)}
                 className="row-interactive flex min-h-11 min-w-0 flex-1 items-center px-3 text-left text-sm text-ink"
               >
-                <Meta items={[s.name, s.classroom, s.archived ? "Гарсан" : null]} />
+                <Meta items={[s.name, s.classroom, s.archived ? "Гарсан" : null, s.paidUp ? "Бүтэн төлсөн" : null]} />
               </button>
               <MoreButton name={s.name} onClick={() => setDetail(s)} />
             </li>
