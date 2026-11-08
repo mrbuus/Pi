@@ -31,6 +31,7 @@ import {
 } from "../types";
 import StudentCompetencyCards from "@/components/classes/StudentCompetencyCards";
 import { studyDurationLabel } from "./studyDuration";
+import RefundEstimateRow from "../RefundEstimate";
 
 /** GET /exams/classes/:classId/students/:id — зөвхөн хураангуйд хэрэгтэй талбарууд */
 export interface ClassSummary {
@@ -180,6 +181,13 @@ export default function StudentOverview({
               </>
             )}
           </Fact>
+        )}
+
+        {/* «Одоо гарвал буцаах дүн» — Багш ч харна (эзэн 2026-11-08); Багшид сервер мөнгөн задаргаа өгөхгүй */}
+        {classroom && !detail.archivedAt && (
+          <div className="col-span-2 min-w-0 rounded-2xl border border-line bg-surface px-3 py-1.5 lg:col-span-1">
+            <RefundEstimateRow studentId={detail.id} />
+          </div>
         )}
 
         <Fact icon={CalendarCheck} label="Ирц">
