@@ -94,7 +94,11 @@ export class WithdrawalService {
       select: {
         role: true,
         archivedAt: true,
-        enrollments: { where: { leftAt: null }, select: { id: true } },
+        // Танхимын анги л — онлайн сургалтад энэ гэрээний тооцоо хамаарахгүй
+        enrollments: {
+          where: { leftAt: null, classroom: { type: 'IN_PERSON' } },
+          select: { id: true },
+        },
       },
     });
     if (!user || user.role !== Role.STUDENT)

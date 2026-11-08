@@ -32,6 +32,7 @@ import {
   type StatusCounts,
 } from "./lib";
 import { CountGrid, CountRow, attendanceCounts, homeworkCounts } from "./parts";
+import RefundEstimateRow from "@/components/students/RefundEstimate";
 
 interface MonthAtt {
   date: string;
@@ -251,7 +252,7 @@ export default function StudentDrawer({
                   currentClass={className}
                 />
                 <NotesSection studentId={studentId} today={today} />
-                <FactsSection data={data} today={today} />
+                <FactsSection data={data} today={today} studentId={studentId} refund={homework} />
               </>
             )}
           </div>
@@ -585,7 +586,18 @@ function NotesSection({ studentId, today }: { studentId: string; today: string }
 
 /* ───────── Мэдээлэл ───────── */
 
-function FactsSection({ data, today }: { data: StudentCardData; today: string }) {
+function FactsSection({
+  data,
+  today,
+  studentId,
+  refund,
+}: {
+  data: StudentCardData;
+  today: string;
+  studentId: string;
+  /** Танхимын анги — «Одоо гарвал буцаах дүн» (эзэн 2026-11-08, Багш ч харна) */
+  refund: boolean;
+}) {
   const s = data.student;
   const facts: Array<[string, string]> = [
     ["Сургууль", s.school || "Оруулаагүй"],
@@ -604,6 +616,7 @@ function FactsSection({ data, today }: { data: StudentCardData; today: string })
           </div>
         ))}
       </dl>
+      {refund && <RefundEstimateRow studentId={studentId} className="mt-2.5 border-t border-line pt-1.5" />}
     </Section>
   );
 }
