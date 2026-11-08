@@ -423,7 +423,11 @@ export default function WorkSheet() {
 
   function downloadCsv() {
     if (!data) return;
-    const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
+    // Excel томьёо болж ажиллахаас сэргийлж =,+,-,@,tab,CR-ээр эхэлсэн утгын өмнө ' тавина
+    const q = (s: string) => {
+      const safe = /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
+      return `"${safe.replace(/"/g, '""')}"`;
+    };
     const lines = [["№", "Нэр", ...days.map((d) => String(dayOf(d))), "Нийт"].join(",")];
     rows.forEach((r, i) => {
       lines.push(
