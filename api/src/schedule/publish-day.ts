@@ -1,3 +1,4 @@
+import { regroupTopicText } from '../common/test-names';
 // Өдрийн хуваарь нийтлэх үеийн мэдэгдлийн ЦЭВЭР логик (ӨС-гүй, тесттэй).
 // Багшид — зөвхөн өөрийн (ахлах/туслах эсвэл хуваарийн) хичээлүүд;
 // сурагчид — зөвхөн өөрийн ангийн хичээл. Багшийн тайлбар энд ОРОХГҮЙ.
@@ -36,7 +37,7 @@ function line(e: PublishEntry, role?: 'туслах') {
     `${hhmm(e.startMinute)}–${hhmm(e.endMinute)}`,
     e.room ? `${e.room} танхим` : null,
     shortClass(e.classroomName),
-    e.topic,
+    e.topic ? regroupTopicText(e.topic) : null,
     role ? 'туслах багш' : null,
   ]
     .filter(Boolean)

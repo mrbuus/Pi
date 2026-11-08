@@ -7,17 +7,23 @@ import { cn } from "@/lib/cn";
 import { useSection } from "@/components/students/progress/useSection";
 import { SkeletonRows } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/StateBlock";
-import { roadmapUnits, type Roadmap, type TestUnit } from "./types";
+import { Meta } from "@/components/ui/Meta";
+import { roadmapUnits, type Roadmap, type RoadmapTest, type TestUnit } from "./types";
 
 const shortDay = (d: string) => d.slice(5).replace("-", ".");
 /** API-ийн CUSTOM_TOPIC_MAX-тай ижил */
 const TOPIC_MAX = 12;
 const sameTopic = (a: string, b: string) => a.toLocaleLowerCase("mn") === b.toLocaleLowerCase("mn");
+/** Анги энэ тестийг аль хэдийн хийсэн өдөр (өмнө нь, эсвэл өнгөрсөн өдрийг засахад хожим) */
+const doneDateOf = (t: RoadmapTest) => (t.status === "DONE" ? (t.doneOn ?? null) : (t.laterOn ?? null));
+const isDone = (t: RoadmapTest) => t.status === "DONE" || !!t.laterOn;
 
 /**
  * Номын дарааллаар тест сонгох (эзэн 2026-10-18): хамгийн сүүлд хийсний
- * ДАРААХ тестүүд эхэнд санал болно; хийсэн, хассан тест сонголтод гарахгүй;
- * алгассан (үлдсэн) нь өөр өнгөөр. 100V3 дуусвал 200V3 үргэлжилнэ.
+ * ДАРААХ тестүүд эхэнд санал болно; хассан тест сонголтод гарахгүй; алгассан
+ * (үлдсэн) нь өөр өнгөөр. 100V3 дуусвал 200V3 үргэлжилнэ.
+ * Хийчихсэн тест жагсаалтад гарахгүй, ХАЙХАД гарна («Хийчихсэн · 11.03», эзэн
+ * 2026-11-08) — дахин сонговол давтлага болж тэр өдөр мөн бүртгэгдэнэ.
  */
 export default function TestPicker({
   classroomId,
@@ -28,6 +34,7 @@ export default function TestPicker({
   customTopics = [],
   onCustomTopicsChange,
   hideChips = false,
+  canHide = false,
 }: {
   classroomId: string;
   date: string;
@@ -45,6 +52,8 @@ export default function TestPicker({
   onCustomTopicsChange?: (list: string[]) => void;
   /** Сонгосон ТЕСТИЙН чипийг нуух (батлах цонх өөрөө жагсаадаг); сэдвийн чип үргэлж харагдана */
   hideChips?: boolean;
+  /** «Энэ ангиас хасах» — зөвхөн Багш+, Админ (сервер ч хориглоно) */
+  canHide?: boolean;
 }) {
   const { data, status, error, reload } = useSection<Roadmap | null>(
     `/classrooms/${classroomId}/roadmap?date=${date}`,
@@ -108,9 +117,11 @@ export default function TestPicker({
     );
   if (status === "error" && !data) return <ErrorState message={error} onRetry={reload} />;
 
-  const visible = (u: TestUnit) =>
-    keep.has(u.test.testId) || chosen.has(u.test.testId) || (u.test.status !== "DONE" && u.test.status !== "REMOVED");
   const q = query.trim().toLowerCase();
+  const visible = (u: TestUnit) =>
+    keep.has(u.test.testId) ||
+    chosen.has(u.test.testId) ||
+    (u.test.status !== "REMOVED" && (!!q || !isDone(u.test)));
   const suggestions = (data?.next ?? []).filter((id) => !chosen.has(id)).slice(0, 6);
   const removed = units.filter((u) => u.test.status === "REMOVED");
   const groups: { key: string; book: string; topic: string; units: TestUnit[] }[] = [];
@@ -234,6 +245,8 @@ export default function TestPicker({
               {g.units.map((u) => {
                 const on = chosen.has(u.test.testId);
                 const skipped = u.test.status === "SKIPPED";
+                const done = isDone(u.test);
+                const doneOn = doneDateOf(u.test);
                 return (
                   <li key={u.test.testId} className="flex items-center gap-1">
                     <button
@@ -257,9 +270,14 @@ export default function TestPicker({
                       <span className="min-w-0 truncate">{u.test.short}</span>
                       {skipped && <span className="shrink-0 text-[11px] font-semibold">Үлдсэн</span>}
                       {u.test.plannedOn && <span className="shrink-0 text-[11px] text-ink-dim">{shortDay(u.test.plannedOn)} төлөвлөсөн</span>}
-                      {u.test.status === "DONE" && <span className="shrink-0 text-[11px] text-success">Хийсэн</span>}
+                      {done && (
+                        <Meta
+                          className="shrink-0 text-[11px] font-semibold text-success"
+                          items={["Хийчихсэн", doneOn ? shortDay(doneOn) : null]}
+                        />
+                      )}
                     </button>
-                    {u.test.status !== "DONE" && (
+                    {canHide && !done && (
                       <button
                         type="button"
                         onClick={() => setRemoved(u, true)}
@@ -279,7 +297,7 @@ export default function TestPicker({
         ))}
       </div>
 
-      {removed.length > 0 && (
+      {canHide && removed.length > 0 && (
         <details className="group text-sm">
           <summary className="inline-flex min-h-9 cursor-pointer list-none items-center gap-1 text-xs font-semibold text-ink-dim">
             <ChevronDown className="size-3.5 transition group-open:rotate-180" aria-hidden />

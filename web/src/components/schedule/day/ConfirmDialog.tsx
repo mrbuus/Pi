@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, ChevronDown, ClipboardCheck, Plus, Undo2, X } from "lucide-react";
+import { BadgeCheck, ChevronDown, ClipboardCheck, Info, Plus, Undo2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -44,27 +44,33 @@ const chip =
   "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 text-sm font-semibold transition disabled:opacity-50";
 
 /**
- * Хичээлийн дараа батлах (Багш+, Админ): бодитоор хийсэн тест (төлөвлөгөөнөөс
+ * Хичээлийн дараа батлах (ямар ч багш): бодитоор хийсэн тест (төлөвлөгөөнөөс
  * урьдчилан бөглөгдөнө) + тест бүрд хассан бодлогын дугаар (ихэнх ангид хасдаггүй
- * тул жижиг товч). ClassTestSession + LessonRecord нэг дор бичигдэнэ.
+ * тул жижиг товч). ClassTestSession + LessonRecord + төлөвлөгөө нэг дор бичигдэнэ —
+ * батлагдсан хичээлийн тест, сэдвийг ЗӨВХӨН энд засна (эзэн 2026-11-08).
  */
 export default function ConfirmDialog({
   entry,
   date,
   tests,
+  canPlan,
   onClose,
   onDone,
 }: {
   entry: DayEntry | null;
   date: string;
   tests: Record<string, TestInfo>;
+  /** Багш+, Админ — тестийг ангиас хасах товч */
+  canPlan: boolean;
   onClose: () => void;
   onDone: () => void;
 }) {
   return (
     <Drawer open={entry !== null} onOpenChange={(o) => !o && onClose()}>
       <DrawerContent className="mx-auto w-full max-w-2xl" aria-describedby={undefined}>
-        {entry && <Body key={`${entry.scheduleId}|${date}`} entry={entry} date={date} tests={tests} onClose={onClose} onDone={onDone} />}
+        {entry && (
+          <Body key={`${entry.scheduleId}|${date}`} entry={entry} date={date} tests={tests} canPlan={canPlan} onClose={onClose} onDone={onDone} />
+        )}
       </DrawerContent>
     </Drawer>
   );
@@ -74,12 +80,14 @@ function Body({
   entry: e,
   date,
   tests,
+  canPlan,
   onClose,
   onDone,
 }: {
   entry: DayEntry;
   date: string;
   tests: Record<string, TestInfo>;
+  canPlan: boolean;
   onClose: () => void;
   onDone: () => void;
 }) {
@@ -90,16 +98,11 @@ function Body({
   const [extra, setExtra] = useState<Record<string, TestInfo>>({});
   const [open, setOpen] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
-  // Багшийн бичих нэмэлт (эзэн 2026-10-27): чөлөөт сэдэв, тайлбар, бодсон бодлогын дугаар
-  // Олон сэдэв (эзэн 2026-10-31): батлаагүй бол төлөвлөгөөний сэдвүүдээр эхэлнэ; бичлэгт таслалаар нэг мөр
-  const [topics, setTopics] = useState<string[]>(
-    e.record
-      ? e.record.topic && e.record.topic !== e.topic
-        ? [e.record.topic]
-        : []
-      : (e.plan?.customTopics ?? []),
-  );
-  const topic = topics.join(", ").slice(0, 200);
+  // Багшийн бичих нэмэлт (эзэн 2026-10-27): чөлөөт сэдэв, тайлбар, бодсон бодлогын дугаар.
+  // Сэдвүүд — төлөвлөгөөнийх (батлахад төлөвлөгөө батламжтай тэнцдэг тул дахин нээхэд ч зөв).
+  // Өмнө нь батламжийн нэгтгэсэн сэдвийг («Тест 1, Тест 2») нэг сэдэв гэж авч давхардуулдаг байв.
+  const [topics, setTopics] = useState<string[]>(e.plan?.customTopics ?? []);
+  const topic = topics.join(", ");
   const [description, setDescription] = useState(e.record?.description ?? "");
   const [numbers, setNumbers] = useState(e.record?.problemNumbersText ?? "");
   const parsedNumbers = parseProblemNumbers(numbers);
@@ -108,6 +111,10 @@ function Body({
   const [error, setError] = useState<string | null>(null);
   const info = (id: string) => tests[id] ?? extra[id];
   const manual = e.done.filter((d) => !d.testId);
+  // Хасаж буй тестээр сурагчид ажилласан бол — тэдний тэмдэглэгээ устахгүй гэдгийг хэлнэ
+  const removedWithWork = e.done.filter(
+    (d) => d.testId && (d.studentWork ?? 0) > 0 && !rows.some((r) => r.testId === d.testId),
+  );
 
   // Нэмсэн тестийн бодлогын дарааллыг (хасах дугаар) татна
   const missing = rows.map((r) => r.testId).filter((id) => !info(id));
@@ -152,7 +159,9 @@ function Body({
         body: {
           date,
           tests: rows.map((r) => ({ testId: r.testId, excludedProblemIds: r.excluded })),
-          topic: topic.trim() || null,
+          customTopics: topics,
+          // Өөр багш хооронд нь баталсан/зассан бол сервер 409 — дарж бичихгүй
+          expectedConfirmedAt: e.record?.confirmedAt ?? null,
           description: description.trim() || null,
           problemNumbers: numbers.trim() || null,
         },
@@ -274,6 +283,7 @@ function Body({
               customTopics={topics}
               onCustomTopicsChange={setTopics}
               hideChips
+              canHide={canPlan}
             />
           </div>
         ) : (
@@ -332,6 +342,17 @@ function Body({
       </div>
 
       <footer className="flex flex-wrap items-center gap-2 border-t border-line px-4 py-3">
+        {removedWithWork.length > 0 && (
+          <p className="flex w-full items-start gap-1.5 rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning">
+            <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+            <span>
+              {removedWithWork
+                .map((d) => `${(d.testId && info(d.testId)?.short) || "Тест"} — ${d.studentWork} сурагч`)
+                .join(", ")}{" "}
+              тэмдэглэсэн. Хасахад тэдний тэмдэглэл устахгүй, энэ өдрийн жагсаалтаас л гарна
+            </span>
+          </p>
+        )}
         {error && (
           <p role="alert" className="w-full rounded-lg bg-error/10 px-3 py-2 text-sm text-error">
             {error}

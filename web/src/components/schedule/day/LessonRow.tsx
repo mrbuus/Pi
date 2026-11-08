@@ -13,7 +13,6 @@ import {
 import type { CSSProperties } from "react";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { cn } from "@/lib/cn";
-import RoomBadge from "../RoomBadge";
 import { formatMinutes, roomCapacityOf } from "../types";
 import RoadMap from "./RoadMap";
 import { DISMISS_LABEL, shortClass, type DayEntry, type StaffRef, type TestInfo } from "./types";
@@ -57,7 +56,7 @@ interface Props {
 const preview = (body: string) => (body.length > 42 ? `${body.slice(0, 40).trimEnd()}…` : body);
 
 /**
- * Өдрийн хуваарийн НЭГ мөр — эзний өдрийн Excel: цаг, танхим, анги,
+ * Өдрийн хуваарийн НЭГ мөр — эзний өдрийн Excel: цаг, анги,
  * тест (өмнөх → өнөөдөр), ахлах, туслах. Мөр дээр дарахад төлөвлөгөөний цонх.
  * Мөрийн доторх байрлал мөрийн ӨӨРИЙН өргөнөөр (container query).
  */
@@ -87,7 +86,7 @@ export default function LessonRow(p: Props) {
           aria-label={`${label}: ${canPlan ? "төлөвлөгөө засах" : "дэлгэрэнгүй"}`}
           className="flex min-h-11 min-w-0 items-center gap-2 rounded-lg text-left"
         >
-          <RoomBadge room={e.room} size="md" />
+          {/* Танхимын дүрс/дугаар өдрийн хуваарьт ХАРАГДАХГҮЙ (эзэн 2026-11-08); засвар «⋯ Танхим, цаг»-д */}
           <span className="min-w-0">
             <span className="block truncate text-base font-bold text-ink">{shortClass(e.classroomName)}</span>
             <span className="block text-xs tabular-nums text-ink-dim">

@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 import { AttendanceMark, HomeworkMark } from "./Marks";
 import { currentMonth, dayKey, dayTitle, loadMonth, monthTitle, todayKey, useMonthDays, weekdayShort } from "./lib";
 import type { HubDay } from "./types";
+import { regroupTopicText } from "@/lib/testNames";
 
 /** «Хичээлүүд» таб: сараар, хичээлийн өдөр бүр нэг мөр — дарахад дэлгэрэнгүй цонх */
 export default function LessonDays({ onOpen }: { onOpen: (day: HubDay) => void }) {
@@ -113,7 +114,7 @@ export function DayRow({
       </span>
       <span className="min-w-0 flex-1">
         <span className={cn("cyrillic-tight block truncate font-semibold", day.topic ? "text-ink" : "text-ink-dim")}>
-          {day.topic ?? "Сэдэв оруулаагүй"}
+          {(day.topic && regroupTopicText(day.topic)) || "Сэдэв оруулаагүй"}
         </span>
         <Meta
           className="mt-0.5 text-xs text-ink-dim"

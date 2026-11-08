@@ -1,5 +1,6 @@
 // Хичээлийн төлөвлөгөө (эзэн 2026-10-18) — ӨС-гүй цэвэр логик, тесттэй.
 import { weekdayOf } from './week-resolver';
+import { groupTestNames } from '../common/test-names';
 
 /** «DISMISS» = тарах, «STAY» = үлдэнэ — ЗӨВХӨН ажилтанд харагдана. */
 export const DISMISS_MODES = ['DISMISS', 'STAY'] as const;
@@ -45,9 +46,22 @@ export function resolveOccurrence(
   return { error: 'NOT_SCHEDULED' };
 }
 
-/** Төлөвлөгөөний гарчиг = тестүүдийн богино нэр («Урвуу функц 1, Урвуу функц 2»). */
+/**
+ * Төлөвлөгөөний гарчиг = тестүүдийн богино нэр, нэг сэдвийнх товчлогдоно
+ * («Урвуу функц 1, 2; Модуль 3» — эзэн 2026-11-08, `common/test-names`).
+ */
 export function planTitle(shortNames: string[]): string {
-  return shortNames.filter(Boolean).join(', ');
+  return groupTestNames(shortNames);
+}
+
+/**
+ * Гарчиг нэрсээс автоматаар үүссэн эсэх. 2026-11-08-аас өмнө «, »-оор
+ * товчлолгүй нийлүүлдэг байсан тул хуучин хэлбэрийг ч автомат гэж тооцно —
+ * эс тэгвээс хуучин гарчиг бүр «багшийн бичсэн сэдэв» болж давхардана.
+ */
+export function isAutoTitle(title: string, shortNames: string[]): boolean {
+  const names = shortNames.filter(Boolean);
+  return title === planTitle(names) || title === names.join(', ');
 }
 
 export const CUSTOM_TOPIC_MAX = 12;
@@ -78,10 +92,11 @@ export function cleanCustomTopics(list: readonly string[]): string[] {
 export function storedCustomTopics(topic: {
   customTopics?: string[] | null;
   title: string;
-  autoTitle: string;
+  /** Тестүүдийн богино нэр (номын дарааллаар) */
+  testNames: string[];
 }): string[] {
   if (topic.customTopics?.length) return topic.customTopics;
-  return topic.title && topic.title !== topic.autoTitle ? [topic.title] : [];
+  return topic.title && !isAutoTitle(topic.title, topic.testNames) ? [topic.title] : [];
 }
 
 /**

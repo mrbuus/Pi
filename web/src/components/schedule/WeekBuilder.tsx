@@ -11,7 +11,6 @@ import InfoHint from "@/components/ui/InfoHint";
 import ClassroomLessonHistory from "@/components/lesson-records/ClassroomLessonHistory";
 import PublishDayButton from "./PublishDayButton";
 import EntryActionPanel from "./EntryActionPanel";
-import RoomBadge from "./RoomBadge";
 import { addDaysToKey, formatMinutes, roomOrderOf, todayUBKey, WEEKDAY_LABELS, WEEKDAY_SHORT, type WeekEntry } from "./types";
 import LessonRow, { type TeacherOption } from "./day/LessonRow";
 import PlanDialog from "./day/PlanDialog";
@@ -26,7 +25,7 @@ import { withPlus } from "@/lib/personName";
 /**
  * ӨДРИЙН ХУВААРЬ (эзэн 2026-10-08, дахин бүтээсэн 2026-10-18).
  *
- * Эзний өдрийн Excel: мөр бүр = цаг, танхим, анги, тест (өмнөх → өнөөдөр),
+ * Эзний өдрийн Excel: мөр бүр = цаг, анги, тест (өмнөх → өнөөдөр),
  * ахлах, туслах. Багш+ маргаашийн төлөвлөгөөг өмнөх орой тавьдаг тул анхдагч
  * нь үдээс хойш маргааш. Мөр дээр дарахад төлөвлөгөөний цонх (Багш — зөвхөн
  * харна). Танхим/цаг/зөөх/цуцлах нь «⋯» дотор (EntryActionPanel).
@@ -285,7 +284,7 @@ export default function WeekBuilder() {
       {data && total > 0 && (
         <div className="flex flex-wrap items-center gap-2 [&>div]:mb-0">
           {canPlan && day >= today && !data.isHoliday && <PublishDayButton key={day} date={day} />}
-          <ExportImage date={day} entries={entries} tests={tests} />
+          <ExportImage data={data} />
         </div>
       )}
 
@@ -438,7 +437,7 @@ export default function WeekBuilder() {
           setPlanOf(null);
         }}
       />
-      <ConfirmDialog entry={find(confirmOf)} date={day} tests={tests} onClose={() => setConfirmOf(null)} onDone={reload} />
+      <ConfirmDialog entry={find(confirmOf)} date={day} tests={tests} canPlan={canPlan} onClose={() => setConfirmOf(null)} onDone={reload} />
       <EntryActionPanel
         open={moreEntry !== null}
         entry={moreEntry as unknown as WeekEntry | null}
@@ -477,10 +476,6 @@ function Legend({ canPlan }: { canPlan: boolean }) {
         </InfoHint>
       </h3>
       <ul className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-ink-dim">
-        <li className="inline-flex items-center gap-1.5">
-          <RoomBadge room="501" />
-          Танхим
-        </li>
         <li>
           Тоолол 3
           <Excluded numbers={[2, 5]} /> — улаан тоо: хассан бодлого

@@ -108,6 +108,18 @@ function makePrisma() {
       findMany: jest.fn(async () => []),
     },
     classDismissal: { findMany: jest.fn(async () => []) },
+    // Хичээлийн төлөвлөгөө: гараар бичсэн гарчиг «Логарифм» (ENTRY.topic), тестгүй
+    lessonTopic: {
+      findUnique: jest.fn(async () => ({
+        id: 'lt1',
+        title: 'Логарифм',
+        testIds: [],
+        customTopics: [],
+        chapterId: null,
+      })),
+      create: jest.fn(async ({ data }: any) => ({ id: 'lt1', ...data })),
+      update: jest.fn(async ({ data }: any) => ({ id: 'lt1', ...data })),
+    },
     auditLog: { create: jest.fn(async () => ({})) },
   };
   prisma.$transaction = jest.fn(async (fn: any) => fn(prisma));
@@ -197,7 +209,8 @@ describe('LessonRecordsService.confirm', () => {
       scheduleId: 's1',
       classroomId: 'c1',
       classroomName: '12А (Баруун 4)',
-      topic: 'Логарифм',
+      // Сэдэв = хийсэн тест + төлөвлөгөөний чөлөөт сэдэв (эзэн 2026-11-08)
+      topic: 'Тест 18; Логарифм',
       leadTeacherId: 'lead',
       leadTeacherName: 'Бат Дорж',
       assistantTeacherName: 'Сараа Болд',
@@ -221,6 +234,12 @@ describe('LessonRecordsService.confirm', () => {
       actorId: 'tp',
     });
     expect(out.date).toBe(DATE);
+    // Төлөвлөгөө бодит байдалтай тэнцэнэ: тест = хийсэн тест, сэдэв хэвээр
+    expect(prisma.lessonTopic.update.mock.calls[0][0].data).toMatchObject({
+      testIds: ['t1'],
+      customTopics: ['Логарифм'],
+      title: 'Тест 18; Логарифм',
+    });
   });
 
   it('эрх: ямар ч багш батална (эзэн 2026-11-03); сурагч, эцэг эх, худалдан авагч үгүй', async () => {
@@ -247,7 +266,7 @@ describe('LessonRecordsService.confirm', () => {
         : [{ id: 't1', title: 'Тест 18' }],
     );
     prisma.classTestSession.findMany = jest.fn(async ({ where }: any) =>
-      where.testId ? [{ id: 'old', testId: 't9', excludedProblemIds: [] }] : [],
+      where.testId ? [{ id: 'old', classroomId: 'c1', testId: 't9', excludedProblemIds: [] }] : [],
     );
     prisma.classTestSession.deleteMany = jest.fn(async () => ({ count: 1 }));
     prisma.classTestSession.upsert = jest.fn(async () => ({}));
@@ -256,7 +275,12 @@ describe('LessonRecordsService.confirm', () => {
       { testId: 't2', excludedProblemIds: [] },
     ]);
     const del = prisma.classTestSession.deleteMany.mock.calls[0][0].where;
-    expect(del).toMatchObject({ classroomId: 'c1', testId: { not: null, notIn: ['t1', 't2'] } });
+    expect(del).toEqual({ id: { in: ['old'] } });
+    // Хассан бүртгэлийн БҮТЭН мөр аудитад үлдэнэ
+    const gone = prisma.auditLog.create.mock.calls
+      .map((c: any) => c[0].data)
+      .find((d: any) => d.entity === 'ClassTestSession' && d.action === 'DELETE');
+    expect(gone).toMatchObject({ entityId: 'old', before: { testId: 't9', classroomId: 'c1' } });
     const ups = prisma.classTestSession.upsert.mock.calls.map((c: any) => c[0]);
     expect(ups[0].where.classroomId_testId_date).toMatchObject({ classroomId: 'c1', testId: 't1' });
     expect(ups[0].create.excludedProblemIds).toEqual(['p2']);
@@ -265,17 +289,12 @@ describe('LessonRecordsService.confirm', () => {
     expect(prisma.lessonRecord.upsert).toHaveBeenCalled();
   });
 
-  it('өөр тестийн бодлогыг хасах, байхгүй тест — 400, юу ч бичихгүй', async () => {
+  it('тестэд байхгүй хассан бодлого чимээгүй шүүгдэнэ; байхгүй тест — 400, юу ч бичихгүй', async () => {
     const { service, prisma } = makeService();
     prisma.test.findMany = jest.fn(async () => [
-      { id: 't1', problems: [{ problemId: 'p1' }] },
+      { id: 't1', deletedAt: null, problems: [{ problemId: 'p1' }] },
     ]);
     prisma.classTestSession.upsert = jest.fn();
-    await expect(
-      service.confirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE, [
-        { testId: 't1', excludedProblemIds: ['zzz'] },
-      ]),
-    ).rejects.toThrow('Хассан бодлого');
     await expect(
       service.confirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE, [
         { testId: 't1', excludedProblemIds: [] },
@@ -603,23 +622,29 @@ describe('Батлахад нэмэлт: сэдэв, тайлбар, бодло�
     });
     const create = prisma.lessonRecord.upsert.mock.calls[0][0].create;
     expect(create).toMatchObject({
-      topic: 'Давтлага',
+      topic: 'Тест 18; Давтлага',
       description: 'Самбарт бодов',
       problemNumbersText: '1-3, 7',
       problemNumbers: [1, 2, 3, 7],
     });
-    // Төлөвлөгөөгүй хичээлд сэдвийг LessonTopic-д шинээр нэмнэ (дарж бичихгүй)
-    expect(prisma.lessonTopic.create.mock.calls[0][0].data).toMatchObject({ title: 'Давтлага', chapterId: null });
+    // Төлөвлөгөөгүй хичээлд LessonTopic шинээр — тест, сэдэв батламжтай ижил
+    expect(prisma.lessonTopic.create.mock.calls[0][0].data).toMatchObject({
+      title: 'Тест 18; Давтлага',
+      testIds: ['t1'],
+      customTopics: ['Давтлага'],
+      chapterId: null,
+    });
 
     prisma.lessonRecord.findUnique.mockResolvedValueOnce({
       id: 'r1',
       description: 'Өмнөх',
       problemNumbersText: 'бүгд',
     });
-    await service.confirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE);
+    // Хуучин клиент: сэдэв нь тестүүдийн автомат нэр бол чөлөөт сэдэв БИШ
+    await service.confirm({ userId: 'tp', role: Role.TEACHER_PLUS }, 's1', DATE, undefined, { topic: 'Тест 18' });
     const update = prisma.lessonRecord.upsert.mock.calls[1][0].update;
     expect(update).toMatchObject({
-      topic: 'Логарифм',
+      topic: 'Тест 18',
       description: 'Өмнөх',
       problemNumbersText: 'бүгд',
       problemNumbers: [],
