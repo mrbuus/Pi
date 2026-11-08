@@ -4,13 +4,20 @@ import { TuitionController } from './tuition.controller';
 import { ScheduleModule } from '../schedule/schedule.module';
 import { AuditModule } from '../audit/audit.module';
 import { PaymentsModule } from '../payments/payments.module';
-import { WithdrawalController } from './withdrawal.controller';
+import {
+  RefundEstimateController,
+  WithdrawalController,
+} from './withdrawal.controller';
 import { WithdrawalService } from './withdrawal.service';
 
 @Module({
   imports: [ScheduleModule, AuditModule, PaymentsModule],
   providers: [TuitionService, WithdrawalService],
-  controllers: [TuitionController, WithdrawalController],
+  controllers: [
+    TuitionController,
+    WithdrawalController,
+    RefundEstimateController,
+  ],
   exports: [TuitionService],
 })
 export class TuitionModule {}

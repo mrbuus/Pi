@@ -335,6 +335,7 @@ function makeDb() {
         attendance.filter((a) => inRange(a.date, where.date)),
       ),
     },
+    homeworkQuizScore: { findMany: jest.fn().mockResolvedValue([]) },
     dailyHomeworkMark: {
       groupBy: jest.fn(async () => []),
       findFirst: jest.fn(async () => null),

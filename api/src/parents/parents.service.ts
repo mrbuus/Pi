@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Role, StudentType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { loadStudentQuizzes } from '../homework-quiz/student-quizzes';
 import { canAccessChapter } from '../common/access';
 import {
   historyWindow,
@@ -156,6 +157,8 @@ export class ParentsService {
           },
         });
         if (!student) throw new NotFoundException('Сурагч олдсонгүй.');
+        // Шалгалтаар даалгавар шалгасан оноо (эзэн 2026-11-08 19:08) — зөвхөн баталгаажсан хүүхдийнх
+        const homeworkQuizzes = await loadStudentQuizzes(this.prisma, link.studentId, { take: 14 });
         return {
           id: link.id,
           verifiedAt: link.verifiedAt,
@@ -164,6 +167,7 @@ export class ParentsService {
             ...student,
             classroom: student.enrollments[0]?.classroom ?? null,
             joinedAt: student.enrollments[0]?.joinedAt ?? null,
+            homeworkQuizzes,
           },
         };
       }),

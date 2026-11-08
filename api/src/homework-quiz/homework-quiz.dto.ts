@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsOptional, Matches, Max, Min, ValidateIf } from 'class-validator';
+import { IsInt, IsNumber, IsOptional, Matches, Max, Min, ValidateIf } from 'class-validator';
 import { QUIZ_MAX_PROBLEMS } from './quiz-score';
 
 /** Шалгалт эхлүүлэх / бодлогын тоог засах */
@@ -21,10 +21,10 @@ export class SetHomeworkQuizScoreDto {
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Огнооны формат буруу байна (YYYY-MM-DD)' })
   date: string;
 
-  @ApiProperty({ example: 8, nullable: true, description: 'Бүхэл тоо 0..бодлогын тоо; null = цэвэрлэх' })
+  @ApiProperty({ example: 7.5, nullable: true, description: '0..бодлогын тоо, бутархай 2 хүртэл орон; null = цэвэрлэх' })
   @IsOptional()
   @ValidateIf((_o, v) => v !== null)
-  @IsInt({ message: 'Оноо бүхэл тоо байна' })
+  @IsNumber({ maxDecimalPlaces: 2, allowNaN: false, allowInfinity: false }, { message: 'Оноо тоо, бутархай нь 2 хүртэл оронтой' })
   @Min(0, { message: 'Оноо 0-ээс багагүй' })
   score: number | null;
 }

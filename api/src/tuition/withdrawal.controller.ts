@@ -89,3 +89,20 @@ export class WithdrawalController {
     return this.withdrawal.list(id);
   }
 }
+
+/**
+ * «Одоо гарвал буцаах дүн» (эзэн 2026-11-08) — сурагчийн хуудас, ирцийн самбарын drawer. Багш ч харна
+ * (эзний шууд шийдвэр), гэхдээ серверээс Багшид зөвхөн буцаах дүн + хичээлийн тооны үндэслэл гарна;
+ * төлсөн/ногдох дүн зөвхөн Админ, Багш+ (refund-estimate.ts). Хадгалахгүй, юу ч өөрчлөхгүй.
+ */
+@Controller('tuition/refund-estimate')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+export class RefundEstimateController {
+  constructor(private readonly withdrawal: WithdrawalService) {}
+
+  @Get(':studentId')
+  estimate(@Param('studentId') studentId: string, @Req() req: AuthedRequest) {
+    return this.withdrawal.estimate(studentId, req.user.role);
+  }
+}

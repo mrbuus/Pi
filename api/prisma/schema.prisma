@@ -3419,13 +3419,14 @@ model HomeworkQuiz {
   @@unique([classroomId, date])
 }
 
-/// Шалгалтын нэг сурагчийн оноо (бүхэл тоо 0..problemCount). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
+/// Шалгалтын нэг сурагчийн оноо 0..problemCount, бутархай 2 хүртэл орон (7.5 — эзэн 2026-11-08 19:08;
+/// Decimal тул хөвөгч тооны алдаагүй). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
 model HomeworkQuizScore {
   id          String       @id @default(cuid())
   quizId      String
   quiz        HomeworkQuiz @relation(fields: [quizId], references: [id], onDelete: Restrict)
   studentId   String
-  score       Int
+  score       Decimal      @db.Decimal(6, 2)
   updatedById String
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt

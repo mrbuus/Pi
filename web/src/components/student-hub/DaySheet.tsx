@@ -11,6 +11,7 @@ import { Meta } from "@/components/ui/Meta";
 import { cleanTitle } from "@/lib/studentTitle";
 import HomeworkPhotoPanel from "./HomeworkPhotoPanel";
 import TheoryDayPanel from "./TheoryDayPanel";
+import QuizScoreChip from "@/components/homework-quiz/QuizScoreChip";
 import { AttendanceMark, HomeworkMark } from "./Marks";
 import { dayKey, dayShort, dayTitle, loadMonth, timeRange, useMonthDays } from "./lib";
 import type { HubDay, HubDayTest } from "./types";
@@ -133,9 +134,18 @@ function DayBody({ day, onChange }: { day: HubDay; onChange: () => void }) {
           </dd>
           <dt className="text-ink-dim">Даалгавар</dt>
           <dd className="flex flex-wrap items-center gap-x-2">
-            <HomeworkMark status={hw.status} />
-            {hw.checkedOn && hw.status && <span className="text-xs text-ink-dim">{dayShort(hw.checkedOn)} шалгасан</span>}
+            {(hw.status || !hw.quiz) && <HomeworkMark status={hw.status} />}
+            {hw.checkedOn && (hw.status || hw.quiz) && <span className="text-xs text-ink-dim">{dayShort(hw.checkedOn)} шалгасан</span>}
           </dd>
+          {/* Шалгалтаар шалгасан оноо (эзэн 2026-11-08 19:08) */}
+          {hw.quiz && (
+            <>
+              <dt className="text-ink-dim">Шалгалт</dt>
+              <dd>
+                <QuizScoreChip score={hw.quiz.score} problemCount={hw.quiz.problemCount} withLabel={false} />
+              </dd>
+            </>
+          )}
         </dl>
         {hw.comment && (
           <p className="mt-2.5 whitespace-pre-line rounded-lg border-l-[3px] border-brand-bright bg-panel px-3 py-2 text-sm text-ink">
