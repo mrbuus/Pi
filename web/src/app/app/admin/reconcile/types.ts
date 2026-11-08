@@ -64,6 +64,8 @@ export interface BankRow {
   direction: "CREDIT" | "DEBIT";
   description: string;
   counterparty: string | null;
+  /** Харьцсан дансны эзэмшигч (хуулгын «ХААНААС: НЭР»-ээс), энэ данснаас ирсэн гүйлгээ, өмнө оноосон хүүхэд */
+  account: { owner: string | null; txCount: number; students: StudentCard[] } | null;
   resolvedAt: string | null;
   resolvedBySystem: boolean;
   /** Ажилтан шийтэд хөтөлсөн гэж тэмдэглэгдсэн (хуваарилалтгүй) */
@@ -115,4 +117,33 @@ export function splitSender(text: string): { main: string; sender: string | null
   const m = /ХААНААС:?\s*\d*\s*/iu.exec(text);
   if (!m) return { main: text.trim(), sender: null };
   return { main: text.slice(0, m.index).trim(), sender: text.slice(m.index + m[0].length).trim() || null };
+}
+
+/** «⋯» дэлгэрэнгүй — GET /reconcile/students/:id */
+export interface StudentDetail {
+  student: StudentCard & {
+    phone: string | null;
+    fatherPhone: string | null;
+    motherPhone: string | null;
+    guardianNote: string | null;
+    school: string | null;
+    grade: number | null;
+    branch: string | null;
+  };
+  /** Хуулгаас энэ хүүхдэд оноосон гүйлгээ (шинэ нь эхэндээ) */
+  bank: {
+    id: string;
+    kind: AllocKind;
+    kindLabel: string;
+    amount: number;
+    txAmount: number;
+    bookedAt: string;
+    description: string;
+    sender: string | null;
+    counterparty: string | null;
+    auto: boolean;
+    inSheet: boolean;
+  }[];
+  /** Энэ хүүхдэд оноосноор системийн сурсан данс, утас */
+  payers: { kind: "ACCOUNT" | "PHONE"; value: string; count: number }[];
 }

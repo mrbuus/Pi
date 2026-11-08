@@ -23,6 +23,7 @@ import {
   matchTransaction,
   normalizePhone,
   phonesIn,
+  splitSender,
   type MatchIndex,
   type MatchResult,
   type PayerHint,
@@ -658,6 +659,8 @@ export class ReconcileService {
       for (const a of r.allocations) if (a.studentId) ids.add(a.studentId);
       for (const c of (r.suggestion as RowSuggestion | null)?.candidates ?? []) ids.add(c.studentId);
     }
+    const accounts = await this.accountInfo([...new Set(rows.map((r) => r.counterparty).filter((a): a is string => !!a))]);
+    for (const a of accounts.values()) for (const id of a.studentIds) ids.add(id);
     const students = await this.studentCards([...ids]);
     // Хүүхэд бүрийн шийтэд бүртгэгдсэн, хуулгатай холбогдоогүй ойрын төлбөр — хуваахдаа харна
     const open = rows.filter((r) => !r.resolvedAt);
@@ -677,6 +680,10 @@ export class ReconcileService {
           direction: r.direction,
           description: r.description,
           counterparty: r.counterparty,
+          account: (() => {
+            const a = r.counterparty ? accounts.get(r.counterparty) : undefined;
+            return a ? { owner: a.owner, txCount: a.txCount, students: a.studentIds.map((id) => students.get(id)).filter(Boolean) } : null;
+          })(),
           resolvedAt: r.resolvedAt,
           resolvedBySystem: !!r.resolvedAt && !r.resolvedById,
           inSheet: r.inSheet,
@@ -733,6 +740,121 @@ export class ReconcileService {
     });
     const cards = await this.studentCards(users.map((u) => u.id));
     return { items: users.map((u) => cards.get(u.id)).filter(Boolean) };
+  }
+
+  /**
+   * Харьцсан дансны эзэмшигч. Хаан банкны хуулгад эзэмшигчийн багана байхгүй тул тэр
+   * данснаас ирсэн гүйлгээний «ХААНААС: … НЭР» хэсгээс хамгийн олон давтагдсан нэрийг
+   * авна (өөр банкнаас бол нэр мэдэгдэхгүй). Өмнө нь энэ дансыг оноосон хүүхдүүд ч хамт.
+   */
+  private async accountInfo(accounts: string[]) {
+    const out = new Map<string, { owner: string | null; txCount: number; studentIds: string[] }>();
+    if (!accounts.length) return out;
+    const [txs, allocs] = await Promise.all([
+      this.prisma.bankTransaction.findMany({
+        where: { counterparty: { in: accounts }, direction: 'CREDIT' },
+        select: { counterparty: true, description: true },
+      }),
+      // Автоматаар (шийттэй тулгаж) оноосон нь ч орно — сурсан дансаас (BankPayerHint) бүрэн
+      this.prisma.bankAllocation.findMany({
+        where: { revokedAt: null, studentId: { not: null }, bankTx: { counterparty: { in: accounts } } },
+        select: { studentId: true, bankTx: { select: { counterparty: true } } },
+      }),
+    ]);
+    const names = new Map<string, Map<string, number>>();
+    for (const t of txs) {
+      const acc = t.counterparty!;
+      const cur = out.get(acc) ?? { owner: null, txCount: 0, studentIds: [] };
+      cur.txCount++;
+      out.set(acc, cur);
+      const sender = splitSender(t.description).sender.replace(/\s+/g, ' ').trim().toUpperCase();
+      if (!/\p{L}{2,}/u.test(sender)) continue;
+      const m = names.get(acc) ?? new Map<string, number>();
+      m.set(sender, (m.get(sender) ?? 0) + 1);
+      names.set(acc, m);
+    }
+    for (const [acc, m] of names) out.get(acc)!.owner = [...m].sort((a, b) => b[1] - a[1])[0][0];
+    const kids = new Map<string, Map<string, number>>();
+    for (const a of allocs) {
+      const m = kids.get(a.bankTx.counterparty!) ?? new Map<string, number>();
+      m.set(a.studentId!, (m.get(a.studentId!) ?? 0) + 1);
+      kids.set(a.bankTx.counterparty!, m);
+    }
+    for (const [acc, m] of kids) {
+      const cur = out.get(acc);
+      if (cur) cur.studentIds = [...m].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([id]) => id);
+    }
+    return out;
+  }
+
+  /**
+   * «⋯» дэлгэрэнгүй: холбоо барих утас (өөрийн, аав, ээж), сургууль, мөн энэ хүүхдэд
+   * хуулгаас оноосон бүх гүйлгээ — хэзээ, ямар данснаас, хэн илгээсэн. Сарын
+   * төлбөрийн блокийг вэб `payments/ledger/student/:id`-ээс авна.
+   */
+  async studentDetail(id: string) {
+    const u = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        role: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        archivedAt: true,
+        studentProfile: { select: { fatherPhone: true, motherPhone: true, guardianNote: true, school: true, grade: true, branch: true } },
+      },
+    });
+    if (!u || u.role !== 'STUDENT') throw new NotFoundException('Хүүхэд олдсонгүй');
+    const [cards, allocs, hints] = await Promise.all([
+      this.studentCards([id]),
+      this.prisma.bankAllocation.findMany({
+        where: { studentId: id, revokedAt: null },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+        select: {
+          id: true,
+          kind: true,
+          amount: true,
+          auto: true,
+          paymentId: true,
+          bankTx: { select: { bookedAt: true, amount: true, description: true, counterparty: true } },
+        },
+      }),
+      this.prisma.bankPayerHint.findMany({ where: { studentId: id, count: { gt: 0 } }, orderBy: { count: 'desc' }, select: { kind: true, value: true, count: true } }),
+    ]);
+    const p = u.studentProfile;
+    return {
+      student: {
+        ...cards.get(id)!,
+        phone: u.phone,
+        fatherPhone: p?.fatherPhone ?? null,
+        motherPhone: p?.motherPhone ?? null,
+        guardianNote: p?.guardianNote ?? null,
+        school: p?.school ?? null,
+        grade: p?.grade ?? null,
+        branch: p?.branch ?? null,
+      },
+      bank: allocs
+        .sort((a, b) => b.bankTx.bookedAt.getTime() - a.bankTx.bookedAt.getTime())
+        .map((a) => {
+          const { main, sender } = splitSender(a.bankTx.description);
+          return {
+            id: a.id,
+            kind: a.kind,
+            kindLabel: ALLOC_LABEL[a.kind as AllocKind],
+            amount: a.amount,
+            txAmount: a.bankTx.amount,
+            bookedAt: a.bankTx.bookedAt,
+            description: main.trim(),
+            sender: sender.trim() || null,
+            counterparty: a.bankTx.counterparty,
+            auto: a.auto,
+            inSheet: !!a.paymentId && !a.paymentId.startsWith('bank_'),
+          };
+        }),
+      payers: hints.map((h) => ({ kind: h.kind as 'ACCOUNT' | 'PHONE', value: h.value, count: h.count })),
+    };
   }
 
   /** Хүүхдийн товч мэдээлэл: нэр, суудаг анги, гарсан эсэх. */

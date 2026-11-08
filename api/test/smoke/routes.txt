@@ -136,6 +136,7 @@ GET /api/recommend/next
 GET /api/reconcile/overview
 GET /api/reconcile/rows
 GET /api/reconcile/students
+GET /api/reconcile/students/:id
 GET /api/schedule
 GET /api/schedule/:id
 GET /api/schedule/:id/plan

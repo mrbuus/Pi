@@ -69,6 +69,12 @@ export class ReconcileController {
     return this.reconcile.searchStudents(query.q);
   }
 
+  /** GET /reconcile/students/:id — «⋯» дэлгэрэнгүй: утас, эцэг эх, хуулгаас оноосон гүйлгээ */
+  @Get('students/:id')
+  student(@Param('id') id: string) {
+    return this.reconcile.studentDetail(id);
+  }
+
   /** POST /reconcile/rows/:id/allocate — нэг гүйлгээг хүүхэд/зориулалтад хуваарилах */
   @Post('rows/:id/allocate')
   @HttpCode(200)

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, CircleAlert, FileSpreadsheet, Landmark, Split, Undo2, UserRound, Users } from "lucide-react";
+import { Check, CircleAlert, FileSpreadsheet, Split, Undo2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
@@ -11,6 +11,9 @@ import LedgerDialog from "@/components/payments/LedgerDialog";
 import { mnt, stampLabel } from "@/components/payments/ledgerFormat";
 import { errMsg } from "@/components/payments/paymentHelpers";
 import AllocateDialog from "./AllocateDialog";
+import PayerInfo from "./PayerInfo";
+import StudentDetailDialog from "./StudentDetailDialog";
+import { MoreButton } from "./StudentPicker";
 import { SIGNAL_LABEL, STUDENT_KINDS, splitSender, type AllocPart, type BankRow, type Candidate } from "./types";
 
 const signals = (c: Candidate) => [...new Set(c.signals.map((s) => SIGNAL_LABEL[s]))].join(" + ");
@@ -30,7 +33,9 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
   const [busy, setBusy] = useState(false);
   const s = row.suggestion;
   const open = !row.resolvedAt;
-  const { main, sender } = splitSender(row.description);
+  const { main } = splitSender(row.description);
+  /** «⋯» дарсан санал болгосон хүүхэд */
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   async function quick(parts: AllocPart[]) {
     setBusy(true);
@@ -77,24 +82,7 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
       <p className="break-words text-base font-semibold leading-snug text-ink">
         {main || <span className="font-normal text-ink-dim">Утгагүй гүйлгээ</span>}
       </p>
-      {(sender || row.counterparty) && (
-        <dl className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-dim">
-          {sender && (
-            <div className="flex items-center gap-1.5">
-              <UserRound className="size-4 shrink-0" aria-hidden />
-              <dt className="sr-only">Илгээгч</dt>
-              <dd className="font-medium text-ink">{sender}</dd>
-            </div>
-          )}
-          {row.counterparty && (
-            <div className="flex items-center gap-1.5">
-              <Landmark className="size-4 shrink-0" aria-hidden />
-              <dt>Данс</dt>
-              <dd className="tabular-nums text-ink">{row.counterparty}</dd>
-            </div>
-          )}
-        </dl>
-      )}
+      <PayerInfo row={row} />
 
       {open && s && (
         <div className="space-y-2">
@@ -120,12 +108,12 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
           {canQuickKid && s.candidates.length > 0 && (
             <ul className="flex flex-wrap gap-2">
               {s.candidates.map((c) => (
-                <li key={c.studentId}>
+                <li key={c.studentId} className="flex items-stretch rounded-xl border border-line">
                   <button
                     type="button"
                     disabled={busy}
                     onClick={() => quick([{ kind: kidKind, amount: row.amount, studentId: c.studentId }])}
-                    className="row-interactive flex min-h-11 flex-col items-start rounded-xl border border-line px-3 py-1.5 text-left disabled:opacity-50"
+                    className="row-interactive flex min-h-11 flex-col items-start rounded-l-xl px-3 py-1.5 text-left disabled:opacity-50"
                   >
                     <span className="flex items-center gap-1.5 text-sm font-semibold text-ink">
                       <Check className="size-4 text-success" aria-hidden />
@@ -135,6 +123,7 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
                       <Meta items={[signals(c), c.sheetPays.length ? `Шийтэд ${c.sheetPays.map((x) => mnt(x.amount)).join(", ")}` : null]} />
                     </span>
                   </button>
+                  <MoreButton name={c.student?.name ?? "Хүүхэд"} onClick={() => setDetailId(c.studentId)} />
                 </li>
               ))}
             </ul>
@@ -199,6 +188,20 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
         )}
       </footer>
 
+      <StudentDetailDialog
+        studentId={detailId}
+        open={!!detailId}
+        onOpenChange={(o) => !o && setDetailId(null)}
+        onPick={
+          canQuickKid && detailId
+            ? () => {
+                const id = detailId;
+                setDetailId(null);
+                quick([{ kind: kidKind, amount: row.amount, studentId: id }]);
+              }
+            : undefined
+        }
+      />
       <AllocateDialog row={row} open={dialog} onOpenChange={setDialog} onSaved={(n) => onDone(row.id, n)} />
       <LedgerDialog
         open={confirmUndo}

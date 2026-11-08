@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/kit/button";
 import LedgerDialog, { inputCls } from "@/components/payments/LedgerDialog";
 import { dayLabel, mnt } from "@/components/payments/ledgerFormat";
 import { errMsg } from "@/components/payments/paymentHelpers";
+import PayerInfo from "./PayerInfo";
 import StudentPicker from "./StudentPicker";
-import { KIND_LABEL, STUDENT_KINDS, type AllocKind, type BankRow, type StudentCard } from "./types";
+import { KIND_LABEL, STUDENT_KINDS, splitSender, type AllocKind, type BankRow, type StudentCard } from "./types";
 
 type Draft = { key: number; kind: AllocKind; amount: string; student: StudentCard | null };
 
@@ -105,7 +106,7 @@ export default function AllocateDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Хуваарилах"
-      description={`${mnt(row.amount)} — ${row.description || "утгагүй"}`}
+      description={`${mnt(row.amount)} — ${splitSender(row.description).main || "утгагүй"}`}
       footer={
         <Button onClick={save} disabled={saving || rest !== 0 || missingKid} className="w-full sm:w-auto">
           {saving ? "Хадгалж байна" : "Хадгалах"}
@@ -113,6 +114,7 @@ export default function AllocateDialog({
       }
     >
       <div className="space-y-4">
+        <PayerInfo row={row} />
         {parts.map((p, i) => (
           <fieldset key={p.key} className="space-y-2 rounded-2xl border border-line p-3">
             <legend className="sr-only">Хэсэг {i + 1}</legend>

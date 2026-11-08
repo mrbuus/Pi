@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Search, X } from "lucide-react";
+import { Loader2, MoreHorizontal, Search, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { Meta } from "@/components/ui/Meta";
 import { inputCls } from "@/components/payments/LedgerDialog";
+import StudentDetailDialog from "./StudentDetailDialog";
 import type { StudentCard } from "./types";
 
 /** Хүүхэд хайх (нэр, овог эсвэл утасны хэсгээр) — сонгосныг харуулж, солих боломжтой. */
@@ -24,6 +25,8 @@ export default function StudentPicker({
   const [items, setItems] = useState<StudentCard[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** «⋯» дарсан хүүхэд — дэлгэрэнгүй цонх */
+  const [detail, setDetail] = useState<StudentCard | null>(null);
 
   useEffect(() => {
     const t = q.trim();
@@ -46,12 +49,30 @@ export default function StudentPicker({
     return () => clearTimeout(timer);
   }, [q]);
 
+  const detailDialog = (
+    <StudentDetailDialog
+      studentId={detail?.id ?? null}
+      open={!!detail}
+      onOpenChange={(o) => !o && setDetail(null)}
+      onPick={
+        detail && detail.id !== value?.id
+          ? () => {
+              onChange(detail);
+              setDetail(null);
+            }
+          : undefined
+      }
+    />
+  );
+
   if (value)
     return (
-      <div className="flex min-h-11 items-center justify-between gap-2 rounded-xl border border-brand/40 bg-brand-bright/5 px-3">
-        <span className="min-w-0 truncate text-sm font-semibold text-ink">
+      <div className="flex min-h-11 items-center justify-between gap-1 rounded-xl border border-brand/40 bg-brand-bright/5 pl-3">
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">
           <Meta items={[value.name, value.classroom, value.archived ? "Гарсан" : null]} />
         </span>
+        <MoreButton name={value.name} onClick={() => setDetail(value)} />
+        {detailDialog}
         <button
           type="button"
           onClick={() => onChange(null)}
@@ -82,19 +103,36 @@ export default function StudentPicker({
       {list.length > 0 && (
         <ul className="max-h-56 overflow-y-auto rounded-xl border border-line">
           {list.map((s) => (
-            <li key={s.id}>
+            <li key={s.id} className="flex items-center">
               <button
                 type="button"
                 onClick={() => onChange(s)}
-                className="row-interactive flex min-h-11 w-full items-center px-3 text-left text-sm text-ink"
+                className="row-interactive flex min-h-11 min-w-0 flex-1 items-center px-3 text-left text-sm text-ink"
               >
                 <Meta items={[s.name, s.classroom, s.archived ? "Гарсан" : null]} />
               </button>
+              <MoreButton name={s.name} onClick={() => setDetail(s)} />
             </li>
           ))}
         </ul>
       )}
       {q.trim().length >= 2 && !loading && !error && items.length === 0 && <p className="text-sm text-ink-dim">Олдсонгүй</p>}
+      {detailDialog}
     </div>
+  );
+}
+
+/** «⋯» — хүүхдийн дэлгэрэнгүй (утас, сарын төлбөр, хуулгын түүх) */
+export function MoreButton({ name, onClick }: { name: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`${name} — дэлгэрэнгүй`}
+      title="Дэлгэрэнгүй"
+      className="grid size-11 shrink-0 place-items-center rounded-lg text-ink-dim hover:bg-ink/5 hover:text-ink"
+    >
+      <MoreHorizontal className="size-5" aria-hidden />
+    </button>
   );
 }

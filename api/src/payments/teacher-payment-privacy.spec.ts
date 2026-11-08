@@ -53,6 +53,7 @@ const AGGREGATE_ROUTES: [Ctor, string, string][] = [
   [ReconcileController, 'rows', 'GET /reconcile/rows'],
   [ReconcileController, 'overview', 'GET /reconcile/overview'],
   [ReconcileController, 'students', 'GET /reconcile/students'],
+  [ReconcileController, 'student', 'GET /reconcile/students/:id'],
   [StoreController, 'adminGetRevenueSummary', 'GET /store/admin/revenue'],
   [TuitionController, 'listRefunds', 'GET /tuition/refunds'],
   [TuitionController, 'getRefund', 'GET /tuition/refund/:id'],

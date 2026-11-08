@@ -15,6 +15,7 @@ export default function LedgerDialog({
   description,
   children,
   footer,
+  wide = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -22,12 +23,14 @@ export default function LedgerDialog({
   description?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
+  /** Дэлгэрэнгүй мэдээлэлтэй цонх — компьютер дээр өргөн */
+  wide?: boolean;
 }) {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-[70] bg-ink/40 backdrop-blur-[2px]" />
-        <DialogPrimitive.Content className="elev-3 fixed inset-x-2 bottom-2 z-[71] flex max-h-[90dvh] flex-col rounded-2xl border border-line bg-surface outline-none sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(30rem,calc(100vw-2rem))] sm:-translate-x-1/2 sm:-translate-y-1/2">
+        <DialogPrimitive.Content className={`elev-3 fixed inset-x-2 bottom-2 z-[71] flex max-h-[90dvh] flex-col rounded-2xl border border-line bg-surface outline-none sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 ${wide ? "sm:w-[min(44rem,calc(100vw-2rem))]" : "sm:w-[min(30rem,calc(100vw-2rem))]"} sm:-translate-x-1/2 sm:-translate-y-1/2`}>
           <div className="flex items-start justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
             <div className="min-w-0">
               <DialogPrimitive.Title className="cyrillic-heading text-base font-bold text-ink">{title}</DialogPrimitive.Title>

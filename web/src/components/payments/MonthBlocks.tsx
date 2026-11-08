@@ -157,14 +157,17 @@ export function LargeBlocks({
   current,
   onPick,
   settled = false,
+  gridClass = "grid grid-cols-3 gap-2 sm:grid-cols-9",
 }: {
   blocks: MonthBlock[];
   current?: string;
   onPick?: (month: string) => void;
   settled?: boolean;
+  /** Цонх дотор (нарийн) бол багана цөөн */
+  gridClass?: string;
 }) {
   return (
-    <div className="grid grid-cols-3 gap-2 sm:grid-cols-9">
+    <div className={gridClass}>
       {blocks.map((b) => {
         const label = blockLabel(b, settled);
         const pickable = onPick && (b.state === "OWED" || b.state === "PARTIAL" || b.state === "FUTURE");
