@@ -34,6 +34,7 @@ import {
 import { CountGrid, CountRow, attendanceCounts, homeworkCounts } from "./parts";
 import { QuizMonthItem, QuizPctBadge, quizDayText, useQuizMonth, type QuizDayRow } from "./QuizDay";
 import { quizCoveredDays } from "@/lib/quizScore";
+import MakeupHistory from "@/components/makeup-visits/MakeupHistory";
 
 interface MonthAtt {
   date: string;
@@ -254,6 +255,15 @@ export default function StudentDrawer({
                   homework={homework}
                   currentClass={className}
                   quiz={quizRows}
+                />
+                {/* Нөхөлт: өөр ангид суусан, 406-д нөхсөн (байхгүй бол хэсэг гарахгүй) */}
+                <MakeupHistory
+                  studentId={studentId}
+                  wrap={(list, n) => (
+                    <Section title="Нөхөлт" hint={`${n} удаа`}>
+                      {list}
+                    </Section>
+                  )}
                 />
                 <NotesSection studentId={studentId} today={today} />
                 <FactsSection data={data} today={today} />

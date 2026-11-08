@@ -31,6 +31,7 @@ import {
 import MakeupChip from "./MakeupChip";
 import QuizScoreInput from "./QuizScoreInput";
 import type { QuizCellState } from "./useHomeworkQuiz";
+import VisitNoteChip, { type VisitNote } from "@/components/makeup-visits/VisitNoteChip";
 
 /** Ирц ба даалгаврын мөр ижил багануудтай — хоёр мөр босоогоор тэгширнэ */
 const COLS = "grid-cols-[1.5rem_repeat(4,minmax(0,1fr))] sm:grid-cols-[5.75rem_repeat(4,minmax(0,1fr))]";
@@ -145,6 +146,8 @@ export interface CardProps {
   onQuizScore?: (id: string, value: number | null, now?: boolean) => void;
   onQuizFlush?: (id: string) => void;
   onQuizInvalid?: (id: string, invalid: boolean) => void;
+  /** Нөхөлт: «12-6 ангид нөхөж суусан» (makeup-visits) — нэрийн доор */
+  visitNote?: VisitNote;
 }
 
 function StudentCardImpl({
@@ -173,6 +176,7 @@ function StudentCardImpl({
   onQuizScore,
   onQuizFlush,
   onQuizInvalid,
+  visitNote,
 }: CardProps) {
   const detailId = `note-${id}`;
   const preview = [rec.attNote.trim(), homework ? rec.hwNote.trim() : ""].filter(Boolean).join(", ");
@@ -223,6 +227,7 @@ function StudentCardImpl({
             <MakeupChip status={makeup} />
           </span>
         )}
+        {visitNote && <VisitNoteChip note={visitNote} />}
         {!open && preview && (
           <button
             type="button"

@@ -7,5 +7,7 @@ import { ClassSessionsService } from './class-sessions.service';
   imports: [PrismaModule],
   controllers: [ClassSessionsController],
   providers: [ClassSessionsService],
+  // Нөхөлт (makeup-visits) замын зургийг уншина
+  exports: [ClassSessionsService],
 })
 export class ClassSessionsModule {}

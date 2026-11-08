@@ -800,3 +800,20 @@ export type HomeworkQuiz = Prisma.HomeworkQuizModel
  * Шалгалтын нэг сурагчийн оноо (бүхэл тоо 0..problemCount). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
  */
 export type HomeworkQuizScore = Prisma.HomeworkQuizScoreModel
+/**
+ * Model MakeupVisit
+ * Нөхөлт (эзэн 2026-11-08): өөрийн ангидаа хийж чадаагүй хичээлээ нөхсөн нэг удаа.
+ * - Өөр ангид суусан: hostClassroomId = зочилсон анги (ж: 12-4-ийн сурагч 12-6-д). Хийсэн
+ * тест = тэр ангийн тэр өдрийн хичээлийнх (ClassTestSession, эс бөгөөс төлөвлөгөө) —
+ * уншихдаа тооцно (makeup-visits/covered.logic.ts), энд хуулахгүй.
+ * - 406 өрөө: hostClassroomId = null. Хийсэн тестийг багш сонгоно → MakeupVisitTest.
+ * Давхардал: нэг сурагч, нэг өдөр, нэг газар (placeKey = hostClassroomId эсвэл "406")
+ * идэвхтэй ганц мөр. Устгах нь зөөлөн (deletedAt). Хэрэглэгч/ангийн FK-гүй (ClassCheck-ийн адил).
+ */
+export type MakeupVisit = Prisma.MakeupVisitModel
+/**
+ * Model MakeupVisitTest
+ * 406 өрөөнд нөхөж хийсэн тест/сэдэв. testId = null бол бодлогын санд байхгүй, багшийн
+ * бичсэн сэдэв (title). Сэдвийг солиход хасагдсан мөр зөөлөн устна (түүх үлдэнэ).
+ */
+export type MakeupVisitTest = Prisma.MakeupVisitTestModel

@@ -3434,3 +3434,60 @@ model HomeworkQuizScore {
   @@unique([quizId, studentId])
   @@index([studentId])
 }
+
+/// Нөхөлт (эзэн 2026-11-08): өөрийн ангидаа хийж чадаагүй хичээлээ нөхсөн нэг удаа.
+/// - Өөр ангид суусан: hostClassroomId = зочилсон анги (ж: 12-4-ийн сурагч 12-6-д). Хийсэн
+///   тест = тэр ангийн тэр өдрийн хичээлийнх (ClassTestSession, эс бөгөөс төлөвлөгөө) —
+///   уншихдаа тооцно (makeup-visits/covered.logic.ts), энд хуулахгүй.
+/// - 406 өрөө: hostClassroomId = null. Хийсэн тестийг багш сонгоно → MakeupVisitTest.
+/// Давхардал: нэг сурагч, нэг өдөр, нэг газар (placeKey = hostClassroomId эсвэл "406")
+/// идэвхтэй ганц мөр. Устгах нь зөөлөн (deletedAt). Хэрэглэгч/ангийн FK-гүй (ClassCheck-ийн адил).
+model MakeupVisit {
+  id              String              @id @default(cuid())
+  studentId       String
+  date            DateTime            @db.Date
+  /// Зочилсон анги; null = 406 өрөө
+  hostClassroomId String?
+  /// hostClassroomId эсвэл "406" — давхардлын түлхүүр
+  placeKey        String
+  /// Нэмэх үеийн сурагчийн өөрийн анги (дараа анги сольсон ч түүх зөв үлдэнэ)
+  homeClassroomId String?
+  /// Багшийн тайлбар — заавал биш
+  comment         String?             @db.VarChar(500)
+  /// Зочилсон ангийн самбар дахь ирц, даалгавар (энгийн сурагчийнхтай ижил блок).
+  /// Attendance хүснэгтэд бичихгүй: сурагчийн ирцийн хувь хоёр дахин тоологдохгүй.
+  attStatus       AttendanceStatus?
+  lateRange       LateRange?
+  attNote         String?             @db.VarChar(200)
+  hwStatus        HomeworkMarkStatus?
+  hwNote          String?             @db.VarChar(200)
+  createdById     String
+  createdAt       DateTime            @default(now())
+  updatedById     String?
+  updatedAt       DateTime            @updatedAt
+  deletedAt       DateTime?
+  deletedById     String?
+  tests           MakeupVisitTest[]
+
+  @@unique([studentId, date, placeKey], where: { deletedAt: null })
+  @@index([placeKey, date])
+  @@index([homeClassroomId, date])
+  @@index([studentId, date])
+}
+
+/// 406 өрөөнд нөхөж хийсэн тест/сэдэв. testId = null бол бодлогын санд байхгүй, багшийн
+/// бичсэн сэдэв (title). Сэдвийг солиход хасагдсан мөр зөөлөн устна (түүх үлдэнэ).
+model MakeupVisitTest {
+  id          String      @id @default(cuid())
+  visitId     String
+  visit       MakeupVisit @relation(fields: [visitId], references: [id], onDelete: Restrict)
+  testId      String?
+  title       String      @db.VarChar(200)
+  createdById String
+  createdAt   DateTime    @default(now())
+  deletedAt   DateTime?
+  deletedById String?
+
+  @@index([visitId])
+  @@index([testId])
+}
