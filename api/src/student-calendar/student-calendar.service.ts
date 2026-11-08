@@ -413,7 +413,7 @@ export class StudentCalendarService {
         select: { classroomId: true, date: true, status: true },
       }),
       this.makeups.coveredByStudent(studentId),
-      this.prisma.classSchedule.findMany({ where: { classroomId: { in: classIds } }, select: { id: true, classroomId: true } })
+      this.prisma.classSchedule.findMany({ where: { classroomId: { in: classIds }, deletedAt: null }, select: { id: true, classroomId: true } })
     ]);
 
     // Ангийн хичээлийн дэлгэрэнгүй (батламжийн тайлбар, ахлах багш, багшийн тэмдэглэл) — тест хийсэн өдрүүдээр
