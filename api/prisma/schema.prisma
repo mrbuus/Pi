@@ -3353,3 +3353,37 @@ model HomeworkComment {
   @@index([studentId, classroomId, lessonDate])
   @@index([classroomId, lessonDate])
 }
+
+/// Гэрийн даалгаврыг ангид богино шалгалтаар шалгах (эзэн 2026-11-08): ижил төрлийн, өөр тоотой
+/// бодлого. Нэг анги × нэг өдөр = нэг шалгалт. «Устгах» = deletedAt (оноонууд мөн deletedAt-тай нуугдана);
+/// дахин эхлүүлбэл ижил мөр сэргэж, оноо хоосноос эхэлнэ. Зөвхөн ажилтан харна.
+model HomeworkQuiz {
+  id           String              @id @default(cuid())
+  classroomId  String
+  date         DateTime            @db.Date
+  problemCount Int
+  createdById  String
+  updatedById  String
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  deletedAt    DateTime?
+  scores       HomeworkQuizScore[]
+
+  @@unique([classroomId, date])
+}
+
+/// Шалгалтын нэг сурагчийн оноо (бүхэл тоо 0..problemCount). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
+model HomeworkQuizScore {
+  id          String       @id @default(cuid())
+  quizId      String
+  quiz        HomeworkQuiz @relation(fields: [quizId], references: [id], onDelete: Restrict)
+  studentId   String
+  score       Int
+  updatedById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@unique([quizId, studentId])
+  @@index([studentId])
+}

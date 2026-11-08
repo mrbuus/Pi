@@ -533,7 +533,9 @@ export const ModelName = {
   AccountDeletionRequest: 'AccountDeletionRequest',
   UiEvent: 'UiEvent',
   HomeworkDeadline: 'HomeworkDeadline',
-  HomeworkComment: 'HomeworkComment'
+  HomeworkComment: 'HomeworkComment',
+  HomeworkQuiz: 'HomeworkQuiz',
+  HomeworkQuizScore: 'HomeworkQuizScore'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -549,7 +551,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment" | "homeworkQuiz" | "homeworkQuizScore"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -10691,6 +10693,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    HomeworkQuiz: {
+      payload: Prisma.$HomeworkQuizPayload<ExtArgs>
+      fields: Prisma.HomeworkQuizFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeworkQuizFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeworkQuizFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>
+        }
+        findFirst: {
+          args: Prisma.HomeworkQuizFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeworkQuizFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>
+        }
+        findMany: {
+          args: Prisma.HomeworkQuizFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>[]
+        }
+        create: {
+          args: Prisma.HomeworkQuizCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>
+        }
+        createMany: {
+          args: Prisma.HomeworkQuizCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeworkQuizCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>[]
+        }
+        delete: {
+          args: Prisma.HomeworkQuizDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>
+        }
+        update: {
+          args: Prisma.HomeworkQuizUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeworkQuizDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeworkQuizUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeworkQuizUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeworkQuizUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>
+        }
+        aggregate: {
+          args: Prisma.HomeworkQuizAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeworkQuiz>
+        }
+        groupBy: {
+          args: Prisma.HomeworkQuizGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkQuizGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeworkQuizCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkQuizCountAggregateOutputType> | number
+        }
+      }
+    }
+    HomeworkQuizScore: {
+      payload: Prisma.$HomeworkQuizScorePayload<ExtArgs>
+      fields: Prisma.HomeworkQuizScoreFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeworkQuizScoreFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeworkQuizScoreFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>
+        }
+        findFirst: {
+          args: Prisma.HomeworkQuizScoreFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeworkQuizScoreFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>
+        }
+        findMany: {
+          args: Prisma.HomeworkQuizScoreFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>[]
+        }
+        create: {
+          args: Prisma.HomeworkQuizScoreCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>
+        }
+        createMany: {
+          args: Prisma.HomeworkQuizScoreCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeworkQuizScoreCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>[]
+        }
+        delete: {
+          args: Prisma.HomeworkQuizScoreDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>
+        }
+        update: {
+          args: Prisma.HomeworkQuizScoreUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeworkQuizScoreDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeworkQuizScoreUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeworkQuizScoreUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeworkQuizScoreUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>
+        }
+        aggregate: {
+          args: Prisma.HomeworkQuizScoreAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeworkQuizScore>
+        }
+        groupBy: {
+          args: Prisma.HomeworkQuizScoreGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkQuizScoreGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeworkQuizScoreCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkQuizScoreCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -12836,6 +12986,35 @@ export const HomeworkCommentScalarFieldEnum = {
 export type HomeworkCommentScalarFieldEnum = (typeof HomeworkCommentScalarFieldEnum)[keyof typeof HomeworkCommentScalarFieldEnum]
 
 
+export const HomeworkQuizScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  date: 'date',
+  problemCount: 'problemCount',
+  createdById: 'createdById',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type HomeworkQuizScalarFieldEnum = (typeof HomeworkQuizScalarFieldEnum)[keyof typeof HomeworkQuizScalarFieldEnum]
+
+
+export const HomeworkQuizScoreScalarFieldEnum = {
+  id: 'id',
+  quizId: 'quizId',
+  studentId: 'studentId',
+  score: 'score',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type HomeworkQuizScoreScalarFieldEnum = (typeof HomeworkQuizScoreScalarFieldEnum)[keyof typeof HomeworkQuizScoreScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -13996,6 +14175,8 @@ export type GlobalOmitConfig = {
   uiEvent?: Prisma.UiEventOmit
   homeworkDeadline?: Prisma.HomeworkDeadlineOmit
   homeworkComment?: Prisma.HomeworkCommentOmit
+  homeworkQuiz?: Prisma.HomeworkQuizOmit
+  homeworkQuizScore?: Prisma.HomeworkQuizScoreOmit
 }
 
 /* Types for Logging */

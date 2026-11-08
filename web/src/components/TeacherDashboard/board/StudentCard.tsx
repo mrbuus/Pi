@@ -29,6 +29,8 @@ import {
   type MakeupStatus,
 } from "./lib";
 import MakeupChip from "./MakeupChip";
+import QuizScoreInput from "./QuizScoreInput";
+import type { QuizCellState } from "./useHomeworkQuiz";
 
 /** Ирц ба даалгаврын мөр ижил багануудтай — хоёр мөр босоогоор тэгширнэ */
 const COLS = "grid-cols-[1.5rem_repeat(4,minmax(0,1fr))] sm:grid-cols-[5.75rem_repeat(4,minmax(0,1fr))]";
@@ -135,6 +137,14 @@ export interface CardProps {
   onDrawer: (id: string) => void;
   /** «Онлайн» дэлгэрэнгүй (оноо, хугацаа, хариу, зураг) */
   onOnline: (id: string) => void;
+  /** Шалгалтаар шалгах горим (QuizBar): бодлогын тоо — null бол «Онлайн» нүд хэвээр */
+  quizMax?: number | null;
+  /** Энэ өдрийн шалгалтын оноо (горим нуугдсан ч) — оноотой бол «шалгаагүй» гэж тодруулахгүй */
+  quizScore?: number | null;
+  quizState?: QuizCellState | null;
+  onQuizScore?: (id: string, value: number | null, now?: boolean) => void;
+  onQuizFlush?: (id: string) => void;
+  onQuizInvalid?: (id: string, invalid: boolean) => void;
 }
 
 function StudentCardImpl({
@@ -157,6 +167,12 @@ function StudentCardImpl({
   onHwNote,
   onDrawer,
   onOnline,
+  quizMax = null,
+  quizScore = null,
+  quizState = null,
+  onQuizScore,
+  onQuizFlush,
+  onQuizInvalid,
 }: CardProps) {
   const detailId = `note-${id}`;
   const preview = [rec.attNote.trim(), homework ? rec.hwNote.trim() : ""].filter(Boolean).join(", ");
@@ -175,7 +191,8 @@ function StudentCardImpl({
   };
 
   // Даалгавраа илгээсэн ч багш одоохондоо тэмдэглээгүй (эзэн 2026-11-03) — өөр өнгөөр тодорно; тэмдэглэмэгц энгийн болно
-  const awaiting = homework && sent && rec.hw === null;
+  // Шалгалтын оноотой бол даалгаврыг шалгасанд тооцно (эзэн 2026-11-08)
+  const awaiting = homework && sent && rec.hw === null && quizScore === null;
   return (
     <li
       data-awaiting={awaiting || undefined}
@@ -244,8 +261,20 @@ function StudentCardImpl({
             className={cn(COLS, "rounded-lg bg-ink/[0.05] p-1")}
             leading={<RowLabel icon={NotebookPen} text="Даалгавар" className="text-ink-dim" />}
           >
-            {/* Онлайн тест байхгүй ч сурагч дэвтрийн зураг илгээсэн бол дарж харна (эзэн 2026-11-03) */}
-            {onlineTests || sent ? (
+            {/* Шалгалтаар шалгах горимд «Онлайн»-ы оронд онооны талбар (эзэн 2026-11-08) */}
+            {quizMax !== null && onQuizScore && onQuizFlush && onQuizInvalid ? (
+              <QuizScoreInput
+                id={id}
+                name={name}
+                max={quizMax}
+                score={quizScore}
+                state={quizState}
+                onScore={onQuizScore}
+                onFlush={onQuizFlush}
+                onInvalid={onQuizInvalid}
+              />
+            ) : /* Онлайн тест байхгүй ч сурагч дэвтрийн зураг илгээсэн бол дарж харна (эзэн 2026-11-03) */
+            onlineTests || sent ? (
               <button
                 type="button"
                 onClick={() => onOnline(id)}
