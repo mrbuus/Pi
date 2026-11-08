@@ -3,6 +3,7 @@ import { HealthController } from './health.controller';
 import { StudyReviewModule } from './study-review/study-review.module';
 import { LessonFlowModule } from './lesson-flow/lesson-flow.module';
 import { LessonDayModule } from './lesson-day/lesson-day.module';
+import { MakeupVisitsModule } from './makeup-visits/makeup-visits.module';
 import { LessonRecordsModule } from './lesson-records/lesson-records.module';
 import { CentreHelpModule } from './centre-help/centre-help.module';
 import { FeedbackModule } from './feedback/feedback.module';
@@ -190,6 +191,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     CentreHelpModule,
     LessonFlowModule,
     LessonDayModule,
+    MakeupVisitsModule,
     LessonRecordsModule,
     // Буцаах ба өөрчлөлтийн түүх (docs/v2/BUTSAAH-TUUKH-TOLOVLOGOO.md)
     RevisionsModule,

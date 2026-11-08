@@ -533,7 +533,9 @@ export const ModelName = {
   AccountDeletionRequest: 'AccountDeletionRequest',
   UiEvent: 'UiEvent',
   HomeworkDeadline: 'HomeworkDeadline',
-  HomeworkComment: 'HomeworkComment'
+  HomeworkComment: 'HomeworkComment',
+  MakeupVisit: 'MakeupVisit',
+  MakeupVisitTest: 'MakeupVisitTest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -549,7 +551,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment" | "makeupVisit" | "makeupVisitTest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -10691,6 +10693,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MakeupVisit: {
+      payload: Prisma.$MakeupVisitPayload<ExtArgs>
+      fields: Prisma.MakeupVisitFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MakeupVisitFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MakeupVisitFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>
+        }
+        findFirst: {
+          args: Prisma.MakeupVisitFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MakeupVisitFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>
+        }
+        findMany: {
+          args: Prisma.MakeupVisitFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>[]
+        }
+        create: {
+          args: Prisma.MakeupVisitCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>
+        }
+        createMany: {
+          args: Prisma.MakeupVisitCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MakeupVisitCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>[]
+        }
+        delete: {
+          args: Prisma.MakeupVisitDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>
+        }
+        update: {
+          args: Prisma.MakeupVisitUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>
+        }
+        deleteMany: {
+          args: Prisma.MakeupVisitDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MakeupVisitUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MakeupVisitUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>[]
+        }
+        upsert: {
+          args: Prisma.MakeupVisitUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>
+        }
+        aggregate: {
+          args: Prisma.MakeupVisitAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMakeupVisit>
+        }
+        groupBy: {
+          args: Prisma.MakeupVisitGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MakeupVisitGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MakeupVisitCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MakeupVisitCountAggregateOutputType> | number
+        }
+      }
+    }
+    MakeupVisitTest: {
+      payload: Prisma.$MakeupVisitTestPayload<ExtArgs>
+      fields: Prisma.MakeupVisitTestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MakeupVisitTestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MakeupVisitTestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>
+        }
+        findFirst: {
+          args: Prisma.MakeupVisitTestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MakeupVisitTestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>
+        }
+        findMany: {
+          args: Prisma.MakeupVisitTestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>[]
+        }
+        create: {
+          args: Prisma.MakeupVisitTestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>
+        }
+        createMany: {
+          args: Prisma.MakeupVisitTestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MakeupVisitTestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>[]
+        }
+        delete: {
+          args: Prisma.MakeupVisitTestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>
+        }
+        update: {
+          args: Prisma.MakeupVisitTestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>
+        }
+        deleteMany: {
+          args: Prisma.MakeupVisitTestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MakeupVisitTestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MakeupVisitTestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>[]
+        }
+        upsert: {
+          args: Prisma.MakeupVisitTestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>
+        }
+        aggregate: {
+          args: Prisma.MakeupVisitTestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMakeupVisitTest>
+        }
+        groupBy: {
+          args: Prisma.MakeupVisitTestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MakeupVisitTestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MakeupVisitTestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MakeupVisitTestCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -12836,6 +12986,44 @@ export const HomeworkCommentScalarFieldEnum = {
 export type HomeworkCommentScalarFieldEnum = (typeof HomeworkCommentScalarFieldEnum)[keyof typeof HomeworkCommentScalarFieldEnum]
 
 
+export const MakeupVisitScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  date: 'date',
+  hostClassroomId: 'hostClassroomId',
+  placeKey: 'placeKey',
+  homeClassroomId: 'homeClassroomId',
+  comment: 'comment',
+  attStatus: 'attStatus',
+  lateRange: 'lateRange',
+  attNote: 'attNote',
+  hwStatus: 'hwStatus',
+  hwNote: 'hwNote',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
+} as const
+
+export type MakeupVisitScalarFieldEnum = (typeof MakeupVisitScalarFieldEnum)[keyof typeof MakeupVisitScalarFieldEnum]
+
+
+export const MakeupVisitTestScalarFieldEnum = {
+  id: 'id',
+  visitId: 'visitId',
+  testId: 'testId',
+  title: 'title',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
+} as const
+
+export type MakeupVisitTestScalarFieldEnum = (typeof MakeupVisitTestScalarFieldEnum)[keyof typeof MakeupVisitTestScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -13996,6 +14184,8 @@ export type GlobalOmitConfig = {
   uiEvent?: Prisma.UiEventOmit
   homeworkDeadline?: Prisma.HomeworkDeadlineOmit
   homeworkComment?: Prisma.HomeworkCommentOmit
+  makeupVisit?: Prisma.MakeupVisitOmit
+  makeupVisitTest?: Prisma.MakeupVisitTestOmit
 }
 
 /* Types for Logging */

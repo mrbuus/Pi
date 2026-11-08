@@ -1611,5 +1611,126 @@
     "roles": [
       "STUDENT"
     ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
+    "path": "/api/makeup-visits/students/search",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
+    "path": "/api/makeup-visits/classrooms",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
+    "path": "/api/makeup-visits/classrooms/:classroomId/students",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
+    "path": "/api/makeup-visits",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
+    "path": "/api/makeup-visits/home",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "POST",
+    "path": "/api/makeup-visits",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "PUT",
+    "path": "/api/makeup-visits/tests",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "PATCH",
+    "path": "/api/makeup-visits/:id",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "DELETE",
+    "path": "/api/makeup-visits/:id",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
+    "path": "/api/students/:id/makeup-visits",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER",
+      "STUDENT"
+    ]
   }
 ]

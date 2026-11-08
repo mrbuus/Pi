@@ -187,7 +187,9 @@ export const ModelName = {
   AccountDeletionRequest: 'AccountDeletionRequest',
   UiEvent: 'UiEvent',
   HomeworkDeadline: 'HomeworkDeadline',
-  HomeworkComment: 'HomeworkComment'
+  HomeworkComment: 'HomeworkComment',
+  MakeupVisit: 'MakeupVisit',
+  MakeupVisitTest: 'MakeupVisitTest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -2310,6 +2312,44 @@ export const HomeworkCommentScalarFieldEnum = {
 } as const
 
 export type HomeworkCommentScalarFieldEnum = (typeof HomeworkCommentScalarFieldEnum)[keyof typeof HomeworkCommentScalarFieldEnum]
+
+
+export const MakeupVisitScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  date: 'date',
+  hostClassroomId: 'hostClassroomId',
+  placeKey: 'placeKey',
+  homeClassroomId: 'homeClassroomId',
+  comment: 'comment',
+  attStatus: 'attStatus',
+  lateRange: 'lateRange',
+  attNote: 'attNote',
+  hwStatus: 'hwStatus',
+  hwNote: 'hwNote',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
+} as const
+
+export type MakeupVisitScalarFieldEnum = (typeof MakeupVisitScalarFieldEnum)[keyof typeof MakeupVisitScalarFieldEnum]
+
+
+export const MakeupVisitTestScalarFieldEnum = {
+  id: 'id',
+  visitId: 'visitId',
+  testId: 'testId',
+  title: 'title',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
+} as const
+
+export type MakeupVisitTestScalarFieldEnum = (typeof MakeupVisitTestScalarFieldEnum)[keyof typeof MakeupVisitTestScalarFieldEnum]
 
 
 export const SortOrder = {
