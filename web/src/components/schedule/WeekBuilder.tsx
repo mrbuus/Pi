@@ -50,6 +50,13 @@ const BRANCHES = ["Баруун 4", "Зүүн 4", "Бусад"] as const;
 export default function WeekBuilder() {
   const [today] = useState(todayUBKey);
   const [day, setDay] = useState(defaultDay);
+  // 7 өдрийн мөрийн эхний өдөр. Сонгосон өдөр мөрнөөс гарвал мөр дагаж шилжинэ (эзэн 2026-11-08:
+  // сум дарахад гарчиг солигдоод доорх өдрүүд хөдөлдөггүй байсан)
+  const [stripStart, setStripStart] = useState(() => addDaysToKey(todayUBKey(), -1));
+  const go = (k: string) => {
+    setDay(k);
+    setStripStart((s) => (k < s ? k : k > addDaysToKey(s, 6) ? addDaysToKey(k, -6) : s));
+  };
   const [planOf, setPlanOf] = useState<string | null>(null);
   const [confirmOf, setConfirmOf] = useState<string | null>(null);
   const [moreOf, setMoreOf] = useState<string | null>(null);
@@ -197,7 +204,7 @@ export default function WeekBuilder() {
   const find = (id: string | null) => entries.find((e) => e.scheduleId === id) ?? null;
   const moreEntry = find(moreOf);
 
-  const strip = Array.from({ length: 7 }, (_, i) => addDaysToKey(today, i - 1));
+  const strip = Array.from({ length: 7 }, (_, i) => addDaysToKey(stripStart, i));
   const rel = (k: string) => (k === today ? "Өнөөдөр" : k === addDaysToKey(today, 1) ? "Маргааш" : k === addDaysToKey(today, -1) ? "Өчигдөр" : null);
 
   return (
@@ -223,7 +230,7 @@ export default function WeekBuilder() {
       <nav aria-label="Өдөр сонгох" className="flex items-center gap-1 rounded-xl border border-line bg-surface p-1">
         <button
           type="button"
-          onClick={() => setDay((d) => addDaysToKey(d, -1))}
+          onClick={() => go(addDaysToKey(day, -1))}
           aria-label="Өмнөх өдөр"
           className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-ink/5 hover:text-ink"
         >
@@ -240,7 +247,7 @@ export default function WeekBuilder() {
                 aria-pressed={on}
                 aria-current={isToday ? "date" : undefined}
                 aria-label={`${WEEKDAY_LABELS[weekdayOf(k)]}, ${k.slice(5).replace("-", ".")}${rel(k) ? `, ${rel(k)}` : ""}`}
-                onClick={() => setDay(k)}
+                onClick={() => go(k)}
                 className={cn(
                   "flex min-h-14 min-w-11 flex-1 flex-col items-center justify-center rounded-lg px-1.5 text-xs transition",
                   on ? "bg-brand-bright text-on-brand" : "text-ink hover:bg-ink/5",
@@ -259,7 +266,7 @@ export default function WeekBuilder() {
         </div>
         <button
           type="button"
-          onClick={() => setDay((d) => addDaysToKey(d, 1))}
+          onClick={() => go(addDaysToKey(day, 1))}
           aria-label="Дараагийн өдөр"
           className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-ink/5 hover:text-ink"
         >
@@ -267,7 +274,7 @@ export default function WeekBuilder() {
         </button>
         <DatePickerButton
           value={day}
-          onChange={(v) => v && setDay(v)}
+          onChange={(v) => v && go(v)}
           ariaLabel="Өдөр сонгох"
           className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-ink/5"
         >
@@ -313,7 +320,7 @@ export default function WeekBuilder() {
               action={
                 <button
                   type="button"
-                  onClick={() => setDay(addDaysToKey(today, 1))}
+                  onClick={() => go(addDaysToKey(today, 1))}
                   className="inline-flex min-h-11 items-center rounded-lg border border-line px-3 text-sm font-semibold"
                 >
                   Маргааш руу очих
