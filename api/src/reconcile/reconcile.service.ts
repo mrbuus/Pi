@@ -845,6 +845,7 @@ export class ReconcileService {
         take: 50,
         select: {
           id: true,
+          bankTxId: true,
           kind: true,
           amount: true,
           auto: true,
@@ -872,6 +873,7 @@ export class ReconcileService {
           const { main, sender } = splitSender(a.bankTx.description);
           return {
             id: a.id,
+            bankTxId: a.bankTxId,
             kind: a.kind,
             kindLabel: ALLOC_LABEL[a.kind as AllocKind],
             amount: a.amount,

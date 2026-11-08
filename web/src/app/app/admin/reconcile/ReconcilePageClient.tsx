@@ -12,7 +12,7 @@ import LedgerDialog, { Field, Segmented, inputCls } from "@/components/payments/
 import { dayLabel } from "@/components/payments/ledgerFormat";
 import { errMsg } from "@/components/payments/paymentHelpers";
 import RowCard from "./RowCard";
-import type { BankRow, ImportSummary, Lane, Overview } from "./types";
+import { RECONCILE_CHANGED, type BankRow, type ImportSummary, type Lane, type Overview } from "./types";
 
 const LANES: { key: Lane; label: string; empty: string }[] = [
   { key: "manual", label: "Шийдэх", empty: "Шийдэх гүйлгээ алга — бүгд хуваарилагдсан" },
@@ -76,6 +76,16 @@ export function ReconcilePageClient() {
     const t = setTimeout(() => loadRows("reset"), q ? 300 : 0);
     return () => clearTimeout(t);
   }, [loadRows, q]);
+
+  // «⋯» цонхноос хуваарилалт буцаавал тоо, жагсаалт шинэчлэгдэнэ (байрлал үсрэхгүй)
+  useEffect(() => {
+    const refresh = () => {
+      loadOverview();
+      loadRows("soft");
+    };
+    window.addEventListener(RECONCILE_CHANGED, refresh);
+    return () => window.removeEventListener(RECONCILE_CHANGED, refresh);
+  }, [loadOverview, loadRows]);
 
   /** Хуваарилсан/буцаасан мөр л жагсаалтаас гарна — хуудас дахин ачаалахгүй */
   const onDone = (rowId: string, alsoResolved?: number) => {

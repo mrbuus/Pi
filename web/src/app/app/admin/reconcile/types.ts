@@ -137,6 +137,7 @@ export interface StudentDetail {
   /** Хуулгаас энэ хүүхдэд оноосон гүйлгээ (шинэ нь эхэндээ) */
   bank: {
     id: string;
+    bankTxId: string;
     kind: AllocKind;
     kindLabel: string;
     amount: number;
@@ -152,3 +153,6 @@ export interface StudentDetail {
   /** Энэ хүүхдэд оноосноор системийн сурсан данс, утас */
   payers: { kind: "ACCOUNT" | "PHONE"; value: string; count: number }[];
 }
+
+/** «⋯» цонхноос хуваарилалт буцаахад жагсаалт шинэчлэгдэнэ */
+export const RECONCILE_CHANGED = "reconcile:changed";
