@@ -9,6 +9,7 @@ import 'ui/formula_review_screen.dart';
 import 'ui/formulas_screen.dart';
 import 'ui/goals_screen.dart';
 import 'ui/learn_screens.dart';
+import 'ui/library_screen.dart';
 import 'ui/mistakes_screen.dart';
 import 'ui/mistakes_today_screen.dart';
 import 'ui/practice_screens.dart';
@@ -62,7 +63,11 @@ final learningRoutes = FeatureRoutes(
     GoRoute(path: '/app/library', builder: (context, state) => const LibraryScreen()),
     GoRoute(
       path: '/app/library/:chapterId/problems',
-      builder: (context, state) => ChapterProblemsScreen(chapterId: state.pathParameters['chapterId']!),
+      builder: (context, state) => ChapterProblemsScreen(
+        chapterId: state.pathParameters['chapterId']!,
+        title: state.uri.queryParameters['title'],
+        classroomAccess: state.uri.queryParameters['access'] != null,
+      ),
     ),
     GoRoute(path: '/app/goals', builder: (context, state) => const GoalsScreen()),
     GoRoute(path: '/app/readiness', builder: (context, state) => const ReadinessScreen()),

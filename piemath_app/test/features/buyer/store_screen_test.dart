@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:piemath_app/core/auth/session.dart';
 import 'package:piemath_app/core/auth/user_role.dart';
-import 'package:piemath_app/core/ui/theme.dart';
 import 'package:piemath_app/core/ui/ui.dart';
 import 'package:piemath_app/features/buyer/ui/store_screen.dart';
 

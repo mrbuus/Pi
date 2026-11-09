@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:piemath_app/features/learning/data/lesson_repository.dart';
 import 'package:piemath_app/features/learning/ui/learn_screens.dart';
+import 'package:piemath_app/features/learning/ui/library_screen.dart';
 
 import '../../helpers/fake_http.dart';
 import 'learning_test_app.dart';
@@ -53,24 +54,72 @@ void main() {
   });
 
   testWidgets('ном ачаалахад алдаа: дахин оролдох', (tester) async {
-    final bad = FakeHttp()..error('GET', '/lessons/chapters', 500);
+    final bad = FakeHttp()..error('GET', '/books', 500);
     await pumpLearning(tester, bad, location: '/app/library');
     expect(find.text('Ном ачаалж чадсангүй'), findsOneWidget);
   });
 
-  testWidgets('ном: номоор бүлэглэнэ', (tester) async {
+  Map<String, Object?> book(String id, String title, {String? display, int? order, int tests = 3}) => {
+        'id': id,
+        'code': id.toUpperCase(),
+        'title': title,
+        'displayName': display,
+        'displayOrder': order,
+        'problemCount': 10,
+        'testCount': tests,
+        '_count': {'chapters': 2},
+      };
+  Map<String, Object?> ch(String id, String title, {int order = 0, bool free = false, int problems = 5, int theories = 0}) => {
+        'id': id,
+        'title': title,
+        'order': order,
+        'freePreview': free,
+        '_count': {'problems': problems, 'theories': theories, 'tests': 1},
+      };
+
+  testWidgets('бодлогын сан: хичээл, номын таб, сэдэв, тест → бодлогын жагсаалт', (tester) async {
     final http = FakeHttp()
-      ..json('GET', '/lessons/chapters', [
-        chapter('c1', 'Тэгшитгэл'),
-        chapter('c2', 'Функц', code: 'B2', book: 'Физик'),
+      ..json('GET', '/books', [
+        book('b1', '100x100', display: 'Е-1', order: 1, tests: 70),
+        book('b2', 'Хавтгай 1'),
+        {...book('b3', 'Хоосон'), 'problemCount': 0, '_count': {'chapters': 0}},
+      ])
+      ..json('GET', '/chapters', [
+        ch('c1', 'Илтгэгч функц · Тест 1', order: 1, free: true, theories: 2),
+        ch('c2', 'Илтгэгч функц · Тест 2', order: 2),
+        ch('c3', 'Логарифм · Тест 1', problems: 8),
       ]);
-    await pumpLearning(tester, http, location: '/app/library');
+    final router = await pumpLearning(tester, http, location: '/app/library');
     expect(find.byType(LibraryScreen), findsOneWidget);
-    expect(find.text('Математик 10'), findsOneWidget);
-    expect(find.text('Физик'), findsOneWidget);
-    await tester.tap(find.text('Физик'));
+    expect(http.requests.first.queryParameters, {'subject': 'MATH'});
+    expect(find.text('Е-1  70 тест'), findsOneWidget, reason: 'дотоод нэр «100x100» харагдахгүй');
+    expect(find.textContaining('100x100'), findsNothing);
+    expect(find.textContaining('Хоосон'), findsNothing, reason: 'бүтэцгүй ном');
+    expect(http.requests.last.queryParameters, {'bookId': 'b1'});
+    expect(find.text('Илтгэгч функц'), findsOneWidget);
+    expect(find.text('Тест 1'), findsOneWidget);
+    expect(find.text('Үнэгүй'), findsOneWidget);
+    await tester.tap(find.byTooltip('Дараах: Логарифм'));
     await settle(tester);
-    expect(find.text('Функц'), findsOneWidget);
+    expect(find.text('Логарифм'), findsOneWidget);
+    expect(find.textContaining('8 бодлого'), findsWidgets);
+    await tester.tap(find.text('Тест 1'));
+    await settle(tester);
+    expect(router.state.uri.path, '/app/library/c3/problems');
+    expect(router.state.uri.queryParameters['title'], 'Логарифм, Тест 1');
+  });
+
+  testWidgets('Нийгмийн ухаан: subject параметр, ном алга бол тайлбар', (tester) async {
+    final http = FakeHttp()
+      ..on('GET', '/books', (_) => FakeResponse([book('b1', 'Е-1')]))
+      ..on('GET', '/books', (_) => const FakeResponse(<Object?>[]))
+      ..json('GET', '/chapters', <Object?>[]);
+    await pumpLearning(tester, http, location: '/app/library');
+    expect(find.text('Ангидаа үзсэн сэдвүүд энд харагдана'), findsOneWidget);
+    await tester.tap(find.text('Нийгмийн ухаан'));
+    await settle(tester);
+    expect(http.requests.where((r) => r.path == '/books').last.queryParameters, {'subject': 'SOCIAL_STUDIES'});
+    expect(find.text('Энэ хичээлээр ном хараахан нэмэгдээгүй байна'), findsOneWidget);
   });
 
   testWidgets('хичээл: онол нээхэд THEORY_READ, бичлэг товшход YouTube nocookie, зөвхөн товшилтоор', (tester) async {

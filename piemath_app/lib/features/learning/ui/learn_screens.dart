@@ -122,64 +122,6 @@ class _LearnScreenState extends ConsumerState<LearnScreen> {
   }
 }
 
-/// `/app/library` — ном: нээлттэй бүлгүүд номоор нь.
-class LibraryScreen extends ConsumerWidget {
-  const LibraryScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final list = ref.watch(lessonChaptersProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Ном')),
-      body: list.when(
-        loading: () => const LoadingState(),
-        error: (e, _) => ErrorState(
-          title: 'Ном ачаалж чадсангүй',
-          message: errorText(e),
-          onRetry: () => ref.invalidate(lessonChaptersProvider),
-        ),
-        data: (all) {
-          if (all.isEmpty) {
-            return const EmptyState(
-              icon: AppIcons.libraryBig,
-              title: 'Одоогоор нээлттэй ном алга',
-              message: 'Ангид элсэх эсвэл эрх авсны дараа энд харагдана',
-            );
-          }
-          final groups = groupByBook(all);
-          return ListView(
-            padding: const EdgeInsets.all(AppSpace.gutter),
-            children: [
-              for (final (name, chapters) in groups) ...[
-                AppCard(
-                  padding: EdgeInsets.zero,
-                  child: Theme(
-                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                    child: ExpansionTile(
-                      initiallyExpanded: groups.length == 1,
-                      tilePadding: const EdgeInsets.symmetric(horizontal: AppSpace.lg),
-                      childrenPadding: const EdgeInsets.fromLTRB(AppSpace.md, 0, AppSpace.md, AppSpace.md),
-                      title: Text(name.isEmpty ? 'Бусад' : name, style: context.text.titleSmall),
-                      subtitle: Text('${chapters.length} бүлэг'),
-                      children: [
-                        for (final c in chapters) ...[
-                          ChapterRow(chapter: c, showBook: false),
-                          const SizedBox(height: AppSpace.sm),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppSpace.md),
-              ],
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
 /// `/app/learn/:chapterId` — бүлгийн онол, бичлэг, тест.
 class LessonScreen extends ConsumerWidget {
   const LessonScreen({super.key, required this.chapterId});
