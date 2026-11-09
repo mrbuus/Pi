@@ -17,6 +17,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { ledgersFor, primaryEnrollment } from '../payments/ledger-load';
 import { dropPaidUp, paidUpOn } from './huulga-paidup';
+import { DemoSheetService } from './demo-sheet.service';
 import { todayKeyUB } from '../payments/ledger';
 import { coveredThrough, parseKhanStatement, readXlsxGrid, shiftDay, StatementFormatError } from './khan-statement';
 import {
@@ -89,6 +90,7 @@ export class ReconcileService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly demoSheet: DemoSheetService,
   ) {}
 
   // ── Импорт ────────────────────────────────────────────────────────────────
@@ -462,7 +464,12 @@ export class ReconcileService {
     // Сурсан данс/утас бусад мөрийг шийдэж магадгүй
     const auto = await this.resolveOpen(actor);
     const settled = row.accountNo ? await this.recomputeCursor(row.accountNo) : null;
-    return { ok: true, alsoResolved: auto.resolved, settledThrough: settled };
+    // ДЕМО: зөвхөн хуулбар шийтэд (DEMO_SHEET_ID) — жинхэнэ шийтэд бичихгүй
+    const sheetWrites = await this.demoSheet.writeTuition(
+      parts.filter((p) => p.kind === 'TUITION' && p.studentId).map((p) => ({ studentId: p.studentId!, amount: p.amount })),
+      row.bookedAt,
+    );
+    return { ok: true, alsoResolved: auto.resolved, settledThrough: settled, sheetWrites };
   }
 
   async undo(id: string, actor: ReconcileActor) {
@@ -618,12 +625,15 @@ export class ReconcileService {
       this.prisma.bankTransaction.count({ where: { inSheet: true, suggestion: { path: ['sheetMissing'], equals: true } } }),
       this.prisma.bankTransaction.findFirst({ orderBy: { importedAt: 'desc' }, select: { importedAt: true } }),
     ]);
+    // ДЕМО: хуулбар шийтийн холбоос (жинхэнэ шийт биш)
+    const demoSheetId = this.demoSheet.enabled ? process.env.DEMO_SHEET_ID!.trim() : null;
     return {
       cursors: cursors.map((c) => ({ accountNo: c.accountNo, settledThrough: c.settledThrough, coveredThrough: c.coveredThrough, sheetThrough: c.sheetThrough })),
       counts: { manual, tuition, other, expense, sheet },
       /** Шийтэд хөтлөгдсөн гэж нуусан ч шийтэд байгааг баталж чадаагүй — шалгах */
       sheetCheck,
       lastImportAt: last?.importedAt ?? null,
+      demoSheetUrl: demoSheetId ? `https://docs.google.com/spreadsheets/d/${demoSheetId}/edit` : null,
     };
   }
 

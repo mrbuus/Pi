@@ -11,7 +11,7 @@ describe('ReconcileService.allocate шалгалт', () => {
     user: { count: jest.fn() },
     $transaction: jest.fn(),
   };
-  const service = new ReconcileService(prisma as unknown as PrismaService, { record: jest.fn() } as unknown as AuditService);
+  const service = new ReconcileService(prisma as unknown as PrismaService, { record: jest.fn() } as unknown as AuditService, { writeTuition: jest.fn(async () => []) } as never);
   const actor = { id: 'u', role: 'TEACHER_PLUS' };
 
   beforeEach(() => {

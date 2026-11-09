@@ -14,7 +14,7 @@ import AllocateDialog from "./AllocateDialog";
 import PayerInfo from "./PayerInfo";
 import StudentDetailDialog from "./StudentDetailDialog";
 import { MoreButton } from "./StudentPicker";
-import { SIGNAL_LABEL, STUDENT_KINDS, splitSender, type AllocPart, type BankRow, type Candidate } from "./types";
+import { SIGNAL_LABEL, STUDENT_KINDS, sheetWriteText, splitSender, type SheetWrite, type AllocPart, type BankRow, type Candidate } from "./types";
 
 const signals = (c: Candidate) => [...new Set(c.signals.map((s) => SIGNAL_LABEL[s]))].join(" + ");
 
@@ -40,8 +40,8 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
   async function quick(parts: AllocPart[]) {
     setBusy(true);
     try {
-      const res = await api<{ alsoResolved: number }>(`/reconcile/rows/${encodeURIComponent(row.id)}/allocate`, { method: "POST", body: { parts } });
-      toast.success("Хуваарилагдлаа");
+      const res = await api<{ alsoResolved: number; sheetWrites?: SheetWrite[] }>(`/reconcile/rows/${encodeURIComponent(row.id)}/allocate`, { method: "POST", body: { parts } });
+      toast.success("Хуваарилагдлаа", { description: sheetWriteText(res.sheetWrites) ?? undefined });
       onDone(row.id, res.alsoResolved);
     } catch (e) {
       toast.error(errMsg(e));

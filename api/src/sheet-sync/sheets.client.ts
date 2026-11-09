@@ -56,7 +56,7 @@ export class SheetsClient {
   }
 
   /** `'Хуудас'!A1:BZ` мэт мужийг уншина (FORMULA — томьёо, UNFORMATTED_VALUE — тоо). */
-  async readRange(range: string, render: 'FORMULA' | 'UNFORMATTED_VALUE'): Promise<unknown[][]> {
+  async readRange(range: string, render: 'FORMULA' | 'UNFORMATTED_VALUE' | 'FORMATTED_VALUE'): Promise<unknown[][]> {
     const client = await this.auth.getClient();
     const res = await client.request<{ values?: unknown[][] }>({
       url: `${this.base}/values/${encodeURIComponent(range)}?valueRenderOption=${render}&dateTimeRenderOption=SERIAL_NUMBER`,
@@ -69,6 +69,23 @@ export class SheetsClient {
   async batchUpdate(requests: unknown[]): Promise<void> {
     const client = await this.auth.getClient();
     await client.request({ url: `${this.base}:batchUpdate`, method: 'POST', data: { requests }, timeout: TIMEOUT_MS });
+  }
+
+  /** Мужийн нүднүүдийн дэвсгэр өнгө (цэнхэр = «суугаагүй сар»). */
+  async backgrounds(range: string): Promise<({ red?: number; green?: number; blue?: number } | null)[][]> {
+    const client = await this.auth.getClient();
+    type Res = { sheets: { data: { rowData?: { values?: { effectiveFormat?: { backgroundColor?: { red?: number; green?: number; blue?: number } } }[] }[] }[] }[] };
+    const res = await client.request<Res>({
+      url: `${this.base}?ranges=${encodeURIComponent(range)}&fields=sheets.data.rowData.values.effectiveFormat.backgroundColor`,
+      timeout: TIMEOUT_MS,
+    });
+    return (res.data.sheets[0]?.data[0]?.rowData ?? []).map((r) => (r.values ?? []).map((v) => v.effectiveFormat?.backgroundColor ?? null));
+  }
+
+  /** values:batchUpdate (RAW — «09/30» текстийг огноо болгохгүй). */
+  async writeValues(data: { range: string; values: unknown[][] }[]): Promise<void> {
+    const client = await this.auth.getClient();
+    await client.request({ url: `${this.base}/values:batchUpdate`, method: 'POST', data: { valueInputOption: 'RAW', data }, timeout: TIMEOUT_MS });
   }
 
   /** Бүх хуудсыг 2 хүсэлтээр (тоон утга + дэлгэцэнд харагдах утга) уншина. */

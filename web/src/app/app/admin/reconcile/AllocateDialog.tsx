@@ -10,7 +10,7 @@ import { dayLabel, mnt } from "@/components/payments/ledgerFormat";
 import { errMsg } from "@/components/payments/paymentHelpers";
 import PayerInfo from "./PayerInfo";
 import StudentPicker from "./StudentPicker";
-import { KIND_LABEL, STUDENT_KINDS, splitSender, type AllocKind, type BankRow, type StudentCard } from "./types";
+import { KIND_LABEL, STUDENT_KINDS, sheetWriteText, splitSender, type SheetWrite, type AllocKind, type BankRow, type StudentCard } from "./types";
 
 type Draft = { key: number; kind: AllocKind; amount: string; student: StudentCard | null };
 
@@ -81,7 +81,7 @@ export default function AllocateDialog({
     setSaving(true);
     setError(null);
     try {
-      const res = await api<{ alsoResolved: number }>(`/reconcile/rows/${encodeURIComponent(row.id)}/allocate`, {
+      const res = await api<{ alsoResolved: number; sheetWrites?: SheetWrite[] }>(`/reconcile/rows/${encodeURIComponent(row.id)}/allocate`, {
         method: "POST",
         body: {
           parts: parts.map((p) => ({
@@ -91,7 +91,7 @@ export default function AllocateDialog({
           })),
         },
       });
-      toast.success("Хуваарилагдлаа");
+      toast.success("Хуваарилагдлаа", { description: sheetWriteText(res.sheetWrites) ?? undefined });
       onOpenChange(false);
       onSaved(res.alsoResolved);
     } catch (e) {

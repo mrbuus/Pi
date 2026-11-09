@@ -188,6 +188,17 @@ export function ReconcilePageClient() {
         )}
       </section>
 
+      {overview?.demoSheetUrl && (
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-info/30 bg-info/10 px-4 py-3 text-sm text-ink">
+          <FileSpreadsheet className="size-4 shrink-0 text-info" aria-hidden />
+          <span className="font-semibold">Демо горим</span>
+          <span className="text-ink-dim">Гараар оноосон сургалтын төлбөр жинхэнэ шийтэд биш, тусдаа хуулбарт бичигдэнэ</span>
+          <a href={overview.demoSheetUrl} target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-2">
+            Демо шийтийг нээх
+          </a>
+        </p>
+      )}
+
       {lastImport && (
         <p className="rounded-2xl bg-info/10 px-4 py-3 text-sm text-ink">
           Хуулгад {lastImport.rows} гүйлгээ: шинээр {lastImport.newRows} орж, {lastImport.duplicates + lastImport.beforeSettled} нь өмнө

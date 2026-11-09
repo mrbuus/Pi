@@ -86,6 +86,8 @@ export interface Overview {
   /** Шийтэд хөтлөгдсөн гэж нуусан ч шийтэд байгааг баталж чадаагүй */
   sheetCheck: number;
   lastImportAt: string | null;
+  /** ДЕМО: гараар оноосон сургалтын төлбөр бичигдэх хуулбар шийт */
+  demoSheetUrl?: string | null;
 }
 
 export interface ImportSummary {
@@ -156,3 +158,18 @@ export interface StudentDetail {
 
 /** «⋯» цонхноос хуваарилалт буцаахад жагсаалт шинэчлэгдэнэ */
 export const RECONCILE_CHANGED = "reconcile:changed";
+
+/** ДЕМО: хуулбар шийтэд бичсэн үр дүн (allocate хариу) */
+export interface SheetWrite {
+  studentId: string;
+  ok: boolean;
+  cell?: string;
+  month?: string;
+  reason?: string;
+}
+export function sheetWriteText(ws: SheetWrite[] | undefined): string | null {
+  if (!ws?.length) return null;
+  return ws
+    .map((w) => (w.ok ? `Демо шийтэд бичлээ: ${w.cell} нүд, ${Number(w.month!.slice(5, 7))}-р сар` : `Демо шийтэд бичсэнгүй: ${w.reason}`))
+    .join("; ");
+}
