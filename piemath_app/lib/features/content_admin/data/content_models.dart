@@ -33,8 +33,8 @@ class ContentBook {
   final String? code;
 }
 
-/// Вэбийн `title.replace(/\s*·\s*/g, " — ")` — номын нэрэнд дунд цэг тусгаарлагч харуулахгүй (RULES §3).
-String cleanBookTitle(String t) => t.replaceAll(RegExp(r'\s*·\s*'), ' — ');
+/// Вэбийн `title.replace(...)` — номын нэрэнд дунд цэг (U+00B7) тусгаарлагч харуулахгүй (RULES §3).
+String cleanBookTitle(String t) => t.replaceAll(RegExp('\\s*\u00B7\\s*'), ' — ');
 
 @immutable
 class ContentChapter {

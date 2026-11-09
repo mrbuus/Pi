@@ -43,8 +43,11 @@ class DraftChapterRef {
     final j = asMap(raw);
     return DraftChapterRef(
       id: asStr(j['id']) ?? '',
-      title: (asStr(j['title']) ?? '').replaceAll(RegExp(r'\s*·\s*'), ' — '),
-      bookTitle: (asStr(j['bookTitle']) ?? asStr(asMap(j['book'])['title']))?.replaceAll(RegExp(r'\s*·\s*'), ' — '),
+      title: (asStr(j['title']) ?? '').replaceAll(RegExp('\\s*\u00B7\\s*'), ' — '),
+      bookTitle: (asStr(j['bookTitle']) ?? asStr(asMap(j['book'])['title']))?.replaceAll(
+        RegExp('\\s*\u00B7\\s*'),
+        ' — ',
+      ),
     );
   }
 
