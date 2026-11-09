@@ -61,8 +61,8 @@ Future<GoRouter> _pump(WidgetTester tester, FakeHttp http, {bool dark = false}) 
 }
 
 void main() {
-  test('маршрут: /app/buyer shell-д', () {
-    expect(buyerRoutes.shell.whereType<GoRoute>().map((r) => r.path), ['/app/buyer']);
+  test('маршрут: /app/buyer, /app/store shell-д', () {
+    expect(buyerRoutes.shell.whereType<GoRoute>().map((r) => r.path), ['/app/buyer', '/app/store']);
   });
 
   test('BuyerPass / BuyerPurchase: төлөв серверийн огнооноос', () {

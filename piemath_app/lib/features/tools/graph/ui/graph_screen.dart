@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart' show Ticker;
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/math/math.dart';
@@ -39,7 +40,7 @@ class _Line {
   GraphItem item = const GraphItem.empty();
 }
 
-class _GraphScreenState extends State<GraphScreen> {
+class _GraphScreenState extends State<GraphScreen> with SingleTickerProviderStateMixin {
   final _lines = <_Line>[];
   int _nextId = 1;
   final _view = ValueNotifier(const GView(cx: 0, cy: 0, sx: 50, sy: 50, w: 0, h: 0));
@@ -50,6 +51,12 @@ class _GraphScreenState extends State<GraphScreen> {
   bool _table = false;
   bool _settings = false;
   final _params = <String, double>{};
+
+  /// Хөдөлгөөнт параметр (вэбийн «Хөдөлгөөнт болгох»): -5..5 хооронд 2 нэгж/сек-ээр нааш цааш.
+  String? _anim;
+  double _animDir = 1;
+  Duration _animLast = Duration.zero;
+  Ticker? _animTicker;
   int? _editing;
   int? _focus;
   (int, double)? _trace;
@@ -79,8 +86,44 @@ class _GraphScreenState extends State<GraphScreen> {
     if (_lines.isEmpty) _addLine('', edit: false);
   }
 
+  void _toggleAnim(String p) {
+    _animTicker ??= createTicker(_onAnimTick);
+    setState(() {
+      if (_anim == p) {
+        _anim = null;
+        _animTicker!.stop();
+        _recompute();
+      } else {
+        _anim = p;
+        _animDir = 1;
+        _animLast = Duration.zero;
+        if (!_animTicker!.isActive) _animTicker!.start();
+      }
+    });
+  }
+
+  void _onAnimTick(Duration elapsed) {
+    final p = _anim;
+    if (p == null || !mounted) return;
+    final dt = math.min(0.1, (elapsed - _animLast).inMicroseconds / 1e6);
+    _animLast = elapsed;
+    var v = (_params[p] ?? 1) + _animDir * 2 * dt;
+    if (v > 5) {
+      v = 5;
+      _animDir = -1;
+    } else if (v < -5) {
+      v = -5;
+      _animDir = 1;
+    }
+    setState(() {
+      _params[p] = (v * 100).roundToDouble() / 100;
+      _trace = null;
+    });
+  }
+
   @override
   void dispose() {
+    _animTicker?.dispose();
     for (final l in _lines) {
       l.ctl.dispose();
     }
@@ -514,6 +557,8 @@ class _GraphScreenState extends State<GraphScreen> {
           for (final p in params) _ParamSlider(
             name: p,
             value: _params[p] ?? 1,
+            animating: _anim == p,
+            onToggleAnim: AppMotion.reduced(context) ? null : () => _toggleAnim(p),
             onChanged: (v) => setState(() {
               _params[p] = v;
               _trace = null;
@@ -886,9 +931,20 @@ class _EditorRow extends StatelessWidget {
 }
 
 class _ParamSlider extends StatelessWidget {
-  const _ParamSlider({required this.name, required this.value, required this.onChanged, required this.onChangeEnd});
+  const _ParamSlider({
+    required this.name,
+    required this.value,
+    required this.onChanged,
+    required this.onChangeEnd,
+    this.animating = false,
+    this.onToggleAnim,
+  });
   final String name;
   final double value;
+  final bool animating;
+
+  /// null = хөдөлгөөн багасгах тохиргоотой.
+  final VoidCallback? onToggleAnim;
   final ValueChanged<double> onChanged;
   final ValueChanged<double> onChangeEnd;
 
@@ -917,6 +973,12 @@ class _ParamSlider extends StatelessWidget {
             onChanged: (v) => onChanged((v * 20).roundToDouble() / 20),
             onChangeEnd: onChangeEnd,
           ),
+        ),
+        IconButton(
+          key: ValueKey('graph-anim-$name'),
+          tooltip: animating ? 'Хөдөлгөөнийг зогсоох' : 'Хөдөлгөөнт болгох',
+          onPressed: onToggleAnim,
+          icon: Icon(animating ? LucideIcons.circleX : LucideIcons.play, size: 18),
         ),
       ],
     );

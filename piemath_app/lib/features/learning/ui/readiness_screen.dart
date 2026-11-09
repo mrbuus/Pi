@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/network/api_error.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
+import '../data/goal_models.dart';
+import '../data/goals_repository.dart';
 import '../data/readiness_models.dart';
 import '../data/readiness_repository.dart';
 import 'inline_message.dart';
@@ -62,6 +65,8 @@ class ReadinessScreen extends ConsumerWidget {
                 const SectionHeader(title: 'Дараагийн алхам'),
                 for (final t in r.nextBest) _NextStep(topic: t),
               ],
+              const SectionHeader(title: 'Миний зорилго'),
+              const ReadinessGoalCard(),
             ],
           ),
         ),
@@ -124,7 +129,11 @@ class _Summary extends StatelessWidget {
           ),
           const SizedBox(height: AppSpace.md),
           Meta(
-            items: ['${r.coverage}% сэдэв хамрагдсан', '${r.dataPoints} оролдлого'],
+            items: [
+              '${r.coverage}% сэдэв хамрагдсан',
+              '${r.dataPoints} оролдлого',
+              if (r.effectiveDataPoints > 0) 'ойролцоогоор ${r.effectiveDataPoints} тусдаа бодлогын нотолгоо',
+            ],
             style: context.text.bodySmall?.copyWith(color: c.inkDim),
           ),
           const SizedBox(height: AppSpace.sm),
@@ -306,6 +315,115 @@ class _NextStep extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Бэлэн байдлын зорилгын гарчгийн угтвар (вэбийн `GOAL_PREFIX`) — хувийн зорилгын жагсаалтад хадгалагдана.
+const readinessGoalPrefix = 'Бэлэн байдлын зорилго:';
+
+/// «Миний зорилго» — зорьж буй бэлэн байдлын индекс (0–100), `/goals`-д хадгална (вэбийн `ReadinessDashboard`).
+class ReadinessGoalCard extends ConsumerStatefulWidget {
+  const ReadinessGoalCard({super.key});
+
+  @override
+  ConsumerState<ReadinessGoalCard> createState() => _ReadinessGoalCardState();
+}
+
+class _ReadinessGoalCardState extends ConsumerState<ReadinessGoalCard> {
+  final _input = TextEditingController(text: '70');
+  bool _seeded = false;
+  bool _saving = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _input.dispose();
+    super.dispose();
+  }
+
+  Goal? _existing(List<Goal> goals) {
+    for (final g in goals) {
+      if (g.title.startsWith(readinessGoalPrefix)) return g;
+    }
+    return null;
+  }
+
+  Future<void> _save(List<Goal> goals) async {
+    final value = int.tryParse(_input.text.trim());
+    if (value == null || value < 0 || value > 100) {
+      setState(() => _error = 'Бүхэл тоогоор 0-100 хооронд оруулна уу');
+      return;
+    }
+    if (_saving) return;
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    final repo = ref.read(goalsRepositoryProvider);
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final title = '$readinessGoalPrefix $value';
+    const description = 'ЭЕШ-ийн бэлэн байдлын хувийн зорилт.';
+    try {
+      final g = _existing(goals);
+      if (g == null) {
+        await repo.create(title: title, description: description);
+      } else {
+        await repo.update(
+          g.id,
+          title: title,
+          description: description,
+          targetDate: g.targetDate,
+          status: g.status,
+          subject: g.subject,
+        );
+      }
+      ref.invalidate(goalsProvider);
+      messenger?.showSnackBar(const SnackBar(content: Text('Зорилго хадгалагдлаа')));
+    } on ApiError catch (e) {
+      messenger?.showSnackBar(SnackBar(content: Text(e.message)));
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final goals = ref.watch(goalsProvider).value;
+    if (goals == null) return const SizedBox.shrink();
+    final saved = _existing(goals);
+    if (!_seeded && saved != null) {
+      _seeded = true;
+      _input.text = saved.title.substring(readinessGoalPrefix.length).trim();
+    }
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _input,
+            keyboardType: TextInputType.number,
+            style: const TextStyle(fontSize: 16),
+            onChanged: (_) {
+              if (_error != null) setState(() => _error = null);
+            },
+            decoration: InputDecoration(
+              labelText: 'Зорьж буй бэлэн байдлын индекс (0-100)',
+              errorText: _error,
+            ),
+          ),
+          const SizedBox(height: AppSpace.md),
+          FilledButton(
+            onPressed: _saving ? null : () => _save(goals),
+            child: Text(_saving ? 'Хадгалж байна' : 'Зорилго хадгалах'),
+          ),
+          const SizedBox(height: AppSpace.sm),
+          Text(
+            'Зорилго нь таны хувийн зорилгын жагсаалтад хадгалагдана',
+            style: context.text.bodySmall?.copyWith(color: context.colors.inkDim),
+          ),
+        ],
       ),
     );
   }

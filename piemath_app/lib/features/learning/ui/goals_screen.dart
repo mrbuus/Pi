@@ -69,6 +69,7 @@ class GoalsScreen extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.gutter, AppSpace.gutter, 96),
               children: [
+                _ProgressSummary(goals: all),
                 if (active.isEmpty)
                   Padding(
                     padding: const EdgeInsets.only(bottom: AppSpace.md),
@@ -364,6 +365,49 @@ class _OptionChip extends StatelessWidget {
         showCheckmark: true,
         onSelected: onTap == null ? null : (_) => onTap!(),
         materialTapTargetSize: MaterialTapTargetSize.padded,
+      ),
+    );
+  }
+}
+
+class _ProgressSummary extends StatelessWidget {
+  const _ProgressSummary({required this.goals});
+
+  final List<Goal> goals;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = goalProgress(goals, UbDateTime.now());
+    if (p.total == 0) return const SizedBox.shrink();
+    final c = context.colors;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpace.md),
+      child: AppCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text('Явц', style: context.text.titleSmall?.copyWith(color: c.brand)),
+                ),
+                Text('${p.done} / ${p.total} зорилго биелсэн', style: context.text.bodySmall),
+              ],
+            ),
+            const SizedBox(height: AppSpace.sm),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: p.percent / 100,
+                minHeight: 8,
+                color: c.success,
+                backgroundColor: c.surfaceSunken,
+              ),
+            ),
+            const SizedBox(height: AppSpace.sm),
+            Meta(items: ['${p.percent}% гүйцэтгэсэн', if (p.overdue > 0) '${p.overdue} зорилтот хугацаа хэтэрсэн']),
+          ],
+        ),
       ),
     );
   }

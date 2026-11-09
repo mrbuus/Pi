@@ -55,7 +55,7 @@ class BuyerHomeScreen extends ConsumerWidget {
                       value: ref.watch(buyerPassesProvider),
                       onRetry: () => ref.invalidate(buyerPassesProvider),
                       emptyTitle: 'Эрх байхгүй',
-                      emptyMessage: 'Одоогоор идэвхтэй эрх алга. Эрхээ вэб хуудсаар нээнэ',
+                      emptyMessage: 'Одоогоор идэвхтэй эрх алга. Эрхийг сургалтын төв олгоно',
                       isEmpty: (l) => l.isEmpty,
                       builder: (l) => [for (final p in l) _PassRow(pass: p, now: at)],
                     ),
@@ -66,7 +66,7 @@ class BuyerHomeScreen extends ConsumerWidget {
                       emptyTitle: 'Худалдан авалт байхгүй',
                       emptyMessage: 'Таны худалдан авалт хараахан бүртгэгдээгүй байна',
                       isEmpty: (l) => l.isEmpty,
-                      builder: (l) => [for (final p in l) _PurchaseRow(purchase: p, now: at)],
+                      builder: (l) => [for (final p in l) PurchaseRow(purchase: p, now: at)],
                     ),
                     _Section<List<PaymentRecord>>(
                       title: 'Төлбөрийн түүх',
@@ -202,8 +202,9 @@ class _PassRow extends StatelessWidget {
   }
 }
 
-class _PurchaseRow extends StatelessWidget {
-  const _PurchaseRow({required this.purchase, required this.now});
+/// Нэг худалдан авалтын мөр (нүүр, дэлгүүрийн «Миний авсан»).
+class PurchaseRow extends StatelessWidget {
+  const PurchaseRow({super.key, required this.purchase, required this.now});
 
   final BuyerPurchase purchase;
   final DateTime now;

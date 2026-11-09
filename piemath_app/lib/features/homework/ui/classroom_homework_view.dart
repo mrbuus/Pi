@@ -13,6 +13,7 @@ import '../domain/homework_logic.dart';
 import 'homework_badges.dart';
 import 'homework_photo_panel.dart';
 import 'homework_providers.dart';
+import 'homework_redo_section.dart';
 
 /// Танхимын загвар (`/homework/my`): хичээлийн өдөр бүрийн дэвтрийн зураг, багшийн тэмдэглэгээ,
 /// ангид хийсэн тестийн B хувилбар (вэбийн `homework-practice/HomeworkList`).
@@ -74,9 +75,12 @@ class _DayListState extends State<_DayList> {
     // Урт жагсаалт — зөвхөн харагдаж буйг зурна (PERFORMANCE §1). Хэсэг бүрийн гарчиг + картууд.
     final rows = <Widget Function()>[];
     for (final s in sections) {
+      // Өмнөх өдрүүдээс зураг нь илгээгдээгүй, одоо ч илгээж болох — гарчигт сануулна (вэбийн улаан тэмдэг)
+      final missed = missedPhotoDays(s, widget.today);
       rows.add(
         () => SectionHeader(
           title: s.title,
+          trailing: missed > 0 ? _MissedBadge(count: missed) : null,
           padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.sm),
         ),
       );
@@ -91,17 +95,44 @@ class _DayListState extends State<_DayList> {
       }
     }
     return RefreshIndicator(
-      onRefresh: () async => ProviderScope.containerOf(context).invalidate(homeworkDaysProvider),
+      onRefresh: () async => ProviderScope.containerOf(context)
+        ..invalidate(homeworkDaysProvider)
+        ..invalidate(homeworkRedoProvider),
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: _DayStrip(days: widget.days, today: widget.today, onTap: _jumpTo),
+          ),
+          const SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpace.gutter),
+            sliver: SliverToBoxAdapter(child: HomeworkRedoSection()),
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(AppSpace.gutter, 0, AppSpace.gutter, AppSpace.xxl),
             sliver: SliverList.builder(itemCount: rows.length, itemBuilder: (_, i) => rows[i]()),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _MissedBadge extends StatelessWidget {
+  const _MissedBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Semantics(
+      label: '$count өдөр илгээгээгүй',
+      child: ExcludeSemantics(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: 2),
+          decoration: BoxDecoration(color: c.error, borderRadius: BorderRadius.circular(AppRadius.pill)),
+          child: Text('$count илгээгээгүй', style: context.text.labelSmall?.copyWith(color: c.onStatus)),
+        ),
       ),
     );
   }

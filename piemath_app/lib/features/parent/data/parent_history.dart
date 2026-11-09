@@ -62,8 +62,56 @@ class HistoryMark {
   final String classroom;
 }
 
+/// Даалгаврын илгээлтийн нэг бүртгэл (сурагч илгээсэн, багш баталсан/буцаасан …).
+class HistoryRevision {
+  const HistoryRevision({
+    required this.id,
+    required this.action,
+    required this.state,
+    this.at,
+    this.studentNote,
+    this.reviewNote,
+    this.imageKeys = const [],
+  });
+
+  factory HistoryRevision.fromJson(Object? j) {
+    final m = _m(j);
+    return HistoryRevision(
+      id: _s(m['id']) ?? '',
+      action: _s(m['action']) ?? '',
+      state: _s(m['state']) ?? '',
+      at: _s(m['at']),
+      studentNote: _s(m['studentNote']),
+      reviewNote: _s(m['reviewNote']),
+      imageKeys: _keys(m['imageKeys']),
+    );
+  }
+
+  final String id;
+
+  /// `SUBMIT | APPROVE | RETURN | MARK_IN_CLASS | LEGACY`.
+  final String action;
+  final String state;
+  final String? at;
+  final String? studentNote;
+  final String? reviewNote;
+  final List<String> imageKeys;
+
+  /// Багшийн хариу (батлах, буцаах, ангид шалгах).
+  bool get isReview => action == 'APPROVE' || action == 'RETURN' || action == 'MARK_IN_CLASS';
+}
+
 class HistorySubmission {
-  const HistorySubmission({required this.id, required this.state, required this.title, this.date});
+  const HistorySubmission({
+    required this.id,
+    required this.state,
+    required this.title,
+    this.date,
+    this.studentNote,
+    this.reviewNote,
+    this.imageKeys = const [],
+    this.revisions = const [],
+  });
 
   factory HistorySubmission.fromJson(Object? j) {
     final m = _m(j);
@@ -72,6 +120,10 @@ class HistorySubmission {
       state: _s(m['state']) ?? '',
       title: _title(m, 'assignment'),
       date: _s(m['submittedAt']) ?? _s(_m(m['assignment'])['dueDate']),
+      studentNote: _s(m['studentNote']),
+      reviewNote: _s(m['reviewNote']),
+      imageKeys: _keys(m['imageKeys']),
+      revisions: [for (final r in (m['revisions'] as List? ?? const <Object?>[])) HistoryRevision.fromJson(r)],
     );
   }
 
@@ -79,6 +131,81 @@ class HistorySubmission {
   final String state;
   final String title;
   final String? date;
+  final String? studentNote;
+  final String? reviewNote;
+  final List<String> imageKeys;
+
+  /// Энэ жилийн бүртгэлүүд (огноогоор өсөх).
+  final List<HistoryRevision> revisions;
+
+  HistoryRevision? get firstSubmit {
+    for (final r in revisions) {
+      if (r.action == 'SUBMIT') return r;
+    }
+    return null;
+  }
+
+  HistoryRevision? get lastReview {
+    HistoryRevision? last;
+    for (final r in revisions) {
+      if (r.isReview) last = r;
+    }
+    return last;
+  }
+}
+
+/// «Анхны хариулт, давталт, засвар» — суралцах урсгалын нотолгоо (`learning.rows[].evidence`).
+class HistoryLearning {
+  const HistoryLearning({required this.id, required this.kind, this.at, this.answer, this.correct, this.mode, this.flagged = false});
+
+  /// `evidence` байхгүй мөрийг null (вэб ч харуулдаггүй).
+  static HistoryLearning? fromJson(Object? j) {
+    final m = _m(j);
+    final e = m['evidence'];
+    if (e is! Map) return null;
+    final ev = e.cast<String, Object?>();
+    final flags = ev['flags'];
+    return HistoryLearning(
+      id: _s(m['id']) ?? '',
+      at: _s(m['at']),
+      kind: _s(ev['kind']) ?? '',
+      answer: _s(ev['answer']),
+      correct: ev['correct'] is bool ? ev['correct']! as bool : null,
+      mode: _s(ev['mode']),
+      flagged: flags is List && flags.isNotEmpty,
+    );
+  }
+
+  final String id;
+  final String? at;
+  final String kind;
+
+  /// LaTeX хариу (MathText-ээр).
+  final String? answer;
+  final bool? correct;
+
+  /// `classroom` (дэвтрийн өөрийн тэмдэглэгээ), `probe` (хугацааны дараах шинэ шалгалт).
+  final String? mode;
+
+  /// Сурагч эргэлзсэн, таасан эсвэл тусламжийн тэмдэглэгээ нэмсэн.
+  final bool flagged;
+
+  String get kindLabel => switch (kind) {
+        'first' => 'Анхны хариулт',
+        'retry-before-solution' => 'Бодолт үзэхээс өмнөх давталт',
+        'solution-assisted-correction' => 'Бодолт үзсэн засвар',
+        'solution-viewed' => 'Бодолт үзсэн',
+        _ => 'Сурах үйлдэл',
+      };
+
+  String get resultLabel {
+    final base = correct == null ? 'Үнэлгээ байхгүй' : (correct! ? 'Зөв' : 'Дахин бодох');
+    return switch (mode) {
+      'classroom' => '$base, дэвтрийн өөрийн тэмдэглэгээ',
+      'probe' => '$base, хугацааны дараах шинэ шалгалт',
+      _ => base,
+    };
+  }
 }
 
 class HistoryResult {
@@ -233,6 +360,7 @@ class ParentHistory {
     required this.page,
     this.summary = const HistorySummary(),
     this.attempts = const HistoryList([]),
+    this.learning = const HistoryList([]),
     this.homework = const HistoryList([]),
     this.submissions = const HistoryList([]),
     this.results = const HistoryList([]),
@@ -248,6 +376,7 @@ class ParentHistory {
       page: _i(m['page']) == 0 ? 1 : _i(m['page']),
       summary: HistorySummary.fromJson(m['summary']),
       attempts: HistoryList.parse(m['attempts'], HistoryAttempt.fromJson),
+      learning: _learning(m['learning']),
       homework: HistoryList.parse(m['homework'], HistoryMark.fromJson),
       submissions: HistoryList.parse(m['submissions'], HistorySubmission.fromJson),
       results: HistoryList.parse(m['results'], HistoryResult.fromJson),
@@ -261,6 +390,7 @@ class ParentHistory {
   final int page;
   final HistorySummary summary;
   final HistoryList<HistoryAttempt> attempts;
+  final HistoryList<HistoryLearning> learning;
   final HistoryList<HistoryMark> homework;
   final HistoryList<HistorySubmission> submissions;
   final HistoryList<HistoryResult> results;
@@ -270,6 +400,7 @@ class ParentHistory {
 
   bool get hasMore =>
       attempts.hasMore ||
+      learning.hasMore ||
       homework.hasMore ||
       submissions.hasMore ||
       results.hasMore ||
@@ -279,6 +410,7 @@ class ParentHistory {
 
   bool get isEmpty =>
       attempts.rows.isEmpty &&
+      learning.rows.isEmpty &&
       homework.rows.isEmpty &&
       submissions.rows.isEmpty &&
       results.rows.isEmpty &&
@@ -292,6 +424,7 @@ class ParentHistory {
     page: next.page,
     summary: summary,
     attempts: attempts.append(next.attempts),
+    learning: learning.append(next.learning),
     homework: homework.append(next.homework),
     submissions: submissions.append(next.submissions),
     results: results.append(next.results),
@@ -299,4 +432,11 @@ class ParentHistory {
     dismissals: dismissals.append(next.dismissals),
     packets: packets.append(next.packets),
   );
+}
+
+HistoryList<HistoryLearning> _learning(Object? j) {
+  final m = _m(j);
+  return HistoryList([
+    for (final r in (m['rows'] as List? ?? const <Object?>[])) ?HistoryLearning.fromJson(r),
+  ], hasMore: m['hasMore'] == true);
 }

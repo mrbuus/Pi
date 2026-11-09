@@ -8,6 +8,7 @@ import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/marks/marks.dart';
+import '../../homework/ui/homework_providers.dart' show assignmentsProvider;
 import '../../learning/data/activity_repository.dart';
 import '../../my_class/data/hub_models.dart';
 import '../../my_class/data/my_class_repository.dart';
@@ -15,7 +16,10 @@ import '../../my_class/domain/hub_logic.dart';
 import '../../my_class/ui/common.dart';
 import '../../my_class/ui/day_row.dart';
 import '../../my_class/ui/day_screen.dart';
+import '../data/evening_marking.dart';
 import 'activity_week_card.dart';
+import 'evening_marking_card.dart';
+import 'online_homework_card.dart';
 
 /// Сурагчийн «Миний самбар» (`/app/student`) — вэбийн `StudentDashboard` (SURAGCH-V2-GEREE):
 /// мэндчилгээ → өнөөдрийн хичээл + түргэн үйлдэл → ирц, даалгаврын хувь → багшийн сүүлийн
@@ -48,6 +52,8 @@ class StudentHomeScreen extends ConsumerWidget {
           announcementsProvider,
           activityYearProvider(today.year),
           activityStreakProvider,
+          eveningTodoProvider,
+          assignmentsProvider,
         ]),
         child: ListView(
           padding: const EdgeInsets.all(AppSpace.gutter),
@@ -94,21 +100,14 @@ class StudentHomeScreen extends ConsumerWidget {
               if (ov.latestMark != null) ...[const SizedBox(height: AppSpace.md), LatestMarkCard(mark: ov.latestMark!)],
               const SizedBox(height: AppSpace.md),
               RecentDaysCard(today: today),
+              const EveningMarkingCard(),
             ] else if (!hasOnline && !classrooms.isLoading)
               const EmptyState(
                 icon: AppIcons.calendar,
                 title: 'Танхимын ангид элсээгүй байна',
                 message: 'Ангид элссэний дараа хичээл, ирц, даалгавар энд харагдана',
               ),
-            if (hasOnline) ...[
-              const SizedBox(height: AppSpace.md),
-              _LinkCard(
-                icon: AppIcons.homework,
-                title: 'Онлайн даалгавар',
-                subtitle: 'Багшийн өгсөн даалгаврыг харах, илгээх',
-                onTap: () => context.go('/app/homework'),
-              ),
-            ],
+            if (hasOnline) const OnlineHomeworkCard(),
             const SizedBox(height: AppSpace.md),
             ActivityWeekCard(today: today),
             const SizedBox(height: AppSpace.md),

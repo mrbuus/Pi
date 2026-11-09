@@ -9,10 +9,13 @@ class TheoryRepository {
 
   final ApiClient _api;
 
-  /// Хичээлийн өдрүүд (огноогоор буурах). [q] — сэдэв эсвэл тестийн нэр.
-  Future<List<TheoryRow>> list({String? q}) => _api.get(
+  /// Хичээлийн өдрүүд (огноогоор буурах). [q] — сэдэв эсвэл тестийн нэр, [date] — тэр өдрөөр шүүх.
+  Future<List<TheoryRow>> list({String? q, String? date}) => _api.get(
         '/student-hub/theory',
-        query: {if (q != null && q.trim().isNotEmpty) 'q': q.trim()},
+        query: {
+          if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
+          if (date != null && date.isNotEmpty) ...{'from': date, 'to': date},
+        },
         parse: (j) => [for (final r in (j as List? ?? const [])) TheoryRow.fromJson(r)],
       );
 
@@ -31,8 +34,11 @@ class TheoryRepository {
 
 final theoryRepositoryProvider = Provider<TheoryRepository>((ref) => TheoryRepository(ref.watch(apiClientProvider)));
 
-final theoryListProvider = FutureProvider.autoDispose.family<List<TheoryRow>, String>(
-  (ref, q) => ref.watch(theoryRepositoryProvider).list(q: q),
+/// Жагсаалтын шүүлтүүр: хайлт ба огноо (хоосон = бүгд).
+typedef TheoryFilter = ({String q, String date});
+
+final theoryListProvider = FutureProvider.autoDispose.family<List<TheoryRow>, TheoryFilter>(
+  (ref, f) => ref.watch(theoryRepositoryProvider).list(q: f.q, date: f.date),
 );
 
 final theoryDayProvider = FutureProvider.autoDispose.family<TheoryDay, (String, String)>(

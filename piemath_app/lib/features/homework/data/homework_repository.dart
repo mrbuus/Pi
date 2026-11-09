@@ -47,31 +47,37 @@ class HomeworkRepository {
         body: {'imageKeys': imageKeys, if (note != null && note.isNotEmpty) 'note': note},
       );
 
+  /// Дахин бодох тестүүд.
+  Future<HwRedo> redo() => _api.get('/homework/redo', parse: HwRedo.fromJson);
+
   // ---- B хувилбарын бодолт ----
 
-  Future<HwAttempt> startAttempt({required String testId, required String date}) => _api.post(
-        '/homework/attempts',
+  /// [redo] — «Дахин бодох» (2-р оролдлого, `POST /homework/redo/attempts`).
+  Future<HwAttempt> startAttempt({required String testId, required String date, bool redo = false}) => _api.post(
+        redo ? '/homework/redo/attempts' : '/homework/attempts',
         body: {'testId': testId, 'date': date},
         parse: HwAttempt.fromJson,
       );
 
-  /// Автомат хадгалалт — зөвхөн өөрчлөгдсөн хариу. Давтахад аюулгүй (idempotent).
-  Future<void> saveAnswers(String attemptId, Map<String, Object?> answers) => _api.patch<Object?>(
+  /// Автомат хадгалалт — зөвхөн өөрчлөгдсөн хариу (+ идэвхийн тоолуур). Давтахад аюулгүй (idempotent):
+  /// сервер тоолуурыг зөвхөн өсгөнө. 409 = өөр төхөөрөмжөөс илгээгдсэн / хугацаа дууссан.
+  Future<void> saveAnswers(String attemptId, Map<String, Object?> answers, {HwActivity? activity}) =>
+      _api.patch<Object?>(
         '/homework/attempts/${Uri.encodeComponent(attemptId)}',
-        body: {'answers': answers},
+        body: {'answers': answers, if (activity != null) 'activity': activity.toJson()},
         retry: true,
       );
 
-  Future<CheckOutcome> check(String attemptId, Map<String, Object?> answers) => _api.post(
+  Future<CheckOutcome> check(String attemptId, Map<String, Object?> answers, {HwActivity? activity}) => _api.post(
         '/homework/attempts/${Uri.encodeComponent(attemptId)}/check',
-        body: {'answers': answers},
+        body: {'answers': answers, if (activity != null) 'activity': activity.toJson()},
         parse: CheckOutcome.fromJson,
       );
 
   /// Илгээх — сервер идемпотент (давтан дуудвал анхны илгээлт).
-  Future<CheckOutcome> submit(String attemptId, Map<String, Object?> answers) => _api.post(
+  Future<CheckOutcome> submit(String attemptId, Map<String, Object?> answers, {HwActivity? activity}) => _api.post(
         '/homework/attempts/${Uri.encodeComponent(attemptId)}/submit',
-        body: {'answers': answers},
+        body: {'answers': answers, if (activity != null) 'activity': activity.toJson()},
         parse: CheckOutcome.fromJson,
         retry: true,
       );
