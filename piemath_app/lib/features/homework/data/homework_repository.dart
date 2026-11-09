@@ -47,10 +47,14 @@ class HomeworkRepository {
         body: {'imageKeys': imageKeys, if (note != null && note.isNotEmpty) 'note': note},
       );
 
+  /// Дахин бодох тестүүд.
+  Future<HwRedo> redo() => _api.get('/homework/redo', parse: HwRedo.fromJson);
+
   // ---- B хувилбарын бодолт ----
 
-  Future<HwAttempt> startAttempt({required String testId, required String date}) => _api.post(
-        '/homework/attempts',
+  /// [redo] — «Дахин бодох» (2-р оролдлого, `POST /homework/redo/attempts`).
+  Future<HwAttempt> startAttempt({required String testId, required String date, bool redo = false}) => _api.post(
+        redo ? '/homework/redo/attempts' : '/homework/attempts',
         body: {'testId': testId, 'date': date},
         parse: HwAttempt.fromJson,
       );

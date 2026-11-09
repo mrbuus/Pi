@@ -487,3 +487,136 @@ class CheckOutcome {
   /// Зөвхөн илгээх (`submit`) хариунд.
   final HwReview? review;
 }
+
+// ---------------------------------------------------------------------------
+// Дахин бодох (`GET /homework/redo`, эзэн 2026-11-03): хичээлээс хойш N хичээл өнгөрсний дараа ангид
+// бодсон А, гэртээ бодсон Б тестийг НЭГ удаа дахин бодно. Анхны дүн хэвээр, дахин бодсон нь тусдаа.
+
+@immutable
+class HwRedoRound {
+  const HwRedoRound({required this.round, required this.attemptId, required this.submitted, this.score});
+
+  factory HwRedoRound.fromJson(Object? json) {
+    final m = _map(json);
+    return HwRedoRound(
+      round: _int(m['round'], 1),
+      attemptId: _str(m['attemptId']) ?? '',
+      submitted: m['status'] == 'SUBMITTED',
+      score: HwScore.parse(m['score']),
+    );
+  }
+
+  /// 1 = анх (гэрийн даалгавар / ангид), 2 = дахин бодсон.
+  final int round;
+  final String attemptId;
+  final bool submitted;
+  final HwScore? score;
+}
+
+@immutable
+class HwRedoItem {
+  const HwRedoItem({
+    required this.testId,
+    required this.title,
+    required this.variantLabel,
+    required this.inClass,
+    required this.problemCount,
+    required this.timeLimitMin,
+    required this.locked,
+    required this.rounds,
+  });
+
+  factory HwRedoItem.fromJson(Object? json) {
+    final m = _map(json);
+    return HwRedoItem(
+      testId: m['testId']! as String,
+      title: _str(m['title']) ?? '',
+      variantLabel: _str(m['variantLabel']),
+      inClass: m['kind'] == 'CLASS',
+      problemCount: _int(m['problemCount']),
+      timeLimitMin: m['timeLimitMin'] is num ? _int(m['timeLimitMin']) : null,
+      locked: m['locked'] == true,
+      rounds: [for (final r in _list(m['rounds'])) HwRedoRound.fromJson(r)],
+    );
+  }
+
+  final String testId;
+  final String title;
+  final String? variantLabel;
+
+  /// Ангид бодсон (А) эсвэл гэртээ бодсон (Б).
+  final bool inClass;
+  final int problemCount;
+  final int? timeLimitMin;
+
+  /// Бусад ангид бодогдох хүлээгдэж байгаа — түр хаалттай.
+  final bool locked;
+  final List<HwRedoRound> rounds;
+
+  HwRedoRound? get first {
+    for (final r in rounds) {
+      if (r.round == 1 && r.submitted) return r;
+    }
+    return null;
+  }
+
+  HwRedoRound? get again {
+    for (final r in rounds) {
+      if (r.round > 1) return r;
+    }
+    return null;
+  }
+}
+
+@immutable
+class HwRedoDay {
+  const HwRedoDay({
+    required this.date,
+    required this.classroomId,
+    required this.classroomName,
+    required this.topic,
+    required this.opened,
+    required this.lessonsLeft,
+    required this.items,
+  });
+
+  factory HwRedoDay.fromJson(Object? json) {
+    final m = _map(json);
+    return HwRedoDay(
+      date: (_str(m['date']) ?? '').padRight(10).substring(0, 10).trim(),
+      classroomId: m['classroomId']! as String,
+      classroomName: _str(m['classroomName']) ?? '',
+      topic: _str(m['topic']),
+      opened: m['opened'] == true,
+      lessonsLeft: _int(m['lessonsLeft']),
+      items: [for (final i in _list(m['items'])) HwRedoItem.fromJson(i)],
+    );
+  }
+
+  final String date;
+  final String classroomId;
+  final String classroomName;
+  final String? topic;
+  final bool opened;
+  final int lessonsLeft;
+  final List<HwRedoItem> items;
+}
+
+@immutable
+class HwRedo {
+  const HwRedo({required this.lessonsToOpen, required this.days});
+
+  factory HwRedo.fromJson(Object? json) {
+    final m = json is Map ? json.cast<String, Object?>() : const <String, Object?>{};
+    final days = [for (final d in _list(m['days'])) HwRedoDay.fromJson(d)]
+      // Нээгдсэн нь эхэнд (шинэ нь дээр), хаалттай нь дараа нь
+      ..sort((a, b) {
+        if (a.opened != b.opened) return a.opened ? -1 : 1;
+        return b.date.compareTo(a.date);
+      });
+    return HwRedo(lessonsToOpen: _int(m['lessonsToOpen'], 2), days: days);
+  }
+
+  final int lessonsToOpen;
+  final List<HwRedoDay> days;
+}

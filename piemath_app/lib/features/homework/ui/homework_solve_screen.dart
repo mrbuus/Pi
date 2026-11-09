@@ -25,7 +25,7 @@ import 'homework_providers.dart';
 /// серверт. Илгээсний дараа алдсан бодлогын зөв хариу, бодолт, бичлэг (сервер нээсэн бол) ба дэвтрийн зураг
 /// илгээх товч (вэбийн `HomeworkResult`). Идэвхийн тоолуур 45 секунд тутам хадгалагдана.
 class HomeworkSolveScreen extends ConsumerStatefulWidget {
-  const HomeworkSolveScreen({super.key, required this.testId, required this.date, this.classroomId});
+  const HomeworkSolveScreen({super.key, required this.testId, required this.date, this.classroomId, this.redo = false});
 
   final String testId;
 
@@ -34,6 +34,9 @@ class HomeworkSolveScreen extends ConsumerStatefulWidget {
 
   /// Дэвтрийн зураг илгээх товчинд (жагсаалтаас ирсэн бол).
   final String? classroomId;
+
+  /// «Дахин бодох» (2-р оролдлого) — анхны дүн хэвээр, дэвтрийн зураг асуухгүй.
+  final bool redo;
 
   @override
   ConsumerState<HomeworkSolveScreen> createState() => _HomeworkSolveScreenState();
@@ -107,7 +110,7 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
       _attempt = null;
     });
     try {
-      final a = await _repo.startAttempt(testId: widget.testId, date: widget.date);
+      final a = await _repo.startAttempt(testId: widget.testId, date: widget.date, redo: widget.redo);
       if (!mounted) return;
       setState(() {
         _attempt = a;
@@ -227,7 +230,9 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
       _saved.addAll(_answers);
       _ticker?.cancel();
       _heartbeat?.cancel();
-      ref.invalidate(homeworkDaysProvider);
+      ref
+        ..invalidate(homeworkDaysProvider)
+        ..invalidate(homeworkRedoProvider);
       if (!mounted) return;
       setState(() {
         _submitted = true;
@@ -251,7 +256,7 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: const AppBackButton(),
-        title: const Text('Гэрийн даалгавар'),
+        title: Text(widget.redo ? 'Дахин бодох' : 'Гэрийн даалгавар'),
         actions: [
           if (_remaining != null)
             Padding(
@@ -351,7 +356,7 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
                 : StatusPill(icon: AppIcons.failure, label: 'Буруу', color: context.colors.error),
           ),
       ],
-      if (widget.classroomId != null) _PhotoForDay(classroomId: widget.classroomId!, date: widget.date),
+      if (widget.classroomId != null && !widget.redo) _PhotoForDay(classroomId: widget.classroomId!, date: widget.date),
     ];
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.sm, AppSpace.gutter, AppSpace.xxl),

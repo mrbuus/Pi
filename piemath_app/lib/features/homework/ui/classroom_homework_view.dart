@@ -13,6 +13,7 @@ import '../domain/homework_logic.dart';
 import 'homework_badges.dart';
 import 'homework_photo_panel.dart';
 import 'homework_providers.dart';
+import 'homework_redo_section.dart';
 
 /// Танхимын загвар (`/homework/my`): хичээлийн өдөр бүрийн дэвтрийн зураг, багшийн тэмдэглэгээ,
 /// ангид хийсэн тестийн B хувилбар (вэбийн `homework-practice/HomeworkList`).
@@ -94,11 +95,17 @@ class _DayListState extends State<_DayList> {
       }
     }
     return RefreshIndicator(
-      onRefresh: () async => ProviderScope.containerOf(context).invalidate(homeworkDaysProvider),
+      onRefresh: () async => ProviderScope.containerOf(context)
+        ..invalidate(homeworkDaysProvider)
+        ..invalidate(homeworkRedoProvider),
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: _DayStrip(days: widget.days, today: widget.today, onTap: _jumpTo),
+          ),
+          const SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpace.gutter),
+            sliver: SliverToBoxAdapter(child: HomeworkRedoSection()),
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(AppSpace.gutter, 0, AppSpace.gutter, AppSpace.xxl),
