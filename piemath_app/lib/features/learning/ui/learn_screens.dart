@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/shell/app_shell.dart';
 import '../../../core/files/files.dart';
 import '../../../core/math/math.dart';
+import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
 import '../data/events_repository.dart';
 import '../data/lesson_models.dart';
@@ -135,11 +136,18 @@ class LessonScreen extends ConsumerWidget {
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Хичээл')),
       body: async.when(
         loading: () => const LoadingState(cards: 2),
-        error: (e, _) => ErrorState(
-          title: 'Хичээл нээгдсэнгүй',
-          message: errorText(e),
-          onRetry: () => ref.invalidate(lessonProvider(chapterId)),
-        ),
+        // 403 = эрхгүй: худалдах товч, гадны холбоосгүй тайлбар (Apple 3.1.1); бусад алдаа дахин оролдоно
+        error: (e, _) => e is ApiError && e.kind == ApiErrorKind.forbidden
+            ? const EmptyState(
+                icon: AppIcons.password,
+                title: 'Энэ хичээлийг үзэх эрх хэрэгтэй байна',
+                message: 'Эрхийг сургалтын төв олгоно',
+              )
+            : ErrorState(
+                title: 'Хичээл нээгдсэнгүй',
+                message: errorText(e),
+                onRetry: () => ref.invalidate(lessonProvider(chapterId)),
+              ),
         data: (l) => _LessonBody(lesson: l),
       ),
     );

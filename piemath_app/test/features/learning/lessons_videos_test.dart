@@ -169,8 +169,9 @@ void main() {
   testWidgets('403: эрхгүй бол тайлбар', (tester) async {
     final http = FakeHttp()..error('GET', '/lessons/c9', 403, 'Энэ бүлгийн хичээлийг үзэх эрхгүй байна');
     await pumpLearning(tester, http, location: '/app/learn/c9');
-    expect(find.text('Хичээл нээгдсэнгүй'), findsOneWidget);
-    expect(find.text('Энэ бүлгийн хичээлийг үзэх эрхгүй байна'), findsOneWidget);
+    expect(find.text('Энэ хичээлийг үзэх эрх хэрэгтэй байна'), findsOneWidget);
+    expect(find.text('Эрхийг сургалтын төв олгоно'), findsOneWidget);
+    expect(find.text('Дахин оролдох'), findsNothing, reason: 'эрхгүй бол давтах утгагүй');
   });
 
   testWidgets('онлайн хичээл: бүлэг → бичлэг', (tester) async {
