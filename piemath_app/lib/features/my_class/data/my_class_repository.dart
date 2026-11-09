@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/auth/session.dart';
+import '../../../core/cache/swr.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/network/network_providers.dart';
@@ -117,6 +118,7 @@ final class TestDetailMissing extends TestDetailResult {
 final myClassRepositoryProvider = Provider<MyClassRepository>((ref) => MyClassRepository(ref.watch(apiClientProvider)));
 
 // Кэш: tab солих, буцаж ирэхэд дахин татахгүй (pull-to-refresh / «Дахин оролдох» → invalidate).
+// Нүүрийн провайдерууд `swr` — апп асахад өмнөх өгөгдлөөр шууд зурна (docs/PERF-OFFLINE.md).
 // Хэрэглэгч солигдвол (гарах/өөр хүн нэвтрэх) бүх кэш дахин ачаална — өөр хүний мэдээлэл үлдэхгүй.
 
 /// Нэвтэрсэн хэрэглэгчийн id-г сонсоно.
@@ -127,10 +129,10 @@ MyClassRepository _repo(Ref ref) {
   return ref.watch(myClassRepositoryProvider);
 }
 
-final hubOverviewProvider = FutureProvider<HubOverview>((ref) => _repo(ref).overview());
+final hubOverviewProvider = FutureProvider<HubOverview>((ref) => swr(ref, () => _repo(ref).overview()));
 
 final hubDaysProvider = FutureProvider.family<HubDays, String>(
-  (ref, month) => _repo(ref).days(month),
+  (ref, month) => swr(ref, () => _repo(ref).days(month)),
 );
 
 final hubTestsProvider = FutureProvider.autoDispose.family<List<HubTestRow>, String>(
@@ -142,21 +144,21 @@ final hubTestDetailProvider = FutureProvider.autoDispose.family<TestDetailResult
 );
 
 final myAttendanceProvider = FutureProvider<List<AttendanceRow>>(
-  (ref) => _repo(ref).myAttendance(),
+  (ref) => swr(ref, () => _repo(ref).myAttendance()),
 );
 
-final myMakeupProvider = FutureProvider<List<MakeupItem>>((ref) => _repo(ref).myMakeup());
+final myMakeupProvider = FutureProvider<List<MakeupItem>>((ref) => swr(ref, () => _repo(ref).myMakeup()));
 
 final theoryDayProvider = FutureProvider.autoDispose.family<TheoryDay, ({String classroomId, String date})>(
   (ref, k) => _repo(ref).theoryDay(classroomId: k.classroomId, date: k.date),
 );
 
-final paidUntilProvider = FutureProvider<String?>((ref) => _repo(ref).paidUntil());
+final paidUntilProvider = FutureProvider<String?>((ref) => swr(ref, () => _repo(ref).paidUntil()));
 
 final announcementsProvider = FutureProvider<List<Announcement>>(
-  (ref) => _repo(ref).announcements(),
+  (ref) => swr(ref, () => _repo(ref).announcements()),
 );
 
 final myClassroomsProvider = FutureProvider<List<MyClassroom>>(
-  (ref) => _repo(ref).myClassrooms(),
+  (ref) => swr(ref, () => _repo(ref).myClassrooms()),
 );
