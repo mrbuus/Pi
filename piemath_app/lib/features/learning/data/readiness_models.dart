@@ -83,6 +83,7 @@ class Readiness {
     required this.high,
     required this.dataPoints,
     required this.coverage,
+    this.effectiveDataPoints = 0,
     this.topics = const [],
     this.nextBest = const [],
     this.weeks = const [],
@@ -96,6 +97,7 @@ class Readiness {
       low: pct(j['low'], 0),
       high: pct(j['high'], 100),
       dataPoints: asInt(j['dataPoints']) ?? 0,
+      effectiveDataPoints: asNum(j['effectiveDataPoints'])?.round() ?? 0,
       coverage: pct(j['coverage'], 0),
       topics: [for (final t in asList(j['topics'])) ReadinessTopic.fromJson(t)],
       nextBest: [for (final t in asList(j['nextBestTopics'])) ReadinessTopic.fromJson(t)],
@@ -107,6 +109,9 @@ class Readiness {
   final int low;
   final int high;
   final int dataPoints;
+
+  /// Ойролцоогоор хэдэн тусдаа бодлогын нотолгоо (давхардсан оролдлогыг жинлэсэн).
+  final int effectiveDataPoints;
   final int coverage;
   final List<ReadinessTopic> topics;
   final List<ReadinessTopic> nextBest;

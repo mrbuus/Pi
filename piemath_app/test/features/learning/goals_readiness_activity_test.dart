@@ -49,6 +49,17 @@ Map<String, Object?> readiness({int points = 20}) => {
 };
 
 void main() {
+  test('goalProgress: цуцалсныг тоолохгүй, хугацаа хэтэрсэн', () {
+    final goals = [
+      Goal.fromJson(goal('a', 'A', status: 'DONE')),
+      Goal.fromJson(goal('b', 'B', date: '2026-11-01T16:00:00.000Z')),
+      Goal.fromJson(goal('c', 'C', status: 'CANCELLED', date: '2026-11-01T16:00:00.000Z')),
+      Goal.fromJson(goal('d', 'D', date: '2026-12-01T16:00:00.000Z')),
+    ];
+    final p = goalProgress(goals, UbDateTime(2026, 11, 10));
+    expect((p.done, p.total, p.percent, p.overdue), (1, 3, 33, 1));
+  });
+
   group('зорилго', () {
     testWidgets('идэвхтэй ба дууссан зорилго тусдаа, огноо, төлөв', (tester) async {
       final http = FakeHttp()
@@ -180,6 +191,27 @@ void main() {
       expect(find.text('Тригонометр'), findsNothing);
       await tester.scrollUntilVisible(find.text('Дараагийн алхам'), 300, scrollable: find.byType(Scrollable).first);
       expect(find.text('Дасгал'), findsOneWidget);
+    });
+
+    testWidgets('«Миний зорилго»: хадгалсан утга, 0-100 шалгалт, PATCH', (tester) async {
+      final http = FakeHttp()
+        ..json('GET', '/readiness/my', readiness())
+        ..json('GET', '/goals', [goal('g9', 'Бэлэн байдлын зорилго: 80')])
+        ..json('PATCH', '/goals/g9', goal('g9', 'Бэлэн байдлын зорилго: 85'));
+      await pumpLearning(tester, http, location: '/app/readiness');
+      expect(find.textContaining('ойролцоогоор 13 тусдаа бодлогын нотолгоо'), findsOneWidget);
+      await tester.scrollUntilVisible(find.text('Зорилго хадгалах'), 300);
+      expect(find.widgetWithText(TextField, '80'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), '120');
+      await tester.tap(find.text('Зорилго хадгалах'));
+      await settle(tester);
+      expect(find.text('Бүхэл тоогоор 0-100 хооронд оруулна уу'), findsOneWidget);
+      expect(http.count('PATCH', '/goals/g9'), 0);
+      await tester.enterText(find.byType(TextField), '85');
+      await tester.tap(find.text('Зорилго хадгалах'));
+      await settle(tester);
+      final patch = http.requests.firstWhere((r) => r.method == 'PATCH');
+      expect((patch.data as Map)['title'], 'Бэлэн байдлын зорилго: 85');
     });
 
     testWidgets('сул сэдэв эхэнд (эзэмшил өсөхөөр)', (tester) async {
