@@ -14,7 +14,7 @@ abstract final class Env {
   /// API-ийн суурь хаяг, төгсгөлийн `/`-гүй.
   static String get apiBaseUrl => checkedBaseUrl(_apiBaseUrl, allowInsecure: kDebugMode);
 
-  /// Вэбийн суурь хаяг (нууцлалын бодлого, «вэбээр нээх» холбоос).
+  /// Вэбийн суурь хаяг (нууцлалын бодлого, апп дотор вэб рүү чиглүүлэхгүй — зөвхөн өгөгдөл татах).
   static String get webBaseUrl => checkedBaseUrl(_webBaseUrl, allowInsecure: kDebugMode);
 
   /// Release-д зөвхөн HTTPS (SECURITY §2). Debug-д localhost/эмуляторын http зөвшөөрнө.

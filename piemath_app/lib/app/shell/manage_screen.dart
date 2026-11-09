@@ -5,7 +5,7 @@ import '../../core/ui/ui.dart';
 import '../nav/nav_data.dart';
 
 /// Админы «Удирдлага» төв (`/app/admin`) — багшийн самбарын дээд талын товчоор нээгдэнэ.
-/// Апп-д хийгдээгүй хуудас вэбээр нээгдэнэ (PendingScreen).
+/// Апп-д хийгдээгүй хуудас «удахгүй» гэж харагдана (PendingScreen).
 class ManageScreen extends StatelessWidget {
   const ManageScreen({super.key});
 

@@ -139,7 +139,7 @@ final _sectionActions = <String, WidgetBuilder>{'/app/homework': (_) => const Ho
 ///
 /// [role]-ийн хэсэг бүр нэг салбар ([NavData.sections]), сүүлийнх нь «Бусад». Feature-ийн маршрут бүрийг
 /// замын хамгийн урт угтвараар хэсэгт нь оноож, хамаарахгүйг «Бусад»-д. Дэд табтай хэсгийн дэд зам бүр
-/// ижил key-тэй [SectionScreen] хуудас болно. Хараахан хийгдээгүй зам — «вэбээр нээх».
+/// ижил key-тэй [SectionScreen] хуудас болно. Хараахан хийгдээгүй зам — апп доторх «удахгүй» хуудас.
 @visibleForTesting
 List<RouteBase> buildRoutes(List<FeatureRoutes> features, {UserRole role = UserRole.unknown}) {
   return [
@@ -223,7 +223,7 @@ StatefulShellRoute buildShellRoute(List<FeatureRoutes> features, List<NavSection
     final i = path == null ? -1 : NavData.sectionIndexOf(role, path);
     (i < 0 ? more : buckets[i]).add(r);
   }
-  // Хараахан хийгдээгүй хэсэг — вэбийн зам руу «вэбээр нээх» (функц хасахгүй). Хамгийн сүүлд.
+  // Хараахан хийгдээгүй хэсэг — апп доторх «удахгүй» хуудас (вэб рүү гаргахгүй). Хамгийн сүүлд.
   more.addAll([
     GoRoute(path: '/app/:a', builder: pending),
     GoRoute(path: '/app/:a/:b', builder: pending),
