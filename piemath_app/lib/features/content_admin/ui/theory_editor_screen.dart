@@ -57,26 +57,9 @@ class _TheoryEditorScreenState extends ConsumerState<TheoryEditorScreen> {
   }
 
   Future<String?> _askAlt() async {
-    final alt = TextEditingController();
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Зургийн товч тайлбар'),
-        content: TextField(
-          controller: alt,
-          autofocus: true,
-          maxLength: 120,
-          decoration: const InputDecoration(hintText: 'Жишээ: Гурвалжны өнцгүүд'),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text(AppStrings.cancel)),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Нэмэх')),
-        ],
-      ),
-    );
-    final text = alt.text.trim();
-    alt.dispose();
-    return ok == true && text.isNotEmpty ? text : null;
+    final text = await showDialog<String>(context: context, builder: (_) => const _AltDialog());
+    final t = text?.trim() ?? '';
+    return t.isEmpty ? null : t;
   }
 
   Future<void> _addImage() async {
@@ -284,4 +267,36 @@ class _Preview extends StatelessWidget {
       ),
     );
   }
+}
+
+class _AltDialog extends StatefulWidget {
+  const _AltDialog();
+
+  @override
+  State<_AltDialog> createState() => _AltDialogState();
+}
+
+class _AltDialogState extends State<_AltDialog> {
+  final _alt = TextEditingController();
+
+  @override
+  void dispose() {
+    _alt.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Зургийн товч тайлбар'),
+    content: TextField(
+      controller: _alt,
+      autofocus: true,
+      maxLength: 120,
+      decoration: const InputDecoration(hintText: 'Жишээ: Гурвалжны өнцгүүд'),
+    ),
+    actions: [
+      TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text(AppStrings.cancel)),
+      FilledButton(onPressed: () => Navigator.of(context).pop(_alt.text), child: const Text('Нэмэх')),
+    ],
+  );
 }
