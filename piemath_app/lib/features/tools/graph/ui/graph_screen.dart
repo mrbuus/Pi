@@ -978,7 +978,7 @@ class _ParamSlider extends StatelessWidget {
           key: ValueKey('graph-anim-$name'),
           tooltip: animating ? 'Хөдөлгөөнийг зогсоох' : 'Хөдөлгөөнт болгох',
           onPressed: onToggleAnim,
-          icon: Icon(animating ? LucideIcons.pause : LucideIcons.play, size: 18),
+          icon: Icon(animating ? LucideIcons.circleX : LucideIcons.play, size: 18),
         ),
       ],
     );
