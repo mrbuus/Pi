@@ -12,6 +12,7 @@ import '../data/exam_models.dart';
 import '../data/exam_repository.dart';
 import '../data/ranking_models.dart';
 import '../domain/test_list_logic.dart';
+import 'mock_exams_tab.dart';
 import 'ranking_screen.dart' show testRankingProvider;
 
 /// «Өгөх» / «Өгсөн, дүн» / «Эрэмбэ» табын өгөгдөл — вэбийн `StudentExamsHub` (+ `StudentExamLists`).
@@ -52,7 +53,7 @@ final testsHubProvider = FutureProvider.autoDispose<TestsHub>((ref) async {
   );
 });
 
-/// `/app/tests` — шалгалт, тестийн жагсаалт. [initialTab] = `give | done | rank` (вэбийн `?tab=`).
+/// `/app/tests` — шалгалт, тестийн жагсаалт. [initialTab] = `give | done | rank | soril` (вэбийн `?tab=`).
 class TestsListScreen extends ConsumerStatefulWidget {
   const TestsListScreen({super.key, this.initialTab});
 
@@ -65,7 +66,7 @@ class TestsListScreen extends ConsumerStatefulWidget {
 class _TestsListScreenState extends ConsumerState<TestsListScreen> {
   String _query = '';
 
-  static const _tabs = ['give', 'done', 'rank'];
+  static const _tabs = ['give', 'done', 'rank', 'soril'];
 
   @override
   Widget build(BuildContext context) {
@@ -81,10 +82,13 @@ class _TestsListScreenState extends ConsumerState<TestsListScreen> {
         appBar: AppBar(
           title: const Text('Шалгалт'),
           bottom: const TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
             tabs: [
               Tab(text: 'Өгөх'),
               Tab(text: 'Өгсөн, дүн'),
               Tab(text: 'Эрэмбэ'),
+              Tab(text: 'Жишиг сорил'),
             ],
           ),
         ),
@@ -101,6 +105,7 @@ class _TestsListScreenState extends ConsumerState<TestsListScreen> {
               _TakeTab(hub: h, query: _query, onQuery: (q) => setState(() => _query = q)),
               _DoneTab(rows: h.done),
               _RankTab(results: h.results),
+              const MockExamsTab(),
             ],
           ),
         ),
