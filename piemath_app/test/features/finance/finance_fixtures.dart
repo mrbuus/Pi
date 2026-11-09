@@ -128,7 +128,7 @@ Uint8List csvBytes([String text = 'Гүйлгээний огноо,Дүн,Утг
 
 List<Override> financeExtra({StatementPicker? picker}) => [
   financeTodayProvider.overrideWithValue(UbDateTime(2026, 11, 4)),
-  if (picker != null) statementPickerProvider.overrideWithValue(picker),
+  statementPickerProvider.overrideWithValue(picker),
 ];
 
 Future<void> pumpFinance(

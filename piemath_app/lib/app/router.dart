@@ -10,6 +10,7 @@ import '../features/buyer/buyer_routes.dart';
 import '../features/classrooms_admin/classrooms_admin_routes.dart';
 import '../features/enrollment/enrollment_routes.dart';
 import '../features/exam/exam_routes.dart';
+import '../features/finance/finance_routes.dart';
 import '../features/groups/groups_routes.dart';
 import '../features/homework/homework_routes.dart';
 import '../features/homework/ui/homework_screen.dart' show HomeworkAppBarActions;
@@ -19,6 +20,7 @@ import '../features/my_class/my_class_routes.dart';
 import '../features/notifications/notifications_routes.dart';
 import '../features/online_students/online_routes.dart';
 import '../features/parent/parent_routes.dart';
+import '../features/passes/passes_routes.dart';
 import '../features/payments/payments_routes.dart';
 import '../features/planner/planner_routes.dart';
 import '../features/results/results_routes.dart';
@@ -75,6 +77,8 @@ final allFeatureRoutes = <FeatureRoutes>[
   onlineRoutes,
   smsRoutes,
   enrollmentRoutes,
+  financeRoutes,
+  passesRoutes,
   _manageRoutes,
 ];
 

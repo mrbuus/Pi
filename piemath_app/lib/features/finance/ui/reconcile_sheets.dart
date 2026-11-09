@@ -316,7 +316,7 @@ class _StudentPickerSheetState extends ConsumerState<StudentPickerSheet> {
   }
 }
 
-/// Хуулга оруулах карт. Файл сонгогч байхгүй бол (апп-д сан багцлагдаагүй) вэбээр оруулахыг тайлбарлана.
+/// Хуулга оруулах карт. Файл сонгогч байхгүй бол (апп-д сан багцлагдаагүй) оруулах боломжгүйг тайлбарлана.
 ///
 /// Урсгал: сонгох → урьдчилсан шалгалт ([StatementPreview], серверт илгээхээс өмнө) → баталгаажуулах →
 /// нэг л илгээлт ([SubmitGuard], автомат давталтгүй) → серверийн дүн (оруулсан, давхардсан, холбогдсон, алдаа).
@@ -391,8 +391,8 @@ class _StatementImportCardState extends ConsumerState<StatementImportCard> {
           const SizedBox(height: AppSpace.xs),
           if (picker == null)
             Text(
-              'Хаан банкны хуулгыг (.xlsx, .csv) одоогоор вэб хувилбараар оруулна',
-              key: const Key('statement-import-web'),
+              'Энэ төхөөрөмж дээр файл сонгох боломжгүй байна',
+              key: const Key('statement-import-unavailable'),
               style: context.text.bodySmall?.copyWith(color: c.inkDim),
             )
           else ...[

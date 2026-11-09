@@ -85,7 +85,7 @@ void main() {
       expect(find.text('2 гүйлгээ'), findsOneWidget);
       expect(find.text('99112233 Болд сургалт'), findsNWidgets(2));
       expect(find.text('2026.11.03 12:20'), findsNWidgets(2)); // 04:20Z = UB 12:20
-      expect(find.byKey(const Key('statement-import-web')), findsOneWidget);
+      expect(find.byKey(const Key('statement-import-unavailable')), findsOneWidget);
       expect(find.byKey(const Key('statement-pick')), findsNothing);
     });
 
