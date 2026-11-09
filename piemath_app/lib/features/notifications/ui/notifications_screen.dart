@@ -218,22 +218,25 @@ class NotificationTile extends StatelessWidget {
             const SizedBox(height: AppSpace.sm),
             Text(DateMn.relative(created, now: now), style: context.text.bodySmall),
           ],
-          if (target != null || unread)
-            Padding(
+          Padding(
               padding: const EdgeInsets.only(top: AppSpace.sm),
               child: Wrap(
                 spacing: AppSpace.sm,
                 runSpacing: AppSpace.xs,
                 children: [
-                  if (target != null)
-                    TextButton.icon(
-                      onPressed: () {
-                        if (unread && !disabled) onMarkRead();
+                  // Апп-д тохирох хэсэггүй холбоос → мэдэгдлийн дэлгэрэнгүй (хөтөч ХЭЗЭЭ Ч нээгдэхгүй).
+                  TextButton.icon(
+                    onPressed: () {
+                      if (unread && !disabled) onMarkRead();
+                      if (target != null) {
                         context.push(target);
-                      },
-                      icon: const Icon(AppIcons.arrowUpRight, size: 18),
-                      label: const Text('Холбогдох хэсэг рүү очих'),
-                    ),
+                      } else {
+                        context.push(notificationDetailPath(item.id), extra: item);
+                      }
+                    },
+                    icon: Icon(target != null ? AppIcons.arrowUpRight : AppIcons.forward, size: 18),
+                    label: Text(target != null ? 'Холбогдох хэсэг рүү очих' : 'Дэлгэрэнгүй'),
+                  ),
                   if (unread)
                     OutlinedButton(
                       onPressed: disabled ? null : onMarkRead,

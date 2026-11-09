@@ -223,7 +223,7 @@ void main() {
     testWidgets('буруу огноо: нүүр рүү хөтөлнө', (tester) async {
       await pumpStudentRoute(tester, http: classHttp(), location: '/app/my-class/day/oo/c1');
       await settle(tester);
-      expect(find.text('Вэбээр нээх'), findsOneWidget); // түр дэлгэц, өдрийн дэлгэц биш
+      expect(find.text('Энэ хэсэг удахгүй апп-д нэмэгдэнэ'), findsOneWidget); // түр дэлгэц, өдрийн дэлгэц биш
     });
   });
 

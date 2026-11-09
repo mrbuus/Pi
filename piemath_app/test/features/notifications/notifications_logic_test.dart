@@ -29,8 +29,20 @@ void main() {
       expect(t(null), isNull);
       expect(t('//evil.com/app/x'), isNull);
       expect(t('/login'), isNull);
-      expect(t('/books'), isNull);
+      expect(t('/booksx'), isNull);
       expect(t('/app/a b'), isNull);
+    });
+
+    test('нийтийн хуудас апп доторх дэлгэц рүү (вэб биш)', () {
+      expect(t('/books'), '/books');
+      expect(t('/books/100V3'), '/books/100V3');
+      expect(t('https://pimath.mn/sorils'), '/sorils');
+      expect(t('/placement'), '/placement');
+      expect(t('/privacy'), '/privacy');
+    });
+
+    test('дэлгэрэнгүйн зам', () {
+      expect(notificationDetailPath('n1'), '/app/notifications/n1');
     });
   });
 

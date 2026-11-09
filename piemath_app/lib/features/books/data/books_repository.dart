@@ -67,3 +67,15 @@ Future<String?> chapterSourcePdfKey(WidgetRef ref, String chapterId) {
         parse: (j) => j is Map ? j['key'] as String? : null,
       );
 }
+
+/// `GET /mock-exams/my` — зөвхөн сурагч, худалдан авагч (бусад role-д хоосон).
+final myMockRegistrationsProvider = FutureProvider.autoDispose<List<MockRegistration>>((ref) {
+  return ref.read(apiClientProvider).get('/mock-exams/my', parse: parseMockRegistrations);
+});
+
+/// Сорилд бүртгүүлэх / цуцлах (`POST|DELETE /mock-exams/:id/register`). Давтахгүй (илгээх үйлдэл).
+Future<void> setMockRegistration(WidgetRef ref, String eventId, {required bool on}) {
+  final path = '/mock-exams/${Uri.encodeComponent(eventId)}/register';
+  final api = ref.read(apiClientProvider);
+  return on ? api.post<Object?>(path) : api.delete<Object?>(path);
+}

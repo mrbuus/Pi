@@ -66,11 +66,18 @@ abstract class VideoLauncher {
   Future<bool> open(Uri uri);
 }
 
+/// Тоглуулж болох хост — зөвхөн YouTube (nocookie embed, `domain/video_source.dart`). Манай вэб хуудас
+/// болон бусад хаягийг апп ХЭЗЭЭ Ч хөтчөөр нээхгүй (эзэн 2026-11-10).
+const videoHosts = {'www.youtube-nocookie.com', 'www.youtube.com', 'youtube.com', 'm.youtube.com', 'youtu.be'};
+
+bool isPlayableVideoUri(Uri uri) => uri.scheme == 'https' && videoHosts.contains(uri.host);
+
 class SystemVideoLauncher implements VideoLauncher {
   const SystemVideoLauncher();
 
   @override
   Future<bool> open(Uri uri) async {
+    if (!isPlayableVideoUri(uri)) return false;
     try {
       return await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
     } catch (_) {

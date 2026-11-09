@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/shell/app_shell.dart';
-import '../../../core/config/env.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
@@ -116,7 +115,7 @@ class _Explanation extends StatelessWidget {
               style: TextButton.styleFrom(minimumSize: const Size(0, AppSizes.minTap)),
               icon: const Icon(AppIcons.forward, size: 18),
               label: const Text('Нууцлалын бодлого'),
-              onPressed: () => launchUrl(Uri.parse('${Env.webBaseUrl}/privacy'), mode: LaunchMode.externalApplication),
+              onPressed: () => context.push('/privacy'),
             ),
           ),
         ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../core/auth/session.dart';
@@ -7,6 +8,7 @@ import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
 import '../data/account_repository.dart';
 import '../data/native_sign_in.dart';
+import 'register_screen.dart';
 import 'widgets/auth_widgets.dart';
 
 enum NativeProvider {
@@ -51,6 +53,9 @@ class _NativeSignInSectionState extends ConsumerState<NativeSignInSection> {
   String? _message;
   bool _isError = true;
 
+  /// Бүртгэлгүй Gmail-ийн тасалбар — «Энэ Gmail-ээр бүртгүүлэх» товч.
+  String? _signupTicket;
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +69,7 @@ class _NativeSignInSectionState extends ConsumerState<NativeSignInSection> {
     setState(() {
       _busy = p;
       _message = null;
+      _signupTicket = null;
     });
     final native = ref.read(nativeSignInProvider);
     final repo = ref.read(accountRepositoryProvider);
@@ -87,8 +93,9 @@ class _NativeSignInSectionState extends ConsumerState<NativeSignInSection> {
                 remember: widget.remember,
               );
         // Router redirect энэ дэлгэцийг солино.
-        case NativeLoginSignup():
+        case NativeLoginSignup(:final ticket):
           _show(googleSignupText, isError: false);
+          if (mounted && ticket != null) setState(() => _signupTicket = ticket);
         case NativeLoginNotLinked():
           _show(notLinkedText(p), isError: false);
       }
@@ -160,6 +167,11 @@ class _NativeSignInSectionState extends ConsumerState<NativeSignInSection> {
           const SizedBox(height: AppSpace.md),
         ],
         FormMessage(message: _message, isError: _isError),
+        if (_signupTicket != null)
+          TextButton(
+            onPressed: () => context.push('/register', extra: RegisterArgs(googleTicket: _signupTicket)),
+            child: const Text('Энэ Gmail-ээр бүртгүүлэх'),
+          ),
       ],
     );
   }
