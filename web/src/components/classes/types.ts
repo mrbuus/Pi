@@ -333,6 +333,27 @@ export interface ClassCheck {
   marks: CheckMark[];
 }
 
+/** GET /classrooms/:id/checks/students/:studentId — нэр дарахад гарах товч мэдээлэл (төлбөргүй) */
+export interface CheckStudentContact {
+  kind: "student" | "father" | "mother" | "parent";
+  phone: string;
+  /** Аппад холбогдсон эцэг эхийн нэр */
+  name?: string;
+  appLinked?: boolean;
+}
+
+export interface CheckStudentInfo {
+  id: string;
+  firstName: string;
+  lastName: string;
+  studentCode: string | null;
+  classroomName: string;
+  /** Одоо энэ ангид байгаа эсэх (гарсан бол false) */
+  inClass: boolean;
+  guardianNote: string | null;
+  contacts: CheckStudentContact[];
+}
+
 export interface ClassChecksResponse {
   classroomId: string;
   /** Одоогийн сурагчид (нэрээр) */
