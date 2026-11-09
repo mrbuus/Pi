@@ -160,7 +160,7 @@ describe('TestsService duplicate and server-side draft behavior', () => {
       Role.TEACHER,
     );
     expect(prisma.testDraft.updateMany).toHaveBeenCalledWith({
-      where: { id: 'draft-1', ownerId: 'teacher-1', revision: 1 },
+      where: { id: 'draft-1', ownerId: 'teacher-1', revision: 1, deletedAt: null },
       data: {
         state: { expectedRevision: 1, title: 'Updated' },
         revision: { increment: 1 },
@@ -196,8 +196,15 @@ describe('TestsService duplicate and server-side draft behavior', () => {
       service.getTestDraft('draft-1', 'admin-1', Role.ADMIN),
     ).resolves.toMatchObject({ id: 'draft-1' });
     await service.deleteTestDraft('draft-1', 'teacher-1', Role.TEACHER);
-    expect(prisma.testDraft.deleteMany).toHaveBeenCalledWith({
-      where: { id: 'draft-1', ownerId: 'teacher-1' },
+    // ЗӨӨЛӨН устгал: deletedAt бөглөнө, хатуу устгалгүй
+    expect(prisma.testDraft.updateMany).toHaveBeenCalledWith({
+      where: { id: 'draft-1', ownerId: 'teacher-1', deletedAt: null },
+      data: { deletedAt: expect.any(Date), deletedById: 'teacher-1' },
+    });
+    expect(prisma.testDraft.deleteMany).not.toHaveBeenCalled();
+    // Ноорог уншилт устсаныг хасна
+    expect(prisma.testDraft.findUnique).toHaveBeenCalledWith({
+      where: { id: 'draft-1', deletedAt: null },
     });
   });
 });

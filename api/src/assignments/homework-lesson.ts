@@ -29,6 +29,7 @@ export async function loadLessonTopics(
   const [plans, records] = await Promise.all([
     prisma.lessonTopic.findMany({
       where: {
+        deletedAt: null,
         date: { in: dates },
         schedule: { deletedAt: null, classroomId: { in: classroomIds } },
       },

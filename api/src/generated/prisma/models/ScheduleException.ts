@@ -47,6 +47,8 @@ export type ScheduleExceptionMinAggregateOutputType = {
   newRoom: string | null
   note: string | null
   createdAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type ScheduleExceptionMaxAggregateOutputType = {
@@ -60,6 +62,8 @@ export type ScheduleExceptionMaxAggregateOutputType = {
   newRoom: string | null
   note: string | null
   createdAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type ScheduleExceptionCountAggregateOutputType = {
@@ -73,6 +77,8 @@ export type ScheduleExceptionCountAggregateOutputType = {
   newRoom: number
   note: number
   createdAt: number
+  deletedAt: number
+  deletedById: number
   _all: number
 }
 
@@ -98,6 +104,8 @@ export type ScheduleExceptionMinAggregateInputType = {
   newRoom?: true
   note?: true
   createdAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type ScheduleExceptionMaxAggregateInputType = {
@@ -111,6 +119,8 @@ export type ScheduleExceptionMaxAggregateInputType = {
   newRoom?: true
   note?: true
   createdAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type ScheduleExceptionCountAggregateInputType = {
@@ -124,6 +134,8 @@ export type ScheduleExceptionCountAggregateInputType = {
   newRoom?: true
   note?: true
   createdAt?: true
+  deletedAt?: true
+  deletedById?: true
   _all?: true
 }
 
@@ -224,6 +236,8 @@ export type ScheduleExceptionGroupByOutputType = {
   newRoom: string | null
   note: string | null
   createdAt: Date
+  deletedAt: Date | null
+  deletedById: string | null
   _count: ScheduleExceptionCountAggregateOutputType | null
   _avg: ScheduleExceptionAvgAggregateOutputType | null
   _sum: ScheduleExceptionSumAggregateOutputType | null
@@ -260,6 +274,8 @@ export type ScheduleExceptionWhereInput = {
   newRoom?: Prisma.StringNullableFilter<"ScheduleException"> | string | null
   note?: Prisma.StringNullableFilter<"ScheduleException"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ScheduleException"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"ScheduleException"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"ScheduleException"> | string | null
   schedule?: Prisma.XOR<Prisma.ClassScheduleScalarRelationFilter, Prisma.ClassScheduleWhereInput>
 }
 
@@ -274,6 +290,8 @@ export type ScheduleExceptionOrderByWithRelationInput = {
   newRoom?: Prisma.SortOrderInput | Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   schedule?: Prisma.ClassScheduleOrderByWithRelationInput
 }
 
@@ -292,6 +310,8 @@ export type ScheduleExceptionWhereUniqueInput = Prisma.AtLeast<{
   newRoom?: Prisma.StringNullableFilter<"ScheduleException"> | string | null
   note?: Prisma.StringNullableFilter<"ScheduleException"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ScheduleException"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"ScheduleException"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"ScheduleException"> | string | null
   schedule?: Prisma.XOR<Prisma.ClassScheduleScalarRelationFilter, Prisma.ClassScheduleWhereInput>
 }, "id" | "scheduleId_date">
 
@@ -306,6 +326,8 @@ export type ScheduleExceptionOrderByWithAggregationInput = {
   newRoom?: Prisma.SortOrderInput | Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ScheduleExceptionCountOrderByAggregateInput
   _avg?: Prisma.ScheduleExceptionAvgOrderByAggregateInput
   _max?: Prisma.ScheduleExceptionMaxOrderByAggregateInput
@@ -327,6 +349,8 @@ export type ScheduleExceptionScalarWhereWithAggregatesInput = {
   newRoom?: Prisma.StringNullableWithAggregatesFilter<"ScheduleException"> | string | null
   note?: Prisma.StringNullableWithAggregatesFilter<"ScheduleException"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ScheduleException"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ScheduleException"> | Date | string | null
+  deletedById?: Prisma.StringNullableWithAggregatesFilter<"ScheduleException"> | string | null
 }
 
 export type ScheduleExceptionCreateInput = {
@@ -339,6 +363,8 @@ export type ScheduleExceptionCreateInput = {
   newRoom?: string | null
   note?: string | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   schedule: Prisma.ClassScheduleCreateNestedOneWithoutExceptionsInput
 }
 
@@ -353,6 +379,8 @@ export type ScheduleExceptionUncheckedCreateInput = {
   newRoom?: string | null
   note?: string | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type ScheduleExceptionUpdateInput = {
@@ -365,6 +393,8 @@ export type ScheduleExceptionUpdateInput = {
   newRoom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   schedule?: Prisma.ClassScheduleUpdateOneRequiredWithoutExceptionsNestedInput
 }
 
@@ -379,6 +409,8 @@ export type ScheduleExceptionUncheckedUpdateInput = {
   newRoom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ScheduleExceptionCreateManyInput = {
@@ -392,6 +424,8 @@ export type ScheduleExceptionCreateManyInput = {
   newRoom?: string | null
   note?: string | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type ScheduleExceptionUpdateManyMutationInput = {
@@ -404,6 +438,8 @@ export type ScheduleExceptionUpdateManyMutationInput = {
   newRoom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ScheduleExceptionUncheckedUpdateManyInput = {
@@ -417,6 +453,8 @@ export type ScheduleExceptionUncheckedUpdateManyInput = {
   newRoom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ScheduleExceptionListRelationFilter = {
@@ -445,6 +483,8 @@ export type ScheduleExceptionCountOrderByAggregateInput = {
   newRoom?: Prisma.SortOrder
   note?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type ScheduleExceptionAvgOrderByAggregateInput = {
@@ -463,6 +503,8 @@ export type ScheduleExceptionMaxOrderByAggregateInput = {
   newRoom?: Prisma.SortOrder
   note?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type ScheduleExceptionMinOrderByAggregateInput = {
@@ -476,6 +518,8 @@ export type ScheduleExceptionMinOrderByAggregateInput = {
   newRoom?: Prisma.SortOrder
   note?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type ScheduleExceptionSumOrderByAggregateInput = {
@@ -539,6 +583,8 @@ export type ScheduleExceptionCreateWithoutScheduleInput = {
   newRoom?: string | null
   note?: string | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type ScheduleExceptionUncheckedCreateWithoutScheduleInput = {
@@ -551,6 +597,8 @@ export type ScheduleExceptionUncheckedCreateWithoutScheduleInput = {
   newRoom?: string | null
   note?: string | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type ScheduleExceptionCreateOrConnectWithoutScheduleInput = {
@@ -593,6 +641,8 @@ export type ScheduleExceptionScalarWhereInput = {
   newRoom?: Prisma.StringNullableFilter<"ScheduleException"> | string | null
   note?: Prisma.StringNullableFilter<"ScheduleException"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ScheduleException"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"ScheduleException"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"ScheduleException"> | string | null
 }
 
 export type ScheduleExceptionCreateManyScheduleInput = {
@@ -605,6 +655,8 @@ export type ScheduleExceptionCreateManyScheduleInput = {
   newRoom?: string | null
   note?: string | null
   createdAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type ScheduleExceptionUpdateWithoutScheduleInput = {
@@ -617,6 +669,8 @@ export type ScheduleExceptionUpdateWithoutScheduleInput = {
   newRoom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ScheduleExceptionUncheckedUpdateWithoutScheduleInput = {
@@ -629,6 +683,8 @@ export type ScheduleExceptionUncheckedUpdateWithoutScheduleInput = {
   newRoom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ScheduleExceptionUncheckedUpdateManyWithoutScheduleInput = {
@@ -641,6 +697,8 @@ export type ScheduleExceptionUncheckedUpdateManyWithoutScheduleInput = {
   newRoom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -656,6 +714,8 @@ export type ScheduleExceptionSelect<ExtArgs extends runtime.Types.Extensions.Int
   newRoom?: boolean
   note?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   schedule?: boolean | Prisma.ClassScheduleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["scheduleException"]>
 
@@ -670,6 +730,8 @@ export type ScheduleExceptionSelectCreateManyAndReturn<ExtArgs extends runtime.T
   newRoom?: boolean
   note?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   schedule?: boolean | Prisma.ClassScheduleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["scheduleException"]>
 
@@ -684,6 +746,8 @@ export type ScheduleExceptionSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   newRoom?: boolean
   note?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   schedule?: boolean | Prisma.ClassScheduleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["scheduleException"]>
 
@@ -698,9 +762,11 @@ export type ScheduleExceptionSelectScalar = {
   newRoom?: boolean
   note?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }
 
-export type ScheduleExceptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scheduleId" | "date" | "kind" | "newDate" | "newStartMinute" | "newEndMinute" | "newRoom" | "note" | "createdAt", ExtArgs["result"]["scheduleException"]>
+export type ScheduleExceptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scheduleId" | "date" | "kind" | "newDate" | "newStartMinute" | "newEndMinute" | "newRoom" | "note" | "createdAt" | "deletedAt" | "deletedById", ExtArgs["result"]["scheduleException"]>
 export type ScheduleExceptionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   schedule?: boolean | Prisma.ClassScheduleDefaultArgs<ExtArgs>
 }
@@ -727,6 +793,8 @@ export type $ScheduleExceptionPayload<ExtArgs extends runtime.Types.Extensions.I
     newRoom: string | null
     note: string | null
     createdAt: Date
+    deletedAt: Date | null
+    deletedById: string | null
   }, ExtArgs["result"]["scheduleException"]>
   composites: {}
 }
@@ -1161,6 +1229,8 @@ export interface ScheduleExceptionFieldRefs {
   readonly newRoom: Prisma.FieldRef<"ScheduleException", 'String'>
   readonly note: Prisma.FieldRef<"ScheduleException", 'String'>
   readonly createdAt: Prisma.FieldRef<"ScheduleException", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"ScheduleException", 'DateTime'>
+  readonly deletedById: Prisma.FieldRef<"ScheduleException", 'String'>
 }
     
 

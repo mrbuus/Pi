@@ -89,7 +89,7 @@ export class LearningLabService {
         seed: generatedSeed,
       };
       const first = await this.prisma.learningEvent.findUnique({
-        where: { id: firstId(userId, publicProblem.id) },
+        where: { id: firstId(userId, publicProblem.id), deletedAt: null },
       });
       return { ...publicProblem, first: first?.meta ?? null };
     } catch {
@@ -116,7 +116,7 @@ export class LearningLabService {
   async bankProblem(userId: string, id: string, role: Role = Role.STUDENT) {
     const p = await this.bank(userId, id, role);
     const first = await this.prisma.learningEvent.findUnique({
-      where: { id: firstId(userId, p.id) },
+      where: { id: firstId(userId, p.id), deletedAt: null },
     });
     return {
       id: p.id,
@@ -190,6 +190,20 @@ export class LearningLabService {
         : 'existing-bank',
       recordedAt: new Date().toISOString(),
     };
+    // «Бүлгийн явц цэвэрлэх» нь эхний хариуг ЗӨӨЛӨН устгадаг (deletedAt) — тэр мөр
+    // PK-г эзэлсэн хэвээр тул шинэ эхний хариугаар СЭРГЭЭНЭ. deletedAt: { not: null }
+    // нөхцөл нь зэрэгцээ хүсэлтийн зөвхөн нэгийг нь л бичүүлнэ.
+    const revived = await this.prisma.learningEvent.updateMany({
+      where: { id: firstId(userId, body.problemId), userId, deletedAt: { not: null } },
+      data: {
+        deletedAt: null,
+        deletedById: null,
+        type: LearningEventType.ANSWER_SUBMITTED,
+        occurredAt: new Date(),
+        meta,
+      },
+    });
+    if (revived.count) return meta;
     // Unique primary key + no update: retry, reload, parallel tabs cannot overwrite the first response.
     const row = await this.prisma.learningEvent.upsert({
       where: { id: firstId(userId, body.problemId) },
@@ -231,13 +245,14 @@ export class LearningLabService {
   ) {
     this.validate(body);
     const first = await this.prisma.learningEvent.findUnique({
-      where: { id: firstId(userId, body.problemId) },
+      where: { id: firstId(userId, body.problemId), deletedAt: null },
     });
     if (!first || first.userId !== userId)
       throw new ForbiddenException('Эхний хариултаа эхлээд тэмдэглэнэ үү.');
     const exposed = await this.prisma.learningEvent.findFirst({
       where: {
         userId,
+        deletedAt: null,
         problemId: body.problemId,
         type: LearningEventType.HINT_USED,
         id: { startsWith: 'lab-event-' },
@@ -281,7 +296,7 @@ export class LearningLabService {
     if (typeof id !== 'string' || id.length > 160)
       throw new BadRequestException('Бодлогын дугаарыг шалгана уу.');
     const first = await this.prisma.learningEvent.findUnique({
-      where: { id: firstId(userId, id) },
+      where: { id: firstId(userId, id), deletedAt: null },
     });
     if (!first || first.userId !== userId)
       throw new ForbiddenException('Эхний хариултаа эхлээд тэмдэглэнэ үү.');
@@ -313,6 +328,7 @@ export class LearningLabService {
     const rows = await this.prisma.learningEvent.findMany({
       where: {
         userId,
+        deletedAt: null,
         AND: [
           {
             OR: [

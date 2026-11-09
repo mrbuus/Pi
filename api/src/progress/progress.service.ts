@@ -11,6 +11,7 @@ import {
   StudentType,
 } from '../generated/prisma/enums';
 import { TEACHER_ROLES } from '../common/access';
+import { softDeleteData } from '../common/soft-delete';
 import { PrismaService } from '../prisma/prisma.service';
 // Аналитик/идэвх/дүнгийн логикийг ДАХИН БИЧИХГҮЙ — байгаа сервисүүдийг шууд
 // дуудна (attempts.service.ts-ийн myStats, activity.service.ts-ийн streak/
@@ -250,12 +251,14 @@ export class ProgressService {
           ) AS success_30d
         FROM "Attempt" a
         WHERE a."studentId" IN (SELECT id FROM online_students)
+          AND a."deletedAt" IS NULL
         GROUP BY a."studentId"
       ),
       event_activity AS (
         SELECT le."userId" AS student_id, MAX(le."occurredAt") AS last_event_at
         FROM "LearningEvent" le
         WHERE le."userId" IN (SELECT id FROM online_students)
+          AND le."deletedAt" IS NULL
         GROUP BY le."userId"
       ),
       test_activity AS (
@@ -337,6 +340,7 @@ export class ProgressService {
           by: ['chapterId'],
           where: {
             userId: studentId,
+            deletedAt: null,
             type: LearningEventType.CHAPTER_OPENED,
             chapterId: { not: null },
           },
@@ -345,6 +349,7 @@ export class ProgressService {
         this.prisma.learningEvent.findMany({
           where: {
             userId: studentId,
+            deletedAt: null,
             type: {
               in: [
                 LearningEventType.VIDEO_STARTED,
@@ -473,6 +478,7 @@ export class ProgressService {
       this.prisma.learningEvent.findMany({
         where: {
           userId: studentId,
+          deletedAt: null,
           ...(hasRange
             ? {
                 occurredAt: {
@@ -488,6 +494,7 @@ export class ProgressService {
       this.prisma.attempt.findMany({
         where: {
           studentId,
+          deletedAt: null,
           ...(hasRange
             ? {
                 occurredOn: {
@@ -614,7 +621,7 @@ export class ProgressService {
     await this.assertOnlineStudent(studentId);
 
     const attempt = await this.prisma.attempt.findUnique({
-      where: { id: attemptId },
+      where: { id: attemptId, deletedAt: null },
     });
     if (!attempt || attempt.studentId !== studentId) {
       throw new NotFoundException('Оролдлого олдсонгүй');
@@ -662,13 +669,18 @@ export class ProgressService {
     await this.assertOnlineStudent(studentId);
 
     const attempt = await this.prisma.attempt.findUnique({
-      where: { id: attemptId },
+      where: { id: attemptId, deletedAt: null },
     });
     if (!attempt || attempt.studentId !== studentId) {
       throw new NotFoundException('Оролдлого олдсонгүй');
     }
 
-    await this.prisma.attempt.delete({ where: { id: attemptId } });
+    // ЗӨӨЛӨН (эзний дүрэм 2026-10-23): мөр deletedAt-тай DB-д үлдэж, явц/идэвх/
+    // стрийк/аналитикийн уншилт бүрээс хасагдана
+    await this.prisma.attempt.update({
+      where: { id: attemptId },
+      data: softDeleteData(actorId),
+    });
 
     await this.audit.record({
       actorId,
@@ -692,7 +704,8 @@ export class ProgressService {
 
   // ============ 7. Бүлгийн явцыг цэвэрлэх ============
   // Attempt (аналитикийн түүх) огт хөндөхгүй — зөвхөн LearningEvent-ийн явцын
-  // тэмдэглэгээг (онол нээсэн, бичлэг үзсэн, бодлого нээсэн гэх мэт) устгана,
+  // тэмдэглэгээг (онол нээсэн, бичлэг үзсэн, бодлого нээсэн гэх мэт) ЗӨӨЛӨН
+  // устгана (deletedAt — мөр DB-д үлдэнэ, уншилт бүр хасна),
   // ингэснээр сурагч тухайн бүлгийг "шинээр" дахин үзэх боломжтой болно.
   async resetChapter(
     studentId: string,
@@ -724,6 +737,7 @@ export class ProgressService {
 
     const where: Prisma.LearningEventWhereInput = {
       userId: studentId,
+      deletedAt: null,
       OR: [
         { chapterId: dto.chapterId },
         ...(problemIds.length ? [{ problemId: { in: problemIds } }] : []),
@@ -736,8 +750,9 @@ export class ProgressService {
       select: { id: true, type: true },
     });
     if (toDelete.length > 0) {
-      await this.prisma.learningEvent.deleteMany({
-        where: { id: { in: toDelete.map((e) => e.id) } },
+      await this.prisma.learningEvent.updateMany({
+        where: { id: { in: toDelete.map((e) => e.id) }, deletedAt: null },
+        data: softDeleteData(actorId),
       });
     }
 

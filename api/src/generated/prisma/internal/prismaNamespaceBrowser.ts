@@ -726,7 +726,9 @@ export const TestDraftScalarFieldEnum = {
   state: 'state',
   revision: 'revision',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type TestDraftScalarFieldEnum = (typeof TestDraftScalarFieldEnum)[keyof typeof TestDraftScalarFieldEnum]
@@ -869,7 +871,9 @@ export const AttemptScalarFieldEnum = {
   testId: 'testId',
   classroomId: 'classroomId',
   mistakeCollectedAt: 'mistakeCollectedAt',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type AttemptScalarFieldEnum = (typeof AttemptScalarFieldEnum)[keyof typeof AttemptScalarFieldEnum]
@@ -1271,7 +1275,9 @@ export const LearningEventScalarFieldEnum = {
   videoId: 'videoId',
   durationMs: 'durationMs',
   device: 'device',
-  meta: 'meta'
+  meta: 'meta',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type LearningEventScalarFieldEnum = (typeof LearningEventScalarFieldEnum)[keyof typeof LearningEventScalarFieldEnum]
@@ -1331,7 +1337,9 @@ export type StaffTaskScalarFieldEnum = (typeof StaffTaskScalarFieldEnum)[keyof t
 export const StaffTaskAssigneeScalarFieldEnum = {
   taskId: 'taskId',
   userId: 'userId',
-  assignedAt: 'assignedAt'
+  assignedAt: 'assignedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type StaffTaskAssigneeScalarFieldEnum = (typeof StaffTaskAssigneeScalarFieldEnum)[keyof typeof StaffTaskAssigneeScalarFieldEnum]
@@ -1366,7 +1374,9 @@ export const ScheduleExceptionScalarFieldEnum = {
   newEndMinute: 'newEndMinute',
   newRoom: 'newRoom',
   note: 'note',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type ScheduleExceptionScalarFieldEnum = (typeof ScheduleExceptionScalarFieldEnum)[keyof typeof ScheduleExceptionScalarFieldEnum]
@@ -1383,7 +1393,9 @@ export const LessonTopicScalarFieldEnum = {
   testIds: 'testIds',
   dismissMode: 'dismissMode',
   photoStudentId: 'photoStudentId',
-  customTopics: 'customTopics'
+  customTopics: 'customTopics',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type LessonTopicScalarFieldEnum = (typeof LessonTopicScalarFieldEnum)[keyof typeof LessonTopicScalarFieldEnum]
@@ -1417,7 +1429,9 @@ export const LessonStaffingScalarFieldEnum = {
   leadTeacherId: 'leadTeacherId',
   assistantTeacherId: 'assistantTeacherId',
   updatedById: 'updatedById',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type LessonStaffingScalarFieldEnum = (typeof LessonStaffingScalarFieldEnum)[keyof typeof LessonStaffingScalarFieldEnum]
@@ -1475,7 +1489,9 @@ export type AcademicCalendarDayScalarFieldEnum = (typeof AcademicCalendarDayScal
 
 export const AcademicCalendarDayClassroomScalarFieldEnum = {
   calendarDayId: 'calendarDayId',
-  classroomId: 'classroomId'
+  classroomId: 'classroomId',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type AcademicCalendarDayClassroomScalarFieldEnum = (typeof AcademicCalendarDayClassroomScalarFieldEnum)[keyof typeof AcademicCalendarDayClassroomScalarFieldEnum]
@@ -2005,7 +2021,9 @@ export const ClassTestStatusScalarFieldEnum = {
   note: 'note',
   updatedById: 'updatedById',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type ClassTestStatusScalarFieldEnum = (typeof ClassTestStatusScalarFieldEnum)[keyof typeof ClassTestStatusScalarFieldEnum]

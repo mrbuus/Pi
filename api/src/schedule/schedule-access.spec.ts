@@ -149,7 +149,8 @@ describe('scoped schedule queries omit global staff work patterns', () => {
         }
       ).where,
     ).toEqual({
-      // Зөөлөн устгасан хуваарийн онцгой тохиолдол хөдөлгүүрт орохгүй
+      // Зөөлөн устгасан хуваарь ба онцгой тохиолдол хөдөлгүүрт орохгүй
+      deletedAt: null,
       schedule: { deletedAt: null, classroomId: { in: ['own'] } },
     });
     expect(prisma.teacherWorkDay.findMany).not.toHaveBeenCalled();

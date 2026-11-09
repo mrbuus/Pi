@@ -48,6 +48,7 @@ export async function staffDays(
     return 'ALL';
   const rows = await db.lessonStaffing.findMany({
     where: {
+      deletedAt: null,
       date: { gte: from, lte: to },
       schedule: { deletedAt: null, classroomId },
       OR: [{ leadTeacherId: actor.userId }, { assistantTeacherId: actor.userId }],

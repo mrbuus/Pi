@@ -22,6 +22,7 @@ import {
 } from './lesson-records.logic';
 import { compareBookOrder, planTitle } from '../schedule/lesson-plan.logic';
 import { shortTestName } from '../class-sessions/roadmap.logic';
+import { LESSON_TOPIC_BLANK } from '../common/soft-delete';
 
 /** Батлахад багшийн бичих нэмэлт (эзэн 2026-10-27). undefined = өмнөхийг хадгална. */
 export interface ConfirmDetails {
@@ -411,7 +412,9 @@ export class LessonRecordsService {
     if (!chapterId && !typedTopic) return;
     const date = parseDateOnly(entry.exception?.originalDate ?? key);
     const where = { scheduleId_date: { scheduleId: entry.scheduleId, date } };
-    const existing = await this.prisma.lessonTopic.findUnique({ where });
+    const stored = await this.prisma.lessonTopic.findUnique({ where });
+    // Устсан (deletedAt) сэдэв = байхгүй; түлхүүрийг эзэлдэг тул доор СЭРГЭЭНЭ
+    const existing = stored && !stored.deletedAt ? stored : null;
     if (existing) {
       const data: { chapterId?: string; title?: string } = {};
       if (!existing.chapterId && chapterId) data.chapterId = chapterId;
@@ -421,15 +424,19 @@ export class LessonRecordsService {
       await this.audit(actor, 'UPDATE', 'LessonTopic', row.id, existing, row);
       return;
     }
-    const row = await this.prisma.lessonTopic.create({
-      data: {
-        scheduleId: entry.scheduleId,
-        date,
-        title: typedTopic ?? '',
-        chapterId,
-        createdById: actor.userId,
-      },
-    });
+    const fresh = {
+      title: typedTopic ?? '',
+      chapterId,
+      createdById: actor.userId,
+    };
+    const row = stored
+      ? await this.prisma.lessonTopic.update({
+          where: { id: stored.id },
+          data: { ...LESSON_TOPIC_BLANK(), ...fresh },
+        })
+      : await this.prisma.lessonTopic.create({
+          data: { scheduleId: entry.scheduleId, date, ...fresh },
+        });
     await this.audit(actor, 'CREATE', 'LessonTopic', row.id, null, row);
   }
 

@@ -209,13 +209,14 @@ export class ParentsService {
     ] = await Promise.all([
       this.prisma.attempt.groupBy({
         by: ['occurredOn'],
-        where: { studentId, occurredOn: dates },
+        where: { studentId, occurredOn: dates, deletedAt: null },
         _count: { _all: true },
         orderBy: { occurredOn: 'asc' },
       }),
       this.prisma.learningEvent.count({
         where: {
           userId: studentId,
+          deletedAt: null,
           occurredAt: dates,
           OR: [
             { id: { startsWith: 'lab-first-' } },
@@ -225,7 +226,7 @@ export class ParentsService {
         },
       }),
       this.prisma.attempt.findMany({
-        where: { studentId, occurredOn: dates },
+        where: { studentId, occurredOn: dates, deletedAt: null },
         select: {
           id: true,
           problemId: true,
@@ -250,6 +251,7 @@ export class ParentsService {
       this.prisma.learningEvent.findMany({
         where: {
           userId: studentId,
+          deletedAt: null,
           occurredAt: dates,
           OR: [
             { id: { startsWith: 'lab-first-' } },

@@ -86,7 +86,11 @@ export class TasksController {
 
   @Delete(':id/assignees/:userId')
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
-  removeAssignee(@Param('id') id: string, @Param('userId') userId: string) {
-    return this.tasks.removeAssignee(id, userId);
+  removeAssignee(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.tasks.removeAssignee(id, userId, req.user.userId);
   }
 }

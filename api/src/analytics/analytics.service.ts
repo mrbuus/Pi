@@ -68,7 +68,7 @@ export class AnalyticsService {
   // нэмэгдсэн тул эхний хэдэн долоо хоногт бага дата байх нь хэвийн).
   private async eventStreamAgeDays(): Promise<number> {
     const [row] = await this.prisma.$queryRaw<{ earliest: Date | null }[]>`
-      SELECT MIN("occurredAt") AS earliest FROM "LearningEvent"
+      SELECT MIN("occurredAt") AS earliest FROM "LearningEvent" WHERE "deletedAt" IS NULL
     `;
     if (!row?.earliest) return 0;
     return (
@@ -114,6 +114,7 @@ export class AnalyticsService {
           )::int AS mau
         FROM "LearningEvent" le
         JOIN "User" u ON u.id = le."userId" AND u.role = 'STUDENT'
+        WHERE le."deletedAt" IS NULL
       `,
       this.prisma.$queryRaw<{ avg_ms: number | null }[]>`
         SELECT AVG(duration_ms) AS avg_ms FROM (
@@ -121,6 +122,7 @@ export class AnalyticsService {
           FROM "LearningEvent" le
           JOIN "User" u ON u.id = le."userId" AND u.role = 'STUDENT'
           WHERE le."sessionId" IS NOT NULL
+            AND le."deletedAt" IS NULL
             AND le."occurredAt" >= ${range.start}
             AND le."occurredAt" < ${endBoundary}
           GROUP BY le."sessionId"
@@ -132,6 +134,7 @@ export class AnalyticsService {
           COUNT(*)::int AS total_attempts
         FROM "Attempt" a
         WHERE a."occurredOn" >= ${range.start} AND a."occurredOn" <= ${range.end}
+          AND a."deletedAt" IS NULL
       `,
       this.eventStreamAgeDays(),
     ]);
@@ -163,6 +166,7 @@ export class AnalyticsService {
         FROM "LearningEvent" le
         JOIN "User" u ON u.id = le."userId" AND u.role = 'STUDENT'
         WHERE le."occurredAt" >= ${range.start} AND le."occurredAt" < ${endBoundary}
+          AND le."deletedAt" IS NULL
         GROUP BY 1
         ORDER BY 1
       `,
@@ -209,6 +213,7 @@ export class AnalyticsService {
       JOIN "Enrollment" en ON en."classroomId" = c.id AND en."leftAt" IS NULL
       LEFT JOIN "Attempt" a
         ON a."studentId" = en."studentId"
+        AND a."deletedAt" IS NULL
         AND a."occurredOn" >= ${range.start} AND a."occurredOn" <= ${range.end}
       WHERE c.archived = false
       GROUP BY c.id, c.name
@@ -257,6 +262,7 @@ export class AnalyticsService {
       LEFT JOIN "Book" b ON b.id = ch."bookId"
       WHERE a."occurredOn" >= ${range.start} AND a."occurredOn" <= ${range.end}
         AND (${Prisma.raw(KNOWN_OUTCOME_SQL_FRAGMENT)})
+        AND a."deletedAt" IS NULL
         AND ch."deletedAt" IS NULL
       GROUP BY ch.id, ch.title, b.title
     `;
@@ -317,6 +323,7 @@ export class AnalyticsService {
           COUNT(*) FILTER (WHERE ${Prisma.raw(SUCCESS_SQL_FRAGMENT)})::int AS correct
         FROM "Attempt" a, bounds
         WHERE a."occurredOn" >= bounds.recent_start AND (${Prisma.raw(KNOWN_OUTCOME_SQL_FRAGMENT)})
+          AND a."deletedAt" IS NULL
         GROUP BY a."studentId"
       ),
       prior AS (
@@ -326,13 +333,14 @@ export class AnalyticsService {
         FROM "Attempt" a, bounds
         WHERE a."occurredOn" >= bounds.prior_start AND a."occurredOn" < bounds.recent_start
           AND (${Prisma.raw(KNOWN_OUTCOME_SQL_FRAGMENT)})
+          AND a."deletedAt" IS NULL
         GROUP BY a."studentId"
       ),
       last_event AS (
-        SELECT "userId" AS "studentId", MAX("occurredAt") AS at FROM "LearningEvent" GROUP BY "userId"
+        SELECT "userId" AS "studentId", MAX("occurredAt") AS at FROM "LearningEvent" WHERE "deletedAt" IS NULL GROUP BY "userId"
       ),
       last_attempt AS (
-        SELECT "studentId", MAX("createdAt") AS at FROM "Attempt" GROUP BY "studentId"
+        SELECT "studentId", MAX("createdAt") AS at FROM "Attempt" WHERE "deletedAt" IS NULL GROUP BY "studentId"
       )
       SELECT DISTINCT ON (u.id)
         u.id AS "studentId",

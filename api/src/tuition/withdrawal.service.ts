@@ -312,6 +312,7 @@ export class WithdrawalService {
       const exceptions = ids.length
         ? await this.prisma.scheduleException.findMany({
             where: {
+              deletedAt: null,
               scheduleId: { in: ids },
               OR: [
                 {

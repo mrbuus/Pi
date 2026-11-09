@@ -121,7 +121,7 @@ export class RecommendService {
       throw new ForbiddenException();
     const [attemptRows, enrollment, exposures, labFirst] = await Promise.all([
       this.prisma.attempt.findMany({
-        where: { studentId, problem: { deletedAt: null } },
+        where: { studentId, deletedAt: null, problem: { deletedAt: null } },
         select: {
           problemId: true,
           problem: { select: { chapterId: true } },
@@ -143,6 +143,7 @@ export class RecommendService {
       this.prisma.learningEvent.findMany({
         where: {
           userId: studentId,
+          deletedAt: null,
           type: 'HINT_USED',
           id: { startsWith: 'lab-event-' },
         },
@@ -150,7 +151,7 @@ export class RecommendService {
         take: 10000,
       }),
       this.prisma.learningEvent.findMany({
-        where: { userId: studentId, id: { startsWith: 'lab-first-' } },
+        where: { userId: studentId, deletedAt: null, id: { startsWith: 'lab-first-' } },
         select: { problemId: true, occurredAt: true, meta: true },
         take: 10000,
       }),

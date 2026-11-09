@@ -226,7 +226,13 @@ describe('LessonPlanService.putPlan', () => {
     });
     const out = await service.putPlan(tp, 's1', { date: '2026-10-19', testIds: [] });
     expect(out.plan).toBeNull();
-    expect(prisma.lessonTopic.delete).toHaveBeenCalled();
+    // Хатуу устгалгүй: мөр deletedAt-тай үлдэнэ (эзний дүрэм 2026-10-23)
+    expect(prisma.lessonTopic.delete).not.toHaveBeenCalled();
+    expect(prisma.lessonTopic.update).toHaveBeenCalledWith({
+      where: { id: 'lt1' },
+      data: { deletedAt: expect.any(Date), deletedById: expect.any(String) },
+    });
+    prisma.lessonTopic.update.mockClear();
 
     prisma.lessonTopic.findUnique.mockResolvedValueOnce({
       id: 'lt1',

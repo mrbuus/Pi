@@ -285,12 +285,13 @@ export class StudyReviewService {
     const ids = rows.map((p) => p.id);
     const [attempts, events, reviews, official] = await Promise.all([
       this.prisma.attempt.findMany({
-        where: { studentId: userId, problemId: { in: ids } },
+        where: { studentId: userId, deletedAt: null, problemId: { in: ids } },
         select: { problemId: true },
       }),
       this.prisma.learningEvent.findMany({
         where: {
           userId,
+          deletedAt: null,
           problemId: { in: ids },
           type: {
             in: [
@@ -592,6 +593,7 @@ export class StudyReviewService {
       const hint = await tx.learningEvent.findFirst({
         where: {
           userId,
+          deletedAt: null,
           problemId: item.problemId,
           type: {
             in: [
