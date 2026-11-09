@@ -45,6 +45,8 @@ void main() {
     const allowed = {
       'lib/features/support/ui/support_screen.dart', // tel:, mailto:
       'lib/features/support/ui/centre_info_screen.dart', // tel:, mailto:
+      'lib/features/content_admin/ui/placement_detail_screen.dart', // tel:
+      'lib/features/content_admin/ui/sorils_admin_screen.dart', // tel:
       'lib/features/legal/legal_screen.dart', // mailto:
       'lib/features/learning/data/lesson_repository.dart', // зөвхөн YouTube хост (isPlayableVideoUri)
       'lib/features/scan/ui/scan_result_screen.dart', // YouTube бодолт

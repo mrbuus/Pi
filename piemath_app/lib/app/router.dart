@@ -4,16 +4,19 @@ import 'package:go_router/go_router.dart';
 
 import '../core/auth/session.dart';
 import '../core/auth/user_role.dart';
+import '../features/admin_oversight/admin_oversight_routes.dart';
 import '../features/auth/auth_routes.dart';
 import '../features/books/books_routes.dart';
 import '../features/buyer/buyer_routes.dart';
 import '../features/classrooms_admin/classrooms_admin_routes.dart';
+import '../features/content_admin/content_admin_routes.dart';
 import '../features/enrollment/enrollment_routes.dart';
 import '../features/exam/exam_routes.dart';
 import '../features/finance/finance_routes.dart';
 import '../features/groups/groups_routes.dart';
 import '../features/homework/homework_routes.dart';
 import '../features/homework/ui/homework_screen.dart' show HomeworkAppBarActions;
+import '../features/internal_drafts/internal_drafts_routes.dart';
 import '../features/learning/learning_routes.dart';
 import '../features/lesson_flow/lesson_flow_routes.dart';
 import '../features/my_class/my_class_routes.dart';
@@ -27,6 +30,7 @@ import '../features/results/results_routes.dart';
 import '../features/scan/scan_routes.dart';
 import '../features/schedule/schedule_routes.dart';
 import '../features/sms/sms_routes.dart';
+import '../features/store_admin/store_admin_routes.dart';
 import '../features/student_home/student_home_routes.dart';
 import '../features/students_admin/students_admin_routes.dart';
 import '../features/support/support_routes.dart';
@@ -79,6 +83,10 @@ final allFeatureRoutes = <FeatureRoutes>[
   enrollmentRoutes,
   financeRoutes,
   passesRoutes,
+  contentAdminRoutes,
+  storeAdminRoutes,
+  internalDraftsRoutes,
+  adminOversightRoutes,
   _manageRoutes,
 ];
 

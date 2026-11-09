@@ -277,6 +277,7 @@ abstract final class NavData {
       _students,
       NavLink('/app/admin/audit', 'Аудит', AppIcons.shield),
       _analytics,
+      NavLink('/app/admin/usage', 'Хэрэглээ', AppIcons.chart),
       _sms,
       _classes,
       NavLink('/app/admin/finance', 'Санхүү', AppIcons.payments),
@@ -336,6 +337,7 @@ abstract final class NavData {
     '/app/admin/students': NavGroup.classes,
     '/app/admin/audit': NavGroup.admin,
     '/app/admin/analytics': NavGroup.admin,
+    '/app/admin/usage': NavGroup.admin,
     '/app/insights': NavGroup.admin,
     '/app/admin/content': NavGroup.internal,
     '/app/admin/registry': NavGroup.admin,
@@ -430,6 +432,7 @@ abstract final class NavData {
       [
         NavLink('/app/admin/analytics', 'Аналитик', AppIcons.chart),
         NavLink('/app/admin/audit', 'Аудит', AppIcons.shield),
+        NavLink('/app/admin/usage', 'Хэрэглээ', AppIcons.chart),
         NavLink('/app/admin/v2', 'v2 ажлын хяналт', AppIcons.tests),
         _insights,
       ],
