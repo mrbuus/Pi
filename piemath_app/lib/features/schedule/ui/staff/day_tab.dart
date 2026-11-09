@@ -14,13 +14,13 @@ import '../../domain/agenda_scroll.dart';
 import '../../domain/day_overlay.dart';
 import '../../domain/staff_schedule_logic.dart';
 import 'lesson_detail.dart';
-import 'special_days_sheet.dart';
 import 'staff_actions.dart';
 
 /// «Өдрийн хуваарь» (вэбийн `WeekBuilder`): дээр 7 хоногийн тууз, доор өдрийн хуваарь.
 /// Туузыг хуруугаар шудрахад 7 хоног солигдоно (гараг хэвээр), өдөр дээр дарж сонгоно. Хуваарийн хэсэг
 /// (hub) өөрөө дэд табаа хуруугаар солидог тул доорх өдрийн хуваарь хажуу тийш шудрагдахгүй — хоёр
-/// хэвтээ шудралт зөрчилдөнө. Хичээл дээр дарахад дэлгэрэнгүй (таблетад баруун талд).
+/// хэвтээ шудралт зөрчилдөнө. Хичээл дээр дарахад дэлгэрэнгүй (таблетад баруун талд). «Онцгой өдөр»
+/// AppBar-т ([StaffScheduleActions]).
 class StaffDayTab extends ConsumerStatefulWidget {
   const StaffDayTab({super.key, required this.filter, required this.perms, this.today});
 
@@ -321,12 +321,6 @@ class _DayHeader extends ConsumerWidget {
                   icon: const Icon(AppIcons.bellRing),
                   onPressed: () => unawaited(publishDay(context, date: plan.date, again: publishedAt != null)),
                 ),
-              // Хэсгийн (hub) дотор дэлгэцийн AppBar-ын товч нуугддаг тул энд ч бас.
-              IconButton(
-                tooltip: 'Онцгой өдөр',
-                icon: const Icon(AppIcons.calendarOff),
-                onPressed: () => unawaited(showSpecialDaysSheet(context, canEdit: perms.canManageAny)),
-              ),
               IconButton(
                 tooltip: listMode ? 'Цагаар харах' : 'Жагсаалтаар харах',
                 icon: Icon(listMode ? AppIcons.schedule : AppIcons.listTodo),

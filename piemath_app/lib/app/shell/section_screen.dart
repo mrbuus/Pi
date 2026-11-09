@@ -194,9 +194,12 @@ class _EmbeddedPageState extends State<_EmbeddedPage> with AutomaticKeepAliveCli
     super.build(context);
     // `toolbarHeight: 0` — дэд хуудасны AppBar-ын гарчиг/товчны мөр алга болно (Scaffold түүнийг
     // `AppBar.preferredHeightFor`-оор тооцдог тул хоосон зай үлдэхгүй); доторх `bottom` таб хэвээр.
-    return AppBarTheme(
-      data: AppBarTheme.of(context).copyWith(toolbarHeight: 0),
-      child: PrimaryScrollController(controller: widget.scroll, child: widget.child),
+    // Нуугдсан мөрөнд буцах товч байсан ч хэсгийн хуудасны ирмэгийн зангаанд бүртгэгдэхгүй.
+    return EdgeBackScope.none(
+      child: AppBarTheme(
+        data: AppBarTheme.of(context).copyWith(toolbarHeight: 0),
+        child: PrimaryScrollController(controller: widget.scroll, child: widget.child),
+      ),
     );
   }
 }

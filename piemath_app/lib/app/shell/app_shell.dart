@@ -74,7 +74,13 @@ class _AppShellState extends State<AppShell> {
     final sections = widget.sections;
     final selected = _shell.currentIndex;
     final atHomeRoot = selected == 0;
-    final body = NotificationListener<ScrollNotification>(onNotification: _onScroll, child: _shell);
+    // Бүрхүүлийг `go`-оор бүтэн дэлгэцээр сольсон: шинэ хуудас орж ирэх хөдөлгөөний турш хуучин бүрхүүл
+    // доор нь үлддэг. Энэ хооронд дахин бүрхүүл рүү буцвал нэг GlobalKey-тэй хоёр бүрхүүл үүсэхгүйн тулд
+    // идэвхгүй болсон бүрхүүл салбаруудаа зурахгүй.
+    final active = ModalRoute.of(context)?.isActive ?? true;
+    final body = active
+        ? NotificationListener<ScrollNotification>(onNotification: _onScroll, child: _shell)
+        : ColoredBox(color: context.colors.bg);
 
     final wide = MediaQuery.sizeOf(context).width >= AppSizes.tabletBreakpoint;
     final Widget scaffold;
@@ -185,23 +191,45 @@ class MoreTabIcon extends ConsumerWidget {
 }
 
 /// «Буцах» = ӨМНӨХ дэлгэц. Гаднаас (QR, push) нээгдсэн, өмнөх дэлгэцгүй бол нүүр (RULES §5).
-class AppBackButton extends ConsumerWidget {
+///
+/// Хуудасны iOS ирмэгийн зангаанд ([EdgeBackScope]) бүртгэгдэнэ: stack-д өмнөх хуудасгүй үед зүүн
+/// ирмэгээс шудрахад яг энэ товчтой ижил газар очно.
+class AppBackButton extends ConsumerStatefulWidget {
   const AppBackButton({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return IconButton(
-      icon: const Icon(AppIcons.back),
-      tooltip: AppStrings.back,
-      onPressed: () {
-        if (context.canPop()) {
-          context.pop();
-          return;
-        }
-        final s = ref.read(sessionProvider);
-        final role = s is SignedIn ? NavData.navigationRole(s.role, s.user) : UserRole.unknown;
-        context.go(s is SignedIn ? NavData.home(role).path : '/login');
-      },
-    );
+  ConsumerState<AppBackButton> createState() => _AppBackButtonState();
+}
+
+class _AppBackButtonState extends ConsumerState<AppBackButton> {
+  VoidCallback? _unregister;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _unregister?.call();
+    _unregister = EdgeBackScope.register(context, _back);
+  }
+
+  @override
+  void dispose() {
+    _unregister?.call();
+    super.dispose();
+  }
+
+  void _back() {
+    if (!mounted) return;
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    final s = ref.read(sessionProvider);
+    final role = s is SignedIn ? NavData.navigationRole(s.role, s.user) : UserRole.unknown;
+    context.go(s is SignedIn ? NavData.home(role).path : '/login');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(icon: const Icon(AppIcons.back), tooltip: AppStrings.back, onPressed: _back);
   }
 }

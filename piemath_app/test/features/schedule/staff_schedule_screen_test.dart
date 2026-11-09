@@ -66,12 +66,12 @@ void main() {
       Navigator.of(tester.element(find.byType(LessonDetail))).pop();
       await settle(tester);
 
-      await tester.tap(find.text('Ерөнхий хуваарь'));
+      await tester.tap(find.text('7 хоног'));
       await settle(tester);
       expect(find.text('Шинэ цаг нэмэх'), findsNothing);
       expect(find.text('12-1'), findsWidgets);
 
-      await tester.tap(find.text('Багшийн ажлын өдөр'));
+      await tester.tap(find.text('Ажлын өдөр'));
       await settle(tester);
       expect(find.byTooltip('Хүснэгтийн тохиргоо'), findsNothing);
       expect(find.text('Онцгой өдөр бүртгэх'), findsNothing);
@@ -109,7 +109,7 @@ void main() {
       }
       Navigator.of(tester.element(find.byType(LessonDetail))).pop();
       await settle(tester);
-      await tester.tap(find.text('Ерөнхий хуваарь'));
+      await tester.tap(find.text('7 хоног'));
       await settle(tester);
       expect(find.text('Шинэ цаг нэмэх'), findsOneWidget);
     });
@@ -165,17 +165,46 @@ void main() {
     await settle(tester);
   });
 
-  testWidgets('шүүлтүүр: ангиар сонгоход нөгөө анги нуугдана', (tester) async {
+  testWidgets('шүүлтүүр: нэг товчоор цонх нээгдэж, ангиар сонгоход нөгөө анги нуугдана', (tester) async {
     final http = staffHttp();
     await openSchedule(tester, http, UserRole.teacher);
+    // Анхдагч нь вэбтэй адил «Бүгд».
+    final filter = find.byKey(const ValueKey('staff-schedule-filter'));
+    expect(find.descendant(of: filter, matching: find.text('Бүгд')), findsOneWidget);
     expect(find.text('301 11-2'), findsOneWidget);
-    await tester.tap(find.text('Анги'));
+    await tester.tap(filter);
     await settle(tester);
+    // Нэг цонхонд: Бүгд, Миний хичээл, багш бүр («+»-тэй), анги бүр.
+    for (final t in ['Бүгд', 'Миний хичээл', 'Сарнай', 'Болд+', '12-1', '11-2']) {
+      expect(find.text(t), findsWidgets, reason: t);
+    }
     await tester.tap(find.text('12-1').last);
     await settle(tester);
     expect(find.text('301 11-2'), findsNothing);
     expect(find.text('501 12-1'), findsOneWidget);
-    await tester.tap(find.byTooltip('Шүүлтүүр арилгах').first);
+    expect(find.descendant(of: filter, matching: find.text('12-1')), findsOneWidget);
+
+    // Шүүлтүүр 7 хоногт ч хэвээр; ажлын өдөрт хамаарахгүй тул товч нуугдана.
+    await tester.tap(find.text('7 хоног'));
+    await settle(tester);
+    expect(find.descendant(of: filter, matching: find.text('12-1')), findsOneWidget);
+    await tester.tap(find.text('Ажлын өдөр'));
+    await settle(tester);
+    expect(filter, findsNothing);
+    expect(find.byTooltip('Онцгой өдөр'), findsOneWidget);
+    await tester.tap(find.text('Өдөр'));
+    await settle(tester);
+
+    await tester.tap(filter);
+    await settle(tester);
+    await tester.tap(find.text('Миний хичээл'));
+    await settle(tester);
+    // Зохиомол өгөгдөлд «миний» хичээл алга.
+    expect(find.text('501 12-1'), findsNothing);
+    expect(find.text('Шүүлтүүрт тохирох хичээл алга'), findsOneWidget);
+    await tester.tap(filter);
+    await settle(tester);
+    await tester.tap(find.text('Бүгд').last);
     await settle(tester);
     expect(find.text('301 11-2'), findsOneWidget);
   });
@@ -256,7 +285,7 @@ void main() {
     testWidgets('Багшийн ажлын өдөр: нүд товшиход тухайн ээлжийн гарагуудыг илгээнэ', (tester) async {
       final http = staffHttp(canPlan: true);
       await openSchedule(tester, http, UserRole.teacherPlus);
-      await tester.tap(find.text('Багшийн ажлын өдөр'));
+      await tester.tap(find.text('Ажлын өдөр'));
       await settle(tester);
       await tester.tap(find.byKey(const ValueKey('roster:Сарнай:3')));
       await settle(tester);
@@ -335,7 +364,7 @@ void main() {
   testWidgets('товчнуудын хүрэх талбай 48dp-ээс багагүй', (tester) async {
     final http = staffHttp(canPlan: true);
     await openSchedule(tester, http, UserRole.teacherPlus);
-    await tester.tap(find.text('Багшийн ажлын өдөр'));
+    await tester.tap(find.text('Ажлын өдөр'));
     await settle(tester);
     final cell = tester.getSize(find.byKey(const ValueKey('roster:Сарнай:1')));
     expect(cell.height, greaterThanOrEqualTo(48));

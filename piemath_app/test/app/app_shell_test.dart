@@ -256,10 +256,15 @@ void main() {
       expect(subTab(tester), 0);
       final section = tester.state(find.byType(SectionScreen));
 
-      await tester.tap(find.descendant(of: find.byType(SubTabBar), matching: find.text('Ангиуд')));
+      // «Хуваарь» хэсэгт зөвхөн 2 дэд таб (эзэн 2026-11-10).
+      expect(
+        find.descendant(of: find.byType(SubTabBar), matching: find.byType(Tab)).evaluate().length,
+        2,
+      );
+      await tester.tap(find.descendant(of: find.byType(SubTabBar), matching: find.text('Төлөвлөгч')));
       await tester.pumpAndSettle();
-      expect(location(c), '/app/classes');
-      expect(subTab(tester), 2);
+      expect(location(c), '/app/planner');
+      expect(subTab(tester), 1);
       // Дэд таб солиход хуудас шинээр үүсээгүй.
       expect(tester.state(find.byType(SectionScreen)), same(section));
 
@@ -267,8 +272,8 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(navItem('Хуваарь'));
       await tester.pumpAndSettle();
-      expect(location(c), '/app/classes');
-      expect(subTab(tester), 2);
+      expect(location(c), '/app/planner');
+      expect(subTab(tester), 1);
     });
 
     testWidgets('дэд таб: хуруугаар гулгуулж шилжинэ', (tester) async {
@@ -290,14 +295,14 @@ void main() {
         ('/app/theory', 3, 1),
         ('/app/library', 3, 2),
       ],
-      UserRole.teacher: [('/app/admin/students', 1, 4), ('/app/videos', 2, 1), ('/app/tools', 2, 3)],
+      UserRole.teacher: [('/app/planner', 1, 1), ('/app/videos', 2, 1), ('/app/tools', 2, 3)],
       UserRole.teacherPlus: [
         ('/app/admin/reconcile', 2, 2),
         ('/app/tuition', 2, 1),
         ('/app/admin/leads', 3, 1),
         ('/app/sms', 3, 5),
         ('/app/online', 3, 6),
-        ('/app/teacher-hours', 1, 4),
+        ('/app/planner', 1, 1),
       ],
       UserRole.admin: [
         ('/app/admin/finance', 2, 2),
@@ -305,7 +310,7 @@ void main() {
         ('/app/sms', 3, 5),
         ('/app/online', 3, 6),
         ('/app/admin/placement', 3, 3),
-        ('/app/teacher-hours', 1, 4),
+        ('/app/planner', 1, 1),
       ],
       UserRole.buyer: [('/app/study/history', 1, 3), ('/app/tests', 1, 1)],
       UserRole.groupTeacher: [('/app/tools', 1, 1)],

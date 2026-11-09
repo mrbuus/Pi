@@ -56,12 +56,21 @@ void main() {
 
   test('ажилтны «Бусад» — дэд табд орсныг давтахгүй', () {
     final teacher = NavData.moreGroups(UserRole.teacher);
-    // Багшийн бүх цэс хэсэгт орсон — «Бусад»-д зөвхөн хувийн.
-    expect(teacher.map((g) => g.$1), [NavGroup.personal]);
+    // Хуваарийн хэсгээс гарсан хуудсууд «Бусад»-ын «Анги» бүлэгт — нэг ч хуудас хасагдаагүй.
+    expect(teacher.map((g) => g.$1), [NavGroup.classes, NavGroup.personal]);
+    expect(teacher.first.$2.map((l) => l.path), [
+      '/app/classes',
+      '/app/lesson-flow',
+      '/app/dismissal',
+      '/app/admin/students',
+    ]);
     final admin = NavData.moreGroups(UserRole.admin).expand((g) => g.$2).map((l) => l.path);
     expect(admin, isNot(contains('/app/admin/finance')));
     expect(admin, contains('/app/admin/analytics'));
-    expect(admin, isNot(contains('/app/classes')));
+    for (final role in [UserRole.teacherPlus, UserRole.admin]) {
+      final more = NavData.moreGroups(role).expand((g) => g.$2).map((l) => l.path);
+      expect(more, containsAll(['/app/classes', '/app/lesson-flow', '/app/teacher-hours', '/app/dismissal']), reason: '$role');
+    }
     expect(admin, containsAll(['/app/library', '/app/admin/capabilities', '/app/internal']));
   });
 
@@ -73,7 +82,8 @@ void main() {
     expect(NavData.sectionIndexOf(UserRole.student, '/app/library/3/problems'), 3);
     expect(NavData.sectionIndexOf(UserRole.student, '/app/notifications'), -1);
     expect(NavData.sectionIndexOf(UserRole.teacher, '/app/teacher/board/c1'), 0);
-    expect(NavData.sectionIndexOf(UserRole.teacher, '/app/classes/c1'), 1);
+    expect(NavData.sectionIndexOf(UserRole.teacher, '/app/classes/c1'), -1);
+    expect(NavData.sectionIndexOf(UserRole.teacher, '/app/planner/workload'), 1);
     expect(NavData.sectionIndexOf(UserRole.admin, '/app/teacher/board/c1'), 0);
     expect(NavData.sectionIndexOf(UserRole.admin, '/app/admin/placement'), 3);
     expect(NavData.sectionIndexOf(UserRole.teacherPlus, '/app/admin/leads'), 3);
@@ -103,16 +113,10 @@ void main() {
   test('NATIVE-PLAN §2: ажилтны хэсгийн дэд табууд', () {
     List<String> pages(UserRole role, String id) =>
         NavData.sections(role).firstWhere((s) => s.id == id).pages.map((p) => p.path).toList();
-    expect(pages(UserRole.teacher, 'schedule'), [
-      '/app/schedule',
-      '/app/planner',
-      '/app/classes',
-      '/app/lesson-flow',
-      '/app/admin/students',
-      '/app/dismissal',
-    ]);
+    // «Хуваарь» хэсэгт ЗӨВХӨН Хуваарь, Төлөвлөгч (эзэн 2026-11-10).
+    expect(pages(UserRole.teacher, 'schedule'), ['/app/schedule', '/app/planner']);
     for (final role in [UserRole.teacherPlus, UserRole.admin]) {
-      expect(pages(role, 'schedule'), ['/app/schedule', '/app/planner', '/app/classes', '/app/lesson-flow', '/app/teacher-hours']);
+      expect(pages(role, 'schedule'), ['/app/schedule', '/app/planner']);
       expect(pages(role, 'students'), [
         '/app/admin/students',
         '/app/admin/leads',
