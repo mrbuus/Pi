@@ -69,3 +69,72 @@ export function checkSummary(
 export function isUniqueViolation(err: unknown): boolean {
   return (err as { code?: unknown } | null)?.code === 'P2002';
 }
+
+// ───────────── Сурагчийн товч мэдээлэл (Чекийн жагсаалтаас нэр дарахад) ─────────────
+
+export type ContactKind = 'student' | 'father' | 'mother' | 'parent';
+
+export interface StudentContact {
+  kind: ContactKind;
+  /** Утасны дугаар — хадгалсан хэлбэрээр нь (зай, +976 хэвээр) */
+  phone: string;
+  /** Аппад холбогдсон эцэг эхийн нэр (kind=parent, эсвэл аав/ээжийн дугаар аппынхтай таарвал) */
+  name?: string;
+  /** Энэ дугаар аппад эцэг эхийн бүртгэлтэй холбогдсон эсэх */
+  appLinked?: boolean;
+}
+
+/**
+ * Дугаарыг харьцуулах түлхүүр: зөвхөн цифр, урдах 976-г хасна (8 оронтой үлдвэл).
+ * Хоосон/цифргүй бол null.
+ */
+export function phoneKey(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  let d = raw.replace(/\D/g, '');
+  if (d.length === 11 && d.startsWith('976')) d = d.slice(3);
+  return d || null;
+}
+
+/**
+ * Утасны жагсаалт: сурагч → аав → ээж → аппын эцэг эх. Ижил дугаар (зай/+976
+ * ялгаагүй) нэг л удаа гарна — аппын эцэг эхийн дугаар аав/ээжийнхтэй таарвал
+ * тэр мөрөнд «аппад холбогдсон» гэж нэмэгдэнэ, тусдаа мөр болохгүй.
+ */
+export function studentContacts(input: {
+  studentPhone?: string | null;
+  fatherPhone?: string | null;
+  motherPhone?: string | null;
+  parents?: readonly { name: string; phone: string | null }[];
+}): StudentContact[] {
+  const out: StudentContact[] = [];
+  const byKey = new Map<string, StudentContact>();
+  const add = (
+    kind: ContactKind,
+    raw: string | null | undefined,
+    name?: string,
+  ) => {
+    const phone = raw?.trim();
+    const key = phoneKey(phone);
+    if (!phone || !key) return;
+    const existing = byKey.get(key);
+    if (existing) {
+      // Сурагчийн өөрийн дугаараар эцэг эх нэвтэрсэн бол сурагчийн мөрөнд юу ч нэмэхгүй
+      if (kind === 'parent' && existing.kind !== 'student') {
+        existing.appLinked = true;
+        existing.name ??= name;
+      }
+      return;
+    }
+    const c: StudentContact =
+      kind === 'parent'
+        ? { kind, phone, name, appLinked: true }
+        : { kind, phone };
+    byKey.set(key, c);
+    out.push(c);
+  };
+  add('student', input.studentPhone);
+  add('father', input.fatherPhone);
+  add('mother', input.motherPhone);
+  for (const p of input.parents ?? []) add('parent', p.phone, p.name);
+  return out;
+}

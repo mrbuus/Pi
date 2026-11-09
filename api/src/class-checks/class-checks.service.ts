@@ -15,6 +15,7 @@ import {
   cleanCheckTitle,
   isUniqueViolation,
   OPEN_CHECKS_MAX,
+  studentContacts,
 } from './class-checks.logic';
 import type {
   CreateClassCheckDto,
@@ -199,6 +200,73 @@ export class ClassChecksService {
     };
   }
 
+  /**
+   * Чекийн жагсаалтаас нэр дарахад гарах товч мэдээлэл (эзэн 2026-11-10): нэр,
+   * код, анги, сурагч/аав/ээж/аппын эцэг эхийн утас, асран хамгаалагчийн
+   * тэмдэглэл. Төлбөрийн мэдээлэл БАЙХГҮЙ (Багш ч харна). Зөвхөн энэ ангид
+   * бүртгэлтэй (одоо эсвэл өмнө нь) сурагчийнх — өөр хүүхдийнхийг энэ замаар
+   * харахгүй.
+   */
+  async studentInfo(classroomId: string, studentId: string, userId: string) {
+    await this.access(classroomId, userId);
+    const enrollment = await this.prisma.enrollment.findFirst({
+      where: { classroomId, studentId },
+      orderBy: { joinedAt: 'desc' },
+      select: {
+        leftAt: true,
+        classroom: { select: { name: true } },
+        student: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            studentCode: true,
+            phone: true,
+            archivedAt: true,
+            studentProfile: {
+              select: {
+                fatherPhone: true,
+                motherPhone: true,
+                guardianNote: true,
+              },
+            },
+            childLinks: {
+              where: { parent: { archivedAt: null } },
+              select: {
+                parent: {
+                  select: { firstName: true, lastName: true, phone: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!enrollment) throw new NotFoundException('Энэ ангийн сурагч биш');
+    const s = enrollment.student;
+    const p = s.studentProfile;
+    return {
+      id: s.id,
+      firstName: s.firstName,
+      lastName: s.lastName,
+      studentCode: s.studentCode,
+      classroomName: enrollment.classroom.name,
+      inClass: !enrollment.leftAt && !s.archivedAt,
+      guardianNote: p?.guardianNote?.trim() || null,
+      contacts: studentContacts({
+        studentPhone: s.phone,
+        fatherPhone: p?.fatherPhone,
+        motherPhone: p?.motherPhone,
+        parents: s.childLinks.map((l) => ({
+          name: [l.parent.lastName?.slice(0, 1), l.parent.firstName]
+            .filter(Boolean)
+            .join('. '),
+          phone: l.parent.phone,
+        })),
+      }),
+    };
+  }
+
   // ───────────────────────── Бичих ─────────────────────────
 
   async create(classroomId: string, dto: CreateClassCheckDto, userId: string) {
@@ -243,6 +311,19 @@ export class ClassChecksService {
       archivedAt?: Date | null;
       archivedById?: string | null;
     } = {};
+    // Хаагдсан чекийн нэр/дүнг засахгүй (тэмдэглэгээтэй адил) — цугларсан мөнгө
+    // хаасны дараа өөрчлөгдөж болохгүй. Эхлээд сэргээнэ (нэг хүсэлтэд ч болно).
+    const staysArchived = !!before.archivedAt && dto.archived !== false;
+    if (
+      staysArchived &&
+      ((dto.title !== undefined &&
+        cleanCheckTitle(dto.title) !== before.title) ||
+        (dto.amount !== undefined &&
+          cleanCheckAmount(dto.amount) !== before.amount))
+    )
+      throw new BadRequestException(
+        'Хаагдсан чекийг засахгүй — эхлээд дахин нээнэ үү',
+      );
     if (dto.title !== undefined) {
       const title = cleanCheckTitle(dto.title);
       if (!title) throw new BadRequestException('Чекийн нэрээ бичнэ үү');
@@ -352,7 +433,7 @@ export class ClassChecksService {
     if (!check) throw new NotFoundException('Чек олдсонгүй');
     if (check.archivedAt)
       throw new BadRequestException(
-        'Хаагдсан чекийг засахгүй — эхлээд сэргээнэ үү',
+        'Хаагдсан чекийг засахгүй — эхлээд дахин нээнэ үү',
       );
     const enrolled = await this.prisma.enrollment.findFirst({
       where: {
