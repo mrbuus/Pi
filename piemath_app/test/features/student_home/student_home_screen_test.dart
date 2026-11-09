@@ -59,20 +59,44 @@ void main() {
     expect(find.byType(RateTile), findsNothing);
   });
 
-  testWidgets('онлайн сурагч: онлайн даалгаврын холбоос', (tester) async {
-    await pumpStudentRoute(
-      tester,
-      http: homeHttp(
-        overview: overviewJson(inClass: false),
-        classrooms: [
-          {'id': 'o1', 'name': 'Онлайн 12', 'type': 'ONLINE', 'grade': 12},
-        ],
-      ),
-      location: '/app/student',
-    );
+  testWidgets('онлайн сурагч: самбар дээр даалгавар (буцаасан нь эхэнд), дарахад даалгавар руу', (tester) async {
+    Map<String, Object?> asg(String id, String title, String status) => {
+          'id': id,
+          'title': title,
+          'imageKeys': <Object?>[],
+          'dueDate': '2026-11-12T15:59:00.000Z',
+          'classroom': {'name': 'Онлайн 12'},
+          'canSubmit': true,
+          'myStatus': status,
+        };
+    final http = homeHttp(
+      overview: overviewJson(inClass: false),
+      classrooms: [
+        {'id': 'o1', 'name': 'Онлайн 12', 'type': 'ONLINE', 'grade': 12},
+      ],
+    )..json('GET', '/assignments/my', [
+        asg('a1', 'Батлагдсан даалгавар', 'DONE_ONLINE'),
+        asg('a2', 'Буцаасан даалгавар', 'RETURNED'),
+      ]);
+    await pumpStudentRoute(tester, http: http, location: '/app/student');
     await settle(tester);
     expect(find.text('Онлайн даалгавар'), findsOneWidget);
     expect(find.text('Танхимын ангид элсээгүй байна'), findsNothing);
+    final returned = tester.getTopLeft(find.text('Буцаасан даалгавар')).dy;
+    final done = tester.getTopLeft(find.text('Батлагдсан даалгавар')).dy;
+    expect(returned, lessThan(done));
+  });
+
+  testWidgets('онлайн сурагч, даалгавар алга: карт харагдахгүй', (tester) async {
+    final http = homeHttp(
+      overview: overviewJson(inClass: false),
+      classrooms: [
+        {'id': 'o1', 'name': 'Онлайн 12', 'type': 'ONLINE', 'grade': 12},
+      ],
+    )..json('GET', '/assignments/my', <Object?>[]);
+    await pumpStudentRoute(tester, http: http, location: '/app/student');
+    await settle(tester);
+    expect(find.text('Онлайн даалгавар'), findsNothing);
   });
 
   testWidgets('өнөөдөр хичээлгүй + QR холбоос шилжинэ', (tester) async {
