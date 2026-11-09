@@ -870,16 +870,21 @@ export class UsersService {
           take: 1,
           select: { classroom: { select: { id: true, name: true, grade: true } } },
         },
+        // Аппад бүртгүүлсэн эцэг эхийн утас — сурагчийн хайлтад (эзэн 2026-11-10)
+        childLinks: { select: { parent: { select: { phone: true } } } },
       },
       orderBy: [{ role: 'asc' }, { firstName: 'asc' }],
       take: 5000,
     });
-    return users.map(({ enrollments, ...u }) => {
+    return users.map(({ enrollments, childLinks, ...u }) => {
       const latest = enrollments[0]?.classroom ?? null;
+      const parentPhones = childLinks
+        .map((l) => l.parent.phone)
+        .filter((p): p is string => !!p);
       // Архивын жагсаалтад: сүүлийн анги (сэргээхэд урьдчилан сонгоно)
       if (includeArchived)
-        return { ...u, currentClassroom: null, lastClassroom: latest };
-      return { ...u, currentClassroom: latest };
+        return { ...u, parentPhones, currentClassroom: null, lastClassroom: latest };
+      return { ...u, parentPhones, currentClassroom: latest };
     });
   }
 

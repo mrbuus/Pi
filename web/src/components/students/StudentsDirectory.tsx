@@ -32,6 +32,12 @@ interface OutstandingRow {
 
 const PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
 
+/** Утасны зөвхөн цифрүүд; урд талын +976 / 976-г хасна */
+function phoneDigits(v: string): string {
+  const d = v.replace(/\D/g, "");
+  return d.length > 8 && d.startsWith("976") ? d.slice(3) : d;
+}
+
 /** Сурагчийн төлбөрийн төлөв — outstandingMap-д байвал дутуу, эс бөгөөс
  * төлбөрийн багц (tuitionPlan) байгаа эсэхээс шалгаж ойролцоогоор тооцно
  * (GET /payments/outstanding зөвхөн танхимын сурагч + дутуу мөрийг буцаадаг —
@@ -149,6 +155,7 @@ export default function StudentsDirectory() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
+    const qDigits = phoneDigits(q);
     return (students ?? []).filter((s) => {
       if (attention === "unassigned" && !unassignedIds.has(s.id)) return false;
       if (attention === "absent" && !absentIds.has(s.id)) return false;
@@ -159,11 +166,15 @@ export default function StudentsDirectory() {
       if (subjectFilter !== "ALL" && subjectFromCode(s.studentCode) !== subjectFilter)
         return false;
       if (!q) return true;
-      const haystack = [s.studentCode, s.firstName, s.lastName, s.phone]
+      const p = s.studentProfile;
+      const phones = [s.phone, p?.fatherPhone, p?.motherPhone, ...(s.parentPhones ?? [])];
+      const haystack = [s.studentCode, s.firstName, s.lastName, s.username, ...phones]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
-      return haystack.includes(q);
+      if (haystack.includes(q)) return true;
+      // Утсыг зай, зураас, +976-тай бичсэн ч олно (3+ орон бичсэн үед)
+      return qDigits.length >= 3 && phones.some((ph) => ph && phoneDigits(ph).includes(qDigits));
     });
   }, [
     students,
@@ -337,14 +348,14 @@ export default function StudentsDirectory() {
           />
         )}
         <label className="sr-only" htmlFor="student-search">
-          Код, нэр, утасны дугаараар хайх
+          Код, нэр, сурагч эсвэл эцэг эхийн утсаар хайх
         </label>
         <input
           id="student-search"
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Код, нэр, утасны дугаараар хайх…"
+          placeholder="Код, нэр, сурагч эсвэл эцэг эхийн утсаар хайх…"
           className={`w-full sm:max-w-xs ${inputCls}`}
         />
         <div className="flex flex-wrap gap-2">

@@ -38,6 +38,7 @@ export interface StudentListItem {
   studentCode?: string | null;
   firstName: string;
   lastName: string;
+  username?: string | null;
   phone?: string | null;
   email?: string | null;
   role: string;
@@ -49,6 +50,8 @@ export interface StudentListItem {
   lastSeenAt?: string | null;
   studentProfile?: StudentProfileLite | null;
   currentClassroom?: ClassroomLite | null;
+  /** Аппад холбогдсон эцэг эхийн утас (ParentLink) */
+  parentPhones?: string[];
 }
 
 /** Бодож байхдаа сайтаас гарсан тоо (users.service.studentFocus) */
