@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/shell/app_shell.dart' show AppBackButton;
+import '../../../core/math/math.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
@@ -239,10 +240,16 @@ class _HistoryContent extends StatelessWidget {
           trailing: MarkLabel.homework(context, HomeworkMark.fromApi(m.status)),
         ),
       for (final s in h.submissions.rows)
-        ParentDatedRow(
-          date: dayLabel(s.date),
-          subtitle: s.title,
-          trailing: MarkLabel.homework(context, HomeworkMark.fromApi(s.state)),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ParentDatedRow(
+              date: dayLabel(s.date),
+              subtitle: s.title,
+              trailing: MarkLabel.homework(context, HomeworkMark.fromApi(s.state)),
+            ),
+            _SubmissionDetail(submission: s),
+          ],
         ),
     ];
     return Column(
@@ -318,6 +325,40 @@ class _HistoryContent extends StatelessWidget {
             ],
           ),
         ],
+        if (h.learning.rows.isNotEmpty) ...[
+          const SectionHeader(title: 'Анхны хариулт, давталт, засвар'),
+          ParentListCard(
+            empty: '',
+            children: [
+              for (final l in h.learning.rows)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpace.xs),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ParentDatedRow(
+                        date: dayLabel(l.at),
+                        subtitle: l.kindLabel,
+                        trailing: switch (l.correct) {
+                          true => MarkLabel(icon: AppIcons.success, label: 'Зөв', color: c.success),
+                          false => MarkLabel(icon: AppIcons.failure, label: 'Дахин бодох', color: c.error),
+                          null => MarkLabel(icon: AppIcons.circleDot, label: 'Үнэлгээгүй', color: c.inkDim),
+                        },
+                      ),
+                      if (l.answer != null && l.answer!.trim().isNotEmpty)
+                        MathText('\$${l.answer}\$', style: context.text.bodyMedium),
+                      Text(l.resultLabel, style: context.text.bodySmall),
+                      if (l.flagged)
+                        Text(
+                          'Сурагч эргэлзсэн, таасан эсвэл тусламжийн тэмдэглэгээ нэмсэн',
+                          style: context.text.bodySmall?.copyWith(color: c.inkDim),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ],
         if (h.dismissals.rows.isNotEmpty) ...[
           const SectionHeader(title: 'Анги тарсан цаг'),
           ParentListCard(
@@ -364,6 +405,67 @@ class _HistoryContent extends StatelessWidget {
     );
   }
 }
+
+/// Илгээлтийн дэлгэрэнгүй: энэ жилийн эхний илгээлт (сурагчийн тайлбар), багшийн сүүлийн хариу,
+/// илгээсэн зураг (вэбийн `ChildHistory` «Даалгаврын илгээлт ба шалгалтын түүх»).
+class _SubmissionDetail extends StatelessWidget {
+  const _SubmissionDetail({required this.submission});
+
+  final HistorySubmission submission;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = submission;
+    final first = s.firstSubmit;
+    final review = s.lastReview;
+    final c = context.colors;
+    final small = context.text.bodySmall;
+    Widget box(String title, List<String> lines) => Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(bottom: AppSpace.xs),
+          padding: const EdgeInsets.all(AppSpace.sm),
+          decoration: BoxDecoration(color: c.surfaceSunken, borderRadius: BorderRadius.circular(AppRadius.sm)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: context.text.labelMedium),
+              for (final l in lines) Text(l, style: small),
+            ],
+          ),
+        );
+    final children = <Widget>[
+      if (first != null) ...[
+        box('Энэ жилийн эхний илгээлт', [dayLabel(first.at), first.studentNote ?? 'Сурагч тайлбар бичээгүй']),
+        box(
+          'Энэ жилийн багшийн сүүлийн хариу',
+          review == null
+              ? ['Энэ жилд багшийн хариу бүртгээгүй']
+              : [dayLabel(review.at), review.reviewNote ?? 'Тайлбар нэмээгүй', submissionStateLabel(review.state)],
+        ),
+      ],
+      if (first == null && s.studentNote != null && s.studentNote!.isNotEmpty)
+        Text('Сурагчийн тайлбар: ${s.studentNote}', style: small),
+      if (first == null && s.reviewNote != null && s.reviewNote!.isNotEmpty)
+        Text('Багшийн хариу: ${s.reviewNote}', style: small),
+      if (s.imageKeys.isNotEmpty) PhotoStrip(fileKeys: s.imageKeys, title: s.title.isEmpty ? 'Илгээсэн зураг' : s.title),
+    ];
+    if (children.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpace.sm),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children),
+    );
+  }
+}
+
+/// Илгээлтийн төлөв (вэбийн `STATUS`).
+String submissionStateLabel(String state) => switch (state) {
+      'SUBMITTED' => 'Шалгуулахаар илгээсэн',
+      'RETURNED' => 'Дахин илгээх',
+      'DONE_ONLINE' => 'Багш шалгасан',
+      'DONE_IN_CLASS' => 'Ангид шалгасан',
+      'NOT_DONE' => 'Илгээгээгүй',
+      _ => 'Шалгасан',
+    };
 
 String _dismissalText(HistoryDismissal d) {
   String? hhmm(String? iso) {
