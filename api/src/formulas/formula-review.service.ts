@@ -19,10 +19,13 @@ import {
 import { SubmitReviewDto } from './formula-review.dto';
 import { reviewDay, reviewStreak, scheduleReview } from './review-scheduler';
 
+// Хязгаарын (\lim) томьёо давтлагын картад хэзээ ч орохгүй (эзэн 2026-11-10).
+export const NO_LIMIT_LATEX = '\\lim';
 const usable: Prisma.FormulaWhereInput = {
   slug: { not: null },
   latex: { not: null },
   sectionSlug: { not: null },
+  AND: [{ NOT: { latex: { contains: NO_LIMIT_LATEX } } }],
 };
 const formulaOrder: Prisma.FormulaOrderByWithRelationInput[] = [
   { sectionSlug: 'asc' },
