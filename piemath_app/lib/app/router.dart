@@ -8,6 +8,7 @@ import '../features/auth/auth_routes.dart';
 import '../features/books/books_routes.dart';
 import '../features/buyer/buyer_routes.dart';
 import '../features/classrooms_admin/classrooms_admin_routes.dart';
+import '../features/enrollment/enrollment_routes.dart';
 import '../features/exam/exam_routes.dart';
 import '../features/groups/groups_routes.dart';
 import '../features/homework/homework_routes.dart';
@@ -23,6 +24,7 @@ import '../features/planner/planner_routes.dart';
 import '../features/results/results_routes.dart';
 import '../features/scan/scan_routes.dart';
 import '../features/schedule/schedule_routes.dart';
+import '../features/sms/sms_routes.dart';
 import '../features/student_home/student_home_routes.dart';
 import '../features/students_admin/students_admin_routes.dart';
 import '../features/support/support_routes.dart';
@@ -71,6 +73,8 @@ final allFeatureRoutes = <FeatureRoutes>[
   groupsRoutes,
   resultsRoutes,
   onlineRoutes,
+  smsRoutes,
+  enrollmentRoutes,
   _manageRoutes,
 ];
 
