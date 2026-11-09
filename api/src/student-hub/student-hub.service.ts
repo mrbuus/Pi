@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { addDaysKey, normalizeVariant } from '../attendance/board-logic';
+import { isVariantA } from './student-hub.logic';
 import { isActivatedClassroomStudent } from '../common/access';
 import { dateKey, parseDateOnly, todayUB } from '../common/date';
 import { markPlus } from '../common/teacher-plus';
@@ -1193,12 +1194,18 @@ export class StudentHubService {
         },
       },
     });
+    const variant = normalizeVariant(test.variantLabel);
+    // Ангийн А хувилбарын хариу ямар ч ангийн сурагчид харагдахгүй (эзэн 2026-11-10)
+    const answersHidden = isVariantA(variant, test.title);
     return {
       testId: test.id,
       title: test.title,
-      variant: normalizeVariant(test.variantLabel),
+      variant,
       date: open[open.length - 1],
-      problems: (rows as HubProblemRow[]).map(hubProblem),
+      answersHidden,
+      problems: (rows as HubProblemRow[])
+        .map(hubProblem)
+        .map((p) => (answersHidden ? { ...p, correctAnswer: null } : p)),
     };
   }
 

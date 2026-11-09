@@ -933,7 +933,7 @@ describe('StudentHubService', () => {
   });
 
   describe('GET /student-hub/tests/:testId', () => {
-    it('нээгдсэн тест: бодлого, сонголт, зөв хариу; YouTube холбоосгүй', async () => {
+    it('нээгдсэн А тест: бодлого, сонголт, хариу ХААЛТТАЙ; YouTube холбоосгүй', async () => {
       env.db.testProblem.findMany.mockResolvedValue([
         {
           problemId: 'p1',
@@ -956,6 +956,7 @@ describe('StudentHubService', () => {
         title: 'Тест 18',
         variant: 'A',
         date: '2026-10-27',
+        answersHidden: true,
         problems: [
           {
             id: 'p1',
@@ -966,7 +967,7 @@ describe('StudentHubService', () => {
               { label: 'A', text: '3', imageKey: null },
               { label: 'B', text: '4', imageKey: null },
             ],
-            correctAnswer: 'B',
+            correctAnswer: null,
             hasVideo: true,
           },
         ],

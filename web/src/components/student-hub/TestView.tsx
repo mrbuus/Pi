@@ -121,7 +121,7 @@ export default function TestView({ testId }: { testId: string }) {
                 ]}
               />
             </div>
-            {state.data.problems.length > 0 && (
+            {state.data.problems.length > 0 && !state.data.answersHidden && (
               <button
                 type="button"
                 onClick={() => {
@@ -141,6 +141,12 @@ export default function TestView({ testId }: { testId: string }) {
             )}
           </header>
 
+          {state.data.answersHidden && (
+            <p className="rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink-dim">
+              А хувилбарын тестийн хариу харагдахгүй
+            </p>
+          )}
+
           {state.data.problems.length === 0 ? (
             <EmptyState icon={FileQuestion} title="Энэ тестэд бодлого алга" />
           ) : (
@@ -152,8 +158,12 @@ export default function TestView({ testId }: { testId: string }) {
                     key={p.id}
                     problem={p}
                     number={i + 1}
-                    open={revealAll !== revealed.has(p.id)}
+                    open={
+                      !state.data.answersHidden &&
+                      revealAll !== revealed.has(p.id)
+                    }
                     onToggle={() => toggle(p.id)}
+                    hideToggle={!!state.data.answersHidden}
                   />
                 ))}
             </ol>
@@ -169,11 +179,13 @@ function ProblemCard({
   number,
   open,
   onToggle,
+  hideToggle,
 }: {
   problem: HubProblem;
   number: number;
   open: boolean;
   onToggle: () => void;
+  hideToggle: boolean;
 }) {
   const answer = problem.correctAnswer?.trim() ?? "";
   const correctChoice =
@@ -209,36 +221,38 @@ function ProblemCard({
           />
         )}
 
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <button
-            type="button"
-            onClick={onToggle}
-            aria-expanded={open}
-            aria-controls={answerId}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-brand-soft hover:bg-brand-bright/10"
-          >
-            {open ? (
-              <EyeOff className="size-4" aria-hidden />
-            ) : (
-              <Eye className="size-4" aria-hidden />
-            )}
-            {open ? "Хариуг нуух" : "Хариу харах"}
-          </button>
-          <div id={answerId} aria-live="polite">
-            {open && answer && (
-              <span className="inline-flex items-center gap-1.5 text-sm text-ink">
-                <span className="text-ink-dim">Хариу</span>
-                <b className="font-bold text-success">
-                  {correctChoice ? (
-                    correctChoice.label
-                  ) : (
-                    <MathText>{answer}</MathText>
-                  )}
-                </b>
-              </span>
-            )}
+        {!hideToggle && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <button
+              type="button"
+              onClick={onToggle}
+              aria-expanded={open}
+              aria-controls={answerId}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-brand-soft hover:bg-brand-bright/10"
+            >
+              {open ? (
+                <EyeOff className="size-4" aria-hidden />
+              ) : (
+                <Eye className="size-4" aria-hidden />
+              )}
+              {open ? "Хариуг нуух" : "Хариу харах"}
+            </button>
+            <div id={answerId} aria-live="polite">
+              {open && answer && (
+                <span className="inline-flex items-center gap-1.5 text-sm text-ink">
+                  <span className="text-ink-dim">Хариу</span>
+                  <b className="font-bold text-success">
+                    {correctChoice ? (
+                      correctChoice.label
+                    ) : (
+                      <MathText>{answer}</MathText>
+                    )}
+                  </b>
+                </span>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </li>
   );

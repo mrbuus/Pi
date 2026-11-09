@@ -474,3 +474,10 @@ export function hubProblem(row: HubProblemRow): HubProblem {
     hasVideo: !!row.problem.youtubeUrl?.trim(),
   };
 }
+
+/** А хувилбар эсэх: variantLabel = A, эсвэл гарчиг «… 15-A» / «… А»-аар төгссөн */
+export function isVariantA(variant: string | null, title: string): boolean {
+  if (variant === 'A') return true;
+  if (variant) return false;
+  return /(^|[\s\-–·])[AА]\s*$/i.test(title.trim());
+}

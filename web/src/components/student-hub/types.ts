@@ -109,7 +109,7 @@ export interface HubProblem {
   stem: string;
   imageKey: string | null;
   choices: HubProblemChoice[];
-  correctAnswer: string;
+  correctAnswer: string | null;
   hasVideo: boolean;
 }
 
@@ -119,6 +119,8 @@ export interface HubTestDetail {
   title: string;
   variant: string | null;
   date: string;
+  /** А хувилбар — хариу ирэхгүй, товч харуулахгүй */
+  answersHidden?: boolean;
   problems: HubProblem[];
 }
 

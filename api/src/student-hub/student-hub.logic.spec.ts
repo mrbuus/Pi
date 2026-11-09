@@ -490,3 +490,17 @@ describe('student-hub.logic — бодлогын харагдац', () => {
     ).toBeNull();
   });
 });
+
+describe('isVariantA', () => {
+  const { isVariantA } = jest.requireActual('./student-hub.logic');
+  it('variantLabel A', () => expect(isVariantA('A', 'Тест 3')).toBe(true));
+  it('B хувилбар', () => expect(isVariantA('B', 'Сорил 15-A')).toBe(false));
+  it('гарчгаас: латин A, кирилл А', () => {
+    expect(isVariantA(null, '1000 бодлого · Сорил 15-A')).toBe(true);
+    expect(isVariantA(null, 'Тест 4 А')).toBe(true);
+  });
+  it('A-гүй гарчиг', () => {
+    expect(isVariantA(null, 'Интеграл · Тест 14')).toBe(false);
+    expect(isVariantA(null, 'Алгебр')).toBe(false);
+  });
+});
