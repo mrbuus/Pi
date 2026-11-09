@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/time/ub_time.dart';
+
 import 'json.dart';
 
 /// Томьёоны сангийн загварууд — `docs/api-contract/learning.md` §5, `api/src/formulas/formulas.service.ts`.
@@ -257,7 +259,15 @@ class FormulaDetail {
 /// `GET /formulas/my` — миний тестэд тааралдсан томьёо.
 @immutable
 class SeenFormula {
-  const SeenFormula({required this.slug, required this.title, this.latex, this.seenCount = 0, this.correctCount = 0, this.lastTestTitle});
+  const SeenFormula({
+    required this.slug,
+    required this.title,
+    this.latex,
+    this.seenCount = 0,
+    this.correctCount = 0,
+    this.lastTestTitle,
+    this.firstSeenAt,
+  });
 
   factory SeenFormula.fromJson(Object? raw) {
     final j = asMap(raw);
@@ -268,8 +278,12 @@ class SeenFormula {
       seenCount: asInt(j['seenCount']) ?? 0,
       correctCount: asInt(j['correctCount']) ?? 0,
       lastTestTitle: asStr(j['lastTestTitle']),
+      firstSeenAt: parseApiInstant(asStr(j['firstSeenAt'])),
     );
   }
+
+  /// Анх тааралдсан агшин («Өнөөдөр / Энэ долоо хоног / Өмнө» бүлэглэлд).
+  final DateTime? firstSeenAt;
 
   final String slug;
   final String title;
@@ -312,4 +326,25 @@ List<FormulaSummary> filterFormulas(
           (q.isEmpty || searchTextOf(f).contains(q)))
         f,
   ];
+}
+
+enum SeenGroup {
+  today('Өнөөдөр'),
+  week('Энэ долоо хоног'),
+  earlier('Өмнө');
+
+  const SeenGroup(this.title);
+
+  final String title;
+}
+
+/// Анх тааралдсан өдрөөр (UB): өнөөдөр, энэ долоо хоногийн (Даваагаас) өмнөх өдрүүд, бусад (вэбийн `dateGroup`).
+SeenGroup seenGroupOf(DateTime? firstSeenAt, UbDateTime now) {
+  if (firstSeenAt == null) return SeenGroup.earlier;
+  final today = now.dayIndex;
+  final day = UbDateTime.fromInstant(firstSeenAt).dayIndex;
+  final monday = today - (now.weekday - 1);
+  if (day == today) return SeenGroup.today;
+  if (day >= monday && day < today) return SeenGroup.week;
+  return SeenGroup.earlier;
 }
