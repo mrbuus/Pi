@@ -66,6 +66,7 @@ class BuyerPurchase {
     required this.createdAt,
     this.grantedAt,
     this.expiresAt,
+    this.productItemId,
   });
 
   factory BuyerPurchase.fromJson(Object? raw) {
@@ -78,10 +79,14 @@ class BuyerPurchase {
       createdAt: parseApiInstant(asStr(j['createdAt'])),
       grantedAt: parseApiInstant(asStr(j['grantedAt'])),
       expiresAt: parseApiInstant(asStr(j['expiresAt'])),
+      productItemId: asStr(j['productItemId']),
     );
   }
 
   final String id;
+
+  /// Дэлгүүрийн бүтээгдэхүүн (`GET /store/products`-ийн `id`).
+  final String? productItemId;
   final String title;
   final PurchaseKind kind;
   final num price;
@@ -94,4 +99,36 @@ class BuyerPurchase {
     if (expiresAt != null && !expiresAt!.isAfter(now)) return PurchaseState.expired;
     return PurchaseState.granted;
   }
+}
+
+/// `GET /store/products` — дэлгүүрийн бүтээгдэхүүн (бүгд дижитал: тест, номын эрх, хугацаат багц).
+@immutable
+class StoreProduct {
+  const StoreProduct({required this.id, required this.kind, required this.title, this.includesVideo = false});
+
+  factory StoreProduct.fromJson(Object? raw) {
+    final j = asMap(raw);
+    final kind = PurchaseKind.fromApi(asStr(j['kind']));
+    final title = asStr(j['title']);
+    return StoreProduct(
+      id: asStr(j['id']) ?? '',
+      kind: kind,
+      title: title == null || title.trim().isEmpty ? kind.groupTitle : title,
+      includesVideo: j['includesVideo'] == true,
+    );
+  }
+
+  final String id;
+  final PurchaseKind kind;
+  final String title;
+  final bool includesVideo;
+}
+
+extension PurchaseKindGroup on PurchaseKind {
+  /// Дэлгүүрийн бүлгийн гарчиг (вэбийн `store-products.tsx`).
+  String get groupTitle => switch (this) {
+        PurchaseKind.test => 'Нэг удаагийн шалгалт',
+        PurchaseKind.book => 'Номын дэлгүүр',
+        PurchaseKind.pass => 'Сургалтын багц',
+      };
 }

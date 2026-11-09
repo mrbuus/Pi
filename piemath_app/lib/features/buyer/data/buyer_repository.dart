@@ -15,6 +15,9 @@ class BuyerRepository {
   Future<List<BuyerPass>> passes() =>
       _api.get('/me/passes', parse: (j) => [for (final p in asList(j)) BuyerPass.fromJson(p)]);
 
+  Future<List<StoreProduct>> products() =>
+      _api.get('/store/products', parse: (j) => [for (final p in asList(j)) StoreProduct.fromJson(p)]);
+
   Future<List<BuyerPurchase>> purchases() =>
       _api.get('/store/my-purchases', parse: (j) => [for (final p in asList(j)) BuyerPurchase.fromJson(p)]);
 }
@@ -30,3 +33,5 @@ BuyerRepository _repo(Ref ref) {
 final buyerPassesProvider = FutureProvider.autoDispose<List<BuyerPass>>((ref) => _repo(ref).passes());
 
 final buyerPurchasesProvider = FutureProvider.autoDispose<List<BuyerPurchase>>((ref) => _repo(ref).purchases());
+
+final storeProductsProvider = FutureProvider.autoDispose<List<StoreProduct>>((ref) => _repo(ref).products());
