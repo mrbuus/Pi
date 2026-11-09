@@ -100,8 +100,6 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
-    // Ажилласан цаг, цалингийн данс — бүх ажилтан (эзэн 2026-11-08)
-    { href: "/app/teacher-hours", label: "Ажилласан цаг", icon: "clock" },
     // Багш бүх анги, сурагчийг Багш+-тай адил ХАРНА (эзэн 2026-10-22); төлбөр, удирдлага нээгдэхгүй
     { href: "/app/classes", label: "Ангиуд", icon: "school" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
@@ -121,8 +119,6 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/sorils", label: "Жишиг сорил", icon: "clipboard-list" },
     { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
-    // Ажилласан цаг, цалингийн данс — бүх ажилтан (эзэн 2026-11-08)
-    { href: "/app/teacher-hours", label: "Ажилласан цаг", icon: "clock" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/analytics", label: "Аналитик", icon: "bar-chart" },
@@ -146,8 +142,6 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/sorils", label: "Жишиг сорил", icon: "clipboard-list" },
     { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
-    // Ажилласан цаг, цалингийн данс — бүх ажилтан (эзэн 2026-11-08)
-    { href: "/app/teacher-hours", label: "Ажилласан цаг", icon: "clock" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },

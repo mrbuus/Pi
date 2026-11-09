@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarDays, GraduationCap, Inbox, ListChecks, Settings2 } from "lucide-react";
+import { CalendarDays, Clock, GraduationCap, Inbox, ListChecks, Settings2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 /**
@@ -15,6 +15,8 @@ export const CLASS_HUB: { href: string; label: string; icon: LucideIcon }[] = [
   // тарах/үлдэх, өдрийн төлөвлөгөө өдрийн хуваарь дотор орсон. Дүн шинжилгээг
   // одоохондоо харуулахгүй. Хуудсууд нь устаагүй, зөвхөн табаас хасагдсан.
   { href: "/app/planner", label: "Төлөвлөгч", icon: ListChecks },
+  // Ажилласан цаг — цэснээс хасаж Хуваарийн сүүлийн таб болгов (эзэн 2026-11-10)
+  { href: "/app/teacher-hours", label: "Ажилласан цаг", icon: Clock },
 ];
 
 // «Элсэлт» = Хүсэлтүүд + Элсэлтийн удирдлага (эзэн 2026-10-13)
