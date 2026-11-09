@@ -21,6 +21,7 @@ final homeworkRoutes = FeatureRoutes(
           builder: (context, state) => HomeworkSolveScreen(
             testId: state.pathParameters['testId']!,
             date: state.uri.queryParameters['date'] ?? '',
+            classroomId: state.uri.queryParameters['classroomId'],
           ),
         ),
       ],

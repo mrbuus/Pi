@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 import '../../../core/time/ub_time.dart';
 
 /// Гэрийн даалгаврын загварууд — `docs/api-contract/homework.md`.
-/// Сервер хэзээ ч зөв хариу, `isCorrect`, бодолт илгээхгүй.
+/// Бодож байх үед сервер зөв хариу, `isCorrect`, бодолт илгээхгүй; ИЛГЭЭСНИЙ ДАРАА л алдсан бодлогын
+/// зөв хариу, баталгаажсан бодолт, бичлэг (`review`) ирнэ (эзэн 2026-11-03).
 
 Map<String, Object?> _map(Object? j) => (j! as Map).cast<String, Object?>();
 List<Object?> _list(Object? j) => (j as List?) ?? const [];
@@ -344,6 +345,75 @@ class HwProblem {
   final List<String> fillSlots;
 }
 
+/// Идэвхийн тоолуур (эзэн 2026-11-03): бодсон хугацаа, апп-аас гарсан тоо/хугацаа. Сервер зөвхөн өсгөнө.
+@immutable
+class HwActivity {
+  const HwActivity({this.activeSec = 0, this.awaySec = 0, this.leaveCount = 0});
+
+  factory HwActivity.parse(Object? v) {
+    if (v is! Map) return const HwActivity();
+    return HwActivity(activeSec: _int(v['activeSec']), awaySec: _int(v['awaySec']), leaveCount: _int(v['leaveCount']));
+  }
+
+  final int activeSec;
+  final int awaySec;
+  final int leaveCount;
+
+  Map<String, Object?> toJson() => {'activeSec': activeSec, 'awaySec': awaySec, 'leaveCount': leaveCount};
+}
+
+/// Илгээсний дараах нэг (алдсан) бодлогын зөв хариу, бодолт, бичлэг.
+@immutable
+class HwReviewItem {
+  const HwReviewItem({this.correct, this.solution, this.videoUrl});
+
+  factory HwReviewItem.fromJson(Object? json) {
+    final m = json is Map ? json.cast<String, Object?>() : const <String, Object?>{};
+    final video = m['video'];
+    final url = video is Map ? _str(video['url']) : null;
+    final c = m['correct'];
+    return HwReviewItem(
+      correct: c is String || c is Map ? c : null,
+      solution: _str(m['solution']),
+      videoUrl: url != null && _safeVideo(url) ? url : null,
+    );
+  }
+
+  /// `"B"`, `"12"` эсвэл `{a: "1", b: "2"}`; null = нээгдээгүй.
+  final Object? correct;
+  final String? solution;
+  final String? videoUrl;
+
+  static bool _safeVideo(String url) {
+    final u = Uri.tryParse(url);
+    return u != null && u.scheme == 'https' && (u.host.endsWith('youtube.com') || u.host == 'youtu.be');
+  }
+}
+
+@immutable
+class HwReview {
+  const HwReview({required this.locked, required this.opensAt, required this.items});
+
+  static HwReview? parse(Object? v) {
+    if (v is! Map) return null;
+    final items = v['items'];
+    return HwReview(
+      locked: v['locked'] == true,
+      opensAt: parseApiInstant(_str(v['opensAt'])),
+      items: items is Map
+          ? {for (final e in items.entries) e.key as String: HwReviewItem.fromJson(e.value)}
+          : const {},
+    );
+  }
+
+  /// Тест бусад ангид бодогдох тул зөв хариу түр нээгдэхгүй.
+  final bool locked;
+
+  /// Хариулаагүй бодлогын зөв хариу нээгдэх агшин (нууж байгаа үед).
+  final DateTime? opensAt;
+  final Map<String, HwReviewItem> items;
+}
+
 @immutable
 class HwAttempt {
   const HwAttempt({
@@ -356,6 +426,8 @@ class HwAttempt {
     required this.problems,
     required this.answers,
     required this.lastCheck,
+    this.activity = const HwActivity(),
+    this.review,
   });
 
   factory HwAttempt.fromJson(Object? json) {
@@ -371,6 +443,8 @@ class HwAttempt {
       problems: problems,
       answers: m['answers'] is Map ? (m['answers']! as Map).cast<String, Object?>() : <String, Object?>{},
       lastCheck: parseResults(m['lastCheck']),
+      activity: HwActivity.parse(m['activity']),
+      review: HwReview.parse(m['review']),
     );
   }
 
@@ -383,11 +457,15 @@ class HwAttempt {
   final List<HwProblem> problems;
   final Map<String, Object?> answers;
   final Map<String, CheckResult>? lastCheck;
+  final HwActivity activity;
+
+  /// Илгээсэн бол алдсан бодлогын зөв хариу; бодож байгаа бол null.
+  final HwReview? review;
 }
 
 @immutable
 class CheckOutcome {
-  const CheckOutcome({required this.results, required this.correct, required this.total, this.checksUsed});
+  const CheckOutcome({required this.results, required this.correct, required this.total, this.checksUsed, this.review});
 
   factory CheckOutcome.fromJson(Object? json) {
     final m = _map(json);
@@ -397,6 +475,7 @@ class CheckOutcome {
       correct: _int(score['correct']),
       total: _int(score['total']),
       checksUsed: m['checksUsed'] is num ? _int(m['checksUsed']) : null,
+      review: HwReview.parse(m['review']),
     );
   }
 
@@ -404,4 +483,7 @@ class CheckOutcome {
   final int correct;
   final int total;
   final int? checksUsed;
+
+  /// Зөвхөн илгээх (`submit`) хариунд.
+  final HwReview? review;
 }

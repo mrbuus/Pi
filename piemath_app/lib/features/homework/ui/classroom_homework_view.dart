@@ -74,9 +74,12 @@ class _DayListState extends State<_DayList> {
     // Урт жагсаалт — зөвхөн харагдаж буйг зурна (PERFORMANCE §1). Хэсэг бүрийн гарчиг + картууд.
     final rows = <Widget Function()>[];
     for (final s in sections) {
+      // Өмнөх өдрүүдээс зураг нь илгээгдээгүй, одоо ч илгээж болох — гарчигт сануулна (вэбийн улаан тэмдэг)
+      final missed = missedPhotoDays(s, widget.today);
       rows.add(
         () => SectionHeader(
           title: s.title,
+          trailing: missed > 0 ? _MissedBadge(count: missed) : null,
           padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.sm),
         ),
       );
@@ -102,6 +105,27 @@ class _DayListState extends State<_DayList> {
             sliver: SliverList.builder(itemCount: rows.length, itemBuilder: (_, i) => rows[i]()),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _MissedBadge extends StatelessWidget {
+  const _MissedBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Semantics(
+      label: '$count өдөр илгээгээгүй',
+      child: ExcludeSemantics(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: 2),
+          decoration: BoxDecoration(color: c.error, borderRadius: BorderRadius.circular(AppRadius.pill)),
+          child: Text('$count илгээгээгүй', style: context.text.labelSmall?.copyWith(color: c.onStatus)),
+        ),
       ),
     );
   }
