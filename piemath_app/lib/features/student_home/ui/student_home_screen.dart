@@ -15,7 +15,9 @@ import '../../my_class/domain/hub_logic.dart';
 import '../../my_class/ui/common.dart';
 import '../../my_class/ui/day_row.dart';
 import '../../my_class/ui/day_screen.dart';
+import '../data/evening_marking.dart';
 import 'activity_week_card.dart';
+import 'evening_marking_card.dart';
 
 /// Сурагчийн «Миний самбар» (`/app/student`) — вэбийн `StudentDashboard` (SURAGCH-V2-GEREE):
 /// мэндчилгээ → өнөөдрийн хичээл + түргэн үйлдэл → ирц, даалгаврын хувь → багшийн сүүлийн
@@ -48,6 +50,7 @@ class StudentHomeScreen extends ConsumerWidget {
           announcementsProvider,
           activityYearProvider(today.year),
           activityStreakProvider,
+          eveningTodoProvider,
         ]),
         child: ListView(
           padding: const EdgeInsets.all(AppSpace.gutter),
@@ -94,6 +97,7 @@ class StudentHomeScreen extends ConsumerWidget {
               if (ov.latestMark != null) ...[const SizedBox(height: AppSpace.md), LatestMarkCard(mark: ov.latestMark!)],
               const SizedBox(height: AppSpace.md),
               RecentDaysCard(today: today),
+              const EveningMarkingCard(),
             ] else if (!hasOnline && !classrooms.isLoading)
               const EmptyState(
                 icon: AppIcons.calendar,

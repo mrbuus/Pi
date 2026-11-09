@@ -6,12 +6,17 @@ import '../../helpers/fake_http.dart';
 import '../student_fixtures.dart';
 import '../student_harness.dart';
 
-FakeHttp homeHttp({Map<String, Object?>? overview, List<Map<String, Object?>> classrooms = const []}) => FakeHttp()
+FakeHttp homeHttp({
+  Map<String, Object?>? overview,
+  List<Map<String, Object?>> classrooms = const [],
+  List<Map<String, Object?>> todo = const [],
+}) => FakeHttp()
   ..json('GET', '/student-hub/overview', overview ?? overviewJson())
   ..json('GET', '/assignments/my-classrooms', classrooms)
   ..json('GET', '/student-hub/days', daysJson())
   ..json('GET', '/activity/me', {'year': 2026, 'totalActiveDays': 0, 'days': <Object?>[]})
   ..json('GET', '/activity/streak', {'currentStreak': 0, 'longestStreak': 0, 'totalActiveDays': 0})
+  ..json('GET', '/me/todo-marking', todo)
   ..json('GET', '/tuition/paid-until/my', {'paidUntil': '2099-01-01T00:00:00.000Z'})
   ..json('GET', '/announcements', [
     {'id': 'a1', 'title': 'Амралтын мэдэгдэл', 'body': '11-р сарын 26-нд хичээл орохгүй', 'pinned': true, 'createdAt': '2026-11-01T02:00:00.000Z'},
