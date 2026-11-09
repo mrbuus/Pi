@@ -37,7 +37,7 @@ void main() {
   group('NativeLoginResult', () {
     test('ok / signup / not_linked', () {
       expect(NativeLoginResult.fromJson(_ok), isA<NativeLoginOk>());
-      expect(NativeLoginResult.fromJson({'status': 'signup', 'ticket': 't'}), isA<NativeLoginSignup>());
+      expect(NativeLoginResult.fromJson({'status': 'signup', 'ticket': 't'}), isA<NativeLoginSignup>().having((s) => s.ticket, 'ticket', 't'));
       expect(NativeLoginResult.fromJson({'status': 'not_linked'}), isA<NativeLoginNotLinked>());
       expect(() => NativeLoginResult.fromJson({'status': 'x'}), throwsFormatException);
     });
@@ -116,6 +116,8 @@ void main() {
       await pump(tester);
       await tapText(tester, 'Google-ээр нэвтрэх');
       expect(find.text(googleSignupText), findsOneWidget);
+      // Тасалбартай бол апп доторх бүртгэл рүү (вэб биш)
+      expect(find.text('Энэ Gmail-ээр бүртгүүлэх'), findsOneWidget);
     });
 
     testWidgets('503: товчийг нууж, утсаар нэвтрэхийг санал болгоно', (tester) async {

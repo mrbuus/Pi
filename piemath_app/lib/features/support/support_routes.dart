@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 
 import '../../app/feature_routes.dart';
+import 'domain/help_links.dart';
+import 'ui/centre_info_screen.dart';
 import 'ui/feedback_screen.dart';
 import 'ui/support_screen.dart';
 
@@ -8,10 +10,12 @@ import 'ui/support_screen.dart';
 ///
 /// - `/app/support` — төвийн туслах (урьдчилан бичсэн хариултаас хайх, AI биш).
 /// - `/app/feedback` — санал хүсэлт илгээх + түүх.
+/// - `/app/support/centre` — төвийн танилцуулга, салбар, холбоо барих (туслахын эх сурвалж; вэб рүү хөтлөхгүй).
 /// - `/app/tools` — хэрэглэгдэхүүн, одоогоор PendingScreen (M5).
 final supportRoutes = FeatureRoutes(
   shell: [
     GoRoute(path: '/app/support', builder: (_, _) => const SupportScreen()),
     GoRoute(path: '/app/feedback', builder: (_, _) => const FeedbackScreen()),
+    GoRoute(path: centreInfoPath, builder: (_, _) => const CentreInfoScreen()),
   ],
 );

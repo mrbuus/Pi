@@ -11,7 +11,8 @@ import 'ui/try_test_screen.dart';
 ///
 /// - `/books` каталог, `/books/:code` ном (сэдвүүд), `/books/:code/topic/:i` сэдвийн тестүүд,
 ///   `/books/:code/try/:testId` үнэгүй тест бодох.
-/// - `/sorils` жишиг сорил (мэдээлэл; бүртгэл вэбээр), `/placement` түвшин тогтоох (мэдээлэл; өгөх нь вэбээр).
+/// - `/sorils` жишиг сорил (апп доторх бүртгэл, `/app/tests/:id`-ээр өгнө), `/placement` түвшин тогтоох
+///   шалгалт (апп дотор бүтэн урсгал: маягт, цагтай тест, бодолтын зураг, илгээх).
 final booksRoutes = FeatureRoutes(
   public: [
     GoRoute(path: '/books', builder: (_, _) => const BooksScreen()),

@@ -68,7 +68,7 @@ class BookDetailScreen extends ConsumerWidget {
                 ),
               ),
             const SizedBox(height: AppSpace.xl),
-            AccessNoteCard(webPath: '/books/${Uri.encodeComponent(code)}'),
+            const AccessNoteCard(),
           ],
         ),
       ),
@@ -108,7 +108,7 @@ class BookTopicScreen extends ConsumerWidget {
                     ChapterCard(code: code, chapter: topic.chapters[i], first: i == 0),
                     const SizedBox(height: AppSpace.md),
                   ],
-                  AccessNoteCard(webPath: '/books/${Uri.encodeComponent(code)}'),
+                  const AccessNoteCard(),
                 ],
               ),
       ),
@@ -226,7 +226,7 @@ class _TestRow extends StatelessWidget {
       action = OutlinedButton.icon(
         icon: const Icon(BooksIcons.lock, size: 18),
         label: const Text('Эрх нээх'),
-        onPressed: () => showAccessSheet(context, webPath: '/books/${Uri.encodeComponent(code)}'),
+        onPressed: () => showAccessSheet(context),
       );
     }
     return Wrap(

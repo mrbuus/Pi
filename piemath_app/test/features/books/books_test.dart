@@ -7,6 +7,7 @@ import 'package:piemath_app/core/math/math.dart';
 import 'package:piemath_app/core/ui/ui.dart';
 import 'package:piemath_app/features/books/books_routes.dart';
 import 'package:piemath_app/features/books/data/books_models.dart';
+import 'package:piemath_app/features/books/data/placement_repository.dart';
 import 'package:piemath_app/features/books/domain/book_meta.dart';
 import 'package:piemath_app/features/books/domain/try_logic.dart';
 import 'package:piemath_app/features/books/ui/sorils_screen.dart';
@@ -336,11 +337,21 @@ void main() {
             {'n': 1, 'statement': r'$1+1$', 'kind': 'choice', 'points': 1, 'choices': {'A': r'$2$'}},
           ],
         });
-      await pumpRouted(tester, initial: '/placement', routes: booksRoutes.public, http: http, session: const SignedOut());
+      await pumpRouted(
+        tester,
+        initial: '/placement',
+        routes: booksRoutes.public,
+        http: http,
+        session: const SignedOut(),
+        extra: [placementAttemptStoreProvider.overrideWithValue(MemoryPlacementAttemptStore())],
+      );
       await settle(tester);
       expect(find.text('Түвшин шалгах тест'), findsOneWidget);
       expect(find.text('1 бодлого'), findsOneWidget);
-      expect(find.text('Вэбээр шалгалт өгөх'), findsOneWidget);
+      // Апп дотор өгнө — вэб рүү хөтлөхгүй (эзэн 2026-11-10)
+      await tester.scrollUntilVisible(find.text('Шалгалт эхлэх, 40 минут'), 200, scrollable: find.byType(Scrollable).first);
+      expect(find.text('Шалгалт эхлэх, 40 минут'), findsOneWidget);
+      expect(find.textContaining('Вэбээр'), findsNothing);
     });
   });
 }
