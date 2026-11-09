@@ -205,12 +205,18 @@ class SkeletonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    // AppCard-тай ижил хэлбэр (уруул нь бодит картын адил доод хүрээ болж харагдана).
     return Container(
       padding: const EdgeInsets.all(AppSpace.lg),
       decoration: BoxDecoration(
         color: c.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border(
+          top: BorderSide(color: c.line, width: 1.5),
+          left: BorderSide(color: c.line, width: 1.5),
+          right: BorderSide(color: c.line, width: 1.5),
+          bottom: BorderSide(color: c.line, width: 4),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

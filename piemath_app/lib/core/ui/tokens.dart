@@ -35,6 +35,15 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.onStatus,
     required this.skeleton,
     required this.focus,
+    required this.lip,
+    required this.teal,
+    required this.tealTint,
+    required this.violet,
+    required this.violetTint,
+    required this.successTint,
+    required this.warningTint,
+    required this.errorTint,
+    required this.infoTint,
   });
 
   /// Хуудасны дэвсгэр.
@@ -87,6 +96,25 @@ class AppColors extends ThemeExtension<AppColors> {
   /// Гарнаас удирдах үеийн фокусын хүрээ.
   final Color focus;
 
+  /// Картын доод «уруул» — вэбийн `chunky` (2px хүрээ + 4px доод хүрээ)-тэй ижил «сурах бичгийн 3D».
+  /// Сүүдэр, blur биш — хатуу өнгө.
+  final Color lip;
+
+  /// Туслах өнгөний зохицол (эзэн 2026-11-10): логоны хар хөхтэй OKLCH-д ижил гэрэлтэлт, дунд зэргийн
+  /// ханалттай. Ангилал, хэсгийг ялгах ЖИЖИГ дүрсний хавтан ([teal] + [tealTint] г.м.), дүрс, шошгонд л —
+  /// картын дэвсгэрт ХЭЗЭЭ Ч биш. 60/30/10: саарал/цагаан 60, хар хөх 30, эдгээр 10-аас бага.
+  final Color teal;
+  final Color tealTint;
+  final Color violet;
+  final Color violetTint;
+
+  /// Төлөвийн өнгөний маш цайвар дэвсгэр — жижиг шошго (pill), дүрсний хавтанд. Дээрх төлөвийн өнгөтэй
+  /// контраст хамгийн багадаа 4.5 (`tokens_test`).
+  final Color successTint;
+  final Color warningTint;
+  final Color errorTint;
+  final Color infoTint;
+
   static const light = AppColors(
     // Саарал нь брэндийн өнгөний тойрог (OKLCH h≈264) руу бага зэрэг хазайсан —
     // «хар-цагаан» биш тайван хүйтэн саарал (UX-RESEARCH §2).
@@ -109,6 +137,16 @@ class AppColors extends ThemeExtension<AppColors> {
     onStatus: Color(0xFFFFFFFF),
     skeleton: Color(0xFFE6E9EE),
     focus: Color(0xFF76B6F7),
+    lip: Color(0xFFC5CBD6),
+    // OKLCH: teal L.50 C.09 h195, violet L.48 C.12 h298; дэвсгэр L.955 C.024.
+    teal: Color(0xFF007373),
+    tealTint: Color(0xFFDFF6F5),
+    violet: Color(0xFF674C98),
+    violetTint: Color(0xFFF2EDFF),
+    successTint: Color(0xFFE6F5E7),
+    warningTint: Color(0xFFFFECE3),
+    errorTint: Color(0xFFFFEBE7),
+    infoTint: Color(0xFFE5F2FF),
   );
 
   static const dark = AppColors(
@@ -131,6 +169,16 @@ class AppColors extends ThemeExtension<AppColors> {
     onStatus: Color(0xFF111317),
     skeleton: Color(0xFF262A31),
     focus: Color(0xFF76B6F7),
+    lip: Color(0xFF2B303A),
+    // OKLCH: L.82 C.09 (зөөлөн, гэрэлтэлтгүй); дэвсгэр L.29 C.04.
+    teal: Color(0xFF78D7D6),
+    tealTint: Color(0xFF0E3231),
+    violet: Color(0xFFCBB8F7),
+    violetTint: Color(0xFF2E273D),
+    successTint: Color(0xFF1B3122),
+    warningTint: Color(0xFF3B2617),
+    errorTint: Color(0xFF3D2321),
+    infoTint: Color(0xFF1A2D3E),
   );
 
   /// Логоны дугуй дэвсгэр (хоёр горимд ижил — лого өөрөө).
@@ -160,6 +208,15 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? onStatus,
     Color? skeleton,
     Color? focus,
+    Color? lip,
+    Color? teal,
+    Color? tealTint,
+    Color? violet,
+    Color? violetTint,
+    Color? successTint,
+    Color? warningTint,
+    Color? errorTint,
+    Color? infoTint,
   }) {
     return AppColors(
       bg: bg ?? this.bg,
@@ -181,6 +238,15 @@ class AppColors extends ThemeExtension<AppColors> {
       onStatus: onStatus ?? this.onStatus,
       skeleton: skeleton ?? this.skeleton,
       focus: focus ?? this.focus,
+      lip: lip ?? this.lip,
+      teal: teal ?? this.teal,
+      tealTint: tealTint ?? this.tealTint,
+      violet: violet ?? this.violet,
+      violetTint: violetTint ?? this.violetTint,
+      successTint: successTint ?? this.successTint,
+      warningTint: warningTint ?? this.warningTint,
+      errorTint: errorTint ?? this.errorTint,
+      infoTint: infoTint ?? this.infoTint,
     );
   }
 
@@ -208,6 +274,15 @@ class AppColors extends ThemeExtension<AppColors> {
       onStatus: l(onStatus, other.onStatus),
       skeleton: l(skeleton, other.skeleton),
       focus: l(focus, other.focus),
+      lip: l(lip, other.lip),
+      teal: l(teal, other.teal),
+      tealTint: l(tealTint, other.tealTint),
+      violet: l(violet, other.violet),
+      violetTint: l(violetTint, other.violetTint),
+      successTint: l(successTint, other.successTint),
+      warningTint: l(warningTint, other.warningTint),
+      errorTint: l(errorTint, other.errorTint),
+      infoTint: l(infoTint, other.infoTint),
     );
   }
 }
@@ -230,6 +305,9 @@ abstract final class AppRadius {
   static const double sm = 8;
   static const double md = 12;
   static const double lg = 16;
+
+  /// Том карт (вэбийн `chunky` 1.5rem-ийн апп хувилбар — утасны дэлгэцэнд арай бага).
+  static const double xl = 20;
   static const double pill = 999;
 }
 
@@ -260,6 +338,41 @@ abstract final class AppSizes {
 
   /// Унших бичвэрийн дээд өргөн (вэбийн `--measure` ~68ch).
   static const double readableWidth = 720;
+}
+
+/// Ангилал, хэсгийг ялгах өнгө (дүрсний хавтан, шошго). Утга бүр нь [AppColors]-ийн хос өнгө:
+/// [fg] — дүрс/бичвэр (surface, [tint] дээр хамгийн багадаа 4.5:1), [tint] — жижиг хавтангийн дэвсгэр.
+enum AppHue {
+  brand,
+  teal,
+  violet,
+  success,
+  warning,
+  error,
+  info,
+  neutral;
+
+  Color fg(AppColors c) => switch (this) {
+    brand => c.brand,
+    teal => c.teal,
+    violet => c.violet,
+    success => c.success,
+    warning => c.warning,
+    error => c.error,
+    info => c.info,
+    neutral => c.inkDim,
+  };
+
+  Color tint(AppColors c) => switch (this) {
+    brand => c.brandTint,
+    teal => c.tealTint,
+    violet => c.violetTint,
+    success => c.successTint,
+    warning => c.warningTint,
+    error => c.errorTint,
+    info => c.infoTint,
+    neutral => c.surfaceSunken,
+  };
 }
 
 extension AppThemeX on BuildContext {

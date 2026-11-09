@@ -68,9 +68,12 @@ class _EveningMarkingCardState extends ConsumerState<EveningMarkingCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Ангийн тестээ тэмдэглэх', style: context.text.titleMedium?.copyWith(color: c.brand)),
-            const SizedBox(height: 2),
-            Text('Ангид хийсэн бодлогуудаа цаасан дээрээсээ хараад тэмдэглээрэй', style: context.text.bodySmall),
+            const CardHeader(
+              icon: AppIcons.exam,
+              hue: AppHue.violet,
+              title: 'Ангийн тестээ тэмдэглэх',
+              subtitle: 'Ангид хийсэн бодлогуудаа цаасан дээрээсээ хараад тэмдэглээрэй',
+            ),
             if (todo.hasError && sessions == null)
               Padding(
                 padding: const EdgeInsets.only(top: AppSpace.sm),

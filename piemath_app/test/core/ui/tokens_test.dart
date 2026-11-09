@@ -27,6 +27,8 @@ void main() {
         'warning': c.warning,
         'error': c.error,
         'info': c.info,
+        'teal': c.teal,
+        'violet': c.violet,
       };
       for (final bgName in ['surface', 'bg']) {
         final bg = bgName == 'surface' ? c.surface : c.bg;
@@ -40,13 +42,22 @@ void main() {
       test('onBrand / brand', () => expect(contrast(c.onBrand, c.brand), greaterThanOrEqualTo(4.5)));
       test('brand / brandTint (сонгогдсон таб)', () => expect(contrast(c.brand, c.brandTint), greaterThanOrEqualTo(4.5)));
       test('onStatus / error', () => expect(contrast(c.onStatus, c.error), greaterThanOrEqualTo(4.5)));
+      for (final hue in AppHue.values) {
+        test('${hue.name} / өөрийн хавтан (дүрсний хавтан, шошго)', () {
+          final r = contrast(hue.fg(c), hue.tint(c));
+          expect(r, greaterThanOrEqualTo(4.5), reason: '${hue.name} ${r.toStringAsFixed(2)}');
+        });
+      }
       test('surface / ink (snackbar, офлайн тууз)', () => expect(contrast(c.surface, c.ink), greaterThanOrEqualTo(4.5)));
     });
   }
 
   test('шар/алтан өнгө токенд байхгүй (hue 40-65°, ханалт өндөр)', () {
     for (final c in [AppColors.light, AppColors.dark]) {
-      for (final color in [c.brand, c.brandBright, c.brandSoft, c.warning, c.success, c.info, c.error]) {
+      for (final color in [
+        c.brand, c.brandBright, c.brandSoft, c.warning, c.success, c.info, c.error, c.teal, c.violet,
+        for (final h in AppHue.values) h.tint(c),
+      ]) {
         final hsv = HSVColor.fromColor(color);
         final yellowish = hsv.hue >= 40 && hsv.hue <= 65 && hsv.saturation > 0.4;
         expect(yellowish, isFalse, reason: '$color шар/алтан');

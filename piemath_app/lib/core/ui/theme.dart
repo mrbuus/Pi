@@ -75,7 +75,7 @@ abstract final class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: text.titleLarge,
+        titleTextStyle: text.titleLarge?.copyWith(fontSize: 20, fontWeight: FontWeight.w700),
         systemOverlayStyle: systemBars(brightness),
       ),
       dividerTheme: DividerThemeData(color: c.line, thickness: 1, space: 1),
@@ -85,8 +85,33 @@ abstract final class AppTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: BorderSide(color: c.line),
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          side: BorderSide(color: c.line, width: 1.5),
+        ),
+      ),
+      // Шүүлтүүр, сонголтын chip: сонгогдсон нь цайвар хөх + хөх бичвэр (дүүрэн хөх биш), бусад нь хүрээтэй цагаан.
+      chipTheme: ChipThemeData(
+        backgroundColor: c.surface,
+        selectedColor: c.brandTint,
+        disabledColor: c.surfaceSunken,
+        checkmarkColor: c.brand,
+        side: WidgetStateBorderSide.resolveWith(
+          (s) => BorderSide(color: s.contains(WidgetState.selected) ? c.brand : c.line, width: 1.5),
+        ),
+        labelStyle: text.labelLarge?.copyWith(color: c.ink),
+        secondaryLabelStyle: text.labelLarge?.copyWith(color: c.brand),
+        iconTheme: IconThemeData(color: c.inkDim, size: 16),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: 6),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.pill)),
+        showCheckmark: true,
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? c.brandTint : c.surface),
+          foregroundColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? c.brand : c.ink),
+          side: WidgetStatePropertyAll(BorderSide(color: c.line, width: 1.5)),
+          textStyle: WidgetStatePropertyAll(text.labelLarge),
+          minimumSize: const WidgetStatePropertyAll(Size(AppSizes.minTap, AppSizes.minTap)),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -104,7 +129,7 @@ abstract final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: c.ink,
-          side: BorderSide(color: c.line),
+          side: BorderSide(color: c.line, width: 1.5),
           minimumSize: const Size(AppSizes.minTap, 48),
           padding: const EdgeInsets.symmetric(horizontal: 20),
           textStyle: text.labelLarge,

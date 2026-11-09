@@ -41,13 +41,11 @@ class OnlineHomeworkCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Icon(AppIcons.homework, size: 20, color: context.colors.brand),
-                const SizedBox(width: AppSpace.sm),
-                Expanded(child: Text('Онлайн даалгавар', style: context.text.titleSmall)),
-                Icon(AppIcons.forward, size: 18, color: context.colors.inkDim),
-              ],
+            CardHeader(
+              icon: AppIcons.homework,
+              hue: AppHue.violet,
+              title: 'Онлайн даалгавар',
+              trailing: Icon(AppIcons.forward, size: 18, color: context.colors.inkDim),
             ),
             for (final a in shown) ...[
               const Divider(height: AppSpace.lg),

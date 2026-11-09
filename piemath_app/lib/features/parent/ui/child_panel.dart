@@ -64,31 +64,51 @@ class ChildPanel extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AppCard(
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Semantics(header: true, child: Text(child.fullName, style: context.text.titleLarge)),
-              const SizedBox(height: AppSpace.xs),
-              Meta(items: [if (grade != null) '$grade-р анги', child.classroom?.name, child.studentProfile?.school]),
-              const SizedBox(height: AppSpace.sm),
-              Row(
-                children: [
-                  Icon(AppIcons.shield, size: 16, color: context.colors.success),
-                  const SizedBox(width: AppSpace.xs),
-                  Text('Холболт баталгаажсан', style: context.text.labelMedium),
-                ],
+              InitialsAvatar(initials: _initials(child.firstName, child.lastName), size: 48),
+              const SizedBox(width: AppSpace.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Semantics(header: true, child: Text(child.fullName, style: context.text.titleLarge)),
+                    const SizedBox(height: 2),
+                    Meta(items: [if (grade != null) '$grade-р анги', child.classroom?.name, child.studentProfile?.school]),
+                    const SizedBox(height: AppSpace.sm),
+                    const TonePill(icon: AppIcons.shield, hue: AppHue.success, label: 'Холболт баталгаажсан'),
+                  ],
+                ),
               ),
-              const SizedBox(height: AppSpace.sm),
-              OutlinedButton.icon(
-                onPressed: () => context.push('/app/parent/weekly?studentId=${Uri.encodeComponent(child.id)}'),
-                icon: const Icon(AppIcons.chart, size: 18),
-                label: const Text('Долоо хоногийн тайлан'),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpace.md),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: ActionCard(
+                  icon: AppIcons.chart,
+                  hue: AppHue.violet,
+                  title: 'Долоо хоногийн тайлан',
+                  chevron: false,
+                  stacked: true,
+                  onTap: () => context.push('/app/parent/weekly?studentId=${Uri.encodeComponent(child.id)}'),
+                ),
               ),
-              const SizedBox(height: AppSpace.sm),
-              OutlinedButton.icon(
-                onPressed: () => context.push('/app/parent/history?studentId=${Uri.encodeComponent(child.id)}'),
-                icon: const Icon(AppIcons.historyLog, size: 18),
-                label: const Text('Жилийн түүх'),
+              const SizedBox(width: AppSpace.md),
+              Expanded(
+                child: ActionCard(
+                  icon: AppIcons.historyLog,
+                  hue: AppHue.teal,
+                  title: 'Жилийн түүх',
+                  chevron: false,
+                  stacked: true,
+                  onTap: () => context.push('/app/parent/history?studentId=${Uri.encodeComponent(child.id)}'),
+                ),
               ),
             ],
           ),
@@ -97,8 +117,10 @@ class ChildPanel extends ConsumerWidget {
           const SizedBox(height: AppSpace.md),
           ExamResultCard(result: results.first, onAcknowledge: () => acknowledge(results.first)),
         ],
-        const SectionHeader(title: 'Сүүлийн ирц'),
+        const SizedBox(height: AppSpace.md),
         ParentListCard(
+          title: 'Сүүлийн ирц',
+          icon: AppIcons.calendarCheck,
           empty: 'Ирцийн бүртгэл хараахан алга',
           children: [
             for (final a in child.attendances)
@@ -109,10 +131,13 @@ class ChildPanel extends ConsumerWidget {
               ),
           ],
         ),
-        const SectionHeader(title: 'Даалгавар'),
+        const SizedBox(height: AppSpace.md),
         _HomeworkCard(child: child),
-        const SectionHeader(title: 'Шалгалтын дүн'),
+        const SizedBox(height: AppSpace.md),
         ParentListCard(
+          title: 'Шалгалтын дүн',
+          icon: AppIcons.exam,
+          hue: AppHue.violet,
           empty: 'Дүн хараахан бүртгээгүй',
           children: [
             for (final r in results)
@@ -156,6 +181,9 @@ class _HomeworkCard extends StatelessWidget {
     // Танхим: багшийн тэмдэглэгээ; онлайн: илгээлт. Тэмдэглэгээ байвал түүнийг (STATUS §7.11).
     final useMarks = child.dailyHomeworkMarks.isNotEmpty || !child.isOnline;
     return ParentListCard(
+      title: 'Даалгавар',
+      icon: AppIcons.homework,
+      hue: AppHue.violet,
       empty: 'Даалгаврын бүртгэл хараахан алга',
       children: useMarks
           ? [
@@ -220,3 +248,8 @@ class _ResultRow extends StatelessWidget {
     );
   }
 }
+
+String _initials(String? first, String? last) => [first?.trim() ?? '', last?.trim() ?? '']
+    .where((s) => s.isNotEmpty)
+    .map((s) => s.substring(0, 1).toUpperCase())
+    .join();

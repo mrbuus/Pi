@@ -36,8 +36,8 @@ class _Fallback extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Хамгийн сүүлийн дүн', style: context.text.titleSmall),
-          const SizedBox(height: AppSpace.xs),
+          const CardHeader(icon: AppIcons.exam, hue: AppHue.violet, title: 'Хамгийн сүүлийн дүн'),
+          const SizedBox(height: AppSpace.sm),
           MetaTitle(result.test.title, style: context.text.bodyMedium),
           if (result.totalScore != null && result.maxScore != null)
             Text('${_n(result.totalScore!)}/${_n(result.maxScore!)} оноо', style: context.text.bodyMedium),
@@ -68,7 +68,8 @@ class _CardBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Хамгийн сүүлийн дүн', style: context.text.titleSmall),
+          const CardHeader(icon: AppIcons.exam, hue: AppHue.violet, title: 'Хамгийн сүүлийн дүн'),
+          const SizedBox(height: AppSpace.sm),
           MetaTitle(card.test.title, style: context.text.bodySmall),
           const SizedBox(height: AppSpace.sm),
           Row(
