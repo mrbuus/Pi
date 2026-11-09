@@ -28,18 +28,24 @@ export type StaffTaskAssigneeMinAggregateOutputType = {
   taskId: string | null
   userId: string | null
   assignedAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type StaffTaskAssigneeMaxAggregateOutputType = {
   taskId: string | null
   userId: string | null
   assignedAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type StaffTaskAssigneeCountAggregateOutputType = {
   taskId: number
   userId: number
   assignedAt: number
+  deletedAt: number
+  deletedById: number
   _all: number
 }
 
@@ -48,18 +54,24 @@ export type StaffTaskAssigneeMinAggregateInputType = {
   taskId?: true
   userId?: true
   assignedAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type StaffTaskAssigneeMaxAggregateInputType = {
   taskId?: true
   userId?: true
   assignedAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type StaffTaskAssigneeCountAggregateInputType = {
   taskId?: true
   userId?: true
   assignedAt?: true
+  deletedAt?: true
+  deletedById?: true
   _all?: true
 }
 
@@ -139,6 +151,8 @@ export type StaffTaskAssigneeGroupByOutputType = {
   taskId: string
   userId: string
   assignedAt: Date
+  deletedAt: Date | null
+  deletedById: string | null
   _count: StaffTaskAssigneeCountAggregateOutputType | null
   _min: StaffTaskAssigneeMinAggregateOutputType | null
   _max: StaffTaskAssigneeMaxAggregateOutputType | null
@@ -166,6 +180,8 @@ export type StaffTaskAssigneeWhereInput = {
   taskId?: Prisma.StringFilter<"StaffTaskAssignee"> | string
   userId?: Prisma.StringFilter<"StaffTaskAssignee"> | string
   assignedAt?: Prisma.DateTimeFilter<"StaffTaskAssignee"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"StaffTaskAssignee"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"StaffTaskAssignee"> | string | null
   task?: Prisma.XOR<Prisma.StaffTaskScalarRelationFilter, Prisma.StaffTaskWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
@@ -174,6 +190,8 @@ export type StaffTaskAssigneeOrderByWithRelationInput = {
   taskId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   task?: Prisma.StaffTaskOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
 }
@@ -186,6 +204,8 @@ export type StaffTaskAssigneeWhereUniqueInput = Prisma.AtLeast<{
   taskId?: Prisma.StringFilter<"StaffTaskAssignee"> | string
   userId?: Prisma.StringFilter<"StaffTaskAssignee"> | string
   assignedAt?: Prisma.DateTimeFilter<"StaffTaskAssignee"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"StaffTaskAssignee"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"StaffTaskAssignee"> | string | null
   task?: Prisma.XOR<Prisma.StaffTaskScalarRelationFilter, Prisma.StaffTaskWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "taskId_userId">
@@ -194,6 +214,8 @@ export type StaffTaskAssigneeOrderByWithAggregationInput = {
   taskId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.StaffTaskAssigneeCountOrderByAggregateInput
   _max?: Prisma.StaffTaskAssigneeMaxOrderByAggregateInput
   _min?: Prisma.StaffTaskAssigneeMinOrderByAggregateInput
@@ -206,10 +228,14 @@ export type StaffTaskAssigneeScalarWhereWithAggregatesInput = {
   taskId?: Prisma.StringWithAggregatesFilter<"StaffTaskAssignee"> | string
   userId?: Prisma.StringWithAggregatesFilter<"StaffTaskAssignee"> | string
   assignedAt?: Prisma.DateTimeWithAggregatesFilter<"StaffTaskAssignee"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"StaffTaskAssignee"> | Date | string | null
+  deletedById?: Prisma.StringNullableWithAggregatesFilter<"StaffTaskAssignee"> | string | null
 }
 
 export type StaffTaskAssigneeCreateInput = {
   assignedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   task: Prisma.StaffTaskCreateNestedOneWithoutAssigneesInput
   user: Prisma.UserCreateNestedOneWithoutStaffTaskAssignmentsInput
 }
@@ -218,10 +244,14 @@ export type StaffTaskAssigneeUncheckedCreateInput = {
   taskId: string
   userId: string
   assignedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StaffTaskAssigneeUpdateInput = {
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   task?: Prisma.StaffTaskUpdateOneRequiredWithoutAssigneesNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutStaffTaskAssignmentsNestedInput
 }
@@ -230,22 +260,30 @@ export type StaffTaskAssigneeUncheckedUpdateInput = {
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffTaskAssigneeCreateManyInput = {
   taskId: string
   userId: string
   assignedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StaffTaskAssigneeUpdateManyMutationInput = {
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffTaskAssigneeUncheckedUpdateManyInput = {
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffTaskAssigneeListRelationFilter = {
@@ -267,18 +305,24 @@ export type StaffTaskAssigneeCountOrderByAggregateInput = {
   taskId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type StaffTaskAssigneeMaxOrderByAggregateInput = {
   taskId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type StaffTaskAssigneeMinOrderByAggregateInput = {
   taskId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type StaffTaskAssigneeCreateNestedManyWithoutUserInput = {
@@ -367,12 +411,16 @@ export type StaffTaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput = {
 
 export type StaffTaskAssigneeCreateWithoutUserInput = {
   assignedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   task: Prisma.StaffTaskCreateNestedOneWithoutAssigneesInput
 }
 
 export type StaffTaskAssigneeUncheckedCreateWithoutUserInput = {
   taskId: string
   assignedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StaffTaskAssigneeCreateOrConnectWithoutUserInput = {
@@ -408,16 +456,22 @@ export type StaffTaskAssigneeScalarWhereInput = {
   taskId?: Prisma.StringFilter<"StaffTaskAssignee"> | string
   userId?: Prisma.StringFilter<"StaffTaskAssignee"> | string
   assignedAt?: Prisma.DateTimeFilter<"StaffTaskAssignee"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"StaffTaskAssignee"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"StaffTaskAssignee"> | string | null
 }
 
 export type StaffTaskAssigneeCreateWithoutTaskInput = {
   assignedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   user: Prisma.UserCreateNestedOneWithoutStaffTaskAssignmentsInput
 }
 
 export type StaffTaskAssigneeUncheckedCreateWithoutTaskInput = {
   userId: string
   assignedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StaffTaskAssigneeCreateOrConnectWithoutTaskInput = {
@@ -449,41 +503,57 @@ export type StaffTaskAssigneeUpdateManyWithWhereWithoutTaskInput = {
 export type StaffTaskAssigneeCreateManyUserInput = {
   taskId: string
   assignedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StaffTaskAssigneeUpdateWithoutUserInput = {
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   task?: Prisma.StaffTaskUpdateOneRequiredWithoutAssigneesNestedInput
 }
 
 export type StaffTaskAssigneeUncheckedUpdateWithoutUserInput = {
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffTaskAssigneeUncheckedUpdateManyWithoutUserInput = {
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffTaskAssigneeCreateManyTaskInput = {
   userId: string
   assignedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type StaffTaskAssigneeUpdateWithoutTaskInput = {
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutStaffTaskAssignmentsNestedInput
 }
 
 export type StaffTaskAssigneeUncheckedUpdateWithoutTaskInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffTaskAssigneeUncheckedUpdateManyWithoutTaskInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -492,6 +562,8 @@ export type StaffTaskAssigneeSelect<ExtArgs extends runtime.Types.Extensions.Int
   taskId?: boolean
   userId?: boolean
   assignedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   task?: boolean | Prisma.StaffTaskDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["staffTaskAssignee"]>
@@ -500,6 +572,8 @@ export type StaffTaskAssigneeSelectCreateManyAndReturn<ExtArgs extends runtime.T
   taskId?: boolean
   userId?: boolean
   assignedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   task?: boolean | Prisma.StaffTaskDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["staffTaskAssignee"]>
@@ -508,6 +582,8 @@ export type StaffTaskAssigneeSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   taskId?: boolean
   userId?: boolean
   assignedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   task?: boolean | Prisma.StaffTaskDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["staffTaskAssignee"]>
@@ -516,9 +592,11 @@ export type StaffTaskAssigneeSelectScalar = {
   taskId?: boolean
   userId?: boolean
   assignedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }
 
-export type StaffTaskAssigneeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"taskId" | "userId" | "assignedAt", ExtArgs["result"]["staffTaskAssignee"]>
+export type StaffTaskAssigneeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"taskId" | "userId" | "assignedAt" | "deletedAt" | "deletedById", ExtArgs["result"]["staffTaskAssignee"]>
 export type StaffTaskAssigneeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.StaffTaskDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -542,6 +620,8 @@ export type $StaffTaskAssigneePayload<ExtArgs extends runtime.Types.Extensions.I
     taskId: string
     userId: string
     assignedAt: Date
+    deletedAt: Date | null
+    deletedById: string | null
   }, ExtArgs["result"]["staffTaskAssignee"]>
   composites: {}
 }
@@ -970,6 +1050,8 @@ export interface StaffTaskAssigneeFieldRefs {
   readonly taskId: Prisma.FieldRef<"StaffTaskAssignee", 'String'>
   readonly userId: Prisma.FieldRef<"StaffTaskAssignee", 'String'>
   readonly assignedAt: Prisma.FieldRef<"StaffTaskAssignee", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"StaffTaskAssignee", 'DateTime'>
+  readonly deletedById: Prisma.FieldRef<"StaffTaskAssignee", 'String'>
 }
     
 

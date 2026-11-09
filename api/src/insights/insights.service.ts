@@ -113,6 +113,7 @@ export class InsightsService {
         SELECT a."problemId", COUNT(*)::int AS total
         FROM "Attempt" a
         JOIN target t ON t.id = a."problemId"
+        WHERE a."deletedAt" IS NULL
         GROUP BY a."problemId"
       )
       SELECT
@@ -131,6 +132,7 @@ export class InsightsService {
         SELECT COUNT(*)::int AS cnt
         FROM "Attempt" a
         WHERE a."problemId" = t.id
+          AND a."deletedAt" IS NULL
           AND a."givenAnswer" #>> '{}' = pc.text
       ) sel ON TRUE
       ORDER BY t.id, pc."order"
@@ -216,6 +218,7 @@ export class InsightsService {
           MAX(CASE WHEN a."autoCorrect" THEN 1 ELSE 0 END) AS score
         FROM "Attempt" a
         WHERE a."autoCorrect" IS NOT NULL
+          AND a."deletedAt" IS NULL
         GROUP BY a."studentId", a."problemId"
       ),
       student_total AS (
@@ -329,7 +332,7 @@ export class InsightsService {
         FROM "User" u
         JOIN "Enrollment" e ON u.id = e."studentId" AND e."leftAt" IS NULL
         JOIN "Classroom" c ON e."classroomId" = c.id
-        JOIN "Attempt" a ON u.id = a."studentId"
+        JOIN "Attempt" a ON u.id = a."studentId" AND a."deletedAt" IS NULL
         JOIN "Problem" p ON a."problemId" = p.id AND p."deletedAt" IS NULL
         JOIN "Chapter" ch ON p."chapterId" = ch.id
         JOIN "Topic" t ON ch."topicId" = t.id AND t."deletedAt" IS NULL
@@ -430,6 +433,7 @@ export class InsightsService {
       JOIN "Problem" p ON a."problemId" = p.id
       JOIN "Chapter" ch ON p."chapterId" = ch.id
       WHERE p."deletedAt" IS NULL
+        AND a."deletedAt" IS NULL
       ORDER BY a."createdAt" ASC
       OFFSET $1
       LIMIT $2
@@ -475,9 +479,9 @@ export class InsightsService {
   async getMLExportCount(): Promise<number> {
     // ::int ЗААВАЛ — COUNT(*) нь bigint буцаадаг бөгөөд Nest түүнийг JSON
     // болгох гэж оролдоод "Do not know how to serialize a BigInt" гэж унана.
-    // Attempt-д soft delete байхгүй тул `deletedAt` шүүлт ч хассан.
+    // Зөөлөн устгасан (deletedAt) оролдлогыг тоолохгүй.
     const result = await this.prisma.$queryRawUnsafe<Array<{ count: number }>>(
-      `SELECT COUNT(*)::int AS count FROM "Attempt"`,
+      `SELECT COUNT(*)::int AS count FROM "Attempt" WHERE "deletedAt" IS NULL`,
     );
     return result[0]?.count ?? 0;
   }

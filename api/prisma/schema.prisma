@@ -1069,8 +1069,12 @@ model TestDraft {
   revision  Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): ноорог устгах = deletedAt.
+  deletedAt   DateTime?
+  deletedById String?
 
   @@index([ownerId, updatedAt])
+  @@index([deletedAt])
 }
 
 model TestProblem {
@@ -1318,6 +1322,9 @@ model Attempt {
   // New wrong attempts explicitly set this to null for durable collector retry.
   mistakeCollectedAt DateTime? @default(now())
   createdAt   DateTime @default(now())
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): оролдлого устгах = deletedAt; явц, идэвх, стрийк, аналитик бүгд устсаныг хасна.
+  deletedAt   DateTime?
+  deletedById String?
 
   @@index([studentId, occurredOn])
   @@index([problemId])
@@ -1947,6 +1954,9 @@ model LearningEvent {
   durationMs Int?
   device     String?
   meta       Json?
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): бүлгийн явц цэвэрлэх = deletedAt; явц, аналитик бүгд устсаныг хасна.
+  deletedAt   DateTime?
+  deletedById String?
 
   // Дан @@index([userId]) байсныг ХАССАН (PERF-AUDIT.md §0 олдвор #8): доорх
   // composite [userId, occurredAt]-ийн prefix нь `WHERE userId = ...` query-г
@@ -2104,8 +2114,12 @@ model StaffTaskAssignee {
   userId     String
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   assignedAt DateTime  @default(now())
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): оноолт хасах = deletedAt; дахин оноовол мөр сэргэнэ (PK хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@id([taskId, userId])
+  @@index([deletedAt])
 }
 
 // ============ Хичээлийн хуваарь (Class Schedule) ============
@@ -2167,8 +2181,12 @@ model ScheduleException {
   newRoom        String?
   note           String?
   createdAt      DateTime              @default(now())
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): цуцлалт/шилжүүлгийг буцаах = deletedAt; ижил өдөр дахин тавибал мөр сэргэнэ (unique хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@unique([scheduleId, date])
+  @@index([deletedAt])
 }
 
 // Тухайн тохиолдол дээр багшийн товлосон "өнөөдөр орох сэдэв".
@@ -2193,8 +2211,12 @@ model LessonTopic {
   // Бодлогын санд байхгүй, багшийн бичсэн сэдвүүд («Иррац шалгалт» г.м., эзэн 2026-10-31) —
   // тесттэй зэрэг олон байж болно. title = тестүүдийн нэр + эдгээр (planTitle).
   customTopics   String[] @default([])
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): сэдэв/төлөвлөгөө арилгах = deletedAt; ижил өдөр дахин тавибал мөр сэргэнэ (unique хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@unique([scheduleId, date])
+  @@index([deletedAt])
 }
 
 // Амралтын өдрийн (Бямба, Ням) хоол (эзэн 2026-10-31): хэн хийх, юу хийх — чөлөөт бичвэр,
@@ -2229,8 +2251,12 @@ model LessonStaffing {
   assistantTeacherId String?
   updatedById        String
   updatedAt          DateTime      @updatedAt
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): оноолт арилгах = deletedAt; дахин оноовол мөр сэргэнэ (unique хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@unique([scheduleId, date])
+  @@index([deletedAt])
 }
 
 // ============ Багшийн долоо хоногийн ажлын өдрийн бүртгэл ============
@@ -2318,9 +2344,13 @@ model AcademicCalendarDayClassroom {
   classroomId   String
   calendarDay   AcademicCalendarDay @relation(fields: [calendarDayId], references: [id], onDelete: Cascade)
   classroom     Classroom           @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): анги хасах = deletedAt; дахин нэмбэл холбоос сэргэнэ (PK хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@id([calendarDayId, classroomId])
   @@index([classroomId])
+  @@index([deletedAt])
 }
 
 // ============ Сурагчийн зорилго (Student Goals) ============
@@ -2973,9 +3003,13 @@ model ClassTestStatus {
   updatedById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): тэмдэглэгээг буцаах (status = null) = deletedAt; дахин тавибал мөр сэргэнэ (unique хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@unique([classroomId, testId])
   @@index([classroomId])
+  @@index([deletedAt])
 }
 
 /// «Өмнө үзсэн сэдэв» (эзэн 2026-10-27): систем эхлэхээс ӨМНӨ анги үзсэн тестийг

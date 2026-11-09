@@ -1378,7 +1378,7 @@ export class UsersService {
       }),
       this.prisma.testResult.count({ where: { studentId: targetId } }),
       this.prisma.attendance.count({ where: { studentId: targetId } }),
-      this.prisma.attempt.count({ where: { studentId: targetId } }),
+      this.prisma.attempt.count({ where: { studentId: targetId, deletedAt: null } }),
       user.role === Role.STUDENT
         ? this.studentFocus(targetId)
         : Promise.resolve(null),
@@ -1493,6 +1493,7 @@ export class UsersService {
                SUM(COALESCE(NULLIF(meta->'timing'->>'leaves', '')::int, 0)) AS leaves
         FROM "LearningEvent"
         WHERE "userId" = ${studentId}
+          AND "deletedAt" IS NULL
           AND "occurredAt" >= ${since}
           AND meta->>'lab' = 'v1'`,
     ]);

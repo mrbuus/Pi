@@ -43,7 +43,7 @@ export class FormulaReviewService {
   private seen(userId: string): Prisma.FormulaWhereInput {
     return {
       problems: {
-        some: { problem: { attempts: { some: { studentId: userId } } } },
+        some: { problem: { attempts: { some: { studentId: userId, deletedAt: null } } } },
       },
     };
   }

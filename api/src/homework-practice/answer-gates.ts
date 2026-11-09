@@ -21,6 +21,7 @@ export async function reservedAnywhere(
       // Анхны огноо 14 хоногийн өмнөөс — хичээл ирээдүй рүү ЗӨӨГДСӨН (ScheduleException.newDate)
       // байж болно; зөөлтийг тусад нь тайлахгүй, хамгаалах талаар барина
       where: {
+        deletedAt: null,
         testIds: { has: testId },
         date: { gte: new Date(today.getTime() - 14 * 86_400_000) },
         schedule: { deletedAt: null },

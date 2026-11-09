@@ -249,7 +249,7 @@ export class ClassSessionsService {
     // Миний өмнө тэмдэглэсэн selfState-ууд
     const problemIds = tests.flatMap((t) => t.problems.map((p) => p.problemId));
     const myAttempts = await this.prisma.attempt.findMany({
-      where: { studentId, problemId: { in: problemIds } },
+      where: { studentId, deletedAt: null, problemId: { in: problemIds } },
       select: { problemId: true, selfState: true, occurredOn: true },
     });
     const stateKey = (pid: string, d: Date) =>
@@ -356,12 +356,13 @@ export class ClassSessionsService {
         select: { testId: true, date: true, excludedProblemIds: true },
       }),
       this.prisma.classTestStatus.findMany({
-        where: { classroomId, status: 'REMOVED' },
+        where: { classroomId, status: 'REMOVED', deletedAt: null },
         select: { testId: true },
       }),
       before
         ? this.prisma.lessonTopic.findMany({
             where: {
+              deletedAt: null,
               schedule: { deletedAt: null, classroomId },
               date: { lt: before, gte: addDateDays(before, -60) },
               NOT: { testIds: { isEmpty: true } },
@@ -422,17 +423,20 @@ export class ClassSessionsService {
         ).map((t) => t.id)
       : [testId];
     const before = await this.prisma.classTestStatus.findMany({
-      where: { classroomId, testId: { in: siblings } },
+      where: { classroomId, testId: { in: siblings }, deletedAt: null },
     });
     if (status === 'REMOVED') {
+      // Өмнө буцаасан (deletedAt) мөр байвал сэргээнэ — (classroomId, testId) UNIQUE
       await this.prisma.classTestStatus.upsert({
         where: { classroomId_testId: { classroomId, testId } },
         create: { classroomId, testId, status, updatedById: userId },
-        update: { status, updatedById: userId },
+        update: { status, updatedById: userId, deletedAt: null, deletedById: null },
       });
     } else {
-      await this.prisma.classTestStatus.deleteMany({
-        where: { classroomId, testId: { in: siblings } },
+      // ЗӨӨЛӨН буцаалт (эзний дүрэм 2026-10-23): мөр deletedAt-тай DB-д үлдэнэ
+      await this.prisma.classTestStatus.updateMany({
+        where: { classroomId, testId: { in: siblings }, deletedAt: null },
+        data: { deletedAt: new Date(), deletedById: userId },
       });
     }
     await this.prisma.auditLog.create({

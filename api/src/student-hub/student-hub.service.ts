@@ -323,7 +323,7 @@ export class StudentHubService {
         },
       }),
       this.prisma.lessonTopic.findMany({
-        where: { date: range, ...ofClasses },
+        where: { deletedAt: null, date: range, ...ofClasses },
         select: {
           scheduleId: true,
           date: true,
@@ -334,7 +334,7 @@ export class StudentHubService {
       }),
       opts.days
         ? this.prisma.lessonStaffing.findMany({
-            where: { date: range, ...ofClasses },
+            where: { deletedAt: null, date: range, ...ofClasses },
             select: {
               scheduleId: true,
               date: true,
@@ -344,7 +344,7 @@ export class StudentHubService {
           })
         : Promise.resolve([]),
       this.prisma.scheduleException.findMany({
-        where: { ...ofClasses, OR: [{ date: range }, { newDate: range }] },
+        where: { deletedAt: null, ...ofClasses, OR: [{ date: range }, { newDate: range }] },
         select: {
           scheduleId: true,
           date: true,
@@ -604,7 +604,7 @@ export class StudentHubService {
         select: { id: true, type: true, title: true },
       }),
       this.prisma.academicCalendarDayClassroom.findMany({
-        where: { calendarDay: { date: todayDate, deletedAt: null } },
+        where: { deletedAt: null, calendarDay: { date: todayDate, deletedAt: null } },
         select: { calendarDayId: true, classroomId: true },
       }),
     ]);
@@ -642,6 +642,7 @@ export class StudentHubService {
             }),
             this.prisma.scheduleException.findMany({
               where: {
+                deletedAt: null,
                 ...ofClasses,
                 OR: [{ date: todayDate }, { newDate: todayDate }],
               },
@@ -657,7 +658,7 @@ export class StudentHubService {
             }),
             // Зөөгдөж ирсэн хичээлийн сэдэв анхны огноогоороо байдаг тул ойрын хугацааг уншина
             this.prisma.lessonTopic.findMany({
-              where: { ...ofClasses, date: { gte: topicFrom, lte: todayDate } },
+              where: { deletedAt: null, ...ofClasses, date: { gte: topicFrom, lte: todayDate } },
               select: { scheduleId: true, date: true, title: true },
             }),
             // Багш баталсан бүртгэл байвал түүний сэдэв/цаг давамгайлна (description-гүй)
@@ -795,8 +796,10 @@ export class StudentHubService {
           JOIN "ClassSchedule" cs ON cs."id" = t."scheduleId"
           LEFT JOIN "ScheduleException" x
             ON x."scheduleId" = t."scheduleId" AND x."date" = t."date"
+              AND x."deletedAt" IS NULL
           WHERE cs."classroomId" = ${classroomId}
             AND cs."deletedAt" IS NULL
+            AND t."deletedAt" IS NULL
             AND t."date" BETWEEN ${from}::date AND ${to}::date
             AND (x."kind" IS NULL OR x."kind" <> 'CANCELLED')
       ) u WHERE u.d BETWEEN ${from}::date AND ${to}::date`;

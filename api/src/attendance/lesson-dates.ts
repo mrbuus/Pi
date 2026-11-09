@@ -33,7 +33,7 @@ export async function loadPreviousLesson(
   const [exceptions, holidays] = await Promise.all([
     scheduleIds.length
       ? prisma.scheduleException.findMany({
-          where: { scheduleId: { in: scheduleIds } },
+          where: { deletedAt: null, scheduleId: { in: scheduleIds } },
           select: { scheduleId: true, date: true, kind: true, newDate: true },
         })
       : Promise.resolve([]),
@@ -42,8 +42,8 @@ export async function loadPreviousLesson(
         deletedAt: null,
         date: { gte: lookFrom, lt: date },
         OR: [
-          { classrooms: { none: {} } },
-          { classrooms: { some: { classroomId } } },
+          { classrooms: { none: { deletedAt: null } } },
+          { classrooms: { some: { classroomId, deletedAt: null } } },
         ],
       },
       select: { date: true },

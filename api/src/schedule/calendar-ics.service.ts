@@ -129,6 +129,7 @@ export class CalendarIcsService {
         ? []
         : await this.prisma.lessonStaffing.findMany({
             where: {
+              deletedAt: null,
               date: { gte: range.from, lte: range.to },
               OR: [{ leadTeacherId: userId }, { assistantTeacherId: userId }],
             },
@@ -182,6 +183,7 @@ export class CalendarIcsService {
     const [exceptions, holidays, topics, staffing] = await Promise.all([
       this.prisma.scheduleException.findMany({
         where: {
+          deletedAt: null,
           scheduleId: { in: scheduleIds },
           OR: [
             { date: { gte: range.from, lte: range.to } },
@@ -191,13 +193,14 @@ export class CalendarIcsService {
       }),
       this.prisma.academicCalendarDay.findMany({
         where: { date: { gte: range.from, lte: range.to }, deletedAt: null },
-        include: { classrooms: { select: { classroomId: true } } },
+        include: { classrooms: { where: { deletedAt: null }, select: { classroomId: true } } },
       }),
       this.prisma.lessonTopic.findMany({
-        where: { scheduleId: { in: scheduleIds } },
+        where: { deletedAt: null, scheduleId: { in: scheduleIds } },
       }),
       this.prisma.lessonStaffing.findMany({
         where: {
+          deletedAt: null,
           scheduleId: { in: scheduleIds },
           date: { gte: range.from, lte: range.to },
         },

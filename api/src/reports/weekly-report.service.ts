@@ -48,7 +48,7 @@ export class WeeklyReportService {
     const classroomIds = [...new Set(enrollments.map((entry) => entry.classroomId))];
     const nextClassroomIds = [...new Set(nextEnrollments.map((entry) => entry.classroomId))];
     const attendanceWhere = { studentId, date: { gte: start, lt: end }, classroomId: { in: classroomIds } };
-    const attemptWhere = { studentId, createdAt: { gte: instantStart, lt: instantEnd }, problem: { deletedAt: null } };
+    const attemptWhere = { studentId, deletedAt: null, createdAt: { gte: instantStart, lt: instantEnd }, problem: { deletedAt: null } };
     const assignmentWhere = { classroomId: { in: classroomIds }, deletedAt: null, dueDate: { gte: instantStart, lt: instantEnd } };
 
     const [attendance, results, assignmentCount, marks, classTests, topicAttemptCount, practiceCount, resultCount, classTestCount] = await Promise.all([
@@ -113,7 +113,7 @@ export class WeeklyReportService {
 
     const schedules = nextClassroomIds.length ? await this.prisma.classSchedule.findMany({
       where: { classroomId: { in: nextClassroomIds }, deletedAt: null },
-      select: { id: true, classroomId: true, weekday: true, startMinute: true, endMinute: true, effectiveFrom: true, effectiveTo: true, room: true, exceptions: { where: { OR: [{ date: { gte: end, lt: nextEnd } }, { newDate: { gte: end, lt: nextEnd } }] }, select: { date: true, kind: true, newDate: true, newStartMinute: true, newEndMinute: true, newRoom: true } } },
+      select: { id: true, classroomId: true, weekday: true, startMinute: true, endMinute: true, effectiveFrom: true, effectiveTo: true, room: true, exceptions: { where: { deletedAt: null, OR: [{ date: { gte: end, lt: nextEnd } }, { newDate: { gte: end, lt: nextEnd } }] }, select: { date: true, kind: true, newDate: true, newStartMinute: true, newEndMinute: true, newRoom: true } } },
     }) : [];
     const scheduled = new Map<string, { date: string; startMinute: number; endMinute: number; room: string | null; classroom: string }>();
     const scheduleIsEffective = (schedule: (typeof schedules)[number], occurrenceDate: Date) => {

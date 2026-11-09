@@ -439,7 +439,7 @@ export class TuitionService {
         deletedAt: null,
         type: 'HOLIDAY',
         // Зөвхөн БҮХ ангид хамаарах амралт (зарим ангийн онцгой өдөр биш)
-        classrooms: { none: {} },
+        classrooms: { none: { deletedAt: null } },
         // Төлбөр хугацаанд
         date: { gte: fromDate },
       },

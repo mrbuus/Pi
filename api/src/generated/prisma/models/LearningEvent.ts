@@ -46,6 +46,8 @@ export type LearningEventMinAggregateOutputType = {
   videoId: string | null
   durationMs: number | null
   device: string | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type LearningEventMaxAggregateOutputType = {
@@ -60,6 +62,8 @@ export type LearningEventMaxAggregateOutputType = {
   videoId: string | null
   durationMs: number | null
   device: string | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type LearningEventCountAggregateOutputType = {
@@ -75,6 +79,8 @@ export type LearningEventCountAggregateOutputType = {
   durationMs: number
   device: number
   meta: number
+  deletedAt: number
+  deletedById: number
   _all: number
 }
 
@@ -99,6 +105,8 @@ export type LearningEventMinAggregateInputType = {
   videoId?: true
   durationMs?: true
   device?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type LearningEventMaxAggregateInputType = {
@@ -113,6 +121,8 @@ export type LearningEventMaxAggregateInputType = {
   videoId?: true
   durationMs?: true
   device?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type LearningEventCountAggregateInputType = {
@@ -128,6 +138,8 @@ export type LearningEventCountAggregateInputType = {
   durationMs?: true
   device?: true
   meta?: true
+  deletedAt?: true
+  deletedById?: true
   _all?: true
 }
 
@@ -230,6 +242,8 @@ export type LearningEventGroupByOutputType = {
   durationMs: number | null
   device: string | null
   meta: runtime.JsonValue | null
+  deletedAt: Date | null
+  deletedById: string | null
   _count: LearningEventCountAggregateOutputType | null
   _avg: LearningEventAvgAggregateOutputType | null
   _sum: LearningEventSumAggregateOutputType | null
@@ -268,6 +282,8 @@ export type LearningEventWhereInput = {
   durationMs?: Prisma.IntNullableFilter<"LearningEvent"> | number | null
   device?: Prisma.StringNullableFilter<"LearningEvent"> | string | null
   meta?: Prisma.JsonNullableFilter<"LearningEvent">
+  deletedAt?: Prisma.DateTimeNullableFilter<"LearningEvent"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"LearningEvent"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -284,6 +300,8 @@ export type LearningEventOrderByWithRelationInput = {
   durationMs?: Prisma.SortOrderInput | Prisma.SortOrder
   device?: Prisma.SortOrderInput | Prisma.SortOrder
   meta?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -303,6 +321,8 @@ export type LearningEventWhereUniqueInput = Prisma.AtLeast<{
   durationMs?: Prisma.IntNullableFilter<"LearningEvent"> | number | null
   device?: Prisma.StringNullableFilter<"LearningEvent"> | string | null
   meta?: Prisma.JsonNullableFilter<"LearningEvent">
+  deletedAt?: Prisma.DateTimeNullableFilter<"LearningEvent"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"LearningEvent"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
@@ -319,6 +339,8 @@ export type LearningEventOrderByWithAggregationInput = {
   durationMs?: Prisma.SortOrderInput | Prisma.SortOrder
   device?: Prisma.SortOrderInput | Prisma.SortOrder
   meta?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.LearningEventCountOrderByAggregateInput
   _avg?: Prisma.LearningEventAvgOrderByAggregateInput
   _max?: Prisma.LearningEventMaxOrderByAggregateInput
@@ -342,6 +364,8 @@ export type LearningEventScalarWhereWithAggregatesInput = {
   durationMs?: Prisma.IntNullableWithAggregatesFilter<"LearningEvent"> | number | null
   device?: Prisma.StringNullableWithAggregatesFilter<"LearningEvent"> | string | null
   meta?: Prisma.JsonNullableWithAggregatesFilter<"LearningEvent">
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"LearningEvent"> | Date | string | null
+  deletedById?: Prisma.StringNullableWithAggregatesFilter<"LearningEvent"> | string | null
 }
 
 export type LearningEventCreateInput = {
@@ -356,6 +380,8 @@ export type LearningEventCreateInput = {
   durationMs?: number | null
   device?: string | null
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   user: Prisma.UserCreateNestedOneWithoutLearningEventsInput
 }
 
@@ -372,6 +398,8 @@ export type LearningEventUncheckedCreateInput = {
   durationMs?: number | null
   device?: string | null
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type LearningEventUpdateInput = {
@@ -386,6 +414,8 @@ export type LearningEventUpdateInput = {
   durationMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutLearningEventsNestedInput
 }
 
@@ -402,6 +432,8 @@ export type LearningEventUncheckedUpdateInput = {
   durationMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LearningEventCreateManyInput = {
@@ -417,6 +449,8 @@ export type LearningEventCreateManyInput = {
   durationMs?: number | null
   device?: string | null
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type LearningEventUpdateManyMutationInput = {
@@ -431,6 +465,8 @@ export type LearningEventUpdateManyMutationInput = {
   durationMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LearningEventUncheckedUpdateManyInput = {
@@ -446,6 +482,8 @@ export type LearningEventUncheckedUpdateManyInput = {
   durationMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LearningEventListRelationFilter = {
@@ -471,6 +509,8 @@ export type LearningEventCountOrderByAggregateInput = {
   durationMs?: Prisma.SortOrder
   device?: Prisma.SortOrder
   meta?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type LearningEventAvgOrderByAggregateInput = {
@@ -489,6 +529,8 @@ export type LearningEventMaxOrderByAggregateInput = {
   videoId?: Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   device?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type LearningEventMinOrderByAggregateInput = {
@@ -503,6 +545,8 @@ export type LearningEventMinOrderByAggregateInput = {
   videoId?: Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   device?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type LearningEventSumOrderByAggregateInput = {
@@ -567,6 +611,8 @@ export type LearningEventCreateWithoutUserInput = {
   durationMs?: number | null
   device?: string | null
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type LearningEventUncheckedCreateWithoutUserInput = {
@@ -581,6 +627,8 @@ export type LearningEventUncheckedCreateWithoutUserInput = {
   durationMs?: number | null
   device?: string | null
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type LearningEventCreateOrConnectWithoutUserInput = {
@@ -625,6 +673,8 @@ export type LearningEventScalarWhereInput = {
   durationMs?: Prisma.IntNullableFilter<"LearningEvent"> | number | null
   device?: Prisma.StringNullableFilter<"LearningEvent"> | string | null
   meta?: Prisma.JsonNullableFilter<"LearningEvent">
+  deletedAt?: Prisma.DateTimeNullableFilter<"LearningEvent"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"LearningEvent"> | string | null
 }
 
 export type LearningEventCreateManyUserInput = {
@@ -639,6 +689,8 @@ export type LearningEventCreateManyUserInput = {
   durationMs?: number | null
   device?: string | null
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type LearningEventUpdateWithoutUserInput = {
@@ -653,6 +705,8 @@ export type LearningEventUpdateWithoutUserInput = {
   durationMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LearningEventUncheckedUpdateWithoutUserInput = {
@@ -667,6 +721,8 @@ export type LearningEventUncheckedUpdateWithoutUserInput = {
   durationMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LearningEventUncheckedUpdateManyWithoutUserInput = {
@@ -681,6 +737,8 @@ export type LearningEventUncheckedUpdateManyWithoutUserInput = {
   durationMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -698,6 +756,8 @@ export type LearningEventSelect<ExtArgs extends runtime.Types.Extensions.Interna
   durationMs?: boolean
   device?: boolean
   meta?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["learningEvent"]>
 
@@ -714,6 +774,8 @@ export type LearningEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   durationMs?: boolean
   device?: boolean
   meta?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["learningEvent"]>
 
@@ -730,6 +792,8 @@ export type LearningEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   durationMs?: boolean
   device?: boolean
   meta?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["learningEvent"]>
 
@@ -746,9 +810,11 @@ export type LearningEventSelectScalar = {
   durationMs?: boolean
   device?: boolean
   meta?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }
 
-export type LearningEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "type" | "occurredAt" | "sessionId" | "problemId" | "testId" | "chapterId" | "videoId" | "durationMs" | "device" | "meta", ExtArgs["result"]["learningEvent"]>
+export type LearningEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "type" | "occurredAt" | "sessionId" | "problemId" | "testId" | "chapterId" | "videoId" | "durationMs" | "device" | "meta" | "deletedAt" | "deletedById", ExtArgs["result"]["learningEvent"]>
 export type LearningEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -777,6 +843,8 @@ export type $LearningEventPayload<ExtArgs extends runtime.Types.Extensions.Inter
     durationMs: number | null
     device: string | null
     meta: runtime.JsonValue | null
+    deletedAt: Date | null
+    deletedById: string | null
   }, ExtArgs["result"]["learningEvent"]>
   composites: {}
 }
@@ -1213,6 +1281,8 @@ export interface LearningEventFieldRefs {
   readonly durationMs: Prisma.FieldRef<"LearningEvent", 'Int'>
   readonly device: Prisma.FieldRef<"LearningEvent", 'String'>
   readonly meta: Prisma.FieldRef<"LearningEvent", 'Json'>
+  readonly deletedAt: Prisma.FieldRef<"LearningEvent", 'DateTime'>
+  readonly deletedById: Prisma.FieldRef<"LearningEvent", 'String'>
 }
     
 

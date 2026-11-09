@@ -22,7 +22,7 @@ describe('FormulasService.my', () => {
   it('aggregates seen and correct attempts and submitted test session context', async () => {
     const { service, prisma } = setup();
     const result = await service.my({ userId: 's1', role: Role.STUDENT }, 'other-student');
-    expect(prisma.attempt.groupBy).toHaveBeenCalledWith(expect.objectContaining({ where: { studentId: 's1' }, _min: { occurredOn: true }, _max: { occurredOn: true } }));
+    expect(prisma.attempt.groupBy).toHaveBeenCalledWith(expect.objectContaining({ where: { studentId: 's1', deletedAt: null }, _min: { occurredOn: true }, _max: { occurredOn: true } }));
     expect(result).toEqual({ totalFormulas: 1, seenFormulas: 1, items: [expect.objectContaining({ seenCount: 4, correctCount: 2, firstSeenAt: date1, lastSeenAt: date2, lastTestTitle: 'Latest test' })] });
   });
   it('allows a parent only for a verified linked child', async () => {
@@ -36,7 +36,7 @@ describe('FormulasService.my', () => {
   it('lets a BUYER see only their own practice history', async () => {
     const { service, prisma } = setup();
     await service.my({ userId: 'buyer', role: Role.BUYER }, 'someone-else');
-    expect(prisma.attempt.groupBy).toHaveBeenCalledWith(expect.objectContaining({ where: { studentId: 'buyer' } }));
+    expect(prisma.attempt.groupBy).toHaveBeenCalledWith(expect.objectContaining({ where: { studentId: 'buyer', deletedAt: null } }));
   });
   it('denies parents without a student and teachers outside their own class', async () => {
     const { service, prisma } = setup();

@@ -217,11 +217,13 @@ export class LessonPlanService {
       this.prisma.lessonTopic.findUnique({
         where: {
           scheduleId_date: { scheduleId, date: parseDateOnly(occurrenceDate) },
+          deletedAt: null,
         },
       }),
       this.roster(schedule.classroomId),
       this.prisma.lessonTopic.findMany({
         where: {
+          deletedAt: null,
           schedule: { deletedAt: null, classroomId: schedule.classroomId },
           photoStudentId: { not: null },
           date: { lt: parseDateOnly(occurrenceDate) },
@@ -269,7 +271,10 @@ export class LessonPlanService {
       await this.schedule.occurrenceKey(scheduleId, key, true);
     const date = parseDateOnly(occurrenceDate);
     const where = { scheduleId_date: { scheduleId, date } };
-    const existing = await this.prisma.lessonTopic.findUnique({ where });
+    // Устсан (deletedAt) мөр ч түлхүүрийг эзэлдэг — дахин тавибал тэр мөрийг шинэ
+    // утгаар СЭРГЭЭНЭ; утгын хувьд «байхгүй» гэж үзнэ (хуучин төлөв AuditLog-д).
+    const stored = await this.prisma.lessonTopic.findUnique({ where });
+    const existing = stored && !stored.deletedAt ? stored : null;
 
     const ids = [...new Set((dto.testIds ?? []).filter(Boolean))];
     const meta = await this.testsMeta([...ids, ...(existing?.testIds ?? [])]);
@@ -313,7 +318,11 @@ export class LessonPlanService {
 
     if (!testIds.length && !dismissMode && !photoStudentId && !customTopics.length) {
       if (existing) {
-        await this.prisma.lessonTopic.delete({ where: { id: existing.id } });
+        // Хатуу устгалгүй (эзний дүрэм): мөр DB-д үлдэж, уншилтаас хасагдана
+        await this.prisma.lessonTopic.update({
+          where: { id: existing.id },
+          data: { deletedAt: new Date(), deletedById: actor.userId },
+        });
         await this.audit(actor, 'DELETE', existing.id, existing, null);
       }
       return { scheduleId, date: key, occurrenceDate, plan: null };
@@ -330,8 +339,13 @@ export class LessonPlanService {
         ? (sorted[sorted.length - 1].chapterId ?? null)
         : (existing?.chapterId ?? null),
     };
-    const row = existing
-      ? await this.prisma.lessonTopic.update({ where: { id: existing.id }, data })
+    const row = stored
+      ? await this.prisma.lessonTopic.update({
+          where: { id: stored.id },
+          data: existing
+            ? data
+            : { ...data, deletedAt: null, deletedById: null, createdById: actor.userId },
+        })
       : await this.prisma.lessonTopic.create({
           data: { ...data, scheduleId, date, createdById: actor.userId },
         });
@@ -400,6 +414,7 @@ export class LessonPlanService {
       entries.length
         ? this.prisma.lessonTopic.findMany({
             where: {
+              deletedAt: null,
               OR: entries.map((e) => ({
                 scheduleId: e.scheduleId,
                 date: parseDateOnly(occurrenceOf(e)),
@@ -704,7 +719,7 @@ export class LessonPlanService {
       throw new ForbiddenException('Энэ шалгалтын хариуг харах эрхгүй');
     const [planned, done, assigned] = await Promise.all([
       this.prisma.lessonTopic.findFirst({
-        where: { testIds: { has: testId }, schedule: { deletedAt: null } },
+        where: { testIds: { has: testId }, deletedAt: null, schedule: { deletedAt: null } },
         select: { id: true },
       }),
       this.prisma.classTestSession.findFirst({ where: { testId }, select: { id: true } }),

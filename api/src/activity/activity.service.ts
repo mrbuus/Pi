@@ -107,11 +107,11 @@ export class ActivityService {
     const [grouped, calendarDays] = await Promise.all([
       this.prisma.attempt.groupBy({
         by: ['occurredOn'],
-        where: { studentId, occurredOn: { gte: start, lte: end } },
+        where: { studentId, occurredOn: { gte: start, lte: end }, deletedAt: null },
         _count: { _all: true },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} }, deletedAt: null },
+        where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: { deletedAt: null } }, deletedAt: null },
         select: { date: true },
       }),
     ]);
@@ -162,7 +162,7 @@ export class ActivityService {
     const [grouped, freezes, calendarDays, goal] = await Promise.all([
       this.prisma.attempt.groupBy({
         by: ['occurredOn'],
-        where: { studentId },
+        where: { studentId, deletedAt: null },
         _count: { _all: true },
       }),
       this.prisma.streakFreeze.findMany({
@@ -170,7 +170,7 @@ export class ActivityService {
         select: { date: true },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} }, deletedAt: null },
+        where: { type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: { deletedAt: null } }, deletedAt: null },
         select: { date: true },
       }),
       this.prisma.studyWeeklyGoal.findFirst({
@@ -264,6 +264,7 @@ export class ActivityService {
         where: {
           studentId: { in: studentIds },
           occurredOn: { gte: start, lte: end },
+          deletedAt: null,
         },
         _count: { _all: true },
       });
@@ -277,7 +278,7 @@ export class ActivityService {
     }
 
     const calendarDays = await this.prisma.academicCalendarDay.findMany({
-      where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} }, deletedAt: null },
+      where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: { deletedAt: null } }, deletedAt: null },
       select: { date: true },
     });
     const nonClassDates = new Set(calendarDays.map((c) => dateKey(c.date)));

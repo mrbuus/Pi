@@ -34,6 +34,8 @@ export type ClassTestStatusMinAggregateOutputType = {
   updatedById: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type ClassTestStatusMaxAggregateOutputType = {
@@ -45,6 +47,8 @@ export type ClassTestStatusMaxAggregateOutputType = {
   updatedById: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type ClassTestStatusCountAggregateOutputType = {
@@ -56,6 +60,8 @@ export type ClassTestStatusCountAggregateOutputType = {
   updatedById: number
   createdAt: number
   updatedAt: number
+  deletedAt: number
+  deletedById: number
   _all: number
 }
 
@@ -69,6 +75,8 @@ export type ClassTestStatusMinAggregateInputType = {
   updatedById?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type ClassTestStatusMaxAggregateInputType = {
@@ -80,6 +88,8 @@ export type ClassTestStatusMaxAggregateInputType = {
   updatedById?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type ClassTestStatusCountAggregateInputType = {
@@ -91,6 +101,8 @@ export type ClassTestStatusCountAggregateInputType = {
   updatedById?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
   _all?: true
 }
 
@@ -175,6 +187,8 @@ export type ClassTestStatusGroupByOutputType = {
   updatedById: string
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
+  deletedById: string | null
   _count: ClassTestStatusCountAggregateOutputType | null
   _min: ClassTestStatusMinAggregateOutputType | null
   _max: ClassTestStatusMaxAggregateOutputType | null
@@ -207,6 +221,8 @@ export type ClassTestStatusWhereInput = {
   updatedById?: Prisma.StringFilter<"ClassTestStatus"> | string
   createdAt?: Prisma.DateTimeFilter<"ClassTestStatus"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ClassTestStatus"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"ClassTestStatus"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"ClassTestStatus"> | string | null
 }
 
 export type ClassTestStatusOrderByWithRelationInput = {
@@ -218,6 +234,8 @@ export type ClassTestStatusOrderByWithRelationInput = {
   updatedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
 export type ClassTestStatusWhereUniqueInput = Prisma.AtLeast<{
@@ -233,6 +251,8 @@ export type ClassTestStatusWhereUniqueInput = Prisma.AtLeast<{
   updatedById?: Prisma.StringFilter<"ClassTestStatus"> | string
   createdAt?: Prisma.DateTimeFilter<"ClassTestStatus"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ClassTestStatus"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"ClassTestStatus"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"ClassTestStatus"> | string | null
 }, "id" | "classroomId_testId">
 
 export type ClassTestStatusOrderByWithAggregationInput = {
@@ -244,6 +264,8 @@ export type ClassTestStatusOrderByWithAggregationInput = {
   updatedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ClassTestStatusCountOrderByAggregateInput
   _max?: Prisma.ClassTestStatusMaxOrderByAggregateInput
   _min?: Prisma.ClassTestStatusMinOrderByAggregateInput
@@ -261,6 +283,8 @@ export type ClassTestStatusScalarWhereWithAggregatesInput = {
   updatedById?: Prisma.StringWithAggregatesFilter<"ClassTestStatus"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ClassTestStatus"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ClassTestStatus"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ClassTestStatus"> | Date | string | null
+  deletedById?: Prisma.StringNullableWithAggregatesFilter<"ClassTestStatus"> | string | null
 }
 
 export type ClassTestStatusCreateInput = {
@@ -272,6 +296,8 @@ export type ClassTestStatusCreateInput = {
   updatedById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type ClassTestStatusUncheckedCreateInput = {
@@ -283,6 +309,8 @@ export type ClassTestStatusUncheckedCreateInput = {
   updatedById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type ClassTestStatusUpdateInput = {
@@ -294,6 +322,8 @@ export type ClassTestStatusUpdateInput = {
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ClassTestStatusUncheckedUpdateInput = {
@@ -305,6 +335,8 @@ export type ClassTestStatusUncheckedUpdateInput = {
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ClassTestStatusCreateManyInput = {
@@ -316,6 +348,8 @@ export type ClassTestStatusCreateManyInput = {
   updatedById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type ClassTestStatusUpdateManyMutationInput = {
@@ -327,6 +361,8 @@ export type ClassTestStatusUpdateManyMutationInput = {
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ClassTestStatusUncheckedUpdateManyInput = {
@@ -338,6 +374,8 @@ export type ClassTestStatusUncheckedUpdateManyInput = {
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ClassTestStatusClassroomIdTestIdCompoundUniqueInput = {
@@ -354,6 +392,8 @@ export type ClassTestStatusCountOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type ClassTestStatusMaxOrderByAggregateInput = {
@@ -365,6 +405,8 @@ export type ClassTestStatusMaxOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type ClassTestStatusMinOrderByAggregateInput = {
@@ -376,6 +418,8 @@ export type ClassTestStatusMinOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 
@@ -389,6 +433,8 @@ export type ClassTestStatusSelect<ExtArgs extends runtime.Types.Extensions.Inter
   updatedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }, ExtArgs["result"]["classTestStatus"]>
 
 export type ClassTestStatusSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -400,6 +446,8 @@ export type ClassTestStatusSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   updatedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }, ExtArgs["result"]["classTestStatus"]>
 
 export type ClassTestStatusSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -411,6 +459,8 @@ export type ClassTestStatusSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   updatedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }, ExtArgs["result"]["classTestStatus"]>
 
 export type ClassTestStatusSelectScalar = {
@@ -422,9 +472,11 @@ export type ClassTestStatusSelectScalar = {
   updatedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }
 
-export type ClassTestStatusOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "classroomId" | "testId" | "status" | "note" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["classTestStatus"]>
+export type ClassTestStatusOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "classroomId" | "testId" | "status" | "note" | "updatedById" | "createdAt" | "updatedAt" | "deletedAt" | "deletedById", ExtArgs["result"]["classTestStatus"]>
 
 export type $ClassTestStatusPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ClassTestStatus"
@@ -438,6 +490,8 @@ export type $ClassTestStatusPayload<ExtArgs extends runtime.Types.Extensions.Int
     updatedById: string
     createdAt: Date
     updatedAt: Date
+    deletedAt: Date | null
+    deletedById: string | null
   }, ExtArgs["result"]["classTestStatus"]>
   composites: {}
 }
@@ -869,6 +923,8 @@ export interface ClassTestStatusFieldRefs {
   readonly updatedById: Prisma.FieldRef<"ClassTestStatus", 'String'>
   readonly createdAt: Prisma.FieldRef<"ClassTestStatus", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ClassTestStatus", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"ClassTestStatus", 'DateTime'>
+  readonly deletedById: Prisma.FieldRef<"ClassTestStatus", 'String'>
 }
     
 

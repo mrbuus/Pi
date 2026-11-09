@@ -277,6 +277,7 @@ export class LessonsService {
         COUNT(DISTINCT CASE WHEN "type" = 'VIDEO_COMPLETED' THEN "videoId" END) AS videos_watched
       FROM "LearningEvent"
       WHERE "userId" = ${userId} AND "chapterId" = ANY(${chapterIds})
+        AND "deletedAt" IS NULL
       GROUP BY "chapterId"
     `;
     const progressByChapter = new Map(
@@ -625,15 +626,18 @@ export class LessonsService {
         (SELECT COALESCE(array_agg(DISTINCT (meta ->> 'theoryId')), '{}')
            FROM "LearningEvent"
           WHERE "userId" = ${userId} AND "chapterId" = ${chapterId}
+            AND "deletedAt" IS NULL
             AND "type" = 'PAGE_VIEW' AND meta ->> 'theoryId' IS NOT NULL) AS theory_read,
         (SELECT COALESCE(array_agg(DISTINCT "videoId"), '{}')
            FROM "LearningEvent"
           WHERE "userId" = ${userId} AND "chapterId" = ${chapterId}
+            AND "deletedAt" IS NULL
             AND "type" = 'VIDEO_COMPLETED' AND "videoId" IS NOT NULL) AS videos_watched,
         (SELECT COUNT(DISTINCT a."problemId")
            FROM "Attempt" a
            JOIN "Problem" p ON p.id = a."problemId"
-          WHERE a."studentId" = ${userId} AND p."chapterId" = ${chapterId}) AS problems_attempted
+          WHERE a."studentId" = ${userId} AND p."chapterId" = ${chapterId}
+            AND a."deletedAt" IS NULL) AS problems_attempted
     `;
     const row = rows[0];
     return {
