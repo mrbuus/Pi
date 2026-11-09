@@ -29,13 +29,17 @@ function stopSelectPointerDown(event: React.PointerEvent<HTMLDivElement>) {
 
 export function DrawerContent({
   className,
+  overlayClassName,
   children,
   onPointerDownCapture,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Content>) {
+}: React.ComponentProps<typeof DrawerPrimitive.Content> & {
+  /** Өөр цонхны (z-[71]) дээгүүр нээх үед давхаргыг өсгөнө */
+  overlayClassName?: string;
+}) {
   return (
     <DrawerPrimitive.Portal>
-      <DrawerPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-[2px]" />
+      <DrawerPrimitive.Overlay className={cn("fixed inset-0 z-50 bg-ink/40 backdrop-blur-[2px]", overlayClassName)} />
       <DrawerPrimitive.Content
         className={cn(
           "fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col rounded-t-[28px] border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] outline-none",

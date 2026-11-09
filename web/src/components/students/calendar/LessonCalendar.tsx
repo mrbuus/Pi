@@ -95,6 +95,8 @@ export default function LessonCalendar({ studentId, today }: { studentId: string
     return c;
   }, [data]);
   const hasQuiz = !!data?.days.some((d) => d.quiz);
+  // Нээлттэй өдрийн хайрцаг цэнхэр хүрээтэй (хаасны дараа өнөөдөр)
+  const openKey = open ? (open.kind === "lesson" ? open.day.key : `m:${open.visit.id}`) : null;
 
   const nav = (dir: -1 | 1) => (
     <button
@@ -140,7 +142,7 @@ export default function LessonCalendar({ studentId, today }: { studentId: string
                   </li>,
                 );
               }
-              nodes.push(<li key={c.key}>{renderBox(c, today, hasQuiz, setOpen)}</li>);
+              nodes.push(<li key={c.key}>{renderBox(c, today, hasQuiz, openKey, setOpen)}</li>);
               return nodes;
             })}
           </ul>
@@ -184,7 +186,7 @@ export default function LessonCalendar({ studentId, today }: { studentId: string
   );
 }
 
-function renderBox(c: Cell, today: string, hasQuiz: boolean, onOpen: (item: SheetItem) => void) {
+function renderBox(c: Cell, today: string, hasQuiz: boolean, openKey: string | null, onOpen: (item: SheetItem) => void) {
   const dayOfMonth = fromKey(c.date).getDate();
   if (c.item.kind === "makeup") {
     const v = c.item.visit;
@@ -202,6 +204,7 @@ function renderBox(c: Cell, today: string, hasQuiz: boolean, onOpen: (item: Shee
         quizRow={hasQuiz}
         muted={false}
         makeup={v.place.kind}
+        selected={openKey === c.key}
         label={label}
         onClick={() => onOpen(c.item)}
       />
@@ -232,7 +235,7 @@ function renderBox(c: Cell, today: string, hasQuiz: boolean, onOpen: (item: Shee
       quizRow={hasQuiz}
       muted={muted}
       otherClass={!d.own}
-      selected={d.date === today}
+      selected={openKey ? openKey === c.key : d.date === today}
       label={label}
       onClick={() => onOpen(c.item)}
     />

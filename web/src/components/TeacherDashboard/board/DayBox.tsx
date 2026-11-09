@@ -10,6 +10,7 @@ import { QuizPctBadge, type QuizDayRow } from "./QuizDay";
  * бүтэн хуудасны «Хичээлийн түүх» хоёулаа ЭНИЙГ хэрэглэнэ (ижил дүрс, ижил байрлал):
  * өдөр, ирцийн дүрс, даалгаврын дүрс, шалгалтын хувь. Тэмдэглээгүй бол зураас, ирээдүй/элсэхээс
  * өмнөх өдөр тасархай хүрээтэй. `kind="makeup"` — нөхөлтийн хайрцаг (өөр өнгө, газрын дүрс).
+ * `onClick` өгвөл ≥44px товч (эзэн 2026-11-10: хайрцаг дарахад ҮРГЭЛЖ тэр өдрийн дэлгэрэнгүй).
  */
 export interface DayBoxProps {
   /** Сарын өдөр (1..31) */
@@ -56,7 +57,7 @@ export default function DayBox({
   const HwIcon = hm?.icon;
   const PlaceIcon = makeup === "ROOM_406" ? DoorOpen : ArrowRightLeft;
   const box = cn(
-    "flex w-10 flex-col items-center justify-center gap-0.5 rounded-lg border py-1 text-[11px] tabular-nums",
+    "flex w-11 flex-col items-center justify-center gap-0.5 rounded-lg border py-1 text-[11px] tabular-nums",
     showHomework ? (quizRow ? "h-[4.75rem]" : "h-[3.75rem]") : quizRow ? "h-[3.75rem]" : "h-12",
     makeup
       ? "border-brand-bright/60 bg-brand-bright/[0.08] text-ink"
@@ -65,7 +66,7 @@ export default function DayBox({
         : "border-line bg-surface text-ink",
     !makeup && otherClass && "border-info/50",
     selected && "ring-2 ring-brand-bright ring-offset-1 ring-offset-surface",
-    onClick && "cursor-pointer transition-colors hover:bg-ink/5 focus-visible:outline-2 focus-visible:outline-brand",
+    onClick && "cursor-pointer touch-manipulation select-none transition-colors hover:bg-ink/5 active:bg-ink/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
     className,
   );
   const inner = (
@@ -90,11 +91,11 @@ export default function DayBox({
           <Minus className="size-3.5 text-ink-dim/60" aria-hidden />
         ))}
       {quizRow && (quiz ? <QuizPctBadge row={quiz} /> : <span className="h-3.5" />)}
-      <span className="sr-only">{label}</span>
+      {!onClick && <span className="sr-only">{label}</span>}
     </>
   );
   return onClick ? (
-    <button type="button" title={label} onClick={onClick} className={box}>
+    <button type="button" title={label} aria-label={label} aria-haspopup="dialog" onClick={onClick} className={box}>
       {inner}
     </button>
   ) : (

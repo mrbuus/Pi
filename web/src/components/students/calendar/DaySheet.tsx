@@ -1,7 +1,7 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { ArrowRightLeft, CalendarClock, DoorOpen, StickyNote, X } from "lucide-react";
+import { ArrowRightLeft, CalendarClock, DoorOpen, LoaderCircle, StickyNote, TriangleAlert, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { ATTENDANCE_MARKS, HOMEWORK_MARKS, TONE_TEXT } from "@/components/attendance/marks";
 import QuizScoreChip from "@/components/homework-quiz/QuizScoreChip";
@@ -20,18 +20,25 @@ export type SheetItem = { kind: "lesson"; day: LessonDay } | { kind: "makeup"; v
 /**
  * Хуанлийн нэг өдрийн дэлгэрэнгүй (эзэн 2026-11-08): ЖИЖИГ цонх — компьютер дээр төвд, утсан дээр
  * доороос гарч доош чирж хаадаг хуудас. X, гадна дарах, Escape — бүгд хаана. Шинэ хуудас нээхгүй.
+ * Самбарын сурагчийн drawer (z-[71]) дотроос ч нээгддэг тул давхарга z-[80/81] (эзэн 2026-11-10).
  */
 export default function DaySheet({
   item,
   studentId,
   makeups,
   onClose,
+  loading = false,
+  notice,
 }: {
   item: SheetItem;
   studentId: string;
   /** Тасалсан өдрийн тестийг дараа нь нөхсөн эсэхийг харуулахад */
   makeups: MakeupHistoryItem[];
   onClose: () => void;
+  /** Дэлгэрэнгүй (тест, тэмдэглэл, нөхөлт) ачаалж байна — байгаа мэдээллийг шууд харуулна */
+  loading?: boolean;
+  /** Дэлгэрэнгүй ачаалагдаагүй үеийн жижиг анхааруулга */
+  notice?: string;
 }) {
   const desktop = useIsDesktop();
   const date = item.kind === "lesson" ? item.day.date : item.visit.date;
@@ -50,12 +57,28 @@ export default function DaySheet({
     ) : (
       item.visit.label
     );
-  const body = item.kind === "lesson" ? <LessonBody day={item.day} makeups={makeups} /> : <MakeupVisitBody v={item.visit} studentId={studentId} />;
+  const body = (
+    <>
+      {loading && (
+        <p className="mb-2 flex items-center gap-1.5 text-xs text-ink-dim" role="status">
+          <LoaderCircle className="size-3.5 animate-spin text-brand motion-reduce:animate-none" aria-hidden />
+          Дэлгэрэнгүйг ачаалж байна
+        </p>
+      )}
+      {notice && (
+        <p className="mb-2 flex items-center gap-1.5 text-xs text-warning" role="status">
+          <TriangleAlert className="size-3.5 shrink-0" aria-hidden />
+          {notice}
+        </p>
+      )}
+      {item.kind === "lesson" ? <LessonBody day={item.day} makeups={makeups} partial={loading || !!notice} /> : <MakeupVisitBody v={item.visit} studentId={studentId} />}
+    </>
+  );
 
   if (!desktop)
     return (
       <Drawer open onOpenChange={(o) => !o && onClose()}>
-        <DrawerContent className="mx-auto w-full max-w-xl">
+        <DrawerContent className="z-[81] mx-auto w-full max-w-xl" overlayClassName="z-[80]">
           <header className="flex items-start gap-2 border-b border-line px-4 pb-3 pt-2">
             <div className="min-w-0 flex-1">
               <DrawerTitle className="cyrillic-heading text-base font-extrabold text-ink">{title}</DrawerTitle>
@@ -71,8 +94,8 @@ export default function DaySheet({
   return (
     <Dialog.Root open onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-[70] bg-ink/30" />
-        <Dialog.Content className="elev-3 fixed left-1/2 top-1/2 z-[71] flex max-h-[80dvh] w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col rounded-2xl border border-line bg-surface">
+        <Dialog.Overlay className="fixed inset-0 z-[80] bg-ink/30" />
+        <Dialog.Content className="elev-3 fixed left-1/2 top-1/2 z-[81] flex max-h-[80dvh] w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col rounded-2xl border border-line bg-surface">
           <header className="flex items-start gap-2 border-b border-line px-4 py-3">
             <div className="min-w-0 flex-1">
               <Dialog.Title className="cyrillic-heading text-base font-extrabold text-ink">{title}</Dialog.Title>
@@ -109,7 +132,8 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function LessonBody({ day, makeups }: { day: LessonDay; makeups: MakeupHistoryItem[] }) {
+/** `partial` — самбарын урьдчилсан мэдээлэл: багш, сэдэв мэдэгдэхгүй бол «Оноогоогүй» гэж худал бичихгүй */
+function LessonBody({ day, makeups, partial = false }: { day: LessonDay; makeups: MakeupHistoryItem[]; partial?: boolean }) {
   const att = day.attendance ? ATTENDANCE_MARKS[day.attendance.status] : null;
   const hw = day.homework?.status ? HOMEWORK_MARKS[day.homework.status] : null;
   const teachers = [day.lead, day.assistant].filter(Boolean) as string[];
@@ -123,6 +147,12 @@ function LessonBody({ day, makeups }: { day: LessonDay; makeups: MakeupHistoryIt
 
   return (
     <div>
+      {day.future && !day.attendance && (
+        <p className="mb-2 flex items-center gap-1.5 rounded-lg bg-ink/[0.04] px-2.5 py-1.5 text-sm text-ink-dim">
+          <CalendarClock className="size-4 shrink-0 text-brand" aria-hidden />
+          Хичээл хараахан болоогүй
+        </p>
+      )}
       {day.movedFrom && (
         <p className="mb-2 flex items-center gap-1.5 text-xs text-ink-dim">
           <CalendarClock className="size-3.5 text-brand" aria-hidden />
@@ -136,7 +166,10 @@ function LessonBody({ day, makeups }: { day: LessonDay; makeups: MakeupHistoryIt
         </p>
       )}
       <dl className="divide-y divide-line">
-        <Row label="Багш">{teachers.length ? teachers.join(", ") : (day.scheduleTeacher ?? "Оноогоогүй")}</Row>
+        {(!partial || teachers.length > 0 || day.scheduleTeacher) && (
+          <Row label="Багш">{teachers.length ? teachers.join(", ") : (day.scheduleTeacher ?? "Оноогоогүй")}</Row>
+        )}
+        {(!partial || day.testsText || topic) && (
         <Row label="Сэдэв">
           {day.testsText ? (
             <span className="font-semibold">{day.testsText}</span>
@@ -150,6 +183,7 @@ function LessonBody({ day, makeups }: { day: LessonDay; makeups: MakeupHistoryIt
           )}
           {day.testsText && topic && topic !== day.testsText && <span className="mt-0.5 block text-xs text-ink-dim">{topic}</span>}
         </Row>
+        )}
         {!day.future && (
           <Row label="Ирц">
             {att ? (

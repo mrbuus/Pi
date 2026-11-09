@@ -19,6 +19,7 @@ import {
   addMonths,
   dayLabel,
   fmtPhone,
+  addDays,
   fromKey,
   fullDate,
   monthKeyLabel,
@@ -35,6 +36,10 @@ import { QuizMonthItem, quizDayText, useQuizMonth, type QuizDayRow } from "./Qui
 import { quizCoveredDays } from "@/lib/quizScore";
 import MakeupHistory from "@/components/makeup-visits/MakeupHistory";
 import RefundEstimateRow from "@/components/students/RefundEstimate";
+import DaySheet from "@/components/students/calendar/DaySheet";
+import { pickLessonDay } from "@/components/students/calendar/dayPick";
+import type { LessonDay, LessonDaysResponse } from "@/components/students/calendar/types";
+import type { MakeupHistoryItem } from "@/components/makeup-visits/types";
 
 interface MonthAtt {
   date: string;
@@ -255,6 +260,7 @@ export default function StudentDrawer({
                   homework={homework}
                   currentClass={className}
                   quiz={quizRows}
+                  studentId={studentId}
                 />
                 {/* Нөхөлт: өөр ангид суусан, 406-д нөхсөн (байхгүй бол хэсэг гарахгүй) */}
                 <MakeupHistory
@@ -318,6 +324,7 @@ function MonthSection({
   homework,
   currentClass,
   quiz,
+  studentId,
 }: {
   data: StudentCardData;
   month: string;
@@ -331,8 +338,11 @@ function MonthSection({
   currentClass: string;
   /** Энэ ангийн тухайн сарын шалгалтын оноо (QuizDay.tsx) */
   quiz: QuizDayRow[];
+  studentId: string;
 }) {
   const headingId = useId();
+  // Дарсан хайрцгийн өдөр — дэлгэрэнгүй цонх (эзэн 2026-11-10: өмнө нь хайрцаг дарахад юу ч болдоггүй байсан)
+  const [openDay, setOpenDay] = useState<string | null>(null);
   // Хамгийн эхний бичлэг (эсвэл элссэн сар) ба өнөөдөр/сонгосон өдрийн сар хооронд
   const first = [data.history.first, data.student.joinedOn].filter((k): k is string => !!k).sort()[0] ?? date;
   const minMonth = first.slice(0, 7);
@@ -431,8 +441,9 @@ function MonthSection({
                     quizRow={hasQuiz}
                     muted={muted}
                     otherClass={!!where}
-                    selected={k === date}
+                    selected={openDay ? k === openDay : k === date}
                     label={label}
+                    onClick={() => setOpenDay(k)}
                   />
                 </li>
               );
@@ -478,7 +489,97 @@ function MonthSection({
       ) : (
         <p className="text-sm text-ink-dim">{currentClass} ангид энэ сард хичээл ороогүй</p>
       )}
+
+      {openDay && (
+        <BoardDayDetail
+          key={openDay}
+          studentId={studentId}
+          fallback={fallbackDay(openDay, {
+            a: att.get(openDay),
+            h: homework ? hw.get(openDay) : undefined,
+            q: qz.get(openDay),
+            currentClass,
+            today,
+          })}
+          onClose={() => setOpenDay(null)}
+        />
+      )}
     </section>
+  );
+}
+
+/* ───────── Хайрцаг дарахад: тэр өдрийн дэлгэрэнгүй (сурагчийн хуудасны DaySheet-ийг дахин ашиглана) ───────── */
+
+/** Самбарт байгаа мэдээллээр шууд харуулах урьдчилсан өдөр (бүрэн мэдээлэл ирэх хүртэл / ирэхгүй бол) */
+function fallbackDay(
+  k: string,
+  { a, h, q, currentClass, today }: { a?: MonthAtt; h?: MonthHw; q?: QuizDayRow; currentClass: string; today: string },
+): LessonDay {
+  const where = a?.classroom ?? h?.classroom ?? null;
+  return {
+    key: k,
+    date: k,
+    classroomId: "",
+    classroomName: where ?? currentClass,
+    own: !where,
+    scheduled: true,
+    startMinute: null,
+    endMinute: null,
+    room: null,
+    movedFrom: null,
+    topic: null,
+    lead: null,
+    assistant: null,
+    scheduleTeacher: null,
+    tests: [],
+    testsText: null,
+    confirmed: null,
+    teacherNote: null,
+    attendance: a ? { status: a.status, lateRange: a.lateRange, note: a.note, markedBy: a.markedBy } : null,
+    homework: h && (h.status || h.comment) ? { status: h.status, comment: h.comment, markedBy: h.markedBy } : null,
+    quiz: q ? { score: q.score, problemCount: q.problemCount } : null,
+    future: k > today,
+  };
+}
+
+/**
+ * Тэр өдрийн бүрэн мэдээлэл: `/students/:id/lesson-days` (тест, багш, тэмдэглэл, нөхөлт). Хариу ирэх
+ * хүртэл самбарын мэдээллийг шууд харуулна; алдаа гарвал тэрийгээ үлдээж жижиг анхааруулга.
+ * 60 хоногийн нөхөлтийг авна — тасалсан өдрийн тестийг дараа нь нөхсөн эсэхийг харуулахад.
+ */
+function BoardDayDetail({ studentId, fallback, onClose }: { studentId: string; fallback: LessonDay; onClose: () => void }) {
+  const k = fallback.date;
+  const [res, setRes] = useState<{ day: LessonDay | null; makeups: MakeupHistoryItem[] } | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    api<LessonDaysResponse>(`/students/${encodeURIComponent(studentId)}/lesson-days?from=${k}&to=${addDays(k, 60)}`)
+      .then((r) => {
+        if (!alive) return;
+        const other = fallback.own ? null : fallback.classroomName;
+        setRes({ day: pickLessonDay(r.days ?? [], k, other), makeups: r.makeups ?? [] });
+      })
+      .catch((e) => alive && setError(e instanceof Error ? e.message : "Дэлгэрэнгүй ачаалагдсангүй"));
+    return () => {
+      alive = false;
+    };
+    // fallback нь өдөр бүрт шинээр үүсдэг — зөвхөн өдөр солигдоход дахин татна
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [studentId, k]);
+
+  const day = res?.day ?? fallback;
+  // Тэр өдрийн нөхөлт (406, өөр анги) — хуанлийн мөр байхгүй ч харуулна
+  const visit = res && !res.day ? res.makeups.find((m) => m.date === k) : undefined;
+  return (
+    <DaySheet
+      item={visit ? { kind: "makeup", visit } : { kind: "lesson", day }}
+      studentId={studentId}
+      makeups={res?.makeups ?? []}
+      onClose={onClose}
+      loading={!res && !error}
+      notice={error ? "Дэлгэрэнгүй ачаалагдсангүй, самбарын мэдээллийг харуулж байна" : undefined}
+    />
   );
 }
 
