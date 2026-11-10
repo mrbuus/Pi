@@ -450,6 +450,9 @@ export const ModelName = {
   Pass: 'Pass',
   UserPass: 'UserPass',
   BankTransaction: 'BankTransaction',
+  BankAllocation: 'BankAllocation',
+  BankPayerHint: 'BankPayerHint',
+  BankCursor: 'BankCursor',
   StudentCodeLegacy: 'StudentCodeLegacy',
   Payment: 'Payment',
   ProductItem: 'ProductItem',
@@ -556,7 +559,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "teacherWorkHours" | "teacherBankAccount" | "teacherPayRate" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment" | "homeworkQuiz" | "homeworkQuizScore" | "makeupVisit" | "makeupVisitTest"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "bankAllocation" | "bankPayerHint" | "bankCursor" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "teacherWorkHours" | "teacherBankAccount" | "teacherPayRate" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment" | "homeworkQuiz" | "homeworkQuizScore" | "makeupVisit" | "makeupVisitTest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -4479,6 +4482,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.BankTransactionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.BankTransactionCountAggregateOutputType> | number
+        }
+      }
+    }
+    BankAllocation: {
+      payload: Prisma.$BankAllocationPayload<ExtArgs>
+      fields: Prisma.BankAllocationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BankAllocationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankAllocationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BankAllocationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankAllocationPayload>
+        }
+        findFirst: {
+          args: Prisma.BankAllocationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankAllocationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BankAllocationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankAllocationPayload>
+        }
+        findMany: {
+          args: Prisma.BankAllocationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankAllocationPayload>[]
+        }
+        create: {
+          args: Prisma.BankAllocationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankAllocationPayload>
+        }
+        createMany: {
+          args: Prisma.BankAllocationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BankAllocationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankAllocationPayload>[]
+        }
+        delete: {
+          args: Prisma.BankAllocationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankAllocationPayload>
+        }
+        update: {
+          args: Prisma.BankAllocationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankAllocationPayload>
+        }
+        deleteMany: {
+          args: Prisma.BankAllocationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BankAllocationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BankAllocationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankAllocationPayload>[]
+        }
+        upsert: {
+          args: Prisma.BankAllocationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankAllocationPayload>
+        }
+        aggregate: {
+          args: Prisma.BankAllocationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBankAllocation>
+        }
+        groupBy: {
+          args: Prisma.BankAllocationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BankAllocationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BankAllocationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BankAllocationCountAggregateOutputType> | number
+        }
+      }
+    }
+    BankPayerHint: {
+      payload: Prisma.$BankPayerHintPayload<ExtArgs>
+      fields: Prisma.BankPayerHintFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BankPayerHintFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankPayerHintPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BankPayerHintFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankPayerHintPayload>
+        }
+        findFirst: {
+          args: Prisma.BankPayerHintFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankPayerHintPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BankPayerHintFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankPayerHintPayload>
+        }
+        findMany: {
+          args: Prisma.BankPayerHintFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankPayerHintPayload>[]
+        }
+        create: {
+          args: Prisma.BankPayerHintCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankPayerHintPayload>
+        }
+        createMany: {
+          args: Prisma.BankPayerHintCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BankPayerHintCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankPayerHintPayload>[]
+        }
+        delete: {
+          args: Prisma.BankPayerHintDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankPayerHintPayload>
+        }
+        update: {
+          args: Prisma.BankPayerHintUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankPayerHintPayload>
+        }
+        deleteMany: {
+          args: Prisma.BankPayerHintDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BankPayerHintUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BankPayerHintUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankPayerHintPayload>[]
+        }
+        upsert: {
+          args: Prisma.BankPayerHintUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankPayerHintPayload>
+        }
+        aggregate: {
+          args: Prisma.BankPayerHintAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBankPayerHint>
+        }
+        groupBy: {
+          args: Prisma.BankPayerHintGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BankPayerHintGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BankPayerHintCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BankPayerHintCountAggregateOutputType> | number
+        }
+      }
+    }
+    BankCursor: {
+      payload: Prisma.$BankCursorPayload<ExtArgs>
+      fields: Prisma.BankCursorFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BankCursorFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankCursorPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BankCursorFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankCursorPayload>
+        }
+        findFirst: {
+          args: Prisma.BankCursorFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankCursorPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BankCursorFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankCursorPayload>
+        }
+        findMany: {
+          args: Prisma.BankCursorFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankCursorPayload>[]
+        }
+        create: {
+          args: Prisma.BankCursorCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankCursorPayload>
+        }
+        createMany: {
+          args: Prisma.BankCursorCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BankCursorCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankCursorPayload>[]
+        }
+        delete: {
+          args: Prisma.BankCursorDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankCursorPayload>
+        }
+        update: {
+          args: Prisma.BankCursorUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankCursorPayload>
+        }
+        deleteMany: {
+          args: Prisma.BankCursorDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BankCursorUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BankCursorUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankCursorPayload>[]
+        }
+        upsert: {
+          args: Prisma.BankCursorUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BankCursorPayload>
+        }
+        aggregate: {
+          args: Prisma.BankCursorAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBankCursor>
+        }
+        groupBy: {
+          args: Prisma.BankCursorGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BankCursorGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BankCursorCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BankCursorCountAggregateOutputType> | number
         }
       }
     }
@@ -12071,9 +12296,15 @@ export const BankTransactionScalarFieldEnum = {
   bankRef: 'bankRef',
   bookedAt: 'bookedAt',
   amount: 'amount',
+  direction: 'direction',
   description: 'description',
   accountNo: 'accountNo',
   counterparty: 'counterparty',
+  closingBalance: 'closingBalance',
+  suggestion: 'suggestion',
+  resolvedAt: 'resolvedAt',
+  resolvedById: 'resolvedById',
+  inSheet: 'inSheet',
   matchStatus: 'matchStatus',
   matchedUserId: 'matchedUserId',
   paymentId: 'paymentId',
@@ -12083,6 +12314,47 @@ export const BankTransactionScalarFieldEnum = {
 } as const
 
 export type BankTransactionScalarFieldEnum = (typeof BankTransactionScalarFieldEnum)[keyof typeof BankTransactionScalarFieldEnum]
+
+
+export const BankAllocationScalarFieldEnum = {
+  id: 'id',
+  bankTxId: 'bankTxId',
+  kind: 'kind',
+  amount: 'amount',
+  studentId: 'studentId',
+  paymentId: 'paymentId',
+  note: 'note',
+  auto: 'auto',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  revokedAt: 'revokedAt',
+  revokedById: 'revokedById'
+} as const
+
+export type BankAllocationScalarFieldEnum = (typeof BankAllocationScalarFieldEnum)[keyof typeof BankAllocationScalarFieldEnum]
+
+
+export const BankPayerHintScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  value: 'value',
+  studentId: 'studentId',
+  count: 'count',
+  lastAt: 'lastAt'
+} as const
+
+export type BankPayerHintScalarFieldEnum = (typeof BankPayerHintScalarFieldEnum)[keyof typeof BankPayerHintScalarFieldEnum]
+
+
+export const BankCursorScalarFieldEnum = {
+  accountNo: 'accountNo',
+  settledThrough: 'settledThrough',
+  coveredThrough: 'coveredThrough',
+  sheetThrough: 'sheetThrough',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BankCursorScalarFieldEnum = (typeof BankCursorScalarFieldEnum)[keyof typeof BankCursorScalarFieldEnum]
 
 
 export const StudentCodeLegacyScalarFieldEnum = {
@@ -14051,6 +14323,20 @@ export type ListEnumRevisionActionFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
+ * Reference to a field of type 'BankDirection'
+ */
+export type EnumBankDirectionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankDirection'>
+    
+
+
+/**
+ * Reference to a field of type 'BankDirection[]'
+ */
+export type ListEnumBankDirectionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankDirection[]'>
+    
+
+
+/**
  * Reference to a field of type 'BankMatchStatus'
  */
 export type EnumBankMatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankMatchStatus'>
@@ -14061,6 +14347,20 @@ export type EnumBankMatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$
  * Reference to a field of type 'BankMatchStatus[]'
  */
 export type ListEnumBankMatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankMatchStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'BankAllocKind'
+ */
+export type EnumBankAllocKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankAllocKind'>
+    
+
+
+/**
+ * Reference to a field of type 'BankAllocKind[]'
+ */
+export type ListEnumBankAllocKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankAllocKind[]'>
     
 
 
@@ -14575,6 +14875,9 @@ export type GlobalOmitConfig = {
   pass?: Prisma.PassOmit
   userPass?: Prisma.UserPassOmit
   bankTransaction?: Prisma.BankTransactionOmit
+  bankAllocation?: Prisma.BankAllocationOmit
+  bankPayerHint?: Prisma.BankPayerHintOmit
+  bankCursor?: Prisma.BankCursorOmit
   studentCodeLegacy?: Prisma.StudentCodeLegacyOmit
   payment?: Prisma.PaymentOmit
   productItem?: Prisma.ProductItemOmit

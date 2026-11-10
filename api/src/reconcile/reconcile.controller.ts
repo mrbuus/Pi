@@ -1,156 +1,98 @@
-import { FinanceCapabilityGuard } from '../payments/finance-capability.guard';
 import {
+  BadRequestException,
+  Body,
   Controller,
-  Post,
   Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
-  Param,
-  Body,
-  Query,
-  BadRequestException,
-  HttpCode,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { ReconcileService } from './reconcile.service';
+import { FinanceCapabilityGuard } from '../payments/finance-capability.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import {
-  ImportConfigDto,
-  GetTransactionsQueryDto,
-  ManualMatchDto,
-  ImportResultDto,
-  BankTransactionResponseDto,
-} from './reconcile.dto';
+import { ReconcileService } from './reconcile.service';
+import { AllocateDto, ListRowsQueryDto, SheetThroughDto, StudentSearchQueryDto } from './reconcile.dto';
 
 // JwtStrategy.validate() нь { userId, role } буцаадаг — sub БИШ
-// (эхний хувилбар sub гэж таамаглаж importedById=undefined болгож байсан)
 interface UserPayload {
   userId: string;
   role: string;
 }
 
+/** Банкны хуулга → хүүхдийн төлбөр. Мөнгөтэй ажил тул Админ, Багш+ (санхүүгийн эрхтэй). */
 @Controller('reconcile')
 @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
+@Roles('ADMIN', 'TEACHER_PLUS')
 export class ReconcileController {
   constructor(private readonly reconcile: ReconcileService) {}
 
-  /**
-   * POST /reconcile/import
-   * Банкны хуулгыг (Excel/.csv) импортлоно
-   *
-   * Multipart form-data:
-   * - file: *.xlsx эсвэл *.csv
-   * - config: JSON string — ImportConfigDto (баганын зураглал)
-   *   Жнь: { "dateCol": 0, "amountCol": 2, "descCol": 3, "journalCol": 4, "accountCol": 5 }
-   */
+  /** POST /reconcile/import — Хаан банкны хуулга (.xlsx) */
   @Post('import')
-  @Roles('ADMIN', 'TEACHER_PLUS')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-      fileFilter: (req, file, cb) => {
-        const allowed =
-          file.mimetype ===
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-          file.mimetype === 'text/csv' ||
-          file.originalname.endsWith('.xlsx') ||
-          file.originalname.endsWith('.csv');
-        if (allowed) {
-          cb(null, true);
-        } else {
-          cb(
-            new BadRequestException('Зөвхөн .xlsx эсвэл .csv файл дэмжэгдэнэ'),
-            false,
-          );
-        }
-      },
+      limits: { fileSize: 5 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) =>
+        file.originalname.toLowerCase().endsWith('.xlsx')
+          ? cb(null, true)
+          : cb(new BadRequestException('Хаан банкнаас татсан .xlsx хуулга оруулна уу'), false),
     }),
   )
-  async importFile(
-    @UploadedFile() file: Express.Multer.File,
-    @Body('config') configStr: string | undefined,
-    @CurrentUser() user: UserPayload,
-  ): Promise<ImportResultDto> {
-    if (!file) {
-      throw new BadRequestException('Файл байхгүй байна');
-    }
-
-    // config СОНГОЛТТОЙ болсон: Хаан банкны форматыг сервис толгойн мөрөөс нь
-    // өөрөө таньдаг тул баганын зураглал заавал хэрэггүй. Ирүүлбэл ирээдүйн
-    // (өөр банкны) форматад ашиглагдана.
-    let config: ImportConfigDto = {} as ImportConfigDto;
-    if (configStr) {
-      try {
-        config = JSON.parse(configStr);
-      } catch {
-        throw new BadRequestException('config JSON буруу байна');
-      }
-    }
-
-    // Файлын төрөл
-    const fileType = file.originalname.endsWith('.xlsx')
-      ? 'xlsx'
-      : file.originalname.endsWith('.csv')
-        ? 'csv'
-        : 'xlsx'; // Дефолт
-
-    return this.reconcile.importFromFile(
-      file.buffer,
-      fileType,
-      config,
-      user.userId,
-    );
+  importFile(@UploadedFile() file: Express.Multer.File, @CurrentUser() user: UserPayload) {
+    if (!file) throw new BadRequestException('Файл сонгоно уу');
+    return this.reconcile.importStatement(file.buffer, { id: user.userId, role: user.role });
   }
 
-  /**
-   * GET /reconcile/transactions?status=&limit=&offset=
-   * Банкны гүйлгээнүүдийг жагсаалтлана
-   */
-  @Get('transactions')
-  @Roles('ADMIN', 'TEACHER_PLUS')
-  async getTransactions(
-    @Query() query: GetTransactionsQueryDto,
-  ): Promise<{ items: BankTransactionResponseDto[]; total: number }> {
-    return this.reconcile.getTransactions(query);
+  /** GET /reconcile/overview — «бүрэн шийдсэн өдөр», жагсаалт бүрийн тоо */
+  @Get('overview')
+  overview() {
+    return this.reconcile.overview();
   }
 
-  /**
-   * POST /reconcile/:id/match
-   * Гараар банкны гүйлгээг сурагчтай холбоно (Payment PENDING үүсгэнэ)
-   */
-  @Post(':id/match')
-  @Roles('ADMIN', 'TEACHER_PLUS')
-  async manualMatch(
-    @Param('id') bankTransactionId: string,
-    @Body() dto: ManualMatchDto,
-    @CurrentUser() user: UserPayload,
-  ): Promise<BankTransactionResponseDto> {
-    return this.reconcile.manualMatch(bankTransactionId, dto, {
-      id: user.userId,
-      role: user.role,
-    });
+  /** GET /reconcile/rows?lane=manual|tuition|other|expense&q=&limit=&offset= */
+  @Get('rows')
+  rows(@Query() query: ListRowsQueryDto) {
+    return this.reconcile.listRows(query);
   }
 
-  /**
-   * POST /reconcile/:id/ignore
-   * Банкны гүйлгээг үл анхааралтай үл үзэх
-   */
-  @Post(':id/ignore')
-  @Roles('ADMIN', 'TEACHER_PLUS')
-  @HttpCode(204)
-  async ignoreTransaction(
-    @Param('id') bankTransactionId: string,
-    @CurrentUser() user: UserPayload,
-  ): Promise<void> {
-    await this.reconcile.ignoreTransaction(bankTransactionId, {
-      id: user.userId,
-      role: user.role,
-    });
+  /** GET /reconcile/students?q= — гараар оноохдоо хүүхэд хайх (нэр, утас) */
+  @Get('students')
+  students(@Query() query: StudentSearchQueryDto) {
+    return this.reconcile.searchStudents(query.q);
+  }
+
+  /** GET /reconcile/students/:id — «⋯» дэлгэрэнгүй: утас, эцэг эх, хуулгаас оноосон гүйлгээ */
+  @Get('students/:id')
+  student(@Param('id') id: string) {
+    return this.reconcile.studentDetail(id);
+  }
+
+  /** POST /reconcile/rows/:id/allocate — нэг гүйлгээг хүүхэд/зориулалтад хуваарилах */
+  @Post('rows/:id/allocate')
+  @HttpCode(200)
+  allocate(@Param('id') id: string, @Body() dto: AllocateDto, @CurrentUser() user: UserPayload) {
+    return this.reconcile.allocate(id, dto, { id: user.userId, role: user.role });
+  }
+
+  /** POST /reconcile/sheet-through — «энэ өдрийг хүртэл ажилтан шийтэд хөтөлсөн»: тулгагдаагүйг «Шийдэх»-ээс нууна */
+  @Post('sheet-through')
+  @HttpCode(200)
+  sheetThrough(@Body() dto: SheetThroughDto, @CurrentUser() user: UserPayload) {
+    return this.reconcile.markSheetThrough(dto.through, { id: user.userId, role: user.role });
+  }
+
+  /** POST /reconcile/rows/:id/undo — хуваарилалтыг буцаах (устгахгүй, төлбөр REVERSED) */
+  @Post('rows/:id/undo')
+  @HttpCode(200)
+  undo(@Param('id') id: string, @CurrentUser() user: UserPayload) {
+    return this.reconcile.undo(id, { id: user.userId, role: user.role });
   }
 }

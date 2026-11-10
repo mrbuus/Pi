@@ -110,9 +110,11 @@ describe('Багш+ — төлбөрийн дүнг серверээс хасн�
       payments: [{ id: 'p1', amount: 350_000, method: 'CASH', status: 'CONFIRMED', description: null, forMonth: '2026-09', paidAt: null, createdAt: new Date(), confirmedBy: null }],
       notes: [],
       refunds: [{ id: 'r1', status: 'DRAFT', leftOn: null, refundAmount: 100_000, shortfall: 0, createdAt: new Date(), classroom: '12А' }],
+      sources: { '2026-09': [{ paymentId: 'p1', amount: 350_000 }] },
     } as never);
     expect(moneyLeaks(student)).toEqual([]);
     expect(student.payments[0]).toMatchObject({ status: 'CONFIRMED', forMonth: '2026-09', amount: null });
+    expect(student.sources['2026-09']).toEqual([{ paymentId: 'p1', amount: null }]);
   });
 
   it('ангийн самбар: Багш+-д төлөв л, Админд дүнтэй', () => {

@@ -117,7 +117,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     // Хүсэлтүүд + Элсэлтийн удирдлага → нэг «Элсэлт», дотор нь табтай (эзэн 2026-10-13)
     { href: "/app/admin/leads", label: "Элсэлт", icon: "user-plus" },
     { href: "/app/admin/sorils", label: "Жишиг сорил", icon: "clipboard-list" },
-    { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
+    { href: "/app/admin/reconcile", label: "Банкны хуулга", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
@@ -140,7 +140,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     // Хүсэлтүүд + Элсэлтийн удирдлага → нэг «Элсэлт», дотор нь табтай (эзэн 2026-10-13)
     { href: "/app/admin/leads", label: "Элсэлт", icon: "user-plus" },
     { href: "/app/admin/sorils", label: "Жишиг сорил", icon: "clipboard-list" },
-    { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
+    { href: "/app/admin/reconcile", label: "Банкны хуулга", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },

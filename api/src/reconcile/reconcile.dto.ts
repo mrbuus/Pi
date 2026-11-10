@@ -1,80 +1,75 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BankMatchStatus } from '../generated/prisma/enums';
+import { Type } from 'class-transformer';
+import { ArrayMaxSize, ArrayMinSize, IsIn, IsInt, IsOptional, IsString, Matches, Max, MaxLength, Min, ValidateNested } from 'class-validator';
 
-export class ImportConfigDto {
-  // Баганын зураглал: хуулгын баганын индекс → өгөгдлийн төрөл
-  // Жнь: { dateCol: 0, amountCol: 2, descCol: 3, journalCol: 4, accountCol: 5 }
-  @ApiProperty({ type: Number })
-  dateCol: number;
-  @ApiProperty({ type: Number })
-  amountCol: number;
-  @ApiProperty({ type: Number })
-  descCol: number;
-  @ApiProperty({ type: Number })
-  journalCol: number;
-  @ApiPropertyOptional({ type: Number })
-  accountCol?: number;
+export const ALLOC_KINDS = ['TUITION', 'BOOK', 'ANSWER_SHEET', 'STAFF_FINE', 'TRANSFER', 'EXPENSE', 'OTHER'] as const;
+export const ROW_LANES = ['all', 'manual', 'tuition', 'other', 'expense', 'sheet'] as const;
+export type RowLane = (typeof ROW_LANES)[number];
 
-  // Толгой мөрийг үлдээх эсэх (дефолт: true = эхний мөр толгой)
-  @ApiPropertyOptional({ type: Boolean })
-  skipHeader?: boolean;
+export class AllocPartDto {
+  @IsIn(ALLOC_KINDS)
+  kind!: (typeof ALLOC_KINDS)[number];
+
+  @IsInt()
+  @Min(1)
+  @Max(1_000_000_000)
+  amount!: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  studentId?: string;
 }
 
-export class BankTransactionResponseDto {
-  @ApiProperty({ type: String })
-  id: string;
-  @ApiProperty({ type: String })
-  bankRef: string;
-  @ApiProperty({ type: String, format: 'date-time' })
-  bookedAt: Date;
-  @ApiProperty({ type: Number })
-  amount: number;
-  @ApiProperty({ type: String })
-  description: string;
-  @ApiProperty({ type: String, nullable: true })
-  accountNo: string | null;
-  @ApiProperty({ type: String, nullable: true })
-  counterparty: string | null;
-  @ApiProperty({ enum: BankMatchStatus })
-  matchStatus: BankMatchStatus;
-  @ApiProperty({ type: String, nullable: true })
-  matchedUserId: string | null;
-  @ApiPropertyOptional({ type: Object, additionalProperties: true, nullable: true })
-  matchedUser?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    phone: string;
-  } | null;
+/** Нэг гүйлгээг хэд хэдэн хэсэгт хуваарилах — нийлбэр нь гүйлгээний дүнтэй тэнцүү. */
+export class AllocateDto {
+  @ValidateNested({ each: true })
+  @Type(() => AllocPartDto)
+  @ArrayMinSize(1)
+  @ArrayMaxSize(10)
+  parts!: AllocPartDto[];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  note?: string;
 }
 
-export class GetTransactionsQueryDto {
-  @ApiPropertyOptional({ enum: BankMatchStatus })
-  status?: BankMatchStatus;
-  @ApiPropertyOptional({ type: Number })
+export class ListRowsQueryDto {
+  @IsIn(ROW_LANES)
+  lane!: RowLane;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  q?: string;
+
+  /** «Шийтэд хөтлөгдсөн»-өөс зөвхөн шийтэд баталгаажаагүйг ('1') */
+  @IsOptional()
+  @IsIn(['1'])
+  check?: '1';
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(200)
   limit?: number;
-  @ApiPropertyOptional({ type: Number })
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
   offset?: number;
 }
 
-export class ManualMatchDto {
-  @ApiProperty({ type: String })
-  userId: string;
+export class StudentSearchQueryDto {
+  @IsString()
+  @MaxLength(60)
+  q!: string;
 }
 
-export class ImportResultDto {
-  @ApiProperty({ type: Number })
-  totalRows: number;
-  @ApiProperty({ type: Number })
-  imported: number;
-  @ApiProperty({ type: Number })
-  skipped: number; // давхардсан bankRef
-  @ApiProperty({ type: 'array', items: { type: 'object', properties: { rowIndex: { type: 'integer' }, bankRef: { type: 'string' }, reason: { type: 'string' } }, required: ['rowIndex', 'reason'] } })
-  errors: Array<{
-    rowIndex: number;
-    bankRef?: string;
-    reason: string;
-  }>;
-  @ApiProperty({ type: Number })
-  matched: number; // AUTO_MATCHED хийгдсэн
+/** Ажилтан энэ өдрийг хүртэлх гүйлгээг шийтэд хөтөлсөн (шилжилтийн үе) */
+export class SheetThroughDto {
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Огноо YYYY-MM-DD хэлбэртэй байх ёстой' })
+  through!: string;
 }

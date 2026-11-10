@@ -133,7 +133,10 @@ GET /api/progress/online-students
 GET /api/progress/student/:id
 GET /api/progress/student/:id/timeline
 GET /api/recommend/next
-GET /api/reconcile/transactions
+GET /api/reconcile/overview
+GET /api/reconcile/rows
+GET /api/reconcile/students
+GET /api/reconcile/students/:id
 GET /api/schedule
 GET /api/schedule/:id
 GET /api/schedule/:id/plan
@@ -285,9 +288,10 @@ POST /api/problems
 POST /api/progress/student/:id/assign-test
 POST /api/progress/student/:id/reset-chapter
 POST /api/recommend/attempt
-POST /api/reconcile/:id/ignore
-POST /api/reconcile/:id/match
 POST /api/reconcile/import
+POST /api/reconcile/rows/:id/allocate
+POST /api/reconcile/rows/:id/undo
+POST /api/reconcile/sheet-through
 POST /api/schedule
 POST /api/schedule/:id/exceptions
 POST /api/schedule/:id/split

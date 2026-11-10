@@ -298,3 +298,25 @@ describe('суудаг анги, гараар бүтэн жил, хоцорч т
     ]);
   });
 });
+
+describe('blockSources — сар бүрийг аль төлбөр дүүргэсэн', () => {
+  const { blockSources } = jest.requireActual('./ledger') as typeof import('./ledger');
+  const b = (month: string, due: number, paid: number) => ({ month, state: paid >= due ? 'PAID' : paid > 0 ? 'PARTIAL' : 'OWED', due, paid, dueOn: `${month}-01`, paidOn: null, lateDays: 0 }) as const;
+
+  it('огноогоор хуучнаас нь дүүргэж, нэг төлбөр олон сар, нэг сар олон төлбөр', () => {
+    const blocks = [b('2026-09', 350_000, 350_000), b('2026-10', 350_000, 350_000), b('2026-11', 350_000, 100_000)];
+    const out = blockSources(
+      blocks,
+      [
+        { id: 'late', amount: 100_000, forMonth: null, paidOn: '2026-11-02' },
+        { id: 'big', amount: 400_000, forMonth: null, paidOn: '2026-09-03' },
+        { id: 'mid', amount: 300_000, forMonth: null, paidOn: '2026-10-01' },
+      ],
+      'MONTHLY',
+      '2026-09-01',
+    );
+    expect(out['2026-09']).toEqual([{ paymentId: 'big', amount: 350_000 }]);
+    expect(out['2026-10']).toEqual([{ paymentId: 'big', amount: 50_000 }, { paymentId: 'mid', amount: 300_000 }]);
+    expect(out['2026-11']).toEqual([{ paymentId: 'late', amount: 100_000 }]);
+  });
+});

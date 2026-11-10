@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, BookOpen, CalendarDays, ClipboardCheck, Hash, LayoutDashboard, ListChecks, Pencil, Settings2, UserPlus, Users } from "lucide-react";
+import { ArrowLeft, BookOpen, CalendarDays, ClipboardCheck, Hash, LayoutDashboard, ListChecks, Pencil, Settings2, UserPlus, Users, Wallet } from "lucide-react";
 import MakeupPanel from "@/components/makeup/MakeupPanel";
+import ClassBoard from "@/components/payments/ClassBoard";
 import RequireRole from "@/components/nav/RequireRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/kit/tabs";
 import { Meta } from "@/components/ui/Meta";
 import { SkeletonCard, SkeletonRows } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/StateBlock";
-import { api } from "@/lib/api";
+import { api, getRole } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { cn } from "@/lib/cn";
 import ClassChecksPanel from "./ClassChecksPanel";
@@ -21,13 +22,14 @@ import TeacherPicker from "./TeacherPicker";
 import TopicsTab from "./TopicsTab";
 import type { ClassDashboard, MonthMetric, PersonRef } from "./types";
 
-type TabKey = "overview" | "month" | "students" | "codes" | "makeup" | "topics";
+type TabKey = "overview" | "month" | "students" | "payments" | "codes" | "makeup" | "topics";
 /** «Чек» нь табын жагсаалтад БИШ — толгойн товчоор нээгдэх тусдаа горим (#checks) */
 type ViewKey = TabKey | "checks";
 const TABS: { key: TabKey; label: string; icon: typeof Users }[] = [
   { key: "overview", label: "Тойм", icon: LayoutDashboard },
   { key: "month", label: "Сарын явц", icon: CalendarDays },
   { key: "students", label: "Сурагчид", icon: Users },
+  { key: "payments", label: "Төлбөр", icon: Wallet },
   { key: "codes", label: "Код", icon: Hash },
   { key: "makeup", label: "Нөхөх", icon: ListChecks },
   { key: "topics", label: "Сэдэв, хөтөлбөр", icon: BookOpen },
@@ -67,6 +69,9 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
   const [data, setData] = useState<ClassDashboard | null>(null);
   const [error, setError] = useState("");
   const [tab, setTab] = useState<ViewKey>("overview");
+  // Ангийн төлбөрийн самбар — зөвхөн Админ, Багш+ (Багш төлбөрийн дүн харахгүй)
+  const [canPayments, setCanPayments] = useState(false);
+  useEffect(() => setCanPayments(["ADMIN", "TEACHER_PLUS"].includes(getRole() ?? "")), []);
   const [lastTab, setLastTab] = useState<TabKey>("overview");
   const [checkCount, setCheckCount] = useState<number | null>(null);
   const [metric, setMetric] = useState<MonthMetric>("attendance");
@@ -209,7 +214,7 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
             ) : (
               <Tabs value={tab} onValueChange={changeTab}>
                 <TabsList aria-label="Ангийн самбарын хэсгүүд">
-                  {TABS.map(({ key, label, icon: Icon }) => (
+                  {TABS.filter((t) => t.key !== "payments" || canPayments).map(({ key, label, icon: Icon }) => (
                     <TabsTrigger key={key} value={key}>
                       <Icon aria-hidden />
                       {label}
@@ -220,7 +225,7 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
                   ))}
                 </TabsList>
                 <TabsContent value="overview" className="mt-4">
-                  <OverviewTab data={data} onOpenStudents={openStudents} onOpenTab={changeTab} onOpenMonth={changeMetric} />
+                  <OverviewTab data={data} onOpenStudents={openStudents} onOpenTab={changeTab} onOpenMonth={changeMetric} onOpenPayments={canPayments ? () => changeTab("payments") : undefined} />
                 </TabsContent>
                 <TabsContent value="month" className="mt-4">
                   <MonthView classroomId={data.classroom.id} metric={metric} onMetric={changeMetric} />
@@ -228,6 +233,12 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
                 <TabsContent value="students" className="mt-4">
                   <StudentsTab data={data} view={view} onViewChange={setView} onChanged={() => void load()} />
                 </TabsContent>
+                {canPayments && (
+                  <TabsContent value="payments" className="mt-4">
+                    {/* Хүүхэд бүр нэг мөр, сар бүрийн блок (шийтийн сарын бүлэгтэй ижил); өртэй мөр улаан */}
+                    <ClassBoard id={data.classroom.id} embedded />
+                  </TabsContent>
+                )}
                 <TabsContent value="codes" className="mt-4">
                   <CodesTab students={data.students} />
                 </TabsContent>

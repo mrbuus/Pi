@@ -104,6 +104,9 @@ export const ModelName = {
   Pass: 'Pass',
   UserPass: 'UserPass',
   BankTransaction: 'BankTransaction',
+  BankAllocation: 'BankAllocation',
+  BankPayerHint: 'BankPayerHint',
+  BankCursor: 'BankCursor',
   StudentCodeLegacy: 'StudentCodeLegacy',
   Payment: 'Payment',
   ProductItem: 'ProductItem',
@@ -1029,9 +1032,15 @@ export const BankTransactionScalarFieldEnum = {
   bankRef: 'bankRef',
   bookedAt: 'bookedAt',
   amount: 'amount',
+  direction: 'direction',
   description: 'description',
   accountNo: 'accountNo',
   counterparty: 'counterparty',
+  closingBalance: 'closingBalance',
+  suggestion: 'suggestion',
+  resolvedAt: 'resolvedAt',
+  resolvedById: 'resolvedById',
+  inSheet: 'inSheet',
   matchStatus: 'matchStatus',
   matchedUserId: 'matchedUserId',
   paymentId: 'paymentId',
@@ -1041,6 +1050,47 @@ export const BankTransactionScalarFieldEnum = {
 } as const
 
 export type BankTransactionScalarFieldEnum = (typeof BankTransactionScalarFieldEnum)[keyof typeof BankTransactionScalarFieldEnum]
+
+
+export const BankAllocationScalarFieldEnum = {
+  id: 'id',
+  bankTxId: 'bankTxId',
+  kind: 'kind',
+  amount: 'amount',
+  studentId: 'studentId',
+  paymentId: 'paymentId',
+  note: 'note',
+  auto: 'auto',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  revokedAt: 'revokedAt',
+  revokedById: 'revokedById'
+} as const
+
+export type BankAllocationScalarFieldEnum = (typeof BankAllocationScalarFieldEnum)[keyof typeof BankAllocationScalarFieldEnum]
+
+
+export const BankPayerHintScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  value: 'value',
+  studentId: 'studentId',
+  count: 'count',
+  lastAt: 'lastAt'
+} as const
+
+export type BankPayerHintScalarFieldEnum = (typeof BankPayerHintScalarFieldEnum)[keyof typeof BankPayerHintScalarFieldEnum]
+
+
+export const BankCursorScalarFieldEnum = {
+  accountNo: 'accountNo',
+  settledThrough: 'settledThrough',
+  coveredThrough: 'coveredThrough',
+  sheetThrough: 'sheetThrough',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BankCursorScalarFieldEnum = (typeof BankCursorScalarFieldEnum)[keyof typeof BankCursorScalarFieldEnum]
 
 
 export const StudentCodeLegacyScalarFieldEnum = {

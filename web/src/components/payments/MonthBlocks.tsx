@@ -157,17 +157,23 @@ export function LargeBlocks({
   current,
   onPick,
   settled = false,
+  gridClass = "grid grid-cols-3 gap-2 sm:grid-cols-9",
+  pickAll = false,
 }: {
   blocks: MonthBlock[];
   current?: string;
   onPick?: (month: string) => void;
   settled?: boolean;
+  /** Цонх дотор (нарийн) бол багана цөөн */
+  gridClass?: string;
+  /** Суусан бүх сарыг дарж болно (төлбөрийн эх сурвалж харах) — зөвхөн төлөх сар биш */
+  pickAll?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-3 gap-2 sm:grid-cols-9">
+    <div className={gridClass}>
       {blocks.map((b) => {
         const label = blockLabel(b, settled);
-        const pickable = onPick && (b.state === "OWED" || b.state === "PARTIAL" || b.state === "FUTURE");
+        const pickable = onPick && (pickAll ? b.state !== "OFF" : b.state === "OWED" || b.state === "PARTIAL" || b.state === "FUTURE");
         const cls = `relative flex min-h-16 flex-col justify-between overflow-hidden rounded-xl p-2 text-left text-sm font-semibold ${LARGE[b.state]} ${
           b.month === current ? "ring-2 ring-brand/40 ring-offset-2 ring-offset-surface" : ""
         }`;
@@ -190,7 +196,7 @@ export function LargeBlocks({
           <button
             key={b.month}
             type="button"
-            aria-label={`${label}. Төлбөр бүртгэх`}
+            aria-label={pickAll ? `${label}. Төлбөрийг харах` : `${label}. Төлбөр бүртгэх`}
             title={label}
             onClick={() => onPick(b.month)}
             className={`${cls} transition hover:brightness-95`}
