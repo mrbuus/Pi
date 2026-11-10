@@ -58,6 +58,20 @@ function useVerifiedChildName(role: string | undefined): string {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  // Дотоод ажилчид (Админ, Багш+, Багш) текстийг чөлөөтэй сонгож хуулна (эзэн 2026-11-10).
+  // Сурагч, эцэг эхэд хэвээр хаалттай (globals.css `html[data-staff]`).
+  useEffect(() => {
+    const sync = () => {
+      if (["ADMIN", "TEACHER_PLUS", "TEACHER"].includes(getRole() ?? "")) document.documentElement.dataset.staff = "1";
+      else delete document.documentElement.dataset.staff;
+    };
+    sync();
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      delete document.documentElement.dataset.staff;
+    };
+  }, [pathname]);
   const role = useSyncExternalStore(
     () => () => {},
     getRole,
