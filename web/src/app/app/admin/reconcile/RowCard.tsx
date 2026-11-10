@@ -14,7 +14,7 @@ import AllocateDialog from "./AllocateDialog";
 import PayerInfo from "./PayerInfo";
 import StudentDetailDialog from "./StudentDetailDialog";
 import { MoreButton } from "./StudentPicker";
-import { SIGNAL_LABEL, STUDENT_KINDS, sheetWriteText, splitSender, type SheetWrite, type AllocPart, type BankRow, type Candidate } from "./types";
+import { SIGNAL_LABEL, STUDENT_KINDS, TONE, rowTone, sheetWriteText, splitSender, type SheetWrite, type AllocPart, type BankRow, type Candidate } from "./types";
 
 const signals = (c: Candidate) => [...new Set(c.signals.map((s) => SIGNAL_LABEL[s]))].join(" + ");
 
@@ -71,15 +71,21 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
   const nonKidKind = open && s && !STUDENT_KINDS.includes(s.kind) && !s.split ? s.kind : null;
 
   return (
-    <article className="space-y-2.5 rounded-2xl border border-line bg-surface p-3 sm:p-4">
+    <article className={`space-y-1.5 rounded-xl border border-l-4 border-line bg-surface px-3 py-2.5 sm:px-4 ${TONE[rowTone(row)].card}`}>
       <header className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <span className={`text-lg font-extrabold tabular-nums ${row.direction === "DEBIT" ? "text-error" : "text-ink"}`}>
+        <span className={`text-base font-extrabold tabular-nums ${row.direction === "DEBIT" ? "text-error" : "text-ink"}`}>
           {row.direction === "DEBIT" ? "-" : ""}
           {mnt(row.amount)}
         </span>
-        <span className="text-sm tabular-nums text-ink-dim">{stampLabel(row.bookedAt)}</span>
+        <span className="flex items-center gap-2 text-sm tabular-nums text-ink-dim">
+          <span className="flex items-center gap-1.5 text-xs font-semibold">
+            <span aria-hidden className={`size-2 rounded-full ${TONE[rowTone(row)].dot}`} />
+            {TONE[rowTone(row)].label}
+          </span>
+          {stampLabel(row.bookedAt)}
+        </span>
       </header>
-      <p className="break-words text-base font-semibold leading-snug text-ink">
+      <p className="break-words text-[15px] font-semibold leading-snug text-ink">
         {main || <span className="font-normal text-ink-dim">Утгагүй гүйлгээ</span>}
       </p>
       <PayerInfo row={row} />
@@ -128,6 +134,11 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
                     <span className="text-xs text-ink-dim">
                       <Meta items={[signals(c), c.sheetPays.length ? `Шийтэд ${c.sheetPays.map((x) => mnt(x.amount)).join(", ")}` : null]} />
                     </span>
+                    {!!c.student?.phones?.length && (
+                      <span className="text-xs tabular-nums text-ink">
+                        <Meta items={c.student.phones.map((p) => `${p.label} ${p.value}`)} />
+                      </span>
+                    )}
                   </button>
                   <MoreButton name={c.student?.name ?? "Хүүхэд"} onClick={() => setDetailId(c.studentId)} />
                 </li>
@@ -166,7 +177,7 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
         </ul>
       )}
 
-      <footer className="flex flex-wrap gap-2 pt-0.5">
+      <footer className="flex flex-wrap gap-2">
         {open && needsSplit && (
           <Button size="sm" onClick={() => setDialog(true)} disabled={busy}>
             <Split /> Хуваах

@@ -109,7 +109,14 @@ export default function StudentPicker({
                 onClick={() => onChange(s)}
                 className="row-interactive flex min-h-11 min-w-0 flex-1 items-center px-3 text-left text-sm text-ink"
               >
-                <Meta items={[s.name, s.classroom, s.archived ? "Гарсан" : null, s.paidUp ? "Бүтэн төлсөн" : null]} />
+                <span className="flex flex-col py-1.5">
+                  <Meta items={[s.name, s.classroom, s.archived ? "Гарсан" : null, s.paidUp ? "Бүтэн төлсөн" : null]} />
+                  {!!s.phones?.length && (
+                    <span className="text-xs tabular-nums text-ink-dim">
+                      <Meta items={s.phones.map((p) => `${p.label} ${p.value}`)} />
+                    </span>
+                  )}
+                </span>
               </button>
               <MoreButton name={s.name} onClick={() => setDetail(s)} />
             </li>

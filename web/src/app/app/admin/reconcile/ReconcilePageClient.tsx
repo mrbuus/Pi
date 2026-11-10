@@ -12,9 +12,10 @@ import LedgerDialog, { Field, Segmented, inputCls } from "@/components/payments/
 import { dayLabel } from "@/components/payments/ledgerFormat";
 import { errMsg } from "@/components/payments/paymentHelpers";
 import RowCard from "./RowCard";
-import { RECONCILE_CHANGED, type BankRow, type ImportSummary, type Lane, type Overview } from "./types";
+import { RECONCILE_CHANGED, TONE, type BankRow, type ImportSummary, type Lane, type Overview } from "./types";
 
 const LANES: { key: Lane; label: string; empty: string }[] = [
+  { key: "all", label: "Бүгд", empty: "Хуулга хараахан ороогүй" },
   { key: "manual", label: "Шийдэх", empty: "Шийдэх гүйлгээ алга — бүгд хуваарилагдсан" },
   { key: "tuition", label: "Сургалтын төлбөр", empty: "Сургалтын төлбөр хараахан ороогүй" },
   { key: "other", label: "Бусад орлого", empty: "Ном, хариултын хуудас, торгууль энд харагдана" },
@@ -25,7 +26,7 @@ const PAGE = 50;
 
 export function ReconcilePageClient() {
   const [overview, setOverview] = useState<Overview | null>(null);
-  const [lane, setLane] = useState<Lane>("manual");
+  const [lane, setLane] = useState<Lane>("all");
   const [q, setQ] = useState("");
   const [checkOnly, setCheckOnly] = useState(false);
   const [rows, setRows] = useState<BankRow[] | null>(null);
@@ -89,9 +90,15 @@ export function ReconcilePageClient() {
 
   /** Хуваарилсан/буцаасан мөр л жагсаалтаас гарна — хуудас дахин ачаалахгүй */
   const onDone = (rowId: string, alsoResolved?: number) => {
+    loadOverview();
+    // «Бүгд»-д мөр үлдэж, өнгө нь солигдоно (байрлал үсрэхгүй)
+    if (lane === "all") {
+      loadRows("soft");
+      if (alsoResolved) toast.success(`Өмнө оноосон данс, утсаар өөр ${alsoResolved} гүйлгээ автоматаар орлоо`);
+      return;
+    }
     setRows((prev) => prev?.filter((r) => r.id !== rowId) ?? prev);
     setTotal((t) => Math.max(0, t - 1));
-    loadOverview();
     if (alsoResolved) {
       toast.success(`Өмнө оноосон данс, утсаар өөр ${alsoResolved} гүйлгээ автоматаар орлоо`);
       loadRows("soft");
@@ -107,7 +114,7 @@ export function ReconcilePageClient() {
       const res = await api<ImportSummary>("/reconcile/import", { method: "POST", body });
       setLastImport(res);
       toast.success(`${res.newRows} шинэ гүйлгээ орлоо`);
-      setLane("manual");
+      setLane("all");
       loadOverview();
       loadRows("reset");
     } catch (e) {
@@ -243,6 +250,17 @@ export function ReconcilePageClient() {
         />
       )}
 
+      {lane === "all" && (
+        <p className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-dim" aria-label="Өнгөний тайлбар">
+          {(["auto", "open", "other", "expense", "sheet"] as const).map((t) => (
+            <span key={t} className="flex items-center gap-1.5">
+              <span aria-hidden className={`size-2.5 rounded-full ${TONE[t].dot}`} />
+              {t === "auto" ? "Сургалтын төлбөр" : TONE[t].label}
+            </span>
+          ))}
+        </p>
+      )}
+
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-dim" aria-hidden />
         <input
@@ -267,7 +285,7 @@ export function ReconcilePageClient() {
       ) : rows.length === 0 ? (
         <EmptyState icon={Inbox} title={q ? "Хайлтад тохирох гүйлгээ алга" : LANES.find((l) => l.key === lane)!.empty} />
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {rows.map((r) => (
             <RowCard key={r.id} row={r} onDone={onDone} />
           ))}

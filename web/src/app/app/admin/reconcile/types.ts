@@ -1,7 +1,7 @@
 // API: /reconcile/* (api/src/reconcile/reconcile.service.ts)
 
 export type AllocKind = "TUITION" | "BOOK" | "ANSWER_SHEET" | "STAFF_FINE" | "TRANSFER" | "EXPENSE" | "OTHER";
-export type Lane = "manual" | "tuition" | "other" | "expense" | "sheet";
+export type Lane = "all" | "manual" | "tuition" | "other" | "expense" | "sheet";
 
 export const KIND_LABEL: Record<AllocKind, string> = {
   TUITION: "Сургалтын төлбөр",
@@ -21,6 +21,8 @@ export interface StudentCard {
   name: string;
   classroom: string | null;
   archived: boolean;
+  /** Өөрийн, аав, ээжийн утас — тулгахад */
+  phones?: { label: string; value: string }[];
   /** Хайлтад: жилийн сургалтын төлбөрөө бүрэн төлсөн */
   paidUp?: boolean;
 }
@@ -173,3 +175,21 @@ export function sheetWriteText(ws: SheetWrite[] | undefined): string | null {
     .map((w) => (w.ok ? `Шийтэд бичлээ: ${w.cell} нүд, ${Number(w.month!.slice(5, 7))}-р сар` : `Шийтэд бичсэнгүй: ${w.reason}`))
     .join("; ");
 }
+
+/** Гүйлгээний төлөв — «Бүгд» жагсаалтад өнгөөр ялгана */
+export type RowTone = "auto" | "done" | "open" | "sheet" | "other" | "expense";
+export function rowTone(r: BankRow): RowTone {
+  if (!r.resolvedAt) return "open";
+  if (r.inSheet) return "sheet";
+  if (r.direction === "DEBIT") return "expense";
+  if (r.allocations.some((a) => a.kind === "TUITION")) return r.resolvedBySystem ? "auto" : "done";
+  return "other";
+}
+export const TONE: Record<RowTone, { label: string; card: string; dot: string }> = {
+  auto: { label: "Сургалтын төлбөр, автоматаар", card: "border-l-success bg-success/5", dot: "bg-success" },
+  done: { label: "Сургалтын төлбөр, гараар", card: "border-l-success bg-success/5", dot: "bg-success" },
+  open: { label: "Шийдэх", card: "border-l-orange-500 bg-orange-500/[0.07]", dot: "bg-orange-500" },
+  sheet: { label: "Шийтэд хөтлөгдсөн", card: "border-l-ink/25", dot: "bg-ink/30" },
+  other: { label: "Бусад орлого", card: "border-l-info bg-info/5", dot: "bg-info" },
+  expense: { label: "Зарлага", card: "border-l-error/60", dot: "bg-error/70" },
+};

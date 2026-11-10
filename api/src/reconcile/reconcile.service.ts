@@ -465,10 +465,15 @@ export class ReconcileService {
     const auto = await this.resolveOpen(actor);
     const settled = row.accountNo ? await this.recomputeCursor(row.accountNo) : null;
     // Шийтэд бичих (SHEET_PAY_WRITE=1 жинхэнэ, эс бөгөөс DEMO_SHEET_ID хуулбар)
-    const sheetWrites = await this.demoSheet.writeTuition(
-      parts.filter((p) => p.kind === 'TUITION' && p.studentId).map((p) => ({ studentId: p.studentId!, amount: p.amount })),
-      row.bookedAt,
-    );
+    // Ажилтан шийтэд хөтөлсөн өдрөөс (sheetThrough) өмнөх гүйлгээг шийтэд ДАХИН бичихгүй — давхардна.
+    // Өдөр тэмдэглээгүй бол юу ч бичихгүй (эзэн 2026-11-10: шийтэд давхар бүртгэл гарсан).
+    const tuitionKids = parts.filter((p) => p.kind === 'TUITION' && p.studentId).map((p) => ({ studentId: p.studentId!, amount: p.amount }));
+    const through = row.accountNo ? (await this.prisma.bankCursor.findUnique({ where: { accountNo: row.accountNo }, select: { sheetThrough: true } }))?.sheetThrough : null;
+    const sheetWrites = !this.demoSheet.enabled
+      ? []
+      : !through || ubDay(row.bookedAt) <= through
+        ? tuitionKids.map((k) => ({ studentId: k.studentId, ok: false, reason: through ? `${through.slice(5).replace('-', '/')} хүртэл ажилтан шийтэд хөтөлсөн тул бичсэнгүй` : '«Шийтэд хөтлөгдсөн өдөр» тэмдэглээгүй тул бичсэнгүй' }))
+        : await this.demoSheet.writeTuition(tuitionKids, row.bookedAt);
     return { ok: true, alsoResolved: auto.resolved, settledThrough: settled, sheetWrites };
   }
 
@@ -615,8 +620,9 @@ export class ReconcileService {
   // ── Унших ─────────────────────────────────────────────────────────────────
 
   async overview() {
-    const [cursors, manual, tuition, other, expense, sheet, sheetCheck, last] = await Promise.all([
+    const [cursors, all, manual, tuition, other, expense, sheet, sheetCheck, last] = await Promise.all([
       this.prisma.bankCursor.findMany({ orderBy: { accountNo: 'asc' } }),
+      this.prisma.bankTransaction.count(),
       this.prisma.bankTransaction.count({ where: this.laneWhere('manual') }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('tuition') }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('other') }),
@@ -627,7 +633,7 @@ export class ReconcileService {
     ]);
     return {
       cursors: cursors.map((c) => ({ accountNo: c.accountNo, settledThrough: c.settledThrough, coveredThrough: c.coveredThrough, sheetThrough: c.sheetThrough })),
-      counts: { manual, tuition, other, expense, sheet },
+      counts: { all, manual, tuition, other, expense, sheet },
       /** Шийтэд хөтлөгдсөн гэж нуусан ч шийтэд байгааг баталж чадаагүй — шалгах */
       sheetCheck,
       lastImportAt: last?.importedAt ?? null,
@@ -639,6 +645,8 @@ export class ReconcileService {
   private laneWhere(lane: RowLane): Prisma.BankTransactionWhereInput {
     const tuitionAlloc = { some: { kind: 'TUITION' as const, revokedAt: null } };
     switch (lane) {
+      case 'all':
+        return {};
       case 'manual':
         return { resolvedAt: null };
       case 'tuition':
@@ -664,7 +672,8 @@ export class ReconcileService {
       this.prisma.bankTransaction.count({ where }),
       this.prisma.bankTransaction.findMany({
         where,
-        orderBy: { bookedAt: query.lane === 'manual' ? 'asc' : 'desc' },
+        // Бүгд, шийдэх — хуулгын дарааллаар (эрт нь дээр)
+        orderBy: [{ bookedAt: query.lane === 'manual' || query.lane === 'all' ? 'asc' : 'desc' }, { id: 'asc' }],
         take: query.limit ?? 50,
         skip: query.offset ?? 0,
         select: {
@@ -902,7 +911,7 @@ export class ReconcileService {
 
   /** Хүүхдийн товч мэдээлэл: нэр, суудаг анги, гарсан эсэх. */
   private async studentCards(ids: string[]) {
-    const out = new Map<string, { id: string; name: string; classroom: string | null; archived: boolean }>();
+    const out = new Map<string, { id: string; name: string; classroom: string | null; archived: boolean; phones: { label: string; value: string }[] }>();
     if (!ids.length) return out;
     const users = await this.prisma.user.findMany({
       where: { id: { in: ids } },
@@ -911,6 +920,8 @@ export class ReconcileService {
         firstName: true,
         lastName: true,
         archivedAt: true,
+        phone: true,
+        studentProfile: { select: { fatherPhone: true, motherPhone: true } },
         enrollments: {
           where: { leftAt: null },
           orderBy: { joinedAt: 'desc' },
@@ -924,6 +935,16 @@ export class ReconcileService {
         name: `${u.lastName} ${u.firstName}`.trim(),
         classroom: primaryEnrollment(u.enrollments)?.classroom.name ?? null,
         archived: !!u.archivedAt,
+        // Тулгахад: хүүхдийн өөрийн, аав, ээжийн утас (гүйлгээний утгатай шууд харьцуулна)
+        phones: (
+          [
+            ['Өөрийн', u.phone],
+            ['Аав', u.studentProfile?.fatherPhone],
+            ['Ээж', u.studentProfile?.motherPhone],
+          ] as const
+        )
+          .filter(([, v]) => !!v)
+          .map(([label, value]) => ({ label, value: value! })),
       });
     return out;
   }
