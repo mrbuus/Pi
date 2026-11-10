@@ -362,7 +362,7 @@ const HUB_TITLE: Record<string, string> = {
   "/app/classes": "Ангиуд",
   "/app/lesson-flow": "Өдрийн хичээл",
   "/app/dismissal": "Анги тарах цаг",
-  "/app/teacher-hours": "Хуваарийн цаг",
+  "/app/teacher-hours": "Ажилласан цаг",
   "/app/planner": "Төлөвлөгч",
   "/app/insights": "Дүн шинжилгээ",
   "/app/admin/enrollment": "Элсэлтийн удирдлага",

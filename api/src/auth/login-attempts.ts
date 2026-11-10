@@ -83,3 +83,37 @@ export const loginAttempts = new LoginAttempts();
  * өөр нэрээр нэг бүртгэлийг оролдсон ч нэг тоолуурт орно. Түгжээ нь loginAttempts-д.
  */
 export const accountAttempts = new LoginAttempts();
+/** Бүртгэл + IP («userId|ip») — нэг эх сурвалжаас өөр нэвтрэх нэрээр ээлжлэн оролдохыг түгжинэ */
+export const accountSourceAttempts = new LoginAttempts();
+
+/**
+ * Нэг IP-аас нэвтрэх оролдлогын нийт тоо (2026-11-05 аудит). Нэвтрэх маршрутын throttle нь «IP +
+ * нэвтрэх нэр»-ээр тоолдог болсон (нэг Wi-Fi-аас олон хүүхэд зэрэг нэвтэрнэ) тул олон бүртгэлийг
+ * дараалан оролдохыг энэ нийт хязгаар барина. Instance-local (restart-д цэвэрлэгдэнэ).
+ */
+export class RateWindow {
+  private readonly hits = new Map<string, number[]>();
+  constructor(
+    private readonly limit: number,
+    private readonly windowMs: number,
+    private readonly now: () => number = Date.now,
+    private readonly maxKeys = 20_000,
+  ) {}
+  /** true = зөвшөөрнө (тоолно), false = хязгаар хэтэрсэн */
+  hit(key: string): boolean {
+    const now = this.now();
+    const list = (this.hits.get(key) ?? []).filter((t) => now - t < this.windowMs);
+    if (list.length >= this.limit) {
+      this.hits.set(key, list);
+      return false;
+    }
+    list.push(now);
+    if (!this.hits.has(key) && this.hits.size >= this.maxKeys) {
+      for (const [k, v] of this.hits) if (!v.some((t) => now - t < this.windowMs)) this.hits.delete(k);
+      if (this.hits.size >= this.maxKeys) this.hits.delete(this.hits.keys().next().value as string);
+    }
+    this.hits.set(key, list);
+    return true;
+  }
+}
+export const loginIpWindow = new RateWindow(60, 60_000);

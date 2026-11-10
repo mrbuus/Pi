@@ -1,3 +1,4 @@
+import { groupTestNames } from '../common/test-names';
 import {
   BadRequestException,
   ConflictException,
@@ -2259,7 +2260,7 @@ export class ScheduleService {
           })
         : [];
       const byId = new Map(tests.map((t) => [t.id, t.title.replace(/\s+/g, ' ').trim()]));
-      const title = existing.testIds.map((id) => byId.get(id) ?? '').filter(Boolean).join(', ');
+      const title = groupTestNames(existing.testIds.map((id) => byId.get(id) ?? ''));
       const updated = await this.prisma.lessonTopic.update({
         where: { id: existing.id },
         data: { title },

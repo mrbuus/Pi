@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { Home, Keyboard, Pause, Play, Plus, Trash2, ZoomIn, ZoomOut } from "lucide-react";
+import { Calculator, Home, Keyboard, Pause, Play, Plus, Trash2, ZoomIn, ZoomOut } from "lucide-react";
 import MathText from "@/components/MathText";
 import { Button } from "@/components/ui/kit/button";
 import { cn } from "@/lib/cn";
@@ -13,6 +13,8 @@ import ToolFrame, { NumberField, Panel, Toggle } from "../core/ToolFrame";
 import MathInput, { type MathInputHandle } from "../core/MathInput";
 import MathKeyboard from "../core/MathKeyboard";
 import { isIncomplete, readLatex } from "../solve/latex";
+import { liveSolve, type Live } from "../solve/live";
+import ResultView from "../solve/ResultView";
 import {
   analyze,
   clamp,
@@ -433,6 +435,25 @@ export default function GraphTool() {
   }, [showTable, items, lines, params, paramNames, tbl]);
 
   /* ---------- Шүргэгч ба талбай (эхний харагдаж буй функцээр) ---------- */
+  // Интегралыг алхамтай бодох (тестэрийн санал 2026-11-05): Бодогчийн тодорхой интегралыг ашиглана.
+  // Түлхүүр (функц|a|b) өөрчлөгдвөл хуучин бодолтыг харуулахгүй.
+  const areaKey = `${fnLines[0]?.l.src ?? ""}|${areaAB.a}|${areaAB.b}`;
+  const [areaSol, setAreaSol] = useState<{ key: string; live: Live } | null>(null);
+  const [areaSteps, setAreaSteps] = useState(true);
+  const solveArea = () => {
+    const first = fnLines[0];
+    if (!first) return;
+    // Бодогч тодорхой интегралыг зөвхөн «\int_a^b … dx» хэлбэрээс таньдаг — «y=»/«f(x)=»-ийг хасаж оруулна
+    const tex = first.l.latex ?? ("tex" in first.it ? (first.it as { tex: string }).tex : first.l.src);
+    const body = tex.replace(/^\s*(y|f\s*\(\s*x\s*\))\s*=\s*/i, "");
+    setAreaSteps(true);
+    setAreaSol({
+      key: areaKey,
+      live: liveSolve(`\\int_{${areaAB.a}}^{${areaAB.b}}\\left(${body}\\right)\\,dx`, { action: "defint" }),
+    });
+  };
+  const areaLive = areaSol?.key === areaKey ? areaSol.live : null;
+
   const analysis = useMemo(() => {
     const first = fnLines[0];
     if (!first || first.it.kind !== "fn" || (!tangent && !area)) return null;
@@ -763,6 +784,18 @@ export default function GraphTool() {
                           <p className="text-sm text-ink-dim">Энэ завсарт функц тасралттай тул интеграл тодорхойлогдохгүй</p>
                         )}
                       </div>
+                    )}
+                    <Button variant="outline" size="sm" onClick={solveArea} className="gap-1.5">
+                      <Calculator className="h-4 w-4" aria-hidden />
+                      Бодох
+                    </Button>
+                    {areaLive?.status === "done" && (
+                      <ResultView sol={areaLive.sol} stepsOpen={areaSteps} onSteps={setAreaSteps} />
+                    )}
+                    {areaLive && areaLive.status !== "done" && (
+                      <p role="status" className="text-sm text-ink-dim">
+                        {areaLive.status === "error" ? areaLive.message : "Энэ функцийн интегралыг алхамтай бодож чадсангүй"}
+                      </p>
                     )}
                   </div>
                 )}

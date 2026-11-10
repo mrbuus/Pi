@@ -7,6 +7,7 @@ import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import { formatMinutes } from "@/components/schedule/types";
 import { ATTENDANCE_LABEL, type MyLesson } from "./types";
+import { regroupTopicText } from "@/lib/testNames";
 
 const SHOW = 5;
 
@@ -28,7 +29,7 @@ export default function StudentLessonHistory() {
           <li key={r.id} className="grid grid-cols-[3.5rem_1fr] gap-x-3 px-3 py-2.5 text-sm">
             <span className="font-mono text-xs font-bold text-brand-soft">{r.date.slice(5).replace("-", ".")}</span>
             <div className="min-w-0">
-              <p className="font-medium">{r.topic ?? <span className="italic text-ink-dim">Сэдэвгүй</span>}</p>
+              <p className="font-medium">{(r.topic && regroupTopicText(r.topic)) || <span className="italic text-ink-dim">Сэдэвгүй</span>}</p>
               <p className="mt-0.5 text-xs text-ink-dim">
                 <Meta
                   items={[

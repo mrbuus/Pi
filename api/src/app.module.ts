@@ -3,6 +3,8 @@ import { HealthController } from './health.controller';
 import { StudyReviewModule } from './study-review/study-review.module';
 import { LessonFlowModule } from './lesson-flow/lesson-flow.module';
 import { LessonDayModule } from './lesson-day/lesson-day.module';
+import { MakeupVisitsModule } from './makeup-visits/makeup-visits.module';
+import { StudentCalendarModule } from './student-calendar/student-calendar.module';
 import { LessonRecordsModule } from './lesson-records/lesson-records.module';
 import { CentreHelpModule } from './centre-help/centre-help.module';
 import { FeedbackModule } from './feedback/feedback.module';
@@ -23,6 +25,7 @@ import { AnnouncementsModule } from './announcements/announcements.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AssignmentsModule } from './assignments/assignments.module';
+import { HomeworkQuizModule } from './homework-quiz/homework-quiz.module';
 import { TeacherGroupsModule } from './teacher-groups/teacher-groups.module';
 import { AuditModule } from './audit/audit.module';
 import { ClassSessionsModule } from './class-sessions/class-sessions.module';
@@ -56,6 +59,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { StoreModule } from './store/store.module';
 import { ScheduleModule as ClassScheduleModule } from './schedule/schedule.module';
+import { TeacherHoursModule } from './teacher-hours/teacher-hours.module';
 import { StorageModule } from './storage/storage.module';
 import { TasksModule } from './tasks/tasks.module';
 import { TestsModule } from './tests/tests.module';
@@ -136,6 +140,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     ClassroomsModule,
     AttendanceModule,
     AssignmentsModule,
+    HomeworkQuizModule,
     ContentModule,
     TestsModule,
     ThousandModule,
@@ -166,6 +171,8 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     ProgressModule,
     TasksModule,
     ClassScheduleModule,
+    // Багшийн ажилласан цагийн хүснэгт, данс, хөлс (эзэн 2026-11-08)
+    TeacherHoursModule,
     AuditModule,
     NotesModule,
     GoalsModule,
@@ -190,6 +197,9 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     CentreHelpModule,
     LessonFlowModule,
     LessonDayModule,
+    MakeupVisitsModule,
+    // Сурагчийн хичээлийн хуанли + сэдэв хөтөлбөр (эзэн 2026-11-08)
+    StudentCalendarModule,
     LessonRecordsModule,
     // Буцаах ба өөрчлөлтийн түүх (docs/v2/BUTSAAH-TUUKH-TOLOVLOGOO.md)
     RevisionsModule,

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -7,6 +8,7 @@ import {
 import { Prisma } from '../generated/prisma/client';
 import { Role } from '../generated/prisma/enums';
 import { dateKey, parseDateOnly, todayUB } from '../common/date';
+import { classTeacherWhere } from '../common/class-teachers';
 import { markPlus, teacherPlusIds } from '../common/teacher-plus';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleService } from '../schedule/schedule.service';
@@ -20,15 +22,33 @@ import {
   PROBLEM_TEXT_MAX,
   ubDayBounds,
 } from './lesson-records.logic';
-import { compareBookOrder, planTitle } from '../schedule/lesson-plan.logic';
+import {
+  cleanCustomTopics,
+  compareBookOrder,
+  isAutoTitle,
+  planTitle,
+  storedCustomTopics,
+} from '../schedule/lesson-plan.logic';
 import { shortTestName } from '../class-sessions/roadmap.logic';
 import { LESSON_TOPIC_BLANK } from '../common/soft-delete';
+import {
+  cleanExcluded,
+  isStale,
+  planSessionSync,
+  recordTestIds,
+  sessionVisibleFor,
+} from '../schedule/lesson-coherence.logic';
 
 /** Батлахад багшийн бичих нэмэлт (эзэн 2026-10-27). undefined = өмнөхийг хадгална. */
 export interface ConfirmDetails {
+  /** Хуучин клиент: чөлөөт сэдвүүдийг «, »-оор нэгтгэсэн нэг мөр */
   topic?: string | null;
+  /** Бодлогын санд байхгүй сэдвүүд (шинэ клиент) — өгвөл `topic`-ыг үл тооно */
+  customTopics?: string[];
   description?: string | null;
   problemNumbers?: string | null;
+  /** Цонх нээх үеийн батламжийн confirmedAt (null = батлаагүй байсан); өөр хүн хооронд нь батлавал 409 */
+  expectedConfirmedAt?: string | null;
 }
 
 export type Actor = { userId: string; role: Role };
@@ -125,40 +145,49 @@ export class LessonRecordsService {
   }
 
   /**
-   * Тухайн өдрийн ангийн сангийн тестийн бүртгэлийг `tests`-ээр солино:
-   * жагсаалтад байгааг upsert (хассан бодлоготой), байхгүйг устгана. Гараар
-   * бичсэн (testId-гүй) бүртгэлд хүрэхгүй.
+   * Тухайн өдрийн ангийн сангийн тестийн бүртгэлийг `tests`-ээр солино: жагсаалтад
+   * байгааг upsert (хассан бодлоготой), байхгүйг хасна. Гараар бичсэн (testId-гүй)
+   * бүртгэл, ӨӨР хичээлийн (тэр өдөр мөн хичээлтэй) батламжид орсон тестэд хүрэхгүй.
+   *
+   * Хассан бүртгэлийн БҮТЭН мөр AuditLog-д (DELETE) үлдэнэ. Сурагчийн оройн тэмдэглэгээ
+   * (Attempt), гэрийн даалгавар (HomeworkAttempt) ХЭЗЭЭ Ч устахгүй — тэд бодлого/огноогоор
+   * хадгалагддаг тул буцааж нэмэхэд дахин холбогдоно (эзэн 2026-11-08).
    */
   private async syncTests(
     classroomId: string,
     date: Date,
     tests: { testId: string; excludedProblemIds: string[] }[],
     actor: Actor,
+    otherLessonsTests: ReadonlySet<string>,
   ) {
     const byId = new Map<string, string[]>();
     for (const t of tests) byId.set(t.testId, [...new Set(t.excludedProblemIds ?? [])]);
     const ids = [...byId.keys()];
-    const rows = ids.length
-      ? await this.prisma.test.findMany({
-          where: { id: { in: ids }, deletedAt: null },
-          select: { id: true, problems: { select: { problemId: true } } },
-        })
-      : [];
-    if (rows.length !== ids.length)
-      throw new BadRequestException('Сонгосон тест олдсонгүй.');
-    for (const r of rows) {
-      const own = new Set(r.problems.map((p) => p.problemId));
-      if (byId.get(r.id)!.some((p) => !own.has(p)))
-        throw new BadRequestException('Хассан бодлого энэ тестэд алга.');
-    }
     const before = await this.prisma.classTestSession.findMany({
       where: { classroomId, date, testId: { not: null } },
-      select: { id: true, testId: true, excludedProblemIds: true },
     });
+    const recorded = new Set(before.map((b) => b.testId));
+    const rows = ids.length
+      ? await this.prisma.test.findMany({
+          where: { id: { in: ids } },
+          select: {
+            id: true,
+            deletedAt: true,
+            problems: { orderBy: { order: 'asc' }, select: { problemId: true } },
+          },
+        })
+      : [];
+    // Тэр өдөр аль хэдийн бүртгэгдсэн тест хожим устсан ч батламжийг дахин хадгалж болно
+    // (өмнө нь «Сонгосон тест олдсонгүй» гэж гацдаг байсан); ШИНЭЭР нэмэх тест бэлэн байх ёстой
+    const usable = rows.filter((r) => !r.deletedAt || recorded.has(r.id));
+    if (usable.length !== ids.length) throw new BadRequestException('Сонгосон тест олдсонгүй.');
+    for (const r of usable)
+      byId.set(r.id, cleanExcluded(byId.get(r.id)!, r.problems.map((p) => p.problemId)));
+
+    const { remove } = planSessionSync(before, ids, otherLessonsTests);
+    const removed = before.filter((b) => remove.includes(b.id));
     await this.prisma.$transaction(async (tx) => {
-      await tx.classTestSession.deleteMany({
-        where: { classroomId, date, testId: { not: null, notIn: ids } },
-      });
+      if (remove.length) await tx.classTestSession.deleteMany({ where: { id: { in: remove } } });
       for (const testId of ids)
         await tx.classTestSession.upsert({
           where: { classroomId_testId_date: { classroomId, testId, date } },
@@ -172,9 +201,20 @@ export class LessonRecordsService {
           update: { excludedProblemIds: byId.get(testId)! },
         });
     });
+    for (const r of removed)
+      await this.audit(actor, 'DELETE', 'ClassTestSession', r.id, r, null);
     await this.audit(actor, 'UPDATE', 'ClassTestSession', `${classroomId}:${dateKey(date)}`, before, {
       tests: ids.map((id) => ({ testId: id, excludedProblemIds: byId.get(id) })),
     });
+  }
+
+  /** Тухайн анги тухайн өдөр ӨӨР хичээлийн (батлагдсан) snapshot-д орсон тестүүд. */
+  private async otherLessonsTests(classroomId: string, date: Date, scheduleId: string) {
+    const others = await this.prisma.lessonRecord.findMany({
+      where: { classroomId, date, cancelledAt: null, scheduleId: { not: scheduleId } },
+      select: { tests: true },
+    });
+    return new Set(others.flatMap((r) => recordTestIds(r.tests)));
   }
 
   // ---------- Батлах ----------
@@ -191,10 +231,22 @@ export class LessonRecordsService {
     if (date > todayUB())
       throw new BadRequestException('Ирээдүйн хичээлийг батлах боломжгүй.');
     const { entry } = await this.resolveEntry(scheduleId, key);
-    if (tests) await this.syncTests(entry.classroomId, date, tests, actor);
+    // Зэрэг засвар: өөр багш энэ хооронд баталсан/зассан бол дарж бичихгүй
+    if (details.expectedConfirmedAt !== undefined) {
+      const current = await this.prisma.lessonRecord.findUnique({
+        where: { scheduleId_date: { scheduleId, date } },
+        select: { confirmedAt: true, cancelledAt: true },
+      });
+      if (isStale(details.expectedConfirmedAt, current && !current.cancelledAt ? current.confirmedAt : null))
+        throw new ConflictException(
+          'Энэ хичээлийг өөр хүн дөнгөж баталсан эсвэл зассан байна. Цонхоо хаагаад дахин нээнэ үү.',
+        );
+    }
+    const others = await this.otherLessonsTests(entry.classroomId, date, scheduleId);
+    if (tests) await this.syncTests(entry.classroomId, date, tests, actor, others);
 
     const { start, end } = ubDayBounds(key);
-    const [enrollments, attendance, sessions] = await Promise.all([
+    const [enrollments, attendance, daySessions] = await Promise.all([
       this.prisma.enrollment.findMany({
         where: {
           classroomId: entry.classroomId,
@@ -217,6 +269,9 @@ export class LessonRecordsService {
         orderBy: { createdAt: 'asc' },
       }),
     ]);
+    // Энэ хичээлд илгээсэн тест ∪ өөр хичээлийнх биш бүртгэл (ганц хичээлтэй өдөр — бүгд)
+    const own = new Set(tests?.map((t) => t.testId) ?? []);
+    const sessions = daySessions.filter((s) => sessionVisibleFor(s.testId, own, others));
     const testIds = sessions.flatMap((s) => (s.testId ? [s.testId] : []));
     const testRows = testIds.length
       ? await this.prisma.test.findMany({
@@ -278,11 +333,23 @@ export class LessonRecordsService {
       include: { students: true },
     });
 
-    // Сэдэв: «Орох тест» чөлөөт бичвэр > төлөвлөгөөний гарчиг > хийсэн тестүүдийн нэр
-    const typedTopic = cleanText(details.topic, 200);
-    const libraryTests = sessions.flatMap((s) => (s.testId ? [testTitles.get(s.testId) ?? ''] : []));
-    const topic =
-      typedTopic ?? snap.record.topic ?? (planTitle(libraryTests.map(shortTestName)) || null);
+    // Сэдэв = ХИЙСЭН тестүүд (номын дарааллаар, товчилсон) + бодлогын санд байхгүй сэдвүүд.
+    // Өмнө нь төлөвлөгөөний гарчгийг авдаг байсан тул буруу тестийг хассаны дараа ч
+    // батламжийн сэдэвт тэр тест үлддэг байв (эзэн 2026-11-08).
+    const storedPlan = await this.prisma.lessonTopic.findUnique({
+      where: {
+        scheduleId_date: {
+          scheduleId,
+          date: parseDateOnly(entry.exception?.originalDate ?? key),
+        },
+      },
+    });
+    // Устсан (deletedAt) төлөвлөгөө = байхгүй
+    const plan = storedPlan && !storedPlan.deletedAt ? storedPlan : null;
+    const ordered = sortByBook(testRows.filter((t) => testIds.includes(t.id)));
+    const shortNames = ordered.map((t) => shortTestName(t.title));
+    const customTopics = await this.resolveCustomTopics(details, plan, shortNames);
+    const topic = planTitle([...shortNames, ...customTopics]) || null;
     // Тайлбар, бодлогын дугаар — өгөөгүй (undefined) бол өмнөх батламжийнхыг хадгална
     const description =
       details.description === undefined
@@ -329,7 +396,7 @@ export class LessonRecordsService {
         students: snap.students.length,
       },
     );
-    await this.feedLessonTopic(actor, entry, key, typedTopic, testRows);
+    await this.syncLessonTopic(actor, entry, key, plan, ordered, customTopics);
     return this.present(record, await this.plusOf([record]));
   }
 
@@ -383,61 +450,100 @@ export class LessonRecordsService {
   }
 
   /**
-   * Ангийн «Одоогийн бүлэг» (class-dashboard currentChapter нь LessonTopic.chapterId-ээс):
-   * батлахад хийсэн тестийн хамгийн хол бүлгийг төлөвлөгөөнд БӨГЛӨНӨ. Зөвхөн
-   * НЭМНЭ — төлөвлөгөөний байгаа гарчиг, бүлгийг дарж бичихгүй. Төлөвлөгөөгүй
-   * хичээлд шинэ мөр (гарчиг = бичсэн сэдэв) үүсгэнэ.
+   * Чөлөөт сэдвүүд: шинэ клиент `customTopics` илгээнэ; хуучин клиент нэгтгэсэн `topic`
+   * (тестүүдийн автомат нэртэй ижил бол сэдэв биш); юу ч ирээгүй бол төлөвлөгөөнийх хэвээр.
    */
-  private async feedLessonTopic(
+  private async resolveCustomTopics(
+    details: ConfirmDetails,
+    plan: { customTopics: string[]; title: string; testIds: string[] } | null,
+    shortNames: string[],
+  ): Promise<string[]> {
+    if (details.customTopics !== undefined) return cleanCustomTopics(details.customTopics);
+    if (details.topic !== undefined) {
+      const typed = cleanText(details.topic, 200);
+      return typed && !isAutoTitle(typed, shortNames) ? cleanCustomTopics([typed]) : [];
+    }
+    if (!plan) return [];
+    const rows = plan.testIds.length
+      ? await this.prisma.test.findMany({
+          where: { id: { in: plan.testIds } },
+          select: { id: true, title: true },
+        })
+      : [];
+    const titleOf = new Map(rows.map((t) => [t.id, shortTestName(t.title)]));
+    return storedCustomTopics({
+      ...plan,
+      testNames: plan.testIds.map((id) => titleOf.get(id) ?? ''),
+    });
+  }
+
+  /**
+   * Батлагдсан хичээлийн ТӨЛӨВЛӨГӨӨГ бодит байдалтай тэнцүүлнэ (эзэн 2026-11-08): тест =
+   * батласан тестүүд (номын дарааллаар), сэдэв = батласан сэдвүүд, гарчиг үүнээс; «Одоогийн
+   * бүлэг» (chapterId) = хамгийн хол тестийн бүлэг. Тарах/үлдэх, зургийн сурагч хөндөгдөхгүй.
+   * Ингэснээр замын зураг, өдрийн мөр, батламж гурав НЭГ зүйлийг хэлнэ — буруу баталсан тестийг
+   * хасахад «дараагийн тест» дахин зөв болно. `tests` илгээгээгүй (хуучин) дуудлагад ч тэр
+   * өдрийн бүртгэлтэй тестээр тэнцүүлнэ. Хуучин утга AuditLog-д.
+   */
+  private async syncLessonTopic(
     actor: Actor,
     entry: { scheduleId: string; exception?: { originalDate?: string | null } | null },
     key: string,
-    typedTopic: string | null,
-    tests: {
+    existing: {
+      id: string;
+      title: string;
+      testIds: string[];
+      customTopics: string[];
       chapterId: string | null;
-      variantLabel: string | null;
-      chapter: { order: number; book: { code: string } | null } | null;
-    }[],
+    } | null,
+    ordered: { id: string; title: string; chapterId: string | null }[] | null,
+    customTopics: string[],
   ) {
-    const last = tests
-      .filter((t) => t.chapterId)
-      .sort((a, b) =>
-        compareBookOrder(
-          { bookCode: a.chapter?.book?.code ?? null, chapterOrder: a.chapter?.order ?? null, variantLabel: a.variantLabel },
-          { bookCode: b.chapter?.book?.code ?? null, chapterOrder: b.chapter?.order ?? null, variantLabel: b.variantLabel },
-        ),
-      )
-      .at(-1);
-    const chapterId = last?.chapterId ?? null;
-    if (!chapterId && !typedTopic) return;
     const date = parseDateOnly(entry.exception?.originalDate ?? key);
-    const where = { scheduleId_date: { scheduleId: entry.scheduleId, date } };
-    const stored = await this.prisma.lessonTopic.findUnique({ where });
-    // Устсан (deletedAt) сэдэв = байхгүй; түлхүүрийг эзэлдэг тул доор СЭРГЭЭНЭ
-    const existing = stored && !stored.deletedAt ? stored : null;
-    if (existing) {
-      const data: { chapterId?: string; title?: string } = {};
-      if (!existing.chapterId && chapterId) data.chapterId = chapterId;
-      if (!existing.title && typedTopic) data.title = typedTopic;
-      if (!Object.keys(data).length) return;
-      const row = await this.prisma.lessonTopic.update({ where: { id: existing.id }, data });
-      await this.audit(actor, 'UPDATE', 'LessonTopic', row.id, existing, row);
+    const testIds = ordered ? ordered.map((t) => t.id) : (existing?.testIds ?? []);
+    const furthest = ordered?.filter((t) => t.chapterId).at(-1)?.chapterId ?? null;
+    const chapterId = furthest ?? existing?.chapterId ?? null;
+    if (!existing) {
+      if (!testIds.length && !customTopics.length) return;
+      // Устсан (deletedAt) мөр түлхүүрийг эзэлдэг — байвал хоосон төлөвөөс СЭРГЭЭНЭ
+      const stored = await this.prisma.lessonTopic.findUnique({
+        where: { scheduleId_date: { scheduleId: entry.scheduleId, date } },
+        select: { id: true },
+      });
+      const fresh = {
+        title: planTitle([...(ordered ?? []).map((t) => shortTestName(t.title)), ...customTopics]),
+        testIds,
+        customTopics,
+        chapterId,
+        createdById: actor.userId,
+      };
+      const row = stored
+        ? await this.prisma.lessonTopic.update({
+            where: { id: stored.id },
+            data: { ...LESSON_TOPIC_BLANK(), ...fresh },
+          })
+        : await this.prisma.lessonTopic.create({
+            data: { scheduleId: entry.scheduleId, date, ...fresh },
+          });
+      await this.audit(actor, 'CREATE', 'LessonTopic', row.id, null, row);
       return;
     }
-    const fresh = {
-      title: typedTopic ?? '',
-      chapterId,
-      createdById: actor.userId,
-    };
-    const row = stored
-      ? await this.prisma.lessonTopic.update({
-          where: { id: stored.id },
-          data: { ...LESSON_TOPIC_BLANK(), ...fresh },
-        })
-      : await this.prisma.lessonTopic.create({
-          data: { scheduleId: entry.scheduleId, date, ...fresh },
-        });
-    await this.audit(actor, 'CREATE', 'LessonTopic', row.id, null, row);
+    const data: {
+      testIds?: string[];
+      customTopics?: string[];
+      title?: string;
+      chapterId?: string | null;
+    } = {};
+    if (customTopics.join('\n') !== existing.customTopics.join('\n')) data.customTopics = customTopics;
+    if (ordered) {
+      const title = planTitle([...ordered.map((t) => shortTestName(t.title)), ...customTopics]);
+      if (testIds.join() !== existing.testIds.join()) data.testIds = testIds;
+      if (title !== existing.title) data.title = title;
+    }
+    if (chapterId !== existing.chapterId) data.chapterId = chapterId;
+    if (!Object.keys(data).length) return;
+    const row = await this.prisma.lessonTopic.update({ where: { id: existing.id }, data });
+    await this.audit(actor, 'UPDATE', 'LessonTopic', row.id, existing, row);
   }
 
   /**
@@ -607,11 +713,14 @@ export class LessonRecordsService {
   async studentHistory(actor: Actor, studentId: string, limit = 60) {
     this.assertStaff(actor);
     if (actor.role === Role.TEACHER) {
-      const active = await this.prisma.enrollment.findFirst({
-        where: { studentId, leftAt: null },
-        select: { classroom: { select: { teacherId: true } } },
+      // Сурагчийн АЛЬ Ч идэвхтэй ангид үндсэн/туслах багш бол харна (2026-11-05 аудит): өмнө нь
+      // зөвхөн эхний элсэлтийн үндсэн багшийг шалгадаг байсан тул хоёр ангид суудаг сурагчийн
+      // хоёр дахь ангийн багш, туслах багш нар буруу хориглогддог байв.
+      const mine = await this.prisma.enrollment.findFirst({
+        where: { studentId, leftAt: null, classroom: classTeacherWhere(actor.userId) },
+        select: { id: true },
       });
-      if (active?.classroom.teacherId !== actor.userId)
+      if (!mine)
         throw new ForbiddenException(
           'Зөвхөн өөрийн ангийн сурагчийг харах эрхтэй',
         );
@@ -702,4 +811,19 @@ export class LessonRecordsService {
       problemNumbers: r.problemNumbers ?? [],
     };
   }
+}
+
+/** Номын дарааллаар (100V3 → 200V3, бүлэг, хувилбар) эрэмбэлнэ. */
+function sortByBook<
+  T extends {
+    variantLabel: string | null;
+    chapter: { order: number; book: { code: string } | null } | null;
+  },
+>(rows: T[]): T[] {
+  return [...rows].sort((a, b) =>
+    compareBookOrder(
+      { bookCode: a.chapter?.book?.code ?? null, chapterOrder: a.chapter?.order ?? null, variantLabel: a.variantLabel },
+      { bookCode: b.chapter?.book?.code ?? null, chapterOrder: b.chapter?.order ?? null, variantLabel: b.variantLabel },
+    ),
+  );
 }

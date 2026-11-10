@@ -20,6 +20,8 @@ import {
   cleanCheckTitle,
   isUniqueViolation,
   OPEN_CHECKS_MAX,
+  phoneKey,
+  studentContacts,
 } from './class-checks.logic';
 import { ClassChecksService } from './class-checks.service';
 
@@ -645,5 +647,195 @@ describe('ClassChecksService', () => {
         }),
       );
     });
+  });
+
+  describe('хаагдсан чекийг засахгүй', () => {
+    const archivedRow = () =>
+      checkRow({ archivedAt: now, archivedById: 'plus' });
+
+    it('хаагдсан чекийн нэр/дүн солих → BadRequest, бичихгүй', async () => {
+      const { service, prisma } = setup();
+      prisma.classCheck.findFirst.mockResolvedValue(archivedRow());
+      await expect(
+        service.update('c1', 'k1', { amount: 30000 }, 'teacher'),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      await expect(
+        service.update('c1', 'k1', { title: 'Өөр нэр' }, 'teacher'),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      await expect(
+        service.update(
+          'c1',
+          'k1',
+          { archived: true, title: 'Өөр нэр' },
+          'teacher',
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(prisma.classCheck.update).not.toHaveBeenCalled();
+    });
+
+    it('ижил утга эсвэл дахин нээхтэй хамт бол зөвшөөрнө', async () => {
+      const { service, prisma } = setup();
+      prisma.classCheck.findFirst.mockResolvedValue(archivedRow());
+      prisma.classCheck.update.mockImplementation(
+        ({ data }: { data: Record<string, unknown> }) =>
+          Promise.resolve(checkRow(data)),
+      );
+      await service.update(
+        'c1',
+        'k1',
+        { title: ' Номны  мөнгө ', amount: 25000 },
+        'teacher',
+      );
+      expect(prisma.classCheck.update).not.toHaveBeenCalled();
+      await service.update(
+        'c1',
+        'k1',
+        { archived: false, amount: 30000 },
+        'teacher',
+      );
+      expect(prisma.classCheck.update.mock.calls[0][0].data).toEqual({
+        amount: 30000,
+        archivedAt: null,
+        archivedById: null,
+      });
+    });
+  });
+
+  describe('сурагчийн товч мэдээлэл', () => {
+    const enrollmentRow = (over: Record<string, unknown> = {}) => ({
+      leftAt: null,
+      classroom: { name: '12-1 Хавтгай' },
+      student: {
+        id: 's1',
+        firstName: 'Болд',
+        lastName: 'Дорж',
+        studentCode: 'B27120001',
+        phone: '99112233',
+        archivedAt: null,
+        studentProfile: {
+          fatherPhone: '8811 2233',
+          motherPhone: null,
+          guardianNote: '  Эмээ авна  ',
+        },
+        childLinks: [
+          {
+            parent: {
+              firstName: 'Сараа',
+              lastName: 'Бат',
+              phone: '+976 88112233',
+            },
+          },
+          {
+            parent: { firstName: 'Нараа', lastName: 'Цэнд', phone: '95556677' },
+          },
+        ],
+        ...over,
+      },
+    });
+
+    it('утас давхардалгүй, аав = аппын эцэг эх бол нэг мөр, төлбөргүй', async () => {
+      const { service, prisma } = setup();
+      prisma.enrollment.findFirst.mockResolvedValueOnce(enrollmentRow());
+      const res = await service.studentInfo('c1', 's1', 'teacher');
+      expect(res).toEqual({
+        id: 's1',
+        firstName: 'Болд',
+        lastName: 'Дорж',
+        studentCode: 'B27120001',
+        classroomName: '12-1 Хавтгай',
+        inClass: true,
+        guardianNote: 'Эмээ авна',
+        contacts: [
+          { kind: 'student', phone: '99112233' },
+          {
+            kind: 'father',
+            phone: '8811 2233',
+            appLinked: true,
+            name: 'Б. Сараа',
+          },
+          {
+            kind: 'parent',
+            phone: '95556677',
+            name: 'Ц. Нараа',
+            appLinked: true,
+          },
+        ],
+      });
+      expect(JSON.stringify(res)).not.toMatch(/tuition|amount|payment/i);
+      // Зөвхөн энэ ангийн бүртгэлээр хайна
+      expect(prisma.enrollment.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { classroomId: 'c1', studentId: 's1' },
+        }),
+      );
+    });
+
+    it('энэ ангид бүртгэлгүй → NotFound; Багш харах эрхгүй анги → Forbidden', async () => {
+      const { service, prisma } = setup();
+      prisma.enrollment.findFirst.mockResolvedValueOnce(null);
+      await expect(
+        service.studentInfo('c1', 'sX', 'teacher'),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      await expect(
+        service.studentInfo('c2', 's1', 'teacher'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(
+        service.studentInfo('c1', 's1', 'student'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('ангиас гарсан сурагч inClass=false, профайлгүй ч ажиллана', async () => {
+      const { service, prisma } = setup();
+      prisma.enrollment.findFirst.mockResolvedValueOnce(
+        enrollmentRow({ studentProfile: null, childLinks: [], phone: null }),
+      );
+      prisma.enrollment.findFirst.mockResolvedValueOnce({
+        ...enrollmentRow({ studentProfile: null, childLinks: [], phone: null }),
+        leftAt: now,
+      });
+      const a = await service.studentInfo('c1', 's1', 'plus');
+      expect(a).toMatchObject({
+        inClass: true,
+        contacts: [],
+        guardianNote: null,
+      });
+      const b = await service.studentInfo('c1', 's1', 'admin');
+      expect(b.inClass).toBe(false);
+    });
+  });
+});
+
+describe('«Чек» — утасны жагсаалт', () => {
+  it('phoneKey: цифр л, урдах 976-г хасна', () => {
+    expect(phoneKey('+976 9911-2233')).toBe('99112233');
+    expect(phoneKey('9911 2233')).toBe('99112233');
+    expect(phoneKey('  ')).toBeNull();
+    expect(phoneKey(null)).toBeNull();
+    expect(phoneKey('97699')).toBe('97699');
+  });
+
+  it('дараалал сурагч → аав → ээж → апп; хоосныг алгасна', () => {
+    expect(
+      studentContacts({
+        studentPhone: '',
+        fatherPhone: null,
+        motherPhone: '88001122',
+        parents: [{ name: 'А. Бат', phone: null }],
+      }),
+    ).toEqual([{ kind: 'mother', phone: '88001122' }]);
+  });
+
+  it('аав, ээж нэг дугаартай бол нэг мөр (аав); сурагчийн дугаартай таарсан аппын эцэг эх тусдаа мөр болохгүй', () => {
+    expect(
+      studentContacts({
+        studentPhone: '99112233',
+        fatherPhone: '88001122',
+        motherPhone: '8800 1122',
+        parents: [{ name: 'Б. Сараа', phone: '99112233' }],
+      }),
+    ).toEqual([
+      { kind: 'student', phone: '99112233' },
+      { kind: 'father', phone: '88001122' },
+    ]);
   });
 });

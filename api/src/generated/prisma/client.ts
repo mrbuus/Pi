@@ -571,6 +571,21 @@ export type LessonRotation = Prisma.LessonRotationModel
  */
 export type StaffCapabilityGrant = Prisma.StaffCapabilityGrantModel
 /**
+ * Model TeacherWorkHours
+ * 
+ */
+export type TeacherWorkHours = Prisma.TeacherWorkHoursModel
+/**
+ * Model TeacherBankAccount
+ * 
+ */
+export type TeacherBankAccount = Prisma.TeacherBankAccountModel
+/**
+ * Model TeacherPayRate
+ * 
+ */
+export type TeacherPayRate = Prisma.TeacherPayRateModel
+/**
  * Model StudyReviewRun
  * 
  */
@@ -757,3 +772,49 @@ export type AccountDeletionRequest = Prisma.AccountDeletionRequestModel
  * эсвэл lucide дүрсний нэрээр тэмдэглэнэ. User-тэй relation зориуд тавиагүй (AuditLog-той адил).
  */
 export type UiEvent = Prisma.UiEventModel
+/**
+ * Model HomeworkDeadline
+ * Гэрийн даалгаврын хугацааг багш гараар тохируулсан (эзэн 2026-11-05: самбарын «Онлайн гэрийн
+ * даалгавар» мөрийн ард). lessonDate = даалгавар ӨГСӨН хичээлийн өдөр. Мөр байхгүй бол хугацаа =
+ * дараагийн хичээлийн өдрийн 00:00 (УБ), хоцорч илгээж болно (хуучин дүрэм хэвээр).
+ * allowLate = false бол хугацаа өнгөрмөгц онлайн тест эхлэх/хадгалах/илгээх, зураг явуулах хаагдана.
+ */
+export type HomeworkDeadline = Prisma.HomeworkDeadlineModel
+/**
+ * Model HomeworkComment
+ * Гэрийн даалгавар дээрх СУРАГЧИД ХАРАГДАХ сэтгэгдэл (эзэн 2026-11-05). Багшийн дотоод тэмдэглэл
+ * (DailyHomeworkMark.comment)-ээс тусдаа. Нэг сурагч × анги × даалгавар өгсөн хичээлийн өдөр = нэг яриа:
+ * багш алдааг нь бичнэ, сурагч хариулж болно. ХЭЗЭЭ Ч устгахгүй (deletedAt зөвхөн зохиогч өөрөө нуухад).
+ * kind: NOTE — энгийн, RETURN — «Буцаах» дарахад бичсэн шалтгаан.
+ */
+export type HomeworkComment = Prisma.HomeworkCommentModel
+/**
+ * Model HomeworkQuiz
+ * Гэрийн даалгаврыг ангид богино шалгалтаар шалгах (эзэн 2026-11-08): ижил төрлийн, өөр тоотой
+ * бодлого. Нэг анги × нэг өдөр = нэг шалгалт. «Устгах» = deletedAt (оноонууд мөн deletedAt-тай нуугдана);
+ * дахин эхлүүлбэл ижил мөр сэргэж, оноо хоосноос эхэлнэ. Зөвхөн ажилтан харна.
+ */
+export type HomeworkQuiz = Prisma.HomeworkQuizModel
+/**
+ * Model HomeworkQuizScore
+ * Шалгалтын нэг сурагчийн оноо 0..problemCount, бутархай 2 хүртэл орон (7.5 — эзэн 2026-11-08 19:08;
+ * Decimal тул хөвөгч тооны алдаагүй). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
+ */
+export type HomeworkQuizScore = Prisma.HomeworkQuizScoreModel
+/**
+ * Model MakeupVisit
+ * Нөхөлт (эзэн 2026-11-08): өөрийн ангидаа хийж чадаагүй хичээлээ нөхсөн нэг удаа.
+ * - Өөр ангид суусан: hostClassroomId = зочилсон анги (ж: 12-4-ийн сурагч 12-6-д). Хийсэн
+ * тест = тэр ангийн тэр өдрийн хичээлийнх (ClassTestSession, эс бөгөөс төлөвлөгөө) —
+ * уншихдаа тооцно (makeup-visits/covered.logic.ts), энд хуулахгүй.
+ * - 406 өрөө: hostClassroomId = null. Хийсэн тестийг багш сонгоно → MakeupVisitTest.
+ * Давхардал: нэг сурагч, нэг өдөр, нэг газар (placeKey = hostClassroomId эсвэл "406")
+ * идэвхтэй ганц мөр. Устгах нь зөөлөн (deletedAt). Хэрэглэгч/ангийн FK-гүй (ClassCheck-ийн адил).
+ */
+export type MakeupVisit = Prisma.MakeupVisitModel
+/**
+ * Model MakeupVisitTest
+ * 406 өрөөнд нөхөж хийсэн тест/сэдэв. testId = null бол бодлогын санд байхгүй, багшийн
+ * бичсэн сэдэв (title). Сэдвийг солиход хасагдсан мөр зөөлөн устна (түүх үлдэнэ).
+ */
+export type MakeupVisitTest = Prisma.MakeupVisitTestModel

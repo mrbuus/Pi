@@ -8,6 +8,12 @@ import {
 } from '@nestjs/common';
 import { addDaysKey, ubDateKey } from '../attendance/board-logic';
 import { dateKey, parseDateOnly, todayUB } from '../common/date';
+import {
+  deadlineClosed,
+  deadlineKey,
+  loadDeadlineOverride,
+  loadDeadlineOverrides,
+} from './homework-deadline';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProblemReviewService } from '../mistakes/problem-review.service';
@@ -53,6 +59,12 @@ import {
 } from './homework-logic';
 import { youtubeOf } from '../exams/exam-data';
 import { loadPlanned } from './planned-tests';
+import {
+  COMMENT_MAX,
+  cleanCaption,
+  cleanText,
+  loadHomeworkComments,
+} from './homework-comments';
 
 const PDF_MAX_BYTES = 25 * 1024 * 1024;
 const MAX_PAGES = 6;
@@ -428,6 +440,18 @@ export class HomeworkPracticeService {
       throw new ForbiddenException('Энэ гэрийн даалгавар танд нээгдээгүй байна');
   }
 
+  /** Багшийн тохируулсан хугацаа — зөвхөн гэрийн даалгаврын (round 1) оролдлогод */
+  private overrideFor(attempt: AttemptRow) {
+    if (attempt.round !== 1) return Promise.resolve(null);
+    return loadDeadlineOverride(this.prisma, attempt.classroomId, dateKey(attempt.lessonDate));
+  }
+
+  /** Багш «хугацаа дуусахад хаагдана» сонгосон бөгөөд хугацаа өнгөрсөн бол хориглоно */
+  private assertNotClosed(o: Awaited<ReturnType<typeof loadDeadlineOverride>>) {
+    if (deadlineClosed(o))
+      throw new ForbiddenException('Гэрийн даалгаврын хугацаа дууссан — багш хүлээж авахаа зогсоосон');
+  }
+
   private async ownOpenAttempt(attemptId: string, studentId: string) {
     const attempt = (await this.prisma.homeworkAttempt.findUnique({
       where: { id: attemptId },
@@ -440,6 +464,7 @@ export class HomeworkPracticeService {
     const date = dateKey(attempt.lessonDate);
     if (date > today || date < addDaysKey(today, -(MAX_DAYS - 1)))
       throw new ForbiddenException('Энэ гэрийн даалгаврын хугацаа дууссан байна');
+    this.assertNotClosed(await this.overrideFor(attempt));
     return attempt;
   }
 
@@ -556,7 +581,7 @@ export class HomeworkPracticeService {
           deadlineAt: true,
         },
       });
-    const [attempts, photos, marks] = await Promise.all([
+    const [attempts, photos, marks, overrides] = await Promise.all([
       testIds.length
         ? attemptsQuery()
         : Promise.resolve([] as Awaited<ReturnType<typeof attemptsQuery>>),
@@ -573,6 +598,8 @@ export class HomeworkPracticeService {
           fileKey: true,
           pages: true,
           createdAt: true,
+          caption: true,
+          returnedAt: true,
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -598,7 +625,20 @@ export class HomeworkPracticeService {
               comment: string | null;
             }[],
           ),
+      loadDeadlineOverrides(
+        this.prisma,
+        [...new Set(list.map((r) => r.classroomId))],
+        fromKey,
+        addDaysKey(today, ADVANCE_DAYS),
+      ),
     ]);
+    // Сурагчид харагдах сэтгэгдэл (багшийн дотоод тэмдэглэл БИШ) — өдөр бүрийн яриа
+    const comments = await loadHomeworkComments(
+      this.prisma,
+      { studentId, lessonDate: { gte: parseDateOnly(fromKey) } },
+      studentId,
+    );
+    const now = Date.now();
     return {
       days: list.map((row) => {
         const slot = row.slot;
@@ -614,12 +654,17 @@ export class HomeworkPracticeService {
                 m.classroomId === row.classroomId && dateKey(m.date) === next,
             )
           : undefined;
-        const deadlineAt = slot?.deadlineAt ?? (next ? ubDayStart(next) : null);
+        // Багш гараар тохируулсан хугацаа давамгайлна (эзэн 2026-11-05)
+        const override = overrides.get(deadlineKey(row.classroomId, row.date)) ?? null;
+        const deadlineAt =
+          override?.dueAt ?? slot?.deadlineAt ?? (next ? ubDayStart(next) : null);
         return {
           date: row.date,
           classroomId: row.classroomId,
           classroomName: row.classroomName,
           deadlineAt: deadlineAt?.toISOString() ?? null,
+          allowLate: override ? override.allowLate : true,
+          closed: deadlineClosed(override, now),
           items: (slot?.items ?? []).map((item) => {
             const a = attempts.find(
               (x) => x.testId === item.id && dateKey(x.lessonDate) === row.date,
@@ -641,7 +686,10 @@ export class HomeworkPracticeService {
                   ? { correct: a.score, total: a.total }
                   : null,
               submittedAt: a?.submittedAt?.toISOString() ?? null,
-              late: isLate(a?.submittedAt ?? null, a?.deadlineAt ?? deadlineAt),
+              late: isLate(
+                a?.submittedAt ?? null,
+                override ? deadlineAt : (a?.deadlineAt ?? deadlineAt),
+              ),
             };
           }),
           photo: photo
@@ -650,12 +698,18 @@ export class HomeworkPracticeService {
                 fileKey: photo.fileKey,
                 pages: photo.pages,
                 uploadedAt: photo.createdAt.toISOString(),
+                caption: photo.caption,
+                returnedAt: photo.returnedAt?.toISOString() ?? null,
                 // Дараагийн хичээлийн өдрөөс хойш илгээсэн бол хоцорсон
                 late: isLate(photo.createdAt, deadlineAt),
               }
             : null,
           mark: mark?.status ?? null,
-          markComment: mark?.comment ?? null,
+          // DailyHomeworkMark.comment = багшийн ДОТООД тэмдэглэл — сурагчид илгээхгүй (эзэн 2026-11-05).
+          // Сурагчид зориулсан бичвэр зөвхөн `comments`-оор.
+          comments: comments
+            .filter((c) => c.classroomId === row.classroomId && c.lessonDate === row.date)
+            .map((c) => c.view),
           upcoming: !!row.upcoming,
           topic: lessons.topics.get(dayKey(row.classroomId, row.date)) ?? null,
         };
@@ -702,15 +756,32 @@ export class HomeworkPracticeService {
       throw new BadRequestException('testId шаардлагатай');
     const date = this.parseDate(body.date);
     const { slot, item } = await this.slotFor(studentId, body.testId, date);
+    const override = await loadDeadlineOverride(this.prisma, slot.classroomId, date);
+    if (deadlineClosed(override)) {
+      // Хаагдсан ч илгээсэн дүнгээ нээж харна — зөвхөн шинээр эхлэх/үргэлжлүүлэхийг хориглоно
+      const done = await this.prisma.homeworkAttempt.findUnique({
+        where: {
+          studentId_testId_lessonDate_round: {
+            studentId,
+            testId: item.id,
+            lessonDate: parseDateOnly(date),
+            round: 1,
+          },
+        },
+        select: { status: true },
+      });
+      if (done?.status !== 'SUBMITTED') this.assertNotClosed(override);
+    }
     const attempt = await this.openAttempt(studentId, {
       classroomId: slot.classroomId,
       testId: item.id,
       date,
       round: 1,
       timeLimitMin: item.timeLimitMin,
-      deadlineAt: () => this.deadlineFor(studentId, slot, date),
+      deadlineAt: () =>
+        override ? Promise.resolve(override.dueAt) : this.deadlineFor(studentId, slot, date),
     });
-    return this.attemptView(attempt, attempt.deadlineAt ?? slot.deadlineAt);
+    return this.attemptView(attempt, override?.dueAt ?? attempt.deadlineAt ?? slot.deadlineAt);
   }
 
   /** Оролдлого олох/үүсгэх; байгаа IN_PROGRESS-ийг нээх бүрт openCount +1 */
@@ -1347,6 +1418,8 @@ export class HomeworkPracticeService {
   ) {
     const { attempt } = await this.ownAttempt(attemptId, studentId);
     if (attempt.status === 'SUBMITTED') return this.submittedView(attempt);
+    const override = await this.overrideFor(attempt);
+    this.assertNotClosed(override);
     const rows = await this.loadProblems(attempt.testId);
     // Хугацаа дууссаны дараах шинэ хариуг авахгүй — хадгалсан хариугаар дүгнэнэ
     const late = this.timeExpired(attempt);
@@ -1416,7 +1489,7 @@ export class HomeworkPracticeService {
       submittedAt: submittedAt.toISOString(),
       review: await this.reviewOf(
         attempt.testId,
-        attempt.deadlineAt,
+        override?.dueAt ?? attempt.deadlineAt,
         submittedAt,
         rows,
         graded.results,
@@ -1425,12 +1498,13 @@ export class HomeworkPracticeService {
   }
 
   private async submittedView(attempt: AttemptRow) {
-    const [final, rows] = await Promise.all([
+    const [final, rows, override] = await Promise.all([
       this.prisma.homeworkCheck.findFirst({
         where: { attemptId: attempt.id, n: 0 },
         select: { results: true },
       }),
       this.loadProblems(attempt.testId),
+      this.overrideFor(attempt),
     ]);
     const results = asRecord(final?.results) as Record<string, CheckResult>;
     return {
@@ -1439,7 +1513,7 @@ export class HomeworkPracticeService {
       submittedAt: attempt.submittedAt?.toISOString() ?? null,
       review: await this.reviewOf(
         attempt.testId,
-        attempt.deadlineAt,
+        override?.dueAt ?? attempt.deadlineAt,
         attempt.submittedAt,
         rows,
         results,
@@ -1451,8 +1525,9 @@ export class HomeworkPracticeService {
 
   async addPhoto(
     studentId: string,
-    body: { classroomId?: unknown; date?: unknown; fileKey?: unknown; pages?: unknown },
+    body: { classroomId?: unknown; date?: unknown; fileKey?: unknown; pages?: unknown; caption?: unknown },
   ) {
+    const caption = cleanCaption(body?.caption);
     if (typeof body?.classroomId !== 'string' || !body.classroomId)
       throw new BadRequestException('classroomId шаардлагатай');
     if (typeof body.fileKey !== 'string' || !body.fileKey)
@@ -1469,6 +1544,19 @@ export class HomeworkPracticeService {
       throw new ForbiddenException('Энэ өдрийн гэрийн даалгавар нээгдээгүй байна');
     if (!(await this.photoDayAllowed(studentId, body.classroomId, date, today)))
       throw new ForbiddenException('Энэ өдрийн гэрийн даалгавар нээгдээгүй байна');
+    // Багш «Буцаах» дарсан бол хугацаа хаагдсан ч дахин илгээнэ (эзэн 2026-11-05)
+    const returned = await this.prisma.homeworkPhoto.findFirst({
+      where: {
+        studentId,
+        classroomId: body.classroomId,
+        lessonDate: parseDateOnly(date),
+        deletedAt: null,
+        returnedAt: { not: null },
+      },
+      select: { id: true },
+    });
+    if (!returned)
+      this.assertNotClosed(await loadDeadlineOverride(this.prisma, body.classroomId, date));
 
     // Файл: өөрийн байршуулсан, «homework» зорилготой (7 хоног хадгалах), PDF
     const file = await this.prisma.storedFile.findUnique({
@@ -1492,7 +1580,12 @@ export class HomeworkPracticeService {
         where: { studentId, classroomId: body.classroomId as string, lessonDate, deletedAt: null },
         orderBy: { createdAt: 'desc' },
       });
-      if (current && current.fileKey === body.fileKey) return current; // давтан дуудалт
+      if (current && current.fileKey === body.fileKey) {
+        // давтан дуудалт — тайлбарыг л шинэчилнэ
+        if (caption !== current.caption)
+          return tx.homeworkPhoto.update({ where: { id: current.id }, data: { caption } });
+        return current;
+      }
       await tx.homeworkPhoto.updateMany({
         where: { studentId, classroomId: body.classroomId as string, lessonDate, deletedAt: null },
         data: { deletedAt: new Date() },
@@ -1504,6 +1597,7 @@ export class HomeworkPracticeService {
           lessonDate,
           fileKey: body.fileKey as string,
           pages: realPages,
+          caption,
         },
       });
     });
@@ -1513,6 +1607,39 @@ export class HomeworkPracticeService {
       fileKey: photo.fileKey,
       pages: photo.pages,
       uploadedAt: photo.createdAt.toISOString(),
+      caption: photo.caption,
+      returnedAt: photo.returnedAt?.toISOString() ?? null,
+    };
+  }
+
+  /** Сурагч багшийн сэтгэгдэлд хариулна — өөрийн ангийн, нээгдсэн өдрийн даалгавар дээр */
+  async addComment(studentId: string, body: { classroomId?: unknown; date?: unknown; body?: unknown }) {
+    if (typeof body?.classroomId !== 'string' || !body.classroomId)
+      throw new BadRequestException('classroomId шаардлагатай');
+    const text = cleanText(body.body, COMMENT_MAX, 'Сэтгэгдэл');
+    const date = this.parseDate(body.date);
+    const today = dateKey(todayUB());
+    if (!(await this.photoDayAllowed(studentId, body.classroomId, date, today)))
+      throw new ForbiddenException('Энэ өдрийн гэрийн даалгавар олдсонгүй');
+    const lessonDate = parseDateOnly(date);
+    await this.prisma.homeworkComment.create({
+      data: {
+        classroomId: body.classroomId,
+        studentId,
+        lessonDate,
+        authorId: studentId,
+        authorRole: 'STUDENT',
+        body: text,
+      },
+    });
+    return {
+      comments: (
+        await loadHomeworkComments(
+          this.prisma,
+          { studentId, classroomId: body.classroomId, lessonDate },
+          studentId,
+        )
+      ).map((c) => c.view),
     };
   }
 

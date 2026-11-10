@@ -42,6 +42,9 @@ export type HomeworkPhotoMinAggregateOutputType = {
   lessonDate: Date | null
   fileKey: string | null
   pages: number | null
+  caption: string | null
+  returnedAt: Date | null
+  returnedById: string | null
   createdAt: Date | null
   deletedAt: Date | null
 }
@@ -53,6 +56,9 @@ export type HomeworkPhotoMaxAggregateOutputType = {
   lessonDate: Date | null
   fileKey: string | null
   pages: number | null
+  caption: string | null
+  returnedAt: Date | null
+  returnedById: string | null
   createdAt: Date | null
   deletedAt: Date | null
 }
@@ -64,6 +70,9 @@ export type HomeworkPhotoCountAggregateOutputType = {
   lessonDate: number
   fileKey: number
   pages: number
+  caption: number
+  returnedAt: number
+  returnedById: number
   createdAt: number
   deletedAt: number
   _all: number
@@ -85,6 +94,9 @@ export type HomeworkPhotoMinAggregateInputType = {
   lessonDate?: true
   fileKey?: true
   pages?: true
+  caption?: true
+  returnedAt?: true
+  returnedById?: true
   createdAt?: true
   deletedAt?: true
 }
@@ -96,6 +108,9 @@ export type HomeworkPhotoMaxAggregateInputType = {
   lessonDate?: true
   fileKey?: true
   pages?: true
+  caption?: true
+  returnedAt?: true
+  returnedById?: true
   createdAt?: true
   deletedAt?: true
 }
@@ -107,6 +122,9 @@ export type HomeworkPhotoCountAggregateInputType = {
   lessonDate?: true
   fileKey?: true
   pages?: true
+  caption?: true
+  returnedAt?: true
+  returnedById?: true
   createdAt?: true
   deletedAt?: true
   _all?: true
@@ -205,6 +223,9 @@ export type HomeworkPhotoGroupByOutputType = {
   lessonDate: Date
   fileKey: string
   pages: number
+  caption: string | null
+  returnedAt: Date | null
+  returnedById: string | null
   createdAt: Date
   deletedAt: Date | null
   _count: HomeworkPhotoCountAggregateOutputType | null
@@ -239,6 +260,9 @@ export type HomeworkPhotoWhereInput = {
   lessonDate?: Prisma.DateTimeFilter<"HomeworkPhoto"> | Date | string
   fileKey?: Prisma.StringFilter<"HomeworkPhoto"> | string
   pages?: Prisma.IntFilter<"HomeworkPhoto"> | number
+  caption?: Prisma.StringNullableFilter<"HomeworkPhoto"> | string | null
+  returnedAt?: Prisma.DateTimeNullableFilter<"HomeworkPhoto"> | Date | string | null
+  returnedById?: Prisma.StringNullableFilter<"HomeworkPhoto"> | string | null
   createdAt?: Prisma.DateTimeFilter<"HomeworkPhoto"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"HomeworkPhoto"> | Date | string | null
 }
@@ -250,6 +274,9 @@ export type HomeworkPhotoOrderByWithRelationInput = {
   lessonDate?: Prisma.SortOrder
   fileKey?: Prisma.SortOrder
   pages?: Prisma.SortOrder
+  caption?: Prisma.SortOrderInput | Prisma.SortOrder
+  returnedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  returnedById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
 }
@@ -264,6 +291,9 @@ export type HomeworkPhotoWhereUniqueInput = Prisma.AtLeast<{
   lessonDate?: Prisma.DateTimeFilter<"HomeworkPhoto"> | Date | string
   fileKey?: Prisma.StringFilter<"HomeworkPhoto"> | string
   pages?: Prisma.IntFilter<"HomeworkPhoto"> | number
+  caption?: Prisma.StringNullableFilter<"HomeworkPhoto"> | string | null
+  returnedAt?: Prisma.DateTimeNullableFilter<"HomeworkPhoto"> | Date | string | null
+  returnedById?: Prisma.StringNullableFilter<"HomeworkPhoto"> | string | null
   createdAt?: Prisma.DateTimeFilter<"HomeworkPhoto"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"HomeworkPhoto"> | Date | string | null
 }, "id">
@@ -275,6 +305,9 @@ export type HomeworkPhotoOrderByWithAggregationInput = {
   lessonDate?: Prisma.SortOrder
   fileKey?: Prisma.SortOrder
   pages?: Prisma.SortOrder
+  caption?: Prisma.SortOrderInput | Prisma.SortOrder
+  returnedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  returnedById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.HomeworkPhotoCountOrderByAggregateInput
@@ -294,6 +327,9 @@ export type HomeworkPhotoScalarWhereWithAggregatesInput = {
   lessonDate?: Prisma.DateTimeWithAggregatesFilter<"HomeworkPhoto"> | Date | string
   fileKey?: Prisma.StringWithAggregatesFilter<"HomeworkPhoto"> | string
   pages?: Prisma.IntWithAggregatesFilter<"HomeworkPhoto"> | number
+  caption?: Prisma.StringNullableWithAggregatesFilter<"HomeworkPhoto"> | string | null
+  returnedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"HomeworkPhoto"> | Date | string | null
+  returnedById?: Prisma.StringNullableWithAggregatesFilter<"HomeworkPhoto"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"HomeworkPhoto"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"HomeworkPhoto"> | Date | string | null
 }
@@ -305,6 +341,9 @@ export type HomeworkPhotoCreateInput = {
   lessonDate: Date | string
   fileKey: string
   pages: number
+  caption?: string | null
+  returnedAt?: Date | string | null
+  returnedById?: string | null
   createdAt?: Date | string
   deletedAt?: Date | string | null
 }
@@ -316,6 +355,9 @@ export type HomeworkPhotoUncheckedCreateInput = {
   lessonDate: Date | string
   fileKey: string
   pages: number
+  caption?: string | null
+  returnedAt?: Date | string | null
+  returnedById?: string | null
   createdAt?: Date | string
   deletedAt?: Date | string | null
 }
@@ -327,6 +369,9 @@ export type HomeworkPhotoUpdateInput = {
   lessonDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fileKey?: Prisma.StringFieldUpdateOperationsInput | string
   pages?: Prisma.IntFieldUpdateOperationsInput | number
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -338,6 +383,9 @@ export type HomeworkPhotoUncheckedUpdateInput = {
   lessonDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fileKey?: Prisma.StringFieldUpdateOperationsInput | string
   pages?: Prisma.IntFieldUpdateOperationsInput | number
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -349,6 +397,9 @@ export type HomeworkPhotoCreateManyInput = {
   lessonDate: Date | string
   fileKey: string
   pages: number
+  caption?: string | null
+  returnedAt?: Date | string | null
+  returnedById?: string | null
   createdAt?: Date | string
   deletedAt?: Date | string | null
 }
@@ -360,6 +411,9 @@ export type HomeworkPhotoUpdateManyMutationInput = {
   lessonDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fileKey?: Prisma.StringFieldUpdateOperationsInput | string
   pages?: Prisma.IntFieldUpdateOperationsInput | number
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -371,6 +425,9 @@ export type HomeworkPhotoUncheckedUpdateManyInput = {
   lessonDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fileKey?: Prisma.StringFieldUpdateOperationsInput | string
   pages?: Prisma.IntFieldUpdateOperationsInput | number
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -382,6 +439,9 @@ export type HomeworkPhotoCountOrderByAggregateInput = {
   lessonDate?: Prisma.SortOrder
   fileKey?: Prisma.SortOrder
   pages?: Prisma.SortOrder
+  caption?: Prisma.SortOrder
+  returnedAt?: Prisma.SortOrder
+  returnedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
 }
@@ -397,6 +457,9 @@ export type HomeworkPhotoMaxOrderByAggregateInput = {
   lessonDate?: Prisma.SortOrder
   fileKey?: Prisma.SortOrder
   pages?: Prisma.SortOrder
+  caption?: Prisma.SortOrder
+  returnedAt?: Prisma.SortOrder
+  returnedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
 }
@@ -408,6 +471,9 @@ export type HomeworkPhotoMinOrderByAggregateInput = {
   lessonDate?: Prisma.SortOrder
   fileKey?: Prisma.SortOrder
   pages?: Prisma.SortOrder
+  caption?: Prisma.SortOrder
+  returnedAt?: Prisma.SortOrder
+  returnedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
 }
@@ -425,6 +491,9 @@ export type HomeworkPhotoSelect<ExtArgs extends runtime.Types.Extensions.Interna
   lessonDate?: boolean
   fileKey?: boolean
   pages?: boolean
+  caption?: boolean
+  returnedAt?: boolean
+  returnedById?: boolean
   createdAt?: boolean
   deletedAt?: boolean
 }, ExtArgs["result"]["homeworkPhoto"]>
@@ -436,6 +505,9 @@ export type HomeworkPhotoSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   lessonDate?: boolean
   fileKey?: boolean
   pages?: boolean
+  caption?: boolean
+  returnedAt?: boolean
+  returnedById?: boolean
   createdAt?: boolean
   deletedAt?: boolean
 }, ExtArgs["result"]["homeworkPhoto"]>
@@ -447,6 +519,9 @@ export type HomeworkPhotoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   lessonDate?: boolean
   fileKey?: boolean
   pages?: boolean
+  caption?: boolean
+  returnedAt?: boolean
+  returnedById?: boolean
   createdAt?: boolean
   deletedAt?: boolean
 }, ExtArgs["result"]["homeworkPhoto"]>
@@ -458,11 +533,14 @@ export type HomeworkPhotoSelectScalar = {
   lessonDate?: boolean
   fileKey?: boolean
   pages?: boolean
+  caption?: boolean
+  returnedAt?: boolean
+  returnedById?: boolean
   createdAt?: boolean
   deletedAt?: boolean
 }
 
-export type HomeworkPhotoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "classroomId" | "lessonDate" | "fileKey" | "pages" | "createdAt" | "deletedAt", ExtArgs["result"]["homeworkPhoto"]>
+export type HomeworkPhotoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "classroomId" | "lessonDate" | "fileKey" | "pages" | "caption" | "returnedAt" | "returnedById" | "createdAt" | "deletedAt", ExtArgs["result"]["homeworkPhoto"]>
 
 export type $HomeworkPhotoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "HomeworkPhoto"
@@ -474,6 +552,15 @@ export type $HomeworkPhotoPayload<ExtArgs extends runtime.Types.Extensions.Inter
     lessonDate: Date
     fileKey: string
     pages: number
+    /**
+     * Сурагчийн бичсэн тайлбар (илгээхээс өмнө, ≤500 тэмдэгт) — файл 7 хоногт устсан ч мөр, тайлбар үлдэнэ
+     */
+    caption: string | null
+    /**
+     * Багш «Буцаах» дарсан (эзэн 2026-11-05) — сурагч хугацаа хаагдсан ч дахин илгээж болно
+     */
+    returnedAt: Date | null
+    returnedById: string | null
     createdAt: Date
     deletedAt: Date | null
   }, ExtArgs["result"]["homeworkPhoto"]>
@@ -905,6 +992,9 @@ export interface HomeworkPhotoFieldRefs {
   readonly lessonDate: Prisma.FieldRef<"HomeworkPhoto", 'DateTime'>
   readonly fileKey: Prisma.FieldRef<"HomeworkPhoto", 'String'>
   readonly pages: Prisma.FieldRef<"HomeworkPhoto", 'Int'>
+  readonly caption: Prisma.FieldRef<"HomeworkPhoto", 'String'>
+  readonly returnedAt: Prisma.FieldRef<"HomeworkPhoto", 'DateTime'>
+  readonly returnedById: Prisma.FieldRef<"HomeworkPhoto", 'String'>
   readonly createdAt: Prisma.FieldRef<"HomeworkPhoto", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"HomeworkPhoto", 'DateTime'>
 }

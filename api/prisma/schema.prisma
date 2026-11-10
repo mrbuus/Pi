@@ -2648,6 +2648,53 @@ model StaffCapabilityGrant {
   @@index([userId, revokedAt, expiresAt])
 }
 
+// ============ Багшийн ажилласан цаг, данс, цагийн хөлс (эзэн 2026-11-08) ============
+// Эзний Excel «Цаг»-ийн веб хувилбар: хагас сар бүр (1–15, 16–сүүл) багш
+// бүрийн өдөр тутмын цаг. teacherId-г энгийн мөр болгож хадгална (LessonStaffing-
+// ийн конвенц) — багш архивлагдсан ч түүх үлдэнэ. Логик: src/teacher-hours/.
+
+// Нэг багшийн нэг өдрийн цаг. hundredths = цаг × 100 (7.5 цаг = 750) — бүхэл тоо
+// тул нийлбэрт хөвөгч цэгийн алдаа орохгүй. null = нүдийг арилгасан (мөр, аудит үлдэнэ).
+model TeacherWorkHours {
+  id          String   @id @default(cuid())
+  teacherId   String
+  date        DateTime @db.Date
+  hundredths  Int?
+  updatedById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([teacherId, date])
+  @@index([date])
+}
+
+// Багшийн цалингийн данс. Бүх ажилтан харна; багш өөрийнхөө дансыг, цаг бөглөх
+// эрхтэй (teacher-hours.edit) хүн бүх багшийнхыг засна. Аудитад дугаар нууцлагдана.
+model TeacherBankAccount {
+  teacherId     String   @id
+  bankName      String
+  accountNumber String
+  holderName    String
+  updatedById   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Цагийн хөлс (₮/цаг) — ЗӨВХӨН О. Баасанжав харж, тавина (teacher-hours/pay-rate-owner.ts).
+// effectiveFrom = хагас сарын эхний өдөр; тэр үеэс хойш өвлөгдөнө. Солиход хуучин
+// мөр deletedAt-аар хаагдаж шинэ мөр нэмэгдэнэ — түүх устахгүй.
+model TeacherPayRate {
+  id            String    @id @default(cuid())
+  teacherId     String
+  effectiveFrom DateTime  @db.Date
+  ratePerHour   Int
+  createdById   String
+  createdAt     DateTime  @default(now())
+  deletedAt     DateTime?
+
+  @@index([teacherId, effectiveFrom])
+}
+
 
 // Self-selected reviews are independent of official TestResults and rankings.
 enum StudyReviewStatus {
@@ -3268,6 +3315,11 @@ model HomeworkPhoto {
   lessonDate  DateTime  @db.Date
   fileKey     String
   pages       Int
+  /// Сурагчийн бичсэн тайлбар (илгээхээс өмнө, ≤500 тэмдэгт) — файл 7 хоногт устсан ч мөр, тайлбар үлдэнэ
+  caption     String?
+  /// Багш «Буцаах» дарсан (эзэн 2026-11-05) — сурагч хугацаа хаагдсан ч дахин илгээж болно
+  returnedAt   DateTime?
+  returnedById String?
   createdAt   DateTime  @default(now())
   deletedAt   DateTime?
 
@@ -3344,4 +3396,133 @@ model UiEvent {
 
   @@index([createdAt])
   @@index([role, createdAt])
+}
+
+/// Гэрийн даалгаврын хугацааг багш гараар тохируулсан (эзэн 2026-11-05: самбарын «Онлайн гэрийн
+/// даалгавар» мөрийн ард). lessonDate = даалгавар ӨГСӨН хичээлийн өдөр. Мөр байхгүй бол хугацаа =
+/// дараагийн хичээлийн өдрийн 00:00 (УБ), хоцорч илгээж болно (хуучин дүрэм хэвээр).
+/// allowLate = false бол хугацаа өнгөрмөгц онлайн тест эхлэх/хадгалах/илгээх, зураг явуулах хаагдана.
+model HomeworkDeadline {
+  id          String   @id @default(cuid())
+  classroomId String
+  lessonDate  DateTime @db.Date
+  dueAt       DateTime
+  allowLate   Boolean  @default(true)
+  setById     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([classroomId, lessonDate])
+}
+
+/// Гэрийн даалгавар дээрх СУРАГЧИД ХАРАГДАХ сэтгэгдэл (эзэн 2026-11-05). Багшийн дотоод тэмдэглэл
+/// (DailyHomeworkMark.comment)-ээс тусдаа. Нэг сурагч × анги × даалгавар өгсөн хичээлийн өдөр = нэг яриа:
+/// багш алдааг нь бичнэ, сурагч хариулж болно. ХЭЗЭЭ Ч устгахгүй (deletedAt зөвхөн зохиогч өөрөө нуухад).
+/// kind: NOTE — энгийн, RETURN — «Буцаах» дарахад бичсэн шалтгаан.
+model HomeworkComment {
+  id          String    @id @default(cuid())
+  classroomId String
+  studentId   String
+  lessonDate  DateTime  @db.Date
+  authorId    String
+  authorRole  Role
+  kind        String    @default("NOTE")
+  body        String
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+
+  @@index([studentId, classroomId, lessonDate])
+  @@index([classroomId, lessonDate])
+}
+
+/// Гэрийн даалгаврыг ангид богино шалгалтаар шалгах (эзэн 2026-11-08): ижил төрлийн, өөр тоотой
+/// бодлого. Нэг анги × нэг өдөр = нэг шалгалт. «Устгах» = deletedAt (оноонууд мөн deletedAt-тай нуугдана);
+/// дахин эхлүүлбэл ижил мөр сэргэж, оноо хоосноос эхэлнэ. Зөвхөн ажилтан харна.
+model HomeworkQuiz {
+  id           String              @id @default(cuid())
+  classroomId  String
+  date         DateTime            @db.Date
+  problemCount Int
+  createdById  String
+  updatedById  String
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  deletedAt    DateTime?
+  scores       HomeworkQuizScore[]
+
+  @@unique([classroomId, date])
+}
+
+/// Шалгалтын нэг сурагчийн оноо 0..problemCount, бутархай 2 хүртэл орон (7.5 — эзэн 2026-11-08 19:08;
+/// Decimal тул хөвөгч тооны алдаагүй). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
+model HomeworkQuizScore {
+  id          String       @id @default(cuid())
+  quizId      String
+  quiz        HomeworkQuiz @relation(fields: [quizId], references: [id], onDelete: Restrict)
+  studentId   String
+  score       Decimal      @db.Decimal(6, 2)
+  updatedById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@unique([quizId, studentId])
+  @@index([studentId])
+}
+
+/// Нөхөлт (эзэн 2026-11-08): өөрийн ангидаа хийж чадаагүй хичээлээ нөхсөн нэг удаа.
+/// - Өөр ангид суусан: hostClassroomId = зочилсон анги (ж: 12-4-ийн сурагч 12-6-д). Хийсэн
+///   тест = тэр ангийн тэр өдрийн хичээлийнх (ClassTestSession, эс бөгөөс төлөвлөгөө) —
+///   уншихдаа тооцно (makeup-visits/covered.logic.ts), энд хуулахгүй.
+/// - 406 өрөө: hostClassroomId = null. Хийсэн тестийг багш сонгоно → MakeupVisitTest.
+/// Давхардал: нэг сурагч, нэг өдөр, нэг газар (placeKey = hostClassroomId эсвэл "406")
+/// идэвхтэй ганц мөр. Устгах нь зөөлөн (deletedAt). Хэрэглэгч/ангийн FK-гүй (ClassCheck-ийн адил).
+model MakeupVisit {
+  id              String              @id @default(cuid())
+  studentId       String
+  date            DateTime            @db.Date
+  /// Зочилсон анги; null = 406 өрөө
+  hostClassroomId String?
+  /// hostClassroomId эсвэл "406" — давхардлын түлхүүр
+  placeKey        String
+  /// Нэмэх үеийн сурагчийн өөрийн анги (дараа анги сольсон ч түүх зөв үлдэнэ)
+  homeClassroomId String?
+  /// Багшийн тайлбар — заавал биш
+  comment         String?             @db.VarChar(500)
+  /// Зочилсон ангийн самбар дахь ирц, даалгавар (энгийн сурагчийнхтай ижил блок).
+  /// Attendance хүснэгтэд бичихгүй: сурагчийн ирцийн хувь хоёр дахин тоологдохгүй.
+  attStatus       AttendanceStatus?
+  lateRange       LateRange?
+  attNote         String?             @db.VarChar(200)
+  hwStatus        HomeworkMarkStatus?
+  hwNote          String?             @db.VarChar(200)
+  createdById     String
+  createdAt       DateTime            @default(now())
+  updatedById     String?
+  updatedAt       DateTime            @updatedAt
+  deletedAt       DateTime?
+  deletedById     String?
+  tests           MakeupVisitTest[]
+
+  @@unique([studentId, date, placeKey], where: { deletedAt: null })
+  @@index([placeKey, date])
+  @@index([homeClassroomId, date])
+  @@index([studentId, date])
+}
+
+/// 406 өрөөнд нөхөж хийсэн тест/сэдэв. testId = null бол бодлогын санд байхгүй, багшийн
+/// бичсэн сэдэв (title). Сэдвийг солиход хасагдсан мөр зөөлөн устна (түүх үлдэнэ).
+model MakeupVisitTest {
+  id          String      @id @default(cuid())
+  visitId     String
+  visit       MakeupVisit @relation(fields: [visitId], references: [id], onDelete: Restrict)
+  testId      String?
+  title       String      @db.VarChar(200)
+  createdById String
+  createdAt   DateTime    @default(now())
+  deletedAt   DateTime?
+  deletedById String?
+
+  @@index([visitId])
+  @@index([testId])
 }

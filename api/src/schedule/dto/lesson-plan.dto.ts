@@ -54,6 +54,12 @@ export class PutLessonPlanDto {
   @IsString({ each: true })
   @MaxLength(200, { each: true })
   customTopics?: string[];
+
+  /** Цонх нээх үеийн төлөвлөгөөний updatedAt (null = төлөвлөгөөгүй). Өөр хүн хооронд нь зассан бол 409. */
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'date-time' })
+  @IsOptional()
+  @IsString()
+  expectedUpdatedAt?: string | null;
 }
 
 /** PUT /schedule/day-meal — амралтын өдрийн хоол, Багш+ / Админ. */

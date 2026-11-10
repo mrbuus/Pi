@@ -34,6 +34,7 @@ describe('WeeklyReportService aggregation', () => {
       attendance: { findMany: jest.fn().mockResolvedValue([]) },
       testResult: { count: jest.fn().mockResolvedValue(0), findMany: jest.fn().mockResolvedValue([]) },
       assignment: { count: jest.fn().mockResolvedValue(0), findMany: jest.fn().mockResolvedValue([]) },
+      homeworkQuizScore: { findMany: jest.fn().mockResolvedValue([]) },
       dailyHomeworkMark: { findMany: jest.fn().mockResolvedValue([]) },
       classTestSession: { count: jest.fn().mockResolvedValue(0), findMany: jest.fn().mockResolvedValue([]) },
       attempt: { count: jest.fn().mockResolvedValue(0), findMany: jest.fn().mockResolvedValue([]) },
@@ -57,11 +58,12 @@ describe('WeeklyReportService aggregation', () => {
     const prisma = emptyPrisma({
       enrollment: { findMany: jest.fn().mockResolvedValue([{ classroomId: 'class', joinedAt: new Date('2026-09-01T00:00:00Z'), leftAt: null, classroom: { name: 'Анги' } }]) },
       assignment: { count: jest.fn().mockResolvedValue(1), findMany: jest.fn().mockResolvedValue([{ id: 'a1', title: 'Нэг ажил', dueDate: new Date('2026-09-23T00:00:00Z'), createdAt: new Date('2026-09-22T00:00:00Z'), classroomId: 'class', submissions: [{ state: 'DONE_ONLINE' }] }]) },
+      homeworkQuizScore: { findMany: jest.fn().mockResolvedValue([]) },
       dailyHomeworkMark: { findMany: jest.fn().mockResolvedValue([{ classroomId: 'class', date: new Date('2026-09-23T00:00:00Z'), status: 'DONE' }]) },
     });
     const service = new WeeklyReportService(prisma as PrismaService);
     const report = await service.get('child', '2026-09-21', admin);
-    expect(report.homework).toEqual({ assignments: { done: 1, notDone: 0, items: [{ title: 'Нэг ажил', dueDate: new Date('2026-09-23T00:00:00Z'), done: true }] }, dailyMarks: { done: 1, partial: 0, notDone: 0, unmarked: 0 } });
+    expect(report.homework).toEqual({ assignments: { done: 1, notDone: 0, items: [{ title: 'Нэг ажил', dueDate: new Date('2026-09-23T00:00:00Z'), done: true }] }, dailyMarks: { done: 1, partial: 0, notDone: 0, unmarked: 0 }, quizzes: [] });
     expect(report).toHaveProperty('testResultsComplete', true);
     expect(report.snapshotAt).toEqual(expect.any(String));
   });

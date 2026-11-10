@@ -1,13 +1,12 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Minus, Phone, StickyNote, TriangleAlert, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Phone, StickyNote, TriangleAlert, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import {
   ATTENDANCE_MARKS,
   HOMEWORK_MARKS,
-  TONE_TEXT,
   type AttendanceStatus,
   type HomeworkStatus,
 } from "@/components/attendance/marks";
@@ -15,12 +14,12 @@ import { SkeletonLine } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
-import { cn } from "@/lib/cn";
 import {
   LATE_RANGE_SHORT,
   addMonths,
   dayLabel,
   fmtPhone,
+  addDays,
   fromKey,
   fullDate,
   monthKeyLabel,
@@ -32,6 +31,15 @@ import {
   type StatusCounts,
 } from "./lib";
 import { CountGrid, CountRow, attendanceCounts, homeworkCounts } from "./parts";
+import DayBox from "./DayBox";
+import { QuizMonthItem, quizDayText, useQuizMonth, type QuizDayRow } from "./QuizDay";
+import { quizCoveredDays } from "@/lib/quizScore";
+import MakeupHistory from "@/components/makeup-visits/MakeupHistory";
+import RefundEstimateRow from "@/components/students/RefundEstimate";
+import DaySheet from "@/components/students/calendar/DaySheet";
+import { pickLessonDay } from "@/components/students/calendar/dayPick";
+import type { LessonDay, LessonDaysResponse } from "@/components/students/calendar/types";
+import type { MakeupHistoryItem } from "@/components/makeup-visits/types";
 
 interface MonthAtt {
   date: string;
@@ -147,6 +155,8 @@ export default function StudentDrawer({
 
   const data = card?.data ?? null;
   const s = data?.student;
+  // Шалгалтын оноо (эзэн 2026-11-08) — тусдаа хүсэлт, алдаа гарвал хоосон
+  const quizRows = useQuizMonth(classId, studentId, month, homework);
 
   return (
     <Dialog.Root open onOpenChange={(o) => !o && onClose()}>
@@ -249,9 +259,20 @@ export default function StudentDrawer({
                   today={today}
                   homework={homework}
                   currentClass={className}
+                  quiz={quizRows}
+                  studentId={studentId}
+                />
+                {/* Нөхөлт: өөр ангид суусан, 406-д нөхсөн (байхгүй бол хэсэг гарахгүй) */}
+                <MakeupHistory
+                  studentId={studentId}
+                  wrap={(list, n) => (
+                    <Section title="Нөхөлт" hint={`${n} удаа`}>
+                      {list}
+                    </Section>
+                  )}
                 />
                 <NotesSection studentId={studentId} today={today} />
-                <FactsSection data={data} today={today} />
+                <FactsSection data={data} today={today} studentId={studentId} refund={homework} />
               </>
             )}
           </div>
@@ -302,6 +323,8 @@ function MonthSection({
   today,
   homework,
   currentClass,
+  quiz,
+  studentId,
 }: {
   data: StudentCardData;
   month: string;
@@ -313,8 +336,13 @@ function MonthSection({
   today: string;
   homework: boolean;
   currentClass: string;
+  /** Энэ ангийн тухайн сарын шалгалтын оноо (QuizDay.tsx) */
+  quiz: QuizDayRow[];
+  studentId: string;
 }) {
   const headingId = useId();
+  // Дарсан хайрцгийн өдөр — дэлгэрэнгүй цонх (эзэн 2026-11-10: өмнө нь хайрцаг дарахад юу ч болдоггүй байсан)
+  const [openDay, setOpenDay] = useState<string | null>(null);
   // Хамгийн эхний бичлэг (эсвэл элссэн сар) ба өнөөдөр/сонгосон өдрийн сар хооронд
   const first = [data.history.first, data.student.joinedOn].filter((k): k is string => !!k).sort()[0] ?? date;
   const minMonth = first.slice(0, 7);
@@ -325,8 +353,26 @@ function MonthSection({
   const m = data.month;
   const att = new Map(m.attendance.map((a) => [a.date, a]));
   const hw = new Map(m.homework.map((h) => [h.date, h]));
+  // Шалгалтын оноо: хайрцагт хувь, «Тэмдэглээгүй»-ээс хасна (эзэн 2026-11-08). Сар солих үед хуучин
+  // сарын мөр ирсэн бол тоолохгүй.
+  const quizRows = homework ? quiz.filter((r) => r.date.startsWith(month)) : [];
+  const qz = new Map(quizRows.map((r) => [r.date, r]));
+  const hasQuiz = qz.size > 0;
+  const covered = quizCoveredDays(
+    m.lessonDays.filter((k) => k >= m.classJoinedOn && k <= today),
+    m.homework.filter((h) => h.status).map((h) => h.date),
+    quizRows.map((r) => r.date),
+  );
+  const counts = covered
+    ? { ...m.counts, homework: { ...m.counts.homework, unmarked: Math.max(0, m.counts.homework.unmarked - covered) } }
+    : m.counts;
   const days = [
-    ...new Set([...m.lessonDays, ...m.attendance.map((a) => a.date), ...(homework ? m.homework.filter((h) => h.status).map((h) => h.date) : [])]),
+    ...new Set([
+      ...m.lessonDays,
+      ...m.attendance.map((a) => a.date),
+      ...(homework ? m.homework.filter((h) => h.status).map((h) => h.date) : []),
+      ...qz.keys(),
+    ]),
   ].sort();
   // Өдрийн тайлбар: ирцийн тайлбар, даалгаврын тайлбар, өөр ангид тэмдэглэсэн (шинэ нь дээр)
   const remarks = days
@@ -372,9 +418,8 @@ function MonthSection({
               const h = homework ? hw.get(k) : undefined;
               const am = a ? ATTENDANCE_MARKS[a.status] : null;
               const hm = h?.status ? HOMEWORK_MARKS[h.status] : null;
-              const AttIcon = am?.icon;
-              const HwIcon = hm?.icon;
-              const muted = !a && !hm && (k > today || k < m.classJoinedOn);
+              const q = qz.get(k);
+              const muted = !a && !hm && !q && (k > today || k < m.classJoinedOn);
               const attText = a
                 ? `${am!.label}${a.lateRange ? ` ${LATE_RANGE_SHORT[a.lateRange]}` : ""}`
                 : k > today
@@ -382,46 +427,38 @@ function MonthSection({
                   : k < m.classJoinedOn
                     ? "элсэхээс өмнө"
                     : "ирц тэмдэглээгүй";
-              const hwText = homework ? (hm ? `даалгавар ${hm.label.toLowerCase()}` : "даалгавар тэмдэглээгүй") : "";
+              const hwText = homework ? (hm ? `даалгавар ${hm.label.toLowerCase()}` : q ? "" : "даалгавар тэмдэглээгүй") : "";
               const where = a?.classroom ?? h?.classroom ?? null;
-              const label = [dayLabel(k), attText, hwText, where ? `${where} анги` : ""].filter(Boolean).join(", ");
+              const label = [dayLabel(k), attText, hwText, q ? quizDayText(q) : "", where ? `${where} анги` : ""].filter(Boolean).join(", ");
               return (
-                <li
-                  key={k}
-                  title={label}
-                  className={cn(
-                    "flex w-10 flex-col items-center justify-center gap-0.5 rounded-lg border py-1 text-[11px] tabular-nums",
-                    homework ? "h-[3.75rem]" : "h-12",
-                    muted ? "border-dashed border-line text-ink-dim/60" : "border-line bg-surface text-ink",
-                    where && "border-info/50",
-                    k === date && "ring-2 ring-brand-bright ring-offset-1 ring-offset-surface",
-                  )}
-                >
-                  <span className="font-semibold leading-none">{fromKey(k).getDate()}</span>
-                  {AttIcon && am ? (
-                    <AttIcon className={cn("size-3.5", TONE_TEXT[am.tone])} aria-hidden />
-                  ) : muted ? (
-                    <span className="h-3.5" />
-                  ) : (
-                    <Minus className="size-3.5 text-ink-dim/60" aria-hidden />
-                  )}
-                  {homework &&
-                    (HwIcon && hm ? (
-                      <HwIcon className={cn("size-3.5", TONE_TEXT[hm.tone])} aria-hidden />
-                    ) : muted ? (
-                      <span className="h-3.5" />
-                    ) : (
-                      <Minus className="size-3.5 text-ink-dim/60" aria-hidden />
-                    ))}
-                  <span className="sr-only">{label}</span>
+                <li key={k}>
+                  <DayBox
+                    dayOfMonth={fromKey(k).getDate()}
+                    attendance={a?.status ?? null}
+                    homework={h?.status ?? null}
+                    showHomework={homework}
+                    quiz={q ?? null}
+                    quizRow={hasQuiz}
+                    muted={muted}
+                    otherClass={!!where}
+                    selected={openDay ? k === openDay : k === date}
+                    label={label}
+                    onClick={() => setOpenDay(k)}
+                  />
                 </li>
               );
             })}
           </ul>
 
           <CountGrid className="mt-2.5 gap-y-1">
-            <CountRow label="Ирц" items={attendanceCounts(m.counts, { unmarked: true })} />
-            {homework && <CountRow label="Даалгавар" items={homeworkCounts(m.counts, { unmarked: true })} />}
+            <CountRow label="Ирц" items={attendanceCounts(counts, { unmarked: true })} />
+            {homework && (
+              <CountRow
+                label="Даалгавар"
+                items={homeworkCounts(counts, { unmarked: true })}
+                extra={hasQuiz ? <QuizMonthItem rows={quizRows} /> : undefined}
+              />
+            )}
           </CountGrid>
 
           {remarks.length > 0 && (
@@ -452,7 +489,97 @@ function MonthSection({
       ) : (
         <p className="text-sm text-ink-dim">{currentClass} ангид энэ сард хичээл ороогүй</p>
       )}
+
+      {openDay && (
+        <BoardDayDetail
+          key={openDay}
+          studentId={studentId}
+          fallback={fallbackDay(openDay, {
+            a: att.get(openDay),
+            h: homework ? hw.get(openDay) : undefined,
+            q: qz.get(openDay),
+            currentClass,
+            today,
+          })}
+          onClose={() => setOpenDay(null)}
+        />
+      )}
     </section>
+  );
+}
+
+/* ───────── Хайрцаг дарахад: тэр өдрийн дэлгэрэнгүй (сурагчийн хуудасны DaySheet-ийг дахин ашиглана) ───────── */
+
+/** Самбарт байгаа мэдээллээр шууд харуулах урьдчилсан өдөр (бүрэн мэдээлэл ирэх хүртэл / ирэхгүй бол) */
+function fallbackDay(
+  k: string,
+  { a, h, q, currentClass, today }: { a?: MonthAtt; h?: MonthHw; q?: QuizDayRow; currentClass: string; today: string },
+): LessonDay {
+  const where = a?.classroom ?? h?.classroom ?? null;
+  return {
+    key: k,
+    date: k,
+    classroomId: "",
+    classroomName: where ?? currentClass,
+    own: !where,
+    scheduled: true,
+    startMinute: null,
+    endMinute: null,
+    room: null,
+    movedFrom: null,
+    topic: null,
+    lead: null,
+    assistant: null,
+    scheduleTeacher: null,
+    tests: [],
+    testsText: null,
+    confirmed: null,
+    teacherNote: null,
+    attendance: a ? { status: a.status, lateRange: a.lateRange, note: a.note, markedBy: a.markedBy } : null,
+    homework: h && (h.status || h.comment) ? { status: h.status, comment: h.comment, markedBy: h.markedBy } : null,
+    quiz: q ? { score: q.score, problemCount: q.problemCount } : null,
+    future: k > today,
+  };
+}
+
+/**
+ * Тэр өдрийн бүрэн мэдээлэл: `/students/:id/lesson-days` (тест, багш, тэмдэглэл, нөхөлт). Хариу ирэх
+ * хүртэл самбарын мэдээллийг шууд харуулна; алдаа гарвал тэрийгээ үлдээж жижиг анхааруулга.
+ * 60 хоногийн нөхөлтийг авна — тасалсан өдрийн тестийг дараа нь нөхсөн эсэхийг харуулахад.
+ */
+function BoardDayDetail({ studentId, fallback, onClose }: { studentId: string; fallback: LessonDay; onClose: () => void }) {
+  const k = fallback.date;
+  const [res, setRes] = useState<{ day: LessonDay | null; makeups: MakeupHistoryItem[] } | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    api<LessonDaysResponse>(`/students/${encodeURIComponent(studentId)}/lesson-days?from=${k}&to=${addDays(k, 60)}`)
+      .then((r) => {
+        if (!alive) return;
+        const other = fallback.own ? null : fallback.classroomName;
+        setRes({ day: pickLessonDay(r.days ?? [], k, other), makeups: r.makeups ?? [] });
+      })
+      .catch((e) => alive && setError(e instanceof Error ? e.message : "Дэлгэрэнгүй ачаалагдсангүй"));
+    return () => {
+      alive = false;
+    };
+    // fallback нь өдөр бүрт шинээр үүсдэг — зөвхөн өдөр солигдоход дахин татна
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [studentId, k]);
+
+  const day = res?.day ?? fallback;
+  // Тэр өдрийн нөхөлт (406, өөр анги) — хуанлийн мөр байхгүй ч харуулна
+  const visit = res && !res.day ? res.makeups.find((m) => m.date === k) : undefined;
+  return (
+    <DaySheet
+      item={visit ? { kind: "makeup", visit } : { kind: "lesson", day }}
+      studentId={studentId}
+      makeups={res?.makeups ?? []}
+      onClose={onClose}
+      loading={!res && !error}
+      notice={error ? "Дэлгэрэнгүй ачаалагдсангүй, самбарын мэдээллийг харуулж байна" : undefined}
+    />
   );
 }
 
@@ -585,7 +712,18 @@ function NotesSection({ studentId, today }: { studentId: string; today: string }
 
 /* ───────── Мэдээлэл ───────── */
 
-function FactsSection({ data, today }: { data: StudentCardData; today: string }) {
+function FactsSection({
+  data,
+  today,
+  studentId,
+  refund,
+}: {
+  data: StudentCardData;
+  today: string;
+  studentId: string;
+  /** Танхимын анги — «Одоо гарвал буцаах дүн» (эзэн 2026-11-08, Багш ч харна) */
+  refund: boolean;
+}) {
   const s = data.student;
   const facts: Array<[string, string]> = [
     ["Сургууль", s.school || "Оруулаагүй"],
@@ -604,6 +742,7 @@ function FactsSection({ data, today }: { data: StudentCardData; today: string })
           </div>
         ))}
       </dl>
+      {refund && <RefundEstimateRow studentId={studentId} className="mt-2.5 border-t border-line pt-1.5" />}
     </Section>
   );
 }

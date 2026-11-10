@@ -14,6 +14,7 @@ import {
   type WeekResponse,
 } from "@/components/schedule/types";
 import { withPlus } from "@/lib/personName";
+import { regroupTopicText } from "@/lib/testNames";
 
 function mondayOf(key: string): string {
   const wd = new Date(`${key}T00:00:00.000Z`).getUTCDay();
@@ -81,7 +82,7 @@ export default function StudentLessonDays() {
               </span>
               <div className="min-w-0">
                 <p className="font-medium">
-                  {e.topic ?? <span className="font-normal italic text-ink-dim">Сэдэв удахгүй</span>}
+                  {(e.topic && regroupTopicText(e.topic)) || <span className="font-normal italic text-ink-dim">Сэдэв удахгүй</span>}
                 </p>
                 <p className="mt-0.5 flex items-center gap-1.5 text-xs text-ink-dim">
                   <RoomShape room={e.room} size={14} />

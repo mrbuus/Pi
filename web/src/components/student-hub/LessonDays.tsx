@@ -5,9 +5,11 @@ import { useState } from "react";
 import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import { Meta } from "@/components/ui/Meta";
 import { cn } from "@/lib/cn";
+import QuizScoreChip from "@/components/homework-quiz/QuizScoreChip";
 import { AttendanceMark, HomeworkMark } from "./Marks";
 import { currentMonth, dayKey, dayTitle, loadMonth, monthTitle, todayKey, useMonthDays, weekdayShort } from "./lib";
 import type { HubDay } from "./types";
+import { regroupTopicText } from "@/lib/testNames";
 
 /** «Хичээлүүд» таб: сараар, хичээлийн өдөр бүр нэг мөр — дарахад дэлгэрэнгүй цонх */
 export default function LessonDays({ onOpen }: { onOpen: (day: HubDay) => void }) {
@@ -113,7 +115,7 @@ export function DayRow({
       </span>
       <span className="min-w-0 flex-1">
         <span className={cn("cyrillic-tight block truncate font-semibold", day.topic ? "text-ink" : "text-ink-dim")}>
-          {day.topic ?? "Сэдэв оруулаагүй"}
+          {(day.topic && regroupTopicText(day.topic)) || "Сэдэв оруулаагүй"}
         </span>
         <Meta
           className="mt-0.5 text-xs text-ink-dim"
@@ -136,7 +138,9 @@ export function DayRow({
       </span>
       <span className="flex shrink-0 items-center gap-2.5 sm:gap-4">
         <AttendanceMark att={day.attendance} compact="sm" />
-        <HomeworkMark status={day.homework.status} compact="sm" />
+        {/* Шалгалтын оноотой бол «Шалгаагүй» зураасны оронд хувь (эзэн 2026-11-08 19:08) */}
+        {!(day.homework.quiz && !day.homework.status) && <HomeworkMark status={day.homework.status} compact="sm" />}
+        {day.homework.quiz && <QuizScoreChip score={day.homework.quiz.score} problemCount={day.homework.quiz.problemCount} compact />}
       </span>
       <ChevronRight className="size-4 shrink-0 text-ink-dim" aria-hidden />
     </button>

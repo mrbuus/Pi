@@ -23,10 +23,9 @@ import { Meta } from "@/components/ui/Meta";
 import { SkeletonRows } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/StateBlock";
 import { clockUB, dismissalOpen, NOTE_MAX, shiftClock, stampUB } from "@/components/lesson-records/types";
-import RoomBadge from "../RoomBadge";
 import { formatMinutes, WEEKDAY_LABELS } from "../types";
 import PdfLink from "./PdfLink";
-import { Excluded, roadOf } from "./RoadMap";
+import { Excluded, GroupedItems, roadOf } from "./RoadMap";
 import TheoryPhotosStaff from "@/components/TheoryPhotosStaff";
 import TestPicker from "./TestPicker";
 import TestProblems from "./TestProblems";
@@ -84,7 +83,6 @@ function Body(p: Props & { entry: DayEntry }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <header className="flex items-start gap-3 border-b border-line px-4 pb-3 pt-2">
-        <RoomBadge room={e.room} size="md" />
         <div className="min-w-0 flex-1">
           <DrawerTitle className="text-lg font-bold text-ink">{shortClass(e.classroomName)}</DrawerTitle>
           <p className="text-xs text-ink-dim">
@@ -301,7 +299,15 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
       if (planChanged)
         await api(`/schedule/${e.scheduleId}/plan`, {
           method: "PUT",
-          body: { date: p.date, testIds, customTopics: topics, dismissMode, photoStudentId: photo },
+          body: {
+            date: p.date,
+            testIds,
+            customTopics: topics,
+            dismissMode,
+            photoStudentId: photo,
+            // Өөр хүн хооронд нь зассан бол сервер 409 — дарж бичихгүй
+            expectedUpdatedAt: p.ctx.plan?.updatedAt ?? null,
+          },
         });
       if (noteChanged)
         await api(`/lesson-records/${e.scheduleId}/note`, {
@@ -321,6 +327,9 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
   return (
     <>
       <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4">
+        {e.record ? (
+          <ConfirmedTests entry={e} tests={p.tests} canConfirm={p.canConfirm} onEdit={p.onConfirm} />
+        ) : (
         <Section title="Орох тест">
           <TestPicker
             classroomId={e.classroomId}
@@ -329,6 +338,7 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
             onChange={setTestIds}
             customTopics={topics}
             onCustomTopicsChange={setTopics}
+            canHide
           />
           {/* Хадгалсан тестийн эх PDF (шинээр сонгосных хадгалсны дараа гарна) */}
           {testIds.some((id) => p.tests[id]?.sourcePdfKey) && (
@@ -345,6 +355,7 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
             </ul>
           )}
         </Section>
+        )}
 
         {testIds.length > 0 && (
           <Section title="Тестийн бодлогууд">
@@ -457,6 +468,49 @@ function EditorForm(p: Props & { entry: DayEntry; ctx: PlanContext }) {
         </button>
       </footer>
     </>
+  );
+}
+
+/**
+ * Батлагдсан хичээл: тест, сэдвийг төлөвлөгөөнөөс БИШ батлах цонхноос засна (эзэн 2026-11-08) —
+ * хийсэн тест, батламж, төлөвлөгөө гурав зөрөхгүй байхын тулд нэг л газар.
+ */
+function ConfirmedTests({
+  entry: e,
+  tests,
+  canConfirm,
+  onEdit,
+}: {
+  entry: DayEntry;
+  tests: Record<string, TestInfo>;
+  canConfirm: boolean;
+  onEdit: () => void;
+}) {
+  const { today, topics } = roadOf(e, tests);
+  return (
+    <Section title="Хийсэн тест">
+      {today.length || topics.length ? (
+        <p className="flex flex-wrap items-center gap-x-1.5 text-sm font-semibold text-ink">
+          <GroupedItems items={today} />
+          {topics.length > 0 && <span className="font-normal text-ink-dim">{topics.join(", ")}</span>}
+        </p>
+      ) : (
+        <p className="text-sm text-ink-dim">Тест бүртгээгүй</p>
+      )}
+      <p className="flex flex-wrap items-center gap-2 text-xs text-ink-dim">
+        <BadgeCheck className="size-4 text-success" aria-hidden />
+        Батлагдсан тул тест, сэдвийг батлах цонхноос засна
+        {canConfirm && (
+          <button
+            type="button"
+            onClick={onEdit}
+            className={cn(chip, "border-line bg-panel text-ink hover:border-success hover:text-success")}
+          >
+            Хийсэн тестийг засах
+          </button>
+        )}
+      </p>
+    </Section>
   );
 }
 

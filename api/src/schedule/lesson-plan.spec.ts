@@ -83,7 +83,8 @@ describe('week-resolver — зөөгдсөн хичээлийн оноолт (20
 
 describe('Төлөвлөгөөний цэвэр логик', () => {
   it('гарчиг — богино нэрс таслалаар', () => {
-    expect(planTitle(['Урвуу функц 1', '', 'Урвуу функц 2'])).toBe('Урвуу функц 1, Урвуу функц 2');
+    expect(planTitle(['Урвуу функц 1', '', 'Урвуу функц 2'])).toBe('Урвуу функц 1, 2');
+    expect(planTitle(['Урвуу функц 1', 'Модуль 3', 'Иррац шалгалт'])).toBe('Урвуу функц 1; Модуль 3; Иррац шалгалт');
   });
   it('номын дараалал: 100V3 → 200V3 → бусад', () => {
     const t = (bookCode: string | null, chapterOrder: number, variantLabel = 'A') => ({
@@ -163,11 +164,12 @@ function makePlanService() {
       ]),
     },
     enrollment: { findFirst: jest.fn(async () => ({ id: 'e' })) },
+    lessonRecord: { findFirst: jest.fn(async () => null) },
     auditLog: { create: jest.fn(async () => ({})) },
   };
   const schedule: any = {
     occurrenceKey: jest.fn(async (_id: string, key: string) => ({
-      schedule: { classroomId: 'c1' },
+      schedule: { classroomId: 'c1', exceptions: [] },
       key,
     })),
   };
@@ -176,6 +178,58 @@ function makePlanService() {
 
 describe('LessonPlanService.putPlan', () => {
   const tp = { userId: 'tp', role: Role.TEACHER_PLUS };
+
+  it('БАТЛАГДСАН хичээлийн тест/сэдвийг төлөвлөгөөгөөр солихгүй (409), бусад талбар засагдана (эзэн 2026-11-08)', async () => {
+    const { service, prisma } = makePlanService();
+    const stored = { id: 'lt1', title: 'Тоо тоолол 1', testIds: ['t1'], customTopics: [], dismissMode: null, photoStudentId: null, chapterId: 'ch101', updatedAt: new Date('2026-11-07T10:00:00Z') };
+    prisma.lessonTopic.findUnique.mockResolvedValue(stored);
+    prisma.lessonRecord.findFirst.mockResolvedValue({ id: 'rec1' });
+    await expect(service.putPlan(tp, 's1', { date: '2026-11-07', testIds: [] })).rejects.toThrow('Батлагдсан');
+    await expect(
+      service.putPlan(tp, 's1', { date: '2026-11-07', testIds: ['t1'], customTopics: ['Шинэ сэдэв'] }),
+    ).rejects.toThrow('Батлагдсан');
+    expect(prisma.lessonTopic.update).not.toHaveBeenCalled();
+    // Ижил тест (өөр дараалал/давхардал), зөвхөн тарах — зөвшөөрнө
+    await service.putPlan(tp, 's1', { date: '2026-11-07', testIds: ['t1', 't1'], customTopics: [], dismissMode: 'DISMISS' });
+    expect(prisma.lessonTopic.update.mock.calls[0][0].data).toMatchObject({ testIds: ['t1'], dismissMode: 'DISMISS' });
+    // Батламжийг БОДИТ огноогоор хайна (зөөгдсөн хичээл шинэ өдрөөрөө)
+    expect(prisma.lessonRecord.findFirst.mock.calls[0][0].where).toMatchObject({ scheduleId: 's1', cancelledAt: null });
+  });
+
+  it('зөөгдсөн хичээл: батламжийг шинэ (бодит) огноогоор шалгана', async () => {
+    const { service, prisma, schedule } = makePlanService();
+    schedule.occurrenceKey.mockResolvedValueOnce({
+      schedule: {
+        classroomId: 'c1',
+        exceptions: [{ date: new Date('2026-11-03T00:00:00Z'), kind: 'MOVED', newDate: new Date('2026-11-05T00:00:00Z') }],
+      },
+      key: '2026-11-03',
+    });
+    await service.putPlan(tp, 's1', { date: '2026-11-05', testIds: ['t1'] });
+    expect(prisma.lessonRecord.findFirst.mock.calls[0][0].where.date.toISOString().slice(0, 10)).toBe('2026-11-05');
+  });
+
+  it('аль хэдийн төлөвлөсөн тест хожим устсан ч тарах/зургийг хадгалж болно; ШИНЭЭР нэмбэл 400', async () => {
+    const { service, prisma } = makePlanService();
+    prisma.lessonTopic.findUnique.mockResolvedValueOnce({ id: 'lt1', title: 'Устсан', testIds: ['dead'], customTopics: [], dismissMode: null, photoStudentId: null, chapterId: null, updatedAt: new Date() });
+    await service.putPlan(tp, 's1', { date: '2026-10-19', testIds: ['dead'], dismissMode: 'STAY' });
+    expect(prisma.lessonTopic.update.mock.calls[0][0].data).toMatchObject({ testIds: ['dead'], dismissMode: 'STAY' });
+    await expect(service.putPlan(tp, 's1', { date: '2026-10-19', testIds: ['dead'] })).rejects.toThrow('тест');
+  });
+
+  it('зэрэг засвар: нээх үеийн updatedAt өөр бол 409, таарвал хадгална', async () => {
+    const { service, prisma } = makePlanService();
+    const at = new Date('2026-11-07T10:00:00Z');
+    prisma.lessonTopic.findUnique.mockResolvedValue({ id: 'lt1', title: '', testIds: [], customTopics: [], dismissMode: null, photoStudentId: null, chapterId: null, updatedAt: at });
+    await expect(
+      service.putPlan(tp, 's1', { date: '2026-10-19', testIds: ['t1'], expectedUpdatedAt: '2026-11-07T09:00:00.000Z' }),
+    ).rejects.toThrow('өөр хүн');
+    await expect(
+      service.putPlan(tp, 's1', { date: '2026-10-19', testIds: ['t1'], expectedUpdatedAt: null }),
+    ).rejects.toThrow('өөр хүн');
+    await service.putPlan(tp, 's1', { date: '2026-10-19', testIds: ['t1'], expectedUpdatedAt: at.toISOString() });
+    expect(prisma.lessonTopic.update).toHaveBeenCalledTimes(1);
+  });
 
   it('тестүүдийг номын дарааллаар хадгалж, гарчгийг богино нэрээс үүсгэнэ', async () => {
     const { service, prisma } = makePlanService();
@@ -188,7 +242,7 @@ describe('LessonPlanService.putPlan', () => {
     const data = prisma.lessonTopic.create.mock.calls[0][0].data;
     expect(data).toMatchObject({
       testIds: ['t1', 'u2'],
-      title: 'Тоо тоолол 1, Урвуу функц 2',
+      title: 'Тоо тоолол 1; Урвуу функц 2',
       dismissMode: 'DISMISS',
       photoStudentId: 'st1',
       chapterId: 'ch502',
@@ -214,7 +268,7 @@ describe('LessonPlanService.putPlan', () => {
     expect(prisma.lessonTopic.create).not.toHaveBeenCalled();
   });
 
-  it('хоосон төлөвлөгөө мөрийг устгана; гараар бичсэн гарчиг тестгүй үед хадгалагдана', async () => {
+  it('хоосон төлөвлөгөө мөрийг УСТГАХГҮЙ, хоосолно; гараар бичсэн гарчиг тестгүй үед хадгалагдана', async () => {
     const { service, prisma } = makePlanService();
     prisma.lessonTopic.findUnique.mockResolvedValueOnce({
       id: 'lt1',
@@ -226,12 +280,8 @@ describe('LessonPlanService.putPlan', () => {
     });
     const out = await service.putPlan(tp, 's1', { date: '2026-10-19', testIds: [] });
     expect(out.plan).toBeNull();
-    // Хатуу устгалгүй: мөр deletedAt-тай үлдэнэ (эзний дүрэм 2026-10-23)
     expect(prisma.lessonTopic.delete).not.toHaveBeenCalled();
-    expect(prisma.lessonTopic.update).toHaveBeenCalledWith({
-      where: { id: 'lt1' },
-      data: { deletedAt: expect.any(Date), deletedById: expect.any(String) },
-    });
+    expect(prisma.lessonTopic.update.mock.calls[0][0].data).toMatchObject({ testIds: [], title: '' });
     prisma.lessonTopic.update.mockClear();
 
     prisma.lessonTopic.findUnique.mockResolvedValueOnce({
@@ -253,7 +303,7 @@ describe('LessonPlanService.putPlan', () => {
     const { service, prisma } = makePlanService();
     const out = await service.putPlan(tp, 's1', { date: '2026-10-19', testIds: ['t1'], title: '  Давтлага   хичээл ' });
     expect(prisma.lessonTopic.create.mock.calls[0][0].data).toMatchObject({
-      title: 'Тоо тоолол 1, Давтлага хичээл',
+      title: 'Тоо тоолол 1; Давтлага хичээл',
       testIds: ['t1'],
       customTopics: ['Давтлага хичээл'],
     });
@@ -286,7 +336,7 @@ describe('LessonPlanService.putPlan', () => {
     expect(prisma.lessonTopic.create.mock.calls[0][0].data).toMatchObject({
       testIds: ['t1'],
       customTopics: ['Иррац шалгалт', 'Шалгалтын тайлбар'],
-      title: 'Тоо тоолол 1, Иррац шалгалт, Шалгалтын тайлбар',
+      title: 'Тоо тоолол 1; Иррац шалгалт; Шалгалтын тайлбар',
     });
     expect(out.plan?.customTopics).toEqual(['Иррац шалгалт', 'Шалгалтын тайлбар']);
 
@@ -364,9 +414,14 @@ describe('LessonPlanService.putPlan', () => {
   });
 
   it('хуучин гарчиг (2026-10-27..31) customTopics хоосон үед нэг сэдэв болж уншигдана', () => {
-    expect(storedCustomTopics({ customTopics: [], title: 'Шалгалт', autoTitle: '' })).toEqual(['Шалгалт']);
-    expect(storedCustomTopics({ customTopics: [], title: 'Тоо тоолол 1', autoTitle: 'Тоо тоолол 1' })).toEqual([]);
-    expect(storedCustomTopics({ customTopics: ['А'], title: 'x', autoTitle: '' })).toEqual(['А']);
+    expect(storedCustomTopics({ customTopics: [], title: 'Шалгалт', testNames: [] })).toEqual(['Шалгалт']);
+    expect(storedCustomTopics({ customTopics: [], title: 'Тоо тоолол 1', testNames: ['Тоо тоолол 1'] })).toEqual([]);
+    expect(storedCustomTopics({ customTopics: ['А'], title: 'x', testNames: [] })).toEqual(['А']);
+    // 2026-11-08-аас өмнөх «, »-тэй автомат гарчиг ч, шинэ товчилсон гарчиг ч сэдэв БИШ
+    const names = ['Урвуу функц 1', 'Урвуу функц 2'];
+    expect(storedCustomTopics({ customTopics: [], title: 'Урвуу функц 1, Урвуу функц 2', testNames: names })).toEqual([]);
+    expect(storedCustomTopics({ customTopics: [], title: 'Урвуу функц 1, 2', testNames: names })).toEqual([]);
+    expect(storedCustomTopics({ customTopics: [], title: 'Урвуу функц', testNames: names })).toEqual(['Урвуу функц']);
   });
 
   it('маршрут: day-plan — ажилтан; plan бичих/унших — Багш+, Админ', () => {

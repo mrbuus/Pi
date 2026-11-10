@@ -12,6 +12,9 @@ export const STAFF_CAPABILITIES = [
   'time.review',
   'payroll.view',
   'finance.manage',
+  // Багшийн ажилласан цагийн хүснэгт бөглөх + бүх багшийн данс засах (эзэн 2026-11-08).
+  // Цагийн ХӨЛС энэ эрхэд ОРОХГҮЙ — зөвхөн teacher-hours/pay-rate-owner.ts.
+  'teacher-hours.edit',
 ] as const;
 export type StaffCapability = (typeof STAFF_CAPABILITIES)[number];
 /** Багш+ олголтгүйгээр БАЙНГА эзэмших эрхүүд (бүх анги) */

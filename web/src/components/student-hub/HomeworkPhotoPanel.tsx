@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock } from "lucide-react";
+import { Clock, MessageSquareText, Undo2 } from "lucide-react";
 import { HwSentIcon } from "@/components/attendance/marks";
 import { dayLabel } from "@/components/makeup/types";
 import { todayKeyUB } from "@/components/homework-practice/lib";
@@ -32,6 +32,8 @@ export default function HomeworkPhotoPanel({
   expanded?: boolean;
 }) {
   const [current, setCurrent] = useState(photo);
+  // Илгээхээс өмнө бичих тайлбар (эзэн 2026-11-05) — багшид харагдана
+  const [caption, setCaption] = useState("");
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- эцгийн шинэ утгыг дагана
@@ -46,8 +48,9 @@ export default function HomeworkPhotoPanel({
   async function save(keys: string[], pages: number) {
     const next = await api<HomeworkPhoto>("/homework/photos", {
       method: "POST",
-      body: { classroomId, date, fileKey: keys[0], pages },
+      body: { classroomId, date, fileKey: keys[0], pages, ...(caption.trim() ? { caption: caption.trim() } : {}) },
     });
+    setCaption("");
     update(next);
   }
 
@@ -58,14 +61,15 @@ export default function HomeworkPhotoPanel({
   }
 
   const sent = !!current;
-  const open = expanded ?? date === todayKeyUB();
+  const returned = !!current?.returnedAt;
+  const open = expanded ?? (date === todayKeyUB() || returned);
 
   return (
     <section
       aria-label="Дэвтрийн зураг"
       className={cn(
         "rounded-xl border p-3 sm:p-4",
-        sent ? "border-success/35 bg-success/5" : canSend ? "border-brand-bright/40 bg-brand-bright/5" : "border-line bg-panel",
+        returned ? "border-error/50 bg-error/[0.05]" : sent ? "border-success/35 bg-success/5" : canSend ? "border-brand-bright/40 bg-brand-bright/5" : "border-line bg-panel",
       )}
     >
       {!sent && (
@@ -73,6 +77,31 @@ export default function HomeworkPhotoPanel({
           <HwSentIcon className="size-5 shrink-0 text-brand-soft" />
           <h3 className="font-bold text-ink">Дэвтрийн зураг</h3>
         </div>
+      )}
+      {returned && (
+        <p role="status" className="mb-3 flex items-start gap-1.5 text-sm font-semibold text-error">
+          <Undo2 className="mt-0.5 size-4 shrink-0" aria-hidden />
+          Багш буцаасан — доорх сэтгэгдлийг уншаад засаж, дахин илгээнэ үү
+        </p>
+      )}
+      {sent && current?.caption && (
+        <p className="mb-3 flex items-start gap-1.5 rounded-lg bg-panel px-3 py-2 text-sm text-ink">
+          <MessageSquareText className="mt-0.5 size-4 shrink-0 text-ink-dim" aria-label="Миний тайлбар" />
+          <span className="min-w-0 whitespace-pre-wrap break-words">{current.caption}</span>
+        </p>
+      )}
+      {canSend && (!sent || returned) && (
+        <label className="mb-3 block">
+          <span className="text-xs font-semibold text-ink-dim">Тайлбар (заавал биш) — багшид харагдана</span>
+          <textarea
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            maxLength={500}
+            rows={2}
+            placeholder="Жишээ нь: 5-р бодлогыг ойлгосонгүй"
+            className="mt-1 block min-h-11 w-full resize-none rounded-xl border border-line bg-bg px-3 py-2 text-base text-ink outline-none placeholder:text-ink-dim focus:border-brand-bright sm:text-sm"
+          />
+        </label>
       )}
       <PhotoSetSender
         sent={current ? { keys: [current.fileKey], pages: current.pages, at: current.uploadedAt, late: current.late } : null}

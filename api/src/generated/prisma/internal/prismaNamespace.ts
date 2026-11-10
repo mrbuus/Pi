@@ -499,6 +499,9 @@ export const ModelName = {
   LessonPhotoTurn: 'LessonPhotoTurn',
   LessonRotation: 'LessonRotation',
   StaffCapabilityGrant: 'StaffCapabilityGrant',
+  TeacherWorkHours: 'TeacherWorkHours',
+  TeacherBankAccount: 'TeacherBankAccount',
+  TeacherPayRate: 'TeacherPayRate',
   StudyReviewRun: 'StudyReviewRun',
   StudyReviewItem: 'StudyReviewItem',
   StudyReviewResponse: 'StudyReviewResponse',
@@ -531,7 +534,13 @@ export const ModelName = {
   DeviceToken: 'DeviceToken',
   AppleIdentity: 'AppleIdentity',
   AccountDeletionRequest: 'AccountDeletionRequest',
-  UiEvent: 'UiEvent'
+  UiEvent: 'UiEvent',
+  HomeworkDeadline: 'HomeworkDeadline',
+  HomeworkComment: 'HomeworkComment',
+  HomeworkQuiz: 'HomeworkQuiz',
+  HomeworkQuizScore: 'HomeworkQuizScore',
+  MakeupVisit: 'MakeupVisit',
+  MakeupVisitTest: 'MakeupVisitTest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -547,7 +556,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "teacherWorkHours" | "teacherBankAccount" | "teacherPayRate" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment" | "homeworkQuiz" | "homeworkQuizScore" | "makeupVisit" | "makeupVisitTest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -8099,6 +8108,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TeacherWorkHours: {
+      payload: Prisma.$TeacherWorkHoursPayload<ExtArgs>
+      fields: Prisma.TeacherWorkHoursFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TeacherWorkHoursFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TeacherWorkHoursFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>
+        }
+        findFirst: {
+          args: Prisma.TeacherWorkHoursFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TeacherWorkHoursFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>
+        }
+        findMany: {
+          args: Prisma.TeacherWorkHoursFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>[]
+        }
+        create: {
+          args: Prisma.TeacherWorkHoursCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>
+        }
+        createMany: {
+          args: Prisma.TeacherWorkHoursCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TeacherWorkHoursCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>[]
+        }
+        delete: {
+          args: Prisma.TeacherWorkHoursDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>
+        }
+        update: {
+          args: Prisma.TeacherWorkHoursUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>
+        }
+        deleteMany: {
+          args: Prisma.TeacherWorkHoursDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TeacherWorkHoursUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TeacherWorkHoursUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>[]
+        }
+        upsert: {
+          args: Prisma.TeacherWorkHoursUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherWorkHoursPayload>
+        }
+        aggregate: {
+          args: Prisma.TeacherWorkHoursAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTeacherWorkHours>
+        }
+        groupBy: {
+          args: Prisma.TeacherWorkHoursGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherWorkHoursGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TeacherWorkHoursCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherWorkHoursCountAggregateOutputType> | number
+        }
+      }
+    }
+    TeacherBankAccount: {
+      payload: Prisma.$TeacherBankAccountPayload<ExtArgs>
+      fields: Prisma.TeacherBankAccountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TeacherBankAccountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TeacherBankAccountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>
+        }
+        findFirst: {
+          args: Prisma.TeacherBankAccountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TeacherBankAccountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>
+        }
+        findMany: {
+          args: Prisma.TeacherBankAccountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>[]
+        }
+        create: {
+          args: Prisma.TeacherBankAccountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>
+        }
+        createMany: {
+          args: Prisma.TeacherBankAccountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TeacherBankAccountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>[]
+        }
+        delete: {
+          args: Prisma.TeacherBankAccountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>
+        }
+        update: {
+          args: Prisma.TeacherBankAccountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>
+        }
+        deleteMany: {
+          args: Prisma.TeacherBankAccountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TeacherBankAccountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TeacherBankAccountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>[]
+        }
+        upsert: {
+          args: Prisma.TeacherBankAccountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherBankAccountPayload>
+        }
+        aggregate: {
+          args: Prisma.TeacherBankAccountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTeacherBankAccount>
+        }
+        groupBy: {
+          args: Prisma.TeacherBankAccountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherBankAccountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TeacherBankAccountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherBankAccountCountAggregateOutputType> | number
+        }
+      }
+    }
+    TeacherPayRate: {
+      payload: Prisma.$TeacherPayRatePayload<ExtArgs>
+      fields: Prisma.TeacherPayRateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TeacherPayRateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TeacherPayRateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>
+        }
+        findFirst: {
+          args: Prisma.TeacherPayRateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TeacherPayRateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>
+        }
+        findMany: {
+          args: Prisma.TeacherPayRateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>[]
+        }
+        create: {
+          args: Prisma.TeacherPayRateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>
+        }
+        createMany: {
+          args: Prisma.TeacherPayRateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TeacherPayRateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>[]
+        }
+        delete: {
+          args: Prisma.TeacherPayRateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>
+        }
+        update: {
+          args: Prisma.TeacherPayRateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>
+        }
+        deleteMany: {
+          args: Prisma.TeacherPayRateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TeacherPayRateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TeacherPayRateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>[]
+        }
+        upsert: {
+          args: Prisma.TeacherPayRateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeacherPayRatePayload>
+        }
+        aggregate: {
+          args: Prisma.TeacherPayRateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTeacherPayRate>
+        }
+        groupBy: {
+          args: Prisma.TeacherPayRateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherPayRateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TeacherPayRateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeacherPayRateCountAggregateOutputType> | number
+        }
+      }
+    }
     StudyReviewRun: {
       payload: Prisma.$StudyReviewRunPayload<ExtArgs>
       fields: Prisma.StudyReviewRunFieldRefs
@@ -10541,6 +10772,450 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    HomeworkDeadline: {
+      payload: Prisma.$HomeworkDeadlinePayload<ExtArgs>
+      fields: Prisma.HomeworkDeadlineFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeworkDeadlineFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeworkDeadlineFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>
+        }
+        findFirst: {
+          args: Prisma.HomeworkDeadlineFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeworkDeadlineFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>
+        }
+        findMany: {
+          args: Prisma.HomeworkDeadlineFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>[]
+        }
+        create: {
+          args: Prisma.HomeworkDeadlineCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>
+        }
+        createMany: {
+          args: Prisma.HomeworkDeadlineCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeworkDeadlineCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>[]
+        }
+        delete: {
+          args: Prisma.HomeworkDeadlineDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>
+        }
+        update: {
+          args: Prisma.HomeworkDeadlineUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeworkDeadlineDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeworkDeadlineUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeworkDeadlineUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeworkDeadlineUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkDeadlinePayload>
+        }
+        aggregate: {
+          args: Prisma.HomeworkDeadlineAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeworkDeadline>
+        }
+        groupBy: {
+          args: Prisma.HomeworkDeadlineGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkDeadlineGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeworkDeadlineCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkDeadlineCountAggregateOutputType> | number
+        }
+      }
+    }
+    HomeworkComment: {
+      payload: Prisma.$HomeworkCommentPayload<ExtArgs>
+      fields: Prisma.HomeworkCommentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeworkCommentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeworkCommentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>
+        }
+        findFirst: {
+          args: Prisma.HomeworkCommentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeworkCommentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>
+        }
+        findMany: {
+          args: Prisma.HomeworkCommentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>[]
+        }
+        create: {
+          args: Prisma.HomeworkCommentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>
+        }
+        createMany: {
+          args: Prisma.HomeworkCommentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeworkCommentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>[]
+        }
+        delete: {
+          args: Prisma.HomeworkCommentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>
+        }
+        update: {
+          args: Prisma.HomeworkCommentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeworkCommentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeworkCommentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeworkCommentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeworkCommentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkCommentPayload>
+        }
+        aggregate: {
+          args: Prisma.HomeworkCommentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeworkComment>
+        }
+        groupBy: {
+          args: Prisma.HomeworkCommentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkCommentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeworkCommentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkCommentCountAggregateOutputType> | number
+        }
+      }
+    }
+    HomeworkQuiz: {
+      payload: Prisma.$HomeworkQuizPayload<ExtArgs>
+      fields: Prisma.HomeworkQuizFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeworkQuizFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeworkQuizFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>
+        }
+        findFirst: {
+          args: Prisma.HomeworkQuizFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeworkQuizFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>
+        }
+        findMany: {
+          args: Prisma.HomeworkQuizFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>[]
+        }
+        create: {
+          args: Prisma.HomeworkQuizCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>
+        }
+        createMany: {
+          args: Prisma.HomeworkQuizCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeworkQuizCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>[]
+        }
+        delete: {
+          args: Prisma.HomeworkQuizDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>
+        }
+        update: {
+          args: Prisma.HomeworkQuizUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeworkQuizDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeworkQuizUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeworkQuizUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeworkQuizUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizPayload>
+        }
+        aggregate: {
+          args: Prisma.HomeworkQuizAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeworkQuiz>
+        }
+        groupBy: {
+          args: Prisma.HomeworkQuizGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkQuizGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeworkQuizCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkQuizCountAggregateOutputType> | number
+        }
+      }
+    }
+    HomeworkQuizScore: {
+      payload: Prisma.$HomeworkQuizScorePayload<ExtArgs>
+      fields: Prisma.HomeworkQuizScoreFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeworkQuizScoreFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeworkQuizScoreFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>
+        }
+        findFirst: {
+          args: Prisma.HomeworkQuizScoreFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeworkQuizScoreFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>
+        }
+        findMany: {
+          args: Prisma.HomeworkQuizScoreFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>[]
+        }
+        create: {
+          args: Prisma.HomeworkQuizScoreCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>
+        }
+        createMany: {
+          args: Prisma.HomeworkQuizScoreCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeworkQuizScoreCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>[]
+        }
+        delete: {
+          args: Prisma.HomeworkQuizScoreDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>
+        }
+        update: {
+          args: Prisma.HomeworkQuizScoreUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeworkQuizScoreDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeworkQuizScoreUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeworkQuizScoreUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeworkQuizScoreUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeworkQuizScorePayload>
+        }
+        aggregate: {
+          args: Prisma.HomeworkQuizScoreAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeworkQuizScore>
+        }
+        groupBy: {
+          args: Prisma.HomeworkQuizScoreGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkQuizScoreGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeworkQuizScoreCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeworkQuizScoreCountAggregateOutputType> | number
+        }
+      }
+    }
+    MakeupVisit: {
+      payload: Prisma.$MakeupVisitPayload<ExtArgs>
+      fields: Prisma.MakeupVisitFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MakeupVisitFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MakeupVisitFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>
+        }
+        findFirst: {
+          args: Prisma.MakeupVisitFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MakeupVisitFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>
+        }
+        findMany: {
+          args: Prisma.MakeupVisitFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>[]
+        }
+        create: {
+          args: Prisma.MakeupVisitCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>
+        }
+        createMany: {
+          args: Prisma.MakeupVisitCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MakeupVisitCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>[]
+        }
+        delete: {
+          args: Prisma.MakeupVisitDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>
+        }
+        update: {
+          args: Prisma.MakeupVisitUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>
+        }
+        deleteMany: {
+          args: Prisma.MakeupVisitDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MakeupVisitUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MakeupVisitUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>[]
+        }
+        upsert: {
+          args: Prisma.MakeupVisitUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitPayload>
+        }
+        aggregate: {
+          args: Prisma.MakeupVisitAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMakeupVisit>
+        }
+        groupBy: {
+          args: Prisma.MakeupVisitGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MakeupVisitGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MakeupVisitCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MakeupVisitCountAggregateOutputType> | number
+        }
+      }
+    }
+    MakeupVisitTest: {
+      payload: Prisma.$MakeupVisitTestPayload<ExtArgs>
+      fields: Prisma.MakeupVisitTestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MakeupVisitTestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MakeupVisitTestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>
+        }
+        findFirst: {
+          args: Prisma.MakeupVisitTestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MakeupVisitTestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>
+        }
+        findMany: {
+          args: Prisma.MakeupVisitTestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>[]
+        }
+        create: {
+          args: Prisma.MakeupVisitTestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>
+        }
+        createMany: {
+          args: Prisma.MakeupVisitTestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MakeupVisitTestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>[]
+        }
+        delete: {
+          args: Prisma.MakeupVisitTestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>
+        }
+        update: {
+          args: Prisma.MakeupVisitTestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>
+        }
+        deleteMany: {
+          args: Prisma.MakeupVisitTestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MakeupVisitTestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MakeupVisitTestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>[]
+        }
+        upsert: {
+          args: Prisma.MakeupVisitTestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MakeupVisitTestPayload>
+        }
+        aggregate: {
+          args: Prisma.MakeupVisitTestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMakeupVisitTest>
+        }
+        groupBy: {
+          args: Prisma.MakeupVisitTestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MakeupVisitTestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MakeupVisitTestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MakeupVisitTestCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -12126,6 +12801,45 @@ export const StaffCapabilityGrantScalarFieldEnum = {
 export type StaffCapabilityGrantScalarFieldEnum = (typeof StaffCapabilityGrantScalarFieldEnum)[keyof typeof StaffCapabilityGrantScalarFieldEnum]
 
 
+export const TeacherWorkHoursScalarFieldEnum = {
+  id: 'id',
+  teacherId: 'teacherId',
+  date: 'date',
+  hundredths: 'hundredths',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeacherWorkHoursScalarFieldEnum = (typeof TeacherWorkHoursScalarFieldEnum)[keyof typeof TeacherWorkHoursScalarFieldEnum]
+
+
+export const TeacherBankAccountScalarFieldEnum = {
+  teacherId: 'teacherId',
+  bankName: 'bankName',
+  accountNumber: 'accountNumber',
+  holderName: 'holderName',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeacherBankAccountScalarFieldEnum = (typeof TeacherBankAccountScalarFieldEnum)[keyof typeof TeacherBankAccountScalarFieldEnum]
+
+
+export const TeacherPayRateScalarFieldEnum = {
+  id: 'id',
+  teacherId: 'teacherId',
+  effectiveFrom: 'effectiveFrom',
+  ratePerHour: 'ratePerHour',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type TeacherPayRateScalarFieldEnum = (typeof TeacherPayRateScalarFieldEnum)[keyof typeof TeacherPayRateScalarFieldEnum]
+
+
 export const StudyReviewRunScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -12608,6 +13322,9 @@ export const HomeworkPhotoScalarFieldEnum = {
   lessonDate: 'lessonDate',
   fileKey: 'fileKey',
   pages: 'pages',
+  caption: 'caption',
+  returnedAt: 'returnedAt',
+  returnedById: 'returnedById',
   createdAt: 'createdAt',
   deletedAt: 'deletedAt'
 } as const
@@ -12669,6 +13386,103 @@ export const UiEventScalarFieldEnum = {
 } as const
 
 export type UiEventScalarFieldEnum = (typeof UiEventScalarFieldEnum)[keyof typeof UiEventScalarFieldEnum]
+
+
+export const HomeworkDeadlineScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  lessonDate: 'lessonDate',
+  dueAt: 'dueAt',
+  allowLate: 'allowLate',
+  setById: 'setById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HomeworkDeadlineScalarFieldEnum = (typeof HomeworkDeadlineScalarFieldEnum)[keyof typeof HomeworkDeadlineScalarFieldEnum]
+
+
+export const HomeworkCommentScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  studentId: 'studentId',
+  lessonDate: 'lessonDate',
+  authorId: 'authorId',
+  authorRole: 'authorRole',
+  kind: 'kind',
+  body: 'body',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type HomeworkCommentScalarFieldEnum = (typeof HomeworkCommentScalarFieldEnum)[keyof typeof HomeworkCommentScalarFieldEnum]
+
+
+export const HomeworkQuizScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  date: 'date',
+  problemCount: 'problemCount',
+  createdById: 'createdById',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type HomeworkQuizScalarFieldEnum = (typeof HomeworkQuizScalarFieldEnum)[keyof typeof HomeworkQuizScalarFieldEnum]
+
+
+export const HomeworkQuizScoreScalarFieldEnum = {
+  id: 'id',
+  quizId: 'quizId',
+  studentId: 'studentId',
+  score: 'score',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type HomeworkQuizScoreScalarFieldEnum = (typeof HomeworkQuizScoreScalarFieldEnum)[keyof typeof HomeworkQuizScoreScalarFieldEnum]
+
+
+export const MakeupVisitScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  date: 'date',
+  hostClassroomId: 'hostClassroomId',
+  placeKey: 'placeKey',
+  homeClassroomId: 'homeClassroomId',
+  comment: 'comment',
+  attStatus: 'attStatus',
+  lateRange: 'lateRange',
+  attNote: 'attNote',
+  hwStatus: 'hwStatus',
+  hwNote: 'hwNote',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
+} as const
+
+export type MakeupVisitScalarFieldEnum = (typeof MakeupVisitScalarFieldEnum)[keyof typeof MakeupVisitScalarFieldEnum]
+
+
+export const MakeupVisitTestScalarFieldEnum = {
+  id: 'id',
+  visitId: 'visitId',
+  testId: 'testId',
+  title: 'title',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
+} as const
+
+export type MakeupVisitTestScalarFieldEnum = (typeof MakeupVisitTestScalarFieldEnum)[keyof typeof MakeupVisitTestScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -13543,6 +14357,20 @@ export type EnumHomeworkAttemptStatusFieldRefInput<$PrismaModel> = FieldRefInput
 export type ListEnumHomeworkAttemptStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HomeworkAttemptStatus[]'>
     
 
+
+/**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal[]'
+ */
+export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -13796,6 +14624,9 @@ export type GlobalOmitConfig = {
   lessonPhotoTurn?: Prisma.LessonPhotoTurnOmit
   lessonRotation?: Prisma.LessonRotationOmit
   staffCapabilityGrant?: Prisma.StaffCapabilityGrantOmit
+  teacherWorkHours?: Prisma.TeacherWorkHoursOmit
+  teacherBankAccount?: Prisma.TeacherBankAccountOmit
+  teacherPayRate?: Prisma.TeacherPayRateOmit
   studyReviewRun?: Prisma.StudyReviewRunOmit
   studyReviewItem?: Prisma.StudyReviewItemOmit
   studyReviewResponse?: Prisma.StudyReviewResponseOmit
@@ -13829,6 +14660,12 @@ export type GlobalOmitConfig = {
   appleIdentity?: Prisma.AppleIdentityOmit
   accountDeletionRequest?: Prisma.AccountDeletionRequestOmit
   uiEvent?: Prisma.UiEventOmit
+  homeworkDeadline?: Prisma.HomeworkDeadlineOmit
+  homeworkComment?: Prisma.HomeworkCommentOmit
+  homeworkQuiz?: Prisma.HomeworkQuizOmit
+  homeworkQuizScore?: Prisma.HomeworkQuizScoreOmit
+  makeupVisit?: Prisma.MakeupVisitOmit
+  makeupVisitTest?: Prisma.MakeupVisitTestOmit
 }
 
 /* Types for Logging */

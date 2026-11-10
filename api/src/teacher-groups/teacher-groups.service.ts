@@ -84,7 +84,8 @@ export class TeacherGroupsService {
         externalTeacherProfile: {
           create: {
             organization: dto.organization || null,
-            verifiedAt: new Date(),
+            // Автоматаар баталгаажуулахгүй — Админ/Багш+ verify/:userId-ээр
+            verifiedAt: null,
             verifiedById: null,
           },
         },

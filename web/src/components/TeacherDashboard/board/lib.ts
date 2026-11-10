@@ -68,6 +68,8 @@ export interface Criteria {
   maxLates: number;
   minHomework: number;
   missingStreak: number;
+  /** Сүүлийн шалгалтын (homework-quiz) хувь үүнээс бага бол; 0 = тооцохгүй (эзэн 2026-11-08 19:08) */
+  minQuiz: number;
 }
 
 export const DEFAULT_CRITERIA: Criteria = {
@@ -77,6 +79,7 @@ export const DEFAULT_CRITERIA: Criteria = {
   maxLates: 4,
   minHomework: 60,
   missingStreak: 2,
+  minQuiz: 50,
 };
 
 /** Хэн ирц авсан / даалгавар шалгасан (эзэн 2026-10-22): багш тус бүрийн сүүлийн цаг */

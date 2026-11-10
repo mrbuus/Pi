@@ -40,6 +40,10 @@ export interface HomeworkPhoto {
   uploadedAt: string;
   /** Дараагийн хичээлээс хойш илгээсэн */
   late?: boolean;
+  /** Сурагчийн бичсэн тайлбар (эзэн 2026-11-05) */
+  caption?: string | null;
+  /** Багш «Буцаах» дарсан — засаад дахин илгээнэ */
+  returnedAt?: string | null;
 }
 
 /** «YYYY-MM-DD»-ээс n хоногийн зөрүү (цагийн бүсгүй өдөр) */

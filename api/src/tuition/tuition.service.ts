@@ -3,12 +3,14 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  Optional,
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleService } from '../schedule/schedule.service';
 import { type DateKey } from './proration';
-import { computePaidUntil } from './paid-until';
+import { computePaidUntil, paidUntilFromLedger } from './paid-until';
+import { PaymentsLedgerService } from '../payments/ledger.service';
 import {
   ACADEMIC_YEAR,
   computeLedger,
@@ -25,6 +27,7 @@ export class TuitionService {
     private prisma: PrismaService,
     private scheduleService: ScheduleService,
     private withdrawal: WithdrawalService,
+    @Optional() private ledger?: PaymentsLedgerService,
   ) {}
 
   /**
@@ -399,6 +402,14 @@ export class TuitionService {
       classroom = { id: enrollment.classroomId };
     }
 
+    // Танхимын сурагч: төлбөрийн ledger-ээс (ажилтны хуудастай ижил — сар бүр, хуваан, бүтэн
+    // жил бүгдийг зөв тооцно). Өмнө нь доорх хуучин гинж Улаанбаатарын (+08) цагтай серверт сарыг
+    // ахиулж чаддаггүй байсан тул 2+ сар төлсөн ч эхний сараар зогсдог байв (2026-11-05).
+    if (this.ledger) {
+      const [row] = await this.ledger.rows({ id: studentId });
+      if (row) return paidUntilFromLedger(row);
+    }
+
     // Төлбөр нь САРЫН дүнтэй төлбөр, forMonth = "2026-09" гэх мэт
     // ДАРААЛСАН гинж хайна
     const payments = await this.prisma.payment.findMany({
@@ -425,7 +436,8 @@ export class TuitionService {
         monthsPaid++;
         // Дараагийн сар авна
         const [y, m] = expectedMonth.split('-').map(Number);
-        const next = new Date(y, m, 1);
+        // UTC-ээр — new Date(y, m, 1) нь +08 серверт өмнөх сарын 16:00 UTC болж сар ахидаггүй байв
+        const next = new Date(Date.UTC(y, m, 1));
         expectedMonth = `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, '0')}`;
       } else {
         // Гинж эвдэрсэн → эхний дараалсан хэсгийг авна

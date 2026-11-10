@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import DatePickerButton from "@/components/ui/DatePickerButton";
 import { Building2, CalendarDays, CalendarOff, ChevronLeft, ChevronRight, Palmtree } from "lucide-react";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -10,7 +11,6 @@ import InfoHint from "@/components/ui/InfoHint";
 import ClassroomLessonHistory from "@/components/lesson-records/ClassroomLessonHistory";
 import PublishDayButton from "./PublishDayButton";
 import EntryActionPanel from "./EntryActionPanel";
-import RoomBadge from "./RoomBadge";
 import { addDaysToKey, formatMinutes, roomOrderOf, todayUBKey, WEEKDAY_LABELS, WEEKDAY_SHORT, type WeekEntry } from "./types";
 import LessonRow, { type TeacherOption } from "./day/LessonRow";
 import PlanDialog from "./day/PlanDialog";
@@ -25,7 +25,7 @@ import { withPlus } from "@/lib/personName";
 /**
  * ӨДРИЙН ХУВААРЬ (эзэн 2026-10-08, дахин бүтээсэн 2026-10-18).
  *
- * Эзний өдрийн Excel: мөр бүр = цаг, танхим, анги, тест (өмнөх → өнөөдөр),
+ * Эзний өдрийн Excel: мөр бүр = цаг, анги, тест (өмнөх → өнөөдөр),
  * ахлах, туслах. Багш+ маргаашийн төлөвлөгөөг өмнөх орой тавьдаг тул анхдагч
  * нь үдээс хойш маргааш. Мөр дээр дарахад төлөвлөгөөний цонх (Багш — зөвхөн
  * харна). Танхим/цаг/зөөх/цуцлах нь «⋯» дотор (EntryActionPanel).
@@ -49,6 +49,13 @@ const BRANCHES = ["Баруун 4", "Зүүн 4", "Бусад"] as const;
 export default function WeekBuilder() {
   const [today] = useState(todayUBKey);
   const [day, setDay] = useState(defaultDay);
+  // 7 өдрийн мөрийн эхний өдөр. Сонгосон өдөр мөрнөөс гарвал мөр дагаж шилжинэ (эзэн 2026-11-08:
+  // сум дарахад гарчиг солигдоод доорх өдрүүд хөдөлдөггүй байсан)
+  const [stripStart, setStripStart] = useState(() => addDaysToKey(todayUBKey(), -1));
+  const go = (k: string) => {
+    setDay(k);
+    setStripStart((s) => (k < s ? k : k > addDaysToKey(s, 6) ? addDaysToKey(k, -6) : s));
+  };
   const [planOf, setPlanOf] = useState<string | null>(null);
   const [confirmOf, setConfirmOf] = useState<string | null>(null);
   const [moreOf, setMoreOf] = useState<string | null>(null);
@@ -196,7 +203,7 @@ export default function WeekBuilder() {
   const find = (id: string | null) => entries.find((e) => e.scheduleId === id) ?? null;
   const moreEntry = find(moreOf);
 
-  const strip = Array.from({ length: 7 }, (_, i) => addDaysToKey(today, i - 1));
+  const strip = Array.from({ length: 7 }, (_, i) => addDaysToKey(stripStart, i));
   const rel = (k: string) => (k === today ? "Өнөөдөр" : k === addDaysToKey(today, 1) ? "Маргааш" : k === addDaysToKey(today, -1) ? "Өчигдөр" : null);
 
   return (
@@ -222,7 +229,7 @@ export default function WeekBuilder() {
       <nav aria-label="Өдөр сонгох" className="flex items-center gap-1 rounded-xl border border-line bg-surface p-1">
         <button
           type="button"
-          onClick={() => setDay((d) => addDaysToKey(d, -1))}
+          onClick={() => go(addDaysToKey(day, -1))}
           aria-label="Өмнөх өдөр"
           className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-ink/5 hover:text-ink"
         >
@@ -239,7 +246,7 @@ export default function WeekBuilder() {
                 aria-pressed={on}
                 aria-current={isToday ? "date" : undefined}
                 aria-label={`${WEEKDAY_LABELS[weekdayOf(k)]}, ${k.slice(5).replace("-", ".")}${rel(k) ? `, ${rel(k)}` : ""}`}
-                onClick={() => setDay(k)}
+                onClick={() => go(k)}
                 className={cn(
                   "flex min-h-14 min-w-11 flex-1 flex-col items-center justify-center rounded-lg px-1.5 text-xs transition",
                   on ? "bg-brand-bright text-on-brand" : "text-ink hover:bg-ink/5",
@@ -258,28 +265,26 @@ export default function WeekBuilder() {
         </div>
         <button
           type="button"
-          onClick={() => setDay((d) => addDaysToKey(d, 1))}
+          onClick={() => go(addDaysToKey(day, 1))}
           aria-label="Дараагийн өдөр"
           className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-ink/5 hover:text-ink"
         >
           <ChevronRight className="size-5" aria-hidden />
         </button>
-        <label className="relative inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-ink/5">
+        <DatePickerButton
+          value={day}
+          onChange={(v) => v && go(v)}
+          ariaLabel="Өдөр сонгох"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-dim hover:bg-ink/5"
+        >
           <CalendarDays className="size-5" aria-hidden />
-          <span className="sr-only">Өдөр сонгох</span>
-          <input
-            type="date"
-            value={day}
-            onChange={(e) => e.target.value && setDay(e.target.value)}
-            className="absolute inset-0 cursor-pointer opacity-0"
-          />
-        </label>
+        </DatePickerButton>
       </nav>
 
       {data && total > 0 && (
         <div className="flex flex-wrap items-center gap-2 [&>div]:mb-0">
           {canPlan && day >= today && !data.isHoliday && <PublishDayButton key={day} date={day} />}
-          <ExportImage date={day} entries={entries} tests={tests} />
+          <ExportImage data={data} />
         </div>
       )}
 
@@ -314,7 +319,7 @@ export default function WeekBuilder() {
               action={
                 <button
                   type="button"
-                  onClick={() => setDay(addDaysToKey(today, 1))}
+                  onClick={() => go(addDaysToKey(today, 1))}
                   className="inline-flex min-h-11 items-center rounded-lg border border-line px-3 text-sm font-semibold"
                 >
                   Маргааш руу очих
@@ -432,7 +437,7 @@ export default function WeekBuilder() {
           setPlanOf(null);
         }}
       />
-      <ConfirmDialog entry={find(confirmOf)} date={day} tests={tests} onClose={() => setConfirmOf(null)} onDone={reload} />
+      <ConfirmDialog entry={find(confirmOf)} date={day} tests={tests} canPlan={canPlan} onClose={() => setConfirmOf(null)} onDone={reload} />
       <EntryActionPanel
         open={moreEntry !== null}
         entry={moreEntry as unknown as WeekEntry | null}
@@ -471,10 +476,6 @@ function Legend({ canPlan }: { canPlan: boolean }) {
         </InfoHint>
       </h3>
       <ul className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-ink-dim">
-        <li className="inline-flex items-center gap-1.5">
-          <RoomBadge room="501" />
-          Танхим
-        </li>
         <li>
           Тоолол 3
           <Excluded numbers={[2, 5]} /> — улаан тоо: хассан бодлого

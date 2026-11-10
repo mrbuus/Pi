@@ -33,6 +33,7 @@ import { Role } from '../generated/prisma/enums';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateClassroomStudentDto } from './dto/create-classroom-student.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { SetUserPasswordDto } from './dto/set-user-password.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import {
   ArchiveStudentDto,
@@ -250,6 +251,23 @@ export class UsersController {
       userId: req.user.userId,
       role: req.user.role,
     });
+  }
+
+  // Админ нууц үгийг шинээр тохируулна (хадгалсан hash-ийг харах боломжгүй).
+  // Нууц үг өгөөгүй бол утасны дугаар руу буцаана. Багш+ энэ эрхгүй.
+  @Post(':id/password')
+  @Roles(Role.ADMIN)
+  setPassword(
+    @Param('id') id: string,
+    @Body() dto: SetUserPasswordDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.users.setPasswordByAdmin(
+      id,
+      dto.password,
+      req.user.userId,
+      req.user.role,
+    );
   }
 
   @Post('promote-teacher')

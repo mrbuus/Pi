@@ -83,7 +83,8 @@ export interface TuitionTier {
 export const TUITION: TuitionTier[] = [
   {
     id: "grade-12",
-    label: "12-р анги",
+    // Үнэ СУУДАГ АНГИЙН 7 хоногийн өдрөөр (эзэн 2026-10-31; api/src/payments/ledger.ts tierFor)
+    label: "7 хоногт 4 өдөр",
     grades: [12],
     plans: [
       { kind: "FULL_YEAR", label: "Бүтэн жилийн төлбөр", amount: 2_500_000, note: "Нэг дор төлөх" },
@@ -94,7 +95,7 @@ export const TUITION: TuitionTier[] = [
   },
   {
     id: "grade-9-11",
-    label: "9-11-р анги",
+    label: "7 хоногт 3 өдөр",
     grades: [9, 10, 11],
     plans: [
       { kind: "FULL_YEAR", label: "Бүтэн жилийн төлбөр", amount: 2_000_000, note: "Нэг дор төлөх" },
