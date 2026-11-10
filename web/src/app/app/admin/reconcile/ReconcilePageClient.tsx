@@ -188,13 +188,17 @@ export function ReconcilePageClient() {
         )}
       </section>
 
-      {overview?.demoSheetUrl && (
+      {overview?.sheetWrite && (
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-info/30 bg-info/10 px-4 py-3 text-sm text-ink">
           <FileSpreadsheet className="size-4 shrink-0 text-info" aria-hidden />
-          <span className="font-semibold">Демо горим</span>
-          <span className="text-ink-dim">Гараар оноосон сургалтын төлбөр жинхэнэ шийтэд биш, тусдаа хуулбарт бичигдэнэ</span>
-          <a href={overview.demoSheetUrl} target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-2">
-            Демо шийтийг нээх
+          <span className="font-semibold">{overview.sheetWrite.demo ? "Демо горим" : "Шийтэд автоматаар бичнэ"}</span>
+          <span className="text-ink-dim">
+            {overview.sheetWrite.demo
+              ? "Гараар оноосон сургалтын төлбөр жинхэнэ шийтэд биш, тусдаа хуулбарт бичигдэнэ"
+              : "Гараар оноосон сургалтын төлбөр «2027 оны төлбөрийн мэдээлэл»-д бичигдэнэ — ажилтан дахин бичихгүй"}
+          </span>
+          <a href={overview.sheetWrite.url} target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-2">
+            Шийтийг нээх
           </a>
         </p>
       )}

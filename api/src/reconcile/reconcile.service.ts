@@ -464,7 +464,7 @@ export class ReconcileService {
     // Сурсан данс/утас бусад мөрийг шийдэж магадгүй
     const auto = await this.resolveOpen(actor);
     const settled = row.accountNo ? await this.recomputeCursor(row.accountNo) : null;
-    // ДЕМО: зөвхөн хуулбар шийтэд (DEMO_SHEET_ID) — жинхэнэ шийтэд бичихгүй
+    // Шийтэд бичих (SHEET_PAY_WRITE=1 жинхэнэ, эс бөгөөс DEMO_SHEET_ID хуулбар)
     const sheetWrites = await this.demoSheet.writeTuition(
       parts.filter((p) => p.kind === 'TUITION' && p.studentId).map((p) => ({ studentId: p.studentId!, amount: p.amount })),
       row.bookedAt,
@@ -625,15 +625,14 @@ export class ReconcileService {
       this.prisma.bankTransaction.count({ where: { inSheet: true, suggestion: { path: ['sheetMissing'], equals: true } } }),
       this.prisma.bankTransaction.findFirst({ orderBy: { importedAt: 'desc' }, select: { importedAt: true } }),
     ]);
-    // ДЕМО: хуулбар шийтийн холбоос (жинхэнэ шийт биш)
-    const demoSheetId = this.demoSheet.enabled ? process.env.DEMO_SHEET_ID!.trim() : null;
     return {
       cursors: cursors.map((c) => ({ accountNo: c.accountNo, settledThrough: c.settledThrough, coveredThrough: c.coveredThrough, sheetThrough: c.sheetThrough })),
       counts: { manual, tuition, other, expense, sheet },
       /** Шийтэд хөтлөгдсөн гэж нуусан ч шийтэд байгааг баталж чадаагүй — шалгах */
       sheetCheck,
       lastImportAt: last?.importedAt ?? null,
-      demoSheetUrl: demoSheetId ? `https://docs.google.com/spreadsheets/d/${demoSheetId}/edit` : null,
+      /** Гараар оноосон сургалтын төлбөр бичигдэх шийт (демо бол хуулбар) */
+      sheetWrite: this.demoSheet.enabled ? { url: `https://docs.google.com/spreadsheets/d/${this.demoSheet.sheetId}/edit`, demo: this.demoSheet.demo } : null,
     };
   }
 

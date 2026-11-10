@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { PrismaService } from '../prisma/prisma.service';
 import { SheetsClient } from '../sheet-sync/sheets.client';
 import { toCell, colLetter } from '../sheet-sync/sheet-book';
@@ -15,21 +16,31 @@ export interface DemoSheetWrite {
 }
 
 /**
- * ДЕМО (эзэн 2026-11-10): гараар оноосон сургалтын төлбөрийг «2027 оны төлбөрийн
- * мэдээлэл»-ийн ТУСДАА ХУУЛБАР файлд (DEMO_SHEET_ID) ажилтны адил бичнэ. Жинхэнэ
- * шийт (PAYMENT_SHEET_ID) рүү ХЭЗЭЭ Ч бичихгүй — хоёр ID ижил бол ажиллахгүй.
- * Мөрийг шийт синкийн rowKey-ээр (нэр + утас) олж, бичихээс өмнө овог нэрийг шалгана.
+ * Гараар оноосон сургалтын төлбөрийг «Суудал баталгаажуулалт» хуудсанд ажилтны адил бичнэ.
+ *  - Албан (эзэн 2026-11-10): SHEET_PAY_WRITE=1 → жинхэнэ шийт (PAYMENT_SHEET_ID). Service
+ *    account шийтэд «Засварлагч» байх ёстой; үгүй бол бичилт алгасагдаж мэдэгдэнэ.
+ *  - Демо: DEMO_SHEET_ID → тусдаа хуулбар файл (жинхэнэ шийттэй ижил ID бол ажиллахгүй).
+ * Мөрийг шийт синкийн rowKey-ээр (нэр + утас) олж, бичихээс өмнө нэрийг шалгана.
  */
 @Injectable()
 export class DemoSheetService {
   private readonly logger = new Logger(DemoSheetService.name);
   private readonly client: SheetsClient | null;
+  readonly demo: boolean;
+  readonly sheetId: string | null;
 
   constructor(private readonly prisma: PrismaService) {
-    const id = process.env.DEMO_SHEET_ID?.trim();
-    const keyFile = process.env.GOOGLE_SHEETS_KEY_FILE?.trim();
-    const real = process.env.PAYMENT_SHEET_ID?.trim();
-    this.client = id && keyFile && existsSync(keyFile) && id !== real ? new SheetsClient({ spreadsheetId: id, keyFile }, { write: true }) : null;
+    const real = process.env.PAYMENT_SHEET_ID?.trim() || null;
+    const demoId = process.env.DEMO_SHEET_ID?.trim() || null;
+    const official = process.env.SHEET_PAY_WRITE === '1' && !!real;
+    this.demo = !official;
+    this.sheetId = official ? real : demoId && demoId !== real ? demoId : null;
+    const keyJson = process.env.GOOGLE_SHEETS_KEY_JSON?.trim();
+    const keyFile = process.env.GOOGLE_SHEETS_KEY_FILE?.trim() || join(process.cwd(), '.secrets', 'google-sheets.json');
+    this.client =
+      this.sheetId && (keyJson || existsSync(keyFile))
+        ? new SheetsClient(keyJson ? { spreadsheetId: this.sheetId, keyJson } : { spreadsheetId: this.sheetId, keyFile }, { write: true })
+        : null;
   }
 
   get enabled() {
@@ -90,7 +101,7 @@ export class DemoSheetService {
       }
       return out;
     } catch (e) {
-      this.logger.warn(`Демо шийтэд бичсэнгүй: ${e instanceof Error ? e.message : e}`);
+      this.logger.warn(`Шийтэд бичсэнгүй: ${e instanceof Error ? e.message : e}`);
       return parts.map((p) => ({ studentId: p.studentId, ok: false, reason: 'Шийттэй холбогдож чадсангүй' }));
     }
   }

@@ -86,8 +86,8 @@ export interface Overview {
   /** Шийтэд хөтлөгдсөн гэж нуусан ч шийтэд байгааг баталж чадаагүй */
   sheetCheck: number;
   lastImportAt: string | null;
-  /** ДЕМО: гараар оноосон сургалтын төлбөр бичигдэх хуулбар шийт */
-  demoSheetUrl?: string | null;
+  /** Гараар оноосон сургалтын төлбөр бичигдэх шийт (демо бол хуулбар) */
+  sheetWrite?: { url: string; demo: boolean } | null;
 }
 
 export interface ImportSummary {
@@ -170,6 +170,6 @@ export interface SheetWrite {
 export function sheetWriteText(ws: SheetWrite[] | undefined): string | null {
   if (!ws?.length) return null;
   return ws
-    .map((w) => (w.ok ? `Демо шийтэд бичлээ: ${w.cell} нүд, ${Number(w.month!.slice(5, 7))}-р сар` : `Демо шийтэд бичсэнгүй: ${w.reason}`))
+    .map((w) => (w.ok ? `Шийтэд бичлээ: ${w.cell} нүд, ${Number(w.month!.slice(5, 7))}-р сар` : `Шийтэд бичсэнгүй: ${w.reason}`))
     .join("; ");
 }
