@@ -18,8 +18,11 @@ import type { LedgerBoard, LedgerRow } from "./ledgerTypes";
 
 type Filter = "all" | "owed" | "notes";
 
-/** Нэг ангийн сурагчид — сар бүрийн блок, шүүлтүүр, блок дээр дарж бүртгэх. */
-export default function ClassBoard({ id }: { id: string }) {
+/**
+ * Нэг ангийн сурагчид — сар бүрийн блок, шүүлтүүр, блок дээр дарж бүртгэх.
+ * `embedded` — ангийн самбарын «Төлбөр» таб дотор (буцах холбоос, ангийн нэр давхардуулахгүй).
+ */
+export default function ClassBoard({ id, embedded = false }: { id: string; embedded?: boolean }) {
   const [data, setData] = useState<LedgerBoard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
@@ -88,11 +91,13 @@ export default function ClassBoard({ id }: { id: string }) {
 
   return (
     <div className="space-y-4">
-      <Link href="/app/payments" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand">
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Төлбөр
-      </Link>
-      <header className="chunky flex flex-wrap items-end justify-between gap-4 p-4 sm:p-5">
-        <div>
+      {!embedded && (
+        <Link href="/app/payments" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand">
+          <ArrowLeft className="h-4 w-4" aria-hidden /> Төлбөр
+        </Link>
+      )}
+      <header className={`flex flex-wrap items-end justify-between gap-4 ${embedded ? "rounded-2xl border border-line bg-surface px-4 py-3" : "chunky p-4 sm:p-5"}`}>
+        <div className={embedded ? "hidden" : undefined}>
           <h1 className="cyrillic-heading flex items-center gap-2 text-2xl font-extrabold text-ink">
             <span aria-hidden className="h-3 w-3 rounded-full" style={{ background: getClassroomColor(data.classroom!.id) }} />
             {data.classroom!.name}

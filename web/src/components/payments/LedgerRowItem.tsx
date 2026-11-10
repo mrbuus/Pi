@@ -109,6 +109,8 @@ export default function LedgerRowItem({
 }) {
   const desktop = useIsDesktop();
   const href = studentHref(r.id);
+  // Төлбөр нь асуудалтай (хугацаа нь болсон өр) мөр улаанаар ялгарна — шийтийн адил нэг харахад олно
+  const owed = isOwed(r);
   const stripe = r.classroom ? ({ "--cls": getClassroomColor(r.classroom.id) } as CSSProperties) : undefined;
   const name = (
     <>
@@ -129,7 +131,7 @@ export default function LedgerRowItem({
       <Link
         href={href}
         style={stripe}
-        className={`block space-y-2 rounded-xl border border-line bg-surface p-3 row-interactive hover:bg-ink/[0.02] ${showClass ? "class-row" : ""}`}
+        className={`block space-y-2 rounded-xl border p-3 row-interactive ${owed ? "border-error/45 bg-error/10" : "border-line bg-surface hover:bg-ink/[0.02]"} ${showClass ? "class-row" : ""}`}
       >
         <span className="flex items-start justify-between gap-3">
           <span className="min-w-0 space-y-0.5">
@@ -146,7 +148,7 @@ export default function LedgerRowItem({
   return (
     <div
       style={stripe}
-      className={`grid grid-cols-[minmax(11rem,1fr)_auto_7.5rem] items-center gap-x-5 gap-y-1 rounded-xl px-3 py-2 row-interactive hover:bg-ink/[0.025] ${showClass ? "class-row" : ""}`}
+      className={`grid grid-cols-[minmax(11rem,1fr)_auto_7.5rem] items-center gap-x-5 gap-y-1 rounded-xl px-3 py-2 row-interactive ${owed ? "bg-error/10 ring-1 ring-inset ring-error/35" : "hover:bg-ink/[0.025]"} ${showClass ? "class-row" : ""}`}
     >
       <Link href={href} className="min-w-0 space-y-0.5 rounded-lg py-1 hover:underline">
         <span className="block truncate">{name}</span>
