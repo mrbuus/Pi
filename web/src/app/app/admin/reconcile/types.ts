@@ -78,6 +78,8 @@ export interface BankRow {
   inSheet: boolean;
   /** Шийтэд ижил дүнтэй ±3 хоногийн бүртгэл олдсонгүй — шалгах */
   sheetMissing: boolean;
+  /** Систем шийтэд бичсэн үр дүн (аль нүд, эсвэл яагаад бичээгүй) */
+  sheetWrites?: SheetWrite[];
   suggestion: Suggestion | null;
   allocations: Allocation[];
 }
@@ -112,13 +114,16 @@ export interface AllocPart {
 }
 
 export const SIGNAL_LABEL: Record<MatchSignal, string> = {
-  PHONE: "Утас",
-  PHONE_LEARNED: "Өмнө оноосон утас",
-  ACCOUNT: "Өмнө оноосон данс",
-  ACCOUNT_LEARNED: "Өмнө оноосон данс",
-  NAME: "Нэр",
-  SURNAME: "Овог",
+  PHONE: "утас таарсан",
+  PHONE_LEARNED: "энэ утаснаас өмнө төлсөн",
+  ACCOUNT: "энэ данснаас өмнө төлсөн",
+  ACCOUNT_LEARNED: "энэ данснаас өмнө төлсөн",
+  NAME: "нэр таарсан",
+  SURNAME: "овог таарсан",
 };
+
+/** Гүйлгээний утга дахь 8 оронтой дугаарууд — хүүхдийн утастай шууд харьцуулна */
+export const phonesInText = (text: string) => new Set(text.match(/(?<!\d)\d{8}(?!\d)/g) ?? []);
 
 /** Хаан банк утганд илгээгчийг залгадаг: «… ХААНААС: 150000 НЭР ОВОГ» — утга ба илгээгчийг салгана */
 export function splitSender(text: string): { main: string; sender: string | null } {

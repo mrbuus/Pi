@@ -149,11 +149,15 @@ export function ReconcilePageClient() {
             <CalendarCheck2 className="mt-0.5 size-5 shrink-0 text-success" aria-hidden />
             <div>
               <p className="font-semibold text-ink">
-                {cursor ? `${dayLabel(cursor.settledThrough)} хүртэл бүрэн шийдэгдсэн` : "Хуулга хараахан ороогүй"}
+                {!cursor
+                  ? "Хуулга хараахан ороогүй"
+                  : overview && overview.counts.manual > 0
+                    ? `${overview.counts.manual} гүйлгээ таны шийдвэрийг хүлээж байна`
+                    : "Бүх гүйлгээ шийдэгдсэн"}
               </p>
               <p className="text-sm text-ink-dim">
                 {cursor
-                  ? `Дараагийн хуулгаас ${dayLabel(cursor.settledThrough)}-ээс хойшхи гүйлгээ л орно. Хуулга ${dayLabel(cursor.coveredThrough)} хүртэл бүтэн`
+                  ? `Хуулга ${dayLabel(cursor.coveredThrough)} хүртэл орсон. Шинэ хуулга оруулахад давхардалгүй, зөвхөн шинэ гүйлгээ нэмэгдэнэ`
                   : "Хаан банкны интернэт банкнаас «Дансны хуулга»-г Excel-ээр татаж оруулна"}
               </p>
             </div>
@@ -168,18 +172,8 @@ export function ReconcilePageClient() {
             <p className="flex items-center gap-2 text-sm text-ink-dim">
               <FileSpreadsheet className="size-4 shrink-0 text-info" aria-hidden />
               {cursor.sheetThrough
-                ? `${dayLabel(cursor.sheetThrough)} хүртэлх гүйлгээг ажилтан шийтэд хөтөлсөн`
-                : "Ажилтан шийтэд аль хэдийн хөтөлсөн гүйлгээг «Шийдэх»-ээс нууж болно"}
-              {cursor.sheetThrough && overview && overview.sheetCheck > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCheckOnly(true);
-                    setLane("sheet");
-                  }} className="font-semibold text-ink underline underline-offset-2">
-                  {overview.sheetCheck} нь шийтэд баталгаажаагүй — харах
-                </button>
-              )}
+                ? `${dayLabel(cursor.sheetThrough)} хүртэл ажилтан шийтэд гараар бичсэн. Түүнээс хойших гүйлгээг систем шийтэд өөрөө бичнэ`
+                : "Ажилтан шийтэд гараар бичсэн сүүлийн өдрийг тэмдэглэнэ үү — түүнээс хойших гүйлгээг систем шийтэд бичнэ"}
             </p>
             <Button
               variant="outline"

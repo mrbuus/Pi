@@ -58,6 +58,7 @@ export interface RowSuggestion {
 type OpenRow = {
   id: string;
   bankRef: string;
+  accountNo?: string | null;
   bookedAt: Date;
   amount: number;
   direction: 'CREDIT' | 'DEBIT';
@@ -231,9 +232,17 @@ export class ReconcileService {
     const open: OpenRow[] = await this.prisma.bankTransaction.findMany({
       where: { resolvedAt: null },
       orderBy: { bookedAt: 'asc' },
-      select: { id: true, bankRef: true, bookedAt: true, amount: true, direction: true, description: true, counterparty: true, suggestion: true },
+      select: { id: true, bankRef: true, accountNo: true, bookedAt: true, amount: true, direction: true, description: true, counterparty: true, suggestion: true },
     });
     if (!open.length) return { resolved: 0, open: 0 };
+    // «Шийтэд хөтлөгдсөн өдөр»-өөс хойш ажилтан шийтэд бичихээ больсон — итгэлтэй таньсныг систем өөрөө шинэ
+    // төлбөр болгож, шийтэд бичнэ (эзэн 2026-11-10: «ухаалаг, бодит шийдвэр»)
+    const throughBy = new Map((await this.prisma.bankCursor.findMany({ select: { accountNo: true, sheetThrough: true } })).map((c) => [c.accountNo, c.sheetThrough]));
+    const afterSheet = (row: OpenRow) => {
+      const t = row.accountNo ? throughBy.get(row.accountNo) : null;
+      return !!t && ubDay(row.bookedAt) > t;
+    };
+    const toSheet: { row: OpenRow; parts: Part[] }[] = [];
     const idx = await this.matchIndex();
     const raw = open.map((row) => ({ row, s: this.suggest(row, idx) }));
     const kidIds = raw.flatMap(({ s }) => s.candidates.map((c) => c.studentId));
@@ -248,6 +257,11 @@ export class ReconcileService {
       // Сургалтын хэсэг шийтийн төлбөртэй холбогдохгүй бол автоматаар шинэ төлбөр үүсгэхгүй
       if (parts && parts.every((p) => p.kind !== 'TUITION' || this.link(p, row, pool))) {
         toAllocate.push({ row, s, parts });
+        continue;
+      }
+      if (parts && afterSheet(row)) {
+        toAllocate.push({ row, s: { ...s, reason: `${s.reason}: шийтэд шинээр бичнэ` }, parts });
+        toSheet.push({ row, parts });
         continue;
       }
       const combo = this.sheetCombo(row, s, pool);
@@ -265,7 +279,36 @@ export class ReconcileService {
         this.logger.warn(`Автомат хуваарилалтын багц алгасагдлаа: ${e instanceof Error ? e.message : e}`);
       }
     }
+    // Шинээр үүссэн сургалтын төлбөрийг шийтэд бичнэ (амжилттай хуваарилагдсан мөрийг л)
+    if (toSheet.length && this.demoSheet.enabled) {
+      const done = new Set(
+        (await this.prisma.bankTransaction.findMany({ where: { id: { in: toSheet.map((x) => x.row.id) }, resolvedAt: { not: null } }, select: { id: true } })).map((r) => r.id),
+      );
+      for (const { row, parts } of toSheet.filter((x) => done.has(x.row.id))) await this.writeSheet(row, parts);
+    }
     return { resolved, open: toSuggest.length };
+  }
+
+  /**
+   * Сургалтын хэсгүүдийг шийтэд бичиж, үр дүнг гүйлгээн дээр хадгална (хүн аль нүдэнд
+   * бичигдсэнийг харна). «Шийтэд хөтлөгдсөн өдөр» хүртэлх гүйлгээг ДАХИН бичихгүй.
+   */
+  private async writeSheet(row: { id: string; accountNo?: string | null; bookedAt: Date }, parts: Part[]) {
+    const kids = parts.filter((p) => p.kind === 'TUITION' && p.studentId).map((p) => ({ studentId: p.studentId!, amount: p.amount }));
+    if (!kids.length || !this.demoSheet.enabled) return [];
+    const through = row.accountNo ? (await this.prisma.bankCursor.findUnique({ where: { accountNo: row.accountNo }, select: { sheetThrough: true } }))?.sheetThrough : null;
+    const writes =
+      !through || ubDay(row.bookedAt) <= through
+        ? kids.map((k) => ({
+            studentId: k.studentId,
+            ok: false,
+            reason: through ? `${through.slice(5).replace('-', '/')} хүртэл ажилтан шийтэд хөтөлсөн тул бичсэнгүй` : '«Шийтэд хөтлөгдсөн өдөр» тэмдэглээгүй тул бичсэнгүй',
+          }))
+        : await this.demoSheet.writeTuition(kids, row.bookedAt);
+    await this.prisma.$executeRaw`
+      UPDATE "BankTransaction" SET "suggestion" = COALESCE("suggestion", '{}'::jsonb) || jsonb_build_object('sheetWrites', ${JSON.stringify(writes)}::jsonb)
+      WHERE id = ${row.id}`;
+    return writes;
   }
 
   /**
@@ -465,15 +508,7 @@ export class ReconcileService {
     const auto = await this.resolveOpen(actor);
     const settled = row.accountNo ? await this.recomputeCursor(row.accountNo) : null;
     // Шийтэд бичих (SHEET_PAY_WRITE=1 жинхэнэ, эс бөгөөс DEMO_SHEET_ID хуулбар)
-    // Ажилтан шийтэд хөтөлсөн өдрөөс (sheetThrough) өмнөх гүйлгээг шийтэд ДАХИН бичихгүй — давхардна.
-    // Өдөр тэмдэглээгүй бол юу ч бичихгүй (эзэн 2026-11-10: шийтэд давхар бүртгэл гарсан).
-    const tuitionKids = parts.filter((p) => p.kind === 'TUITION' && p.studentId).map((p) => ({ studentId: p.studentId!, amount: p.amount }));
-    const through = row.accountNo ? (await this.prisma.bankCursor.findUnique({ where: { accountNo: row.accountNo }, select: { sheetThrough: true } }))?.sheetThrough : null;
-    const sheetWrites = !this.demoSheet.enabled
-      ? []
-      : !through || ubDay(row.bookedAt) <= through
-        ? tuitionKids.map((k) => ({ studentId: k.studentId, ok: false, reason: through ? `${through.slice(5).replace('-', '/')} хүртэл ажилтан шийтэд хөтөлсөн тул бичсэнгүй` : '«Шийтэд хөтлөгдсөн өдөр» тэмдэглээгүй тул бичсэнгүй' }))
-        : await this.demoSheet.writeTuition(tuitionKids, row.bookedAt);
+    const sheetWrites = await this.writeSheet(row, parts);
     return { ok: true, alsoResolved: auto.resolved, settledThrough: settled, sheetWrites };
   }
 
@@ -731,6 +766,7 @@ export class ReconcileService {
           resolvedBySystem: !!r.resolvedAt && !r.resolvedById,
           inSheet: r.inSheet,
           sheetMissing: r.inSheet && !!(r.suggestion as { sheetMissing?: boolean } | null)?.sheetMissing,
+          sheetWrites: (r.suggestion as { sheetWrites?: unknown[] } | null)?.sheetWrites ?? [],
           suggestion: s && {
             decision: s.decision,
             kind: s.kind,

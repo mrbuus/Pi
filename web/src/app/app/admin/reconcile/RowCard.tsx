@@ -14,16 +14,25 @@ import AllocateDialog from "./AllocateDialog";
 import PayerInfo from "./PayerInfo";
 import StudentDetailDialog from "./StudentDetailDialog";
 import { MoreButton } from "./StudentPicker";
-import { SIGNAL_LABEL, STUDENT_KINDS, TONE, rowTone, sheetWriteText, splitSender, type SheetWrite, type AllocPart, type BankRow, type Candidate } from "./types";
+import { SIGNAL_LABEL, STUDENT_KINDS, TONE, phonesInText, rowTone, sheetWriteText, splitSender, type SheetWrite, type AllocPart, type BankRow, type Candidate } from "./types";
 
-const signals = (c: Candidate) => [...new Set(c.signals.map((s) => SIGNAL_LABEL[s]))].join(" + ");
+/** Яагаад энэ хүүхэд гэж үзсэн — хүний хэлээр («утас таарсан, нэр таарсан») */
+const signals = (c: Candidate) => [...new Set(c.signals.map((s) => SIGNAL_LABEL[s]))].join(", ");
 
 /** Яагаад хүн шийдэх хэрэгтэй болсныг товч хэлнэ */
 const DECISION_HINT: Record<string, string> = {
-  SUGGEST: "Нэг шинжээр таарсан — зөв бол товшоод батална уу",
-  CHOOSE: "Тохирох хүүхэд хэд хэд байна — сонгоно уу",
-  NONE: "Хүүхэд танигдсангүй",
+  SUGGEST: "Зөвхөн нэг баримтаар танисан тул систем өөрөө оноогоогүй — зөв бол хүүхэд дээр дарна уу",
+  CHOOSE: "Хэд хэдэн хүүхэд тохирч байна — утас, ангийг нь харьцуулаад зөвийг нь дарна уу",
+  NONE: "Хүүхэд танигдсангүй — «Хүүхэд хайж оноох»-оор нэр, утсаар хайна уу",
 };
+
+/** Шийттэй холбоо: ажилтны бичлэгтэй холбосон, систем аль нүдэнд бичсэн, эсвэл яагаад бичээгүй */
+function sheetNote(row: BankRow, studentId: string | null, inSheet: boolean): string {
+  if (inSheet) return "Ажилтны шийтийн бичлэгтэй холбосон";
+  const w = row.sheetWrites?.find((x) => x.studentId === studentId);
+  if (!w) return "Шинэ төлбөр";
+  return w.ok ? `Шийтэд бичсэн: ${w.cell} нүд, ${Number(w.month!.slice(5, 7))}-р сар` : `Шийтэд бичээгүй: ${w.reason}`;
+}
 
 /** Банкны нэг гүйлгээ: шийдэгдээгүй бол санал + товч, шийдэгдсэн бол хуваарилалт + «Буцаах». */
 /** onDone: тэр мөр жагсаалтаас гарна (хуудас дахин ачаалахгүй); alsoResolved — сурсан данс/утсаар нэмж шийдэгдсэн */
@@ -34,6 +43,8 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
   const s = row.suggestion;
   const open = !row.resolvedAt;
   const { main } = splitSender(row.description);
+  // Утганд бичсэн утас хүүхдийн утастай таарвал тодруулна
+  const textPhones = phonesInText(row.description);
   /** «⋯» дарсан санал болгосон хүүхэд */
   const [detailId, setDetailId] = useState<string | null>(null);
 
@@ -135,8 +146,19 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
                       <Meta items={[signals(c), c.sheetPays.length ? `Шийтэд ${c.sheetPays.map((x) => mnt(x.amount)).join(", ")}` : null]} />
                     </span>
                     {!!c.student?.phones?.length && (
-                      <span className="text-xs tabular-nums text-ink">
-                        <Meta items={c.student.phones.map((p) => `${p.label} ${p.value}`)} />
+                      <span className="text-xs tabular-nums text-ink-dim">
+                        <Meta
+                          items={c.student.phones.map((p) =>
+                            textPhones.has(p.value) ? (
+                              <span key={p.value} className="inline-flex items-center gap-0.5 font-bold text-success" title="Гүйлгээний утганд энэ дугаар бичигдсэн">
+                                {p.label} {p.value}
+                                <Check className="size-3.5" aria-label="утганд бичигдсэн" />
+                              </span>
+                            ) : (
+                              `${p.label} ${p.value}`
+                            ),
+                          )}
+                        />
                       </span>
                     )}
                   </button>
@@ -169,7 +191,7 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
               )}
               {row.allocations.length > 1 && <span className="tabular-nums text-ink-dim">{mnt(a.amount)}</span>}
               {a.kind === "TUITION" && (
-                <span className="text-xs text-ink-dim">{a.inSheet ? "Шийтэд бүртгэлтэй" : "Шинэ төлбөр"}</span>
+                <span className="text-xs text-ink-dim">{sheetNote(row, a.studentId, a.inSheet)}</span>
               )}
               {a.auto && <span className="text-xs text-ink-dim">Автоматаар</span>}
             </li>

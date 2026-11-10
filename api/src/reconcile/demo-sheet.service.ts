@@ -63,7 +63,7 @@ export class DemoSheetService {
         const user = await this.prisma.user.findUnique({ where: { id: p.studentId }, select: { firstName: true, lastName: true } });
         const idx = links.map((l) => byKey.get(l.rowKey)).find((i) => i != null);
         if (idx == null || !user) {
-          out.push({ studentId: p.studentId, ok: false, reason: 'Шийтэд энэ хүүхдийн мөр олдсонгүй' });
+          out.push({ studentId: p.studentId, ok: false, reason: '«Суудал баталгаажуулалт»-д энэ хүүхдийн мөр алга — ажилтан гараар бичнэ үү' });
           continue;
         }
         const row = rows[idx];
