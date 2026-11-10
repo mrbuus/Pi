@@ -296,6 +296,13 @@ export class ReconcileService {
   private async writeSheet(row: { id: string; accountNo?: string | null; bookedAt: Date }, parts: Part[]) {
     const kids = parts.filter((p) => p.kind === 'TUITION' && p.studentId).map((p) => ({ studentId: p.studentId!, amount: p.amount }));
     if (!kids.length || !this.demoSheet.enabled) return [];
+    // Атомар эзэмшинэ: зэрэг ажиллалт эсвэл буцаасны дараах дахин хуваарилалт шийтэд ДАВХАР бичихгүй.
+    // Нэг гүйлгээ шийтэд нэг л удаа бичигдэнэ (буцаасан бол тэр нүдийг ажилтан гараар засна).
+    const claimed = await this.prisma.$executeRaw`
+      UPDATE "BankTransaction" SET "suggestion" = COALESCE("suggestion", '{}'::jsonb) || '{"sheetWrites": "pending"}'::jsonb
+      WHERE id = ${row.id} AND NOT (COALESCE("suggestion", '{}'::jsonb) ? 'sheetWrites')`;
+    if (!claimed)
+      return kids.map((k) => ({ studentId: k.studentId, ok: false, reason: 'Энэ гүйлгээг шийтэд өмнө нь бичсэн — шаардлагатай бол тэр нүдийг гараар засна уу' }));
     const through = row.accountNo ? (await this.prisma.bankCursor.findUnique({ where: { accountNo: row.accountNo }, select: { sheetThrough: true } }))?.sheetThrough : null;
     const writes =
       !through || ubDay(row.bookedAt) <= through
@@ -390,7 +397,9 @@ export class ReconcileService {
     if (!items.length) return;
     const values = Prisma.join(items.map((i) => Prisma.sql`(${i.id}, ${JSON.stringify(i.s)}::jsonb)`));
     await this.prisma.$executeRaw`
-      UPDATE "BankTransaction" t SET "suggestion" = v.s
+      UPDATE "BankTransaction" t SET "suggestion" = CASE
+          WHEN t."suggestion" ? 'sheetWrites' THEN v.s || jsonb_build_object('sheetWrites', t."suggestion"->'sheetWrites')
+          ELSE v.s END
       FROM (VALUES ${values}) AS v(id, s) WHERE t.id = v.id AND t."resolvedAt" IS NULL`;
   }
 
@@ -457,7 +466,10 @@ export class ReconcileService {
         "resolvedById" = ${auto ? null : actor.id},
         "matchStatus" = v.status::"BankMatchStatus",
         "matchedUserId" = v.uid,
-        "suggestion" = COALESCE(v.s, t."suggestion")
+        -- Шийтэд бичсэн тэмдэг (sheetWrites) үлдэнэ — дахин хуваарилахад шийтэд давхар бичихгүй
+        "suggestion" = CASE
+          WHEN v.s IS NOT NULL AND t."suggestion" ? 'sheetWrites' THEN v.s || jsonb_build_object('sheetWrites', t."suggestion"->'sheetWrites')
+          ELSE COALESCE(v.s, t."suggestion") END
       FROM (VALUES ${values}) AS v(id, s, status, uid)
       WHERE t.id = v.id AND (${!auto} OR t."resolvedAt" IS NULL)`;
     if (updated !== rowUpdates.length) throw new Error(`Хуваарилалт зөрлөө (${updated}/${rowUpdates.length}) — буцаалаа`);
@@ -766,7 +778,7 @@ export class ReconcileService {
           resolvedBySystem: !!r.resolvedAt && !r.resolvedById,
           inSheet: r.inSheet,
           sheetMissing: r.inSheet && !!(r.suggestion as { sheetMissing?: boolean } | null)?.sheetMissing,
-          sheetWrites: (r.suggestion as { sheetWrites?: unknown[] } | null)?.sheetWrites ?? [],
+          sheetWrites: ((w) => (Array.isArray(w) ? w : []))((r.suggestion as { sheetWrites?: unknown } | null)?.sheetWrites),
           suggestion: s && {
             decision: s.decision,
             kind: s.kind,
