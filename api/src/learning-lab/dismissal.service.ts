@@ -34,6 +34,7 @@ export class DismissalService {
       date &&
       (await this.prisma.lessonStaffing.count({
         where: {
+          deletedAt: null,
           date: dismissalDate(date),
           schedule: { deletedAt: null, classroomId },
           OR: [{ leadTeacherId: actorId }, { assistantTeacherId: actorId }],

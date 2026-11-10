@@ -100,7 +100,7 @@ export class FormulasService {
     }
 
     const [attemptGroups, sessions] = await Promise.all([
-      this.prisma.attempt.groupBy({ by: ['problemId', 'autoCorrect'], where: { studentId }, _count: { _all: true }, _min: { occurredOn: true }, _max: { occurredOn: true } }),
+      this.prisma.attempt.groupBy({ by: ['problemId', 'autoCorrect'], where: { studentId, deletedAt: null }, _count: { _all: true }, _min: { occurredOn: true }, _max: { occurredOn: true } }),
       // finalize() stores each answered exam item in Attempt and submits the
       // session atomically. Attempt is canonical for counts and correctness;
       // the session supplies only the test title to avoid double counting.

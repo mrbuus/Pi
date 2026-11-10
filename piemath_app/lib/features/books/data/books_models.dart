@@ -326,3 +326,36 @@ class MockPublic {
 
   bool get isEmpty => live == null && next == null && upcoming.isEmpty && last == null;
 }
+
+/// `GET /mock-exams/my` — нэвтэрсэн сурагч, худалдан авагчийн сорилын бүртгэл.
+@immutable
+class MockRegistration {
+  const MockRegistration({required this.eventId, required this.testId, this.status = 'NOT_STARTED', this.score, this.max});
+
+  static MockRegistration? fromJson(Object? j) {
+    if (j is! Map) return null;
+    final eventId = j['eventId'] as String?;
+    final testId = j['testId'] as String?;
+    if (eventId == null || testId == null) return null;
+    return MockRegistration(
+      eventId: eventId,
+      testId: testId,
+      status: j['status'] as String? ?? 'NOT_STARTED',
+      score: j['score'] as num?,
+      max: j['max'] as num?,
+    );
+  }
+
+  final String eventId;
+  final String testId;
+
+  /// NOT_STARTED | IN_PROGRESS | SUBMITTED
+  final String status;
+  final num? score;
+  final num? max;
+
+  bool get submitted => status == 'SUBMITTED';
+}
+
+List<MockRegistration> parseMockRegistrations(Object? j) =>
+    [for (final r in (j is Map ? _list(j['registrations']) : const <Object?>[])) ?MockRegistration.fromJson(r)];

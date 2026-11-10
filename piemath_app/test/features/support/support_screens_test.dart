@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:piemath_app/features/support/domain/help_links.dart';
+import 'package:piemath_app/features/support/ui/centre_info_screen.dart';
 import 'package:piemath_app/features/support/ui/feedback_screen.dart';
 import 'package:piemath_app/features/support/ui/support_screen.dart';
 
@@ -7,6 +9,47 @@ import '../../helpers/fake_http.dart';
 import '../m7_harness.dart';
 
 void main() {
+  group('туслахын эх сурвалж апп доторх зам руу (вэб биш)', () {
+    test('зураглал', () {
+      expect(supportSourceTarget('/app/study'), '/app/study');
+      expect(supportSourceTarget('/#branches'), centreInfoPath);
+      expect(supportSourceTarget('/#tuition'), centreInfoPath);
+      expect(supportSourceTarget('/register'), centreInfoPath);
+      expect(supportSourceTarget('/login'), '/app/password');
+      expect(supportSourceTarget('/offline'), isNull);
+      expect(supportSourceTarget('https://pimath.mn/help'), isNull);
+      expect(supportSourceTarget('//evil.com/app/x'), isNull);
+    });
+
+    testWidgets('вэбийн нүүрийн хэсэг → төвийн мэдээлэл, апп-д байхгүй бол товчгүй', (tester) async {
+      final http = FakeHttp()
+        ..json('GET', '/centre-help/topics', {'version': '1', 'topics': <Object?>[]})
+        ..json('POST', '/centre-help/ask', {
+          'version': '1',
+          'mode': 'authored-retrieval',
+          'matches': [
+            {'id': 'a', 'question': 'Салбарууд хаана', 'answer': 'Хоёр салбар', 'terms': <String>[], 'source': {'label': 'Салбарын хаяг', 'href': '/#branches'}},
+            {'id': 'b', 'question': 'Интернэтгүй', 'answer': 'Хадгалсан томьёо', 'terms': <String>[], 'source': {'label': 'Холболтын тусламж', 'href': '/offline'}},
+          ],
+          'fallback': null,
+        });
+      await pumpM7(tester, const SupportScreen(), http: http);
+      await tester.tap(find.text('Гэрийн даалгаврын зураг яаж илгээх вэ?'));
+      await settle(tester);
+      expect(find.text('Салбарууд хаана'), findsOneWidget);
+      expect(find.text('Холболтын тусламж'), findsNothing);
+      await tester.tap(find.text('Салбарын хаяг'));
+      await settle(tester);
+      expect(find.text('ROUTE:$centreInfoPath'), findsOneWidget);
+    });
+
+    testWidgets('төвийн мэдээлэл: салбар, утас', (tester) async {
+      await pumpM7(tester, const CentreInfoScreen(), http: FakeHttp());
+      expect(find.text('Салбар 1'), findsOneWidget);
+      expect(find.text('9590 4411'), findsOneWidget);
+    });
+  });
+
   group('Төвийн туслах', () {
     testWidgets('сэдэв → асуух → хариулт, эх сурвалж апп-ын замаар', (tester) async {
       final http = FakeHttp()

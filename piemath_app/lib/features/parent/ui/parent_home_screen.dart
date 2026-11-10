@@ -40,13 +40,9 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
           return RefreshIndicator(
             onRefresh: () => ref.refresh(parentChildrenProvider.future).catchError((_) => links),
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(AppSpace.gutter, 0, AppSpace.gutter, AppSpace.xxl),
+              padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.xs, AppSpace.gutter, AppSpace.xxl),
               children: [
-                Text(
-                  'Баталгаажсан холболтын хүрээнд хүүхдийн ирц, даалгавар, дүн, төлбөрийг харна.',
-                  style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim),
-                ),
-                const SizedBox(height: AppSpace.lg),
+                const SizedBox(height: AppSpace.xs),
                 if (links.length > 1) ...[
                   _ChildSelector(
                     links: links,
@@ -99,7 +95,7 @@ class _ChildSelector extends StatelessWidget {
             ChoiceChip(
               label: Text(l.student.firstName.isEmpty ? l.student.fullName : l.student.firstName),
               selected: l.id == selectedId,
-              avatar: l.verified ? null : const Icon(AppIcons.time, size: 16),
+              avatar: l.verified ? null : Icon(AppIcons.time, size: 16, color: context.colors.info),
               onSelected: (_) => onSelect(l.id),
             ),
         ],
@@ -172,12 +168,10 @@ class _LinkChildCardState extends ConsumerState<_LinkChildCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Icon(AppIcons.link, size: 18, color: context.colors.brand),
-              const SizedBox(width: AppSpace.sm),
-              Text(widget.hasChildren ? 'Өөр хүүхэд холбох' : 'Хүүхэд холбох', style: context.text.titleMedium),
-            ],
+          CardHeader(
+            icon: AppIcons.link,
+            hue: AppHue.teal,
+            title: widget.hasChildren ? 'Өөр хүүхэд холбох' : 'Хүүхэд холбох',
           ),
           const SizedBox(height: AppSpace.md),
           TextField(

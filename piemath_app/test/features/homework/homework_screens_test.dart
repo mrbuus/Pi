@@ -146,6 +146,62 @@ void main() {
       expect(router.state.uri.queryParameters, {'date': _today, 'classroomId': 'c1'});
     });
 
+    testWidgets('«Дахин бодох»: нээгдсэн/хаалттай өдөр, анх ба дахин дүн, дарахад redo=1', (tester) async {
+      final http = classroomHttp()
+        ..json('GET', '/homework/redo', {
+          'lessonsToOpen': 2,
+          'days': [
+            {
+              'date': '2026-10-20T00:00:00.000Z',
+              'classroomId': 'c1',
+              'classroomName': '12-р анги',
+              'topic': 'Логарифм',
+              'opened': false,
+              'lessonsLeft': 1,
+              'items': [
+                {'testId': 't9', 'title': 'Тест 9', 'variantLabel': 'А', 'kind': 'CLASS', 'problemCount': 10, 'timeLimitMin': 40, 'locked': false, 'rounds': <Object?>[]},
+              ],
+            },
+            {
+              'date': '2026-10-16T00:00:00.000Z',
+              'classroomId': 'c1',
+              'classroomName': '12-р анги',
+              'topic': 'Илтгэгч',
+              'opened': true,
+              'lessonsLeft': 0,
+              'items': [
+                {
+                  'testId': 't8',
+                  'title': 'Тест 8',
+                  'variantLabel': 'Б',
+                  'kind': 'HOME',
+                  'problemCount': 10,
+                  'timeLimitMin': null,
+                  'locked': false,
+                  'rounds': [
+                    {'round': 1, 'attemptId': 'x1', 'status': 'SUBMITTED', 'score': {'correct': 6, 'total': 10}, 'submittedAt': null},
+                  ],
+                },
+              ],
+            },
+          ],
+        })
+        ..json('POST', '/homework/redo/attempts', fixtureAttempt());
+      final router = await pumpStudentRoute(tester, http: http, location: '/app/homework', overrides: _Photos().overrides);
+      await settle(tester);
+      await scrollTo(tester, find.text('Нээгдэхэд 1 хичээл үлдсэн'));
+      expect(find.text('Дахин бодох'), findsWidgets);
+      expect(find.text('Анх 6/10'), findsOneWidget);
+      final first = tester.getTopLeft(find.text('Илтгэгч')).dy;
+      final second = tester.getTopLeft(find.text('Логарифм')).dy;
+      expect(first, lessThan(second), reason: 'нээгдсэн нь эхэнд');
+      await tester.tap(find.text('Анх 6/10'));
+      await _wait(tester);
+      expect(router.state.uri.queryParameters['redo'], '1');
+      expect(http.count('POST', '/homework/redo/attempts'), 1);
+      expect(http.count('POST', '/homework/attempts'), 0);
+    });
+
     testWidgets('14 хоногт хичээл алга: хоосон төлөв', (tester) async {
       await pumpStudentRoute(tester, http: classroomHttp(days: []), location: '/app/homework', overrides: _Photos().overrides);
       await settle(tester);
@@ -304,7 +360,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 800));
       await settle(tester, frames: 4);
       final patch = http.requests.firstWhere((r) => r.method == 'PATCH');
-      expect(patch.data, {'answers': {'p1': '36'}});
+      final body = patch.data as Map;
+      expect(body['answers'], {'p1': '36'});
+      expect((body['activity'] as Map).keys, containsAll(['activeSec', 'awaySec', 'leaveCount']));
     });
 
     testWidgets('шалгах: зөв/буруу тэмдэг, эрх хасагдана', (tester) async {
@@ -351,6 +409,77 @@ void main() {
       expect(find.text('Илгээсэн'), findsOneWidget);
       expect(find.text('2/3'), findsOneWidget);
       expect(find.text('Шалгах (2)'), findsNothing);
+    });
+
+    testWidgets('илгээсний дараа: алдсан бодлогын зөв хариу, бодолт, дэвтрийн зураг', (tester) async {
+      final http = classroomHttp()
+        ..json('POST', '/homework/attempts', fixtureAttempt())
+        ..json('POST', '/homework/attempts/at1/submit', {
+          'score': {'correct': 1, 'total': 3},
+          'results': {'p1': 'CORRECT', 'p2': 'WRONG', 'p3': 'BLANK'},
+          'submittedAt': '2026-11-02T04:00:00.000Z',
+          'review': {
+            'locked': false,
+            'opensAt': '2026-11-05T04:00:00.000Z',
+            'items': {
+              'p2': {'correct': 'C', 'solution': r'$2^3 = 8$ тул $x = 3$', 'video': null},
+            },
+          },
+        });
+      await pumpStudentRoute(tester, http: http, location: path, overrides: _Photos().overrides);
+      await settle(tester);
+      await tester.tap(find.widgetWithText(FilledButton, 'Илгээх'));
+      await settle(tester);
+      await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text('Илгээх')));
+      await settle(tester);
+      expect(find.text('2 бодлого алдсан байна. Доорх зөв хариуг харж алдаагаа засаарай'), findsOneWidget);
+      expect(find.text('Алдсан бодлогууд'), findsOneWidget);
+      expect(find.textContaining('Хариулаагүй бодлогын зөв хариу 2026.11.05'), findsOneWidget);
+      expect(find.text('Зөв хариу'), findsOneWidget, reason: 'зөвхөн нээгдсэн p2-д');
+      expect(find.text('Бодолт'), findsOneWidget);
+      await scrollTo(tester, find.text('Дэвтрийн зураг'));
+      expect(find.text('Дэвтрийн зураг'), findsWidgets);
+    });
+
+    testWidgets('тест бусад ангид бодогдож байгаа: «Зөв хариу удахгүй нээгдэнэ»', (tester) async {
+      final http = FakeHttp()
+        ..json('POST', '/homework/attempts', {
+          ...fixtureAttempt(status: 'SUBMITTED'),
+          'review': {'locked': true, 'opensAt': null, 'items': <String, Object?>{}},
+        });
+      await pumpStudentRoute(tester, http: http, location: path, overrides: _Photos().overrides);
+      await settle(tester);
+      expect(find.text('Зөв хариу удахгүй нээгдэнэ'), findsOneWidget);
+      expect(find.text('Алдсан бодлогууд'), findsNothing);
+    });
+
+    testWidgets('45 секунд тутам идэвхийн тоолуур хадгалагдана (хариу өөрчлөгдөөгүй ч)', (tester) async {
+      final http = FakeHttp()
+        ..json('POST', '/homework/attempts', fixtureAttempt())
+        ..json('PATCH', '/homework/attempts/at1', <String, Object?>{});
+      await pumpStudentRoute(tester, http: http, location: path, overrides: _Photos().overrides);
+      await settle(tester);
+      await tester.pump(const Duration(seconds: 46));
+      await settle(tester, frames: 4);
+      final patch = http.requests.firstWhere((r) => r.method == 'PATCH');
+      final body = patch.data as Map;
+      expect(body['answers'], isEmpty);
+      expect((body['activity'] as Map)['activeSec'], greaterThanOrEqualTo(0));
+    });
+
+    testWidgets('409 (өөр төхөөрөмжөөс илгээгдсэн): дүнг дахин ачаална', (tester) async {
+      final http = FakeHttp()
+        ..on('POST', '/homework/attempts', (_) => FakeResponse(fixtureAttempt()))
+        ..on('POST', '/homework/attempts', (_) => FakeResponse(fixtureAttempt(status: 'SUBMITTED')))
+        ..error('PATCH', '/homework/attempts/at1', 409, 'Гэрийн даалгавар илгээгдсэн байна');
+      await pumpStudentRoute(tester, http: http, location: path, overrides: _Photos().overrides);
+      await settle(tester);
+      await tester.enterText(find.widgetWithText(TextField, 'Хариулт').first, '36');
+      await tester.pump(const Duration(milliseconds: 1300));
+      await settle(tester);
+      expect(http.count('POST', '/homework/attempts'), 2);
+      expect(find.text('Илгээсэн'), findsOneWidget);
+      expect(find.text('2/3'), findsOneWidget);
     });
 
     testWidgets('нээгдээгүй (403): тайлбартай алдааны төлөв', (tester) async {

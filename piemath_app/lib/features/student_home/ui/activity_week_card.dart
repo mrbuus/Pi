@@ -64,21 +64,11 @@ class ActivityWeekCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Icon(AppIcons.chart, size: 20, color: context.colors.brandSoft),
-              const SizedBox(width: AppSpace.sm),
-              Expanded(
-                child: Text(
-                  'Идэвх',
-                  style: context.text.titleMedium?.copyWith(
-                    color: context.colors.brandSoft,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              Icon(AppIcons.forward, size: 18, color: context.colors.inkDim),
-            ],
+          CardHeader(
+            icon: AppIcons.chart,
+            hue: AppHue.teal,
+            title: 'Идэвх',
+            trailing: Icon(AppIcons.forward, size: 18, color: context.colors.inkDim),
           ),
           const SizedBox(height: AppSpace.md),
           ExcludeSemantics(
@@ -128,16 +118,16 @@ class _DayDot extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: dot.done ? c.brand : null,
-              border: Border.all(color: dot.done ? c.brand : (dot.isToday ? c.brandSoft : c.line), width: 2),
+              color: dot.done ? c.teal : null,
+              border: Border.all(color: dot.done ? c.teal : (dot.isToday ? c.brand : c.line), width: 2),
             ),
-            child: dot.done ? Icon(AppIcons.check, size: 18, color: c.onBrand) : null,
+            child: dot.done ? Icon(AppIcons.check, size: 18, color: c.surface) : null,
           ),
           const SizedBox(height: 4),
           Text(
             weekdayShortMn(dot.date.weekday),
             style: context.text.labelSmall?.copyWith(
-              color: dot.isToday ? c.brandSoft : c.inkDim,
+              color: dot.isToday ? c.brand : c.inkDim,
               fontWeight: dot.isToday ? FontWeight.w700 : FontWeight.w400,
             ),
           ),
@@ -157,7 +147,7 @@ class _Stat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text('$value', style: context.text.titleLarge),
+        Text('$value', style: context.text.displaySmall?.copyWith(fontSize: 20)),
         Text(
           label,
           style: context.text.bodySmall?.copyWith(color: context.colors.inkDim),

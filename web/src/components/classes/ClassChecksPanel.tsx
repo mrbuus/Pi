@@ -11,12 +11,15 @@ import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { formatMnDate, formatMnDateTime } from "@/lib/dateMn";
 import { byFirstName, rosterNames, shortName, staffName } from "@/lib/personName";
+import CheckStudentSheet from "./CheckStudentSheet";
 import { Segmented } from "./parts";
 import type { CheckMark, CheckPerson, ClassCheck, ClassChecksResponse } from "./types";
 
 type Filter = "all" | "left" | "done";
 
 const mnt = (n: number) => `${n.toLocaleString("en-US")}₮`;
+/** API-ийн CHECK_AMOUNT_MAX-тай ижил */
+const AMOUNT_MAX = 100_000_000;
 const md = (iso: string) => formatMnDate(iso, { month: "2-digit", day: "2-digit" });
 const mdhm = (iso: string) => formatMnDateTime(iso, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
 
@@ -56,6 +59,9 @@ export default function ClassChecksPanel({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [saving, setSaving] = useState<Set<string>>(() => new Set());
+  // Хаах хөдөлгөөний үеэр нэр алга болохгүйн тулд сүүлийн хүүхдийг хадгална
+  const [infoFor, setInfoFor] = useState<CheckPerson | null>(null);
+  const [infoOpen, setInfoOpen] = useState(false);
   const base = `/classrooms/${encodeURIComponent(classroomId)}/checks`;
 
   // Нэг сурагчийн даралтын дараалал, хамгийн сүүлийн даралтын дугаар, серверийн баталсан төлөв
@@ -63,15 +69,24 @@ export default function ClassChecksPanel({
   const seq = useRef(new Map<string, number>());
   const confirmed = useRef(new Map<string, CheckMark | null>());
   const inflight = useRef(0);
+  // Тэмдэглэгээ алдаатай бол (өөр багш чекийг хаасан/устгасан, сурагч ангиас гарсан)
+  // бүх даралт дуусмагц серверээс дахин уншина — дэлгэц хуучин төлөвтэй үлдэхгүй
+  const resync = useRef(false);
 
-  const load = useCallback(async () => {
-    setError("");
-    try {
-      setData(await api<ClassChecksResponse>(base));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Чекүүдийг ачаалж чадсангүй");
-    }
-  }, [base]);
+  /** quiet = арын шинэчлэл: хадгалж буй даралт байвал хариуг хаяна (optimistic төлөвийг дарахгүй) */
+  const load = useCallback(
+    async (quiet = false) => {
+      if (!quiet) setError("");
+      try {
+        const res = await api<ClassChecksResponse>(base);
+        if (quiet && inflight.current > 0) return;
+        setData(res);
+      } catch (err) {
+        if (!quiet) setError(err instanceof Error ? err.message : "Чекүүдийг ачаалж чадсангүй");
+      }
+    },
+    [base],
+  );
 
   useEffect(() => {
     const t = window.setTimeout(() => void load(), 0);
@@ -81,7 +96,7 @@ export default function ClassChecksPanel({
   // Өөр апп руу (ж: банк) шилжээд буцахад нөгөө багшийн тэмдэглэсэн нь харагдана
   useEffect(() => {
     const onVisible = () => {
-      if (document.visibilityState === "visible" && inflight.current === 0) void load();
+      if (document.visibilityState === "visible" && inflight.current === 0) void load(true);
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => document.removeEventListener("visibilitychange", onVisible);
@@ -143,9 +158,14 @@ export default function ClassChecksPanel({
           confirmed.current.delete(key);
           updateCheck(check.id, (c) => withMark(c, studentId, prev));
           toast.error(err instanceof Error ? err.message : "Хадгалж чадсангүй — дахин дарна уу");
+          resync.current = true;
         } finally {
           inflight.current -= 1;
           if (seq.current.get(key) === n) markSaving(key, false);
+          if (inflight.current === 0 && resync.current) {
+            resync.current = false;
+            void load(true);
+          }
         }
       };
       const p = (queue.current.get(key) ?? Promise.resolve()).then(send);
@@ -154,7 +174,7 @@ export default function ClassChecksPanel({
         if (queue.current.get(key) === p) queue.current.delete(key);
       });
     },
-    [base, markSaving, updateCheck],
+    [base, load, markSaving, updateCheck],
   );
 
   async function create(title: string, amount: number | null) {
@@ -233,6 +253,10 @@ export default function ClassChecksPanel({
             onToggle={(sid) => toggle(selected, sid)}
             onPatch={(body) => patch(selected.id, body)}
             onDelete={() => remove(selected.id)}
+            onOpenInfo={(p) => {
+              setInfoFor(p);
+              setInfoOpen(true);
+            }}
           />
         )}
         {data && !selected && (
@@ -247,6 +271,7 @@ export default function ClassChecksPanel({
           />
         )}
       </div>
+      <CheckStudentSheet classroomId={classroomId} student={infoFor} open={infoOpen} onClose={() => setInfoOpen(false)} />
     </section>
   );
 }
@@ -377,6 +402,7 @@ function CheckDetail({
   onToggle,
   onPatch,
   onDelete,
+  onOpenInfo,
 }: {
   check: ClassCheck;
   roster: CheckPerson[];
@@ -388,8 +414,12 @@ function CheckDetail({
   onToggle: (studentId: string) => void;
   onPatch: (body: { title?: string; amount?: number | null; archived?: boolean }) => Promise<ClassCheck>;
   onDelete: () => Promise<void>;
+  onOpenInfo: (student: CheckPerson) => void;
 }) {
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilterState] = useState<Filter>("all");
+  // «Үлдсэн/Болсон» шүүлттэй үед дарсан хүүхэд шууд алга болохгүй (андуурч дарвал
+  // буцааж болиулна) — шүүлт солиход л жагсаалт шинэчлэгдэнэ
+  const [sticky, setSticky] = useState<Set<string>>(() => new Set());
   const [editing, setEditing] = useState(false);
   const [confirm, setConfirm] = useState<"archive" | "delete" | null>(null);
   const [busy, setBusy] = useState(false);
@@ -398,15 +428,26 @@ function CheckDetail({
   const markBy = useMemo(() => new Map(check.marks.map((m) => [m.studentId, m])), [check.marks]);
   const formerChecked = former.filter((p) => markBy.get(p.id)?.checked);
   const shown = roster.filter((p) => {
+    if (filter === "all" || sticky.has(p.id)) return true;
     const on = !!markBy.get(p.id)?.checked;
-    return filter === "all" || (filter === "done" ? on : !on);
+    return filter === "done" ? on : !on;
   });
+
+  function setFilter(f: Filter) {
+    setFilterState(f);
+    setSticky(new Set());
+  }
+
+  function toggleStudent(id: string) {
+    if (filter !== "all") setSticky((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
+    onToggle(id);
+  }
 
   async function setArchived(value: boolean) {
     setBusy(true);
     try {
       await onPatch({ archived: value });
-      toast.success(value ? "Чекийг хаалаа" : "Чекийг сэргээлээ");
+      toast.success(value ? "Чекийг хаалаа" : "Чекийг дахин нээлээ");
       setConfirm(null);
       if (value) onBack();
     } catch (err) {
@@ -427,7 +468,8 @@ function CheckDetail({
   }
 
   const actionClass =
-    "-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-ink-dim hover:bg-panel hover:text-ink focus-visible:outline-2 focus-visible:outline-brand";
+    "-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-ink-dim hover:bg-panel hover:text-ink focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50";
+  const left = s.total - s.done;
 
   return (
     <div className="space-y-4">
@@ -446,8 +488,11 @@ function CheckDetail({
           submitLabel="Хадгалах"
           onCancel={() => setEditing(false)}
           onSubmit={async (title, amount) => {
-            await onPatch({ title, amount });
-            toast.success("Хадгаллаа");
+            // Өөрчлөлтгүй бол серверт явуулахгүй, «Хадгаллаа» гэж худал хэлэхгүй
+            if (title !== check.title || amount !== check.amount) {
+              await onPatch({ title, amount });
+              toast.success("Хадгаллаа");
+            }
             setEditing(false);
           }}
         />
@@ -462,9 +507,13 @@ function CheckDetail({
           {!archived && (
             <button
               type="button"
-              onClick={() => setEditing(true)}
+              onClick={() => {
+                setConfirm(null);
+                setEditing(true);
+              }}
+              disabled={busy}
               aria-label="Нэр, дүнг засах"
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-ink-dim hover:bg-panel hover:text-ink focus-visible:outline-2 focus-visible:outline-brand"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-ink-dim hover:bg-panel hover:text-ink focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50"
             >
               <Pencil className="h-4 w-4" aria-hidden />
             </button>
@@ -497,7 +546,7 @@ function CheckDetail({
             Хаагдсан — {staffName(check.archivedBy) ?? "хэн нэгэн"}, {check.archivedAt ? md(check.archivedAt) : ""}
           </span>
           <Button variant="outline" size="sm" disabled={busy} onClick={() => void setArchived(false)}>
-            <ArchiveRestore aria-hidden /> Сэргээх
+            <ArchiveRestore aria-hidden /> {busy ? "Нээж байна" : "Дахин нээх"}
           </Button>
         </div>
       )}
@@ -509,7 +558,7 @@ function CheckDetail({
           onChange={setFilter}
           options={[
             { value: "all", label: "Бүгд", count: s.total },
-            { value: "left", label: "Үлдсэн", count: s.total - s.done },
+            { value: "left", label: "Үлдсэн", count: left },
             { value: "done", label: "Болсон", count: s.done },
           ]}
         />
@@ -525,12 +574,13 @@ function CheckDetail({
         <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line">
           {shown.map((p) => (
             <li key={p.id}>
-              <StudentToggle
+              <StudentRow
                 name={names.get(p.id) ?? shortName(p.firstName, p.lastName)}
                 mark={markBy.get(p.id) ?? null}
                 saving={saving.has(`${check.id}:${p.id}`)}
-                disabled={archived}
-                onToggle={() => onToggle(p.id)}
+                disabled={archived || busy}
+                onToggle={() => toggleStudent(p.id)}
+                onInfo={() => onOpenInfo(p)}
               />
             </li>
           ))}
@@ -543,18 +593,28 @@ function CheckDetail({
           <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line opacity-80">
             {formerChecked.map((p) => (
               <li key={p.id}>
-                <StudentToggle name={names.get(p.id) ?? shortName(p.firstName, p.lastName)} mark={markBy.get(p.id) ?? null} saving={false} disabled onToggle={() => undefined} />
+                <StudentRow
+                  name={names.get(p.id) ?? shortName(p.firstName, p.lastName)}
+                  mark={markBy.get(p.id) ?? null}
+                  saving={false}
+                  disabled
+                  onToggle={() => undefined}
+                  onInfo={() => onOpenInfo(p)}
+                />
               </li>
             ))}
           </ul>
         </div>
       )}
 
-      {confirm === "archive" ? (
+      {editing ? null : confirm === "archive" ? (
         <div role="group" aria-label="Чекийг хаах уу" className="flex flex-wrap items-center gap-2 rounded-xl border border-line px-3 py-2">
-          <p className="min-w-0 flex-1 text-sm text-ink">Хаасан чек «Хаагдсан» хэсэгт түүхтэйгээ үлдэнэ</p>
-          <Button variant="danger" size="sm" disabled={busy} onClick={() => void setArchived(true)}>
-            Тийм, хаах
+          <p className="min-w-0 flex-1 text-sm text-ink">
+            {left > 0 && <span className="block font-semibold text-warning">{left} хүүхэд тэмдэглэгдээгүй байна</span>}
+            Хаасан чек «Хаагдсан» хэсэгт түүхтэйгээ үлдэнэ, дахин нээж болно
+          </p>
+          <Button size="sm" disabled={busy} onClick={() => void setArchived(true)}>
+            {busy ? "Хааж байна" : "Тийм, хаах"}
           </Button>
           <Button variant="ghost" size="sm" disabled={busy} onClick={() => setConfirm(null)}>
             Болих
@@ -563,10 +623,11 @@ function CheckDetail({
       ) : confirm === "delete" ? (
         <div role="group" aria-label="Чекийг устгах уу" className="flex flex-wrap items-center gap-2 rounded-xl border border-error/40 bg-error/5 px-3 py-2">
           <p className="min-w-0 flex-1 text-sm text-ink">
-            «{check.title}» чек бүх жагсаалтаас алга болно. Тэмдэглэгээ нь системд хадгалагдан үлдэнэ
+            «{check.title}» чек бүх жагсаалтаас алга болж, буцааж гаргах боломжгүй
+            {s.done + s.former > 0 ? ` (${s.done + s.former} хүүхэд тэмдэглэгдсэн)` : ""}. Тэмдэглэгээ нь системд хадгалагдан үлдэнэ
           </p>
           <Button variant="danger" size="sm" disabled={busy} onClick={() => void remove()}>
-            Тийм, устгах
+            {busy ? "Устгаж байна" : "Тийм, устгах"}
           </Button>
           <Button variant="ghost" size="sm" disabled={busy} onClick={() => setConfirm(null)}>
             Болих
@@ -575,11 +636,11 @@ function CheckDetail({
       ) : (
         <div className="flex flex-wrap gap-x-4">
           {!archived && (
-            <button type="button" onClick={() => setConfirm("archive")} className={actionClass}>
+            <button type="button" disabled={busy} onClick={() => setConfirm("archive")} className={actionClass}>
               <Archive className="h-4 w-4" aria-hidden /> Чекийг хаах
             </button>
           )}
-          <button type="button" onClick={() => setConfirm("delete")} className={cn(actionClass, "hover:text-error")}>
+          <button type="button" disabled={busy} onClick={() => setConfirm("delete")} className={cn(actionClass, "hover:text-error")}>
             <Trash2 className="h-4 w-4" aria-hidden /> Устгах
           </button>
         </div>
@@ -588,54 +649,63 @@ function CheckDetail({
   );
 }
 
-/** Нэг сурагч — мөр бүхэлдээ дарагдана (утсан дээр том талбай) */
-function StudentToggle({
+/**
+ * Нэг сурагч — нэр дээр дарвал товч мэдээлэл (утас г.м.), баруун талын том
+ * дугуй хэсэг дээр дарвал тэмдэглэнэ/болиулна (утсан дээр 64px өргөн талбай).
+ */
+function StudentRow({
   name,
   mark,
   saving,
   disabled,
   onToggle,
+  onInfo,
 }: {
   name: string;
   mark: CheckMark | null;
   saving: boolean;
   disabled: boolean;
   onToggle: () => void;
+  onInfo: () => void;
 }) {
   const on = !!mark?.checked;
   const by = mark?.updatedBy ? staffName(mark.updatedBy) : null;
   return (
-    <button
-      type="button"
-      aria-pressed={on}
-      disabled={disabled}
-      onClick={onToggle}
-      aria-label={`${name} — ${on ? "тэмдэглэсэн, болиулах" : "тэмдэглэх"}`}
-      className={cn(
-        "flex min-h-14 w-full items-center gap-3 px-3 py-2 text-left transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand",
-        on ? "bg-success/10" : "bg-surface",
-        !disabled && "hover:bg-panel active:bg-panel",
-        disabled && "cursor-default",
-      )}
-    >
-      <span className="min-w-0 flex-1">
-        <span className="block truncate font-semibold text-ink">{name}</span>
+    <div className={cn("flex min-h-14 items-stretch transition-colors", on ? "bg-success/10" : "bg-surface")}>
+      <button
+        type="button"
+        onClick={onInfo}
+        aria-label={`${name} — мэдээлэл, утас`}
+        className="min-w-0 flex-1 px-3 py-2 text-left hover:bg-panel focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand"
+      >
+        <span className="block truncate font-semibold text-ink underline-offset-2 hover:underline">{name}</span>
         {(saving || (mark && by)) && (
-          <span className="block truncate text-xs text-ink-dim">
-            {saving ? "Хадгалж байна" : `${by} ${mdhm(mark!.updatedAt)}`}
-          </span>
+          <span className="block truncate text-xs text-ink-dim">{saving ? "Хадгалж байна" : `${by} ${mdhm(mark!.updatedAt)}`}</span>
         )}
-      </span>
-      <span
-        aria-hidden
+      </button>
+      <button
+        type="button"
+        aria-pressed={on}
+        disabled={disabled}
+        onClick={onToggle}
+        aria-label={`${name} — ${on ? "тэмдэглэсэн, болиулах" : "тэмдэглэх"}`}
         className={cn(
-          "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-          on ? "border-success bg-success text-on-success" : "border-line text-ink-dim",
+          "flex w-16 shrink-0 items-center justify-center focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand",
+          !disabled && "hover:bg-panel active:bg-panel",
+          disabled && "cursor-default",
         )}
       >
-        {on ? <Check className="h-5 w-5" strokeWidth={3} /> : <Plus className="h-5 w-5" />}
-      </span>
-    </button>
+        <span
+          aria-hidden
+          className={cn(
+            "inline-flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors",
+            on ? "border-success bg-success text-on-success" : "border-line text-ink-dim",
+          )}
+        >
+          {on ? <Check className="h-5 w-5" strokeWidth={3} /> : disabled ? null : <Plus className="h-5 w-5" />}
+        </span>
+      </button>
+    </div>
   );
 }
 
@@ -668,6 +738,10 @@ function CheckForm({
       return;
     }
     const n = amount ? Number(amount) : null;
+    if (n !== null && n > AMOUNT_MAX) {
+      setErr(`Дүн ${mnt(AMOUNT_MAX)}-өөс их байж болохгүй`);
+      return;
+    }
     setBusy(true);
     setErr("");
     try {

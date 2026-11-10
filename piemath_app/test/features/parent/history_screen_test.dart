@@ -144,6 +144,55 @@ void main() {
     expect(find.text('Дараагийн хуудас'), findsNothing);
   });
 
+  testWidgets('суралцах урсгалын нотолгоо, илгээлтийн бүртгэл (эхний илгээлт, багшийн хариу)', (tester) async {
+    final page = {
+      ..._page(withAll: false),
+      'learning': {
+        'rows': [
+          {
+            'id': 'lab-first-1',
+            'problemId': 'p1',
+            'chapterId': 'ch1',
+            'at': '2026-10-29T05:00:00.000Z',
+            'evidence': {'kind': 'first', 'answer': r'x = 3', 'correct': false, 'mode': 'probe', 'flags': ['doubt']},
+          },
+          {'id': 'lab-event-2', 'problemId': 'p2', 'chapterId': 'ch1', 'at': '2026-10-29T05:00:00.000Z', 'evidence': null},
+        ],
+        'hasMore': false,
+      },
+      'submissions': {
+        'rows': [
+          {
+            'id': 'sb1',
+            'state': 'DONE_ONLINE',
+            'studentNote': null,
+            'reviewNote': null,
+            'imageKeys': <Object?>[],
+            'submittedAt': '2026-10-26T10:00:00.000Z',
+            'assignment': {'title': 'Логарифмын даалгавар', 'dueDate': null, 'classroom': {'name': '12Б'}},
+            'revisions': [
+              {'id': 'r1', 'action': 'SUBMIT', 'state': 'SUBMITTED', 'studentNote': 'Гурав дахь нь хэцүү байсан', 'reviewNote': null, 'imageKeys': <Object?>[], 'at': '2026-10-26T10:00:00.000Z'},
+              {'id': 'r2', 'action': 'APPROVE', 'state': 'DONE_ONLINE', 'studentNote': null, 'reviewNote': 'Сайн', 'imageKeys': <Object?>[], 'at': '2026-10-27T10:00:00.000Z'},
+            ],
+          },
+        ],
+        'hasMore': false,
+      },
+    };
+    final h = ParentHistory.fromJson(page);
+    expect(h.learning.rows, hasLength(1), reason: 'evidence-гүй мөр харагдахгүй');
+    final http = _http()..json('GET', '/parent/children/s1/history', page);
+    await pumpM7(tester, const ParentHistoryScreen(), http: http, session: _parent);
+    await scrollTo(tester, find.text('Энэ жилийн эхний илгээлт'));
+    expect(find.text('Гурав дахь нь хэцүү байсан'), findsOneWidget);
+    expect(find.text('Энэ жилийн багшийн сүүлийн хариу'), findsOneWidget);
+    expect(find.text('Сайн'), findsOneWidget);
+    await scrollTo(tester, find.text('Анхны хариулт'));
+    expect(find.text('Дахин бодох'), findsOneWidget);
+    expect(find.text('Дахин бодох, хугацааны дараах шинэ шалгалт'), findsOneWidget);
+    expect(find.text('Сурагч эргэлзсэн, таасан эсвэл тусламжийн тэмдэглэгээ нэмсэн'), findsOneWidget);
+  });
+
   testWidgets('өмнөх жил сонгоход year параметртэй дахин татна', (tester) async {
     final http = _http()
       ..json('GET', '/parent/children/s1/history', _page())

@@ -6,7 +6,7 @@ import 'ui/theory_screen.dart';
 
 /// `theory` feature-ийн маршрутууд. Энэ файлыг ЗӨВХӨН энэ feature-ийн эзэн засна.
 ///
-/// shell: `/app/theory` (жагсаалт; вэбийн `?date=&c=` холбоос шууд өдөр рүү),
+/// shell: `/app/theory` (жагсаалт; `?date=&c=` шууд өдөр рүү, `?date=` тэр өдрөөр шүүнэ),
 /// `/app/theory/:classroomId/:date` (өдрийн зураг).
 final theoryRoutes = FeatureRoutes(
   shell: [
@@ -15,10 +15,10 @@ final theoryRoutes = FeatureRoutes(
       builder: (context, state) {
         final date = state.uri.queryParameters['date'];
         final classroom = state.uri.queryParameters['c'];
-        if (date != null && classroom != null && RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(date)) {
-          return TheoryDayScreen(classroomId: classroom, date: date);
-        }
-        return const TheoryScreen();
+        final isDate = date != null && RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(date);
+        if (isDate && classroom != null) return TheoryDayScreen(classroomId: classroom, date: date);
+        // Зөвхөн `?date=` (самбарын «Онол илгээх») — тэр өдрөөр шүүж, ганц анги бол шууд нээнэ
+        return TheoryScreen(initialDate: isDate ? date : null);
       },
       routes: [
         GoRoute(

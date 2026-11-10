@@ -3,14 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../app/redirect.dart';
-import '../../../core/config/env.dart';
 import '../../../core/math/math.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
 import '../../payments/domain/org_info.dart';
 import '../data/support_models.dart';
 import '../data/support_repository.dart';
+import '../domain/help_links.dart';
 
 /// Түргэн асуултууд — серверийн сэдэв ачаалагдаагүй үед (вэбийн `CentreHelp` `QUICK`).
 const _quickQuestions = [
@@ -76,16 +75,8 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
     }
   }
 
-  void _openSource(String href) {
-    final internal = href.startsWith('/app/') ? safeNext(href) : null;
-    if (internal != null) {
-      context.push(internal);
-      return;
-    }
-    if (href.startsWith('/')) {
-      launchUrl(Uri.parse('${Env.webBaseUrl}$href'), mode: LaunchMode.externalApplication);
-    }
-  }
+  /// Эх сурвалжийг апп дотор нээнэ (вэб рүү хөтлөхгүй).
+  void _openSource(String target) => context.push(target);
 
   @override
   Widget build(BuildContext context) {
@@ -138,9 +129,9 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                       Text(reply.matches[i].question, style: context.text.titleSmall),
                       const SizedBox(height: AppSpace.xs),
                       MathText(reply.matches[i].answer, style: context.text.bodyMedium),
-                      if (reply.matches[i].source != null && reply.matches[i].source!.href.isNotEmpty)
+                      if (reply.matches[i].source case final src? when supportSourceTarget(src.href) != null)
                         TextButton.icon(
-                          onPressed: () => _openSource(reply.matches[i].source!.href),
+                          onPressed: () => _openSource(supportSourceTarget(src.href)!),
                           icon: const Icon(AppIcons.theory, size: 18),
                           label: Text(reply.matches[i].source!.label),
                         ),
@@ -178,6 +169,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                   ),
                 ],
                 TextButton(onPressed: () => context.push('/app/feedback'), child: const Text('Санал хүсэлт өгөх')),
+                TextButton(onPressed: () => context.push(centreInfoPath), child: const Text('Төвийн мэдээлэл, салбарууд')),
               ],
             ),
           ),

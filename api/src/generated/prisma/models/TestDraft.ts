@@ -40,6 +40,8 @@ export type TestDraftMinAggregateOutputType = {
   revision: number | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type TestDraftMaxAggregateOutputType = {
@@ -48,6 +50,8 @@ export type TestDraftMaxAggregateOutputType = {
   revision: number | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type TestDraftCountAggregateOutputType = {
@@ -57,6 +61,8 @@ export type TestDraftCountAggregateOutputType = {
   revision: number
   createdAt: number
   updatedAt: number
+  deletedAt: number
+  deletedById: number
   _all: number
 }
 
@@ -75,6 +81,8 @@ export type TestDraftMinAggregateInputType = {
   revision?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type TestDraftMaxAggregateInputType = {
@@ -83,6 +91,8 @@ export type TestDraftMaxAggregateInputType = {
   revision?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type TestDraftCountAggregateInputType = {
@@ -92,6 +102,8 @@ export type TestDraftCountAggregateInputType = {
   revision?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
   _all?: true
 }
 
@@ -188,6 +200,8 @@ export type TestDraftGroupByOutputType = {
   revision: number
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
+  deletedById: string | null
   _count: TestDraftCountAggregateOutputType | null
   _avg: TestDraftAvgAggregateOutputType | null
   _sum: TestDraftSumAggregateOutputType | null
@@ -220,6 +234,8 @@ export type TestDraftWhereInput = {
   revision?: Prisma.IntFilter<"TestDraft"> | number
   createdAt?: Prisma.DateTimeFilter<"TestDraft"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TestDraft"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"TestDraft"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"TestDraft"> | string | null
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -230,6 +246,8 @@ export type TestDraftOrderByWithRelationInput = {
   revision?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   owner?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -243,6 +261,8 @@ export type TestDraftWhereUniqueInput = Prisma.AtLeast<{
   revision?: Prisma.IntFilter<"TestDraft"> | number
   createdAt?: Prisma.DateTimeFilter<"TestDraft"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TestDraft"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"TestDraft"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"TestDraft"> | string | null
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
@@ -253,6 +273,8 @@ export type TestDraftOrderByWithAggregationInput = {
   revision?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TestDraftCountOrderByAggregateInput
   _avg?: Prisma.TestDraftAvgOrderByAggregateInput
   _max?: Prisma.TestDraftMaxOrderByAggregateInput
@@ -270,6 +292,8 @@ export type TestDraftScalarWhereWithAggregatesInput = {
   revision?: Prisma.IntWithAggregatesFilter<"TestDraft"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"TestDraft"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"TestDraft"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TestDraft"> | Date | string | null
+  deletedById?: Prisma.StringNullableWithAggregatesFilter<"TestDraft"> | string | null
 }
 
 export type TestDraftCreateInput = {
@@ -278,6 +302,8 @@ export type TestDraftCreateInput = {
   revision?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   owner: Prisma.UserCreateNestedOneWithoutTestDraftsInput
 }
 
@@ -288,6 +314,8 @@ export type TestDraftUncheckedCreateInput = {
   revision?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type TestDraftUpdateInput = {
@@ -296,6 +324,8 @@ export type TestDraftUpdateInput = {
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   owner?: Prisma.UserUpdateOneRequiredWithoutTestDraftsNestedInput
 }
 
@@ -306,6 +336,8 @@ export type TestDraftUncheckedUpdateInput = {
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TestDraftCreateManyInput = {
@@ -315,6 +347,8 @@ export type TestDraftCreateManyInput = {
   revision?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type TestDraftUpdateManyMutationInput = {
@@ -323,6 +357,8 @@ export type TestDraftUpdateManyMutationInput = {
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TestDraftUncheckedUpdateManyInput = {
@@ -332,6 +368,8 @@ export type TestDraftUncheckedUpdateManyInput = {
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TestDraftListRelationFilter = {
@@ -351,6 +389,8 @@ export type TestDraftCountOrderByAggregateInput = {
   revision?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type TestDraftAvgOrderByAggregateInput = {
@@ -363,6 +403,8 @@ export type TestDraftMaxOrderByAggregateInput = {
   revision?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type TestDraftMinOrderByAggregateInput = {
@@ -371,6 +413,8 @@ export type TestDraftMinOrderByAggregateInput = {
   revision?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type TestDraftSumOrderByAggregateInput = {
@@ -425,6 +469,8 @@ export type TestDraftCreateWithoutOwnerInput = {
   revision?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type TestDraftUncheckedCreateWithoutOwnerInput = {
@@ -433,6 +479,8 @@ export type TestDraftUncheckedCreateWithoutOwnerInput = {
   revision?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type TestDraftCreateOrConnectWithoutOwnerInput = {
@@ -471,6 +519,8 @@ export type TestDraftScalarWhereInput = {
   revision?: Prisma.IntFilter<"TestDraft"> | number
   createdAt?: Prisma.DateTimeFilter<"TestDraft"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TestDraft"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"TestDraft"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"TestDraft"> | string | null
 }
 
 export type TestDraftCreateManyOwnerInput = {
@@ -479,6 +529,8 @@ export type TestDraftCreateManyOwnerInput = {
   revision?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type TestDraftUpdateWithoutOwnerInput = {
@@ -487,6 +539,8 @@ export type TestDraftUpdateWithoutOwnerInput = {
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TestDraftUncheckedUpdateWithoutOwnerInput = {
@@ -495,6 +549,8 @@ export type TestDraftUncheckedUpdateWithoutOwnerInput = {
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TestDraftUncheckedUpdateManyWithoutOwnerInput = {
@@ -503,6 +559,8 @@ export type TestDraftUncheckedUpdateManyWithoutOwnerInput = {
   revision?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -514,6 +572,8 @@ export type TestDraftSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   revision?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testDraft"]>
 
@@ -524,6 +584,8 @@ export type TestDraftSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   revision?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testDraft"]>
 
@@ -534,6 +596,8 @@ export type TestDraftSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   revision?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testDraft"]>
 
@@ -544,9 +608,11 @@ export type TestDraftSelectScalar = {
   revision?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }
 
-export type TestDraftOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ownerId" | "state" | "revision" | "createdAt" | "updatedAt", ExtArgs["result"]["testDraft"]>
+export type TestDraftOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ownerId" | "state" | "revision" | "createdAt" | "updatedAt" | "deletedAt" | "deletedById", ExtArgs["result"]["testDraft"]>
 export type TestDraftInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -569,6 +635,8 @@ export type $TestDraftPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     revision: number
     createdAt: Date
     updatedAt: Date
+    deletedAt: Date | null
+    deletedById: string | null
   }, ExtArgs["result"]["testDraft"]>
   composites: {}
 }
@@ -999,6 +1067,8 @@ export interface TestDraftFieldRefs {
   readonly revision: Prisma.FieldRef<"TestDraft", 'Int'>
   readonly createdAt: Prisma.FieldRef<"TestDraft", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"TestDraft", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"TestDraft", 'DateTime'>
+  readonly deletedById: Prisma.FieldRef<"TestDraft", 'String'>
 }
     
 

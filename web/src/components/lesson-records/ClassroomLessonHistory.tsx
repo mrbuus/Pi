@@ -7,6 +7,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock
 import { Meta } from "@/components/ui/Meta";
 import { formatMinutes } from "@/components/schedule/types";
 import type { LessonRecord } from "./types";
+import { regroupTopicText } from "@/lib/testNames";
 
 /** Ангийн батлагдсан хичээлийн түүх — ажилтанд (Багш, Багш+, Админ). */
 export default function ClassroomLessonHistory({
@@ -44,7 +45,7 @@ export default function ClassroomLessonHistory({
                     {r.date.slice(5).replace("-", ".")}
                   </span>
                   <div className="min-w-0">
-                    <p className="font-medium">{r.topic ?? <span className="italic text-ink-dim">Сэдэвгүй</span>}</p>
+                    <p className="font-medium">{(r.topic && regroupTopicText(r.topic)) || <span className="italic text-ink-dim">Сэдэвгүй</span>}</p>
                     <p className="mt-0.5 text-xs text-ink-dim">
                       <Meta
                         items={[

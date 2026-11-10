@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 import '../../../core/time/ub_time.dart';
 
 /// Гэрийн даалгаврын загварууд — `docs/api-contract/homework.md`.
-/// Сервер хэзээ ч зөв хариу, `isCorrect`, бодолт илгээхгүй.
+/// Бодож байх үед сервер зөв хариу, `isCorrect`, бодолт илгээхгүй; ИЛГЭЭСНИЙ ДАРАА л алдсан бодлогын
+/// зөв хариу, баталгаажсан бодолт, бичлэг (`review`) ирнэ (эзэн 2026-11-03).
 
 Map<String, Object?> _map(Object? j) => (j! as Map).cast<String, Object?>();
 List<Object?> _list(Object? j) => (j as List?) ?? const [];
@@ -344,6 +345,75 @@ class HwProblem {
   final List<String> fillSlots;
 }
 
+/// Идэвхийн тоолуур (эзэн 2026-11-03): бодсон хугацаа, апп-аас гарсан тоо/хугацаа. Сервер зөвхөн өсгөнө.
+@immutable
+class HwActivity {
+  const HwActivity({this.activeSec = 0, this.awaySec = 0, this.leaveCount = 0});
+
+  factory HwActivity.parse(Object? v) {
+    if (v is! Map) return const HwActivity();
+    return HwActivity(activeSec: _int(v['activeSec']), awaySec: _int(v['awaySec']), leaveCount: _int(v['leaveCount']));
+  }
+
+  final int activeSec;
+  final int awaySec;
+  final int leaveCount;
+
+  Map<String, Object?> toJson() => {'activeSec': activeSec, 'awaySec': awaySec, 'leaveCount': leaveCount};
+}
+
+/// Илгээсний дараах нэг (алдсан) бодлогын зөв хариу, бодолт, бичлэг.
+@immutable
+class HwReviewItem {
+  const HwReviewItem({this.correct, this.solution, this.videoUrl});
+
+  factory HwReviewItem.fromJson(Object? json) {
+    final m = json is Map ? json.cast<String, Object?>() : const <String, Object?>{};
+    final video = m['video'];
+    final url = video is Map ? _str(video['url']) : null;
+    final c = m['correct'];
+    return HwReviewItem(
+      correct: c is String || c is Map ? c : null,
+      solution: _str(m['solution']),
+      videoUrl: url != null && _safeVideo(url) ? url : null,
+    );
+  }
+
+  /// `"B"`, `"12"` эсвэл `{a: "1", b: "2"}`; null = нээгдээгүй.
+  final Object? correct;
+  final String? solution;
+  final String? videoUrl;
+
+  static bool _safeVideo(String url) {
+    final u = Uri.tryParse(url);
+    return u != null && u.scheme == 'https' && (u.host.endsWith('youtube.com') || u.host == 'youtu.be');
+  }
+}
+
+@immutable
+class HwReview {
+  const HwReview({required this.locked, required this.opensAt, required this.items});
+
+  static HwReview? parse(Object? v) {
+    if (v is! Map) return null;
+    final items = v['items'];
+    return HwReview(
+      locked: v['locked'] == true,
+      opensAt: parseApiInstant(_str(v['opensAt'])),
+      items: items is Map
+          ? {for (final e in items.entries) e.key as String: HwReviewItem.fromJson(e.value)}
+          : const {},
+    );
+  }
+
+  /// Тест бусад ангид бодогдох тул зөв хариу түр нээгдэхгүй.
+  final bool locked;
+
+  /// Хариулаагүй бодлогын зөв хариу нээгдэх агшин (нууж байгаа үед).
+  final DateTime? opensAt;
+  final Map<String, HwReviewItem> items;
+}
+
 @immutable
 class HwAttempt {
   const HwAttempt({
@@ -356,6 +426,8 @@ class HwAttempt {
     required this.problems,
     required this.answers,
     required this.lastCheck,
+    this.activity = const HwActivity(),
+    this.review,
   });
 
   factory HwAttempt.fromJson(Object? json) {
@@ -371,6 +443,8 @@ class HwAttempt {
       problems: problems,
       answers: m['answers'] is Map ? (m['answers']! as Map).cast<String, Object?>() : <String, Object?>{},
       lastCheck: parseResults(m['lastCheck']),
+      activity: HwActivity.parse(m['activity']),
+      review: HwReview.parse(m['review']),
     );
   }
 
@@ -383,11 +457,15 @@ class HwAttempt {
   final List<HwProblem> problems;
   final Map<String, Object?> answers;
   final Map<String, CheckResult>? lastCheck;
+  final HwActivity activity;
+
+  /// Илгээсэн бол алдсан бодлогын зөв хариу; бодож байгаа бол null.
+  final HwReview? review;
 }
 
 @immutable
 class CheckOutcome {
-  const CheckOutcome({required this.results, required this.correct, required this.total, this.checksUsed});
+  const CheckOutcome({required this.results, required this.correct, required this.total, this.checksUsed, this.review});
 
   factory CheckOutcome.fromJson(Object? json) {
     final m = _map(json);
@@ -397,6 +475,7 @@ class CheckOutcome {
       correct: _int(score['correct']),
       total: _int(score['total']),
       checksUsed: m['checksUsed'] is num ? _int(m['checksUsed']) : null,
+      review: HwReview.parse(m['review']),
     );
   }
 
@@ -404,4 +483,140 @@ class CheckOutcome {
   final int correct;
   final int total;
   final int? checksUsed;
+
+  /// Зөвхөн илгээх (`submit`) хариунд.
+  final HwReview? review;
+}
+
+// ---------------------------------------------------------------------------
+// Дахин бодох (`GET /homework/redo`, эзэн 2026-11-03): хичээлээс хойш N хичээл өнгөрсний дараа ангид
+// бодсон А, гэртээ бодсон Б тестийг НЭГ удаа дахин бодно. Анхны дүн хэвээр, дахин бодсон нь тусдаа.
+
+@immutable
+class HwRedoRound {
+  const HwRedoRound({required this.round, required this.attemptId, required this.submitted, this.score});
+
+  factory HwRedoRound.fromJson(Object? json) {
+    final m = _map(json);
+    return HwRedoRound(
+      round: _int(m['round'], 1),
+      attemptId: _str(m['attemptId']) ?? '',
+      submitted: m['status'] == 'SUBMITTED',
+      score: HwScore.parse(m['score']),
+    );
+  }
+
+  /// 1 = анх (гэрийн даалгавар / ангид), 2 = дахин бодсон.
+  final int round;
+  final String attemptId;
+  final bool submitted;
+  final HwScore? score;
+}
+
+@immutable
+class HwRedoItem {
+  const HwRedoItem({
+    required this.testId,
+    required this.title,
+    required this.variantLabel,
+    required this.inClass,
+    required this.problemCount,
+    required this.timeLimitMin,
+    required this.locked,
+    required this.rounds,
+  });
+
+  factory HwRedoItem.fromJson(Object? json) {
+    final m = _map(json);
+    return HwRedoItem(
+      testId: m['testId']! as String,
+      title: _str(m['title']) ?? '',
+      variantLabel: _str(m['variantLabel']),
+      inClass: m['kind'] == 'CLASS',
+      problemCount: _int(m['problemCount']),
+      timeLimitMin: m['timeLimitMin'] is num ? _int(m['timeLimitMin']) : null,
+      locked: m['locked'] == true,
+      rounds: [for (final r in _list(m['rounds'])) HwRedoRound.fromJson(r)],
+    );
+  }
+
+  final String testId;
+  final String title;
+  final String? variantLabel;
+
+  /// Ангид бодсон (А) эсвэл гэртээ бодсон (Б).
+  final bool inClass;
+  final int problemCount;
+  final int? timeLimitMin;
+
+  /// Бусад ангид бодогдох хүлээгдэж байгаа — түр хаалттай.
+  final bool locked;
+  final List<HwRedoRound> rounds;
+
+  HwRedoRound? get first {
+    for (final r in rounds) {
+      if (r.round == 1 && r.submitted) return r;
+    }
+    return null;
+  }
+
+  HwRedoRound? get again {
+    for (final r in rounds) {
+      if (r.round > 1) return r;
+    }
+    return null;
+  }
+}
+
+@immutable
+class HwRedoDay {
+  const HwRedoDay({
+    required this.date,
+    required this.classroomId,
+    required this.classroomName,
+    required this.topic,
+    required this.opened,
+    required this.lessonsLeft,
+    required this.items,
+  });
+
+  factory HwRedoDay.fromJson(Object? json) {
+    final m = _map(json);
+    return HwRedoDay(
+      date: (_str(m['date']) ?? '').padRight(10).substring(0, 10).trim(),
+      classroomId: m['classroomId']! as String,
+      classroomName: _str(m['classroomName']) ?? '',
+      topic: _str(m['topic']),
+      opened: m['opened'] == true,
+      lessonsLeft: _int(m['lessonsLeft']),
+      items: [for (final i in _list(m['items'])) HwRedoItem.fromJson(i)],
+    );
+  }
+
+  final String date;
+  final String classroomId;
+  final String classroomName;
+  final String? topic;
+  final bool opened;
+  final int lessonsLeft;
+  final List<HwRedoItem> items;
+}
+
+@immutable
+class HwRedo {
+  const HwRedo({required this.lessonsToOpen, required this.days});
+
+  factory HwRedo.fromJson(Object? json) {
+    final m = json is Map ? json.cast<String, Object?>() : const <String, Object?>{};
+    final days = [for (final d in _list(m['days'])) HwRedoDay.fromJson(d)]
+      // Нээгдсэн нь эхэнд (шинэ нь дээр), хаалттай нь дараа нь
+      ..sort((a, b) {
+        if (a.opened != b.opened) return a.opened ? -1 : 1;
+        return b.date.compareTo(a.date);
+      });
+    return HwRedo(lessonsToOpen: _int(m['lessonsToOpen'], 2), days: days);
+  }
+
+  final int lessonsToOpen;
+  final List<HwRedoDay> days;
 }

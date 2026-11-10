@@ -13,7 +13,7 @@ sealed class NativeLoginResult {
     final m = (json! as Map).cast<String, Object?>();
     return switch (m['status']) {
       'ok' => NativeLoginOk(TokenResult.fromJson(m)),
-      'signup' => const NativeLoginSignup(),
+      'signup' => NativeLoginSignup(ticket: m['ticket'] as String?),
       'not_linked' => const NativeLoginNotLinked(),
       _ => throw const FormatException('Тодорхойгүй хариу'),
     };
@@ -26,9 +26,11 @@ final class NativeLoginOk extends NativeLoginResult {
   final TokenResult token;
 }
 
-/// Зөвхөн Google: бүртгэлгүй Gmail. Бүртгүүлэх урсгал апп-д хийгдээгүй (вэбээр).
+/// Зөвхөн Google: бүртгэлгүй Gmail. [ticket]-ээр апп доторх `/register` Gmail-ийг урьдчилж бөглөнө.
 final class NativeLoginSignup extends NativeLoginResult {
-  const NativeLoginSignup();
+  const NativeLoginSignup({this.ticket});
+
+  final String? ticket;
 }
 
 /// Бүртгэл байгаа ч холбогдоогүй — утсаараа нэвтэрч профайлаас холбоно (имэйлээр автоматаар холбохгүй).

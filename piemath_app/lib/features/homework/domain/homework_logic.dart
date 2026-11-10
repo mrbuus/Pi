@@ -51,6 +51,11 @@ List<HwSection> homeworkSections(List<HwDay> days, String today) {
   return [for (final s in sections) if (s.days.isNotEmpty) s];
 }
 
+/// «Өмнөх хичээлүүд» хэсгийн зураг илгээгээгүй боловч одоо ч илгээж болох өдрийн тоо (бусад хэсэгт 0).
+int missedPhotoDays(HwSection s, String today) => s.title != 'Өмнөх хичээлүүд'
+    ? 0
+    : s.days.where((d) => d.photo == null && canSendPhoto(d, today)).length;
+
 /// Өдрийн бүх ажил илгээгдсэн эсэх (өдрийн зурвасын тэмдэг).
 bool dayDone(HwDay d) => d.photo != null && d.items.every((i) => i.status == HwItemStatus.submitted);
 

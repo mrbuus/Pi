@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/config/env.dart';
 import '../../../core/math/math.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
@@ -41,9 +39,7 @@ const accessNoteText = 'Номын бүх тест, зөв хариу, бодо�
 /// Эрх нээх тухай мэдээлэл. Апп дотор ХУДАЛДАХГҮЙ, гадны худалдан авалт руу хөтлөхгүй
 /// (Apple 3.1.1, Google Play Payments): үнэ, худалдах товч, вэб холбоос БАЙХГҮЙ.
 class AccessNoteCard extends StatelessWidget {
-  const AccessNoteCard({super.key, this.webPath = '/books'});
-
-  final String webPath;
+  const AccessNoteCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +63,7 @@ class AccessNoteCard extends StatelessWidget {
 }
 
 /// Доороос гарах мэдээлэл (тестийн мөрийн «Эрх нээх»).
-Future<void> showAccessSheet(BuildContext context, {String webPath = '/books'}) => showModalBottomSheet<void>(
+Future<void> showAccessSheet(BuildContext context) => showModalBottomSheet<void>(
   context: context,
   builder: (ctx) => SafeArea(
     child: Padding(
@@ -84,10 +80,6 @@ Future<void> showAccessSheet(BuildContext context, {String webPath = '/books'}) 
     ),
   ),
 );
-
-/// Вэбийн нийтийн хуудсыг гаднаас нээнэ (зөвхөн апп-ын өөрийн домэйн).
-Future<void> openWeb(String path) =>
-    launchUrl(Uri.parse('${Env.webBaseUrl}$path'), mode: LaunchMode.externalApplication);
 
 /// Нийтийн хуудсын алдааны төлөв (сүлжээ / 404).
 Widget publicError(Object error, {required VoidCallback onRetry}) {

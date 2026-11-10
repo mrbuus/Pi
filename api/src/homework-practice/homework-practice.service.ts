@@ -327,6 +327,7 @@ export class HomeworkPracticeService {
     if (!siblingIds.length) return [];
     const rows = await this.prisma.lessonTopic.findMany({
       where: {
+        deletedAt: null,
         testIds: { hasSome: siblingIds },
         schedule: { deletedAt: null, classroomId: { in: classroomIds } },
       },
@@ -420,6 +421,7 @@ export class HomeworkPracticeService {
       }),
       this.prisma.lessonTopic.findFirst({
         where: {
+          deletedAt: null,
           testIds: { has: attempt.testId },
           schedule: { deletedAt: null, classroomId: attempt.classroomId },
         },
@@ -945,6 +947,7 @@ export class HomeworkPracticeService {
       }),
       this.prisma.lessonTopic.findMany({
         where: {
+          deletedAt: null,
           testIds: { hasSome: ids },
           date: { gte: parseDateOnly(addDaysKey(today, -14)) },
           schedule: { deletedAt: null },

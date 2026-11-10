@@ -4,25 +4,34 @@ import 'package:go_router/go_router.dart';
 
 import '../core/auth/session.dart';
 import '../core/auth/user_role.dart';
+import '../features/admin_oversight/admin_oversight_routes.dart';
 import '../features/auth/auth_routes.dart';
 import '../features/books/books_routes.dart';
 import '../features/buyer/buyer_routes.dart';
 import '../features/classrooms_admin/classrooms_admin_routes.dart';
+import '../features/content_admin/content_admin_routes.dart';
+import '../features/enrollment/enrollment_routes.dart';
 import '../features/exam/exam_routes.dart';
+import '../features/finance/finance_routes.dart';
 import '../features/groups/groups_routes.dart';
 import '../features/homework/homework_routes.dart';
 import '../features/homework/ui/homework_screen.dart' show HomeworkAppBarActions;
+import '../features/internal_drafts/internal_drafts_routes.dart';
 import '../features/learning/learning_routes.dart';
 import '../features/lesson_flow/lesson_flow_routes.dart';
 import '../features/my_class/my_class_routes.dart';
 import '../features/notifications/notifications_routes.dart';
 import '../features/online_students/online_routes.dart';
 import '../features/parent/parent_routes.dart';
+import '../features/passes/passes_routes.dart';
 import '../features/payments/payments_routes.dart';
 import '../features/planner/planner_routes.dart';
 import '../features/results/results_routes.dart';
 import '../features/scan/scan_routes.dart';
 import '../features/schedule/schedule_routes.dart';
+import '../features/schedule/ui/staff/staff_schedule_screen.dart' show StaffScheduleActions;
+import '../features/sms/sms_routes.dart';
+import '../features/store_admin/store_admin_routes.dart';
 import '../features/student_home/student_home_routes.dart';
 import '../features/students_admin/students_admin_routes.dart';
 import '../features/support/support_routes.dart';
@@ -71,6 +80,14 @@ final allFeatureRoutes = <FeatureRoutes>[
   groupsRoutes,
   resultsRoutes,
   onlineRoutes,
+  smsRoutes,
+  enrollmentRoutes,
+  financeRoutes,
+  passesRoutes,
+  contentAdminRoutes,
+  storeAdminRoutes,
+  internalDraftsRoutes,
+  adminOversightRoutes,
   _manageRoutes,
 ];
 
@@ -114,7 +131,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/splash',
     refreshListenable: refresh,
     debugLogDiagnostics: false,
-    errorBuilder: (context, state) => PendingScreen(path: state.uri.path),
+    errorPageBuilder: (context, state) => appPage(state, PendingScreen(path: state.uri.path)),
   );
   ref.onDispose(() {
     router.dispose();
@@ -125,26 +142,65 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 /// Дэд хуудасны AppBar-ын үйлдлийг хэсгийн AppBar-т гаргах (дэд хуудасны өөрийн мөр нуугддаг).
-final _sectionActions = <String, WidgetBuilder>{'/app/homework': (_) => const HomeworkAppBarActions()};
+final _sectionActions = <String, WidgetBuilder>{
+  '/app/homework': (_) => const HomeworkAppBarActions(),
+  '/app/schedule': (_) => const StaffScheduleActions(),
+};
 
 /// Маршрутын мод: public → бүтэн дэлгэц → доод табын салбарууд ([StatefulShellRoute]).
 ///
 /// [role]-ийн хэсэг бүр нэг салбар ([NavData.sections]), сүүлийнх нь «Бусад». Feature-ийн маршрут бүрийг
 /// замын хамгийн урт угтвараар хэсэгт нь оноож, хамаарахгүйг «Бусад»-д. Дэд табтай хэсгийн дэд зам бүр
-/// ижил key-тэй [SectionScreen] хуудас болно. Хараахан хийгдээгүй зам — «вэбээр нээх».
+/// ижил key-тэй [SectionScreen] хуудас болно. Хараахан хийгдээгүй зам — апп доторх «удахгүй» хуудас.
 @visibleForTesting
 List<RouteBase> buildRoutes(List<FeatureRoutes> features, {UserRole role = UserRole.unknown}) {
   return [
-    GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
-    // Redirect нь «/», «/app»-ийг нүүр рүү шилжүүлнэ; энд хүрвэл зөвхөн хоосон дэлгэц үлдэхгүйн тулд.
-    GoRoute(path: '/', builder: (_, _) => const SplashScreen()),
-    GoRoute(path: '/q/:code', builder: (_, _) => const SplashScreen()),
-    for (final f in features) ...f.public,
-    for (final f in features)
-      for (final r in f.fullscreen) _withParent(r, rootNavigatorKey),
+    for (final r in [
+      GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
+      // Redirect нь «/», «/app»-ийг нүүр рүү шилжүүлнэ; энд хүрвэл зөвхөн хоосон дэлгэц үлдэхгүйн тулд.
+      GoRoute(path: '/', builder: (_, _) => const SplashScreen()),
+      GoRoute(path: '/q/:code', builder: (_, _) => const SplashScreen()),
+      for (final f in features) ...f.public,
+      for (final f in features)
+        for (final r in f.fullscreen) _withParent(r, rootNavigatorKey),
+    ])
+      withMaterialPages(r),
     buildShellRoute(features, NavData.sections(role), role: role),
   ];
 }
+
+/// Хуудас бүрийг апп-ын `MaterialPage`-ээр (theme-ийн [AppPageTransitions]: iOS-д ирмэгээс буцах зангаа,
+/// Android-д predictive back) зурна.
+///
+/// Шалтгаан: go_router 18 апп-ын төрлийг `material_ui` багцын `MaterialApp`-аар таньдаг, энэ апп
+/// `flutter/material`-ийнхийг ашигладаг тул `builder`-тэй маршрут бүр `NoTransitionPage` болж байсан —
+/// хуудас шилжих хөдөлгөөнгүй, iPhone-д зүүн ирмэгээс шудрахад буцдаггүй байв.
+@visibleForTesting
+RouteBase withMaterialPages(RouteBase r) {
+  if (r is! GoRoute) return r;
+  final builder = r.builder;
+  return GoRoute(
+    path: r.path,
+    name: r.name,
+    redirect: r.redirect,
+    parentNavigatorKey: r.parentNavigatorKey,
+    metadata: r.metadata,
+    onExit: r.onExit,
+    caseSensitive: r.caseSensitive,
+    pageBuilder:
+        r.pageBuilder ?? (builder == null ? null : (context, state) => appPage(state, builder(context, state))),
+    routes: [for (final c in r.routes) withMaterialPages(c)],
+  );
+}
+
+/// go_router-ийн өгөгдмөл хуудастай ижил түлхүүр, нэр, аргументтай `MaterialPage`.
+Page<void> appPage(GoRouterState state, Widget child) => MaterialPage<void>(
+  key: state.pageKey,
+  name: state.name ?? state.path,
+  arguments: <String, String>{...state.pathParameters, ...state.uri.queryParameters},
+  restorationId: state.pageKey.value,
+  child: child,
+);
 
 /// Доод табын салбарууд — [sections] бүрт нэг + «Бусад».
 @visibleForTesting
@@ -156,14 +212,15 @@ StatefulShellRoute buildShellRoute(List<FeatureRoutes> features, List<NavSection
       if (r is GoRoute) r.path: r,
   };
   final buckets = [for (var i = 0; i <= sections.length; i++) <RouteBase>[]];
-  final more = buckets.last..add(GoRoute(path: morePath, builder: (_, _) => const MoreScreen()));
+  final more = buckets.last
+    ..add(withMaterialPages(GoRoute(path: morePath, builder: (_, _) => const MoreScreen())));
   final placed = <String>{};
 
   for (var i = 0; i < sections.length; i++) {
     final s = sections[i];
     if (!s.hasSubTabs) {
       final r = byPath[s.rootPath];
-      buckets[i].add(r ?? GoRoute(path: s.rootPath, builder: pending));
+      buckets[i].add(withMaterialPages(r ?? GoRoute(path: s.rootPath, builder: pending)));
       placed.add(s.rootPath);
       continue;
     }
@@ -184,7 +241,7 @@ StatefulShellRoute buildShellRoute(List<FeatureRoutes> features, List<NavSection
           path: link.path,
           name: original?.name,
           redirect: original?.redirect,
-          routes: original?.routes ?? const [],
+          routes: [for (final c in original?.routes ?? const <RouteBase>[]) withMaterialPages(c)],
           pageBuilder: (context, state) => MaterialPage<void>(
             // Бүх дэд зам нэг key — дэд таб солиход хуудас шинээр үүсэхгүй, зөвхөн шинэчлэгдэнэ.
             key: ValueKey('section:${s.id}'),
@@ -213,18 +270,27 @@ StatefulShellRoute buildShellRoute(List<FeatureRoutes> features, List<NavSection
     if (r is GoRoute && placed.contains(r.path)) continue;
     final path = r is GoRoute ? r.path : null;
     final i = path == null ? -1 : NavData.sectionIndexOf(role, path);
-    (i < 0 ? more : buckets[i]).add(r);
+    (i < 0 ? more : buckets[i]).add(withMaterialPages(r));
   }
-  // Хараахан хийгдээгүй хэсэг — вэбийн зам руу «вэбээр нээх» (функц хасахгүй). Хамгийн сүүлд.
+  // Хараахан хийгдээгүй хэсэг — апп доторх «удахгүй» хуудас (вэб рүү гаргахгүй). Хамгийн сүүлд.
   more.addAll([
-    GoRoute(path: '/app/:a', builder: pending),
-    GoRoute(path: '/app/:a/:b', builder: pending),
-    GoRoute(path: '/app/:a/:b/:c', builder: pending),
-    GoRoute(path: '/app/:a/:b/:c/:d', builder: pending),
+    for (final r in [
+      GoRoute(path: '/app/:a', builder: pending),
+      GoRoute(path: '/app/:a/:b', builder: pending),
+      GoRoute(path: '/app/:a/:b/:c', builder: pending),
+      GoRoute(path: '/app/:a/:b/:c/:d', builder: pending),
+    ])
+      withMaterialPages(r),
   ]);
 
   return StatefulShellRoute(
-    builder: (context, state, shell) => AppShell(navigationShell: shell, sections: sections),
+    // Бүрхүүл өөрөө шилжилтгүй (нэвтрэх, бүтэн дэлгэцээс `go`-оор буцах үед бүхэлдээ гулсахгүй).
+    pageBuilder: (context, state, shell) => NoTransitionPage<void>(
+      key: state.pageKey,
+      name: state.name ?? state.path,
+      restorationId: state.pageKey.value,
+      child: AppShell(navigationShell: shell, sections: sections),
+    ),
     navigatorContainerBuilder: (context, shell, children) =>
         BranchStack(currentIndex: shell.currentIndex, children: children),
     branches: [
@@ -271,6 +337,9 @@ RouteBase _withParent(RouteBase r, GlobalKey<NavigatorState> key) {
       pageBuilder: r.pageBuilder,
       redirect: r.redirect,
       routes: r.routes,
+      metadata: r.metadata,
+      onExit: r.onExit,
+      caseSensitive: r.caseSensitive,
       parentNavigatorKey: key,
     );
   }

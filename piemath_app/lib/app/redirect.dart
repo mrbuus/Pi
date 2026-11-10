@@ -6,7 +6,7 @@ import 'nav/nav_data.dart';
 /// «//evil.com», «http://…», нэвтрэх хуудас өөрөө зэргийг хүлээн авахгүй (вэбийн `safeNext`).
 String? safeNext(String? raw) {
   if (raw == null || !raw.startsWith('/') || raw.startsWith('//') || RegExp(r'[\\\s]').hasMatch(raw)) return null;
-  if (RegExp(r'^/(login|register|forgot-password|splash)(/|\?|#|$)').hasMatch(raw)) return null;
+  if (RegExp(r'^/(login|register|teacher-register|forgot-password|splash)(/|\?|#|$)').hasMatch(raw)) return null;
   return raw;
 }
 
@@ -18,6 +18,7 @@ bool isPublicPath(String path) =>
     path == '/login' ||
     path == '/forgot-password' ||
     path == '/register' ||
+    path == '/teacher-register' ||
     path == '/splash' ||
     path.startsWith('/q/') ||
     path == '/books' ||
@@ -65,7 +66,7 @@ String? appRedirect(SessionState session, Uri uri, {ConsentCheck? needsConsent})
       if (user != null && needsConsent != null && needsConsent(user) && path != '/app/consent') {
         return '/app/consent';
       }
-      if (path == '/splash' || path == '/login' || path == '/forgot-password' || path == '/register') {
+      if (path == '/splash' || path == '/login' || path == '/forgot-password' || path == '/register' || path == '/teacher-register') {
         final next = safeNext(uri.queryParameters['next']);
         return next ?? home;
       }

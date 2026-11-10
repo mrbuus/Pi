@@ -45,7 +45,7 @@ export class ReadinessService {
     // window (roughly 109 days from the current snapshot).
     const since = new Date(asOf.getTime() - 110 * 86_400_000);
     const attempts = await this.prisma.attempt.findMany({
-      where: { studentId, occurredOn: { gte: since, lte: asOf }, problem: { deletedAt: null } },
+      where: { studentId, deletedAt: null, occurredOn: { gte: since, lte: asOf }, problem: { deletedAt: null } },
       select: {
         id: true, problemId: true, occurredOn: true, autoCorrect: true, selfState: true,
         problem: { select: { analysis: { select: { topic: true } }, formulas: { select: { formula: { select: { topicSlugs: true } } } }, chapter: { select: { id: true, topic: { select: { name: true } } } } } },

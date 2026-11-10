@@ -16,6 +16,7 @@ import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import TheoryDayPanel from "./TheoryDayPanel";
 import { addDays, isDateKey, type TheoryListDay } from "./photo-types";
+import { regroupTopicText } from "@/lib/testNames";
 
 const WEEKDAY_SHORT = ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"];
 const rowKey = (d: { classroomId: string; date: string }) => `${d.classroomId}:${d.date}`;
@@ -96,7 +97,7 @@ function DayRow({ day, onOpen }: { day: TheoryListDay; onOpen: () => void }) {
         </span>
         <span className="min-w-0 flex-1">
           <span className={cn("cyrillic-tight block truncate font-semibold", day.topic ? "text-ink" : "text-ink-dim")}>
-            {day.topic ?? (day.tests[0] || "Сэдэв тодорхойгүй")}
+            {(day.topic && regroupTopicText(day.topic)) || day.tests[0] || "Сэдэв тодорхойгүй"}
           </span>
           <Meta className="mt-0.5 text-xs text-ink-dim" items={[day.classroomName, names || null]} />
         </span>

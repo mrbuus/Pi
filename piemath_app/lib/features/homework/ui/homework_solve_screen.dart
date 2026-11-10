@@ -7,22 +7,36 @@ import '../../../app/shell/app_shell.dart';
 import '../../../core/files/files.dart';
 import '../../../core/math/math.dart';
 import '../../../core/network/api_error.dart';
+import '../../../core/time/date_mn.dart';
+import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
+import '../../exam/data/exam_models.dart' show ProblemFormat, ReviewChoice, ReviewProblem, YoutubeLink;
+import '../../exam/ui/widgets/review_parts.dart' show ReviewProblemCard;
 import '../data/homework_models.dart';
 import '../data/homework_repository.dart';
+import '../domain/homework_activity.dart';
 import '../domain/homework_logic.dart';
 import 'homework_badges.dart';
+import 'homework_photo_panel.dart';
 import 'homework_providers.dart';
 
 /// `/app/homework/:testId?date=&classroomId=` — ангид хийсэн тестийн нөгөө (B) хувилбарыг гэртээ бодох.
-/// «Шалгах» 2 удаа (зөв/буруу л — зөв хариу ХЭЗЭЭ Ч харагдахгүй), дараа нь «Илгээх». Оноо, хугацаа серверт.
+/// «Шалгах» 2 удаа (зөв/буруу л — бодож байх үед зөв хариу харагдахгүй), дараа нь «Илгээх». Оноо, хугацаа
+/// серверт. Илгээсний дараа алдсан бодлогын зөв хариу, бодолт, бичлэг (сервер нээсэн бол) ба дэвтрийн зураг
+/// илгээх товч (вэбийн `HomeworkResult`). Идэвхийн тоолуур 45 секунд тутам хадгалагдана.
 class HomeworkSolveScreen extends ConsumerStatefulWidget {
-  const HomeworkSolveScreen({super.key, required this.testId, required this.date});
+  const HomeworkSolveScreen({super.key, required this.testId, required this.date, this.classroomId, this.redo = false});
 
   final String testId;
 
   /// Анги тестийг хийсэн өдөр (`YYYY-MM-DD`).
   final String date;
+
+  /// Дэвтрийн зураг илгээх товчинд (жагсаалтаас ирсэн бол).
+  final String? classroomId;
+
+  /// «Дахин бодох» (2-р оролдлого) — анхны дүн хэвээр, дэвтрийн зураг асуухгүй.
+  final bool redo;
 
   @override
   ConsumerState<HomeworkSolveScreen> createState() => _HomeworkSolveScreenState();
@@ -42,23 +56,47 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
   bool _saving = false;
   Timer? _debounce;
   Timer? _ticker;
+  Timer? _heartbeat;
   int? _remaining;
+  HwReview? _review;
+  HomeworkActivityClock? _clock;
+  AppLifecycleListener? _lifecycle;
 
-  HomeworkRepository get _repo => ref.read(homeworkRepositoryProvider);
+  /// Өөр төхөөрөмжөөс илгээгдсэн (409) — дахин ачаалж байна, давхар бүү хадгал.
+  bool _reloading = false;
+
+  static const heartbeat = Duration(seconds: 45);
+
+  HwActivity? get _activity => _clock?.snapshot(DateTime.now());
+
+  /// initState-д авна — dispose дотор `ref` ашиглаж болохгүй.
+  late final HomeworkRepository _repo;
 
   @override
   void initState() {
     super.initState();
+    _repo = ref.read(homeworkRepositoryProvider);
+    _lifecycle = AppLifecycleListener(
+      onHide: () {
+        _clock?.hide(DateTime.now());
+        unawaited(_save(force: true)); // гарах агшинд хариу, тоолуурыг шууд хадгална
+      },
+      onShow: () => _clock?.show(DateTime.now()),
+    );
     _load();
   }
 
   @override
   void dispose() {
+    _lifecycle?.dispose();
     _debounce?.cancel();
     _ticker?.cancel();
-    // Хүлээгдэж буй хариуг алдахгүй.
-    if (!_submitted && _attempt != null && changedAnswers(_answers, _saved).isNotEmpty) {
-      unawaited(_repo.saveAnswers(_attempt!.attemptId, changedAnswers(_answers, _saved)).catchError((_) {}));
+    _heartbeat?.cancel();
+    // Хүлээгдэж буй хариуг алдахгүй (тоолуур нь 45 секундын цохилт, апп-аас гарах үед хадгалагддаг).
+    if (!_submitted && !_reloading && _attempt != null && changedAnswers(_answers, _saved).isNotEmpty) {
+      unawaited(
+        _repo.saveAnswers(_attempt!.attemptId, changedAnswers(_answers, _saved), activity: _activity).catchError((_) {}),
+      );
     }
     for (final c in _controllers.values) {
       c.dispose();
@@ -72,7 +110,7 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
       _attempt = null;
     });
     try {
-      final a = await _repo.startAttempt(testId: widget.testId, date: widget.date);
+      final a = await _repo.startAttempt(testId: widget.testId, date: widget.date, redo: widget.redo);
       if (!mounted) return;
       setState(() {
         _attempt = a;
@@ -87,8 +125,13 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
         _score = a.score;
         _results = a.lastCheck;
         _remaining = a.submitted ? null : a.remainingSec;
+        _review = a.review;
+        _reloading = false;
+        _clock = a.submitted ? null : HomeworkActivityClock(a.activity, DateTime.now());
       });
       _startTicker();
+      _heartbeat?.cancel();
+      if (!a.submitted) _heartbeat = Timer.periodic(heartbeat, (_) => unawaited(_save(force: true)));
     } on ApiError catch (e) {
       if (mounted) setState(() => _loadError = e);
     }
@@ -120,18 +163,24 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
     _debounce = Timer(const Duration(milliseconds: 1200), _save);
   }
 
-  Future<void> _save() async {
+  /// [force] — хариу өөрчлөгдөөгүй ч идэвхийн тоолуурыг илгээнэ (45 секундын цохилт, апп-аас гарах).
+  Future<void> _save({bool force = false}) async {
     final a = _attempt;
-    if (a == null || _submitted) return;
+    if (a == null || _submitted || _reloading) return;
     final diff = changedAnswers(_answers, _saved);
-    if (diff.isEmpty) return;
-    setState(() => _saving = true);
+    if (diff.isEmpty && !force) return;
+    if (diff.isNotEmpty && mounted) setState(() => _saving = true);
     try {
-      await _repo.saveAnswers(a.attemptId, diff);
+      await _repo.saveAnswers(a.attemptId, diff, activity: _activity);
       _saved.addAll(diff);
     } on ApiError catch (e) {
-      if (e.kind == ApiErrorKind.conflict) _snack(e.message);
-      // Сүлжээний алдаа — дараагийн өөрчлөлтөөр дахин илгээнэ.
+      if (e.kind == ApiErrorKind.conflict) {
+        // Өөр төхөөрөмжөөс илгээгдсэн эсвэл хугацаа дууссан — серверийн төлөвийг (дүнг) дахин ачаална.
+        _reloading = true;
+        _snack(e.message);
+        if (mounted) unawaited(_load());
+      }
+      // Сүлжээний алдаа — дараагийн өөрчлөлт / цохилтоор дахин илгээнэ.
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -142,7 +191,7 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
     if (a == null) return;
     setState(() => _busy = true);
     try {
-      final r = await _repo.check(a.attemptId, Map.of(_answers));
+      final r = await _repo.check(a.attemptId, Map.of(_answers), activity: _activity);
       _saved.addAll(_answers);
       if (!mounted) return;
       setState(() {
@@ -177,16 +226,20 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
     _debounce?.cancel();
     setState(() => _busy = true);
     try {
-      final r = await _repo.submit(a.attemptId, Map.of(_answers));
+      final r = await _repo.submit(a.attemptId, Map.of(_answers), activity: _activity);
       _saved.addAll(_answers);
       _ticker?.cancel();
-      ref.invalidate(homeworkDaysProvider);
+      _heartbeat?.cancel();
+      ref
+        ..invalidate(homeworkDaysProvider)
+        ..invalidate(homeworkRedoProvider);
       if (!mounted) return;
       setState(() {
         _submitted = true;
         _results = r.results;
         _score = HwScore(r.correct, r.total);
         _remaining = null;
+        _review = r.review;
       });
     } on ApiError catch (e) {
       _snack(e.message);
@@ -203,7 +256,7 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: const AppBackButton(),
-        title: const Text('Гэрийн даалгавар'),
+        title: Text(widget.redo ? 'Дахин бодох' : 'Гэрийн даалгавар'),
         actions: [
           if (_remaining != null)
             Padding(
@@ -240,6 +293,7 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
 
   Widget _body(HwAttempt a) {
     if (a.problems.isEmpty) return const EmptyState(title: 'Бодлого алга');
+    if (_submitted) return _resultBody(a);
     final header = _submitted
         ? _ResultHeader(score: _score)
         : _SaveStatus(saving: _saving, checksLeft: (a.maxChecks - _checksUsed).clamp(0, a.maxChecks));
@@ -263,6 +317,68 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
     );
   }
 
+  /// Илгээсний дараа: дүн → алдсан бодлогын зөв хариу, бодолт → дэвтрийн зураг (вэбийн `HomeworkResult`).
+  Widget _resultBody(HwAttempt a) {
+    final images = ref.watch(fileImageProvider);
+    final results = _results ?? const <String, CheckResult>{};
+    final missed = [
+      for (var i = 0; i < a.problems.length; i++)
+        if (results[a.problems[i].id] == CheckResult.wrong || results[a.problems[i].id] == CheckResult.blank)
+          (n: i + 1, p: a.problems[i]),
+    ];
+    final review = _review;
+    final opensAt = review?.opensAt;
+    final children = <Widget>[
+      _ResultHeader(score: _score),
+      if (missed.length > 1)
+        _Notice(
+          icon: AppIcons.warning,
+          tone: context.colors.warning,
+          text: '${missed.length} бодлого алдсан байна. Доорх зөв хариуг харж алдаагаа засаарай',
+        ),
+      if (missed.isNotEmpty && review != null && review.locked)
+        _Notice(icon: AppIcons.password, tone: context.colors.inkDim, text: 'Зөв хариу удахгүй нээгдэнэ'),
+      if (missed.isNotEmpty && review != null && !review.locked) ...[
+        const SectionHeader(title: 'Алдсан бодлогууд', padding: EdgeInsets.only(top: AppSpace.sm)),
+        if (opensAt != null)
+          _Notice(
+            icon: AppIcons.time,
+            tone: context.colors.inkDim,
+            text: 'Хариулаагүй бодлогын зөв хариу ${DateMn.numericWithTime(UbDateTime.fromInstant(opensAt))}-с нээгдэнэ',
+          ),
+        for (final m in missed)
+          ReviewProblemCard(
+            number: m.n,
+            problem: _reviewProblem(m.p, review.items[m.p.id]),
+            imageFor: images.image,
+            status: results[m.p.id] == CheckResult.blank
+                ? StatusPill(icon: AppIcons.circleDashed, label: 'Хариулаагүй', color: context.colors.inkDim, dashed: true)
+                : StatusPill(icon: AppIcons.failure, label: 'Буруу', color: context.colors.error),
+          ),
+      ],
+      if (widget.classroomId != null && !widget.redo) _PhotoForDay(classroomId: widget.classroomId!, date: widget.date),
+    ];
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.sm, AppSpace.gutter, AppSpace.xxl),
+      itemCount: children.length,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpace.md),
+      itemBuilder: (_, i) => children[i],
+    );
+  }
+
+  ReviewProblem _reviewProblem(HwProblem p, HwReviewItem? item) => ReviewProblem(
+        format: ProblemFormat.parse(p.format),
+        statementText: p.statementText,
+        imageKey: p.imageKey,
+        choices: p.choices == null
+            ? null
+            : [for (final c in p.choices!) ReviewChoice(letter: c.label, text: c.text, image: c.imageKey)],
+        myAnswer: isBlankAnswer(_answers[p.id]) ? null : _answers[p.id],
+        correctAnswer: item?.correct,
+        solution: item?.solution,
+        youtube: item?.videoUrl == null ? null : YoutubeLink(item!.videoUrl!, null),
+      );
+
   Widget _actions(HwAttempt a) {
     final left = (a.maxChecks - _checksUsed).clamp(0, a.maxChecks);
     return SafeArea(
@@ -282,6 +398,57 @@ class _HomeworkSolveScreenState extends ConsumerState<HomeworkSolveScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _Notice extends StatelessWidget {
+  const _Notice({required this.icon, required this.tone, required this.text});
+
+  final IconData icon;
+  final Color tone;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        liveRegion: true,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(padding: const EdgeInsets.only(top: 2), child: Icon(icon, size: 18, color: tone)),
+            const SizedBox(width: AppSpace.sm),
+            Expanded(child: Text(text, style: context.text.bodyMedium)),
+          ],
+        ),
+      );
+}
+
+/// Илгээсний дараа тухайн хичээлийн өдрийн дэвтрийн зураг (вэбийн `PhotoButton`). Өдөр жагсаалтад
+/// байхгүй бол (14 хоногоос хуучин) юу ч харуулахгүй.
+class _PhotoForDay extends ConsumerWidget {
+  const _PhotoForDay({required this.classroomId, required this.date});
+
+  final String classroomId;
+  final String date;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final days = ref.watch(homeworkDaysProvider).value;
+    final today = ref.watch(todayKeyProvider);
+    HwDay? day;
+    for (final d in days ?? const <HwDay>[]) {
+      if (d.classroomId == classroomId && d.date == date) day = d;
+    }
+    if (day == null) return const SizedBox.shrink();
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Дэвтрийн зураг', style: context.text.titleSmall),
+          const SizedBox(height: AppSpace.sm),
+          HomeworkPhotoPanel(day: day, canSend: canSendPhoto(day, today)),
+        ],
       ),
     );
   }

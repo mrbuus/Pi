@@ -1069,8 +1069,12 @@ model TestDraft {
   revision  Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): ноорог устгах = deletedAt.
+  deletedAt   DateTime?
+  deletedById String?
 
   @@index([ownerId, updatedAt])
+  @@index([deletedAt])
 }
 
 model TestProblem {
@@ -1318,6 +1322,9 @@ model Attempt {
   // New wrong attempts explicitly set this to null for durable collector retry.
   mistakeCollectedAt DateTime? @default(now())
   createdAt   DateTime @default(now())
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): оролдлого устгах = deletedAt; явц, идэвх, стрийк, аналитик бүгд устсаныг хасна.
+  deletedAt   DateTime?
+  deletedById String?
 
   @@index([studentId, occurredOn])
   @@index([problemId])
@@ -2030,6 +2037,9 @@ model LearningEvent {
   durationMs Int?
   device     String?
   meta       Json?
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): бүлгийн явц цэвэрлэх = deletedAt; явц, аналитик бүгд устсаныг хасна.
+  deletedAt   DateTime?
+  deletedById String?
 
   // Дан @@index([userId]) байсныг ХАССАН (PERF-AUDIT.md §0 олдвор #8): доорх
   // composite [userId, occurredAt]-ийн prefix нь `WHERE userId = ...` query-г
@@ -2187,8 +2197,12 @@ model StaffTaskAssignee {
   userId     String
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   assignedAt DateTime  @default(now())
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): оноолт хасах = deletedAt; дахин оноовол мөр сэргэнэ (PK хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@id([taskId, userId])
+  @@index([deletedAt])
 }
 
 // ============ Хичээлийн хуваарь (Class Schedule) ============
@@ -2250,8 +2264,12 @@ model ScheduleException {
   newRoom        String?
   note           String?
   createdAt      DateTime              @default(now())
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): цуцлалт/шилжүүлгийг буцаах = deletedAt; ижил өдөр дахин тавибал мөр сэргэнэ (unique хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@unique([scheduleId, date])
+  @@index([deletedAt])
 }
 
 // Тухайн тохиолдол дээр багшийн товлосон "өнөөдөр орох сэдэв".
@@ -2276,8 +2294,12 @@ model LessonTopic {
   // Бодлогын санд байхгүй, багшийн бичсэн сэдвүүд («Иррац шалгалт» г.м., эзэн 2026-10-31) —
   // тесттэй зэрэг олон байж болно. title = тестүүдийн нэр + эдгээр (planTitle).
   customTopics   String[] @default([])
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): сэдэв/төлөвлөгөө арилгах = deletedAt; ижил өдөр дахин тавибал мөр сэргэнэ (unique хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@unique([scheduleId, date])
+  @@index([deletedAt])
 }
 
 // Амралтын өдрийн (Бямба, Ням) хоол (эзэн 2026-10-31): хэн хийх, юу хийх — чөлөөт бичвэр,
@@ -2312,8 +2334,12 @@ model LessonStaffing {
   assistantTeacherId String?
   updatedById        String
   updatedAt          DateTime      @updatedAt
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): оноолт арилгах = deletedAt; дахин оноовол мөр сэргэнэ (unique хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@unique([scheduleId, date])
+  @@index([deletedAt])
 }
 
 // ============ Багшийн долоо хоногийн ажлын өдрийн бүртгэл ============
@@ -2401,9 +2427,13 @@ model AcademicCalendarDayClassroom {
   classroomId   String
   calendarDay   AcademicCalendarDay @relation(fields: [calendarDayId], references: [id], onDelete: Cascade)
   classroom     Classroom           @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): анги хасах = deletedAt; дахин нэмбэл холбоос сэргэнэ (PK хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@id([calendarDayId, classroomId])
   @@index([classroomId])
+  @@index([deletedAt])
 }
 
 // ============ Сурагчийн зорилго (Student Goals) ============
@@ -2699,6 +2729,53 @@ model StaffCapabilityGrant {
 
   @@unique([userId, capability, scopeKey])
   @@index([userId, revokedAt, expiresAt])
+}
+
+// ============ Багшийн ажилласан цаг, данс, цагийн хөлс (эзэн 2026-11-08) ============
+// Эзний Excel «Цаг»-ийн веб хувилбар: хагас сар бүр (1–15, 16–сүүл) багш
+// бүрийн өдөр тутмын цаг. teacherId-г энгийн мөр болгож хадгална (LessonStaffing-
+// ийн конвенц) — багш архивлагдсан ч түүх үлдэнэ. Логик: src/teacher-hours/.
+
+// Нэг багшийн нэг өдрийн цаг. hundredths = цаг × 100 (7.5 цаг = 750) — бүхэл тоо
+// тул нийлбэрт хөвөгч цэгийн алдаа орохгүй. null = нүдийг арилгасан (мөр, аудит үлдэнэ).
+model TeacherWorkHours {
+  id          String   @id @default(cuid())
+  teacherId   String
+  date        DateTime @db.Date
+  hundredths  Int?
+  updatedById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([teacherId, date])
+  @@index([date])
+}
+
+// Багшийн цалингийн данс. Бүх ажилтан харна; багш өөрийнхөө дансыг, цаг бөглөх
+// эрхтэй (teacher-hours.edit) хүн бүх багшийнхыг засна. Аудитад дугаар нууцлагдана.
+model TeacherBankAccount {
+  teacherId     String   @id
+  bankName      String
+  accountNumber String
+  holderName    String
+  updatedById   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Цагийн хөлс (₮/цаг) — ЗӨВХӨН О. Баасанжав харж, тавина (teacher-hours/pay-rate-owner.ts).
+// effectiveFrom = хагас сарын эхний өдөр; тэр үеэс хойш өвлөгдөнө. Солиход хуучин
+// мөр deletedAt-аар хаагдаж шинэ мөр нэмэгдэнэ — түүх устахгүй.
+model TeacherPayRate {
+  id            String    @id @default(cuid())
+  teacherId     String
+  effectiveFrom DateTime  @db.Date
+  ratePerHour   Int
+  createdById   String
+  createdAt     DateTime  @default(now())
+  deletedAt     DateTime?
+
+  @@index([teacherId, effectiveFrom])
 }
 
 
@@ -3056,9 +3133,13 @@ model ClassTestStatus {
   updatedById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): тэмдэглэгээг буцаах (status = null) = deletedAt; дахин тавибал мөр сэргэнэ (unique хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@unique([classroomId, testId])
   @@index([classroomId])
+  @@index([deletedAt])
 }
 
 /// «Өмнө үзсэн сэдэв» (эзэн 2026-10-27): систем эхлэхээс ӨМНӨ анги үзсэн тестийг
@@ -3435,4 +3516,96 @@ model HomeworkComment {
 
   @@index([studentId, classroomId, lessonDate])
   @@index([classroomId, lessonDate])
+}
+
+/// Гэрийн даалгаврыг ангид богино шалгалтаар шалгах (эзэн 2026-11-08): ижил төрлийн, өөр тоотой
+/// бодлого. Нэг анги × нэг өдөр = нэг шалгалт. «Устгах» = deletedAt (оноонууд мөн deletedAt-тай нуугдана);
+/// дахин эхлүүлбэл ижил мөр сэргэж, оноо хоосноос эхэлнэ. Зөвхөн ажилтан харна.
+model HomeworkQuiz {
+  id           String              @id @default(cuid())
+  classroomId  String
+  date         DateTime            @db.Date
+  problemCount Int
+  createdById  String
+  updatedById  String
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  deletedAt    DateTime?
+  scores       HomeworkQuizScore[]
+
+  @@unique([classroomId, date])
+}
+
+/// Шалгалтын нэг сурагчийн оноо 0..problemCount, бутархай 2 хүртэл орон (7.5 — эзэн 2026-11-08 19:08;
+/// Decimal тул хөвөгч тооны алдаагүй). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
+model HomeworkQuizScore {
+  id          String       @id @default(cuid())
+  quizId      String
+  quiz        HomeworkQuiz @relation(fields: [quizId], references: [id], onDelete: Restrict)
+  studentId   String
+  score       Decimal      @db.Decimal(6, 2)
+  updatedById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@unique([quizId, studentId])
+  @@index([studentId])
+}
+
+/// Нөхөлт (эзэн 2026-11-08): өөрийн ангидаа хийж чадаагүй хичээлээ нөхсөн нэг удаа.
+/// - Өөр ангид суусан: hostClassroomId = зочилсон анги (ж: 12-4-ийн сурагч 12-6-д). Хийсэн
+///   тест = тэр ангийн тэр өдрийн хичээлийнх (ClassTestSession, эс бөгөөс төлөвлөгөө) —
+///   уншихдаа тооцно (makeup-visits/covered.logic.ts), энд хуулахгүй.
+/// - 406 өрөө: hostClassroomId = null. Хийсэн тестийг багш сонгоно → MakeupVisitTest.
+/// Давхардал: нэг сурагч, нэг өдөр, нэг газар (placeKey = hostClassroomId эсвэл "406")
+/// идэвхтэй ганц мөр. Устгах нь зөөлөн (deletedAt). Хэрэглэгч/ангийн FK-гүй (ClassCheck-ийн адил).
+model MakeupVisit {
+  id              String              @id @default(cuid())
+  studentId       String
+  date            DateTime            @db.Date
+  /// Зочилсон анги; null = 406 өрөө
+  hostClassroomId String?
+  /// hostClassroomId эсвэл "406" — давхардлын түлхүүр
+  placeKey        String
+  /// Нэмэх үеийн сурагчийн өөрийн анги (дараа анги сольсон ч түүх зөв үлдэнэ)
+  homeClassroomId String?
+  /// Багшийн тайлбар — заавал биш
+  comment         String?             @db.VarChar(500)
+  /// Зочилсон ангийн самбар дахь ирц, даалгавар (энгийн сурагчийнхтай ижил блок).
+  /// Attendance хүснэгтэд бичихгүй: сурагчийн ирцийн хувь хоёр дахин тоологдохгүй.
+  attStatus       AttendanceStatus?
+  lateRange       LateRange?
+  attNote         String?             @db.VarChar(200)
+  hwStatus        HomeworkMarkStatus?
+  hwNote          String?             @db.VarChar(200)
+  createdById     String
+  createdAt       DateTime            @default(now())
+  updatedById     String?
+  updatedAt       DateTime            @updatedAt
+  deletedAt       DateTime?
+  deletedById     String?
+  tests           MakeupVisitTest[]
+
+  @@unique([studentId, date, placeKey], where: { deletedAt: null })
+  @@index([placeKey, date])
+  @@index([homeClassroomId, date])
+  @@index([studentId, date])
+}
+
+/// 406 өрөөнд нөхөж хийсэн тест/сэдэв. testId = null бол бодлогын санд байхгүй, багшийн
+/// бичсэн сэдэв (title). Сэдвийг солиход хасагдсан мөр зөөлөн устна (түүх үлдэнэ).
+model MakeupVisitTest {
+  id          String      @id @default(cuid())
+  visitId     String
+  visit       MakeupVisit @relation(fields: [visitId], references: [id], onDelete: Restrict)
+  testId      String?
+  title       String      @db.VarChar(200)
+  createdById String
+  createdAt   DateTime    @default(now())
+  deletedAt   DateTime?
+  deletedById String?
+
+  @@index([visitId])
+  @@index([testId])
 }

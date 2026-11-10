@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/math/math.dart';
+import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../data/formula_models.dart';
 import '../data/formula_repository.dart';
@@ -195,20 +196,29 @@ class _MineTab extends ConsumerWidget {
             message: 'Тест өгсний дараа тухайн бодлогуудад хэрэгтэй томьёо энд гарна',
           );
         }
+        final now = UbDateTime.now();
         return ListView(
           padding: const EdgeInsets.all(AppSpace.gutter),
           children: [
             Text('${m.seen} / ${m.total} томьёотой тааралдсан', style: context.text.bodyMedium),
             const SizedBox(height: AppSpace.md),
-            for (final f in m.items) ...[
-              _FormulaRow(
-                title: f.title,
-                slug: f.slug,
-                latex: f.latex,
-                footer: [if (f.lastTestTitle != null) f.lastTestTitle!, '${f.seenCount} удаа тааралдсан'].join(', '),
-              ),
-              const SizedBox(height: AppSpace.sm),
-            ],
+            for (final g in SeenGroup.values)
+              if (m.items.where((f) => seenGroupOf(f.firstSeenAt, now) == g).toList() case final group
+                  when group.isNotEmpty) ...[
+                SectionHeader(title: g.title, padding: const EdgeInsets.only(top: AppSpace.md, bottom: AppSpace.sm)),
+                for (final f in group) ...[
+                  _FormulaRow(
+                    title: f.title,
+                    slug: f.slug,
+                    latex: f.latex,
+                    footer: [
+                      if (f.lastTestTitle != null) 'Сүүлд: ${f.lastTestTitle!}',
+                      '${f.seenCount} удаа тааралдсан',
+                    ].join(', '),
+                  ),
+                  const SizedBox(height: AppSpace.sm),
+                ],
+              ],
           ],
         );
       },

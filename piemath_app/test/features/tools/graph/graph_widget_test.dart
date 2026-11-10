@@ -83,6 +83,26 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('параметрийг хөдөлгөөнт болгох: утга өөрчлөгдөж, дахин дарахад зогсоно', (tester) async {
+    await pumpThemed(tester, const GraphScreen(initial: ['a*x']), size: const Size(360, 760));
+    await tester.pump();
+    final anim = find.byKey(const ValueKey('graph-anim-a'));
+    await tester.scrollUntilVisible(anim, 120, scrollable: find.byType(Scrollable).last);
+    double value() => tester.widget<Slider>(find.byType(Slider)).value;
+    expect(value(), 1);
+    await tester.tap(anim);
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    expect(value(), greaterThan(1.5));
+    expect(find.byTooltip('Хөдөлгөөнийг зогсоох'), findsOneWidget);
+    await tester.tap(anim);
+    await tester.pump();
+    final stopped = value();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(value(), stopped);
+  });
+
   testWidgets('тохиргоо нуугдмал, нээхэд тор/градус гарна; чирж томруулна', (tester) async {
     await pumpThemed(tester, const GraphScreen(), size: const Size(360, 760));
     await tester.pump();

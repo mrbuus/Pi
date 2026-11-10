@@ -156,6 +156,9 @@ export const ModelName = {
   LessonPhotoTurn: 'LessonPhotoTurn',
   LessonRotation: 'LessonRotation',
   StaffCapabilityGrant: 'StaffCapabilityGrant',
+  TeacherWorkHours: 'TeacherWorkHours',
+  TeacherBankAccount: 'TeacherBankAccount',
+  TeacherPayRate: 'TeacherPayRate',
   StudyReviewRun: 'StudyReviewRun',
   StudyReviewItem: 'StudyReviewItem',
   StudyReviewResponse: 'StudyReviewResponse',
@@ -190,7 +193,11 @@ export const ModelName = {
   AccountDeletionRequest: 'AccountDeletionRequest',
   UiEvent: 'UiEvent',
   HomeworkDeadline: 'HomeworkDeadline',
-  HomeworkComment: 'HomeworkComment'
+  HomeworkComment: 'HomeworkComment',
+  HomeworkQuiz: 'HomeworkQuiz',
+  HomeworkQuizScore: 'HomeworkQuizScore',
+  MakeupVisit: 'MakeupVisit',
+  MakeupVisitTest: 'MakeupVisitTest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -731,7 +738,9 @@ export const TestDraftScalarFieldEnum = {
   state: 'state',
   revision: 'revision',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type TestDraftScalarFieldEnum = (typeof TestDraftScalarFieldEnum)[keyof typeof TestDraftScalarFieldEnum]
@@ -874,7 +883,9 @@ export const AttemptScalarFieldEnum = {
   testId: 'testId',
   classroomId: 'classroomId',
   mistakeCollectedAt: 'mistakeCollectedAt',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type AttemptScalarFieldEnum = (typeof AttemptScalarFieldEnum)[keyof typeof AttemptScalarFieldEnum]
@@ -1323,7 +1334,9 @@ export const LearningEventScalarFieldEnum = {
   videoId: 'videoId',
   durationMs: 'durationMs',
   device: 'device',
-  meta: 'meta'
+  meta: 'meta',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type LearningEventScalarFieldEnum = (typeof LearningEventScalarFieldEnum)[keyof typeof LearningEventScalarFieldEnum]
@@ -1383,7 +1396,9 @@ export type StaffTaskScalarFieldEnum = (typeof StaffTaskScalarFieldEnum)[keyof t
 export const StaffTaskAssigneeScalarFieldEnum = {
   taskId: 'taskId',
   userId: 'userId',
-  assignedAt: 'assignedAt'
+  assignedAt: 'assignedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type StaffTaskAssigneeScalarFieldEnum = (typeof StaffTaskAssigneeScalarFieldEnum)[keyof typeof StaffTaskAssigneeScalarFieldEnum]
@@ -1418,7 +1433,9 @@ export const ScheduleExceptionScalarFieldEnum = {
   newEndMinute: 'newEndMinute',
   newRoom: 'newRoom',
   note: 'note',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type ScheduleExceptionScalarFieldEnum = (typeof ScheduleExceptionScalarFieldEnum)[keyof typeof ScheduleExceptionScalarFieldEnum]
@@ -1435,7 +1452,9 @@ export const LessonTopicScalarFieldEnum = {
   testIds: 'testIds',
   dismissMode: 'dismissMode',
   photoStudentId: 'photoStudentId',
-  customTopics: 'customTopics'
+  customTopics: 'customTopics',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type LessonTopicScalarFieldEnum = (typeof LessonTopicScalarFieldEnum)[keyof typeof LessonTopicScalarFieldEnum]
@@ -1469,7 +1488,9 @@ export const LessonStaffingScalarFieldEnum = {
   leadTeacherId: 'leadTeacherId',
   assistantTeacherId: 'assistantTeacherId',
   updatedById: 'updatedById',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type LessonStaffingScalarFieldEnum = (typeof LessonStaffingScalarFieldEnum)[keyof typeof LessonStaffingScalarFieldEnum]
@@ -1527,7 +1548,9 @@ export type AcademicCalendarDayScalarFieldEnum = (typeof AcademicCalendarDayScal
 
 export const AcademicCalendarDayClassroomScalarFieldEnum = {
   calendarDayId: 'calendarDayId',
-  classroomId: 'classroomId'
+  classroomId: 'classroomId',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type AcademicCalendarDayClassroomScalarFieldEnum = (typeof AcademicCalendarDayClassroomScalarFieldEnum)[keyof typeof AcademicCalendarDayClassroomScalarFieldEnum]
@@ -1784,6 +1807,45 @@ export const StaffCapabilityGrantScalarFieldEnum = {
 } as const
 
 export type StaffCapabilityGrantScalarFieldEnum = (typeof StaffCapabilityGrantScalarFieldEnum)[keyof typeof StaffCapabilityGrantScalarFieldEnum]
+
+
+export const TeacherWorkHoursScalarFieldEnum = {
+  id: 'id',
+  teacherId: 'teacherId',
+  date: 'date',
+  hundredths: 'hundredths',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeacherWorkHoursScalarFieldEnum = (typeof TeacherWorkHoursScalarFieldEnum)[keyof typeof TeacherWorkHoursScalarFieldEnum]
+
+
+export const TeacherBankAccountScalarFieldEnum = {
+  teacherId: 'teacherId',
+  bankName: 'bankName',
+  accountNumber: 'accountNumber',
+  holderName: 'holderName',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeacherBankAccountScalarFieldEnum = (typeof TeacherBankAccountScalarFieldEnum)[keyof typeof TeacherBankAccountScalarFieldEnum]
+
+
+export const TeacherPayRateScalarFieldEnum = {
+  id: 'id',
+  teacherId: 'teacherId',
+  effectiveFrom: 'effectiveFrom',
+  ratePerHour: 'ratePerHour',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type TeacherPayRateScalarFieldEnum = (typeof TeacherPayRateScalarFieldEnum)[keyof typeof TeacherPayRateScalarFieldEnum]
 
 
 export const StudyReviewRunScalarFieldEnum = {
@@ -2057,7 +2119,9 @@ export const ClassTestStatusScalarFieldEnum = {
   note: 'note',
   updatedById: 'updatedById',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
 } as const
 
 export type ClassTestStatusScalarFieldEnum = (typeof ClassTestStatusScalarFieldEnum)[keyof typeof ClassTestStatusScalarFieldEnum]
@@ -2360,6 +2424,73 @@ export const HomeworkCommentScalarFieldEnum = {
 } as const
 
 export type HomeworkCommentScalarFieldEnum = (typeof HomeworkCommentScalarFieldEnum)[keyof typeof HomeworkCommentScalarFieldEnum]
+
+
+export const HomeworkQuizScalarFieldEnum = {
+  id: 'id',
+  classroomId: 'classroomId',
+  date: 'date',
+  problemCount: 'problemCount',
+  createdById: 'createdById',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type HomeworkQuizScalarFieldEnum = (typeof HomeworkQuizScalarFieldEnum)[keyof typeof HomeworkQuizScalarFieldEnum]
+
+
+export const HomeworkQuizScoreScalarFieldEnum = {
+  id: 'id',
+  quizId: 'quizId',
+  studentId: 'studentId',
+  score: 'score',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type HomeworkQuizScoreScalarFieldEnum = (typeof HomeworkQuizScoreScalarFieldEnum)[keyof typeof HomeworkQuizScoreScalarFieldEnum]
+
+
+export const MakeupVisitScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  date: 'date',
+  hostClassroomId: 'hostClassroomId',
+  placeKey: 'placeKey',
+  homeClassroomId: 'homeClassroomId',
+  comment: 'comment',
+  attStatus: 'attStatus',
+  lateRange: 'lateRange',
+  attNote: 'attNote',
+  hwStatus: 'hwStatus',
+  hwNote: 'hwNote',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
+} as const
+
+export type MakeupVisitScalarFieldEnum = (typeof MakeupVisitScalarFieldEnum)[keyof typeof MakeupVisitScalarFieldEnum]
+
+
+export const MakeupVisitTestScalarFieldEnum = {
+  id: 'id',
+  visitId: 'visitId',
+  testId: 'testId',
+  title: 'title',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
+} as const
+
+export type MakeupVisitTestScalarFieldEnum = (typeof MakeupVisitTestScalarFieldEnum)[keyof typeof MakeupVisitTestScalarFieldEnum]
 
 
 export const SortOrder = {

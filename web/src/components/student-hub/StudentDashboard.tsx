@@ -37,6 +37,7 @@ import { DayRow } from "./LessonDays";
 import { HomeworkMark } from "./Marks";
 import { currentMonth, dayHref, dayShort, loadMonth, timeRange, todayKey, useApi, useMonthDays } from "./lib";
 import type { HubOverview } from "./types";
+import { regroupTopicText } from "@/lib/testNames";
 
 /* ============================================================================
  * Сурагчийн «Миний самбар» (SURAGCH-V2-GEREE, 2026-10-31) — нэг харцаар:
@@ -177,7 +178,7 @@ function TodayCard({ today }: { today: HubOverview["today"] }) {
           <span className="min-w-0 flex-1">
             <span className="block font-bold tabular-nums text-ink">{timeRange(today.startMinute, today.endMinute)}</span>
             <span className="cyrillic-tight block truncate text-sm text-ink-dim">
-              <Meta items={[today.topic, today.classroomName]} />
+              <Meta items={[today.topic && regroupTopicText(today.topic), today.classroomName]} />
             </span>
           </span>
           <ArrowRight className="size-4 shrink-0 text-ink-dim" aria-hidden />

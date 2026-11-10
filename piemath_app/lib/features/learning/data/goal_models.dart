@@ -94,3 +94,15 @@ List<Goal> sortGoals(Iterable<Goal> goals) {
   });
   return list;
 }
+
+/// Нийт явц (вэбийн `ProgressSummary`): цуцалснаас бусад зорилгоос биелсэн тоо, хувь, хугацаа хэтэрсэн.
+({int done, int total, int percent, int overdue}) goalProgress(Iterable<Goal> goals, UbDateTime today) {
+  final active = goals.where((g) => g.status != GoalStatus.cancelled).toList();
+  final done = active.where((g) => g.status == GoalStatus.done).length;
+  final total = active.length;
+  final start = today.startOfDay;
+  final overdue = active
+      .where((g) => g.status != GoalStatus.done && g.targetDate != null && g.targetDate!.compareTo(start) < 0)
+      .length;
+  return (done: done, total: total, percent: total == 0 ? 0 : (done * 100 / total).round(), overdue: overdue);
+}

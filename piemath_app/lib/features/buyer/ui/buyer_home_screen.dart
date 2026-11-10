@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
@@ -50,26 +51,38 @@ class BuyerHomeScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    ActionCard(
+                      icon: AppIcons.store,
+                      hue: AppHue.teal,
+                      title: 'Дэлгүүр',
+                      subtitle: 'Ном, сорил, багцын жагсаалт',
+                      onTap: () => context.push('/app/store'),
+                    ),
                     _Section<List<BuyerPass>>(
                       title: 'Идэвхтэй эрх',
+                      icon: AppIcons.key,
+                      hue: AppHue.success,
                       value: ref.watch(buyerPassesProvider),
                       onRetry: () => ref.invalidate(buyerPassesProvider),
                       emptyTitle: 'Эрх байхгүй',
-                      emptyMessage: 'Одоогоор идэвхтэй эрх алга. Эрхээ вэб хуудсаар нээнэ',
+                      emptyMessage: 'Одоогоор идэвхтэй эрх алга. Эрхийг сургалтын төв олгоно',
                       isEmpty: (l) => l.isEmpty,
                       builder: (l) => [for (final p in l) _PassRow(pass: p, now: at)],
                     ),
                     _Section<List<BuyerPurchase>>(
                       title: 'Худалдан авалтын төлөв',
+                      icon: AppIcons.card,
+                      hue: AppHue.violet,
                       value: ref.watch(buyerPurchasesProvider),
                       onRetry: () => ref.invalidate(buyerPurchasesProvider),
                       emptyTitle: 'Худалдан авалт байхгүй',
                       emptyMessage: 'Таны худалдан авалт хараахан бүртгэгдээгүй байна',
                       isEmpty: (l) => l.isEmpty,
-                      builder: (l) => [for (final p in l) _PurchaseRow(purchase: p, now: at)],
+                      builder: (l) => [for (final p in l) PurchaseRow(purchase: p, now: at)],
                     ),
                     _Section<List<PaymentRecord>>(
                       title: 'Төлбөрийн түүх',
+                      icon: AppIcons.payments,
                       value: ref.watch(myPaymentsProvider),
                       onRetry: () => ref.invalidate(myPaymentsProvider),
                       emptyTitle: 'Төлбөр бүртгэгдээгүй байна',
@@ -102,6 +115,8 @@ class BuyerHomeScreen extends ConsumerWidget {
 class _Section<T> extends StatelessWidget {
   const _Section({
     required this.title,
+    required this.icon,
+    this.hue = AppHue.brand,
     required this.value,
     required this.onRetry,
     required this.emptyTitle,
@@ -111,6 +126,8 @@ class _Section<T> extends StatelessWidget {
   });
 
   final String title;
+  final IconData icon;
+  final AppHue hue;
   final AsyncValue<T> value;
   final VoidCallback onRetry;
   final String emptyTitle;
@@ -120,51 +137,57 @@ class _Section<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SectionHeader(title: title),
-        value.when(
-          skipLoadingOnRefresh: false,
-          loading: () => const SkeletonPulse(child: SkeletonCard(lines: 3)),
-          error: (e, _) => AppCard(
-            child: Row(
+    final Widget body = value.when(
+      skipLoadingOnRefresh: false,
+      loading: () => const SkeletonPulse(child: SkeletonRows(rows: 2)),
+      error: (e, _) => Row(
+        children: [
+          Icon(AppIcons.error, size: 20, color: context.colors.error),
+          const SizedBox(width: AppSpace.sm),
+          Expanded(child: Text(_message(e), style: context.text.bodyMedium)),
+          TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(0, AppSizes.minTap)),
+            onPressed: onRetry,
+            child: const Text(AppStrings.retry),
+          ),
+        ],
+      ),
+      data: (d) {
+        if (isEmpty(d)) {
+          // Карт доторх товч хоосон төлөв (бүтэн дэлгэцийн том дүрсгүй).
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpace.sm),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(AppIcons.error, size: 20),
-                const SizedBox(width: AppSpace.sm),
-                Expanded(child: Text(_message(e), style: context.text.bodyMedium)),
-                TextButton(
-                  style: TextButton.styleFrom(minimumSize: const Size(0, AppSizes.minTap)),
-                  onPressed: onRetry,
-                  child: const Text(AppStrings.retry),
-                ),
+                Text(emptyTitle, style: context.text.titleSmall),
+                const SizedBox(height: 2),
+                Text(emptyMessage, style: context.text.bodySmall),
               ],
             ),
-          ),
-          data: (d) {
-            if (isEmpty(d)) {
-              return AppCard(
-                child: SizedBox(
-                  height: 200,
-                  child: EmptyState(icon: AppIcons.empty, title: emptyTitle, message: emptyMessage),
-                ),
-              );
-            }
-            final rows = builder(d);
-            return AppCard(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: AppSpace.xs),
-              child: Column(
-                children: [
-                  for (var i = 0; i < rows.length; i++) ...[
-                    if (i > 0) Divider(height: 1, color: context.colors.line),
-                    rows[i],
-                  ],
-                ],
-              ),
-            );
-          },
-        ),
-      ],
+          );
+        }
+        final rows = builder(d);
+        return Column(
+          children: [
+            for (var i = 0; i < rows.length; i++) ...[
+              if (i > 0) Divider(height: 1, color: context.colors.line),
+              rows[i],
+            ],
+          ],
+        );
+      },
+    );
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpace.md),
+      child: TitledCard(
+        title: title,
+        icon: icon,
+        hue: hue,
+        gap: AppSpace.sm,
+        padding: const EdgeInsets.fromLTRB(AppSpace.lg, AppSpace.lg, AppSpace.lg, AppSpace.sm),
+        child: body,
+      ),
     );
   }
 }
@@ -202,8 +225,9 @@ class _PassRow extends StatelessWidget {
   }
 }
 
-class _PurchaseRow extends StatelessWidget {
-  const _PurchaseRow({required this.purchase, required this.now});
+/// Нэг худалдан авалтын мөр (нүүр, дэлгүүрийн «Миний авсан»).
+class PurchaseRow extends StatelessWidget {
+  const PurchaseRow({super.key, required this.purchase, required this.now});
 
   final BuyerPurchase purchase;
   final DateTime now;

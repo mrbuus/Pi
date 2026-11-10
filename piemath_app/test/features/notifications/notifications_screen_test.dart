@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:piemath_app/core/ui/strings.dart';
+import 'package:piemath_app/features/notifications/data/notification_models.dart';
+import 'package:piemath_app/features/notifications/ui/notification_detail_screen.dart';
 import 'package:piemath_app/features/notifications/ui/notification_settings_screen.dart';
 import 'package:piemath_app/features/notifications/ui/notifications_screen.dart';
 
@@ -33,6 +35,32 @@ void main() {
     await settle(tester);
     expect(find.text('ROUTE:/app/homework'), findsOneWidget);
     expect(http.count('POST', '/notifications/n1/read'), 1);
+  });
+
+  testWidgets('апп-д тохирох хэсэггүй холбоос → дэлгэрэнгүй (хөтөч нээхгүй)', (tester) async {
+    final http = _http([notification('n1', link: 'https://example.com/promo')])
+      ..json('POST', '/notifications/n1/read', {'read': true});
+    await pumpM7(tester, const NotificationsScreen(), http: http);
+    expect(find.text('Холбогдох хэсэг рүү очих'), findsNothing);
+    await tester.tap(find.text('Дэлгэрэнгүй'));
+    await settle(tester);
+    expect(find.text('ROUTE:/app/notifications/n1'), findsOneWidget);
+  });
+
+  testWidgets('дэлгэрэнгүй дэлгэц: гарчиг, бичвэр, апп доторх холбоос', (tester) async {
+    final item = AppNotification.fromJson(notification('n1', link: '/app/homework'));
+    await pumpM7(tester, NotificationDetailScreen(id: 'n1', initial: item), http: _http(const []));
+    expect(find.text('Шинэ даалгавар n1'), findsOneWidget);
+    expect(find.text('Логарифмын 5 бодлого'), findsOneWidget);
+    await tester.tap(find.text('Холбогдох хэсэг рүү очих'));
+    await settle(tester);
+    expect(find.text('ROUTE:/app/homework'), findsOneWidget);
+  });
+
+  testWidgets('дэлгэрэнгүй: олдохгүй бол тайлбар', (tester) async {
+    await pumpM7(tester, const NotificationDetailScreen(id: 'zz'), http: _http(const []));
+    await settle(tester);
+    expect(find.text('Мэдэгдэл олдсонгүй'), findsOneWidget);
   });
 
   testWidgets('«Уншсан болгох»', (tester) async {

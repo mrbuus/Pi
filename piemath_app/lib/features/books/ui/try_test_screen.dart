@@ -196,7 +196,7 @@ class _TryTestScreenState extends ConsumerState<TryTestScreen> {
           ),
         ],
         const SizedBox(height: AppSpace.xl),
-        AccessNoteCard(webPath: '/books/${Uri.encodeComponent(widget.code)}'),
+        const AccessNoteCard(),
       ],
     );
   }

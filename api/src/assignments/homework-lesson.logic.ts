@@ -1,3 +1,4 @@
+import { groupTestNames, regroupTopicText } from '../common/test-names';
 /**
  * Гэрийн даалгаврыг ӨГСӨН ХИЧЭЭЛЭЭР (анги + огноо) нэрлэх — эзэн 2026-10-27.
  * Сурагч ном/бүлэг/тест сонгохгүй: даалгавар бүр «10-р сарын 26 — Логарифм
@@ -79,12 +80,13 @@ export function resolveLessonTopic(input: {
   testTitles?: string[];
   recordTopic?: string | null;
 }): string | null {
+  // Хуучин «А 1, А 2» гарчгийг ч товчилно (эзэн 2026-11-08, common/test-names)
   const record = clean(input.recordTopic);
-  if (record) return record;
+  if (record) return regroupTopicText(record);
   const plan = clean(input.planTitle);
-  if (plan) return plan;
+  if (plan) return regroupTopicText(plan);
   const tests = (input.testTitles ?? []).map((t) => clean(t)).filter(Boolean);
-  return tests.length ? tests.join(', ') : null;
+  return tests.length ? groupTestNames(tests as string[]) : null;
 }
 
 /** Шошго угсрах: сэдэвтэй бол «10-р сарын 26 — Сэдэв», үгүй бол «10-р сарын 26-ны даалгавар» */

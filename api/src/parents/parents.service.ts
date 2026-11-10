@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Role, StudentType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { loadStudentQuizzes } from '../homework-quiz/student-quizzes';
 import { canAccessChapter } from '../common/access';
 import {
   historyWindow,
@@ -156,6 +157,8 @@ export class ParentsService {
           },
         });
         if (!student) throw new NotFoundException('Сурагч олдсонгүй.');
+        // Шалгалтаар даалгавар шалгасан оноо (эзэн 2026-11-08 19:08) — зөвхөн баталгаажсан хүүхдийнх
+        const homeworkQuizzes = await loadStudentQuizzes(this.prisma, link.studentId, { take: 14 });
         return {
           id: link.id,
           verifiedAt: link.verifiedAt,
@@ -164,6 +167,7 @@ export class ParentsService {
             ...student,
             classroom: student.enrollments[0]?.classroom ?? null,
             joinedAt: student.enrollments[0]?.joinedAt ?? null,
+            homeworkQuizzes,
           },
         };
       }),
@@ -199,13 +203,14 @@ export class ParentsService {
     ] = await Promise.all([
       this.prisma.attempt.groupBy({
         by: ['occurredOn'],
-        where: { studentId, occurredOn: dates },
+        where: { studentId, occurredOn: dates, deletedAt: null },
         _count: { _all: true },
         orderBy: { occurredOn: 'asc' },
       }),
       this.prisma.learningEvent.count({
         where: {
           userId: studentId,
+          deletedAt: null,
           occurredAt: dates,
           OR: [
             { id: { startsWith: 'lab-first-' } },
@@ -215,7 +220,7 @@ export class ParentsService {
         },
       }),
       this.prisma.attempt.findMany({
-        where: { studentId, occurredOn: dates },
+        where: { studentId, occurredOn: dates, deletedAt: null },
         select: {
           id: true,
           problemId: true,
@@ -240,6 +245,7 @@ export class ParentsService {
       this.prisma.learningEvent.findMany({
         where: {
           userId: studentId,
+          deletedAt: null,
           occurredAt: dates,
           OR: [
             { id: { startsWith: 'lab-first-' } },

@@ -106,6 +106,8 @@ export interface HubTestDetail {
   title: string;
   variant: string | null;
   date: string;
+  /** А хувилбар (ангид хийдэг) — хариу хэзээ ч ирэхгүй (эзэн 2026-11-10) */
+  answersHidden: boolean;
   problems: HubProblem[];
 }
 

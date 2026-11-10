@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { loadStudentQuizzes } from '../homework-quiz/student-quizzes';
 
 const UB_OFFSET_MS = 8 * 60 * 60 * 1000;
 const QUERY_PAGE = 500;
@@ -48,7 +49,7 @@ export class WeeklyReportService {
     const classroomIds = [...new Set(enrollments.map((entry) => entry.classroomId))];
     const nextClassroomIds = [...new Set(nextEnrollments.map((entry) => entry.classroomId))];
     const attendanceWhere = { studentId, date: { gte: start, lt: end }, classroomId: { in: classroomIds } };
-    const attemptWhere = { studentId, createdAt: { gte: instantStart, lt: instantEnd }, problem: { deletedAt: null } };
+    const attemptWhere = { studentId, deletedAt: null, createdAt: { gte: instantStart, lt: instantEnd }, problem: { deletedAt: null } };
     const assignmentWhere = { classroomId: { in: classroomIds }, deletedAt: null, dueDate: { gte: instantStart, lt: instantEnd } };
 
     const [attendance, results, assignmentCount, marks, classTests, topicAttemptCount, practiceCount, resultCount, classTestCount] = await Promise.all([
@@ -113,7 +114,7 @@ export class WeeklyReportService {
 
     const schedules = nextClassroomIds.length ? await this.prisma.classSchedule.findMany({
       where: { classroomId: { in: nextClassroomIds }, deletedAt: null },
-      select: { id: true, classroomId: true, weekday: true, startMinute: true, endMinute: true, effectiveFrom: true, effectiveTo: true, room: true, exceptions: { where: { OR: [{ date: { gte: end, lt: nextEnd } }, { newDate: { gte: end, lt: nextEnd } }] }, select: { date: true, kind: true, newDate: true, newStartMinute: true, newEndMinute: true, newRoom: true } } },
+      select: { id: true, classroomId: true, weekday: true, startMinute: true, endMinute: true, effectiveFrom: true, effectiveTo: true, room: true, exceptions: { where: { deletedAt: null, OR: [{ date: { gte: end, lt: nextEnd } }, { newDate: { gte: end, lt: nextEnd } }] }, select: { date: true, kind: true, newDate: true, newStartMinute: true, newEndMinute: true, newRoom: true } } },
     }) : [];
     const scheduled = new Map<string, { date: string; startMinute: number; endMinute: number; room: string | null; classroom: string }>();
     const scheduleIsEffective = (schedule: (typeof schedules)[number], occurrenceDate: Date) => {
@@ -150,6 +151,8 @@ export class WeeklyReportService {
         }
       }
     }
+    // Шалгалтаар даалгавар шалгасан оноо (эзэн 2026-11-08 19:08) — энэ долоо хоногийн, тухайн ангиудын
+    const quizzes = (await loadStudentQuizzes(this.prisma, studentId, { from: start, to: new Date(end.getTime() - 86400000), classroomIds })).reverse();
     const scheduleItems = [...scheduled.values()].sort((a, b) => a.date.localeCompare(b.date) || a.startMinute - b.startMinute);
     const dailyMarks = {
       done: marks.filter((item) => item.status === 'DONE' && enrollments.some((enrollment) => enrollment.classroomId === item.classroomId && ubDateKey(enrollment.joinedAt) <= dateKey(item.date) && (!enrollment.leftAt || ubDateKey(enrollment.leftAt) >= dateKey(item.date)))).length,
@@ -166,7 +169,7 @@ export class WeeklyReportService {
       testResultLimit: resultCount > 500 || classTestCount > 500 || classTestResultCount > 500 ? 500 : null,
       snapshotAt: new Date().toISOString(),
       practiceCount,
-      homework: { assignments: { done: assignmentItems.filter((item) => item.done).length, notDone: assignmentItems.filter((item) => !item.done).length, items: assignmentItems }, dailyMarks },
+      homework: { assignments: { done: assignmentItems.filter((item) => item.done).length, notDone: assignmentItems.filter((item) => !item.done).length, items: assignmentItems }, dailyMarks, quizzes },
       topics: { best: rankedTopics[0] ?? null, weakest: rankedTopics.length ? rankedTopics[rankedTopics.length - 1] : null, complete: topicComplete, sampleLimit: topicComplete ? null : MAX_TOPIC_ATTEMPTS },
       nextWeekSchedule: scheduleItems,
     };

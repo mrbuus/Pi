@@ -160,6 +160,7 @@ export class LessonFlowService {
           const attempts = await this.prisma.attempt.findMany({
             where: {
               classroomId,
+              deletedAt: null,
               occurredOn: date,
               studentId: { in: [...pupils.keys()] },
               problemId: { in: problems.map((p) => p.problemId) },

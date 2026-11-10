@@ -331,6 +331,18 @@
   },
   {
     "gap": "G26",
+    "file": "tuition/withdrawal.controller",
+    "controller": "RefundEstimateController",
+    "method": "GET",
+    "path": "/api/tuition/refund-estimate/:studentId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "G26",
     "file": "tuition/tuition.controller",
     "controller": "TuitionController",
     "method": "GET",
@@ -1610,6 +1622,295 @@
     "path": "/api/student-hub/theory",
     "roles": [
       "STUDENT"
+    ]
+  },
+  {
+    "gap": "TEACHER-HOURS",
+    "file": "teacher-hours/work-sheet.controller",
+    "controller": "WorkSheetController",
+    "method": "GET",
+    "path": "/api/teacher-hours/sheet",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "TEACHER-HOURS",
+    "file": "teacher-hours/work-sheet.controller",
+    "controller": "WorkSheetController",
+    "method": "PUT",
+    "path": "/api/teacher-hours/sheet/cell",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "TEACHER-HOURS",
+    "file": "teacher-hours/work-sheet.controller",
+    "controller": "WorkSheetController",
+    "method": "GET",
+    "path": "/api/teacher-hours/accounts/:teacherId",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "TEACHER-HOURS",
+    "file": "teacher-hours/work-sheet.controller",
+    "controller": "WorkSheetController",
+    "method": "PUT",
+    "path": "/api/teacher-hours/accounts/:teacherId",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "TEACHER-HOURS",
+    "file": "teacher-hours/work-sheet.controller",
+    "controller": "WorkSheetController",
+    "method": "GET",
+    "path": "/api/teacher-hours/pay",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "TEACHER-HOURS",
+    "file": "teacher-hours/work-sheet.controller",
+    "controller": "WorkSheetController",
+    "method": "PUT",
+    "path": "/api/teacher-hours/pay/rate",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS"
+    ]
+  },
+  {
+    "gap": "HW-QUIZ",
+    "file": "homework-quiz/homework-quiz.controller",
+    "controller": "HomeworkQuizController",
+    "method": "GET",
+    "path": "/api/classrooms/:id/homework-quiz",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "HW-QUIZ",
+    "file": "homework-quiz/homework-quiz.controller",
+    "controller": "HomeworkQuizController",
+    "method": "PUT",
+    "path": "/api/classrooms/:id/homework-quiz",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "HW-QUIZ",
+    "file": "homework-quiz/homework-quiz.controller",
+    "controller": "HomeworkQuizController",
+    "method": "DELETE",
+    "path": "/api/classrooms/:id/homework-quiz",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "HW-QUIZ",
+    "file": "homework-quiz/homework-quiz.controller",
+    "controller": "HomeworkQuizController",
+    "method": "PUT",
+    "path": "/api/classrooms/:id/homework-quiz/scores/:studentId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "HW-QUIZ",
+    "file": "homework-quiz/homework-quiz.controller",
+    "controller": "HomeworkQuizController",
+    "method": "GET",
+    "path": "/api/classrooms/:id/homework-quiz/students/:studentId",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
+    "path": "/api/makeup-visits/students/search",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
+    "path": "/api/makeup-visits/classrooms",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
+    "path": "/api/makeup-visits/classrooms/:classroomId/students",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
+    "path": "/api/makeup-visits",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
+    "path": "/api/makeup-visits/roadmap",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
+    "path": "/api/makeup-visits/home",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "POST",
+    "path": "/api/makeup-visits",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "PUT",
+    "path": "/api/makeup-visits/tests",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "PATCH",
+    "path": "/api/makeup-visits/:id",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "DELETE",
+    "path": "/api/makeup-visits/:id",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "NOHOLT",
+    "file": "makeup-visits/makeup-visits.controller",
+    "controller": "MakeupVisitsController",
+    "method": "GET",
+    "path": "/api/students/:id/makeup-visits",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER",
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "SURAGCH-HUANLI",
+    "file": "student-calendar/student-calendar.controller",
+    "controller": "StudentCalendarController",
+    "method": "GET",
+    "path": "/api/students/:id/lesson-days",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "SURAGCH-HUANLI",
+    "file": "student-calendar/student-calendar.controller",
+    "controller": "StudentCalendarController",
+    "method": "GET",
+    "path": "/api/students/:id/syllabus",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
     ]
   }
 ]

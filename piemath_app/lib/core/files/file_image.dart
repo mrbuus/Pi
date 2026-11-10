@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import '../auth/session.dart';
 import '../network/api_error.dart';
 import '../network/network_providers.dart';
+import '../perf/perf_tier.dart';
 import 'file_cache.dart';
 import 'file_fetcher.dart';
 
@@ -121,7 +122,13 @@ final fileCacheDirectoryProvider = Provider<Future<Directory?> Function()>(
 );
 
 final fileBytesCacheProvider = Provider<FileBytesCache>((ref) {
-  final cache = FileBytesCache(directory: ref.watch(fileCacheDirectoryProvider));
+  // 2 GB утсанд санах ойг бага барина (decode хийсэн зураг imageCache-д тусдаа зай эзэлдэг).
+  final low = ref.watch(perfTierProvider).isLow;
+  final cache = FileBytesCache(
+    directory: ref.watch(fileCacheDirectoryProvider),
+    memoryBudget: (low ? 10 : 24) * 1024 * 1024,
+    diskBudget: (low ? 80 : 120) * 1024 * 1024,
+  );
   // Гарахад кэшийг бүрэн устгана (SECURITY §3).
   ref.listen<SessionState>(sessionProvider, (_, next) {
     if (next is SignedOut) unawaited(cache.clear());

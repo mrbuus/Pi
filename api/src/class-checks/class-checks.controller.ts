@@ -41,6 +41,19 @@ export class ClassChecksController {
     return this.checks.list(classroomId, req.user.userId);
   }
 
+  /**
+   * Нэр дарахад гарах товч мэдээлэл: код, анги, утаснууд, тэмдэглэл (төлбөргүй).
+   * Энэ ангид бүртгэлтэй байсан сурагчийнх л.
+   */
+  @Get('students/:studentId')
+  studentInfo(
+    @Req() req: AuthedRequest,
+    @Param('classroomId') classroomId: string,
+    @Param('studentId') studentId: string,
+  ) {
+    return this.checks.studentInfo(classroomId, studentId, req.user.userId);
+  }
+
   @Post()
   create(
     @Req() req: AuthedRequest,

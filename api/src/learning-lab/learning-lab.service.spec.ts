@@ -8,7 +8,17 @@ describe('owned immutable learning evidence', () => {
     rows = new Map();
     prisma = {
       learningEvent: {
-        findUnique: jest.fn(async ({ where }) => rows.get(where.id) ?? null),
+        // Хуурамч Prisma: where.deletedAt === null бол устсан (deletedAt) мөрийг хасна
+        findUnique: jest.fn(async ({ where }) => {
+          const r = rows.get(where.id) ?? null;
+          return r && where.deletedAt === null && r.deletedAt ? null : r;
+        }),
+        updateMany: jest.fn(async ({ where, data }) => {
+          const r = rows.get(where.id);
+          if (!r || !r.deletedAt || r.userId !== where.userId) return { count: 0 };
+          rows.set(where.id, { ...r, ...data });
+          return { count: 1 };
+        }),
         upsert: jest.fn(async ({ where, create }) => {
           if (!rows.has(where.id)) rows.set(where.id, create);
           return rows.get(where.id);
@@ -44,6 +54,21 @@ describe('owned immutable learning evidence', () => {
     await service.respond('bob', { problemId: p.id, answer: p.answers[0] });
     expect(rows.size).toBe(2);
     expect(prisma.learningEvent.upsert.mock.calls[0][0].update).toEqual({});
+  });
+  it('бүлгийн явц цэвэрлэсэн (deletedAt) эхний хариуг шинээр сэргээнэ — хатуу устгалгүй', async () => {
+    const p = generate('linear', 6);
+    const first = await service.respond('alice', { problemId: p.id, answer: '999' });
+    const id = [...rows.keys()][0];
+    rows.set(id, { ...rows.get(id), deletedAt: new Date(), deletedById: 'tp' });
+    // Устсан эхний хариу уншилтад харагдахгүй, шийдэл нээгдэхгүй
+    expect((await service.problem('alice', 'linear', 6)).first).toBeNull();
+    await expect(service.solution('alice', p.id)).rejects.toThrow();
+    const again = await service.respond('alice', { problemId: p.id, answer: p.answers[0] });
+    expect(again).not.toEqual(first);
+    expect(rows.get(id)).toMatchObject({ deletedAt: null, deletedById: null, meta: again });
+    expect(rows.size).toBe(1);
+    // Идэвхтэй мөрийг дахин дарж бичихгүй
+    expect(await service.respond('alice', { problemId: p.id, answer: '1' })).toEqual(again);
   });
   it('requires owned first answer for solution/retry', async () => {
     await expect(service.solution('b', 'lab-v1:linear:5')).rejects.toThrow();

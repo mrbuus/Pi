@@ -53,6 +53,7 @@ export async function assertMarkAccess(
   if (dateWhere) {
     const staffed = await prisma.lessonStaffing.count({
       where: {
+        deletedAt: null,
         ...dateWhere,
         schedule: { deletedAt: null, classroomId },
         OR: [{ leadTeacherId: userId }, { assistantTeacherId: userId }],

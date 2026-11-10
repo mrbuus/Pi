@@ -125,4 +125,12 @@ void main() {
       expect(formatClock(-5), '0:00');
     });
   });
+
+  test('missedPhotoDays: зөвхөн «Өмнөх хичээлүүд», 14 хоногийн дотор зураггүй өдөр', () {
+    final extra = HwDay.fromJson({...fixtureDays().last, 'date': '2026-10-31', 'mark': null});
+    final sections = homeworkSections([...days, extra], '2026-11-02');
+    final past = sections.firstWhere((s) => s.title == 'Өмнөх хичээлүүд');
+    expect(missedPhotoDays(past, '2026-11-02'), 1, reason: '10-31 зураггүй; 10-30 зурагтай; 10-10 хугацаа өнгөрсөн');
+    expect(missedPhotoDays(sections.first, '2026-11-02'), 0);
+  });
 }

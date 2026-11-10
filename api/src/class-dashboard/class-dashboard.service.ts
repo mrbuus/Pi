@@ -142,6 +142,7 @@ export class ClassDashboardService {
       }),
       this.prisma.lessonStaffing.findMany({
         where: {
+          deletedAt: null,
           date: { gte: daysAgo(STAFFING_DAYS) },
           schedule: { deletedAt: null },
           OR: [
@@ -526,7 +527,7 @@ export class ClassDashboardService {
       : null;
     if (!chapterId) {
       const topic = await this.prisma.lessonTopic.findFirst({
-        where: { schedule: { deletedAt: null, classroomId }, chapterId: { not: null } },
+        where: { deletedAt: null, schedule: { deletedAt: null, classroomId }, chapterId: { not: null } },
         orderBy: { date: 'desc' },
         select: { chapterId: true },
       });
@@ -618,6 +619,7 @@ export class ClassDashboardService {
           COUNT(*) FILTER (WHERE a."selfState" IS NOT NULL OR a."autoCorrect" IS NOT NULL) AS judged
         FROM "Attempt" a
         WHERE a."studentId" = ANY(${ids}::text[]) AND a."testId" IS NULL
+          AND a."deletedAt" IS NULL
           AND a."occurredOn" >= ${firstDate} AND a."occurredOn" <= ${lastDate}
         GROUP BY 1, 2
         UNION ALL
@@ -627,6 +629,7 @@ export class ClassDashboardService {
           COUNT(*) FILTER (WHERE e.meta->>'correct' IN ('true', 'false'))
         FROM "LearningEvent" e
         WHERE e."userId" = ANY(${ids}::text[]) AND e.type = 'ANSWER_SUBMITTED'
+          AND e."deletedAt" IS NULL
           AND e.id LIKE 'lab-first-%'
           AND e."occurredAt" >= ${w.fromUtc} AND e."occurredAt" < ${w.toUtc}
         GROUP BY 1, 2
@@ -742,6 +745,7 @@ export class ClassDashboardService {
         where: {
           studentId: { in: ids },
           testId: null,
+          deletedAt: null,
           occurredOn: { gte: historyFrom },
         },
         select: {
@@ -813,7 +817,7 @@ export class ClassDashboardService {
         },
       }),
       this.prisma.lessonStaffing.findMany({
-        where: { schedule: { deletedAt: null, classroomId }, date: { gte: daysAgo(STAFFING_DAYS) } },
+        where: { deletedAt: null, schedule: { deletedAt: null, classroomId }, date: { gte: daysAgo(STAFFING_DAYS) } },
         select: { leadTeacherId: true, assistantTeacherId: true },
       }),
       coverageP.then((c) =>
@@ -841,6 +845,7 @@ export class ClassDashboardService {
             JOIN "Chapter" ch ON ch.id = p."chapterId"
             JOIN "Topic" t ON t.id = ch."topicId" AND t."deletedAt" IS NULL
             WHERE a."studentId" = ANY(${ids}::text[])
+              AND a."deletedAt" IS NULL
               AND a."occurredOn" >= ${historyFrom}
             GROUP BY t.id, t.name, t."order"
             ORDER BY t."order", t.name`)
@@ -1253,7 +1258,7 @@ export class ClassDashboardService {
             date: true,
             type: true,
             title: true,
-            classrooms: { select: { classroomId: true } },
+            classrooms: { where: { deletedAt: null }, select: { classroomId: true } },
           },
         }),
         this.prisma.lessonRecord.findMany({
@@ -1279,7 +1284,7 @@ export class ClassDashboardService {
       ]);
     const exceptions = schedules.length
       ? await this.prisma.scheduleException.findMany({
-          where: { scheduleId: { in: schedules.map((s) => s.id) } },
+          where: { deletedAt: null, scheduleId: { in: schedules.map((s) => s.id) } },
         })
       : [];
     const testIds = access.map((a) => a.test.id);
@@ -1469,7 +1474,7 @@ export class ClassDashboardService {
         select: { date: true, status: true },
       }),
       this.prisma.attempt.findMany({
-        where: { studentId, testId: null, occurredOn: { gte: from } },
+        where: { studentId, testId: null, deletedAt: null, occurredOn: { gte: from } },
         select: { occurredOn: true, autoCorrect: true, selfState: true },
       }),
     ]);

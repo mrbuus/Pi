@@ -8,6 +8,7 @@ import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/marks/marks.dart';
+import '../../homework/ui/homework_providers.dart' show assignmentsProvider;
 import '../../learning/data/activity_repository.dart';
 import '../../my_class/data/hub_models.dart';
 import '../../my_class/data/my_class_repository.dart';
@@ -15,7 +16,10 @@ import '../../my_class/domain/hub_logic.dart';
 import '../../my_class/ui/common.dart';
 import '../../my_class/ui/day_row.dart';
 import '../../my_class/ui/day_screen.dart';
+import '../data/evening_marking.dart';
 import 'activity_week_card.dart';
+import 'evening_marking_card.dart';
+import 'online_homework_card.dart';
 
 /// Сурагчийн «Миний самбар» (`/app/student`) — вэбийн `StudentDashboard` (SURAGCH-V2-GEREE):
 /// мэндчилгээ → өнөөдрийн хичээл + түргэн үйлдэл → ирц, даалгаврын хувь → багшийн сүүлийн
@@ -48,11 +52,13 @@ class StudentHomeScreen extends ConsumerWidget {
           announcementsProvider,
           activityYearProvider(today.year),
           activityStreakProvider,
+          eveningTodoProvider,
+          assignmentsProvider,
         ]),
         child: ListView(
-          padding: const EdgeInsets.all(AppSpace.gutter),
+          padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.xs, AppSpace.gutter, AppSpace.xxl),
           children: [
-            const _Greeting(),
+            _Greeting(dateLine: dayTitle(today.dateKey)),
             const SizedBox(height: AppSpace.lg),
             if (overview.hasError && ov == null)
               ErrorState(message: errorMessageOf(overview.error!), onRetry: () => ref.invalidate(hubOverviewProvider))
@@ -69,6 +75,7 @@ class StudentHomeScreen extends ConsumerWidget {
                       child: RateTile(
                         title: 'Ирц',
                         icon: AppIcons.calendarCheck,
+                        hue: AppHue.brand,
                         rate: ov.attendance.rate,
                         total: ov.attendance.total,
                         items: [
@@ -82,6 +89,7 @@ class StudentHomeScreen extends ConsumerWidget {
                       child: RateTile(
                         title: 'Даалгавар',
                         icon: AppIcons.homework,
+                        hue: AppHue.violet,
                         rate: ov.homework.rate,
                         total: ov.homework.total,
                         items: [for (final s in homeworkOrder) (meta: homeworkMeta(s), value: ov.homework.count(s))],
@@ -93,38 +101,23 @@ class StudentHomeScreen extends ConsumerWidget {
               ),
               if (ov.latestMark != null) ...[const SizedBox(height: AppSpace.md), LatestMarkCard(mark: ov.latestMark!)],
               const SizedBox(height: AppSpace.md),
+              const _QuickLinks(),
+              const SizedBox(height: AppSpace.md),
               RecentDaysCard(today: today),
+              const EveningMarkingCard(),
             ] else if (!hasOnline && !classrooms.isLoading)
               const EmptyState(
                 icon: AppIcons.calendar,
                 title: 'Танхимын ангид элсээгүй байна',
                 message: 'Ангид элссэний дараа хичээл, ирц, даалгавар энд харагдана',
               ),
-            if (hasOnline) ...[
-              const SizedBox(height: AppSpace.md),
-              _LinkCard(
-                icon: AppIcons.homework,
-                title: 'Онлайн даалгавар',
-                subtitle: 'Багшийн өгсөн даалгаврыг харах, илгээх',
-                onTap: () => context.go('/app/homework'),
-              ),
-            ],
+            if (hasOnline) const OnlineHomeworkCard(),
+            if (!inClass) ...[const SizedBox(height: AppSpace.md), const _QuickLinks()],
             const SizedBox(height: AppSpace.md),
             ActivityWeekCard(today: today),
             const SizedBox(height: AppSpace.md),
-            const _QuickLinks(),
-            const SizedBox(height: AppSpace.md),
             PaidUntilCard(today: today),
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: TextButton.icon(
-                icon: const Icon(AppIcons.forward, size: 16),
-                label: const Text('Төлбөрийн дэлгэрэнгүй'),
-                onPressed: () => context.push('/app/student/payments'),
-              ),
-            ),
             const AnnouncementsCard(),
-            const SizedBox(height: AppSpace.xl),
           ],
         ),
       ),
@@ -157,65 +150,35 @@ class _DashboardSkeleton extends StatelessWidget {
   }
 }
 
-/// Мэндчилгээ: профайл зураг (эсвэл эхний үсэг), нэр.
+/// Мэндчилгээ: огноо, профайл зураг (эсвэл эхний үсэг), нэр.
 class _Greeting extends ConsumerWidget {
-  const _Greeting();
+  const _Greeting({required this.dateLine});
+
+  final String dateLine;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(sessionProvider);
     final user = session is SignedIn ? session.user : null;
-    final c = context.colors;
     final first = user?.firstName.trim() ?? '';
     final initials = [
       first,
       user?.lastName?.trim() ?? '',
     ].where((s) => s.isNotEmpty).map((s) => s.substring(0, 1).toUpperCase()).join();
     final avatar = user?.avatarUrl;
-    return Row(
-      children: [
-        Container(
-          width: 52,
-          height: 52,
-          alignment: Alignment.center,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: c.line, width: 2),
-          ),
-          child: avatar != null
-              ? Image(
-                  image: ResizeImage(ref.watch(fileImageProvider).image(avatar), width: 156),
-                  width: 52,
-                  height: 52,
-                  fit: BoxFit.cover,
-                  semanticLabel: 'Профайл зураг',
-                  errorBuilder: (_, _, _) =>
-                      Text(initials, style: context.text.titleMedium?.copyWith(color: c.brandSoft)),
-                )
-              : Text(initials, style: context.text.titleMedium?.copyWith(color: c.brandSoft)),
-        ),
-        const SizedBox(width: AppSpace.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Сайн байна уу', style: context.text.bodySmall),
-              Text(
-                first.isEmpty ? AppStrings.appName : first,
-                style: context.text.headlineSmall,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ],
+    return GreetingHeader(
+      dateLine: dateLine,
+      name: first.isEmpty ? AppStrings.appName : first,
+      leading: InitialsAvatar(
+        initials: initials,
+        size: 52,
+        image: avatar == null ? null : ResizeImage(ref.watch(fileImageProvider).image(avatar), width: 156),
+      ),
     );
   }
 }
 
-/// Өнөөдрийн хичээл + түргэн үйлдэл (онол илгээх, даалгавар).
+/// Өнөөдрийн хичээл + түргэн үйлдэл (онол илгээх, даалгавар) — нүүрний гол карт.
 class TodayCard extends StatelessWidget {
   const TodayCard({super.key, required this.today, required this.todayKey});
 
@@ -225,13 +188,13 @@ class TodayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = today;
-    return SectionCard(
-      icon: AppIcons.calendar,
-      title: 'Өнөөдөр',
-      trailing: Text(dayTitle(todayKey), style: context.text.bodySmall),
+    final c = context.colors;
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const CardHeader(icon: AppIcons.calendar, title: 'Өнөөдөр'),
+          const SizedBox(height: AppSpace.md),
           if (t == null)
             const DashedNote('Өнөөдөр хичээлгүй')
           else
@@ -242,28 +205,33 @@ class TodayCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: AppSpace.xs),
                 child: Row(
                   children: [
-                    RoomBadge(room: t.room, size: 44),
+                    RoomBadge(room: t.room, size: 48),
                     const SizedBox(width: AppSpace.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(timeRange(t.startMinute, t.endMinute) ?? '', style: context.text.titleMedium),
+                          Text(
+                            timeRange(t.startMinute, t.endMinute) ?? '',
+                            style: context.text.displaySmall?.copyWith(fontSize: 22),
+                          ),
+                          const SizedBox(height: 2),
                           Meta(items: [t.topic, t.classroomName]),
                         ],
                       ),
                     ),
-                    Icon(AppIcons.forward, size: 18, color: context.colors.inkDim),
+                    Icon(AppIcons.forward, size: 18, color: c.inkDim),
                   ],
                 ),
               ),
             ),
-          const SizedBox(height: AppSpace.md),
+          const SizedBox(height: AppSpace.lg),
           Row(
             children: [
               Expanded(
                 child: FilledButton.icon(
-                  icon: const Icon(AppIcons.theoryPhoto, size: 18),
+                  style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+                  icon: const Icon(AppIcons.theoryPhoto, size: 20),
                   label: Text(t != null ? 'Онол илгээх' : 'Онолын зураг', overflow: TextOverflow.ellipsis),
                   onPressed: () => context.go(t != null ? '/app/theory?date=$todayKey' : '/app/theory'),
                 ),
@@ -271,7 +239,8 @@ class TodayCard extends StatelessWidget {
               const SizedBox(width: AppSpace.sm),
               Expanded(
                 child: OutlinedButton.icon(
-                  icon: const Icon(AppIcons.homework, size: 18),
+                  style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+                  icon: Icon(AppIcons.homework, size: 20, color: c.violet),
                   label: const Text('Даалгавар', overflow: TextOverflow.ellipsis),
                   onPressed: () => context.go('/app/homework'),
                 ),
@@ -294,10 +263,12 @@ class RateTile extends StatelessWidget {
     required this.total,
     required this.items,
     required this.onTap,
+    this.hue = AppHue.brand,
   });
 
   final String title;
   final IconData icon;
+  final AppHue hue;
   final int rate;
   final int total;
   final List<({MarkMeta meta, int value})> items;
@@ -325,22 +296,21 @@ class RateTile extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, size: 16, color: c.inkDim),
-                const SizedBox(width: 6),
-                Text(
-                  title,
-                  style: context.text.labelMedium?.copyWith(color: c.inkDim, fontWeight: FontWeight.w700),
+                IconTile(icon, hue: hue, size: 28),
+                const SizedBox(width: AppSpace.sm),
+                Expanded(
+                  child: Text(title, style: context.text.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
                 ),
               ],
             ),
-            const SizedBox(height: AppSpace.sm),
+            const SizedBox(height: AppSpace.md),
             if (total == 0)
               Text('Тэмдэглэгээ алга', style: context.text.bodyMedium?.copyWith(color: c.inkDim))
             else ...[
               Text.rich(
                 TextSpan(
                   children: [
-                    TextSpan(text: '$rate', style: context.text.displaySmall),
+                    TextSpan(text: '$rate', style: context.text.displaySmall?.copyWith(fontSize: 30)),
                     TextSpan(
                       text: '%',
                       style: context.text.titleMedium?.copyWith(color: c.inkDim),
@@ -354,8 +324,8 @@ class RateTile extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: (rate.clamp(0, 100)) / 100,
                   minHeight: 6,
-                  color: c.brandBright,
-                  backgroundColor: c.line,
+                  color: hue.fg(c),
+                  backgroundColor: hue.tint(c),
                 ),
               ),
               const SizedBox(height: AppSpace.sm),
@@ -392,10 +362,11 @@ class LatestMarkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SectionCard(
+    return TitledCard(
       icon: AppIcons.messageSquareText,
+      hue: AppHue.teal,
       title: 'Багшийн тэмдэглэгээ',
-      trailing: Text(dayShort(mark.date), style: context.text.bodySmall),
+      trailing: Text(dayShort(mark.date)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -424,10 +395,11 @@ class RecentDaysCard extends ConsumerWidget {
     final prevKey = curData != null && curData.days.length < 5 ? curData.prevMonth : null;
     final prev = prevKey == null ? null : ref.watch(hubDaysProvider(prevKey));
     final loading = curData == null && !cur.hasError || (prev != null && prev.value == null && !prev.hasError);
-    return SectionCard(
+    return TitledCard(
       icon: AppIcons.checklist,
       title: 'Сүүлийн хичээлүүд',
-      padding: const EdgeInsets.fromLTRB(AppSpace.lg, AppSpace.lg, AppSpace.lg, AppSpace.sm),
+      gap: AppSpace.xs,
+      padding: const EdgeInsets.fromLTRB(AppSpace.lg, AppSpace.sm, AppSpace.sm, AppSpace.xs),
       trailing: TextButton(onPressed: () => context.go('/app/my-class'), child: const Text('Бүгд')),
       child: Builder(
         builder: (context) {
@@ -463,55 +435,29 @@ class _QuickLinks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _LinkCard(
-            icon: AppIcons.scan,
-            title: 'QR уншуулах',
-            subtitle: 'Номын бодлого',
-            onTap: () => context.push('/app/scan'),
-          ),
-        ),
-        const SizedBox(width: AppSpace.md),
-        Expanded(
-          child: _LinkCard(
-            icon: AppIcons.exam,
-            title: 'Шалгалт',
-            subtitle: 'Тест өгөх, дүн',
-            onTap: () => context.push('/app/tests'),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _LinkCard extends StatelessWidget {
-  const _LinkCard({required this.icon, required this.title, required this.subtitle, required this.onTap});
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      onTap: onTap,
-      semanticLabel: title,
-      padding: const EdgeInsets.all(AppSpace.md),
+    return IntrinsicHeight(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(icon, color: context.colors.brandSoft),
+          Expanded(
+            child: ActionCard(
+              icon: AppIcons.scan,
+              hue: AppHue.teal,
+              title: 'QR уншуулах',
+              subtitle: 'Номын бодлого',
+              chevron: false,
+              onTap: () => context.push('/app/scan'),
+            ),
+          ),
           const SizedBox(width: AppSpace.md),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: context.text.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
-                Text(subtitle, style: context.text.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
-              ],
+            child: ActionCard(
+              icon: AppIcons.exam,
+              hue: AppHue.violet,
+              title: 'Шалгалт',
+              subtitle: 'Тест өгөх, дүн',
+              chevron: false,
+              onTap: () => context.push('/app/tests'),
             ),
           ),
         ],
@@ -531,6 +477,8 @@ class PaidUntilCard extends ConsumerWidget {
     final value = ref.watch(paidUntilProvider);
     final c = context.colors;
     return AppCard(
+      onTap: () => context.push('/app/student/payments'),
+      padding: const EdgeInsets.fromLTRB(AppSpace.lg, AppSpace.lg, AppSpace.lg, AppSpace.sm),
       child: AsyncBody(
         value: value,
         compactError: true,
@@ -539,28 +487,28 @@ class PaidUntilCard extends ConsumerWidget {
         builder: (paidUntil) {
           final left = paidUntilDaysLeft(paidUntil, today);
           final state = paidUntilState(left);
-          final (IconData icon, Color tone, String title, String hint) = switch (state) {
+          final (IconData icon, AppHue tone, String title, String hint) = switch (state) {
             PaidUntilState.unknown => (
               AppIcons.upcoming,
-              c.inkDim,
+              AppHue.neutral,
               'Төлбөрийн хугацаа тооцогдоогүй байна',
               'Анги, төлбөрийн мэдээлэл бүртгэгдмэгц энд харагдана',
             ),
             PaidUntilState.expired => (
               AppIcons.calendarExpired,
-              c.error,
+              AppHue.error,
               '${left!.abs()} хоногийн өмнө дууссан',
               'Хичээлээ тасалдуулахгүйн тулд төлбөрөө төлөөрэй',
             ),
             PaidUntilState.endingSoon => (
               AppIcons.upcoming,
-              c.info,
+              AppHue.info,
               left == 0 ? 'Өнөөдөр дуусна' : '$left хоногийн дараа дуусна',
               'Удахгүй дуусах гэж байна — дараагийн сарын төлбөрөө бэлдээрэй',
             ),
             PaidUntilState.ok => (
               AppIcons.calendarCheck,
-              c.success,
+              AppHue.success,
               '$left хоног үлдсэн',
               'Бүх зүйл хэвийн. Хичээлдээ анхаараарай',
             ),
@@ -569,8 +517,9 @@ class PaidUntilCard extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(icon, size: 32, color: tone),
+                  IconTile(icon, hue: tone, size: 44),
                   const SizedBox(width: AppSpace.md),
                   Expanded(
                     child: Column(
@@ -581,14 +530,31 @@ class PaidUntilCard extends ConsumerWidget {
                           paidUntil == null ? '–' : paidUntilLabel(paidUntil),
                           style: context.text.displaySmall?.copyWith(fontSize: 22),
                         ),
-                        Text(title, style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                        const SizedBox(height: AppSpace.xs),
+                        Text(title, style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: tone.fg(c))),
+                        const SizedBox(height: 2),
+                        Text(hint, style: context.text.bodySmall),
                       ],
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: AppSpace.sm),
-              Text(hint, style: context.text.bodySmall),
+              Divider(height: 1, color: c.line),
+              ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: AppSizes.minTap),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Төлбөрийн дэлгэрэнгүй',
+                        style: context.text.labelLarge?.copyWith(color: c.brand),
+                      ),
+                    ),
+                    Icon(AppIcons.forward, size: 18, color: c.brand),
+                  ],
+                ),
+              ),
             ],
           );
         },
@@ -616,8 +582,9 @@ class _AnnouncementsCardState extends ConsumerState<AnnouncementsCard> {
     final visible = _expanded ? list : list.take(_maxVisible).toList();
     return Padding(
       padding: const EdgeInsets.only(top: AppSpace.md),
-      child: SectionCard(
+      child: TitledCard(
         icon: AppIcons.megaphone,
+        hue: AppHue.info,
         title: 'Төвийн мэдэгдэл',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -646,7 +613,7 @@ class _AnnouncementTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpace.md),
       decoration: BoxDecoration(
-        border: Border.all(color: context.colors.line),
+        color: context.colors.surfaceSunken,
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Column(

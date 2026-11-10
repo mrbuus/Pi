@@ -69,7 +69,7 @@ class _AppNavBarState extends State<AppNavBar> with SingleTickerProviderStateMix
         color: c.surface,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: c.line)),
+            border: Border(top: BorderSide(color: c.line, width: 1.5)),
           ),
           child: SafeArea(
             top: false,
@@ -171,7 +171,7 @@ class _NavButton extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: context.text.labelSmall?.copyWith(
                   color: color,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
             ],

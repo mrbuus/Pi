@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:piemath_app/core/files/files.dart';
+import 'package:piemath_app/core/time/ub_time.dart';
 import 'package:piemath_app/core/ui/ui.dart';
 import 'package:piemath_app/features/homework/data/photo_processor.dart';
 
@@ -54,14 +55,66 @@ void main() {
   setUpAll(loadAppFonts);
 
   group('Онолын зургийн жагсаалт', () {
-    testWidgets('өдрүүд, сэдэв/тест, зургийн тоо, «Зураггүй»', (tester) async {
-      final http = FakeHttp()..json('GET', '/student-hub/theory', theoryList());
+    testWidgets('өдрүүд, сэдэв/тест, зургийн тоо, «Илгээх», сарын гарчиг', (tester) async {
+      final list = [
+        ...theoryList(),
+        {...theoryList().last, 'date': '2026-09-15', 'canUpload': false, 'tests': ['Вектор']},
+      ];
+      final http = FakeHttp()..json('GET', '/student-hub/theory', list);
       await pumpStudentRoute(tester, http: http, location: '/app/theory');
       await settle(tester);
       expect(find.text('Илтгэгч функц'), findsOneWidget);
       expect(find.text('Логарифм 1'), findsOneWidget, reason: 'сэдэвгүй бол тестийн нэр');
       expect(find.text('2'), findsOneWidget);
-      expect(find.text('Зураггүй'), findsOneWidget);
+      expect(find.text('Илгээх'), findsOneWidget, reason: 'зураггүй ч илгээх боломжтой өдөр');
+      expect(find.text('Зураггүй'), findsOneWidget, reason: 'илгээх хугацаа өнгөрсөн');
+      final year = UbDateTime.now().year;
+      expect(find.text(year == 2026 ? '10-р сар' : '2026 оны 10-р сар'), findsOneWidget);
+      expect(find.text(year == 2026 ? '9-р сар' : '2026 оны 9-р сар'), findsOneWidget);
+    });
+
+    testWidgets('«Өнөөдрийн онол»: дээд хэсэгт шууд илгээх товчтой', (tester) async {
+      final today = UbDateTime.now().dateKey;
+      final list = [
+        {...theoryList().first, 'date': today, 'topic': 'Өнөөдрийн сэдэв'},
+        ...theoryList(),
+      ];
+      final http = FakeHttp()
+        ..json('GET', '/student-hub/theory', list)
+        ..json('GET', '/lesson-day/c1/$today/photos', {...theoryDayJson(), 'date': today});
+      await pumpStudentRoute(tester, http: http, location: '/app/theory');
+      await settle(tester);
+      expect(find.text('Өнөөдрийн онол'), findsOneWidget);
+      expect(find.text('Онолын зураг илгээх'), findsOneWidget);
+      expect(find.text('Өнөөдрийн сэдэв'), findsNWidgets(2), reason: 'дээд карт ба жагсаалтын мөр');
+    });
+
+    testWidgets('огнооны чип: «Өчигдөр» from/to-тэй хүсэлт, хоосон бол «Бүх өдөр»', (tester) async {
+      final http = FakeHttp()
+        ..on('GET', '/student-hub/theory', (_) => FakeResponse(theoryList()))
+        ..on('GET', '/student-hub/theory', (_) => const FakeResponse(<Object?>[]))
+        ..on('GET', '/student-hub/theory', (_) => FakeResponse(theoryList()));
+      await pumpStudentRoute(tester, http: http, location: '/app/theory');
+      await settle(tester);
+      await tester.tap(find.text('Өчигдөр'));
+      await settle(tester);
+      final y = UbDateTime.now().add(const Duration(days: -1)).dateKey;
+      expect(http.requests.last.queryParameters, {'from': y, 'to': y});
+      expect(find.text('Энэ өдөр хичээл ороогүй байна'), findsOneWidget);
+      await tester.tap(find.text('Бүх өдөр'));
+      await settle(tester);
+      expect(find.text('Илтгэгч функц'), findsOneWidget);
+    });
+
+    testWidgets('?date= (самбараас): тэр өдрөөр шүүж, ганц анги бол өдрийг шууд нээнэ', (tester) async {
+      final http = FakeHttp()
+        ..json('GET', '/student-hub/theory', [theoryList().first])
+        ..json('GET', '/lesson-day/c1/2026-10-30/photos', theoryDayJson());
+      final router = await pumpStudentRoute(tester, http: http, location: '/app/theory?date=2026-10-30');
+      await settle(tester);
+      expect(http.requests.first.queryParameters, {'from': '2026-10-30', 'to': '2026-10-30'});
+      expect(router.state.uri.path, '/app/theory/c1/2026-10-30');
+      expect(find.text('Онолын зураг илгээх'), findsOneWidget);
     });
 
     testWidgets('өдөр дарахад өдрийн дэлгэц', (tester) async {

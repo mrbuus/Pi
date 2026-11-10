@@ -92,7 +92,7 @@ void main() {
     await pumpStudentRoute(tester, http: scheduleHttp(), location: '/app/schedule', role: UserRole.teacher);
     await settle(tester);
     expect(find.text('Вэбээр нээх'), findsNothing);
-    expect(find.text('Өдрийн хуваарь'), findsOneWidget);
+    expect(find.byKey(const ValueKey('staff-schedule-view')), findsOneWidget);
   });
 
   testWidgets('хурууны хүрэх талбай ≥ 44dp (7 хоногийн сум)', (tester) async {

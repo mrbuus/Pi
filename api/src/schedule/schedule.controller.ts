@@ -451,7 +451,7 @@ export class ScheduleController {
     const existing = await this.schedule.findCalendarDay(id);
     await this.manageCalendar(req.user, existing.classroomIds);
     if (dto.classroomIds) await this.manageCalendar(req.user, dto.classroomIds);
-    return this.schedule.updateCalendarDay(id, dto);
+    return this.schedule.updateCalendarDay(id, dto, req.user.userId);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)

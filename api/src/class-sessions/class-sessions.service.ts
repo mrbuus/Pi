@@ -17,6 +17,7 @@ import { isClassTeacher } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '../generated/prisma/client';
 import { ROADMAP_BOOK_CODES, buildRoadmap } from './roadmap.logic';
+import { tentativePlans } from '../schedule/lesson-coherence.logic';
 
 /**
  * Анги тухайн өдөр ямар тест хийснийг багш бүртгэдэг, сурагч түүнийгээ оройн
@@ -40,6 +41,17 @@ export class ClassSessionsService {
     if (role === Role.ADMIN || role === Role.TEACHER_PLUS) return;
     if (role === Role.TEACHER && isClassTeacher(classroom, userId)) return;
     throw new ForbiddenException('Энэ ангид хандах эрхгүй');
+  }
+
+  /** Замын зураг унших: анги байгаа, архивлаагүй, хэрэглэгч ажилтан (controller-ийн @Roles). */
+  private async assertClassReadable(classroomId: string, role: Role) {
+    const classroom = await this.prisma.classroom.findUnique({
+      where: { id: classroomId },
+      select: { archived: true },
+    });
+    if (!classroom || classroom.archived) throw new NotFoundException('Анги олдсонгүй');
+    if (role !== Role.ADMIN && role !== Role.TEACHER_PLUS && role !== Role.TEACHER)
+      throw new ForbiddenException('Энэ ангид хандах эрхгүй');
   }
 
   // Багш: "энэ анги өнөөдөр энэ тестийг хийсэн"
@@ -249,7 +261,7 @@ export class ClassSessionsService {
     // Миний өмнө тэмдэглэсэн selfState-ууд
     const problemIds = tests.flatMap((t) => t.problems.map((p) => p.problemId));
     const myAttempts = await this.prisma.attempt.findMany({
-      where: { studentId, problemId: { in: problemIds } },
+      where: { studentId, deletedAt: null, problemId: { in: problemIds } },
       select: { problemId: true, selfState: true, occurredOn: true },
     });
     const stateKey = (pid: string, d: Date) =>
@@ -318,7 +330,18 @@ export class ClassSessionsService {
    * ӨМНӨХ хичээлүүдэд төлөвлөсөн (хараахан батлаагүй) тестийн дараахаас санал болгоно.
    */
   async roadmap(classroomId: string, userId: string, role: Role, dateStr?: string) {
-    await this.assertClassAccess(classroomId, userId, role);
+    // Унших эрх — ЯМАР Ч ажилтан (батлах нь ямар ч багшид нээлттэй, эзэн 2026-11-03): ангийн
+    // багш биш ч тэр өдөр хичээл орсон багш «Батлах» цонхонд тест сонгоно. Өмнө нь ангийн
+    // багш биш Багшид 403 «Энэ ангид хандах эрхгүй» гарч батлах цонх эвдэрдэг байв.
+    await this.assertClassReadable(classroomId, role);
+    return this.roadmapData(classroomId, dateStr);
+  }
+
+  /**
+   * Эрх шалгахгүй замын зураг — дуудагч өөрөө шалгана (нөхөлтийн 406 өрөөнд ЯМАР Ч
+   * багш сурагчийн ангийн хийсэн тестийг харж сонгоно, makeup-visits).
+   */
+  async roadmapData(classroomId: string, dateStr?: string) {
     let before: Date | null = null;
     if (dateStr) {
       try {
@@ -356,25 +379,58 @@ export class ClassSessionsService {
         select: { testId: true, date: true, excludedProblemIds: true },
       }),
       this.prisma.classTestStatus.findMany({
-        where: { classroomId, status: 'REMOVED' },
+        where: { classroomId, status: 'REMOVED', deletedAt: null },
         select: { testId: true },
       }),
       before
         ? this.prisma.lessonTopic.findMany({
             where: {
+              deletedAt: null,
               schedule: { deletedAt: null, classroomId },
-              date: { lt: before, gte: addDateDays(before, -60) },
+              // Анхны огноо: зөөгдсөн хичээл 60 хоногоос илүү хол зөөгдөхгүй гэж үзнэ
+              date: { lt: addDateDays(before, 60), gte: addDateDays(before, -60) },
               NOT: { testIds: { isEmpty: true } },
             },
-            select: { testIds: true, date: true },
+            select: { scheduleId: true, testIds: true, date: true },
           })
-        : Promise.resolve([] as { testIds: string[]; date: Date }[]),
+        : Promise.resolve([] as { scheduleId: string; testIds: string[]; date: Date }[]),
       // «Өмнө үзсэн» (огноогүй) — эзэн 2026-10-27
       this.prisma.classCoveredTest.findMany({
         where: { classroomId, removedAt: null, testId: { in: testIds } },
         select: { testId: true },
       }),
     ]);
+    // Төлөвлөгөө → БОДИТ огноо (зөөгдсөн), цуцлагдсан/батлагдсан хичээлийнхийг хасна
+    // (эзэн 2026-11-08: буруу баталсныг засаад ч «дараагийн тест» тэр тестийг алгассаар байв)
+    const beforeKey = before ? dateKey(before) : null;
+    let activePlans: { testIds: string[]; date: string }[] = [];
+    if (beforeKey && plans.length) {
+      const scheduleIds = [...new Set(plans.map((p) => p.scheduleId))];
+      const [exceptions, records] = await Promise.all([
+        this.prisma.scheduleException.findMany({
+          where: { scheduleId: { in: scheduleIds }, date: { in: plans.map((p) => p.date) }, deletedAt: null },
+          select: { scheduleId: true, date: true, kind: true, newDate: true },
+        }),
+        this.prisma.lessonRecord.findMany({
+          where: {
+            scheduleId: { in: scheduleIds },
+            cancelledAt: null,
+            date: { lt: addDateDays(before!, 60), gte: addDateDays(before!, -60) },
+          },
+          select: { scheduleId: true, date: true },
+        }),
+      ]);
+      activePlans = tentativePlans(
+        plans.map((p) => ({ scheduleId: p.scheduleId, date: dateKey(p.date), testIds: p.testIds })),
+        exceptions.map((e) => ({
+          scheduleId: e.scheduleId,
+          date: dateKey(e.date),
+          kind: e.kind,
+          newDate: e.newDate ? dateKey(e.newDate) : null,
+        })),
+        new Set(records.map((r) => `${r.scheduleId}|${dateKey(r.date)}`)),
+      ).filter((p) => p.date < beforeKey);
+    }
     return buildRoadmap({
       books,
       chapters: chapters.map((c) => ({ ...c, bookId: c.bookId ?? '' })),
@@ -392,7 +448,8 @@ export class ClassSessionsService {
       ),
       removedTestIds: statuses.map((s) => s.testId),
       pastTestIds: past.map((p) => p.testId),
-      plans: plans.map((p) => ({ testIds: p.testIds, date: dateKey(p.date) })),
+      plans: activePlans,
+      asOf: beforeKey ?? undefined,
     });
   }
 
@@ -422,17 +479,20 @@ export class ClassSessionsService {
         ).map((t) => t.id)
       : [testId];
     const before = await this.prisma.classTestStatus.findMany({
-      where: { classroomId, testId: { in: siblings } },
+      where: { classroomId, testId: { in: siblings }, deletedAt: null },
     });
     if (status === 'REMOVED') {
+      // Өмнө буцаасан (deletedAt) мөр байвал сэргээнэ — (classroomId, testId) UNIQUE
       await this.prisma.classTestStatus.upsert({
         where: { classroomId_testId: { classroomId, testId } },
         create: { classroomId, testId, status, updatedById: userId },
-        update: { status, updatedById: userId },
+        update: { status, updatedById: userId, deletedAt: null, deletedById: null },
       });
     } else {
-      await this.prisma.classTestStatus.deleteMany({
-        where: { classroomId, testId: { in: siblings } },
+      // ЗӨӨЛӨН буцаалт (эзний дүрэм 2026-10-23): мөр deletedAt-тай DB-д үлдэнэ
+      await this.prisma.classTestStatus.updateMany({
+        where: { classroomId, testId: { in: siblings }, deletedAt: null },
+        data: { deletedAt: new Date(), deletedById: userId },
       });
     }
     await this.prisma.auditLog.create({

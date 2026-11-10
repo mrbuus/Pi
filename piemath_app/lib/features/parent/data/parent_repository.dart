@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/cache/swr.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_providers.dart';
 import 'parent_history.dart';
@@ -65,7 +66,7 @@ final parentRepositoryProvider = Provider<ParentRepository>(
 );
 
 final parentChildrenProvider = FutureProvider.autoDispose<List<ParentLink>>(
-  (ref) => ref.watch(parentRepositoryProvider).children(),
+  (ref) => swr(ref, () => ref.watch(parentRepositoryProvider).children()),
 );
 
 final examResultCardProvider = FutureProvider.autoDispose.family<ExamResultCardData, String>(

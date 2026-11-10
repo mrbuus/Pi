@@ -32,6 +32,8 @@ export interface DayEntry extends Omit<WeekEntry, "leadTeacher" | "assistantTeac
     manualTitle: string | null;
     excludedNumbers: number[];
     excludedProblemIds: string[];
+    /** Энэ тестээр тэмдэглэгээ/гэрийн даалгавар хийсэн сурагчийн тоо — хасахад анхааруулна */
+    studentWork?: number;
   }[];
   note: { body: string; updatedByName: string; updatedAt: string } | null;
   record: {
@@ -95,6 +97,10 @@ export interface RoadmapTest {
   doneOn?: string;
   excludedNumbers?: number[];
   plannedOn?: string;
+  /** «Өмнө үзсэн» (огноогүй) */
+  past?: true;
+  /** Сонгосон өдрөөс ХОЙШ хийсэн өдөр (өнгөрсөн өдрийг засаж байхад) */
+  laterOn?: string;
 }
 export interface Roadmap {
   books: {
@@ -123,6 +129,8 @@ export interface PlanContext {
     customTopics?: string[];
     /** Багшийн гараар бичсэн сэдэв (тестийн нэрээс автоматаар үүсээгүй бол) */
     customTitle?: string | null;
+    /** Зэрэг засварын хамгаалалтад буцааж илгээнэ */
+    updatedAt?: string;
   } | null;
   roster: { id: string; name: string }[];
   photoSuggestion: string | null;

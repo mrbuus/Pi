@@ -7,6 +7,7 @@ import { Meta } from "@/components/ui/Meta";
 import { formatMnDate } from "@/lib/dateMn";
 import { api } from "@/lib/api";
 import SendPasswordResetButton from "../SendPasswordResetButton";
+import AdminPasswordButton from "../AdminPasswordButton";
 import { SMS_ENABLED } from "@/lib/features";
 import {
   StudentDetailData,
@@ -233,6 +234,7 @@ export default function StudentInfoTab({
               </Button>
               {/* Нууц үгээ мартсан сурагчийг багш газар дээр нь шийднэ — код зөвхөн сурагчийн утас руу */}
               {SMS_ENABLED && <SendPasswordResetButton studentId={studentId} studentName={fullName(detail)} />}
+              <AdminPasswordButton userId={studentId} hasPhone={Boolean(detail.phone)} />
             </div>
           )}
           {editing && (

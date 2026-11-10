@@ -5,6 +5,8 @@ export interface WithdrawalCycle {
   end: string;
   full: boolean;
   lessons: number;
+  /** Вэбд ирц бүртгэхээс өмнөх (суусан гэж үзсэн) хичээл — 2026-11-08-аас өмнө хадгалсанд байхгүй */
+  assumed?: number;
   leaveDay: string | null;
   extraDays: string[];
   counted: number;
@@ -17,6 +19,8 @@ export interface WithdrawalResult {
   fullMonths: number;
   owed: number;
   paid: number;
+  /** Өмнө нь гаргасан буцаалт (төлсөн дүнгээс хассан) */
+  refundedBefore?: number;
   refund: number;
   over: number;
 }
@@ -27,6 +31,8 @@ export interface WithdrawalLessonDay {
   note: string | null;
   leave: boolean;
   excluded: boolean;
+  /** Вэбд ирц бүртгэхээс өмнөх — суусан гэж үзнэ, хасах боломжгүй */
+  assumed?: boolean;
 }
 
 export interface WithdrawalPreview {
@@ -39,6 +45,10 @@ export interface WithdrawalPreview {
   startDate: string | null;
   countFrom: string;
   leftOn: string;
+  /** Ангид вэбд ирц бүртгэж эхэлсэн өдөр */
+  webStart?: string | null;
+  /** Хуваарьгүй анги — хичээлийн тоо мэдэгдэхгүй */
+  noSchedule?: boolean;
   payments: { amount: number; paidOn: string | null; forMonth: string | null }[];
   result: WithdrawalResult;
   lastCycleDays: WithdrawalLessonDay[];

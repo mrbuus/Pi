@@ -33,30 +33,44 @@ class ParentDatedRow extends StatelessWidget {
   }
 }
 
-/// Мөрүүдтэй карт; хоосон бол тайлбар.
+/// Мөрүүдтэй карт; хоосон бол тайлбар. [title] өгвөл картын дотор дүрстэй толгой.
 class ParentListCard extends StatelessWidget {
-  const ParentListCard({super.key, required this.children, required this.empty});
+  const ParentListCard({
+    super.key,
+    required this.children,
+    required this.empty,
+    this.title,
+    this.icon,
+    this.hue = AppHue.brand,
+  });
 
   final List<Widget> children;
   final String empty;
+  final String? title;
+  final IconData? icon;
+  final AppHue hue;
 
   @override
   Widget build(BuildContext context) {
+    final t = title;
     return AppCard(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: AppSpace.sm),
-      child: children.isEmpty
-          ? Padding(
+      padding: EdgeInsets.fromLTRB(AppSpace.lg, t == null ? AppSpace.sm : AppSpace.lg, AppSpace.lg, AppSpace.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (t != null) ...[CardHeader(title: t, icon: icon, hue: hue), const SizedBox(height: AppSpace.sm)],
+          if (children.isEmpty)
+            Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpace.sm),
               child: Text(empty, style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim)),
             )
-          : Column(
-              children: [
-                for (var i = 0; i < children.length; i++) ...[
-                  if (i > 0) Divider(height: 1, color: context.colors.line),
-                  children[i],
-                ],
-              ],
-            ),
+          else
+            for (var i = 0; i < children.length; i++) ...[
+              if (i > 0) Divider(height: 1, color: context.colors.line),
+              children[i],
+            ],
+        ],
+      ),
     );
   }
 }

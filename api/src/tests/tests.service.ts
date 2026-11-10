@@ -185,7 +185,7 @@ export class TestsService {
     await assertInternalTeachingStaff(this.prisma, actorId);
     this.assertDraftRole(actorRole);
     const draft = await this.prisma.testDraft.findUnique({
-      where: { id: draftId },
+      where: { id: draftId, deletedAt: null },
     });
     if (!draft || (actorRole !== Role.ADMIN && draft.ownerId !== actorId)) {
       throw new NotFoundException('Ноорог олдсонгүй');
@@ -222,8 +222,8 @@ export class TestsService {
     const state = this.draftState(dto);
     const where =
       actorRole !== Role.ADMIN
-        ? { id: draftId, ownerId: actorId, revision: dto.expectedRevision }
-        : { id: draftId, revision: dto.expectedRevision };
+        ? { id: draftId, ownerId: actorId, revision: dto.expectedRevision, deletedAt: null }
+        : { id: draftId, revision: dto.expectedRevision, deletedAt: null };
     // The UPDATE holds the row lock until the matching snapshot is read.
     // Returning a snapshot from outside the transaction could pair a later
     // writer's revision with this client's older form contents.
@@ -233,7 +233,7 @@ export class TestsService {
         data: { state, revision: { increment: 1 } },
       });
       if (changed.count !== 1) return null;
-      return tx.testDraft.findUnique({ where: { id: draftId } });
+      return tx.testDraft.findUnique({ where: { id: draftId, deletedAt: null } });
     });
     if (!saved) {
       const latest = await this.findDraftForActor(draftId, actorId, actorRole);
@@ -250,9 +250,13 @@ export class TestsService {
     await this.findDraftForActor(draftId, actorId, actorRole);
     const where =
       actorRole !== Role.ADMIN
-        ? { id: draftId, ownerId: actorId }
-        : { id: draftId };
-    await this.prisma.testDraft.deleteMany({ where });
+        ? { id: draftId, ownerId: actorId, deletedAt: null }
+        : { id: draftId, deletedAt: null };
+    // ЗӨӨЛӨН (эзний дүрэм 2026-10-23): ноорог deletedAt-тай DB-д үлдэнэ
+    await this.prisma.testDraft.updateMany({
+      where,
+      data: { deletedAt: new Date(), deletedById: actorId },
+    });
     return { deleted: true };
   }
 

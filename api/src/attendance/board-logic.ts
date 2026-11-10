@@ -1,6 +1,13 @@
 // Ирц ба даалгаврын самбарын ЦЭВЭР логик (эзэн 2026-10-18, docs/v2/UDRIIN-HICHEEL-REWORK.md).
 // ӨС-гүй — unit тестэд бүрэн ордог (board-logic.spec.ts).
 
+import {
+  DEFAULT_MIN_QUIZ,
+  formatPercent,
+  quizBelow,
+  quizPercent,
+} from '../homework-quiz/quiz-score';
+
 /* ───────── Шалгуур (Classroom.riskCriteria) ───────── */
 
 export interface RiskCriteria {
@@ -16,6 +23,11 @@ export interface RiskCriteria {
   minHomework: number;
   /** Дараалан хийгээгүй тоо үүнээс их буюу тэнцүү бол */
   missingStreak: number;
+  /**
+   * Цонх доторх ХАМГИЙН СҮҮЛИЙН шалгалтаар даалгавар шалгасан оноо (homework-quiz) энэ хувиас
+   * бага бол (эзэн 2026-11-08 19:08). 0 = тооцохгүй.
+   */
+  minQuiz: number;
 }
 
 export const DEFAULT_CRITERIA: RiskCriteria = {
@@ -25,6 +37,7 @@ export const DEFAULT_CRITERIA: RiskCriteria = {
   maxLates: 4,
   minHomework: 60,
   missingStreak: 2,
+  minQuiz: DEFAULT_MIN_QUIZ,
 };
 
 export const CRITERIA_WINDOWS = [7, 14, 30, 60, 90] as const;
@@ -39,6 +52,7 @@ export const CRITERIA_LIMITS: Record<
   maxLates: { min: 1, max: 10, step: 1 },
   minHomework: { min: 0, max: 100, step: 5 },
   missingStreak: { min: 1, max: 6, step: 1 },
+  minQuiz: { min: 0, max: 100, step: 5 },
 };
 
 /** Хувь бодохын өмнө хамгийн багадаа хэдэн тэмдэглэгээ байх (цөөн өгөгдлөөр «улаан» болгохгүй) */
@@ -68,6 +82,8 @@ export function criteriaToStore(
   input: Record<string, unknown>,
 ): { ok: true; value: RiskCriteria | null } | { ok: false; error: string } {
   const out = {} as RiskCriteria;
+  // Шалгалтын босгогүй хуучин клиент → анхдагч (2026-11-08-аас өмнөх вэб)
+  if (input.minQuiz === undefined) input = { ...input, minQuiz: DEFAULT_MIN_QUIZ };
   for (const key of Object.keys(DEFAULT_CRITERIA) as (keyof RiskCriteria)[]) {
     if (!validNumber(key, input[key]))
       return { ok: false, error: `Шалгуурын утга буруу: ${key}` };
@@ -81,7 +97,13 @@ export function criteriaToStore(
 
 /* ───────── Эрсдэл: шалгуур хангаагүй зүйлс ───────── */
 
-export type RiskKind = 'attendance' | 'absences' | 'lates' | 'homework' | 'streak';
+export type RiskKind =
+  | 'attendance'
+  | 'absences'
+  | 'lates'
+  | 'homework'
+  | 'streak'
+  | 'quiz';
 export interface RiskFlag {
   kind: RiskKind;
   /** Богино тайлбар: «Ирц 72%», «3 удаа тасалсан» */
@@ -98,6 +120,13 @@ export interface HwRow {
   date: string;
   status: 'DONE' | 'PARTIAL' | 'NOT_DONE' | null;
 }
+/** Шалгалтаар даалгавар шалгасан оноо (homework-quiz), устгаагүй */
+export interface QuizRow {
+  studentId: string;
+  date: string;
+  score: number;
+  problemCount: number;
+}
 
 /**
  * Сурагч бүрийн шалгуур хангаагүй зүйлс. Мөрүүдийг дуудагч цонхоор
@@ -109,7 +138,14 @@ export function computeRisk(
   att: AttRow[],
   hw: HwRow[],
   c: RiskCriteria,
+  quiz: QuizRow[] = [],
 ): Record<string, RiskFlag[]> {
+  // Сурагч бүрийн хамгийн сүүлийн шалгалт (ижил өдөр давхардахгүй — анги × өдөр = нэг шалгалт)
+  const lastQuiz = new Map<string, QuizRow>();
+  for (const r of quiz) {
+    const cur = lastQuiz.get(r.studentId);
+    if (!cur || r.date > cur.date) lastQuiz.set(r.studentId, r);
+  }
   const tally = new Map<
     string,
     { present: number; late: number; absent: number; done: number; partial: number; missing: number; hw: HwRow[] }
@@ -166,6 +202,14 @@ export function computeRisk(
       }
       if (streak >= c.missingStreak)
         flags.push({ kind: 'streak', label: `${streak} удаа дараалан хийгээгүй` });
+    }
+    // Шалгалт: ганц оноо ч хангалттай (MIN_SAMPLE хамаарахгүй) — багш өөрөө өгсөн шалгалт
+    const q = lastQuiz.get(id);
+    if (q && quizBelow(q.score, q.problemCount, c.minQuiz)) {
+      flags.push({
+        kind: 'quiz',
+        label: `Шалгалт ${formatPercent(quizPercent(q.score, q.problemCount) ?? 0)}`,
+      });
     }
     out[id] = flags;
   }

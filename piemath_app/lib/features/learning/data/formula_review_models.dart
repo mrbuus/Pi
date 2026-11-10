@@ -102,6 +102,19 @@ class ReviewCard {
   final ReviewExercise exercise;
 }
 
+/// Хязгаарын томьёо (`\\lim`) давтлагын картад хэзээ ч гарахгүй (эзэн 2026-11-10). Сервер ч шүүдэг; энд прод
+/// шинэчлэгдэхээс өмнөх хариунд зориулав. Харьцуулах картын бүлгийн нэг нь хязгаар бол бүлгийг бүхэлд нь хасна.
+const _limitSlugs = {'fn-e-number', 'calc-derivative-definition'};
+
+bool isLimitCard(ReviewCard c) =>
+    c.slug.startsWith('calc-limit-') || _limitSlugs.contains(c.slug) || (c.latex?.contains(r'\lim') ?? false);
+
+List<ReviewCard> withoutLimitCards(Iterable<ReviewCard> cards) {
+  final list = cards.toList();
+  final badGroups = {for (final c in list) if (isLimitCard(c) && c.exercise.groupId != null) c.exercise.groupId};
+  return [for (final c in list) if (!isLimitCard(c) && !badGroups.contains(c.exercise.groupId)) c];
+}
+
 /// `GET /formulas/review/due`.
 @immutable
 class ReviewDue {
@@ -112,7 +125,7 @@ class ReviewDue {
     return ReviewDue(
       dueCount: asInt(j['dueCount']) ?? 0,
       newCount: asInt(j['newCount']) ?? 0,
-      cards: [for (final c in asList(j['cards'])) ReviewCard.fromJson(c)].where((c) => c.slug.isNotEmpty).toList(),
+      cards: withoutLimitCards([for (final c in asList(j['cards'])) ReviewCard.fromJson(c)].where((c) => c.slug.isNotEmpty)),
     );
   }
 

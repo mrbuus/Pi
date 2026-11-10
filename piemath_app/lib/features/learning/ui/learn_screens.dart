@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/shell/app_shell.dart';
 import '../../../core/files/files.dart';
 import '../../../core/math/math.dart';
+import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
 import '../data/events_repository.dart';
 import '../data/lesson_models.dart';
@@ -122,64 +123,6 @@ class _LearnScreenState extends ConsumerState<LearnScreen> {
   }
 }
 
-/// `/app/library` — ном: нээлттэй бүлгүүд номоор нь.
-class LibraryScreen extends ConsumerWidget {
-  const LibraryScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final list = ref.watch(lessonChaptersProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Ном')),
-      body: list.when(
-        loading: () => const LoadingState(),
-        error: (e, _) => ErrorState(
-          title: 'Ном ачаалж чадсангүй',
-          message: errorText(e),
-          onRetry: () => ref.invalidate(lessonChaptersProvider),
-        ),
-        data: (all) {
-          if (all.isEmpty) {
-            return const EmptyState(
-              icon: AppIcons.libraryBig,
-              title: 'Одоогоор нээлттэй ном алга',
-              message: 'Ангид элсэх эсвэл эрх авсны дараа энд харагдана',
-            );
-          }
-          final groups = groupByBook(all);
-          return ListView(
-            padding: const EdgeInsets.all(AppSpace.gutter),
-            children: [
-              for (final (name, chapters) in groups) ...[
-                AppCard(
-                  padding: EdgeInsets.zero,
-                  child: Theme(
-                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                    child: ExpansionTile(
-                      initiallyExpanded: groups.length == 1,
-                      tilePadding: const EdgeInsets.symmetric(horizontal: AppSpace.lg),
-                      childrenPadding: const EdgeInsets.fromLTRB(AppSpace.md, 0, AppSpace.md, AppSpace.md),
-                      title: Text(name.isEmpty ? 'Бусад' : name, style: context.text.titleSmall),
-                      subtitle: Text('${chapters.length} бүлэг'),
-                      children: [
-                        for (final c in chapters) ...[
-                          ChapterRow(chapter: c, showBook: false),
-                          const SizedBox(height: AppSpace.sm),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppSpace.md),
-              ],
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
 /// `/app/learn/:chapterId` — бүлгийн онол, бичлэг, тест.
 class LessonScreen extends ConsumerWidget {
   const LessonScreen({super.key, required this.chapterId});
@@ -193,11 +136,18 @@ class LessonScreen extends ConsumerWidget {
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Хичээл')),
       body: async.when(
         loading: () => const LoadingState(cards: 2),
-        error: (e, _) => ErrorState(
-          title: 'Хичээл нээгдсэнгүй',
-          message: errorText(e),
-          onRetry: () => ref.invalidate(lessonProvider(chapterId)),
-        ),
+        // 403 = эрхгүй: худалдах товч, гадны холбоосгүй тайлбар (Apple 3.1.1); бусад алдаа дахин оролдоно
+        error: (e, _) => e is ApiError && e.kind == ApiErrorKind.forbidden
+            ? const EmptyState(
+                icon: AppIcons.password,
+                title: 'Энэ хичээлийг үзэх эрх хэрэгтэй байна',
+                message: 'Эрхийг сургалтын төв олгоно',
+              )
+            : ErrorState(
+                title: 'Хичээл нээгдсэнгүй',
+                message: errorText(e),
+                onRetry: () => ref.invalidate(lessonProvider(chapterId)),
+              ),
         data: (l) => _LessonBody(lesson: l),
       ),
     );

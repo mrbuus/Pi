@@ -24,13 +24,15 @@ class FileBytesCache {
   final _memory = <String, Uint8List>{}; // LinkedHashMap — оруулсан дарааллаар
   int _memoryBytes = 0;
   Future<Directory?>? _dir;
+  int _writesSinceTrim = 0;
+  bool _trimming = false;
 
   Future<Directory?> _cacheDir() => _dir ??= () async {
         try {
           final base = await directory?.call();
           if (base == null) return null;
           final d = Directory('${base.path}/pm_files');
-          if (!d.existsSync()) d.createSync(recursive: true);
+          await d.create(recursive: true);
           return d;
         } catch (_) {
           return null; // Диск ашиглах боломжгүй — зөвхөн санах ой.
@@ -53,16 +55,13 @@ class FileBytesCache {
     if (dir == null) return null;
     final f = File('${dir.path}/${fileName(key)}');
     try {
-      if (!f.existsSync()) return null;
       final bytes = await f.readAsBytes();
       _remember(key, bytes);
-      try {
-        // Ашигласан огноог шинэчилнэ — дискийг шахахад хамгийн хуучныг устгана.
-        f.setLastModifiedSync(DateTime.now());
-      } catch (_) {}
+      // Ашигласан огноог шинэчилнэ — дискийг шахахад хамгийн хуучныг устгана (UI thread-д sync I/O-гүй).
+      unawaited(f.setLastModified(DateTime.now()).then((_) => null, onError: (_) => null));
       return bytes;
     } catch (_) {
-      return null;
+      return null; // Байхгүй эсвэл эвдэрсэн.
     }
   }
 
@@ -72,7 +71,11 @@ class FileBytesCache {
     if (dir == null) return;
     try {
       await File('${dir.path}/${fileName(key)}').writeAsBytes(bytes);
-      _trimDisk(dir);
+      // Хавтсыг бичилт бүрт биш, 20 бичилт тутамд async-аар шахна (жагсаалтын sync I/O гацаадаг байсан).
+      if (++_writesSinceTrim >= 20) {
+        _writesSinceTrim = 0;
+        unawaited(_trimDisk(dir));
+      }
     } catch (_) {
       // Диск дүүрсэн гэх мэт — кэшгүй үргэлжилнэ.
     }
@@ -90,23 +93,38 @@ class FileBytesCache {
     }
   }
 
-  void _trimDisk(Directory dir) {
-    final stats = <(File, int, DateTime)>[];
-    var total = 0;
-    for (final f in dir.listSync().whereType<File>()) {
-      final s = f.statSync();
-      total += s.size;
-      stats.add((f, s.size, s.modified));
+  Future<void> _trimDisk(Directory dir) async {
+    if (_trimming) return;
+    _trimming = true;
+    try {
+      final stats = <(File, int, DateTime)>[];
+      var total = 0;
+      await for (final f in dir.list(followLinks: false)) {
+        if (f is! File) continue;
+        // ignore: avoid_slow_async_io — UI thread-ийг sync stat-аар гацаахгүй.
+        final s = await f.stat();
+        total += s.size;
+        stats.add((f, s.size, s.modified));
+      }
+      if (total <= diskBudget) return;
+      stats.sort((a, b) => a.$3.compareTo(b.$3));
+      for (final (f, size, _) in stats) {
+        if (total <= diskBudget * 0.8) break;
+        try {
+          await f.delete();
+          total -= size;
+        } catch (_) {}
+      }
+    } catch (_) {
+    } finally {
+      _trimming = false;
     }
-    if (total <= diskBudget) return;
-    stats.sort((a, b) => a.$3.compareTo(b.$3));
-    for (final (f, size, _) in stats) {
-      if (total <= diskBudget * 0.8) break;
-      try {
-        f.deleteSync();
-        total -= size;
-      } catch (_) {}
-    }
+  }
+
+  /// Санах ойн дарамт (2 GB утас) — санах ойг суллана, диск үлдэнэ.
+  void clearMemory() {
+    _memory.clear();
+    _memoryBytes = 0;
   }
 
   /// Гарах үед — санах ой ба диск бүрэн.
@@ -117,8 +135,8 @@ class FileBytesCache {
     _dir = null;
     if (dir == null) return;
     try {
-      if (dir.existsSync()) dir.deleteSync(recursive: true);
-    } catch (_) {}
+      await dir.delete(recursive: true);
+    } catch (_) {} // Байхгүй бол — устгах зүйлгүй.
   }
 
   @visibleForTesting

@@ -47,6 +47,48 @@ class _DayBody extends ConsumerWidget {
 
   String get _subtitle => [dayLabel(day.date), day.classroomName].join(', ');
 
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return RefreshIndicator(
+      onRefresh: () async => ref.invalidate(theoryDayProvider((day.classroomId, day.date))),
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.sm, AppSpace.gutter, AppSpace.xxl),
+        children: [
+          Text(day.classroomName, style: context.text.bodySmall),
+          if (day.topic != null) ...[
+            const SizedBox(height: AppSpace.xs),
+            Text(day.topic!, style: context.text.titleMedium),
+          ],
+          if (day.tests.isNotEmpty) ...[const SizedBox(height: AppSpace.xs), Meta(items: day.tests)],
+          if (day.canUpload) ...[const SizedBox(height: AppSpace.lg), TheoryUploadActions(day: day)],
+          const SizedBox(height: AppSpace.lg),
+          if (day.photos.isEmpty)
+            EmptyState(
+              icon: AppIcons.theoryPhoto,
+              title: 'Онолын зураг алга',
+              message: day.assignedName != null
+                  ? 'Томилогдсон: ${day.assignedName}'
+                  : 'Ангийнхан илгээмэгц энд харагдана',
+            )
+          else
+            for (final set in day.photos) ...[
+              _PhotoSetCard(set: set, subtitle: _subtitle),
+              const SizedBox(height: AppSpace.md),
+            ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Өөрийн онолын зургийг илгээх / солих / устгах товчнууд (өдрийн дэлгэц, жагсаалтын «Өнөөдрийн онол»).
+class TheoryUploadActions extends ConsumerWidget {
+  const TheoryUploadActions({super.key, required this.day});
+
+  final TheoryDay day;
+
+  String get _subtitle => [dayLabel(day.date), day.classroomName].join(', ');
+
   /// Өөрчлөлтийн дараа энэ өдөр, жагсаалтын зургийн тоо, «Хичээл» hub-ын өдрийн онолыг шинэчилнэ.
   void _refreshAfterChange(WidgetRef ref) {
     ref.invalidate(theoryDayProvider((day.classroomId, day.date)));
@@ -100,59 +142,34 @@ class _DayBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mine = day.mine;
-    return RefreshIndicator(
-      onRefresh: () async => ref.invalidate(theoryDayProvider((day.classroomId, day.date))),
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.sm, AppSpace.gutter, AppSpace.xxl),
-        children: [
-          Text(day.classroomName, style: context.text.bodySmall),
-          if (day.topic != null) ...[
-            const SizedBox(height: AppSpace.xs),
-            Text(day.topic!, style: context.text.titleMedium),
-          ],
-          if (day.tests.isNotEmpty) ...[const SizedBox(height: AppSpace.xs), Meta(items: day.tests)],
-          if (day.canUpload) ...[
-            const SizedBox(height: AppSpace.lg),
-            if (day.assignedToMe)
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpace.sm),
-                child: Text('Багш таныг энэ өдрийн онолын зургийг авахаар томилсон', style: context.text.bodyMedium),
-              ),
-            Wrap(
-              spacing: AppSpace.sm,
-              runSpacing: AppSpace.xs,
-              children: [
-                FilledButton.icon(
-                  onPressed: () => _upload(context, ref),
-                  icon: const Icon(AppIcons.camera, size: 18),
-                  label: Text(mine == null ? 'Онолын зураг илгээх' : 'Зургаа солих'),
-                ),
-                if (mine != null)
-                  TextButton.icon(
-                    onPressed: () => _delete(context, ref),
-                    style: TextButton.styleFrom(foregroundColor: context.colors.error),
-                    icon: const Icon(AppIcons.trash, size: 18),
-                    label: const Text('Устгах'),
-                  ),
-              ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (day.assignedToMe)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpace.sm),
+            child: Text('Багш таныг энэ өдрийн онолын зургийг авахаар томилсон', style: context.text.bodyMedium),
+          ),
+        Wrap(
+          spacing: AppSpace.sm,
+          runSpacing: AppSpace.xs,
+          children: [
+            FilledButton.icon(
+              onPressed: () => _upload(context, ref),
+              icon: const Icon(AppIcons.camera, size: 18),
+              label: Text(mine == null ? 'Онолын зураг илгээх' : 'Зургаа солих'),
             ),
+            if (mine != null)
+              TextButton.icon(
+                onPressed: () => _delete(context, ref),
+                style: TextButton.styleFrom(foregroundColor: context.colors.error),
+                icon: const Icon(AppIcons.trash, size: 18),
+                label: const Text('Устгах'),
+              ),
           ],
-          const SizedBox(height: AppSpace.lg),
-          if (day.photos.isEmpty)
-            EmptyState(
-              icon: AppIcons.theoryPhoto,
-              title: 'Онолын зураг алга',
-              message: day.assignedName != null
-                  ? 'Томилогдсон: ${day.assignedName}'
-                  : 'Ангийнхан илгээмэгц энд харагдана',
-            )
-          else
-            for (final set in day.photos) ...[
-              _PhotoSetCard(set: set, subtitle: _subtitle),
-              const SizedBox(height: AppSpace.md),
-            ],
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

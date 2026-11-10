@@ -30,3 +30,8 @@ final isOnlineStudentProvider = Provider<bool>((ref) {
 
 /// UB-ийн өнөөдөр (`YYYY-MM-DD`). Тестэд override.
 final todayKeyProvider = Provider<String>((ref) => UbDateTime.now().dateKey);
+
+/// «Дахин бодох» тестүүд (алдаа гарвал хэсэг харагдахгүй).
+final homeworkRedoProvider = FutureProvider.autoDispose<HwRedo>(
+  (ref) => ref.watch(homeworkRepositoryProvider).redo(),
+);

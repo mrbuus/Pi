@@ -153,6 +153,7 @@ export class MistakeCollector implements OnModuleDestroy {
         where: {
           id: attemptId,
           mistakeCollectedAt: null,
+          deletedAt: null,
           OR: [
             { autoCorrect: false },
             { selfState: { in: [SelfState.FAILED, SelfState.FIXED_AFTER_ERROR] } },
@@ -212,6 +213,7 @@ export class MistakeCollector implements OnModuleDestroy {
         const pending = await this.prisma.attempt.findMany({
           where: {
             mistakeCollectedAt: null,
+            deletedAt: null,
             OR: [
               { autoCorrect: false },
               { selfState: { in: [SelfState.FAILED, SelfState.FIXED_AFTER_ERROR] } },

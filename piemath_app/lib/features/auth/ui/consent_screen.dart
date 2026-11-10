@@ -1,10 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/shell/app_shell.dart';
-import '../../../core/config/env.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
 import '../data/auth_models.dart';
@@ -87,8 +86,8 @@ class _ConsentFormState extends ConsumerState<_ConsentForm> {
     }
   }
 
-  void _openWeb(String path) =>
-      launchUrl(Uri.parse('${Env.webBaseUrl}$path'), mode: LaunchMode.externalApplication);
+  /// Бодлогыг апп дотор нээнэ (`/terms`, `/privacy` — вэб рүү хөтлөхгүй).
+  void _openLegal(String path) => context.push(path);
 
   @override
   Widget build(BuildContext context) {
@@ -125,13 +124,13 @@ class _ConsentFormState extends ConsumerState<_ConsentForm> {
                       TextSpan(
                         text: 'Үйлчилгээний нөхцөл',
                         style: link,
-                        recognizer: TapGestureRecognizer()..onTap = () => _openWeb('/terms'),
+                        recognizer: TapGestureRecognizer()..onTap = () => _openLegal('/terms'),
                       ),
                       const TextSpan(text: ', '),
                       TextSpan(
                         text: 'нууцлалын бодлогыг',
                         style: link,
-                        recognizer: TapGestureRecognizer()..onTap = () => _openWeb('/privacy'),
+                        recognizer: TapGestureRecognizer()..onTap = () => _openLegal('/privacy'),
                       ),
                       const TextSpan(text: ' уншиж зөвшөөрч байна'),
                     ],

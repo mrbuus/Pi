@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:piemath_app/core/time/ub_time.dart';
 import 'package:piemath_app/core/ui/tokens.dart';
 import 'package:piemath_app/features/learning/data/formula_models.dart';
 import 'package:piemath_app/features/learning/data/formula_repository.dart';
@@ -71,6 +72,15 @@ Map<String, Object?> _apiDetail() => {
 
 void main() {
   final overrides = [formulaWebBaseProvider.overrideWithValue(_web)];
+
+  test('seenGroupOf: өнөөдөр, энэ долоо хоног (Даваагаас), өмнө (UB өдрөөр)', () {
+    final now = UbDateTime(2026, 11, 12, 10); // Лхагва
+    expect(seenGroupOf(DateTime.utc(2026, 11, 12, 1), now), SeenGroup.today);
+    expect(seenGroupOf(DateTime.utc(2026, 11, 9, 1), now), SeenGroup.week, reason: 'Даваа');
+    expect(seenGroupOf(DateTime.utc(2026, 11, 8, 15), now), SeenGroup.earlier, reason: 'Ням 23:00 UB');
+    expect(seenGroupOf(DateTime.utc(2026, 11, 11, 17), now), SeenGroup.today, reason: 'UTC өчигдөр ч UB өнөөдөр');
+    expect(seenGroupOf(null, now), SeenGroup.earlier);
+  });
 
   group('өгөгдөл', () {
     test('simple задлал: say/formula байхгүй бол null, parts хоосон tex хасна', () {

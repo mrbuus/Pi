@@ -208,12 +208,12 @@ export function RemoveFromTrainingDialog({
                           type="checkbox"
                           checked={exclude.includes(d.date)}
                           onChange={() => toggle(d.date)}
-                          disabled={d.leave && !exclude.includes(d.date)}
+                          disabled={d.assumed || (d.leave && !exclude.includes(d.date))}
                           className="size-4 accent-[var(--color-brand-bright)]"
                         />
                         <span className="w-12 tabular-nums text-ink-dim">{md(d.date)}</span>
                         <span className="min-w-0 flex-1 truncate text-ink">
-                          {d.status ? ATT_LABEL[d.status] : "Ирц бүртгээгүй"}
+                          {d.assumed ? "Вэбд ирц бүртгэхээс өмнө, суусанд тооцно" : d.status ? ATT_LABEL[d.status] : "Ирц бүртгээгүй"}
                           {d.note ? ` — ${d.note}` : ""}
                         </span>
                         {d.leave && <span className="shrink-0 text-xs font-semibold text-brand-soft">Чөлөө хассан</span>}

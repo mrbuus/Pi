@@ -52,6 +52,19 @@
 
 ## Бичлэгүүд
 
+### 2026-11-10 — давалгаа 3–5 (локал session «Flutter», 10 agent)
+
+- Нийлсэн: санхүү/тулгалт, тасалбар, SMS, элсэлт (w3); хурд+офлайн кэш (`lib/core/cache`, docs/PERF-OFFLINE.md),
+  вэб рүү гаргахгүй (бүртгэл, нөхцөл/нууцлал, түвшин тогтоох, сорил, тусламж натив; `test/no_web_exit_test.dart`),
+  сурагч/эцэг эхийн дутуу функц, ажилтан/админы контент, дэлгүүр, ноорог, хяналт (w4); iOS зүүн захаас шудрах =
+  буцах бүх хуудсанд (go_router NoTransitionPage-ийн шалтгааныг зассан), хуваарийн hub зөвхөн Хуваарь/Төлөвлөгч,
+  дизайны нэгдсэн шинэчлэл + 4 нүүр (w5); серверийн зөөлөн устгал 2 (9 модель); флэш картад \lim томьёо орохгүй.
+- Шалгалт: analyze 0, `flutter test -x golden` 2070/2070, API jest 2749/2749. Прод deploy ХИЙГЭЭГҮЙ (сервер өөрчлөлт: зөөлөн
+  устгал 2-ын миграци, давтлагын \lim шүүлт — ачааллын тест + эзний зөвшөөрөл).
+- Үлдсэн: /app/admin/content, capabilities (эзний шийдвэр), insights (problemToken), formulas print/widgets, solid
+  хэрэгслийн нэмэлт, хатуу устгалтай endpoint-ууд (expenses, passes, pass grant, mock-exams, draft blocks) → зөөлөн
+  болгох; my_class SectionCard → TitledCard; problem_figure, tools_back-д шудрах буцах. Дэлгэрэнгүй: docs/W4-RESUME.md.
+
 ### 2026-11-04 — гөлгөр навигаци, хэсгийн дэд табууд (agent, `app/nav-smooth`)
 
 - Доод таб = `StatefulShellRoute` салбар (role бүрт `RoutingConfig`-оор): таб бүр өөрийн stack, гүйлгэлт, өгөгдлөө

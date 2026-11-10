@@ -99,9 +99,20 @@ export function homeworkCounts(
  * Нэг мөр тоо: «Ирц» шошго + төлөв бүр (дүрс, нэр, тоо). Багтахгүй бол ороож доош буух тул
  * 390px утсан дээр хэвтээ гүйлгээ гарахгүй. `CountGrid` дотор шошгонууд нэг баганад тэгширнэ.
  */
-export function CountRow({ label, items, className = "" }: { label: string; items: CountDef[]; className?: string }) {
+export function CountRow({
+  label,
+  items,
+  className = "",
+  extra,
+}: {
+  label: string;
+  items: CountDef[];
+  className?: string;
+  /** Төгсгөлд нэмэлт <li> (ж: сарын шалгалтын дундаж — board/QuizDay.tsx) */
+  extra?: ReactNode;
+}) {
   const shown = items.filter((i) => i.keepZero || i.value !== 0);
-  if (!shown.length) return null;
+  if (!shown.length && !extra) return null;
   return (
     <div role="group" aria-label={label} className={cn("contents", className)}>
       <span className="pt-px text-[11px] font-semibold leading-5 text-ink-dim sm:text-xs">{label}</span>
@@ -124,6 +135,7 @@ export function CountRow({ label, items, className = "" }: { label: string; item
             </li>
           );
         })}
+        {extra}
       </ul>
     </div>
   );

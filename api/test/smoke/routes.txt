@@ -331,6 +331,7 @@ POST /api/tuition/refund/:id/pending
 POST /api/uploads
 POST /api/users
 POST /api/users/:id/archive
+POST /api/users/:id/password
 POST /api/users/:id/send-password-reset
 POST /api/users/:id/unarchive
 POST /api/users/promote-teacher

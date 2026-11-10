@@ -32,6 +32,8 @@ export type LessonStaffingMinAggregateOutputType = {
   assistantTeacherId: string | null
   updatedById: string | null
   updatedAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type LessonStaffingMaxAggregateOutputType = {
@@ -42,6 +44,8 @@ export type LessonStaffingMaxAggregateOutputType = {
   assistantTeacherId: string | null
   updatedById: string | null
   updatedAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type LessonStaffingCountAggregateOutputType = {
@@ -52,6 +56,8 @@ export type LessonStaffingCountAggregateOutputType = {
   assistantTeacherId: number
   updatedById: number
   updatedAt: number
+  deletedAt: number
+  deletedById: number
   _all: number
 }
 
@@ -64,6 +70,8 @@ export type LessonStaffingMinAggregateInputType = {
   assistantTeacherId?: true
   updatedById?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type LessonStaffingMaxAggregateInputType = {
@@ -74,6 +82,8 @@ export type LessonStaffingMaxAggregateInputType = {
   assistantTeacherId?: true
   updatedById?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type LessonStaffingCountAggregateInputType = {
@@ -84,6 +94,8 @@ export type LessonStaffingCountAggregateInputType = {
   assistantTeacherId?: true
   updatedById?: true
   updatedAt?: true
+  deletedAt?: true
+  deletedById?: true
   _all?: true
 }
 
@@ -167,6 +179,8 @@ export type LessonStaffingGroupByOutputType = {
   assistantTeacherId: string | null
   updatedById: string
   updatedAt: Date
+  deletedAt: Date | null
+  deletedById: string | null
   _count: LessonStaffingCountAggregateOutputType | null
   _min: LessonStaffingMinAggregateOutputType | null
   _max: LessonStaffingMaxAggregateOutputType | null
@@ -198,6 +212,8 @@ export type LessonStaffingWhereInput = {
   assistantTeacherId?: Prisma.StringNullableFilter<"LessonStaffing"> | string | null
   updatedById?: Prisma.StringFilter<"LessonStaffing"> | string
   updatedAt?: Prisma.DateTimeFilter<"LessonStaffing"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"LessonStaffing"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"LessonStaffing"> | string | null
   schedule?: Prisma.XOR<Prisma.ClassScheduleScalarRelationFilter, Prisma.ClassScheduleWhereInput>
 }
 
@@ -209,6 +225,8 @@ export type LessonStaffingOrderByWithRelationInput = {
   assistantTeacherId?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   schedule?: Prisma.ClassScheduleOrderByWithRelationInput
 }
 
@@ -224,6 +242,8 @@ export type LessonStaffingWhereUniqueInput = Prisma.AtLeast<{
   assistantTeacherId?: Prisma.StringNullableFilter<"LessonStaffing"> | string | null
   updatedById?: Prisma.StringFilter<"LessonStaffing"> | string
   updatedAt?: Prisma.DateTimeFilter<"LessonStaffing"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"LessonStaffing"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"LessonStaffing"> | string | null
   schedule?: Prisma.XOR<Prisma.ClassScheduleScalarRelationFilter, Prisma.ClassScheduleWhereInput>
 }, "id" | "scheduleId_date">
 
@@ -235,6 +255,8 @@ export type LessonStaffingOrderByWithAggregationInput = {
   assistantTeacherId?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.LessonStaffingCountOrderByAggregateInput
   _max?: Prisma.LessonStaffingMaxOrderByAggregateInput
   _min?: Prisma.LessonStaffingMinOrderByAggregateInput
@@ -251,6 +273,8 @@ export type LessonStaffingScalarWhereWithAggregatesInput = {
   assistantTeacherId?: Prisma.StringNullableWithAggregatesFilter<"LessonStaffing"> | string | null
   updatedById?: Prisma.StringWithAggregatesFilter<"LessonStaffing"> | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LessonStaffing"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"LessonStaffing"> | Date | string | null
+  deletedById?: Prisma.StringNullableWithAggregatesFilter<"LessonStaffing"> | string | null
 }
 
 export type LessonStaffingCreateInput = {
@@ -260,6 +284,8 @@ export type LessonStaffingCreateInput = {
   assistantTeacherId?: string | null
   updatedById: string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   schedule: Prisma.ClassScheduleCreateNestedOneWithoutStaffingInput
 }
 
@@ -271,6 +297,8 @@ export type LessonStaffingUncheckedCreateInput = {
   assistantTeacherId?: string | null
   updatedById: string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type LessonStaffingUpdateInput = {
@@ -280,6 +308,8 @@ export type LessonStaffingUpdateInput = {
   assistantTeacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   schedule?: Prisma.ClassScheduleUpdateOneRequiredWithoutStaffingNestedInput
 }
 
@@ -291,6 +321,8 @@ export type LessonStaffingUncheckedUpdateInput = {
   assistantTeacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LessonStaffingCreateManyInput = {
@@ -301,6 +333,8 @@ export type LessonStaffingCreateManyInput = {
   assistantTeacherId?: string | null
   updatedById: string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type LessonStaffingUpdateManyMutationInput = {
@@ -310,6 +344,8 @@ export type LessonStaffingUpdateManyMutationInput = {
   assistantTeacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LessonStaffingUncheckedUpdateManyInput = {
@@ -320,6 +356,8 @@ export type LessonStaffingUncheckedUpdateManyInput = {
   assistantTeacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LessonStaffingListRelationFilter = {
@@ -345,6 +383,8 @@ export type LessonStaffingCountOrderByAggregateInput = {
   assistantTeacherId?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type LessonStaffingMaxOrderByAggregateInput = {
@@ -355,6 +395,8 @@ export type LessonStaffingMaxOrderByAggregateInput = {
   assistantTeacherId?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type LessonStaffingMinOrderByAggregateInput = {
@@ -365,6 +407,8 @@ export type LessonStaffingMinOrderByAggregateInput = {
   assistantTeacherId?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type LessonStaffingCreateNestedManyWithoutScheduleInput = {
@@ -416,6 +460,8 @@ export type LessonStaffingCreateWithoutScheduleInput = {
   assistantTeacherId?: string | null
   updatedById: string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type LessonStaffingUncheckedCreateWithoutScheduleInput = {
@@ -425,6 +471,8 @@ export type LessonStaffingUncheckedCreateWithoutScheduleInput = {
   assistantTeacherId?: string | null
   updatedById: string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type LessonStaffingCreateOrConnectWithoutScheduleInput = {
@@ -464,6 +512,8 @@ export type LessonStaffingScalarWhereInput = {
   assistantTeacherId?: Prisma.StringNullableFilter<"LessonStaffing"> | string | null
   updatedById?: Prisma.StringFilter<"LessonStaffing"> | string
   updatedAt?: Prisma.DateTimeFilter<"LessonStaffing"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"LessonStaffing"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"LessonStaffing"> | string | null
 }
 
 export type LessonStaffingCreateManyScheduleInput = {
@@ -473,6 +523,8 @@ export type LessonStaffingCreateManyScheduleInput = {
   assistantTeacherId?: string | null
   updatedById: string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type LessonStaffingUpdateWithoutScheduleInput = {
@@ -482,6 +534,8 @@ export type LessonStaffingUpdateWithoutScheduleInput = {
   assistantTeacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LessonStaffingUncheckedUpdateWithoutScheduleInput = {
@@ -491,6 +545,8 @@ export type LessonStaffingUncheckedUpdateWithoutScheduleInput = {
   assistantTeacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LessonStaffingUncheckedUpdateManyWithoutScheduleInput = {
@@ -500,6 +556,8 @@ export type LessonStaffingUncheckedUpdateManyWithoutScheduleInput = {
   assistantTeacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedById?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -512,6 +570,8 @@ export type LessonStaffingSelect<ExtArgs extends runtime.Types.Extensions.Intern
   assistantTeacherId?: boolean
   updatedById?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   schedule?: boolean | Prisma.ClassScheduleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonStaffing"]>
 
@@ -523,6 +583,8 @@ export type LessonStaffingSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   assistantTeacherId?: boolean
   updatedById?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   schedule?: boolean | Prisma.ClassScheduleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonStaffing"]>
 
@@ -534,6 +596,8 @@ export type LessonStaffingSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   assistantTeacherId?: boolean
   updatedById?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   schedule?: boolean | Prisma.ClassScheduleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonStaffing"]>
 
@@ -545,9 +609,11 @@ export type LessonStaffingSelectScalar = {
   assistantTeacherId?: boolean
   updatedById?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }
 
-export type LessonStaffingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scheduleId" | "date" | "leadTeacherId" | "assistantTeacherId" | "updatedById" | "updatedAt", ExtArgs["result"]["lessonStaffing"]>
+export type LessonStaffingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scheduleId" | "date" | "leadTeacherId" | "assistantTeacherId" | "updatedById" | "updatedAt" | "deletedAt" | "deletedById", ExtArgs["result"]["lessonStaffing"]>
 export type LessonStaffingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   schedule?: boolean | Prisma.ClassScheduleDefaultArgs<ExtArgs>
 }
@@ -571,6 +637,8 @@ export type $LessonStaffingPayload<ExtArgs extends runtime.Types.Extensions.Inte
     assistantTeacherId: string | null
     updatedById: string
     updatedAt: Date
+    deletedAt: Date | null
+    deletedById: string | null
   }, ExtArgs["result"]["lessonStaffing"]>
   composites: {}
 }
@@ -1002,6 +1070,8 @@ export interface LessonStaffingFieldRefs {
   readonly assistantTeacherId: Prisma.FieldRef<"LessonStaffing", 'String'>
   readonly updatedById: Prisma.FieldRef<"LessonStaffing", 'String'>
   readonly updatedAt: Prisma.FieldRef<"LessonStaffing", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"LessonStaffing", 'DateTime'>
+  readonly deletedById: Prisma.FieldRef<"LessonStaffing", 'String'>
 }
     
 
