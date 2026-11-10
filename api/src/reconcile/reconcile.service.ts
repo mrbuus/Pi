@@ -572,7 +572,8 @@ export class ReconcileService {
           orderBy: { bookedAt: 'asc' },
           select: { id: true, amount: true, bookedAt: true, direction: true, suggestion: true },
         })
-      ).filter((r) => !(r.suggestion as RowSuggestion | null)?.held);
+        // Буцаасан (held) мөр ч орно: тэр өдрийг хүртэл ажилтан бүгдийг шийтэд хөтөлсөн (эзэн 2026-11-10)
+      );
       if (!rows.length) continue;
       const kidsOf = (r: (typeof rows)[number]) => ((r.suggestion as RowSuggestion | null)?.candidates ?? []).map((x) => x.studentId);
       const pool = await this.existingPayments(rows.flatMap(kidsOf));
