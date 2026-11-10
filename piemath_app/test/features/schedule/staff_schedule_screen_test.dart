@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:piemath_app/core/auth/user_role.dart';
+import 'package:piemath_app/features/my_class/ui/common.dart' show RoomBadge;
 import 'package:piemath_app/features/schedule/ui/staff/lesson_detail.dart';
 import 'package:piemath_app/features/schedule/ui/staff/staff_schedule_screen.dart';
 import 'package:piemath_app/shared/native/native.dart';
@@ -163,6 +164,41 @@ void main() {
     expect(find.byKey(const ValueKey('staff-day-skeleton')), findsOneWidget);
     await tester.pump(const Duration(seconds: 3));
     await settle(tester);
+  });
+
+  testWidgets('нягт өдөр жагсаалтаар нээгдэнэ: цагийн бүлэг, танхим, товчоор хүснэгт рүү', (tester) async {
+    final http = staffHttp(
+      entries: (date) => [
+        for (var i = 1; i <= 6; i++)
+          lessonJson(id: 's$i', date: date, classroomId: 'k$i', start: 900, end: 1020, room: '50$i'),
+      ],
+    );
+    await openSchedule(tester, http, UserRole.teacher);
+    expect(find.byType(DayAgenda), findsNothing);
+    expect(find.byKey(const ValueKey('staff-day-list')), findsOneWidget);
+    expect(find.text('15:00'), findsOneWidget);
+    expect(find.text('6 анги'), findsOneWidget);
+    expect(find.descendant(of: find.byType(RoomBadge), matching: find.text('503')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.byTooltip('Цагаар харах'));
+    await settle(tester);
+    expect(find.byType(DayAgenda), findsOneWidget);
+  });
+
+  testWidgets('7 хоног: гарагийн мөр үргэлж харагдана, мөр зүүн захад наалдахгүй', (tester) async {
+    final http = staffHttp();
+    await openSchedule(tester, http, UserRole.teacher);
+    await tester.tap(find.text('7 хоног'));
+    await settle(tester);
+    for (var mn = 1; mn <= 7; mn++) {
+      expect(find.byKey(ValueKey('pattern-weekday:$mn')), findsOneWidget);
+    }
+    await tester.tap(find.byKey(const ValueKey('pattern-weekday:1')));
+    await settle(tester);
+    final title = find.descendant(of: find.byKey(const ValueKey('staff-pattern-list')), matching: find.text('12-1'));
+    expect(title, findsWidgets);
+    expect(tester.getTopLeft(title.first).dx, greaterThan(40));
   });
 
   testWidgets('шүүлтүүр: нэг товчоор цонх нээгдэж, ангиар сонгоход нөгөө анги нуугдана', (tester) async {

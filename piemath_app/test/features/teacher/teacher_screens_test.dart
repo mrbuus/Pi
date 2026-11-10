@@ -226,6 +226,12 @@ void main() {
       );
       expect(find.text('Б. Тэмүүжин'), findsOneWidget);
       expect(find.text('10-р сарын 30, Ба'), findsOneWidget);
+      // Өдрийн мөрүүд картын зүүн захаас эхэлнэ (богино мөр голлохгүй)
+      final lefts = {
+        for (final e in find.textContaining('-р сарын ').evaluate()) tester.getTopLeft(find.byWidget(e.widget)).dx,
+      };
+      expect(lefts, hasLength(1));
+      expect(lefts.single, lessThan(60));
       expect(find.textContaining('₮'), findsNothing);
       expect(find.textContaining('ойлгоогүй', findRichText: true), findsOneWidget);
     });

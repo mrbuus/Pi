@@ -248,6 +248,16 @@ void main() {
       expect(teacherClashes([a, c]), isEmpty);
     });
 
+    test('нягт өдөр: нэг цагт 4-өөс олон анги эхэлбэл жагсаалтаар', () {
+      DayLesson at(int i, int start) =>
+          DayLesson.fromJson(lessonJson(id: 's$i', date: 'd', start: start, end: start + 120, room: '50$i'), 'd');
+      expect(crowdedDay([for (var i = 0; i < 4; i++) at(i, 900)]), isFalse);
+      expect(crowdedDay([for (var i = 0; i < 5; i++) at(i, 900)]), isTrue);
+      // Өөр өөр цагт тарсан 6 анги нягт биш
+      expect(crowdedDay([for (var i = 0; i < 6; i++) at(i, 600 + i * 120)]), isFalse);
+      expect(crowdedDay(const []), isFalse);
+    });
+
     test('давхарга: нуусан, optimistic багш', () {
       final plan = DayPlan.fromJson(dayPlanJson('2026-11-05'));
       final o = DayOverlayState(

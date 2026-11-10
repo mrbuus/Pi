@@ -142,7 +142,9 @@ class _ProgressTab extends ConsumerWidget {
               const SizedBox(height: AppSpace.md),
               AppCard(
                 padding: EdgeInsets.zero,
+                // stretch: мөр бүр картын бүтэн өргөнийг авч зүүн тийш тэгширнэ (өмнө нь голлодог байв)
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     for (final (i, day) in days.indexed) ...[
                       if (i > 0) Divider(height: 1, color: c.line),

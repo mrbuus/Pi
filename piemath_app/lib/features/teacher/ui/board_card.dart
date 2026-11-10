@@ -161,19 +161,26 @@ class BoardStudentCard extends ConsumerWidget {
               Row(
                 children: [
                   const SizedBox(width: AppSpace.xs),
-                  ...head,
-                  if (makeup != null) ...[
-                    const SizedBox(width: 6),
-                    Flexible(flex: 2, child: MakeupChip(status: makeup)),
-                  ],
-                  if (preview.isNotEmpty) ...[
-                    const SizedBox(width: 6),
-                    Expanded(
-                      flex: 2,
-                      child: _NotePreview(text: preview, onTap: openNote),
+                  // Нэр, тэмдэг үлдсэн бүх зайг эзэлнэ — «⋯» үргэлж баруун захад (эзэн 2026-11-10).
+                  // Өмнө нь Flexible(3) + Spacer(1) зайг 3:1 хувааж, «⋯» мөрийн дунд үлддэг байв.
+                  Expanded(
+                    child: Row(
+                      children: [
+                        ...head,
+                        if (makeup != null) ...[
+                          const SizedBox(width: 6),
+                          Flexible(flex: 2, child: MakeupChip(status: makeup)),
+                        ],
+                        if (preview.isNotEmpty) ...[
+                          const SizedBox(width: 6),
+                          Expanded(
+                            flex: 2,
+                            child: _NotePreview(text: preview, onTap: openNote),
+                          ),
+                        ],
+                      ],
                     ),
-                  ] else
-                    const Spacer(),
+                  ),
                   more,
                 ],
               ),

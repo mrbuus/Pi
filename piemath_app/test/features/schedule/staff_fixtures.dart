@@ -139,11 +139,19 @@ Map<String, Object?> slotJson(String id, {int weekday = 1, String classroomId = 
 };
 
 /// Бүх уншилтын замтай хуурамч сервер. `day-plan` хүссэн огноогоо буцаана.
-FakeHttp staffHttp({bool canPlan = false, Map<String, Object?>? caps, List<Map<String, Object?>>? slots}) => FakeHttp()
+FakeHttp staffHttp({
+  bool canPlan = false,
+  Map<String, Object?>? caps,
+  List<Map<String, Object?>>? slots,
+  List<Map<String, Object?>> Function(String date)? entries,
+}) => FakeHttp()
   ..on(
     'GET',
     '/schedule/day-plan',
-    (r) => FakeResponse(dayPlanJson(r.queryParameters['date']! as String, canPlan: canPlan)),
+    (r) {
+      final date = r.queryParameters['date']! as String;
+      return FakeResponse(dayPlanJson(date, canPlan: canPlan, entries: entries?.call(date)));
+    },
   )
   ..on('GET', '/schedule/week', (r) => FakeResponse({'start': r.queryParameters['start'], 'days': <Object?>[]}))
   ..json('GET', '/schedule/teachers', teachersJson)

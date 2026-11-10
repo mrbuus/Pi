@@ -236,6 +236,17 @@ List<DayLesson> sortLessons(Iterable<DayLesson> lessons) => [...lessons]
     return r != 0 ? r : a.classroomName.compareTo(b.classroomName);
   });
 
+/// Цагийн хүснэгтэд багтахгүй «нягт» өдөр: нэг цагт [limit]-ээс олон анги зэрэг эхэлдэг. Утасны дэлгэцэд
+/// 4-өөс олон багана болоход ангийн нэр, цаг тасардаг тул тэр үед жагсаалтаар харуулна.
+bool crowdedDay(Iterable<DayLesson> lessons, {int limit = 4}) {
+  final perStart = <int, int>{};
+  for (final l in lessons) {
+    final n = perStart[l.startMinute] = (perStart[l.startMinute] ?? 0) + 1;
+    if (n > limit) return true;
+  }
+  return false;
+}
+
 /// Нэг багш ДАВХАР цагт хоёр ангид оноогдсон эсэх — `scheduleId|teacherId` түлхүүрүүд.
 Set<String> teacherClashes(List<DayLesson> lessons) {
   final rows = [

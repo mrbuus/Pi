@@ -320,6 +320,13 @@ void main() {
       expect(card.left, greaterThanOrEqualTo(16));
       expect(card.right, lessThanOrEqualTo(width - 16));
       expect(_inKey('card-s2', find.text('автобус')), findsOneWidget);
+      // «⋯» картын баруун захад (нэрийн ард дунд хавьд үлдэхгүй) — тэмдэглэлтэй, тэмдэглэлгүй аль ч картад
+      for (final id in ['s2', 's1']) {
+        await scrollTo(tester, find.byKey(ValueKey('card-$id')));
+        final box = tester.getRect(find.byKey(ValueKey('card-$id')));
+        final more = tester.getRect(find.byKey(ValueKey('note-$id')));
+        expect(box.right - more.right, lessThanOrEqualTo(12), reason: id);
+      }
     });
   }
 }

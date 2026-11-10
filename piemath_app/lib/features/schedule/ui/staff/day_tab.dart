@@ -14,6 +14,7 @@ import '../../domain/agenda_scroll.dart';
 import '../../domain/day_overlay.dart';
 import '../../domain/staff_schedule_logic.dart';
 import 'lesson_detail.dart';
+import 'schedule_rows.dart';
 import 'staff_actions.dart';
 
 /// «Өдрийн хуваарь» (вэбийн `WeekBuilder`): дээр 7 хоногийн тууз, доор өдрийн хуваарь.
@@ -36,7 +37,9 @@ class StaffDayTab extends ConsumerStatefulWidget {
 
 class _StaffDayTabState extends ConsumerState<StaffDayTab> {
   late UbDateTime _day = defaultScheduleDay(widget.today ?? UbDateTime.now());
-  bool _listMode = false;
+
+  /// null = автомат: нэг цагт олон анги давхцвал жагсаалт, цөөн бол цагийн хүснэгт ([_DayPage]).
+  bool? _listMode;
   String? _selected;
 
   void _select(UbDateTime d) {
@@ -85,7 +88,7 @@ class _StaffDayTabState extends ConsumerState<StaffDayTab> {
                 filter: widget.filter,
                 perms: widget.perms,
                 listMode: _listMode,
-                onToggleMode: () => setState(() => _listMode = !_listMode),
+                onSetListMode: (v) => setState(() => _listMode = v),
                 onOpen: (l) => _open(l, wide: wide),
                 onGoTo: _select,
                 selectedId: wide ? _selected : null,
@@ -125,7 +128,7 @@ class _DayPage extends ConsumerWidget {
     required this.filter,
     required this.perms,
     required this.listMode,
-    required this.onToggleMode,
+    required this.onSetListMode,
     required this.onOpen,
     required this.onGoTo,
     required this.selectedId,
@@ -137,8 +140,10 @@ class _DayPage extends ConsumerWidget {
   final UbDateTime now;
   final ScheduleFilter filter;
   final StaffPermissions perms;
-  final bool listMode;
-  final VoidCallback onToggleMode;
+
+  /// Хэрэглэгчийн сонголт; null бол [crowdedDay]-ээр автомат.
+  final bool? listMode;
+  final ValueChanged<bool> onSetListMode;
   final ValueChanged<DayLesson> onOpen;
   final ValueChanged<UbDateTime> onGoTo;
   final String? selectedId;
@@ -155,7 +160,16 @@ class _DayPage extends ConsumerWidget {
     final lessons = sortLessons(plan.lessons.where(filter.matchesLesson));
     final counts = dayCounts(plan.lessons);
     final today = dayOf(plan.today);
-    final header = _DayHeader(plan: plan, counts: counts, perms: perms, listMode: listMode, onToggleMode: onToggleMode);
+    // Нэг цагт 4-өөс олон анги давхцвал цагийн хүснэгтийн багана хэт нарийсаж нэр тасардаг
+    // (утсан дээр 7–11 багана) — тэр үед жагсаалтаар нээнэ. Товчоор хүссэн үедээ солино.
+    final list = listMode ?? crowdedDay(lessons);
+    final header = _DayHeader(
+      plan: plan,
+      counts: counts,
+      perms: perms,
+      listMode: list,
+      onToggleMode: () => onSetListMode(!list),
+    );
     Widget body;
     if (counts.total == 0 || lessons.isEmpty) {
       final tomorrow = today.addDays(1);
@@ -167,7 +181,7 @@ class _DayPage extends ConsumerWidget {
             ? OutlinedButton(onPressed: () => onGoTo(tomorrow), child: const Text('Маргааш руу очих'))
             : null,
       );
-    } else if (listMode) {
+    } else if (list) {
       body = _LessonList(lessons: lessons, onOpen: onOpen, selectedId: selectedId);
     } else {
       body = _AutoScrollAgenda(
@@ -364,7 +378,7 @@ class _Banner extends StatelessWidget {
   );
 }
 
-/// Жагсаалтаар: ижил цагт эхлэх хичээлүүд нэг бүлэг (вэбийн «блок»), танхимын эрэмбээр.
+/// Жагсаалтаар: ижил цагт эхлэх хичээлүүд нэг карт (вэбийн «блок»), танхимын эрэмбээр.
 class _LessonList extends StatelessWidget {
   const _LessonList({required this.lessons, required this.onOpen, required this.selectedId});
 
@@ -374,59 +388,48 @@ class _LessonList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rows = <Object>[];
-    int? last;
+    final groups = <({int start, List<DayLesson> lessons})>[];
     for (final l in lessons) {
-      if (l.startMinute != last) {
-        rows.add(l.startMinute);
-        last = l.startMinute;
-      }
-      rows.add(l);
+      if (groups.isEmpty || groups.last.start != l.startMinute) groups.add((start: l.startMinute, lessons: []));
+      groups.last.lessons.add(l);
     }
     final c = context.colors;
     return ListView.builder(
       key: const ValueKey('staff-day-list'),
       padding: const EdgeInsets.only(bottom: AppSpace.xxl),
-      itemCount: rows.length,
+      itemCount: groups.length,
       itemBuilder: (context, i) {
-        final row = rows[i];
-        if (row is int) {
-          final n = lessons.where((l) => l.startMinute == row).length;
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.lg, AppSpace.gutter, AppSpace.xs),
-            child: Row(
+        final g = groups[i];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TimeGroupHeader(title: formatMinutes(g.start), count: g.lessons.length),
+            LessonGroupCard(
               children: [
-                Text(formatMinutes(row), style: context.text.titleMedium),
-                const SizedBox(width: AppSpace.sm),
-                Text('$n анги', style: context.text.bodySmall),
+                for (final l in g.lessons)
+                  LessonRow(
+                    room: l.room,
+                    title: shortClass(l.classroomName),
+                    meta: [
+                      [
+                        if (l.lead != null) staffRefLabel(l.lead!) else ?lessonTeacherLabel(l),
+                        if (l.assistant != null) staffRefLabel(l.assistant!),
+                      ].join(', '),
+                      if (l.moved != null) 'Зөөгдсөн',
+                      if (l.planned && l.record == null) 'Төлөвлөсөн',
+                    ],
+                    trailing: l.record != null
+                        ? Tooltip(
+                            message: 'Батлагдсан',
+                            child: Icon(AppIcons.badgeCheck, size: 20, color: c.success),
+                          )
+                        : null,
+                    selected: l.scheduleId == selectedId,
+                    onTap: () => onOpen(l),
+                  ),
               ],
             ),
-          );
-        }
-        final l = row as DayLesson;
-        final staff = [
-          if (l.lead != null) staffRefLabel(l.lead!) else ?lessonTeacherLabel(l),
-          if (l.assistant != null) staffRefLabel(l.assistant!),
-        ].join(', ');
-        return Material(
-          color: l.scheduleId == selectedId ? c.brandTint : Colors.transparent,
-          child: InkWell(
-            onTap: () => onOpen(l),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: AppSizes.minTap),
-              child: ItemRow(
-                title: shortClass(l.classroomName),
-                meta: [
-                  l.room,
-                  if (staff.isNotEmpty) staff,
-                  if (l.moved != null) 'Зөөгдсөн',
-                  if (l.planned) 'Төлөвлөсөн',
-                ],
-                trailing: l.record != null ? Icon(AppIcons.badgeCheck, size: 20, color: c.success) : null,
-                chevron: true,
-              ),
-            ),
-          ),
+          ],
         );
       },
     );
