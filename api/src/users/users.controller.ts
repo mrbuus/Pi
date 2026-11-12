@@ -113,7 +113,7 @@ export class UsersController {
       return rows.map((u) => ({
         ...u,
         studentProfile: u.studentProfile
-          ? { ...u.studentProfile, tuitionPlan: null, tuitionAmount: null }
+          ? { ...u.studentProfile, tuitionPlan: null, tuitionAmount: null, tuitionAgreed: null }
           : u.studentProfile,
       }));
     }

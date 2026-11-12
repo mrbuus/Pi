@@ -1469,6 +1469,7 @@ export class UsersService {
     if (requesterRole === Role.TEACHER && strippedStudentProfile) {
       strippedStudentProfile.tuitionPlan = null;
       strippedStudentProfile.tuitionAmount = null;
+      strippedStudentProfile.tuitionAgreed = null;
       strippedStudentProfile.tuitionNote = null;
     }
 
