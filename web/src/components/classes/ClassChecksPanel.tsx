@@ -12,7 +12,7 @@ import { cn } from "@/lib/cn";
 import { formatMnDate, formatMnDateTime } from "@/lib/dateMn";
 import { byFirstName, rosterNames, shortName, staffName } from "@/lib/personName";
 import BookMarkSheet, { type BookSheetTarget } from "@/components/book-money/BookMarkSheet";
-import { BOOKS, SHEET_KIND, type BookMarkInput } from "@/components/book-money/books";
+import { BOOKS, SHEET_KINDS, type BookMarkInput } from "@/components/book-money/books";
 import CheckStudentSheet from "./CheckStudentSheet";
 import { Segmented } from "./parts";
 import type { CheckMark, CheckPerson, ClassCheck, ClassChecksResponse } from "./types";
@@ -357,7 +357,7 @@ function CheckList({
         <EmptyState
           icon={ClipboardCheck}
           title="Нээлттэй чек алга"
-          hint="Ном эсвэл хариултын хуудсаа сонгож, бусад зүйлийг нэрлэж нээгээд хүүхэд бүрийг тэмдэглэнэ"
+          hint="Ном эсвэл шалгалтаа сонгож, бусад зүйлийг нэрлэж нээгээд хүүхэд бүрийг тэмдэглэнэ"
         />
       )}
 
@@ -917,7 +917,7 @@ function CheckForm({
         <div>
           <p className="mb-1.5 text-sm font-semibold text-ink">Ямар чек нээх вэ</p>
           <div role="radiogroup" aria-label="Чекийн төрөл" className="flex flex-wrap gap-1.5">
-            {[...BOOKS, { key: SHEET_KIND, title: "Хариултын хуудас" }, { key: "other", title: "Бусад" }].map((b) => {
+            {[...BOOKS, ...SHEET_KINDS, { key: "other", title: "Бусад" }].map((b) => {
               const used = usedBooks?.has(b.key) ?? false;
               const on = kind === b.key;
               return (
@@ -968,7 +968,7 @@ function CheckForm({
             onChange={(e) => setAmount(e.target.value.replace(/\D/g, "").replace(/^0+/, "").slice(0, 9))}
             inputMode="numeric"
             autoFocus={isBook}
-            placeholder={isBook ? (kind === SHEET_KIND ? "3,000" : "40,000") : "25,000"}
+            placeholder={isBook ? (SHEET_KINDS.some((k) => k.key === kind) ? "3,000" : "40,000") : "25,000"}
             className={cn(inputClass, "pr-8 tabular-nums")}
           />
           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-dim" aria-hidden>

@@ -11,8 +11,7 @@ import { mnt, type BookClassRow, type BookDashboardResponse } from "./books";
 
 /**
  * «Дотоод → Номын мөнгө» (эзэн 2026-11-12): ном бүрээр аль анги авсан, хэдэн
- * хүүхэд өгсөн, багш тус бүр хэдийг хураасан. Багш тоо, хувийг бүгдийг харна,
- * мөнгөн дүнгээс зөвхөн өөрийн хураасныг (сервер шүүнэ).
+ * хүүхэд өгсөн, багш тус бүр хэдийг хураасан. Бүх багш бүх дүнг харна.
  */
 export default function BookMoneyDashboard() {
   const [data, setData] = useState<BookDashboardResponse | null>(null);
@@ -51,7 +50,7 @@ export default function BookMoneyDashboard() {
 
       {data && data.collectors.length > 0 && (
         <section className="chunky p-4 md:p-6">
-          <h2 className="mb-3 font-bold text-brand-soft">{data.seeAllMoney ? "Багш тус бүрийн хураасан" : "Миний хураасан"}</h2>
+          <h2 className="mb-3 font-bold text-brand-soft">Багш тус бүрийн хураасан</h2>
           <ul className="divide-y divide-line">
             {data.collectors.map((c, i) => (
               <li key={c.person?.id ?? i} className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-2.5">

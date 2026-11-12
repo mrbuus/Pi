@@ -9,9 +9,10 @@ import { AuditService } from '../audit/audit.service';
 import {
   bookTitle,
   isBookKey,
+  CLASS_SHEET_KIND,
+  isSheetKey,
   nextSheetKey,
   SHEET_KIND,
-  sheetNumber,
 } from '../book-payments/book-payments.logic';
 import {
   BookPaymentsService,
@@ -369,20 +370,23 @@ export class ClassChecksService {
     const role = await this.access(classroomId, userId);
     let bookKey = dto.bookKey ?? null;
     // Хуудасны дугаарыг клиент өөрөө сонгож болохгүй — зөвхөн «SHEET» төрөл
-    if (bookKey !== null && sheetNumber(bookKey) !== null)
+    if (bookKey !== null && isSheetKey(bookKey))
       throw new BadRequestException('Номоо сонгоно уу');
-    // «Хариултын хуудас» — дугаарыг сервер өгнө: энэ ангийн дараагийн хуудас
-    // (устгасан чекийн дугаарыг дахин ашиглахгүй — хуучин төлбөр шинэ чект наалдахгүй)
-    if (bookKey === SHEET_KIND) {
+    // Шалгалтын хуудас — дугаарыг сервер өгнө: энэ ангийн тухайн төрлийн дараагийнх
+    // (устгасан чекийн дугаарыг дахин ашиглахгүй — хуучин төлбөр шинэ чект наалдахгүй).
+    // SHEET = нэгдсэн шалгалт (бүх ангид ижил түлхүүр), CSHEET = ангийн шалгалт (ангид тусдаа).
+    if (bookKey === SHEET_KIND || bookKey === CLASS_SHEET_KIND) {
+      const kind = bookKey;
       const prior = await this.prisma.classCheck.findMany({
-        where: { classroomId, bookKey: { startsWith: SHEET_KIND } },
+        where: { classroomId, bookKey: { startsWith: kind } },
         select: { bookKey: true },
       });
       bookKey = nextSheetKey(
         prior.flatMap((c) => (c.bookKey ? [c.bookKey] : [])),
+        kind === CLASS_SHEET_KIND ? classroomId : undefined,
       );
       if (!bookKey)
-        throw new BadRequestException('Хариултын хуудасны чек хэт олон байна');
+        throw new BadRequestException('Шалгалтын хуудасны чек хэт олон байна');
     }
     if (bookKey !== null && !isBookKey(bookKey))
       throw new BadRequestException('Номоо сонгоно уу');

@@ -5,6 +5,7 @@ import {
   bookOrder,
   bookTitle,
   classBookSummary,
+  classSheet,
   cleanBookAmount,
   cleanBookNote,
   collectorTotals,
@@ -43,7 +44,20 @@ describe('«Номын мөнгө» — цэвэр функц', () => {
     expect(isBookKey('SHEET')).toBe(false);
     expect(isBookKey('SHEET0')).toBe(false);
     expect(isBookKey('SHEET100')).toBe(false);
-    expect(bookTitle('SHEET2')).toBe('Хариултын хуудас 2');
+    expect(bookTitle('SHEET2')).toBe('Нэгдсэн шалгалт 2');
+    // Ангийн шалгалт: түлхүүр ангийн id-тай — анги бүрт тусдаа зүйл
+    const c1 = 'cmuzbhtra000cc97nt5js9qeh';
+    expect(isBookKey(`CSHEET1:${c1}`)).toBe(true);
+    expect(isBookKey('CSHEET1')).toBe(false);
+    expect(isBookKey('CSHEET1:')).toBe(false);
+    expect(bookTitle(`CSHEET3:${c1}`)).toBe('Ангийн шалгалт 3');
+    expect(classSheet(`CSHEET3:${c1}`)).toEqual({ n: 3, classroomId: c1 });
+    expect(nextSheetKey([], c1)).toBe(`CSHEET1:${c1}`);
+    // Нэгдсэн ба ангийн дугаарлалт бие биедээ нөлөөлөхгүй
+    expect(nextSheetKey(['SHEET5', `CSHEET2:${c1}`], c1)).toBe(`CSHEET3:${c1}`);
+    expect(nextSheetKey(['SHEET5', `CSHEET2:${c1}`])).toBe('SHEET6');
+    expect(`CSHEET99:${c1}`.length).toBeLessThanOrEqual(48);
+    expect(bookOrder('SHEET9')).toBeLessThan(bookOrder(`CSHEET1:${c1}`));
     expect(bookTitle('E2')).toBe('E-2');
     expect(nextSheetKey([])).toBe('SHEET1');
     expect(nextSheetKey(['SHEET1', 'E2', 'SHEET3'])).toBe('SHEET4');
@@ -561,8 +575,28 @@ describe('BookPaymentsService', () => {
     });
   });
 
+  describe('ангийн шалгалт', () => {
+    it('мөнгө үргэлж тэр ангид бүртгэгдэнэ (өөр анги сонгосон ч), нэр нь ангитайгаа', async () => {
+      const { service, prisma, active } = setup();
+      prisma.classCheck.findFirst.mockResolvedValue({ id: 'k5', amount: 2000 });
+      const saved = await service.setFromProfile(
+        's1',
+        'CSHEET1:c5',
+        { status: 'PAID', classroomId: 'c4' },
+        'teacher',
+      );
+      expect(saved).toMatchObject({ classroom: { id: 'c5' }, amount: 2000 });
+      expect(active()[0]).toMatchObject({ classroomId: 'c5' });
+      const view = await service.studentBooks('s1', 'teacher');
+      expect(view.books.at(-1)).toMatchObject({
+        key: 'CSHEET1:c5',
+        title: 'Ангийн шалгалт 1, c5',
+      });
+    });
+  });
+
   describe('самбар', () => {
-    it('Багш тоог бүгдийг, мөнгөнөөс зөвхөн өөрийн хураасныг харна', async () => {
+    it('ном × анги тоо, багш тус бүрийн хураасан — Багш ч бүх дүнг харна', async () => {
       const { service, mark, prisma } = setup();
       await mark({ checked: true }, { actorId: 'teacher' });
       prisma.bookPayment.findMany.mockImplementation(() =>
@@ -591,29 +625,23 @@ describe('BookPaymentsService', () => {
         { classroomId: 'c5', studentId: 's2' },
         { classroomId: 'c5', studentId: 's3' },
       ]);
+      // Багш ч бүх дүнг харна (эзэн 2026-11-12)
       const forTeacher = await service.dashboard('teacher');
-      expect(forTeacher.seeAllMoney).toBe(false);
+      expect(forTeacher.seeAllMoney).toBe(true);
       expect(forTeacher.books).toHaveLength(1);
-      expect(forTeacher.books[0]).toMatchObject({ key: 'E2', collected: null });
+      expect(forTeacher.books[0]).toMatchObject({
+        key: 'E2',
+        collected: 75000,
+      });
       expect(forTeacher.books[0].classes[0]).toMatchObject({
         classroomId: 'c5',
         total: 2,
         paidHere: 1,
         formerPaid: 1,
         left: 1,
-        collected: null,
+        collected: 75000,
       });
-      expect(forTeacher.collectors).toEqual([
-        expect.objectContaining({
-          person: {
-            id: 'teacher',
-            firstName: 'teacher',
-            lastName: 'Б',
-            role: Role.TEACHER,
-          },
-          sum: 40000,
-        }),
-      ]);
+      expect(forTeacher.collectors).toHaveLength(2);
       const forPlus = await service.dashboard('plus');
       expect(forPlus.books[0].collected).toBe(75000);
       expect(forPlus.books[0].classes[0].collected).toBe(75000);

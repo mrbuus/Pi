@@ -3224,7 +3224,7 @@ model ClassCheck {
   amount       Int?
   /// Номын чек (эзэн 2026-11-12): BOOKS-ийн түлхүүр (E2, HAVTGAI1 …). null = энгийн чек.
   /// Номын чекийн тэмдэглэгээ ClassCheckMark-т БИШ, BookPayment-т хадгалагдана.
-  bookKey      String?          @db.VarChar(24)
+  bookKey      String?          @db.VarChar(48)
   createdById  String
   createdAt    DateTime         @default(now())
   archivedAt   DateTime?
@@ -3261,7 +3261,7 @@ model ClassCheckMark {
 model BookPayment {
   id            String    @id @default(cuid())
   studentId     String
-  bookKey       String    @db.VarChar(24)
+  bookKey       String    @db.VarChar(48)
   /// PAID = мөнгөө өгсөн, SKIPPED = энэ номыг авахгүй
   status        String    @db.VarChar(8)
   /// Бодит өгсөн дүн (₮) — чекийн үнээс өөр байж болно (гэмтэлтэй ном −5,000 г.м.)
