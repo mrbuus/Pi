@@ -17,40 +17,75 @@ export const BOOKS = [
 const BOOK_TITLE = new Map<string, string>(BOOKS.map((b) => [b.key, b.title]));
 
 /**
- * Хариултын хуудасны мөнгө (эзэн 2026-11-12) — ном БИШ, гэхдээ яг адил бүртгэгдэнэ
- * (сурагч × зүйл, анги сольсон ч зөрөхгүй). Түлхүүр SHEET1, SHEET2 … — дугаарыг
- * анги бүрт сервер автоматаар өгнө (тэр ангийн дараагийн хуудас).
+ * Шалгалтын хариултын хуудасны мөнгө (эзэн 2026-11-12) — ном БИШ, гэхдээ яг адил
+ * бүртгэгдэнэ. Хоёр төрөл:
+ *  - НЭГДСЭН шалгалт (төв даяар бүх анги ижил шалгалт авна): түлхүүр SHEET1, SHEET2 …
+ *    — бүх ангид ИЖИЛ. Анги сольсон сурагч өмнөх ангидаа төлсөн бол шинэ ангид
+ *    «төлсөн» гэж гарна.
+ *  - АНГИЙН шалгалт (анги тус бүр өөрийнхөө): түлхүүр CSHEET1:<classroomId> — анги
+ *    бүрт ТУСДАА зүйл. Өөр ангийн «Ангийн шалгалт 1» огт хамаарахгүй.
+ * Дугаарыг сервер өгнө: тэр ангийн тухайн төрлийн дараагийнх.
  */
 export const SHEET_KIND = 'SHEET';
+export const CLASS_SHEET_KIND = 'CSHEET';
 export const SHEET_MAX = 99;
 const SHEET_RE = /^SHEET([1-9]\d?)$/;
+const CLASS_SHEET_RE = /^CSHEET([1-9]\d?):([a-z0-9]{1,36})$/;
 
-/** SHEET3 → 3; хариултын хуудас биш бол null */
+/** SHEET3 → 3; нэгдсэн шалгалтын хуудас биш бол null */
 export function sheetNumber(key: string): number | null {
   const m = SHEET_RE.exec(key);
   return m ? Number(m[1]) : null;
 }
 
-/** Бүртгэж болох зүйл: ном эсвэл хариултын хуудас */
+/** CSHEET3:<classroomId> → { n: 3, classroomId }; ангийн шалгалтын хуудас биш бол null */
+export function classSheet(
+  key: string,
+): { n: number; classroomId: string } | null {
+  const m = CLASS_SHEET_RE.exec(key);
+  return m ? { n: Number(m[1]), classroomId: m[2] } : null;
+}
+
+/** Шалгалтын хуудас (аль ч төрөл) — дугаарыг нь клиент өөрөө өгч болохгүй */
+export function isSheetKey(key: string): boolean {
+  return sheetNumber(key) !== null || classSheet(key) !== null;
+}
+
+/** Бүртгэж болох зүйл: ном эсвэл шалгалтын хуудас */
 export function isBookKey(raw: unknown): raw is string {
-  return typeof raw === 'string' && (BOOK_TITLE.has(raw) || SHEET_RE.test(raw));
+  return typeof raw === 'string' && (BOOK_TITLE.has(raw) || isSheetKey(raw));
 }
 
 export function bookTitle(key: string): string {
   const n = sheetNumber(key);
-  return n !== null ? `Хариултын хуудас ${n}` : (BOOK_TITLE.get(key) ?? key);
+  if (n !== null) return `Нэгдсэн шалгалт ${n}`;
+  const c = classSheet(key);
+  return c ? `Ангийн шалгалт ${c.n}` : (BOOK_TITLE.get(key) ?? key);
 }
 
-/** Тэр ангид өмнө нээсэн хуудаснуудын (устгасныг оролцуулаад) дараагийн дугаар */
-export function nextSheetKey(existingKeys: readonly string[]): string | null {
-  const max = Math.max(0, ...existingKeys.map((k) => sheetNumber(k) ?? 0));
-  return max >= SHEET_MAX ? null : `${SHEET_KIND}${max + 1}`;
+/**
+ * Тэр ангид өмнө нээсэн (устгасныг оролцуулаад) тухайн төрлийн хуудаснуудын
+ * дараагийн дугаар. `classroomId` өгвөл ангийн шалгалт, өгөхгүй бол нэгдсэн.
+ */
+export function nextSheetKey(
+  existingKeys: readonly string[],
+  classroomId?: string,
+): string | null {
+  const num = (k: string) =>
+    (classroomId ? classSheet(k)?.n : sheetNumber(k)) ?? 0;
+  const max = Math.max(0, ...existingKeys.map(num));
+  if (max >= SHEET_MAX) return null;
+  return classroomId
+    ? `${CLASS_SHEET_KIND}${max + 1}:${classroomId}`
+    : `${SHEET_KIND}${max + 1}`;
 }
 
-/** Жагсаалтын дараалал: номууд (BOOKS-ийн дарааллаар), дараа нь хуудаснууд дугаараар */
+/** Жагсаалтын дараалал: ном (BOOKS-ийн дарааллаар) → нэгдсэн шалгалт → ангийн шалгалт */
 export function bookOrder(key: string): number {
   const i = BOOKS.findIndex((b) => b.key === key);
-  return i >= 0 ? i : 100 + (sheetNumber(key) ?? 99);
+  if (i >= 0) return i;
+  const n = sheetNumber(key);
+  return n !== null ? 100 + n : 200 + (classSheet(key)?.n ?? 99);
 }
 
 /**

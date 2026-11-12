@@ -19,8 +19,10 @@ import {
   isBookKey,
   lockedElsewhere,
   samePayment,
+  CLASS_SHEET_KIND,
+  classSheet,
+  isSheetKey,
   SHEET_KIND,
-  sheetNumber,
   sortCollectors,
   type PaymentValue,
 } from './book-payments.logic';
@@ -119,6 +121,22 @@ export class BookPaymentsService {
       select: { id: true, name: true },
     });
     return new Map(rows.map((c) => [c.id, c.name]));
+  }
+
+  /**
+   * Зүйлийн нэр. Ангийн шалгалт анги бүрт тусдаа зүйл тул ангийн нэртэй нь:
+   * «Ангийн шалгалт 1, 12-4» — сурагчийн хуудас, самбарт хоёр ангийнх ялгарна.
+   */
+  private async titles(
+    keys: Iterable<string>,
+  ): Promise<(key: string) => string> {
+    const names = await this.classNames(
+      [...keys].map((k) => classSheet(k)?.classroomId ?? null),
+    );
+    return (key) => {
+      const name = names.get(classSheet(key)?.classroomId ?? '');
+      return name ? `${bookTitle(key)}, ${name}` : bookTitle(key);
+    };
   }
 
   /** Мөрүүдийг хүний нэр, ангийн нэртэй нь буцаана (нэг багц асуулгаар) */
@@ -380,7 +398,10 @@ export class BookPaymentsService {
         where: {
           // Зөвхөн одоогийн анги — гарсан ангид дараа нь нээсэн хуудас хамаарахгүй
           classroomId: { in: current.map((e) => e.classroomId) },
-          bookKey: { startsWith: SHEET_KIND },
+          OR: [
+            { bookKey: { startsWith: SHEET_KIND } },
+            { bookKey: { startsWith: CLASS_SHEET_KIND } },
+          ],
           deletedAt: null,
         },
         select: { bookKey: true },
@@ -402,6 +423,7 @@ export class BookPaymentsService {
         ...rows.map((r) => r.bookKey),
       ]),
     ].sort((a, b) => bookOrder(a) - bookOrder(b));
+    const title = await this.titles(keys);
     return {
       student: { id: s.id, firstName: s.firstName, lastName: s.lastName },
       // Одоогийн анги эхэнд, дараа нь өмнө сууж байсан ангиуд (давхардалгүй)
@@ -414,11 +436,11 @@ export class BookPaymentsService {
         })),
       books: keys.map((key) => ({
         key,
-        title: bookTitle(key),
+        title: title(key),
         suggestedAmount: suggested.get(key) ?? null,
         payment: active.get(key) ?? null,
       })),
-      history: shaped.map((r) => ({ ...r, title: bookTitle(r.bookKey) })),
+      history: shaped.map((r) => ({ ...r, title: title(r.bookKey) })),
     };
   }
 
@@ -437,7 +459,7 @@ export class BookPaymentsService {
     const s = await this.student(studentId);
     // Хариултын хуудас: зөвхөн сурагчийн сууж байсан ангид нээгдсэн, эсвэл өөрөө
     // бүртгэлтэй дугаар — дурын SHEETn-ээр зохиомол мөр үүсгэхгүй
-    if (sheetNumber(bookKey) !== null) {
+    if (isSheetKey(bookKey)) {
       const [check, own] = await Promise.all([
         this.prisma.classCheck.findFirst({
           where: {
@@ -462,7 +484,10 @@ export class BookPaymentsService {
         select: ROW_SELECT,
       });
       let classroomId: string | null;
-      if (dto.classroomId !== undefined) {
+      const own = classSheet(bookKey);
+      // Ангийн шалгалтын мөнгө үргэлж тэр ангийнх — өөр ангиар бүртгэхгүй
+      if (own) classroomId = own.classroomId;
+      else if (dto.classroomId !== undefined) {
         classroomId = dto.classroomId;
         if (
           classroomId &&
@@ -530,12 +555,12 @@ export class BookPaymentsService {
 
   /**
    * «Дотоод → Номын мөнгө»: ном бүрээр аль анги авсан, хэд нь өгсөн, багш тус
-   * бүр хэдийг хураасан. Багш (TEACHER) тоо, хувийг бүгдийг харна, мөнгөн
-   * дүнгээс зөвхөн ӨӨРИЙН хураасныг (төлбөрийн нийт дүнг Багш харахгүй дүрэм).
+   * бүр хэдийг хураасан. Бүх багш (Багш ч) бүх дүнг харна.
    */
   async dashboard(userId: string) {
-    const role = await assertInternalTeachingStaff(this.prisma, userId);
-    const seeAllMoney = role !== Role.TEACHER;
+    await assertInternalTeachingStaff(this.prisma, userId);
+    // Номын мөнгөний дүнг Багш ч бүгдийг харна (эзэн 2026-11-12 17:51) — сургалтын
+    // төлбөрийн нийт дүнг Багш харахгүй дүрэмд номын мөнгө хамаарахгүй
     const [checks, payments] = await Promise.all([
       this.prisma.classCheck.findMany({
         where: { bookKey: { not: null }, deletedAt: null },
@@ -589,8 +614,9 @@ export class BookPaymentsService {
         ...payments.map((p) => p.bookKey),
       ]),
     ].sort((a, b) => bookOrder(a) - bookOrder(b));
+    const title = await this.titles(allKeys);
     const books = allKeys.map((key) => {
-      const b = { key, title: bookTitle(key) };
+      const b = { key, title: title(key) };
       const bookPayments = payments.filter((p) => p.bookKey === b.key);
       const bookChecks = checks.filter((c) => c.bookKey === b.key);
       const ids = new Set([
@@ -620,7 +646,7 @@ export class BookPaymentsService {
             price: check?.amount ?? null,
             openedAt: check?.createdAt.toISOString() ?? null,
             ...sum,
-            collected: seeAllMoney ? sum.collected : null,
+            collected: sum.collected,
           };
         })
         .sort((x, y) => x.name.localeCompare(y.name, 'mn', { numeric: true }));
@@ -633,23 +659,19 @@ export class BookPaymentsService {
         classes,
         noClassPaid: noClass.length,
         paid: bookPayments.filter((p) => p.status === 'PAID').length,
-        collected: seeAllMoney
-          ? bookPayments.reduce(
-              (n, p) => n + (p.status === 'PAID' ? (p.amount ?? 0) : 0),
-              0,
-            )
-          : null,
+        collected: bookPayments.reduce(
+          (n, p) => n + (p.status === 'PAID' ? (p.amount ?? 0) : 0),
+          0,
+        ),
       };
     });
 
-    const collectors = collectorTotals(payments)
-      .filter((t) => seeAllMoney || t.collectedById === userId)
-      .map((t) => ({
-        person: people.get(t.collectedById) ?? null,
-        count: t.count,
-        sum: t.sum,
-        byBook: t.byBook.map((x) => ({ ...x, title: bookTitle(x.bookKey) })),
-      }));
-    return { seeAllMoney, books, collectors };
+    const collectors = collectorTotals(payments).map((t) => ({
+      person: people.get(t.collectedById) ?? null,
+      count: t.count,
+      sum: t.sum,
+      byBook: t.byBook.map((x) => ({ ...x, title: title(x.bookKey) })),
+    }));
+    return { seeAllMoney: true, books, collectors };
   }
 }

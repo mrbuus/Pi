@@ -850,7 +850,7 @@ describe('ClassChecksService', () => {
         service.create('c1', { bookKey: 'SHEET', amount: 3000 }, 'teacher'),
       ).resolves.toMatchObject({
         bookKey: 'SHEET1',
-        title: 'Хариултын хуудас 1',
+        title: 'Нэгдсэн шалгалт 1',
       });
       prisma.classCheck.findMany.mockResolvedValueOnce([
         { bookKey: 'SHEET1' },
@@ -860,8 +860,30 @@ describe('ClassChecksService', () => {
         service.create('c1', { bookKey: 'SHEET', amount: 3000 }, 'teacher'),
       ).resolves.toMatchObject({
         bookKey: 'SHEET3',
-        title: 'Хариултын хуудас 3',
+        title: 'Нэгдсэн шалгалт 3',
       });
+      // Ангийн шалгалт: түлхүүр ангийн id-тай, дугаарлалт нэгдсэнээс тусдаа
+      prisma.classCheck.findMany.mockResolvedValueOnce([
+        { bookKey: 'CSHEET1:c1' },
+      ]);
+      prisma.classCheck.create.mockImplementationOnce(
+        ({ data }: { data: Record<string, unknown> }) =>
+          Promise.resolve(checkRow(data)),
+      );
+      await expect(
+        service.create('c1', { bookKey: 'CSHEET', amount: 2000 }, 'teacher'),
+      ).resolves.toMatchObject({ title: 'Ангийн шалгалт 2' });
+      expect(prisma.classCheck.findMany).toHaveBeenLastCalledWith({
+        where: { classroomId: 'c1', bookKey: { startsWith: 'CSHEET' } },
+        select: { bookKey: true },
+      });
+      await expect(
+        service.create(
+          'c1',
+          { bookKey: 'CSHEET1:cmuzbhtra000cc97nt5js9qeh', amount: 1 },
+          'teacher',
+        ),
+      ).rejects.toThrow('Номоо сонгоно уу');
       // Клиент дугаараа өөрөө сонгож болохгүй
       await expect(
         service.create('c1', { bookKey: 'SHEET7', amount: 3000 }, 'teacher'),
