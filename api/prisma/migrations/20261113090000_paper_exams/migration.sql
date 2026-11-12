@@ -1,9 +1,14 @@
--- Цаасан шалгалт (OMR / Excel) — зөвхөн шинэ хүснэгт нэмнэ, одоо байгааг хөндөхгүй (docs/PLAN-OMR.md)
+-- Нэгдсэн шалгалт (төвийн цаасан шалгалт: OMR / Excel) — зөвхөн шинэ хүснэгт нэмнэ, одоо байгааг
+-- хөндөхгүй (docs/PLAN-OMR.md). Идемпотент: deploy дунд тасарч дахин ажиллахад унахгүй (STATUS §4).
 -- CreateEnum
-CREATE TYPE "PaperExamImportStatus" AS ENUM ('CONFIRMED', 'REVERTED');
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'PaperExamImportStatus') THEN
+    CREATE TYPE "PaperExamImportStatus" AS ENUM ('CONFIRMED', 'REVERTED');
+  END IF;
+END $$;
 
 -- CreateTable
-CREATE TABLE "PaperExam" (
+CREATE TABLE IF NOT EXISTS "PaperExam" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "heldOn" DATE NOT NULL,
@@ -18,7 +23,7 @@ CREATE TABLE "PaperExam" (
 );
 
 -- CreateTable
-CREATE TABLE "PaperExamItem" (
+CREATE TABLE IF NOT EXISTS "PaperExamItem" (
     "id" TEXT NOT NULL,
     "examId" TEXT NOT NULL,
     "number" INTEGER NOT NULL,
@@ -33,7 +38,7 @@ CREATE TABLE "PaperExamItem" (
 );
 
 -- CreateTable
-CREATE TABLE "PaperExamSheet" (
+CREATE TABLE IF NOT EXISTS "PaperExamSheet" (
     "id" TEXT NOT NULL,
     "examId" TEXT NOT NULL,
     "importId" TEXT NOT NULL,
@@ -55,7 +60,7 @@ CREATE TABLE "PaperExamSheet" (
 );
 
 -- CreateTable
-CREATE TABLE "PaperExamImport" (
+CREATE TABLE IF NOT EXISTS "PaperExamImport" (
     "id" TEXT NOT NULL,
     "examId" TEXT NOT NULL,
     "fileName" TEXT NOT NULL,
@@ -72,37 +77,57 @@ CREATE TABLE "PaperExamImport" (
 );
 
 -- CreateIndex
-CREATE INDEX "PaperExam_deletedAt_heldOn_idx" ON "PaperExam"("deletedAt", "heldOn");
+CREATE INDEX IF NOT EXISTS "PaperExam_deletedAt_heldOn_idx" ON "PaperExam"("deletedAt", "heldOn");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PaperExamItem_examId_number_key" ON "PaperExamItem"("examId", "number");
+CREATE UNIQUE INDEX IF NOT EXISTS "PaperExamItem_examId_number_key" ON "PaperExamItem"("examId", "number");
 
 -- CreateIndex
-CREATE INDEX "PaperExamSheet_examId_supersededAt_idx" ON "PaperExamSheet"("examId", "supersededAt");
+CREATE INDEX IF NOT EXISTS "PaperExamSheet_examId_supersededAt_idx" ON "PaperExamSheet"("examId", "supersededAt");
 
 -- CreateIndex
-CREATE INDEX "PaperExamSheet_studentId_idx" ON "PaperExamSheet"("studentId");
+CREATE INDEX IF NOT EXISTS "PaperExamSheet_studentId_idx" ON "PaperExamSheet"("studentId");
 
 -- CreateIndex
-CREATE INDEX "PaperExamSheet_importId_idx" ON "PaperExamSheet"("importId");
+CREATE INDEX IF NOT EXISTS "PaperExamSheet_importId_idx" ON "PaperExamSheet"("importId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PaperExamSheet_active_student_key" ON "PaperExamSheet"("examId", "studentId") WHERE ("supersededAt" IS NULL);
+CREATE UNIQUE INDEX IF NOT EXISTS "PaperExamSheet_active_student_key" ON "PaperExamSheet"("examId", "studentId") WHERE ("supersededAt" IS NULL);
 
 -- CreateIndex
-CREATE INDEX "PaperExamImport_examId_createdAt_idx" ON "PaperExamImport"("examId", "createdAt");
+CREATE INDEX IF NOT EXISTS "PaperExamImport_examId_createdAt_idx" ON "PaperExamImport"("examId", "createdAt");
 
 -- AddForeignKey
-ALTER TABLE "PaperExamItem" ADD CONSTRAINT "PaperExamItem_examId_fkey" FOREIGN KEY ("examId") REFERENCES "PaperExam"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'PaperExamItem_examId_fkey') THEN
+    ALTER TABLE "PaperExamItem" ADD CONSTRAINT "PaperExamItem_examId_fkey" FOREIGN KEY ("examId") REFERENCES "PaperExam"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "PaperExamSheet" ADD CONSTRAINT "PaperExamSheet_examId_fkey" FOREIGN KEY ("examId") REFERENCES "PaperExam"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'PaperExamSheet_examId_fkey') THEN
+    ALTER TABLE "PaperExamSheet" ADD CONSTRAINT "PaperExamSheet_examId_fkey" FOREIGN KEY ("examId") REFERENCES "PaperExam"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "PaperExamSheet" ADD CONSTRAINT "PaperExamSheet_importId_fkey" FOREIGN KEY ("importId") REFERENCES "PaperExamImport"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'PaperExamSheet_importId_fkey') THEN
+    ALTER TABLE "PaperExamSheet" ADD CONSTRAINT "PaperExamSheet_importId_fkey" FOREIGN KEY ("importId") REFERENCES "PaperExamImport"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "PaperExamSheet" ADD CONSTRAINT "PaperExamSheet_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'PaperExamSheet_studentId_fkey') THEN
+    ALTER TABLE "PaperExamSheet" ADD CONSTRAINT "PaperExamSheet_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+  END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "PaperExamImport" ADD CONSTRAINT "PaperExamImport_examId_fkey" FOREIGN KEY ("examId") REFERENCES "PaperExam"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'PaperExamImport_examId_fkey') THEN
+    ALTER TABLE "PaperExamImport" ADD CONSTRAINT "PaperExamImport_examId_fkey" FOREIGN KEY ("examId") REFERENCES "PaperExam"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;
