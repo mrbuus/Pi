@@ -24,6 +24,8 @@ export interface HubOverview {
     room: string | null;
     topic: string | null;
   } | null;
+  /** Хоёр ангид зэрэг суудаг сурагчийн өнөөдрийн нөгөө ангийн хичээл */
+  todayOther?: NonNullable<HubOverview["today"]>[];
   latestMark: { date: string; status: HomeworkStatus; comment: string | null } | null;
 }
 

@@ -341,6 +341,7 @@ export function StudentActionsMenu({
   student,
   archived = false,
   currentClassId = null,
+  otherClassIds,
   lastClassId = null,
   onChanged,
   className,
@@ -348,6 +349,7 @@ export function StudentActionsMenu({
   student: StudentRef;
   archived?: boolean;
   currentClassId?: string | null;
+  otherClassIds?: string[];
   lastClassId?: string | null;
   onChanged: () => void;
   className?: string;
@@ -391,6 +393,7 @@ export function StudentActionsMenu({
           studentId={student.id}
           studentName={student.name}
           currentClassId={currentClassId}
+          otherClassIds={otherClassIds}
           onClose={close}
           onChanged={onChanged}
         />

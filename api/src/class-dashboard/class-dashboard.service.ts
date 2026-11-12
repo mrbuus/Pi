@@ -1,3 +1,4 @@
+import { activeClasses } from '../common/class-track';
 import {
   BadRequestException,
   ForbiddenException,
@@ -1447,11 +1448,7 @@ export class ClassDashboardService {
 
   async studentCompetency(studentId: string, userId: string) {
     const actor = await this.actor(userId);
-    const enrollment = await this.prisma.enrollment.findFirst({
-      where: { studentId, leftAt: null, classroom: { archived: false } },
-      orderBy: { joinedAt: 'desc' },
-      select: { classroomId: true },
-    });
+    const [enrollment] = await activeClasses(this.prisma, studentId);
     if (!enrollment) return { competency: null, classroomId: null };
     const visible = await this.visibleClassIds(actor);
     if (visible !== 'ALL' && !visible.includes(enrollment.classroomId))

@@ -737,6 +737,7 @@ describe('StudentHubService', () => {
           classroomId: 'c1',
           lessonDate: '2026-10-27',
         },
+        todayOther: [],
       });
       expect(env.db.attendance.groupBy.mock.calls[0][0].where).toEqual({
         studentId: 's1',

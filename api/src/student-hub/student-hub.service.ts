@@ -1,3 +1,4 @@
+import { mainFirst } from '../common/class-track';
 import {
   BadRequestException,
   ForbiddenException,
@@ -750,26 +751,38 @@ export class StudentHubService {
     });
     const entry =
       day && !day.isHoliday ? pickToday(day.entries, ubMinuteOfDay()) : null;
-    const record = entry
-      ? records.find(
-          (r) =>
-            r.classroomId === entry.classroomId &&
-            r.scheduleId === entry.scheduleId,
-        )
-      : undefined;
-    const todayView: HubOverview['today'] = entry
-      ? {
-          classroomId: entry.classroomId,
-          classroomName: entry.classroomName,
-          date: today,
-          startMinute: record?.startMinute ?? entry.startMinute,
-          endMinute: record?.endMinute ?? entry.endMinute,
-          room: record?.room ?? entry.room,
-          topic: topicOf(record?.topic, entry.topic),
-        }
-      : null;
+    type Entry = NonNullable<typeof entry>;
+    const viewOf = (e: Entry): NonNullable<HubOverview['today']> => {
+      const record = records.find(
+        (r) => r.classroomId === e.classroomId && r.scheduleId === e.scheduleId,
+      );
+      return {
+        classroomId: e.classroomId,
+        classroomName: e.classroomName,
+        date: today,
+        startMinute: record?.startMinute ?? e.startMinute,
+        endMinute: record?.endMinute ?? e.endMinute,
+        room: record?.room ?? e.room,
+        topic: topicOf(record?.topic, e.topic),
+      };
+    };
+    const todayView: HubOverview['today'] = entry ? viewOf(entry) : null;
+    // Хоёр ангид зэрэг суудаг сурагч (математик + Нийгэм): өнөөдрийн НӨГӨӨ ангийн хичээл
+    const otherToday: Entry[] = [];
+    if (entry && day)
+      for (const id of new Set(day.entries.map((e) => e.classroomId))) {
+        if (id === entry.classroomId) continue;
+        const e = pickToday(
+          day.entries.filter((x) => x.classroomId === id),
+          ubMinuteOfDay(),
+        );
+        if (e) otherToday.push(e);
+      }
     return {
-      classrooms: classes.map((c) => ({
+      // Хоёр ангитай бол үндсэн (математикийн) анги эхэнд
+      classrooms: mainFirst(
+        classes.map((c) => ({ c, classroom: { name: c.classroomName } })),
+      ).map(({ c }) => ({
         id: c.classroomId,
         name: c.classroomName,
       })),
@@ -780,6 +793,9 @@ export class StudentHubService {
         homework.map((h) => ({ status: h.status, count: h._count._all })),
       ),
       today: todayView,
+      todayOther: otherToday
+        .map(viewOf)
+        .sort((a, b) => a.startMinute - b.startMinute),
       latestMark:
         latest && latest.status
           ? {

@@ -1,5 +1,6 @@
 "use client";
 
+import { classNames } from "@/lib/classTrack";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -143,6 +144,7 @@ export default function StudentsDirectory() {
     const branches = new Set<string>();
     for (const s of students ?? []) {
       if (s.currentClassroom) classrooms.set(s.currentClassroom.id, s.currentClassroom.name);
+      for (const c of s.otherClassrooms ?? []) classrooms.set(c.id, c.name);
       if (s.studentProfile?.grade) grades.add(s.studentProfile.grade);
       if (s.studentProfile?.branch) branches.add(s.studentProfile.branch);
     }
@@ -159,7 +161,12 @@ export default function StudentsDirectory() {
     return (students ?? []).filter((s) => {
       if (attention === "unassigned" && !unassignedIds.has(s.id)) return false;
       if (attention === "absent" && !absentIds.has(s.id)) return false;
-      if (classroomFilter !== "ALL" && s.currentClassroom?.id !== classroomFilter) return false;
+      if (
+        classroomFilter !== "ALL" &&
+        s.currentClassroom?.id !== classroomFilter &&
+        !(s.otherClassrooms ?? []).some((c) => c.id === classroomFilter)
+      )
+        return false;
       if (gradeFilter !== "ALL" && String(s.studentProfile?.grade ?? "") !== gradeFilter)
         return false;
       if (branchFilter !== "ALL" && s.studentProfile?.branch !== branchFilter) return false;
@@ -546,7 +553,7 @@ export default function StudentsDirectory() {
                             )}
                           </td>
                           <td className="px-3 py-2 text-ink-dim">
-                            {cls?.name ?? (s.studentProfile?.grade ? `${s.studentProfile.grade}-р анги` : "—")}
+                            {(showArchived ? cls?.name : classNames(cls, s.otherClassrooms)) ?? (s.studentProfile?.grade ? `${s.studentProfile.grade}-р анги` : "—")}
                           </td>
                           <td className="px-3 py-2 text-ink-dim">{s.studentProfile?.section ?? "—"}</td>
                           <td className="px-3 py-2 text-ink-dim">{s.studentProfile?.branch ?? "—"}</td>
@@ -576,6 +583,7 @@ export default function StudentsDirectory() {
                                 student={{ id: s.id, name: fullName(s) }}
                                 archived={!!s.archivedAt}
                                 currentClassId={s.currentClassroom?.id ?? null}
+                                otherClassIds={(s.otherClassrooms ?? []).map((c) => c.id)}
                                 lastClassId={s.lastClassroom?.id ?? null}
                                 onChanged={reloadAll}
                               />
@@ -604,7 +612,7 @@ export default function StudentsDirectory() {
                           className="text-xs text-ink-dim"
                           items={[
                             s.studentCode && <span key="c" className="font-mono">{s.studentCode}</span>,
-                            cls?.name ?? (isUnassigned ? "Хуваарилаагүй" : null),
+                            (showArchived ? cls?.name : classNames(cls, s.otherClassrooms)) ?? (isUnassigned ? "Хуваарилаагүй" : null),
                             !showArchived && absentIds.has(s.id) ? "Ирэхгүй" : null,
                             showArchived ? s.archiveReason : null,
                           ]}
@@ -620,6 +628,7 @@ export default function StudentsDirectory() {
                           student={{ id: s.id, name: fullName(s) }}
                           archived={!!s.archivedAt}
                           currentClassId={s.currentClassroom?.id ?? null}
+                          otherClassIds={(s.otherClassrooms ?? []).map((c) => c.id)}
                           lastClassId={s.lastClassroom?.id ?? null}
                           onChanged={reloadAll}
                         />

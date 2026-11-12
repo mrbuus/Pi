@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -114,5 +115,16 @@ export class LessonDayController {
     @Body() dto: ImageKeysDto,
   ) {
     return this.lessonDay.uploadDayPhotos(req.user, classroomId, date, dto.imageKeys);
+  }
+
+  // Буруу илгээсэн онолын зургаа 5 минутын дотор буцааж устгана (эзэн 2026-11-12)
+  @Roles(...STAFF, Role.STUDENT)
+  @Delete('lesson-day/:classroomId/:date/photos')
+  removeDayPhotos(
+    @Req() req: RequestWithUser,
+    @Param('classroomId') classroomId: string,
+    @Param('date') date: string,
+  ) {
+    return this.lessonDay.removeDayPhotos(req.user, classroomId, date);
   }
 }

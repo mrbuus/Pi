@@ -46,3 +46,19 @@ export function normalizeTarget(raw: string | undefined): string | null {
   }
   return SAFE_VALUE.test(value) ? `${kind}:${value}` : null;
 }
+
+/**
+ * Клиентийн техникийн алдаа («err:photo/build SamsungBrowser27 Android10 …»): аль утсан
+ * дээр, аль шатанд зураг илгээж чадаагүйг олоход. Зөвхөн үсэг, тоо, энгийн тэмдэг —
+ * бусдыг зайгаар солино; нэр, агуулга ордоггүй (клиент тогтмол шошго + хөтчийн алдааны нэр).
+ */
+export function normalizeErrorTarget(raw: string | undefined): string | null {
+  if (!raw || !raw.startsWith('err:')) return null;
+  const value = raw
+    .slice(4)
+    .replace(/[^\p{L}\p{N} _.\-/:]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 200);
+  return value ? `err:${value}` : null;
+}

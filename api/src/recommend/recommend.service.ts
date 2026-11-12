@@ -1,3 +1,4 @@
+import { activeClasses, mainFirst } from '../common/class-track';
 import {
   BadRequestException,
   ForbiddenException,
@@ -133,13 +134,18 @@ export class RecommendService {
         orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
         take: 10000,
       }),
-      this.prisma.enrollment.findFirst({
-        where: { studentId, leftAt: null, classroom: { archived: false } },
-        select: {
-          classroomId: true,
-          classroom: { select: { grade: true, progressChapterId: true } },
-        },
-      }),
+      this.prisma.enrollment
+        .findMany({
+          where: { studentId, leftAt: null, classroom: { archived: false } },
+          orderBy: { joinedAt: 'desc' },
+          select: {
+            classroomId: true,
+            classroom: {
+              select: { grade: true, progressChapterId: true, name: true, subject: true },
+            },
+          },
+        })
+        .then((rows) => mainFirst(rows)[0] ?? null),
       this.prisma.learningEvent.findMany({
         where: {
           userId: studentId,
@@ -489,10 +495,7 @@ export class RecommendService {
           },
         },
       }),
-      this.prisma.enrollment.findFirst({
-        where: { studentId, leftAt: null },
-        select: { classroomId: true },
-      }),
+      activeClasses(this.prisma, studentId).then((rows) => rows[0] ?? null),
     ]);
 
     if (!student) throw new NotFoundException('Сурагч олдсонгүй');
@@ -567,10 +570,7 @@ export class RecommendService {
         select: { id: true, title: true, order: true, grade: true },
         take: 5000,
       }),
-      this.prisma.enrollment.findFirst({
-        where: { studentId, leftAt: null, classroom: { archived: false } },
-        select: { classroom: { select: { grade: true } } },
-      }),
+      activeClasses(this.prisma, studentId).then((rows) => rows[0] ?? null),
     ]);
     const match = matchChapter(topic, chapters, enrollment?.classroom.grade ?? null);
     const none = { chapterId: null, chapterIds: [] as string[], title: null };

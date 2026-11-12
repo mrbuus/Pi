@@ -1,3 +1,4 @@
+import { mainFirst } from '../common/class-track';
 import {
   BadRequestException,
   Injectable,
@@ -383,7 +384,12 @@ export class TuitionService {
     // Сурагч байгаа эсэх
     const student = await this.prisma.user.findUnique({
       where: { id: studentId },
-      include: { enrollments: { where: { leftAt: null } } },
+      include: {
+        enrollments: {
+          where: { leftAt: null },
+          include: { classroom: { select: { name: true, subject: true } } },
+        },
+      },
     });
     if (!student) {
       throw new NotFoundException('Сурагч олдсонгүй');
@@ -398,7 +404,7 @@ export class TuitionService {
       if (!classroom) throw new NotFoundException('Анги олдсонгүй');
     } else if (student.enrollments.length > 0) {
       // ТАНХИМЫН сурагч → сүүлийн идэвхтэй ангийг авна
-      const enrollment = student.enrollments[0];
+      const enrollment = mainFirst(student.enrollments)[0];
       classroom = { id: enrollment.classroomId };
     }
 

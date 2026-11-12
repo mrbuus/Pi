@@ -215,18 +215,21 @@ export class ClassSessionsService {
   // Сурагч: сүүлийн өдрүүдэд ангид хийсэн тестүүд + бодлогууд + миний тэмдэглэгээ.
   // Token мэдэх шаардлагагүй — хүүхэд цаасаа хараад бодлого бүрийг тэмдэглэнэ.
   async todoForStudent(studentId: string, subject?: Subject) {
-    const enrollment = await this.prisma.enrollment.findFirst({
-      where: { studentId, leftAt: null },
-      select: { classroomId: true },
-    });
-    if (!enrollment) return [];
+    // Хоёр ангид зэрэг суудаг сурагч — бүх ангийнхаа тестийг тэмдэглэнэ
+    const classIds = (
+      await this.prisma.enrollment.findMany({
+        where: { studentId, leftAt: null },
+        select: { classroomId: true },
+      })
+    ).map((e) => e.classroomId);
+    if (!classIds.length) return [];
 
     const today = todayUB();
     const since = addDateDays(today, -(EVENING_MARKING_WINDOW_DAYS - 1));
 
     const sessions = await this.prisma.classTestSession.findMany({
       where: {
-        classroomId: enrollment.classroomId,
+        classroomId: { in: classIds },
         date: { gte: since, lte: today },
       },
       orderBy: { date: 'desc' },

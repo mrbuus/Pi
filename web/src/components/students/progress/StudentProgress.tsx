@@ -224,6 +224,7 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
             studentId={studentId}
             studentName={fullName(detail)}
             currentClassId={classId}
+            otherClassIds={(detail.otherClassrooms ?? []).map((c) => c.id)}
             onClose={() => setMoving(false)}
             onChanged={load}
           />

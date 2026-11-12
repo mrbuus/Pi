@@ -50,6 +50,8 @@ export interface StudentListItem {
   lastSeenAt?: string | null;
   studentProfile?: StudentProfileLite | null;
   currentClassroom?: ClassroomLite | null;
+  /** Зэрэг сууж буй бусад анги (ж: Нийгэм) — үндсэн анги currentClassroom */
+  otherClassrooms?: ClassroomLite[];
   /** Аппад холбогдсон эцэг эхийн утас (ParentLink) */
   parentPhones?: string[];
 }
@@ -96,6 +98,8 @@ export interface StudentDetailData {
   focus?: StudentFocus | null;
   studentProfile: StudentProfileLite | null;
   currentClassroom: ClassroomLite | null;
+  /** Зэрэг сууж буй бусад анги (ж: Нийгэм) */
+  otherClassrooms?: ClassroomLite[];
   counts: {
     assignmentsCompleted: number;
     testResults: number;

@@ -44,8 +44,7 @@ export class PaymentsExportService {
             enrollments: {
               where: { leftAt: null },
               orderBy: { joinedAt: 'desc' },
-              take: 1,
-              select: { classroom: { select: { name: true } } },
+              select: { classroom: { select: { name: true, subject: true } } },
             },
           },
         },

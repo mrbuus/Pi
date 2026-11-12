@@ -1,3 +1,4 @@
+import { mainFirst } from '../common/class-track';
 import {
   Injectable,
   NotFoundException,
@@ -89,11 +90,11 @@ export class ParentsService {
             },
             enrollments: {
               where: { leftAt: null },
+              orderBy: { joinedAt: 'desc' },
               select: {
                 joinedAt: true,
-                classroom: { select: { id: true, name: true, grade: true } },
+                classroom: { select: { id: true, name: true, grade: true, subject: true } },
               },
-              take: 1,
             },
             attendances: {
               select: {
@@ -165,8 +166,9 @@ export class ParentsService {
           verified: true,
           student: {
             ...student,
-            classroom: student.enrollments[0]?.classroom ?? null,
-            joinedAt: student.enrollments[0]?.joinedAt ?? null,
+            // хоёр ангитай бол үндсэн (математикийн) анги
+            classroom: mainFirst(student.enrollments)[0]?.classroom ?? null,
+            joinedAt: mainFirst(student.enrollments)[0]?.joinedAt ?? null,
             homeworkQuizzes,
           },
         };

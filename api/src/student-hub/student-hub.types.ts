@@ -28,6 +28,8 @@ export interface HubOverview {
     room: string | null;
     topic: string | null;
   } | null;
+  /** Хоёр ангид зэрэг суудаг сурагчийн өнөөдрийн нөгөө ангийн хичээл (ихэвчлэн хоосон) */
+  todayOther?: NonNullable<HubOverview['today']>[];
   /**
    * Хамгийн сүүлд багшийн тавьсан тэмдэглэгээ: date = тэмдэглэсэн өдөр (D'), lessonDate =
    * даалгавар өгсөн хичээлийн өдөр (D; олдохгүй/хуучин анги бол null)

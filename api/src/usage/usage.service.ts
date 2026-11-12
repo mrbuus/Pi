@@ -3,7 +3,7 @@ import { Prisma } from '../generated/prisma/client';
 import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecordUsageDto } from './dto/record-usage.dto';
-import { normalizePath, normalizeTarget } from './usage-normalize';
+import { normalizeErrorTarget, normalizePath, normalizeTarget } from './usage-normalize';
 
 const TOP_PAGES = 15;
 const TOP_CLICKS = 20;
@@ -44,8 +44,13 @@ export class UsageService implements OnModuleInit, OnModuleDestroy {
       if (this.buffer.length >= MAX_BUFFER) break; // сан удаа унтарвал санах ой дүүргэхгүй
       const path = normalizePath(e.path);
       if (!path) continue;
-      const target = e.kind === 'click' ? normalizeTarget(e.target) : null;
-      if (e.kind === 'click' && !target) continue;
+      const target =
+        e.kind === 'click'
+          ? normalizeTarget(e.target)
+          : e.kind === 'error'
+            ? normalizeErrorTarget(e.target)
+            : null;
+      if (e.kind !== 'page' && !target) continue;
       this.buffer.push({ userId, role, kind: e.kind, path, target, device: dto.device, createdAt: now });
       accepted++;
     }

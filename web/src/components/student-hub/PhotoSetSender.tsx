@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Camera, CircleCheck, LoaderCircle, RefreshCw, Trash2, TriangleAlert, Undo2 } from "lucide-react";
 import PhotoPicker from "@/components/makeup/PhotoPicker";
 import { Button } from "@/components/ui/kit/button";
@@ -42,6 +42,8 @@ export default function PhotoSetSender({
   sendLabel = "Зураг илгээх",
   heading,
   flash = false,
+  editableUntil,
+  resendAlways = false,
 }: {
   sent: SentSet | null;
   canEdit: boolean;
@@ -61,6 +63,10 @@ export default function PhotoSetSender({
   heading?: ReactNode;
   /** Шинээр үүссэн үед «Илгээгдлээ» мэдэгдлийг шууд харуулах */
   flash?: boolean;
+  /** Энэ агшин (ms) хүртэл л «Дахин илгээх» / «Устгах» (илгээснээс 5 минут). undefined = хязгааргүй */
+  editableUntil?: number | null;
+  /** Хугацаа өнгөрсөн ч «Дахин илгээх» үлдэнэ (багш буцаасан) */
+  resendAlways?: boolean;
 }) {
   const [replacing, setReplacing] = useState(false);
   const [expanded, setExpanded] = useState(!collapsed);
@@ -68,6 +74,17 @@ export default function PhotoSetSender({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
+  // 5 минутын хугацаа дуусах агшинд товчнууд өөрөө алга болно
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!editableUntil) return;
+    const left = editableUntil - Date.now();
+    if (left <= 0) return;
+    const t = setTimeout(() => setNow(Date.now()), left + 250);
+    return () => clearTimeout(t);
+  }, [editableUntil]);
+  const inWindow = editableUntil === undefined || (editableUntil !== null && now < editableUntil);
+  const canResend = inWindow || resendAlways;
 
   async function save(keys: string[], pages: number) {
     await onSave(keys, pages);
@@ -91,7 +108,7 @@ export default function PhotoSetSender({
     }
   }
 
-  if (sent && !replacing) {
+  if (sent && !(replacing && canResend)) {
     const time = sentTime(sent.at);
     return (
       <div className="space-y-3">
@@ -122,7 +139,7 @@ export default function PhotoSetSender({
             Илгээгдлээ
           </p>
         )}
-        {canEdit && (
+        {canEdit && canResend && (
           <div className="flex flex-wrap items-center gap-2">
             {!confirmDelete ? (
               <>
@@ -139,7 +156,7 @@ export default function PhotoSetSender({
                   <RefreshCw aria-hidden />
                   Дахин илгээх
                 </Button>
-                {onDelete && (
+                {onDelete && inWindow && (
                   <Button variant="ghost" size="sm" className="min-h-11" onClick={() => setConfirmDelete(true)}>
                     <Trash2 aria-hidden />
                     Устгах
@@ -163,6 +180,9 @@ export default function PhotoSetSender({
               </>
             )}
           </div>
+        )}
+        {canEdit && inWindow && editableUntil != null && (
+          <p className="text-xs text-ink-dim">Буруу илгээсэн бол 5 минутын дотор устгаж, сольж болно</p>
         )}
         {error && (
           <p role="alert" className="flex items-center gap-1.5 text-sm text-error">
