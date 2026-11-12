@@ -13,6 +13,8 @@ import { managesAllClasses } from '../exams/exam-access';
 import { loadWorkbook, normalizeName } from '../exams/gradebook-sheet';
 import {
   areaScores,
+  classifyBy,
+  PAPER_TOPICS,
   competitionRanks,
   CONTENT_AREAS,
   gradeSheet,
@@ -104,6 +106,8 @@ const ITEM_SELECT = {
   answerKey: true,
   points: true,
   area: true,
+  topic: true,
+  formulaSlugs: true,
   voided: true,
 } as const;
 
@@ -303,15 +307,35 @@ export class PaperExamsService {
         throw new BadRequestException(`${item.number}-р бодлого давхардсан`);
       seen.add(item.number);
     }
+    const slugs = [...new Set(dto.items.flatMap((i) => i.formulaSlugs ?? []))];
+    if (slugs.length) {
+      const found = await this.prisma.formula.findMany({
+        where: { slug: { in: slugs } },
+        select: { slug: true },
+      });
+      const have = new Set(found.map((f) => f.slug));
+      const missing = slugs.filter((x) => !have.has(x));
+      if (missing.length)
+        throw new BadRequestException(
+          `Томьёоны санд алга: ${missing.slice(0, 5).join(', ')}`,
+        );
+    }
     const before = exam.items;
     await this.prisma.$transaction(
       async (tx) => {
         for (const item of dto.items) {
+          // Илгээсэн талбарыг л өөрчилнө (undefined = хэвээр, null = арилгах)
           const data = {
-            answerKey: item.answerKey ?? null,
             points: item.points,
-            area: item.area ?? null,
-            voided: item.voided ?? false,
+            ...(item.answerKey !== undefined
+              ? { answerKey: item.answerKey }
+              : {}),
+            ...(item.area !== undefined ? { area: item.area } : {}),
+            ...(item.topic !== undefined ? { topic: item.topic } : {}),
+            ...(item.formulaSlugs !== undefined
+              ? { formulaSlugs: [...new Set(item.formulaSlugs)] }
+              : {}),
+            ...(item.voided !== undefined ? { voided: item.voided } : {}),
           };
           await tx.paperExamItem.upsert({
             where: { examId_number: { examId: id, number: item.number } },
@@ -945,6 +969,21 @@ export class PaperExamsService {
     }));
   }
 
+  /** Бодлогуудад оноосон томьёонууд (нэр + LaTeX) — Томьёоны сангаас. */
+  private async formulasFor(items: PaperItem[]) {
+    const slugs = [...new Set(items.flatMap((i) => i.formulaSlugs ?? []))];
+    if (slugs.length === 0) return [];
+    const rows = await this.prisma.formula.findMany({
+      where: { slug: { in: slugs } },
+      select: { slug: true, name: true, latex: true, general: true },
+    });
+    return rows.map((f) => ({
+      slug: f.slug!,
+      title: f.name,
+      latex: f.latex ?? f.general ?? null,
+    }));
+  }
+
   // ======================= Багшийн хүснэгт =======================
 
   /** Багш (TEACHER) өөрийн ангийнхаа мөрийг; Багш+/Админ бүгдийг. */
@@ -1001,8 +1040,10 @@ export class PaperExamsService {
       );
     }
 
+    const by = classifyBy(items);
     const row = (x: (typeof graded)[number]) => {
       const areas = areaScores([x.g.statuses], items);
+      const topics = areaScores([x.g.statuses], items, 'topic');
       return {
         sheetId: x.s.id,
         studentId: x.s.studentId,
@@ -1013,8 +1054,9 @@ export class PaperExamsService {
         maxScore: x.g.maxScore,
         pct: pct(x.g.totalScore, x.g.maxScore),
         rank: rankBy.get(x.s.id) ?? null,
-        weak: weakAreas(areas),
+        weak: weakAreas(by === 'topic' ? topics : areas),
         areas: areas.map((a) => ({ area: a.area, pct: a.pct })),
+        topics: topics.map((a) => ({ area: a.area, pct: a.pct })),
         statuses: x.g.statuses.map((st) => STATUS_CHAR[st]).join(''),
         answers: x.answers,
       };
@@ -1054,6 +1096,7 @@ export class PaperExamsService {
             items,
           ),
           areas: areaScores(statuses, items),
+          topics: areaScores(statuses, items, 'topic'),
           rows: list.map(row),
         };
       });
@@ -1072,6 +1115,9 @@ export class PaperExamsService {
       },
       scope: all ? ('ALL' as const) : ('OWN_CLASSES' as const),
       areasList: CONTENT_AREAS,
+      topicsList: PAPER_TOPICS,
+      classifyBy: by,
+      formulas: await this.formulasFor(items),
       items,
       overall: {
         count: counted.length,
@@ -1093,6 +1139,11 @@ export class PaperExamsService {
         areas: areaScores(
           counted.map((x) => x.g.statuses),
           items,
+        ),
+        topics: areaScores(
+          counted.map((x) => x.g.statuses),
+          items,
+          'topic',
         ),
       },
       groups,
@@ -1173,6 +1224,13 @@ export class PaperExamsService {
     const me = graded.find((x) => x.s.id === mine.id)!;
     const myRank = ranks[graded.indexOf(me)];
     const myAreas = areaScores([me.g.statuses], items);
+    const myTopics = areaScores([me.g.statuses], items, 'topic');
+    const by = classifyBy(items);
+    const allStatuses = graded.map((x) => x.g.statuses);
+    const centerItems = itemStats(
+      graded.map((x) => ({ statuses: x.g.statuses, answers: [] })),
+      items,
+    );
 
     const ranking = graded
       .map((x, i) => ({
@@ -1201,14 +1259,19 @@ export class PaperExamsService {
         rank: myRank,
         participants: graded.length,
         group: mine.groupLabel,
-        weak: weakAreas(myAreas),
+        weak: weakAreas(by === 'topic' ? myTopics : myAreas),
         areas: myAreas,
+        topics: myTopics,
         items: items.map((item, i) => {
           const answer = me.answers[i] ?? '';
           const letter = /^[A-E]$/.test(answer) ? answer : null;
           return {
             number: item.number,
             area: item.area,
+            topic: item.topic ?? null,
+            formulaSlugs: item.formulaSlugs ?? [],
+            // Төвийн сурагчдын хэдэн хувь зөв бодсон (нэгтгэсэн тоо)
+            centerPct: centerItems[i]?.pct ?? null,
             points: item.points,
             status: me.g.statuses[i],
             answer: letter,
@@ -1225,11 +1288,17 @@ export class PaperExamsService {
           graded.reduce((t, x) => t + x.g.totalScore, 0),
           graded.reduce((t, x) => t + x.g.maxScore, 0),
         ),
-        areas: areaScores(
-          graded.map((x) => x.g.statuses),
-          items,
-        ).map((a) => ({ area: a.area, pct: a.pct })),
+        areas: areaScores(allStatuses, items).map((a) => ({
+          area: a.area,
+          pct: a.pct,
+        })),
+        topics: areaScores(allStatuses, items, 'topic').map((a) => ({
+          area: a.area,
+          pct: a.pct,
+        })),
       },
+      classifyBy: by,
+      formulas: await this.formulasFor(items),
       ranking,
     };
   }

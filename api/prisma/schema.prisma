@@ -3709,6 +3709,10 @@ model PaperExamItem {
   points    Int       @default(1)
   /// БҮТ-ийн агуулгын ангилал (paper-exams/paper-exam-logic.ts CONTENT_AREAS)
   area      String?
+  /// Сэдэв (бүлэг): «Модульт тэгшитгэл» … — чөлөөт бичвэр, санал болгох жагсаалттай
+  topic     String?
+  /// Бодлогод ашиглах томьёо — Томьёоны сангийн Formula.slug (дарааллаар)
+  formulaSlugs String[] @default([])
   /// Хүчингүй болгосон бодлого — оноо, хувьд тооцогдохгүй
   voided    Boolean   @default(false)
 

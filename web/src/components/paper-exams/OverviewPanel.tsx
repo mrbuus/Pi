@@ -5,7 +5,8 @@ import { EmptyState } from "@/components/ui/StateBlock";
 import { BarChart3 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import AreaBars from "./AreaBars";
-import { areaShort, scoreText, TONE_CELL, toneOf, type Board } from "./types";
+import FormulaLine from "./FormulaLine";
+import { areaShort, CLASSIFY_LABEL, scoreText, TONE_CELL, toneOf, topicShort, type Board } from "./types";
 
 /**
  * Харагдац 2 — бүх багийн тойм: нийт үзүүлэлт, баг × агуулгын хүснэгт,
@@ -16,7 +17,12 @@ export default function OverviewPanel({ board }: { board: Board }) {
   if (o.count === 0) {
     return <EmptyState icon={BarChart3} title="Дүн алга" hint="Дүн оруулсны дараа тойм энд харагдана." />;
   }
-  const areaNames = o.areas.map((a) => a.area);
+  const by = board.classifyBy;
+  const label = CLASSIFY_LABEL[by];
+  const overallBy = by === "topic" ? o.topics : o.areas;
+  const short = by === "topic" ? topicShort : areaShort;
+  const areaNames = overallBy.map((a) => a.area);
+  const formulaBy = new Map(board.formulas.map((f) => [f.slug, f]));
   const hardest = [...o.items]
     .filter((s) => s.pct !== null)
     .sort((a, b) => (a.pct ?? 0) - (b.pct ?? 0) || a.number - b.number)
@@ -43,7 +49,7 @@ export default function OverviewPanel({ board }: { board: Board }) {
       </div>
 
       <Card padding="none" className="overflow-hidden">
-        <h3 className="px-5 pt-4 font-bold text-brand-soft">Багаар — агуулгын гүйцэтгэл %</h3>
+        <h3 className="px-5 pt-4 font-bold text-brand-soft">Багаар — {label.one.toLocaleLowerCase("mn-MN")} бүрийн гүйцэтгэл %</h3>
         <div className="overflow-x-auto p-3">
           <table className="w-full min-w-[36rem] border-separate border-spacing-0 text-sm">
             <thead>
@@ -55,14 +61,14 @@ export default function OverviewPanel({ board }: { board: Board }) {
                 {areaNames.map((a) => (
                   <th key={a} className="px-1 py-2 text-center font-bold" title={a}>
                     <span className="hidden lg:inline">{a}</span>
-                    <span className="lg:hidden">{areaShort(a)}</span>
+                    <span className="lg:hidden">{short(a)}</span>
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {board.groups.map((g) => {
-                const by = new Map(g.areas.map((a) => [a.area, a.pct]));
+                const pctBy = new Map((by === "topic" ? g.topics : g.areas).map((a) => [a.area, a.pct]));
                 return (
                   <tr key={g.label}>
                     <td className="border-t border-line px-2 py-1.5">
@@ -73,7 +79,7 @@ export default function OverviewPanel({ board }: { board: Board }) {
                     <td className="border-t border-line px-2 py-1.5 text-right tabular-nums">{scoreText(g.avgScore)}</td>
                     <td className="border-t border-line px-2 py-1.5 text-right font-bold tabular-nums">{g.avgPct ?? ""}</td>
                     {areaNames.map((a) => {
-                      const p = by.get(a) ?? null;
+                      const p = pctBy.get(a) ?? null;
                       return (
                         <td key={a} className="border-t border-line p-1">
                           <span className={cn("block rounded-md py-1 text-center text-xs font-bold tabular-nums", TONE_CELL[toneOf(p)])}>
@@ -90,7 +96,7 @@ export default function OverviewPanel({ board }: { board: Board }) {
                 <td className="border-t-2 border-line px-2 py-1.5 text-right tabular-nums">{o.count}</td>
                 <td className="border-t-2 border-line px-2 py-1.5 text-right tabular-nums">{scoreText(o.avgScore)}</td>
                 <td className="border-t-2 border-line px-2 py-1.5 text-right tabular-nums">{o.avgPct ?? ""}</td>
-                {o.areas.map((a) => (
+                {overallBy.map((a) => (
                   <td key={a.area} className="border-t-2 border-line p-1">
                     <span className={cn("block rounded-md py-1 text-center text-xs tabular-nums", TONE_CELL[toneOf(a.pct)])}>{a.pct ?? ""}</span>
                   </td>
@@ -103,8 +109,14 @@ export default function OverviewPanel({ board }: { board: Board }) {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
-          <h3 className="mb-3 font-bold text-brand-soft">Агуулгын төрлөөр — гүйцэтгэл %</h3>
-          <AreaBars areas={o.areas} />
+          <h3 className="mb-3 font-bold text-brand-soft">{label.by} — гүйцэтгэл %</h3>
+          <AreaBars areas={overallBy} />
+          {by === "topic" && o.areas.length > 1 && (
+            <>
+              <h3 className="mb-3 mt-5 font-bold text-brand-soft">{CLASSIFY_LABEL.area.by} — гүйцэтгэл %</h3>
+              <AreaBars areas={o.areas} />
+            </>
+          )}
         </Card>
         <Card>
           <h3 className="mb-3 font-bold text-brand-soft">Хамгийн их алдсан бодлого</h3>
@@ -118,7 +130,7 @@ export default function OverviewPanel({ board }: { board: Board }) {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="font-semibold text-ink">{s.number}-р бодлого</span>
-                    {it?.area && <span className="ml-2 text-xs text-ink-dim">{it.area}</span>}
+                    {(it?.topic ?? it?.area) && <span className="ml-2 text-xs text-ink-dim">{it?.topic ?? it?.area}</span>}
                   </span>
                   {s.topWrong && (
                     <span className="shrink-0 text-xs text-ink-dim">
@@ -131,6 +143,60 @@ export default function OverviewPanel({ board }: { board: Board }) {
           </ul>
         </Card>
       </div>
+
+      <Card padding="none" className="overflow-hidden">
+        <h3 className="px-5 pt-4 font-bold text-brand-soft">Бодлого бүрээр — сэдэв, томьёо, гүйцэтгэл</h3>
+        <div className="overflow-x-auto p-3">
+          <table className="w-full min-w-[40rem] border-separate border-spacing-0 text-sm">
+            <thead>
+              <tr className="text-left text-xs text-ink-dim">
+                <th className="px-2 py-2 font-bold">№</th>
+                <th className="px-2 py-2 font-bold">Сэдэв</th>
+                <th className="px-2 py-2 font-bold">Ашиглах томьёо</th>
+                <th className="px-2 py-2 text-right font-bold">Зөв %</th>
+                <th className="px-2 py-2 font-bold">Түгээмэл алдаа</th>
+              </tr>
+            </thead>
+            <tbody>
+              {board.items.map((it, i) => {
+                const s = o.items[i];
+                return (
+                  <tr key={it.number} className={cn("align-top", it.voided && "opacity-60")}>
+                    <td className="border-t border-line px-2 py-2 font-bold tabular-nums text-ink">{it.number}</td>
+                    <td className="border-t border-line px-2 py-2">
+                      <span className="block text-ink">{it.topic ?? ""}</span>
+                      {it.area && <span className="block text-xs text-ink-dim">{it.area}</span>}
+                      {it.voided && <span className="block text-xs text-ink-dim">хүчингүй</span>}
+                    </td>
+                    <td className="border-t border-line px-2 py-2">
+                      <div className="flex flex-col gap-1.5">
+                        {it.formulaSlugs.map((slug) => {
+                          const f = formulaBy.get(slug);
+                          return f ? <FormulaLine key={slug} formula={f} compact link /> : null;
+                        })}
+                      </div>
+                    </td>
+                    <td className="border-t border-line px-2 py-2 text-right">
+                      <span className={cn("inline-flex h-8 min-w-12 items-center justify-center rounded-lg px-2 font-bold tabular-nums", TONE_CELL[toneOf(s?.pct ?? null)])}>
+                        {s?.pct ?? ""}
+                      </span>
+                    </td>
+                    <td className="border-t border-line px-2 py-2 text-xs text-ink-dim">
+                      {s?.topWrong ? (
+                        <>
+                          <span className="font-bold text-ink">{s.topWrong.letter}</span> — {s.topWrong.count} сурагч
+                        </>
+                      ) : (
+                        ""
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </div>
   );
 }

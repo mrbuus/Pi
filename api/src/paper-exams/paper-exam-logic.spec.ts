@@ -1,5 +1,6 @@
 import {
   areaScores,
+  classifyBy,
   competitionRanks,
   gradeSheet,
   itemStats,
@@ -129,6 +130,32 @@ describe('areaScores, weakAreas', () => {
       'Алгебр',
       'Шинэ',
     ]);
+  });
+});
+
+describe('сэдвээр ангилах', () => {
+  const items = [
+    item(1, { area: 'Алгебр', topic: 'Модультай тэнцэтгэл биш' }),
+    item(2, { area: 'Алгебр', topic: 'Модультай тэгшитгэл' }),
+    item(3, { area: 'Алгебр', topic: 'Модультай тэгшитгэл' }),
+    item(4, { area: 'Алгебр' }),
+  ];
+  it('сэдэв оноосон бол сэдвээр, үгүй бол агуулгаар', () => {
+    expect(classifyBy(items)).toBe('topic');
+    expect(classifyBy([item(1, { area: 'Алгебр' })])).toBe('area');
+    expect(classifyBy([item(1, { topic: 'X', voided: true })])).toBe('area');
+  });
+  it('сэдвийн хувь — шалгалтад анх гарсан дарааллаар, сэдэвгүй бодлого орохгүй', () => {
+    const s = areaScores(
+      [['WRONG', 'CORRECT', 'WRONG', 'CORRECT']],
+      items,
+      'topic',
+    );
+    expect(s.map((a) => [a.area, a.pct])).toEqual([
+      ['Модультай тэнцэтгэл биш', 0],
+      ['Модультай тэгшитгэл', 50],
+    ]);
+    expect(weakAreas(s)).toEqual(['Модультай тэнцэтгэл биш']);
   });
 });
 

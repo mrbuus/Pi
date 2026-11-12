@@ -42,8 +42,21 @@ export interface PaperItem {
   answerKey: string | null;
   points: number;
   area: string | null;
+  /** Сэдэв (бүлэг) — «Модультай тэгшитгэл» … */
+  topic: string | null;
+  /** Томьёоны сангийн slug-ууд */
+  formulaSlugs: string[];
   voided: boolean;
 }
+
+/** Бодлогод оноосон томьёо (Томьёоны сангаас) */
+export interface FormulaRef {
+  slug: string;
+  title: string;
+  latex: string | null;
+}
+
+export type ClassifyBy = "area" | "topic";
 
 export interface AreaScore {
   area: string;
@@ -72,6 +85,7 @@ export interface BoardRow {
   rank: number | null;
   weak: string[];
   areas: { area: string; pct: number | null }[];
+  topics: { area: string; pct: number | null }[];
   statuses: string;
   answers: string[];
 }
@@ -84,12 +98,16 @@ export interface BoardGroup {
   avgPct: number | null;
   items: ItemStat[];
   areas: AreaScore[];
+  topics: AreaScore[];
   rows: BoardRow[];
 }
 
 export interface Board {
   exam: { id: string; title: string; heldOn: string; itemCount: number; published: boolean };
   scope: "ALL" | "OWN_CLASSES";
+  topicsList: { slug: string; name: string }[];
+  classifyBy: ClassifyBy;
+  formulas: FormulaRef[];
   items: PaperItem[];
   overall: {
     count: number;
@@ -100,6 +118,7 @@ export interface Board {
     medianScore: number | null;
     items: ItemStat[];
     areas: AreaScore[];
+    topics: AreaScore[];
   };
   groups: BoardGroup[];
   unmatched: BoardRow[];
@@ -169,9 +188,26 @@ export interface MyPaperDetail {
     group: string;
     weak: string[];
     areas: AreaScore[];
-    items: { number: number; area: string | null; points: number; status: ItemStatus; answer: string | null; key: string | null }[];
+    topics: AreaScore[];
+    items: {
+      number: number;
+      area: string | null;
+      topic: string | null;
+      formulaSlugs: string[];
+      centerPct: number | null;
+      points: number;
+      status: ItemStatus;
+      answer: string | null;
+      key: string | null;
+    }[];
   };
-  center: { avgPct: number | null; areas: { area: string; pct: number | null }[] };
+  center: {
+    avgPct: number | null;
+    areas: { area: string; pct: number | null }[];
+    topics: { area: string; pct: number | null }[];
+  };
+  classifyBy: ClassifyBy;
+  formulas: FormulaRef[];
   ranking: { rank: number; name: string; group: string; totalScore: number; maxScore: number; isMe: boolean }[];
 }
 
@@ -241,3 +277,16 @@ export function orderedAreas(names: string[]): string[] {
   const known = CONTENT_AREAS.filter((a) => names.includes(a)) as string[];
   return [...known, ...names.filter((n) => !(CONTENT_AREAS as readonly string[]).includes(n))];
 }
+
+/** Сэдвийн товчлол: «Модультай тэнцэтгэл биш» → «МТБ» */
+export function topicShort(topic: string | null): string {
+  if (!topic) return "";
+  const words = topic.split(/[\s,]+/).filter(Boolean);
+  return words.length === 1 ? words[0].slice(0, 3) : words.map((w) => w.charAt(0).toLocaleUpperCase("mn-MN")).join("").slice(0, 4);
+}
+
+/** Ангиллын нэр томьёо (сэдэв оноосон бол сэдвээр) */
+export const CLASSIFY_LABEL: Record<ClassifyBy, { one: string; weak: string; by: string }> = {
+  area: { one: "Агуулга", weak: "Сул агуулга", by: "Агуулгын төрлөөр" },
+  topic: { one: "Сэдэв", weak: "Сул сэдэв", by: "Сэдвээр" },
+};

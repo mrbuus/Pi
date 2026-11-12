@@ -2557,6 +2557,8 @@ export const PaperExamItemScalarFieldEnum = {
   answerKey: 'answerKey',
   points: 'points',
   area: 'area',
+  topic: 'topic',
+  formulaSlugs: 'formulaSlugs',
   voided: 'voided'
 } as const
 

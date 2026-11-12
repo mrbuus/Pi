@@ -10,7 +10,9 @@ import {
   Length,
   Matches,
   Max,
+  MaxLength,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { ANSWER_LETTERS, CONTENT_AREAS } from './paper-exam-logic';
@@ -80,6 +82,26 @@ export class PaperItemDto {
   @IsOptional()
   @IsIn([...CONTENT_AREAS, null])
   area?: string | null;
+
+  /** Сэдэв — чөлөөт бичвэр (хоосон = оноогоогүй) */
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string'
+      ? value.trim().replace(/\s+/g, ' ') || null
+      : value,
+  )
+  @ValidateIf((_o, v) => v !== null)
+  @IsString()
+  @MaxLength(60)
+  topic?: string | null;
+
+  /** Томьёоны сангийн slug-ууд */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(8)
+  @IsString({ each: true })
+  @MaxLength(80, { each: true })
+  formulaSlugs?: string[];
 
   @IsOptional()
   @IsBoolean()

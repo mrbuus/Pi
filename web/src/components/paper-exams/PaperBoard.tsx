@@ -165,7 +165,7 @@ export default function PaperBoard({ id }: { id: string }) {
                   тохиргоо — түлхүүр өөрчлөгдсөн үед л ноорог шинээр эхэлнэ (нийтлэх,
                   холбох зэрэг бусад дахин ачаалалт ноорогт хүрэхгүй) */}
               <Tabs.Content value="key" forceMount className="data-[state=inactive]:hidden">
-                <KeyEditor key={itemsKey} examId={id} items={board.items} onSaved={load} />
+                <KeyEditor key={itemsKey} examId={id} items={board.items} formulas={board.formulas} topics={board.topicsList} onSaved={load} />
               </Tabs.Content>
               <Tabs.Content value="import">
                 <ImportPanel examId={id} itemCount={e.itemCount} unmatched={board.unmatched} onChanged={load} />

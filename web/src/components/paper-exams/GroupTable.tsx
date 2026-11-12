@@ -11,6 +11,8 @@ import AreaBars from "./AreaBars";
 import SheetDialog from "./SheetDialog";
 import {
   areaShort,
+  CLASSIFY_LABEL,
+  topicShort,
   cellText,
   scoreText,
   STATUS_CELL,
@@ -122,13 +124,17 @@ export default function GroupTable({ board }: { board: Board }) {
         <GroupSheet board={board} group={group} onOpen={setOpen} />
       )}
 
-      <SheetDialog row={open} items={board.items} onOpenChange={(v) => !v && setOpen(null)} />
+      <SheetDialog row={open} items={board.items} formulas={board.formulas} classifyBy={board.classifyBy} onOpenChange={(v) => !v && setOpen(null)} />
     </div>
   );
 }
 
 function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup; onOpen: (r: BoardRow) => void }) {
   const items = board.items;
+  const by = board.classifyBy;
+  const label = CLASSIFY_LABEL[by];
+  const overallBy = by === "topic" ? board.overall.topics : board.overall.areas;
+  const groupBy = by === "topic" ? group.topics : group.areas;
   const head = "sticky top-0 z-10 bg-panel px-2 py-2 text-left text-xs font-bold text-ink-dim";
   return (
     <div className="space-y-4">
@@ -154,16 +160,16 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
                 <th className={cn(head, "hidden md:table-cell")}>Шифр</th>
                 <th className={cn(head, "sticky left-8 z-20 min-w-36 border-r border-line")}>Овог, нэр</th>
                 <th className={cn(head, "text-right")}>Оноо</th>
-                <th className={cn(head, "min-w-32")}>Сул агуулга</th>
+                <th className={cn(head, "min-w-32")}>{label.weak}</th>
                 {items.map((it) => (
                   <th
                     key={it.number}
                     scope="col"
-                    title={[`${it.number}-р бодлого`, it.area, it.voided ? "хүчингүй" : null].filter(Boolean).join(" — ")}
+                    title={[`${it.number}-р бодлого`, it.topic, it.area, it.voided ? "хүчингүй" : null].filter(Boolean).join(" — ")}
                     className={cn(head, "w-8 px-0 text-center tabular-nums", it.voided && "line-through opacity-60")}
                   >
                     <span className="block">{it.number}</span>
-                    <span className="block text-[10px] font-semibold opacity-70">{areaShort(it.area)}</span>
+                    <span className="block text-[10px] font-semibold opacity-70">{by === "topic" ? topicShort(it.topic) : areaShort(it.area)}</span>
                   </th>
                 ))}
               </tr>
@@ -222,21 +228,23 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
           </table>
         </div>
       </Card>
-      <Legend />
+      <Legend topics={by === "topic" ? [...new Set(items.flatMap((i) => (i.topic ? [i.topic] : [])))] : null} />
 
       <Card>
-        <h3 className="mb-3 font-bold text-brand-soft">Агуулгын төрлөөр — гүйцэтгэл %</h3>
-        <AreaBars
-          areas={group.areas}
-          compare={new Map(board.overall.areas.map((a) => [a.area, a.pct]))}
-          compareLabel="төв"
-        />
+        <h3 className="mb-3 font-bold text-brand-soft">{label.by} — гүйцэтгэл %</h3>
+        <AreaBars areas={groupBy} compare={new Map(overallBy.map((a) => [a.area, a.pct]))} compareLabel="төв" />
       </Card>
+      {by === "topic" && group.areas.length > 1 && (
+        <Card>
+          <h3 className="mb-3 font-bold text-brand-soft">{CLASSIFY_LABEL.area.by} — гүйцэтгэл %</h3>
+          <AreaBars areas={group.areas} compare={new Map(board.overall.areas.map((a) => [a.area, a.pct]))} compareLabel="төв" />
+        </Card>
+      )}
     </div>
   );
 }
 
-function Legend() {
+function Legend({ topics }: { topics: string[] | null }) {
   const items = [
     { st: "CORRECT", text: "1", label: "зөв" },
     { st: "WRONG", text: "B", label: "буруу (сонгосон хариу, 1/0 файлд 0)" },
@@ -252,7 +260,9 @@ function Legend() {
         </span>
       ))}
       <Badge tone="neutral" className="font-normal">
-        Толгойн товчлол: ТТ, Ал, Ан, ГТ, МС — агуулга
+        {topics
+          ? `Толгойн товчлол: ${topics.map((t) => `${topicShort(t)} — ${t}`).join(", ")}`
+          : "Толгойн товчлол: ТТ, Ал, Ан, ГТ, МС — агуулга"}
       </Badge>
     </div>
   );

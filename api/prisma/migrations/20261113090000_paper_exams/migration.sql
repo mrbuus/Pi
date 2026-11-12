@@ -25,6 +25,8 @@ CREATE TABLE "PaperExamItem" (
     "answerKey" TEXT,
     "points" INTEGER NOT NULL DEFAULT 1,
     "area" TEXT,
+    "topic" TEXT,
+    "formulaSlugs" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "voided" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "PaperExamItem_pkey" PRIMARY KEY ("id")

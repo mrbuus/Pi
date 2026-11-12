@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Medal, Target, Trophy } from "lucide-react";
+import { ArrowLeft, Medal, Sigma, Target, Trophy } from "lucide-react";
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
 import { Card } from "@/components/ui/Surface";
@@ -12,13 +12,26 @@ import { SkeletonCard, SkeletonRows } from "@/components/ui/Skeleton";
 import { errorText } from "@/components/exams/types";
 import { cn } from "@/lib/cn";
 import AreaBars from "./AreaBars";
-import { dayText, orderedAreas, scoreText, STATUS_CELL, STATUS_LABEL, type MyPaperDetail } from "./types";
+import FormulaLine from "./FormulaLine";
+import {
+  CLASSIFY_LABEL,
+  dayText,
+  orderedAreas,
+  scoreText,
+  STATUS_CELL,
+  STATUS_LABEL,
+  type FormulaRef,
+  type MyPaperDetail,
+} from "./types";
 
 type Filter = "wrong" | "all";
+type MyItem = MyPaperDetail["me"]["items"][number];
+const missed = (i: MyItem) => i.status === "WRONG" || i.status === "BLANK" || i.status === "MULTI";
 
 /**
- * Сурагчийн өөрийн дүн (зөвхөн өөрөө харна): оноо, байр, агуулга бүрийн хувь,
- * алдсан бодлогууд агуулгаар; доор нь төвийн жагсаалт зөвхөн нийт оноогоор.
+ * Сурагчийн өөрийн дүн (зөвхөн өөрөө харна): оноо, байр, сэдэв/агуулга бүрийн хувь,
+ * алдсан бодлого бүрт ашиглах томьёо, давтах томьёоны жагсаалт; доор нь төвийн
+ * жагсаалт зөвхөн нийт оноогоор.
  */
 export default function StudentPaperDetail({ id }: { id: string }) {
   const [data, setData] = useState<MyPaperDetail | null>(null);
@@ -35,15 +48,28 @@ export default function StudentPaperDetail({ id }: { id: string }) {
   }, [id]);
   useEffect(load, [load]);
 
-  const wrongByArea = useMemo(() => {
-    if (!data) return [];
-    const wrong = data.me.items.filter((i) => i.status === "WRONG" || i.status === "BLANK" || i.status === "MULTI");
-    const by = new Map<string, typeof wrong>();
+  const view = useMemo(() => {
+    if (!data) return null;
+    const by = data.classifyBy;
+    const wrong = data.me.items.filter(missed);
+    const groups = new Map<string, MyItem[]>();
     for (const w of wrong) {
-      const k = w.area ?? "Агуулга оноогоогүй";
-      by.set(k, [...(by.get(k) ?? []), w]);
+      const k = (by === "topic" ? w.topic : w.area) ?? `${CLASSIFY_LABEL[by].one} оноогоогүй`;
+      groups.set(k, [...(groups.get(k) ?? []), w]);
     }
-    return orderedAreas([...by.keys()]).map((area) => ({ area, items: by.get(area)! }));
+    // Сэдэв — шалгалтын дарааллаар (Map оруулсан дарааллаа хадгална); агуулга — БҮТ-ийн дарааллаар
+    const names = by === "topic" ? [...groups.keys()] : orderedAreas([...groups.keys()]);
+    const formulaBy = new Map(data.formulas.map((f) => [f.slug, f]));
+    // Давтах томьёо: алдсан бодлогуудад хамаарах, олон бодлогод орсон нь эхэнд
+    const need = new Map<string, number[]>();
+    for (const w of wrong) for (const slug of w.formulaSlugs) need.set(slug, [...(need.get(slug) ?? []), w.number]);
+    const review = [...need.entries()]
+      .flatMap(([slug, numbers]) => {
+        const f = formulaBy.get(slug);
+        return f ? [{ formula: f, numbers }] : [];
+      })
+      .sort((a, b) => b.numbers.length - a.numbers.length);
+    return { by, wrong, groups: names.map((name) => ({ name, items: groups.get(name)! })), formulaBy, review };
   }, [data]);
 
   if (error) {
@@ -54,7 +80,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
       </div>
     );
   }
-  if (!data) {
+  if (!data || !view) {
     return (
       <div className="space-y-4">
         <SkeletonCard />
@@ -63,8 +89,9 @@ export default function StudentPaperDetail({ id }: { id: string }) {
     );
   }
   const me = data.me;
-  const center = new Map(data.center.areas.map((a) => [a.area, a.pct]));
-  const wrongCount = wrongByArea.reduce((t, g) => t + g.items.length, 0);
+  const label = CLASSIFY_LABEL[view.by];
+  const mineBy = view.by === "topic" ? me.topics : me.areas;
+  const centerBy = new Map((view.by === "topic" ? data.center.topics : data.center.areas).map((a) => [a.area, a.pct]));
 
   return (
     <div className="space-y-4">
@@ -97,15 +124,34 @@ export default function StudentPaperDetail({ id }: { id: string }) {
 
       <Card>
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="font-bold text-brand-soft">Агуулгаар</h2>
+          <h2 className="font-bold text-brand-soft">{label.by}</h2>
           {me.weak.length > 0 && (
             <span className="text-sm text-ink-dim">
               Анхаарах: <span className="font-semibold text-ink">{me.weak.join(", ")}</span>
             </span>
           )}
         </div>
-        <AreaBars areas={me.areas} compare={center} compareLabel="төв" />
+        <AreaBars areas={mineBy} compare={centerBy} compareLabel="төв" />
       </Card>
+
+      {view.review.length > 0 && (
+        <Card>
+          <h2 className="mb-1 flex items-center gap-2 font-bold text-brand-soft">
+            <Sigma className="size-5" aria-hidden /> Давтах томьёо
+          </h2>
+          <p className="mb-3 text-sm text-ink-dim">Таны алдсан бодлогуудад хэрэглэгдэх томьёо. Дарвал тайлбар, жишээ бодлого нээгдэнэ.</p>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {view.review.map(({ formula, numbers }) => (
+              <li key={formula.slug}>
+                <FormulaLine formula={formula} link />
+                <span className="mt-0.5 block text-xs text-ink-dim">
+                  {numbers.length} бодлогод: {numbers.join(", ")}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <Card>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -113,10 +159,10 @@ export default function StudentPaperDetail({ id }: { id: string }) {
           <div className="flex gap-1" role="group" aria-label="Шүүлт">
             {(
               [
-                ["wrong", `Алдсан ${wrongCount}`],
+                ["wrong", `Алдсан ${view.wrong.length}`],
                 ["all", "Бүгд"],
               ] as const
-            ).map(([v, label]) => (
+            ).map(([v, text]) => (
               <button
                 key={v}
                 aria-pressed={filter === v}
@@ -126,48 +172,44 @@ export default function StudentPaperDetail({ id }: { id: string }) {
                   filter === v ? "border-brand-bright bg-brand-bright/15 text-brand-soft" : "border-line text-ink-dim",
                 )}
               >
-                {label}
+                {text}
               </button>
             ))}
           </div>
         </div>
 
         {filter === "wrong" ? (
-          wrongCount === 0 ? (
+          view.wrong.length === 0 ? (
             <p className="text-sm text-ink-dim">Бүх бодлогыг зөв бодсон байна.</p>
           ) : (
-            <div className="space-y-4">
-              {wrongByArea.map((g) => (
-                <div key={g.area}>
+            <div className="space-y-5">
+              {view.groups.map((g) => (
+                <section key={g.name}>
                   <h3 className="mb-2 text-sm font-bold text-ink">
-                    {g.area} <span className="font-normal text-ink-dim">({g.items.length})</span>
+                    {g.name} <span className="font-normal text-ink-dim">({g.items.length})</span>
                   </h3>
-                  <ul className="flex flex-wrap gap-1.5">
+                  <ul className="space-y-2">
                     {g.items.map((i) => (
-                      <li key={i.number} className={cn("rounded-lg px-2.5 py-1.5 text-sm", STATUS_CELL[i.status])}>
-                        <span className="font-bold tabular-nums">{i.number}</span>
-                        <span className="ml-1.5 text-xs">
-                          {i.answer ? `та ${i.answer}` : STATUS_LABEL[i.status].toLocaleLowerCase("mn-MN")}
-                          {i.key ? `, зөв ${i.key}` : ""}
-                        </span>
-                      </li>
+                      <WrongItem key={i.number} item={i} formulaBy={view.formulaBy} showTopic={view.by !== "topic"} />
                     ))}
                   </ul>
-                </div>
+                </section>
               ))}
             </div>
           )
         ) : (
           <ol className="grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-1.5">
             {me.items.map((i) => (
-              <li key={i.number} className={cn("rounded-lg px-2 py-1.5 text-xs", STATUS_CELL[i.status])} title={i.area ?? undefined}>
+              <li
+                key={i.number}
+                className={cn("rounded-lg px-2 py-1.5 text-xs", STATUS_CELL[i.status])}
+                title={[i.topic, i.area].filter(Boolean).join(" — ") || undefined}
+              >
                 <div className="flex items-baseline justify-between gap-1">
                   <span className="font-bold tabular-nums">{i.number}</span>
                   {i.answer && <span className="font-bold">{i.answer}</span>}
                 </div>
-                <div className="truncate text-[10px] opacity-80">
-                  {i.status === "WRONG" && i.key ? `зөв: ${i.key}` : STATUS_LABEL[i.status]}
-                </div>
+                <div className="truncate text-[10px] opacity-80">{i.status === "WRONG" && i.key ? `зөв: ${i.key}` : STATUS_LABEL[i.status]}</div>
               </li>
             ))}
           </ol>
@@ -193,7 +235,11 @@ export default function StudentPaperDetail({ id }: { id: string }) {
                   <td className="px-4 py-1.5 text-right tabular-nums">{r.rank}</td>
                   <td className="px-2 py-1.5 text-ink">
                     {r.name}
-                    {r.isMe && <Badge tone="brand" className="ml-2">Та</Badge>}
+                    {r.isMe && (
+                      <Badge tone="brand" className="ml-2">
+                        Та
+                      </Badge>
+                    )}
                   </td>
                   <td className="px-2 py-1.5 text-ink-dim">{r.group}</td>
                   <td className="px-4 py-1.5 text-right tabular-nums">
@@ -207,6 +253,48 @@ export default function StudentPaperDetail({ id }: { id: string }) {
         </div>
       </Card>
     </div>
+  );
+}
+
+/** Алдсан нэг бодлого: дугаар, өөрийн/зөв хариу, төвийн гүйцэтгэл, ашиглах томьёо. */
+function WrongItem({ item, formulaBy, showTopic }: { item: MyItem; formulaBy: Map<string, FormulaRef>; showTopic: boolean }) {
+  const formulas = item.formulaSlugs.flatMap((s) => {
+    const f = formulaBy.get(s);
+    return f ? [f] : [];
+  });
+  return (
+    <li className="rounded-xl border border-line p-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span className={cn("inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm font-bold tabular-nums", STATUS_CELL[item.status])}>
+          {item.number}
+        </span>
+        <span className="text-sm text-ink">
+          {item.answer ? (
+            <>
+              Таны хариу <b>{item.answer}</b>
+            </>
+          ) : (
+            STATUS_LABEL[item.status]
+          )}
+          {item.key && (
+            <>
+              , зөв хариу <b>{item.key}</b>
+            </>
+          )}
+        </span>
+        <Meta
+          className="ml-auto text-xs text-ink-dim"
+          items={[showTopic ? item.topic : null, item.centerPct !== null ? `төвийн ${item.centerPct}% зөв бодсон` : null]}
+        />
+      </div>
+      {formulas.length > 0 && (
+        <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
+          {formulas.map((f) => (
+            <FormulaLine key={f.slug} formula={f} compact link />
+          ))}
+        </div>
+      )}
+    </li>
   );
 }
 

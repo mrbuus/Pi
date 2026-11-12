@@ -29,7 +29,55 @@ export interface PaperItem {
   answerKey: string | null;
   points: number;
   area: string | null;
+  /** Сэдэв (бүлэг) — «Модульт тэгшитгэл» … */
+  topic?: string | null;
+  /** Томьёоны сангийн slug-ууд */
+  formulaSlugs?: string[];
   voided: boolean;
+}
+
+/** Ангиллын хэмжээс: БҮТ-ийн агуулга эсвэл сэдэв */
+export type ClassifyBy = 'area' | 'topic';
+
+/**
+ * Санал болгох сэдвүүд — системийн бусад хэсэгтэй (readiness, томьёоны сан) ижил нэршил.
+ * slug нь томьёоны сангийн topicSlugs-тэй таарна → сэдвээр томьёо шүүнэ.
+ */
+export const PAPER_TOPICS: { slug: string; name: string }[] = [
+  { slug: 'TOO', name: 'Тоо' },
+  { slug: 'ALG', name: 'Алгебрийн хувиргалт' },
+  { slug: 'RATEQ', name: 'Рационал тэгшитгэл' },
+  { slug: 'RATINEQ', name: 'Рационал тэнцэтгэл биш' },
+  { slug: 'ABSEQ', name: 'Модультай тэгшитгэл' },
+  { slug: 'ABSINEQ', name: 'Модультай тэнцэтгэл биш' },
+  { slug: 'IRREQ', name: 'Иррационал тэгшитгэл' },
+  { slug: 'IRRINEQ', name: 'Иррационал тэнцэтгэл биш' },
+  { slug: 'EXPEQ', name: 'Илтгэгч тэгшитгэл' },
+  { slug: 'EXPINEQ', name: 'Илтгэгч тэнцэтгэл биш' },
+  { slug: 'LOGEXP', name: 'Логарифмын илэрхийлэл' },
+  { slug: 'LOGEQ', name: 'Логарифм тэгшитгэл' },
+  { slug: 'LOGINEQ', name: 'Логарифм тэнцэтгэл биш' },
+  { slug: 'SYSTEM', name: 'Тэгшитгэлийн систем' },
+  { slug: 'PARAM', name: 'Параметртэй бодлого' },
+  { slug: 'FUNC', name: 'Функц' },
+  { slug: 'TRIG', name: 'Тригонометр' },
+  { slug: 'TRIGEQ', name: 'Тригонометр тэгшитгэл' },
+  { slug: 'SEQ', name: 'Прогресс' },
+  { slug: 'COMB', name: 'Комбинаторик' },
+  { slug: 'PROB', name: 'Магадлал' },
+  { slug: 'STAT', name: 'Статистик' },
+  { slug: 'LIMIT', name: 'Хязгаар' },
+  { slug: 'DERIV', name: 'Уламжлал' },
+  { slug: 'INTEG', name: 'Интеграл' },
+  { slug: 'PLANE', name: 'Хавтгайн геометр' },
+  { slug: 'SOLID', name: 'Огторгуйн геометр' },
+  { slug: 'VECTOR', name: 'Вектор' },
+  { slug: 'COORD', name: 'Координат' },
+];
+
+/** Сэдэв оноосон бол сэдвээр, үгүй бол БҮТ-ийн агуулгаар ангилна («сул» баганад). */
+export function classifyBy(items: PaperItem[]): ClassifyBy {
+  return items.some((i) => i.topic && !i.voided) ? 'topic' : 'area';
 }
 
 export function isContentArea(v: unknown): v is ContentArea {
@@ -92,20 +140,29 @@ export interface AreaScore {
 export function areaScores(
   sheets: ItemStatus[][],
   items: PaperItem[],
+  by: ClassifyBy = 'area',
 ): AreaScore[] {
   const acc = new Map<string, { earned: number; possible: number }>();
   for (const statuses of sheets) {
     items.forEach((item, i) => {
-      if (!item.area) return;
+      const name = by === 'topic' ? item.topic : item.area;
+      if (!name) return;
       const st = statuses[i];
       if (st === 'UNGRADED' || st === undefined) return;
-      const a = acc.get(item.area) ?? { earned: 0, possible: 0 };
+      const a = acc.get(name) ?? { earned: 0, possible: 0 };
       a.possible += item.points;
       if (st === 'CORRECT') a.earned += item.points;
-      acc.set(item.area, a);
+      acc.set(name, a);
     });
   }
-  return orderAreas([...acc.keys()]).map((area) => {
+  // Агуулга — БҮТ-ийн дарааллаар; сэдэв — шалгалтад анх гарсан дарааллаар
+  const names =
+    by === 'topic'
+      ? [...new Set(items.flatMap((i) => (i.topic ? [i.topic] : [])))].filter(
+          (n) => acc.has(n),
+        )
+      : orderAreas([...acc.keys()]);
+  return names.map((area) => {
     const a = acc.get(area)!;
     return {
       area,
