@@ -136,10 +136,9 @@ export default function StudentPaperDetail({ id }: { id: string }) {
 
       {view.review.length > 0 && (
         <Card>
-          <h2 className="mb-1 flex items-center gap-2 font-bold text-brand-soft">
+          <h2 className="mb-3 flex items-center gap-2 font-bold text-brand-soft">
             <Sigma className="size-5" aria-hidden /> Давтах томьёо
           </h2>
-          <p className="mb-3 text-sm text-ink-dim">Таны алдсан бодлогуудад хэрэглэгдэх томьёо. Дарвал тайлбар, жишээ бодлого нээгдэнэ.</p>
           <ul className="grid gap-2 sm:grid-cols-2">
             {view.review.map(({ formula, numbers }) => (
               <li key={formula.slug}>
@@ -217,8 +216,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
       </Card>
 
       <Card padding="none" className="overflow-hidden">
-        <h2 className="px-5 pt-4 font-bold text-brand-soft">Төвийн жагсаалт</h2>
-        <p className="px-5 pb-2 text-xs text-ink-dim">Зөвхөн нийт оноо харагдана. Бусдын бодлого бүрийн дүн нууц.</p>
+        <h2 className="px-5 pb-2 pt-4 font-bold text-brand-soft">Төвийн жагсаалт</h2>
         <div className="max-h-[60vh] overflow-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-panel text-left text-xs text-ink-dim">

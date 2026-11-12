@@ -92,7 +92,6 @@ export default function FormulaPicker({
       onOpenChange={(v) => !v && onClose()}
       wide
       title={title}
-      description="Томьёоны сангаас сонгоно. Сурагчид алдсан бодлогын доор эдгээр томьёо харагдана."
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>

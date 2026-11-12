@@ -30,7 +30,7 @@ import { cleanTitle } from "@/lib/studentTitle";
 const TABS = [
   { value: "give", label: "Өгөх", icon: PencilLine },
   { value: "done", label: "Өгсөн, дүн", icon: ClipboardCheck },
-  { value: "paper", label: "Цаасан шалгалт", icon: ScanLine },
+  { value: "paper", label: "Нэгдсэн шалгалт", icon: ScanLine },
   { value: "rank", label: "Эрэмбэ", icon: Trophy },
   { value: "soril", label: "Жишиг сорил", icon: Sparkles },
 ] as const;

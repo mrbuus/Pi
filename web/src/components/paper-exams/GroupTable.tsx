@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Search, Users } from "lucide-react";
-import { Badge } from "@/components/ui/kit/badge";
+import InfoHint from "@/components/ui/InfoHint";
 import { Card } from "@/components/ui/Surface";
 import { Meta } from "@/components/ui/Meta";
 import { EmptyState } from "@/components/ui/StateBlock";
@@ -247,7 +247,7 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
 function Legend({ topics }: { topics: string[] | null }) {
   const items = [
     { st: "CORRECT", text: "1", label: "зөв" },
-    { st: "WRONG", text: "B", label: "буруу (сонгосон хариу, 1/0 файлд 0)" },
+    { st: "WRONG", text: "B", label: "буруу (сонгосон хариу)" },
     { st: "BLANK", text: "", label: "хариулаагүй" },
     { st: "MULTI", text: "*", label: "давхар будсан" },
   ] as const;
@@ -259,11 +259,20 @@ function Legend({ topics }: { topics: string[] | null }) {
           {x.label}
         </span>
       ))}
-      <Badge tone="neutral" className="font-normal">
-        {topics
-          ? `Толгойн товчлол: ${topics.map((t) => `${topicShort(t)} — ${t}`).join(", ")}`
-          : "Толгойн товчлол: ТТ, Ал, Ан, ГТ, МС — агуулга"}
-      </Badge>
+      {topics && topics.length > 0 && (
+        <span className="inline-flex items-center gap-1">
+          Товчлол
+          <InfoHint label="Сэдвийн товчлол">
+            <ul className="space-y-0.5">
+              {topics.map((t) => (
+                <li key={t}>
+                  <b>{topicShort(t)}</b> {t}
+                </li>
+              ))}
+            </ul>
+          </InfoHint>
+        </span>
+      )}
     </div>
   );
 }

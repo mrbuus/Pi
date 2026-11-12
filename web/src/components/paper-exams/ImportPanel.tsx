@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/kit/badge";
 import { Button } from "@/components/ui/kit/button";
 import { Card } from "@/components/ui/Surface";
 import { Meta } from "@/components/ui/Meta";
+import InfoHint from "@/components/ui/InfoHint";
 import { formatMnDateTime } from "@/lib/dateMn";
 import ExamDialog from "@/components/exams/ExamDialog";
 import { errorText } from "@/components/exams/types";
@@ -87,13 +88,13 @@ export default function ImportPanel({
   return (
     <div className="space-y-4">
       <Card>
-        <h3 className="mb-1 flex items-center gap-2 font-bold text-brand-soft">
+        <h3 className="mb-3 flex items-center gap-2 font-bold text-brand-soft">
           <Upload className="size-5" aria-hidden /> Файл оруулах
+          <InfoHint label="Файлын хэлбэр">
+            Шийт бүр нэг баг. Шифр, Овог, Нэр баганууд ба 1…{itemCount} дугаартай бодлогын баганууд. Нүдэнд 1 (зөв), хоосон (буруу),
+            эсвэл уншигчийн гаргасан үсэг (A–E).
+          </InfoHint>
         </h3>
-        <p className="mb-3 text-sm text-ink-dim">
-          Шийт бүр нэг баг: <b className="text-ink">Шифр, Овог, Нэр</b> баганууд ба <b className="text-ink">1…{itemCount}</b> дугаартай
-          бодлогын баганууд. Нүдэнд 1 (зөв) / хоосон (буруу), эсвэл машины уншсан үсэг (A–E).
-        </p>
         <label className="block text-sm font-semibold text-ink">
           <span className="sr-only">Excel файл (.xlsx)</span>
           <input
@@ -247,8 +248,7 @@ export default function ImportPanel({
 
       {unmatched.length > 0 && (
         <Card>
-          <h3 className="mb-1 font-bold text-brand-soft">Сурагчтай холбогдоогүй хуудас</h3>
-          <p className="mb-3 text-sm text-ink-dim">Шифр буруу будсан эсвэл бүртгэлгүй. Холбосны дараа дүн, жагсаалтад орно.</p>
+          <h3 className="mb-3 font-bold text-brand-soft">Сурагчтай холбогдоогүй хуудас</h3>
           <ul className="divide-y divide-line">
             {unmatched.map((r) => (
               <li key={r.sheetId} className="flex min-h-11 flex-wrap items-center gap-3 py-2">
@@ -310,7 +310,7 @@ export default function ImportPanel({
         open={!!reverting}
         onOpenChange={(v) => !v && setReverting(null)}
         title="Импортыг буцаах уу?"
-        description={reverting ? `«${reverting.fileName}» — энэ файлаар орсон дүн хүчингүй болж, өмнөх дүн нь (байсан бол) сэргэнэ. Устгахгүй, түүхэнд үлдэнэ.` : undefined}
+        description={reverting ? `«${reverting.fileName}» файлаар орсон дүн хүчингүй болно.` : undefined}
         footer={
           <>
             <Button variant="ghost" onClick={() => setReverting(null)}>

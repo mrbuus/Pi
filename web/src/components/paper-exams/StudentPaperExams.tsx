@@ -11,7 +11,7 @@ import { SkeletonRows } from "@/components/ui/Skeleton";
 import { errorText } from "@/components/exams/types";
 import { dayText, scoreText, toneOf, type MyPaperExam } from "./types";
 
-/** Сурагчийн «Шалгалт» → «Цаасан шалгалт» таб: өгсөн шалгалт бүрийн оноо, байр. */
+/** Сурагчийн «Шалгалт» → «Нэгдсэн шалгалт» таб: өгсөн шалгалт бүрийн оноо, байр. */
 export default function StudentPaperExams() {
   const [rows, setRows] = useState<MyPaperExam[] | null>(null);
   const [error, setError] = useState("");
@@ -31,8 +31,8 @@ export default function StudentPaperExams() {
     return (
       <EmptyState
         icon={ScanLine}
-        title="Цаасан шалгалтын дүн алга"
-        hint="Төвд өгсөн цаасан шалгалтын дүнг багш оруулж нээсний дараа энд харагдана."
+        title="Нэгдсэн шалгалтын дүн алга"
+        hint="Багш дүнг оруулж нээсний дараа энд харагдана."
       />
     );
   }

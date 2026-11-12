@@ -81,7 +81,7 @@ export default function KeyEditor({
     setDraft((prev) =>
       prev.map((d, i) => (i < letters.length ? { ...d, answerKey: /[A-E]/.test(letters[i]) ? letters[i] : null } : d)),
     );
-    toast.success(`${Math.min(letters.length, items.length)} бодлогын түлхүүр буулгав — «Хадгалах»-ыг дарна уу`);
+    toast.success(`${Math.min(letters.length, items.length)} түлхүүр буулгалаа`);
   }
 
   function applyFormulas(picked: FormulaRef[]) {
@@ -120,7 +120,7 @@ export default function KeyEditor({
           })),
         },
       });
-      toast.success("Хадгаллаа — оноо дахин бодогдлоо");
+      toast.success("Хадгаллаа");
       onSaved();
     } catch (e) {
       toast.error(errorText(e, "Хадгалж чадсангүй"));
@@ -207,9 +207,6 @@ export default function KeyEditor({
               Буулгах
             </Button>
           </div>
-          <p className="mt-3 text-xs text-ink-dim">
-            Дүн 1 / хоосон хэлбэрээр орсон бол түлхүүр шаардлагагүй. Машины үсэгтэй гаралтад түлхүүрээр оноо бодогдоно.
-          </p>
         </Card>
       </div>
 

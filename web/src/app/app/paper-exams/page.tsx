@@ -7,7 +7,7 @@ import PaperExamsList from "@/components/paper-exams/PaperExamsList";
 
 const noopSubscribe = () => () => {};
 
-/** Ажилтны «Цаасан шалгалт» (OMR / Excel). Сурагч «Шалгалт» → «Цаасан шалгалт» таб руу. */
+/** Ажилтны «Нэгдсэн шалгалт» (төвийн цаасан шалгалт: OMR / Excel). Сурагч «Шалгалт» → «Нэгдсэн шалгалт» таб руу. */
 export default function PaperExamsPage() {
   const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const role = mounted ? getRole() : null;

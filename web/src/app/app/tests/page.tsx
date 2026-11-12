@@ -269,8 +269,8 @@ function StaffTestsView({ role }: { role: string | null }) {
             href="/app/paper-exams"
             className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line px-4 text-sm font-bold text-ink-dim transition hover:border-brand hover:text-ink"
           >
-            <ScanLine className="size-4" aria-hidden /> Цаасан шалгалт
-            <span className="hidden text-xs font-normal opacity-70 sm:inline">OMR, Excel-ийн дүн</span>
+            <ScanLine className="size-4" aria-hidden /> Нэгдсэн шалгалт
+            <span className="hidden text-xs font-normal opacity-70 sm:inline">төвийн бүх баг</span>
           </Link>
         )}
       </div>

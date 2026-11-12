@@ -28,7 +28,7 @@ const ALL_TABS = [
 ] as const;
 type BoardTab = (typeof ALL_TABS)[number]["value"];
 
-/** Ажилтны цаасан шалгалтын хуудас. Багш — өөрийн анги; Багш+/Админ — бүгд + удирдлага. */
+/** Ажилтны нэгдсэн шалгалтын хуудас. Багш — өөрийн анги; Багш+/Админ — бүгд + удирдлага. */
 export default function PaperBoard({ id }: { id: string }) {
   const router = useRouter();
   const role = getRole();
@@ -110,7 +110,7 @@ export default function PaperBoard({ id }: { id: string }) {
   return (
     <div className="space-y-4">
       <Link href="/app/paper-exams" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink-dim hover:text-ink">
-        <ArrowLeft className="size-4" aria-hidden /> Цаасан шалгалт
+        <ArrowLeft className="size-4" aria-hidden /> Нэгдсэн шалгалт
       </Link>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
@@ -179,7 +179,7 @@ export default function PaperBoard({ id }: { id: string }) {
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
         title="Шалгалтыг устгах уу?"
-        description="Жагсаалтаас болон сурагчдаас нуугдана. Дүн ӨС-д хадгалагдсан хэвээр үлдэнэ."
+        description="Жагсаалтаас хасагдаж, сурагчдад харагдахаа болино."
         footer={
           <>
             <Button variant="ghost" onClick={() => setConfirmDelete(false)}>

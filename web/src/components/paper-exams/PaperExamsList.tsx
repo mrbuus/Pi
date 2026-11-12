@@ -15,10 +15,19 @@ import { correctTone } from "@/components/exams/analytics";
 import { errorText } from "@/components/exams/types";
 import { dayText, type PaperExamRow } from "./types";
 
+/** «Нэгдсэн шалгалт N» — байгаа хамгийн их дугаарын дараагийнх (эзэн 2026-11-13) */
+export function nextTitle(rows: { title: string }[]): string {
+  const used = rows.flatMap((r) => {
+    const m = r.title.trim().match(/^Нэгдсэн шалгалт\s+(\d+)$/i);
+    return m ? [Number(m[1])] : [];
+  });
+  return `Нэгдсэн шалгалт ${used.length ? Math.max(...used) + 1 : 1}`;
+}
+
 const todayUB = () =>
   new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Ulaanbaatar" }).format(new Date());
 
-/** Ажилтны «Цаасан шалгалт» жагсаалт + шинээр үүсгэх (Багш+/Админ). */
+/** Ажилтны «Нэгдсэн шалгалт» жагсаалт + шинээр үүсгэх (Багш+/Админ). */
 export default function PaperExamsList({ canManage }: { canManage: boolean }) {
   const [rows, setRows] = useState<PaperExamRow[] | null>(null);
   const [error, setError] = useState("");
@@ -39,7 +48,7 @@ export default function PaperExamsList({ canManage }: { canManage: boolean }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <ScanLine className="size-5 text-brand-soft" aria-hidden />
-          <h2 className="font-bold text-brand-soft">Цаасан шалгалт</h2>
+          <h2 className="font-bold text-brand-soft">Нэгдсэн шалгалт</h2>
         </div>
         {canManage && (
           <Button onClick={() => setOpen(true)}>
@@ -53,7 +62,7 @@ export default function PaperExamsList({ canManage }: { canManage: boolean }) {
       {rows && rows.length === 0 && (
         <EmptyState
           icon={ScanLine}
-          title="Цаасан шалгалт алга"
+          title="Нэгдсэн шалгалт алга"
           hint={
             canManage
               ? "Шалгалт үүсгээд машины эсвэл Excel-ийн дүнгээ оруулна."
@@ -99,14 +108,14 @@ export default function PaperExamsList({ canManage }: { canManage: boolean }) {
         </ul>
       )}
 
-      {canManage && <CreateDialog open={open} onOpenChange={setOpen} />}
+      {canManage && open && <CreateDialog onOpenChange={setOpen} suggestedTitle={nextTitle(rows ?? [])} />}
     </div>
   );
 }
 
-function CreateDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+function CreateDialog({ onOpenChange, suggestedTitle }: { onOpenChange: (v: boolean) => void; suggestedTitle: string }) {
   const router = useRouter();
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(suggestedTitle);
   const [heldOn, setHeldOn] = useState(todayUB);
   const [count, setCount] = useState("48");
   const [busy, setBusy] = useState(false);
@@ -134,10 +143,9 @@ function CreateDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v:
 
   return (
     <ExamDialog
-      open={open}
+      open
       onOpenChange={onOpenChange}
-      title="Шинэ цаасан шалгалт"
-      description="Дараа нь түлхүүр, агуулгыг оноож, дүнгээ оруулна"
+      title="Шинэ нэгдсэн шалгалт"
       footer={
         <>
           <Button variant="ghost" type="button" onClick={() => onOpenChange(false)}>
@@ -156,7 +164,6 @@ function CreateDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v:
             className={field}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="ШМХФС сорил 3"
             maxLength={120}
             autoFocus
           />
