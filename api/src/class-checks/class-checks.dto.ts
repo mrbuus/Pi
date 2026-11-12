@@ -12,10 +12,19 @@ import { CHECK_AMOUNT_MAX, CHECK_TITLE_MAX } from './class-checks.logic';
 
 /** Шинэ чек — «Номны мөнгө», дүн (₮) заавал биш */
 export class CreateClassCheckDto {
-  @ApiProperty({ maxLength: CHECK_TITLE_MAX })
+  /** Номын чек бол заавал биш — нэр нь номын нэр болно */
+  @ApiPropertyOptional({ maxLength: CHECK_TITLE_MAX })
+  @IsOptional()
   @IsString()
   @MaxLength(CHECK_TITLE_MAX + 40) // илүү зайг cleanCheckTitle шахна
-  title: string;
+  title?: string;
+
+  /** Номын чек (эзэн 2026-11-12): BOOKS-ийн түлхүүр. Дүн (үнэ) заавал. */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(24)
+  bookKey?: string;
 
   @ApiPropertyOptional({
     type: Number,
@@ -61,4 +70,33 @@ export class SetClassCheckMarkDto {
   @ApiProperty()
   @IsBoolean()
   checked: boolean;
+
+  // ── Доорх нь зөвхөн номын чекэд (энгийн чек үл тооно) ──
+
+  /** «Авахгүй» — энэ номыг авахгүй сурагч */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  skipped?: boolean;
+
+  /** Энэ сурагчийн бодит дүн — өгөөгүй бол чекийн үнэ */
+  @ApiPropertyOptional({ type: Number, nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(CHECK_AMOUNT_MAX)
+  amount?: number | null;
+
+  /** Мөнгийг хүлээж авсан багш — өгөөгүй бол тэмдэглэж буй хүн */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  collectedById?: string;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  @IsOptional()
+  @IsString()
+  @MaxLength(240)
+  note?: string | null;
 }

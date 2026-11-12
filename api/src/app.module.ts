@@ -80,6 +80,7 @@ import { RevisionsModule } from './revisions/revisions.module';
 import { PresenceModule } from './presence/presence.module';
 import { ClassDashboardModule } from './class-dashboard/class-dashboard.module';
 import { ClassChecksModule } from './class-checks/class-checks.module';
+import { BookPaymentsModule } from './book-payments/book-payments.module';
 import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
 
 @Module({
@@ -207,6 +208,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     // «Анги» самбар (эзэн 2026-10-13)
     ClassDashboardModule,
     ClassChecksModule,
+    BookPaymentsModule,
     // «Дотоод» — нийтлэхээс өмнөх бодлого/тестийн ноорог (эзэн 2026-10-13)
     InternalDraftsModule,
     // Piemath гар утасны апп: push токен, бүртгэл устгах хүсэлт

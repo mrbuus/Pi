@@ -6,6 +6,17 @@ import {
 } from '@nestjs/common';
 import { Role } from '../generated/prisma/enums';
 import { AuditService } from '../audit/audit.service';
+import {
+  bookTitle,
+  isBookKey,
+  nextSheetKey,
+  SHEET_KIND,
+  sheetNumber,
+} from '../book-payments/book-payments.logic';
+import {
+  BookPaymentsService,
+  type ShapedBookPayment,
+} from '../book-payments/book-payments.service';
 import { ClassDashboardService } from '../class-dashboard/class-dashboard.service';
 import { assertInternalTeachingStaff } from '../common/access';
 import { PrismaService } from '../prisma/prisma.service';
@@ -43,6 +54,7 @@ const CHECK_SELECT = {
   classroomId: true,
   title: true,
   amount: true,
+  bookKey: true,
   createdById: true,
   createdAt: true,
   archivedAt: true,
@@ -55,6 +67,7 @@ type CheckRow = {
   classroomId: string;
   title: string;
   amount: number | null;
+  bookKey: string | null;
   createdById: string;
   createdAt: Date;
   archivedAt: Date | null;
@@ -68,6 +81,29 @@ type CheckRow = {
 };
 
 /**
+ * Номын чекийн нэг сурагчийн мөр — BookPayment-аас. `elsewhere` = өөр ангид
+ * байхдаа төлсөн (энэ ангийн мөнгөнд орохгүй, эндээс засахгүй).
+ */
+function bookMark(p: ShapedBookPayment, classroomId: string) {
+  const paid = p.status === 'PAID';
+  return {
+    studentId: p.studentId,
+    checked: paid,
+    skipped: p.status === 'SKIPPED',
+    updatedAt: p.createdAt,
+    updatedBy: p.createdBy,
+    collectedBy: p.collectedBy,
+    amount: p.amount,
+    note: p.note,
+    elsewhere:
+      paid && p.classroom?.id !== classroomId
+        ? { name: p.classroom?.name ?? null }
+        : null,
+  };
+}
+type BookMark = ReturnType<typeof bookMark>;
+
+/**
  * «Чек» — ангийн нэртэй шалгах жагсаалт (эзэн 2026-10-22). Багш бүр
  * (ADMIN/TEACHER_PLUS/TEACHER) өөрийн харах ангидаа (ангийн самбарын эрхтэй ижил)
  * нээж, нэрийг засаж, хааж (зөөлөн), сурагч бүрийг тэмдэглэнэ.
@@ -78,6 +114,7 @@ export class ClassChecksService {
     private readonly prisma: PrismaService,
     private readonly dashboard: ClassDashboardService,
     private readonly audit: AuditService,
+    private readonly books: BookPaymentsService,
   ) {}
 
   // ───────────────────────── Эрх ─────────────────────────
@@ -125,29 +162,74 @@ export class ClassChecksService {
     ]);
   }
 
-  private static shape(c: CheckRow, people: Map<string, Person>) {
+  private static shape(
+    c: CheckRow,
+    people: Map<string, Person>,
+    bookMarks?: BookMark[],
+  ) {
     return {
       id: c.id,
       title: c.title,
       amount: c.amount,
+      bookKey: c.bookKey,
       createdAt: c.createdAt.toISOString(),
       createdBy: people.get(c.createdById) ?? null,
       archivedAt: c.archivedAt?.toISOString() ?? null,
       archivedBy: c.archivedById ? (people.get(c.archivedById) ?? null) : null,
-      marks: c.marks.map((m) => ({
-        studentId: m.studentId,
-        checked: m.checked,
-        updatedAt: m.updatedAt.toISOString(),
-        updatedBy: people.get(m.updatedById) ?? null,
-      })),
+      marks: c.bookKey
+        ? (bookMarks ?? [])
+        : c.marks.map((m) => ({
+            studentId: m.studentId,
+            checked: m.checked,
+            updatedAt: m.updatedAt.toISOString(),
+            updatedBy: people.get(m.updatedById) ?? null,
+          })),
     };
   }
 
-  private async shapeOne(c: CheckRow) {
-    return ClassChecksService.shape(
-      c,
-      await this.people(ClassChecksService.staffIds([c])),
+  private async rosterIds(classroomId: string): Promise<string[]> {
+    const rows = await this.prisma.enrollment.findMany({
+      where: { classroomId, leftAt: null, student: { archivedAt: null } },
+      select: { studentId: true },
+    });
+    return rows.map((r) => r.studentId);
+  }
+
+  /**
+   * Номын чекүүдийн мөрүүд (ном тус бүрээр): одоогийн сурагчдын аль ч ангид
+   * төлсөн мөр + энэ ангид төлөөд гарсан сурагчийн мөр.
+   */
+  private async bookMarks(
+    classroomId: string,
+    checks: readonly CheckRow[],
+    rosterIds: readonly string[],
+  ): Promise<Map<string, BookMark[]>> {
+    const keys = [
+      ...new Set(checks.flatMap((c) => (c.bookKey ? [c.bookKey] : []))),
+    ];
+    const out = new Map<string, BookMark[]>();
+    if (keys.length === 0) return out;
+    const rows = await this.books.shape(
+      await this.books.activeForClass(classroomId, keys, rosterIds),
     );
+    for (const r of rows) {
+      const list = out.get(r.bookKey) ?? [];
+      list.push(bookMark(r, classroomId));
+      out.set(r.bookKey, list);
+    }
+    return out;
+  }
+
+  private async shapeOne(c: CheckRow) {
+    const [people, marks] = await Promise.all([
+      this.people(ClassChecksService.staffIds([c])),
+      c.bookKey
+        ? this.rosterIds(c.classroomId).then((ids) =>
+            this.bookMarks(c.classroomId, [c], ids),
+          )
+        : undefined,
+    ]);
+    return ClassChecksService.shape(c, people, marks?.get(c.bookKey ?? ''));
   }
 
   /**
@@ -181,6 +263,16 @@ export class ClassChecksService {
     for (const c of [...open, ...archived])
       for (const m of c.marks)
         if (m.checked && !roster.has(m.studentId)) formerIds.add(m.studentId);
+    const bookMarks = await this.bookMarks(
+      classroomId,
+      [...open, ...archived],
+      [...roster.keys()],
+    );
+    // Энэ ангид номын мөнгөө өгөөд гарсан/шилжсэн сурагч — мөнгө нь энэ ангид үлдэнэ
+    for (const marks of bookMarks.values())
+      for (const m of marks)
+        if (m.checked && !m.elsewhere && !roster.has(m.studentId))
+          formerIds.add(m.studentId);
     const people = await this.people([
       ...ClassChecksService.staffIds([...open, ...archived]),
       ...formerIds,
@@ -195,8 +287,12 @@ export class ClassChecksService {
         .map((id) => people.get(id))
         .filter((p): p is Person => !!p)
         .sort(byName),
-      checks: open.map((c) => ClassChecksService.shape(c, people)),
-      archived: archived.map((c) => ClassChecksService.shape(c, people)),
+      checks: open.map((c) =>
+        ClassChecksService.shape(c, people, bookMarks.get(c.bookKey ?? '')),
+      ),
+      archived: archived.map((c) =>
+        ClassChecksService.shape(c, people, bookMarks.get(c.bookKey ?? '')),
+      ),
     };
   }
 
@@ -271,10 +367,44 @@ export class ClassChecksService {
 
   async create(classroomId: string, dto: CreateClassCheckDto, userId: string) {
     const role = await this.access(classroomId, userId);
-    const title = cleanCheckTitle(dto.title);
+    let bookKey = dto.bookKey ?? null;
+    // Хуудасны дугаарыг клиент өөрөө сонгож болохгүй — зөвхөн «SHEET» төрөл
+    if (bookKey !== null && sheetNumber(bookKey) !== null)
+      throw new BadRequestException('Номоо сонгоно уу');
+    // «Хариултын хуудас» — дугаарыг сервер өгнө: энэ ангийн дараагийн хуудас
+    // (устгасан чекийн дугаарыг дахин ашиглахгүй — хуучин төлбөр шинэ чект наалдахгүй)
+    if (bookKey === SHEET_KIND) {
+      const prior = await this.prisma.classCheck.findMany({
+        where: { classroomId, bookKey: { startsWith: SHEET_KIND } },
+        select: { bookKey: true },
+      });
+      bookKey = nextSheetKey(
+        prior.flatMap((c) => (c.bookKey ? [c.bookKey] : [])),
+      );
+      if (!bookKey)
+        throw new BadRequestException('Хариултын хуудасны чек хэт олон байна');
+    }
+    if (bookKey !== null && !isBookKey(bookKey))
+      throw new BadRequestException('Номоо сонгоно уу');
+    // Номын чекийн нэр = номын нэр (бүх ангид ижил, самбарт нэгдэнэ)
+    const title = bookKey ? bookTitle(bookKey) : cleanCheckTitle(dto.title);
     if (!title) throw new BadRequestException('Чекийн нэрээ бичнэ үү');
     const amount = cleanCheckAmount(dto.amount ?? null);
     if (Number.isNaN(amount)) throw new BadRequestException('Дүн буруу байна');
+    if (bookKey) {
+      if (amount === null) throw new BadRequestException('Үнээ оруулна уу');
+      // Нэг ангид нэг номын ганц чек — давхар нээвэл тоо хоёр хуваагдана
+      const existing = await this.prisma.classCheck.findFirst({
+        where: { classroomId, bookKey, deletedAt: null },
+        select: { archivedAt: true },
+      });
+      if (existing)
+        throw new BadRequestException(
+          existing.archivedAt
+            ? `«${title}» чек энэ ангид нуусан байна — «Нуусан» хэсгээс буцааж гаргана уу`
+            : `«${title}» чек энэ ангид аль хэдийн нээлттэй байна`,
+        );
+    }
     const openCount = await this.prisma.classCheck.count({
       where: { classroomId, archivedAt: null, deletedAt: null },
     });
@@ -282,17 +412,27 @@ export class ClassChecksService {
       throw new BadRequestException(
         `Нээлттэй чек ${OPEN_CHECKS_MAX}-аас олон байж болохгүй — дууссаныг нь хаана уу`,
       );
-    const created = await this.prisma.classCheck.create({
-      data: { classroomId, title, amount, createdById: userId },
-      select: CHECK_SELECT,
-    });
+    let created: CheckRow;
+    try {
+      created = await this.prisma.classCheck.create({
+        data: { classroomId, title, amount, bookKey, createdById: userId },
+        select: CHECK_SELECT,
+      });
+    } catch (err) {
+      // Хоёр багш зэрэг ижил ном/хуудас нээвэл unique индекс нэгийг нь буцаана
+      if (bookKey && isUniqueViolation(err))
+        throw new BadRequestException(
+          `«${title}» чекийг өөр багш дөнгөж нээлээ — хуудсаа шинэчилнэ үү`,
+        );
+      throw err;
+    }
     await this.audit.record({
       actorId: userId,
       actorRole: role,
       action: 'CREATE',
       entity: 'ClassCheck',
       entityId: created.id,
-      after: { classroomId, title, amount },
+      after: { classroomId, title, amount, bookKey },
     });
     return this.shapeOne(created);
   }
@@ -322,17 +462,24 @@ export class ClassChecksService {
           cleanCheckAmount(dto.amount) !== before.amount))
     )
       throw new BadRequestException(
-        'Хаагдсан чекийг засахгүй — эхлээд дахин нээнэ үү',
+        'Нуусан чекийг засахгүй — эхлээд буцааж гаргана уу',
       );
     if (dto.title !== undefined) {
       const title = cleanCheckTitle(dto.title);
       if (!title) throw new BadRequestException('Чекийн нэрээ бичнэ үү');
-      if (title !== before.title) data.title = title;
+      if (title !== before.title) {
+        if (before.bookKey)
+          throw new BadRequestException('Энэ чекийн нэрийг солихгүй');
+        data.title = title;
+      }
     }
     if (dto.amount !== undefined) {
       const amount = cleanCheckAmount(dto.amount);
       if (Number.isNaN(amount))
         throw new BadRequestException('Дүн буруу байна');
+      // Үнэ солиход өмнө тэмдэглэсэн сурагчдын дүн хэвээр (мөр бүр өөрийн дүнтэй)
+      if (before.bookKey && amount === null)
+        throw new BadRequestException('Үнээ оруулна уу');
       if (amount !== before.amount) data.amount = amount;
     }
     if (dto.archived === true && !before.archivedAt) {
@@ -428,12 +575,12 @@ export class ClassChecksService {
     const role = await this.access(classroomId, userId);
     const check = await this.prisma.classCheck.findFirst({
       where: { id: checkId, classroomId, deletedAt: null },
-      select: { id: true, archivedAt: true },
+      select: { id: true, archivedAt: true, bookKey: true, amount: true },
     });
     if (!check) throw new NotFoundException('Чек олдсонгүй');
     if (check.archivedAt)
       throw new BadRequestException(
-        'Хаагдсан чекийг засахгүй — эхлээд дахин нээнэ үү',
+        'Нуусан чекийг засахгүй — эхлээд буцааж гаргана уу',
       );
     const enrolled = await this.prisma.enrollment.findFirst({
       where: {
@@ -446,6 +593,31 @@ export class ClassChecksService {
     });
     if (!enrolled)
       throw new BadRequestException('Энэ сурагч энэ ангид одоо бүртгэлгүй');
+
+    // Номын чек — мөнгөний бүртгэл BookPayment-т (анги сольсон ч, чек нуусан ч үлдэнэ)
+    if (check.bookKey) {
+      const row = await this.books.markFromCheck({
+        classroomId,
+        check: { id: check.id, bookKey: check.bookKey, amount: check.amount },
+        studentId,
+        dto,
+        actorId: userId,
+        actorRole: role,
+      });
+      if (row) return bookMark((await this.books.shape([row]))[0], classroomId);
+      const me = await this.people([userId]);
+      return {
+        studentId,
+        checked: false,
+        skipped: false,
+        updatedAt: new Date().toISOString(),
+        updatedBy: me.get(userId) ?? null,
+        collectedBy: null,
+        amount: null,
+        note: null,
+        elsewhere: null,
+      };
+    }
 
     const where = { checkId_studentId: { checkId, studentId } };
     const before = await this.prisma.classCheckMark.findUnique({

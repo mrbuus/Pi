@@ -44,6 +44,7 @@ export type ClassCheckMinAggregateOutputType = {
   classroomId: string | null
   title: string | null
   amount: number | null
+  bookKey: string | null
   createdById: string | null
   createdAt: Date | null
   archivedAt: Date | null
@@ -57,6 +58,7 @@ export type ClassCheckMaxAggregateOutputType = {
   classroomId: string | null
   title: string | null
   amount: number | null
+  bookKey: string | null
   createdById: string | null
   createdAt: Date | null
   archivedAt: Date | null
@@ -70,6 +72,7 @@ export type ClassCheckCountAggregateOutputType = {
   classroomId: number
   title: number
   amount: number
+  bookKey: number
   createdById: number
   createdAt: number
   archivedAt: number
@@ -93,6 +96,7 @@ export type ClassCheckMinAggregateInputType = {
   classroomId?: true
   title?: true
   amount?: true
+  bookKey?: true
   createdById?: true
   createdAt?: true
   archivedAt?: true
@@ -106,6 +110,7 @@ export type ClassCheckMaxAggregateInputType = {
   classroomId?: true
   title?: true
   amount?: true
+  bookKey?: true
   createdById?: true
   createdAt?: true
   archivedAt?: true
@@ -119,6 +124,7 @@ export type ClassCheckCountAggregateInputType = {
   classroomId?: true
   title?: true
   amount?: true
+  bookKey?: true
   createdById?: true
   createdAt?: true
   archivedAt?: true
@@ -219,6 +225,7 @@ export type ClassCheckGroupByOutputType = {
   classroomId: string
   title: string
   amount: number | null
+  bookKey: string | null
   createdById: string
   createdAt: Date
   archivedAt: Date | null
@@ -255,6 +262,7 @@ export type ClassCheckWhereInput = {
   classroomId?: Prisma.StringFilter<"ClassCheck"> | string
   title?: Prisma.StringFilter<"ClassCheck"> | string
   amount?: Prisma.IntNullableFilter<"ClassCheck"> | number | null
+  bookKey?: Prisma.StringNullableFilter<"ClassCheck"> | string | null
   createdById?: Prisma.StringFilter<"ClassCheck"> | string
   createdAt?: Prisma.DateTimeFilter<"ClassCheck"> | Date | string
   archivedAt?: Prisma.DateTimeNullableFilter<"ClassCheck"> | Date | string | null
@@ -269,6 +277,7 @@ export type ClassCheckOrderByWithRelationInput = {
   classroomId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   amount?: Prisma.SortOrderInput | Prisma.SortOrder
+  bookKey?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -286,6 +295,7 @@ export type ClassCheckWhereUniqueInput = Prisma.AtLeast<{
   classroomId?: Prisma.StringFilter<"ClassCheck"> | string
   title?: Prisma.StringFilter<"ClassCheck"> | string
   amount?: Prisma.IntNullableFilter<"ClassCheck"> | number | null
+  bookKey?: Prisma.StringNullableFilter<"ClassCheck"> | string | null
   createdById?: Prisma.StringFilter<"ClassCheck"> | string
   createdAt?: Prisma.DateTimeFilter<"ClassCheck"> | Date | string
   archivedAt?: Prisma.DateTimeNullableFilter<"ClassCheck"> | Date | string | null
@@ -300,6 +310,7 @@ export type ClassCheckOrderByWithAggregationInput = {
   classroomId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   amount?: Prisma.SortOrderInput | Prisma.SortOrder
+  bookKey?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -321,6 +332,7 @@ export type ClassCheckScalarWhereWithAggregatesInput = {
   classroomId?: Prisma.StringWithAggregatesFilter<"ClassCheck"> | string
   title?: Prisma.StringWithAggregatesFilter<"ClassCheck"> | string
   amount?: Prisma.IntNullableWithAggregatesFilter<"ClassCheck"> | number | null
+  bookKey?: Prisma.StringNullableWithAggregatesFilter<"ClassCheck"> | string | null
   createdById?: Prisma.StringWithAggregatesFilter<"ClassCheck"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ClassCheck"> | Date | string
   archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ClassCheck"> | Date | string | null
@@ -334,6 +346,7 @@ export type ClassCheckCreateInput = {
   classroomId: string
   title: string
   amount?: number | null
+  bookKey?: string | null
   createdById: string
   createdAt?: Date | string
   archivedAt?: Date | string | null
@@ -348,6 +361,7 @@ export type ClassCheckUncheckedCreateInput = {
   classroomId: string
   title: string
   amount?: number | null
+  bookKey?: string | null
   createdById: string
   createdAt?: Date | string
   archivedAt?: Date | string | null
@@ -362,6 +376,7 @@ export type ClassCheckUpdateInput = {
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bookKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -376,6 +391,7 @@ export type ClassCheckUncheckedUpdateInput = {
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bookKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -390,6 +406,7 @@ export type ClassCheckCreateManyInput = {
   classroomId: string
   title: string
   amount?: number | null
+  bookKey?: string | null
   createdById: string
   createdAt?: Date | string
   archivedAt?: Date | string | null
@@ -403,6 +420,7 @@ export type ClassCheckUpdateManyMutationInput = {
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bookKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -416,6 +434,7 @@ export type ClassCheckUncheckedUpdateManyInput = {
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bookKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -429,6 +448,7 @@ export type ClassCheckCountOrderByAggregateInput = {
   classroomId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  bookKey?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
@@ -446,6 +466,7 @@ export type ClassCheckMaxOrderByAggregateInput = {
   classroomId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  bookKey?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
@@ -459,6 +480,7 @@ export type ClassCheckMinOrderByAggregateInput = {
   classroomId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  bookKey?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
@@ -495,6 +517,7 @@ export type ClassCheckCreateWithoutMarksInput = {
   classroomId: string
   title: string
   amount?: number | null
+  bookKey?: string | null
   createdById: string
   createdAt?: Date | string
   archivedAt?: Date | string | null
@@ -508,6 +531,7 @@ export type ClassCheckUncheckedCreateWithoutMarksInput = {
   classroomId: string
   title: string
   amount?: number | null
+  bookKey?: string | null
   createdById: string
   createdAt?: Date | string
   archivedAt?: Date | string | null
@@ -537,6 +561,7 @@ export type ClassCheckUpdateWithoutMarksInput = {
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bookKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -550,6 +575,7 @@ export type ClassCheckUncheckedUpdateWithoutMarksInput = {
   classroomId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bookKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -594,6 +620,7 @@ export type ClassCheckSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   classroomId?: boolean
   title?: boolean
   amount?: boolean
+  bookKey?: boolean
   createdById?: boolean
   createdAt?: boolean
   archivedAt?: boolean
@@ -609,6 +636,7 @@ export type ClassCheckSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   classroomId?: boolean
   title?: boolean
   amount?: boolean
+  bookKey?: boolean
   createdById?: boolean
   createdAt?: boolean
   archivedAt?: boolean
@@ -622,6 +650,7 @@ export type ClassCheckSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   classroomId?: boolean
   title?: boolean
   amount?: boolean
+  bookKey?: boolean
   createdById?: boolean
   createdAt?: boolean
   archivedAt?: boolean
@@ -635,6 +664,7 @@ export type ClassCheckSelectScalar = {
   classroomId?: boolean
   title?: boolean
   amount?: boolean
+  bookKey?: boolean
   createdById?: boolean
   createdAt?: boolean
   archivedAt?: boolean
@@ -643,7 +673,7 @@ export type ClassCheckSelectScalar = {
   deletedById?: boolean
 }
 
-export type ClassCheckOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "classroomId" | "title" | "amount" | "createdById" | "createdAt" | "archivedAt" | "archivedById" | "deletedAt" | "deletedById", ExtArgs["result"]["classCheck"]>
+export type ClassCheckOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "classroomId" | "title" | "amount" | "bookKey" | "createdById" | "createdAt" | "archivedAt" | "archivedById" | "deletedAt" | "deletedById", ExtArgs["result"]["classCheck"]>
 export type ClassCheckInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   marks?: boolean | Prisma.ClassCheck$marksArgs<ExtArgs>
   _count?: boolean | Prisma.ClassCheckCountOutputTypeDefaultArgs<ExtArgs>
@@ -664,6 +694,11 @@ export type $ClassCheckPayload<ExtArgs extends runtime.Types.Extensions.Internal
      * Нэг сурагчийн мөнгөн дүн (₮), заавал биш
      */
     amount: number | null
+    /**
+     * Номын чек (эзэн 2026-11-12): BOOKS-ийн түлхүүр (E2, HAVTGAI1 …). null = энгийн чек.
+     * Номын чекийн тэмдэглэгээ ClassCheckMark-т БИШ, BookPayment-т хадгалагдана.
+     */
+    bookKey: string | null
     createdById: string
     createdAt: Date
     archivedAt: Date | null
@@ -1101,6 +1136,7 @@ export interface ClassCheckFieldRefs {
   readonly classroomId: Prisma.FieldRef<"ClassCheck", 'String'>
   readonly title: Prisma.FieldRef<"ClassCheck", 'String'>
   readonly amount: Prisma.FieldRef<"ClassCheck", 'Int'>
+  readonly bookKey: Prisma.FieldRef<"ClassCheck", 'String'>
   readonly createdById: Prisma.FieldRef<"ClassCheck", 'String'>
   readonly createdAt: Prisma.FieldRef<"ClassCheck", 'DateTime'>
   readonly archivedAt: Prisma.FieldRef<"ClassCheck", 'DateTime'>

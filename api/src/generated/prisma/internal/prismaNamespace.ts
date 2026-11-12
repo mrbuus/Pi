@@ -525,6 +525,7 @@ export const ModelName = {
   LessonMakeup: 'LessonMakeup',
   ClassCheck: 'ClassCheck',
   ClassCheckMark: 'ClassCheckMark',
+  BookPayment: 'BookPayment',
   LoginText: 'LoginText',
   SheetSyncRun: 'SheetSyncRun',
   SheetRow: 'SheetRow',
@@ -559,7 +560,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "bankAllocation" | "bankPayerHint" | "bankCursor" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "teacherWorkHours" | "teacherBankAccount" | "teacherPayRate" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment" | "homeworkQuiz" | "homeworkQuizScore" | "makeupVisit" | "makeupVisitTest"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "bankAllocation" | "bankPayerHint" | "bankCursor" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "teacherWorkHours" | "teacherBankAccount" | "teacherPayRate" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "bookPayment" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment" | "homeworkQuiz" | "homeworkQuizScore" | "makeupVisit" | "makeupVisitTest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -10035,6 +10036,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    BookPayment: {
+      payload: Prisma.$BookPaymentPayload<ExtArgs>
+      fields: Prisma.BookPaymentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BookPaymentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookPaymentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BookPaymentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookPaymentPayload>
+        }
+        findFirst: {
+          args: Prisma.BookPaymentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookPaymentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BookPaymentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookPaymentPayload>
+        }
+        findMany: {
+          args: Prisma.BookPaymentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookPaymentPayload>[]
+        }
+        create: {
+          args: Prisma.BookPaymentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookPaymentPayload>
+        }
+        createMany: {
+          args: Prisma.BookPaymentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BookPaymentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookPaymentPayload>[]
+        }
+        delete: {
+          args: Prisma.BookPaymentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookPaymentPayload>
+        }
+        update: {
+          args: Prisma.BookPaymentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookPaymentPayload>
+        }
+        deleteMany: {
+          args: Prisma.BookPaymentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BookPaymentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BookPaymentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookPaymentPayload>[]
+        }
+        upsert: {
+          args: Prisma.BookPaymentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookPaymentPayload>
+        }
+        aggregate: {
+          args: Prisma.BookPaymentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBookPayment>
+        }
+        groupBy: {
+          args: Prisma.BookPaymentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BookPaymentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BookPaymentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BookPaymentCountAggregateOutputType> | number
+        }
+      }
+    }
     LoginText: {
       payload: Prisma.$LoginTextPayload<ExtArgs>
       fields: Prisma.LoginTextFieldRefs
@@ -13444,6 +13519,7 @@ export const ClassCheckScalarFieldEnum = {
   classroomId: 'classroomId',
   title: 'title',
   amount: 'amount',
+  bookKey: 'bookKey',
   createdById: 'createdById',
   createdAt: 'createdAt',
   archivedAt: 'archivedAt',
@@ -13465,6 +13541,25 @@ export const ClassCheckMarkScalarFieldEnum = {
 } as const
 
 export type ClassCheckMarkScalarFieldEnum = (typeof ClassCheckMarkScalarFieldEnum)[keyof typeof ClassCheckMarkScalarFieldEnum]
+
+
+export const BookPaymentScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  bookKey: 'bookKey',
+  status: 'status',
+  amount: 'amount',
+  classroomId: 'classroomId',
+  checkId: 'checkId',
+  collectedById: 'collectedById',
+  note: 'note',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  voidedAt: 'voidedAt',
+  voidedById: 'voidedById'
+} as const
+
+export type BookPaymentScalarFieldEnum = (typeof BookPaymentScalarFieldEnum)[keyof typeof BookPaymentScalarFieldEnum]
 
 
 export const LoginTextScalarFieldEnum = {
@@ -14951,6 +15046,7 @@ export type GlobalOmitConfig = {
   lessonMakeup?: Prisma.LessonMakeupOmit
   classCheck?: Prisma.ClassCheckOmit
   classCheckMark?: Prisma.ClassCheckMarkOmit
+  bookPayment?: Prisma.BookPaymentOmit
   loginText?: Prisma.LoginTextOmit
   sheetSyncRun?: Prisma.SheetSyncRunOmit
   sheetRow?: Prisma.SheetRowOmit

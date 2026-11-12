@@ -320,12 +320,24 @@ export interface CheckMark {
   checked: boolean;
   updatedAt: string;
   updatedBy: CheckPerson | null;
+  // ── Доорх нь зөвхөн номын чекэд (ClassCheck.bookKey) ──
+  /** «Авахгүй» — энэ номыг авахгүй сурагч */
+  skipped?: boolean;
+  /** Мөнгийг хүлээж авсан багш */
+  collectedBy?: CheckPerson | null;
+  /** Бодит өгсөн дүн (чекийн үнээс өөр байж болно) */
+  amount?: number | null;
+  note?: string | null;
+  /** Өөр ангид байхдаа төлсөн — энэ ангийн мөнгөнд орохгүй, эндээс засахгүй */
+  elsewhere?: { name: string | null } | null;
 }
 
 export interface ClassCheck {
   id: string;
   title: string;
   amount: number | null;
+  /** Номын чек бол номын түлхүүр (E2 …), энгийн чек бол null */
+  bookKey?: string | null;
   createdAt: string;
   createdBy: CheckPerson | null;
   archivedAt: string | null;
