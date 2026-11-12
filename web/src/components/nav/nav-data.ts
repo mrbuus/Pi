@@ -100,6 +100,8 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
+    // Номын мөнгө (эзэн 2026-11-12) — бүх багш; Багш мөнгөн дүнгээс зөвхөн өөрийн хураасныг харна
+    { href: "/app/book-money", label: "Номын мөнгө", icon: "book-open" },
     // Багш бүх анги, сурагчийг Багш+-тай адил ХАРНА (эзэн 2026-10-22); төлбөр, удирдлага нээгдэхгүй
     { href: "/app/classes", label: "Ангиуд", icon: "school" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
@@ -109,6 +111,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
   TEACHER_PLUS: [
     HOME.TEACHER_PLUS,
     { href: "/app/internal", label: "Бодлогын ноорог", icon: "pencil" },
+    { href: "/app/book-money", label: "Номын мөнгө", icon: "book-open" },
     { href: "/app/import", label: "Word импорт", icon: "file-text" },
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
@@ -132,6 +135,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/v2", label: "v2 ажлын хяналт", icon: "clipboard-list" },
     { href: "/app/admin/capabilities", label: "Эрхийн матриц", icon: "shield-check" },
     { href: "/app/internal", label: "Бодлогын ноорог", icon: "pencil" },
+    { href: "/app/book-money", label: "Номын мөнгө", icon: "book-open" },
     { href: "/app/import", label: "Word импорт", icon: "file-text" },
     { href: "/app/teacher", label: "Багшийн самбар", icon: "teacher" },
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
@@ -177,6 +181,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
 // Маршрут бүрийг аль бүлэгт харьяалагдахыг тодорхойлно (нүүр хуудсуудаас бусад).
 const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/internal": "internal",
+  "/app/book-money": "internal",
   "/app/study/history": "learn",
   "/app/groups": "class",
   "/app/study": "learn",

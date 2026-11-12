@@ -179,6 +179,7 @@ export const ModelName = {
   LessonMakeup: 'LessonMakeup',
   ClassCheck: 'ClassCheck',
   ClassCheckMark: 'ClassCheckMark',
+  BookPayment: 'BookPayment',
   LoginText: 'LoginText',
   SheetSyncRun: 'SheetSyncRun',
   SheetRow: 'SheetRow',
@@ -2179,6 +2180,7 @@ export const ClassCheckScalarFieldEnum = {
   classroomId: 'classroomId',
   title: 'title',
   amount: 'amount',
+  bookKey: 'bookKey',
   createdById: 'createdById',
   createdAt: 'createdAt',
   archivedAt: 'archivedAt',
@@ -2200,6 +2202,25 @@ export const ClassCheckMarkScalarFieldEnum = {
 } as const
 
 export type ClassCheckMarkScalarFieldEnum = (typeof ClassCheckMarkScalarFieldEnum)[keyof typeof ClassCheckMarkScalarFieldEnum]
+
+
+export const BookPaymentScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  bookKey: 'bookKey',
+  status: 'status',
+  amount: 'amount',
+  classroomId: 'classroomId',
+  checkId: 'checkId',
+  collectedById: 'collectedById',
+  note: 'note',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  voidedAt: 'voidedAt',
+  voidedById: 'voidedById'
+} as const
+
+export type BookPaymentScalarFieldEnum = (typeof BookPaymentScalarFieldEnum)[keyof typeof BookPaymentScalarFieldEnum]
 
 
 export const LoginTextScalarFieldEnum = {

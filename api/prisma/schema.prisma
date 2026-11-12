@@ -3219,6 +3219,9 @@ model ClassCheck {
   title        String           @db.VarChar(80)
   /// Нэг сурагчийн мөнгөн дүн (₮), заавал биш
   amount       Int?
+  /// Номын чек (эзэн 2026-11-12): BOOKS-ийн түлхүүр (E2, HAVTGAI1 …). null = энгийн чек.
+  /// Номын чекийн тэмдэглэгээ ClassCheckMark-т БИШ, BookPayment-т хадгалагдана.
+  bookKey      String?          @db.VarChar(24)
   createdById  String
   createdAt    DateTime         @default(now())
   archivedAt   DateTime?
@@ -3244,6 +3247,38 @@ model ClassCheckMark {
 
   @@unique([checkId, studentId])
   @@index([studentId])
+}
+
+/// Номын мөнгө (эзэн 2026-11-12) — сурагч × ном. Чекээс ХАМААРАХГҮЙ хадгалагдана:
+/// чек нуугдсан/устсан, сурагч анги сольсон ч «хэн, аль ангид байхдаа, аль багшид,
+/// хэдийг өгсөн» нь үлдэнэ. Мөр хэзээ ч устахгүй, засагдахгүй — өөрчлөх бүрд хуучин
+/// мөр voidedAt авч, шинэ мөр үүснэ (бүтэн түүх). Идэвхтэй мөр (voidedAt IS NULL)
+/// сурагч × номд ГАНЦ — хэсэгчилсэн unique индекс зөвхөн SQL-д (миграци
+/// 20261112150000_book_payments). FK-гүй (ClassCheck-ийн адил). api/src/book-payments.
+model BookPayment {
+  id            String    @id @default(cuid())
+  studentId     String
+  bookKey       String    @db.VarChar(24)
+  /// PAID = мөнгөө өгсөн, SKIPPED = энэ номыг авахгүй
+  status        String    @db.VarChar(8)
+  /// Бодит өгсөн дүн (₮) — чекийн үнээс өөр байж болно (гэмтэлтэй ном −5,000 г.м.)
+  amount        Int?
+  /// Мөнгөө өгөх үед сууж байсан анги (тэр ангийн тооцоонд орно). null = ангигүй
+  classroomId   String?
+  /// Аль чекээр тэмдэглэсэн (байвал)
+  checkId       String?
+  /// Мөнгийг хүлээж авсан багш (PAID үед заавал)
+  collectedById String?
+  note          String?   @db.VarChar(200)
+  /// Тэмдэглэсэн хүн, цаг
+  createdById   String
+  createdAt     DateTime  @default(now())
+  voidedAt      DateTime?
+  voidedById    String?
+
+  @@index([studentId, bookKey])
+  @@index([classroomId, bookKey])
+  @@index([collectedById])
 }
 
 /// Нэвтрэх хуудасны тайлбар/зарлал (эзэн 2026-10-22, Агент D). Ганц мөр id="default";
