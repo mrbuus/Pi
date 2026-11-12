@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { ArrayMaxSize, ArrayMinSize, IsIn, IsInt, IsOptional, IsString, Matches, Max, MaxLength, Min, ValidateNested } from 'class-validator';
 
-export const ALLOC_KINDS = ['TUITION', 'BOOK', 'ANSWER_SHEET', 'STAFF_FINE', 'TRANSFER', 'EXPENSE', 'OTHER'] as const;
+export const ALLOC_KINDS = ['TUITION', 'SOCIAL', 'BOOK', 'ANSWER_SHEET', 'STAFF_FINE', 'TRANSFER', 'EXPENSE', 'OTHER'] as const;
 export const ROW_LANES = ['all', 'manual', 'tuition', 'other', 'expense', 'sheet'] as const;
 export type RowLane = (typeof ROW_LANES)[number];
 

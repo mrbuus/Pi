@@ -1608,6 +1608,7 @@ model BankTransaction {
 // гүйлгээний дүн. Устгахгүй: буцаахад revokedAt (TUITION-ийн Payment REVERSED).
 enum BankAllocKind {
   TUITION // сургалтын төлбөр → Payment CONFIRMED
+  SOCIAL // нийгмийн сургалтын төлбөр (утгад «нийгэм») — үндсэн анги нь Нийгэм бол Payment, үгүй бол зөвхөн бүртгэл
   BOOK // ном (E1, E2, Хавтгайн геометр…)
   ANSWER_SHEET // шалгалтын хариултын хуудас (1,000₮/ш)
   STAFF_FINE // ажилтны заалны торгууль

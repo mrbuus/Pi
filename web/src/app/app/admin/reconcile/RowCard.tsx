@@ -14,7 +14,7 @@ import AllocateDialog from "./AllocateDialog";
 import PayerInfo from "./PayerInfo";
 import StudentDetailDialog from "./StudentDetailDialog";
 import { MoreButton } from "./StudentPicker";
-import { SIGNAL_LABEL, STUDENT_KINDS, TONE, phonesInText, rowTone, sheetWriteText, splitSender, type SheetWrite, type AllocPart, type BankRow, type Candidate } from "./types";
+import { SIGNAL_LABEL, STUDENT_KINDS, TONE, isTuitionKind, phonesInText, rowTone, sheetWriteText, splitSender, type SheetWrite, type AllocPart, type BankRow, type Candidate } from "./types";
 
 /** Яагаад энэ хүүхэд гэж үзсэн — хүний хэлээр («утас таарсан, нэр таарсан») */
 const signals = (c: Candidate) => [...new Set(c.signals.map((s) => SIGNAL_LABEL[s]))].join(", ");
@@ -104,9 +104,9 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
       {open && s && (
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-1.5">
-            <Badge tone={s.kind === "TUITION" ? "brand" : "neutral"}>{s.kindLabel}</Badge>
+            <Badge tone={isTuitionKind(s.kind) ? "brand" : "neutral"}>{s.kindLabel}</Badge>
             {s.reason !== s.kindLabel && !s.reason.startsWith(`${s.kindLabel}:`) && <span className="text-sm text-ink-dim">{s.reason}</span>}
-            {row.direction === "CREDIT" && !s.split && DECISION_HINT[s.decision] && (s.kind === "TUITION" || s.candidates.length > 0) && (
+            {row.direction === "CREDIT" && !s.split && DECISION_HINT[s.decision] && (isTuitionKind(s.kind) || s.candidates.length > 0) && (
               <span className="text-sm text-ink-dim">{DECISION_HINT[s.decision]}</span>
             )}
           </div>
@@ -183,14 +183,14 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
         <ul className="space-y-1">
           {row.allocations.map((a) => (
             <li key={a.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-              <Badge tone={a.kind === "TUITION" ? "brand" : "neutral"}>{a.kindLabel}</Badge>
+              <Badge tone={isTuitionKind(a.kind) ? "brand" : "neutral"}>{a.kindLabel}</Badge>
               {a.student && (
                 <span className="font-semibold text-ink">
                   <Meta items={[a.student.name, a.student.classroom]} />
                 </span>
               )}
               {row.allocations.length > 1 && <span className="tabular-nums text-ink-dim">{mnt(a.amount)}</span>}
-              {a.kind === "TUITION" && (
+              {isTuitionKind(a.kind) && (
                 <span className="text-xs text-ink-dim">{sheetNote(row, a.studentId, a.inSheet)}</span>
               )}
               {a.auto && <span className="text-xs text-ink-dim">Автоматаар</span>}

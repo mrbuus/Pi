@@ -4,9 +4,9 @@
 // Үнийг эзэн 2026-11-05-нд хэлсэн. Хуулгын 230 «төлбөр биш» орлогоор шалгахад
 // 144 ном, 15 хариултын хуудас, 9 «сургалт + ном» хольсон төлбөр тайлбарлагдсан.
 
-import type { MatchResult } from './huulga-match';
+import { SOCIAL_WORD, type MatchResult } from './huulga-match';
 
-export type AllocKind = 'TUITION' | 'BOOK' | 'ANSWER_SHEET' | 'STAFF_FINE' | 'TRANSFER' | 'EXPENSE' | 'OTHER';
+export type AllocKind = 'TUITION' | 'SOCIAL' | 'BOOK' | 'ANSWER_SHEET' | 'STAFF_FINE' | 'TRANSFER' | 'EXPENSE' | 'OTHER';
 
 export const HUULGA_PRICES = {
   /** Шалгалтын хариултын хуудас — хэвлэлийн компаниас захиалдаг, ширхэг бүр */
@@ -27,6 +27,7 @@ export const HUULGA_PRICES = {
 
 export const ALLOC_LABEL: Record<AllocKind, string> = {
   TUITION: 'Сургалтын төлбөр',
+  SOCIAL: 'Нийгэм сургалт',
   BOOK: 'Ном',
   ANSWER_SHEET: 'Хариултын хуудас',
   STAFF_FINE: 'Заалны торгууль',
@@ -44,6 +45,7 @@ const KW = {
     `(^|${NOT_LETTER})(ном|nom|book)(ын|ны|ний|нь|ууд|iin|nii|uud)?(${NOT_LETTER}|$)|боть|дэвтэр|devter|геометр|geometr|havtga|хавтга|(^|[^\\p{L}\\d])e-?[12](${NOT_LETTER}|$)|\\d\\s*ш(${NOT_LETTER}|$)|\\d\\s*(sh|shirheg)(${NOT_LETTER}|$)`,
     'iu',
   ),
+  math: new RegExp(`математик|matematik|(^|${NOT_LETTER})(мат|mat)(${NOT_LETTER}|$)`, 'iu'),
   tuition: /сургалт|surgalt|төлбөр|tulbur|tolbor|сар|sar(iin|in)?\b|2027|урьдчилгаа|uridchilgaa/iu,
 };
 
@@ -104,6 +106,14 @@ export function classifyTransaction(
     return { kind: 'OTHER', confident: false, reason: 'Бага дүн, тайлбаргүй' };
   }
   if (bookWord && !KW.tuition.test(text)) return { kind: 'BOOK', confident: false, reason: 'Утгад «ном», дүн нь номын үнэтэй таарахгүй' };
+
+  // Нийгмийн хичээлийн төлбөр — математикийнхаас тусдаа (эзэн 2026-11-12)
+  if (SOCIAL_WORD.test(text)) {
+    if (KW.math.test(text)) return { kind: 'SOCIAL', confident: false, reason: 'Утгад «нийгэм» ба «математик» хоёулаа — хувааж оноо' };
+    if (!hasKid) return { kind: 'SOCIAL', confident: false, reason: 'Нийгэм: хүүхэд танигдсангүй' };
+    if (!match.social?.known) return { kind: 'SOCIAL', confident: false, reason: 'Утгад «нийгэм» ч энэ хүүхэд нийгэмд бүртгэлгүй — шалгана уу' };
+    return { kind: 'SOCIAL', confident: true, reason: 'Нийгмийн сургалтын төлбөр' };
+  }
 
   // «Сургалт + ном» хольсон: 380,000 = 350,000 + E1. Сургалтын бүх үнэ 50,000-ийн
   // үржвэр тул тийм дүнг хуваахгүй (350,000 ≠ 300,000 + 2 геометр); хувь хүн

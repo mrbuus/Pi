@@ -10,7 +10,7 @@ import { dayLabel, mnt } from "@/components/payments/ledgerFormat";
 import { errMsg } from "@/components/payments/paymentHelpers";
 import PayerInfo from "./PayerInfo";
 import StudentPicker from "./StudentPicker";
-import { KIND_LABEL, STUDENT_KINDS, sheetWriteText, splitSender, type SheetWrite, type AllocKind, type BankRow, type StudentCard } from "./types";
+import { KIND_LABEL, STUDENT_KINDS, isTuitionKind, sheetWriteText, splitSender, type SheetWrite, type AllocKind, type BankRow, type StudentCard } from "./types";
 
 type Draft = { key: number; kind: AllocKind; amount: string; student: StudentCard | null };
 
@@ -33,13 +33,13 @@ export function initialDrafts(row: BankRow): { drafts: Draft[]; guessed: boolean
     if (sheet.every((x) => x != null)) {
       const sum = sheet.reduce((t, x) => t + x!, 0);
       if (sum <= row.amount) {
-        const drafts = cands.map((c, i) => draft("TUITION", sheet[i]!, c.student));
+        const drafts = cands.map((c, i) => draft(s.kind === "SOCIAL" ? "SOCIAL" : "TUITION", sheet[i]!, c.student));
         if (row.amount - sum > 0) drafts.push(draft("OTHER", row.amount - sum));
         return { drafts, guessed: false };
       }
     }
     const each = Math.floor(row.amount / kids.length / 1000) * 1000;
-    return { drafts: kids.map((k, i) => draft("TUITION", i === kids.length - 1 ? row.amount - each * (kids.length - 1) : each, k)), guessed: true };
+    return { drafts: kids.map((k, i) => draft(s.kind === "SOCIAL" ? "SOCIAL" : "TUITION", i === kids.length - 1 ? row.amount - each * (kids.length - 1) : each, k)), guessed: true };
   }
   const kind: AllocKind = row.direction === "DEBIT" ? "EXPENSE" : s?.kind ?? "TUITION";
   return { drafts: [draft(kind, row.amount, STUDENT_KINDS.includes(kind) && kids.length === 1 ? kids[0] : null)], guessed: false };
@@ -69,10 +69,10 @@ export default function AllocateDialog({
     }
   }, [open, row]);
 
-  const kinds = (Object.keys(KIND_LABEL) as AllocKind[]).filter((k) => (row.direction === "DEBIT" ? k !== "TUITION" : k !== "EXPENSE"));
+  const kinds = (Object.keys(KIND_LABEL) as AllocKind[]).filter((k) => (row.direction === "DEBIT" ? !isTuitionKind(k) : k !== "EXPENSE"));
   const sum = parts.reduce((t, p) => t + (parseInt(p.amount.replace(/\D/g, ""), 10) || 0), 0);
   const rest = row.amount - sum;
-  const missingKid = parts.some((p) => p.kind === "TUITION" && !p.student);
+  const missingKid = parts.some((p) => isTuitionKind(p.kind) && !p.student);
   const suggested = (row.suggestion?.candidates ?? []).map((c) => c.student).filter((x): x is StudentCard => !!x);
   const sheetOf = (studentId: string | undefined) => row.suggestion?.candidates.find((c) => c.studentId === studentId)?.sheetPays ?? [];
   const update = (key: number, patch: Partial<Draft>) => setParts((ps) => ps.map((p) => (p.key === key ? { ...p, ...patch } : p)));

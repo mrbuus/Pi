@@ -1,10 +1,11 @@
 // API: /reconcile/* (api/src/reconcile/reconcile.service.ts)
 
-export type AllocKind = "TUITION" | "BOOK" | "ANSWER_SHEET" | "STAFF_FINE" | "TRANSFER" | "EXPENSE" | "OTHER";
+export type AllocKind = "TUITION" | "SOCIAL" | "BOOK" | "ANSWER_SHEET" | "STAFF_FINE" | "TRANSFER" | "EXPENSE" | "OTHER";
 export type Lane = "all" | "manual" | "tuition" | "other" | "expense" | "sheet";
 
 export const KIND_LABEL: Record<AllocKind, string> = {
   TUITION: "Сургалтын төлбөр",
+  SOCIAL: "Нийгэм сургалт",
   BOOK: "Ном",
   ANSWER_SHEET: "Хариултын хуудас",
   STAFF_FINE: "Заалны торгууль",
@@ -14,7 +15,10 @@ export const KIND_LABEL: Record<AllocKind, string> = {
 };
 
 /** Хүүхэдтэй холбогддог зориулалт */
-export const STUDENT_KINDS: AllocKind[] = ["TUITION", "BOOK", "ANSWER_SHEET"];
+export const STUDENT_KINDS: AllocKind[] = ["TUITION", "SOCIAL", "BOOK", "ANSWER_SHEET"];
+
+/** Сургалтын мөнгө (математик эсвэл нийгэм) — хүүхэд заавал */
+export const isTuitionKind = (k: AllocKind) => k === "TUITION" || k === "SOCIAL";
 
 export interface StudentCard {
   id: string;
@@ -187,7 +191,7 @@ export function rowTone(r: BankRow): RowTone {
   if (!r.resolvedAt) return "open";
   if (r.inSheet) return "sheet";
   if (r.direction === "DEBIT") return "expense";
-  if (r.allocations.some((a) => a.kind === "TUITION")) return r.resolvedBySystem ? "auto" : "done";
+  if (r.allocations.some((a) => isTuitionKind(a.kind))) return r.resolvedBySystem ? "auto" : "done";
   return "other";
 }
 export const TONE: Record<RowTone, { label: string; card: string; dot: string }> = {

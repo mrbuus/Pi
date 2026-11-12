@@ -124,7 +124,7 @@ function BankLine({ b, onUndo }: { b: BankItem; onUndo: () => void }) {
         </p>
         <p className="truncate font-medium text-ink">{b.description || "Утгагүй гүйлгээ"}</p>
         <p className="text-ink-dim">
-          <Meta items={[b.kindLabel, b.counterparty ? `Данс ${b.counterparty}` : null, b.sender, b.kind === "TUITION" ? (b.inSheet ? "Шийтэд бүртгэлтэй" : "Шинэ төлбөр") : null]} />
+          <Meta items={[b.kindLabel, b.counterparty ? `Данс ${b.counterparty}` : null, b.sender, b.kind === "TUITION" || b.kind === "SOCIAL" ? (b.inSheet ? "Шийтэд бүртгэлтэй" : "Шинэ төлбөр") : null]} />
         </p>
       </div>
       <Button size="sm" variant="ghost" onClick={onUndo} aria-label={`${mnt(b.amount)}-ийн хуваарилалтыг буцаах`}>
