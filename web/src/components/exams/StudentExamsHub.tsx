@@ -3,7 +3,7 @@
 import Link from "next/link";
 import * as Tabs from "@radix-ui/react-tabs";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ChevronRight, ClipboardCheck, ClipboardList, PencilLine, Search, Sparkles, Trophy } from "lucide-react";
+import { ChevronRight, ClipboardCheck, ClipboardList, PencilLine, ScanLine, Search, Sparkles, Trophy } from "lucide-react";
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
 import { MetaTitle } from "@/components/ui/Meta";
@@ -13,6 +13,7 @@ import ContinueBanner from "@/components/test-list/ContinueBanner";
 import TopicGroup from "@/components/test-list/TopicGroup";
 import { collapseVariants, isExamType, splitTopic, type GroupRow, type TestRow } from "@/components/test-list/types";
 import MockExamsPanel from "@/components/mock-exams/MockExamsPanel";
+import StudentPaperExams from "@/components/paper-exams/StudentPaperExams";
 import { formatMnDate } from "@/lib/dateMn";
 import MyRankings, { type MyResult } from "./MyRankings";
 import { examTitleOf, ExamsToTakeList, useMyExams } from "./StudentExamLists";
@@ -29,6 +30,7 @@ import { cleanTitle } from "@/lib/studentTitle";
 const TABS = [
   { value: "give", label: "Өгөх", icon: PencilLine },
   { value: "done", label: "Өгсөн, дүн", icon: ClipboardCheck },
+  { value: "paper", label: "Нэгдсэн шалгалт", icon: ScanLine },
   { value: "rank", label: "Эрэмбэ", icon: Trophy },
   { value: "soril", label: "Жишиг сорил", icon: Sparkles },
 ] as const;
@@ -86,6 +88,9 @@ export default function StudentExamsHub() {
           </Tabs.Content>
           <Tabs.Content value="done">
             <DoneTab studentId={studentId} />
+          </Tabs.Content>
+          <Tabs.Content value="paper">
+            <StudentPaperExams />
           </Tabs.Content>
           <Tabs.Content value="rank">
             <MyRankings />

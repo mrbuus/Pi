@@ -826,3 +826,23 @@ export type MakeupVisit = Prisma.MakeupVisitModel
  * бичсэн сэдэв (title). Сэдвийг солиход хасагдсан мөр зөөлөн устна (түүх үлдэнэ).
  */
 export type MakeupVisitTest = Prisma.MakeupVisitTestModel
+/**
+ * Model PaperExam
+ * 
+ */
+export type PaperExam = Prisma.PaperExamModel
+/**
+ * Model PaperExamItem
+ * 
+ */
+export type PaperExamItem = Prisma.PaperExamItemModel
+/**
+ * Model PaperExamSheet
+ * 
+ */
+export type PaperExamSheet = Prisma.PaperExamSheetModel
+/**
+ * Model PaperExamImport
+ * 
+ */
+export type PaperExamImport = Prisma.PaperExamImportModel

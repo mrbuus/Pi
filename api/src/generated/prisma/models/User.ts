@@ -377,6 +377,7 @@ export type UserWhereInput = {
   feedback?: Prisma.FeedbackListRelationFilter
   studentProfile?: Prisma.XOR<Prisma.StudentProfileNullableScalarRelationFilter, Prisma.StudentProfileWhereInput> | null
   mockRegistrations?: Prisma.MockExamRegistrationListRelationFilter
+  paperExamSheets?: Prisma.PaperExamSheetListRelationFilter
   teacherProfile?: Prisma.XOR<Prisma.TeacherProfileNullableScalarRelationFilter, Prisma.TeacherProfileWhereInput> | null
   externalTeacherProfile?: Prisma.XOR<Prisma.ExternalTeacherProfileNullableScalarRelationFilter, Prisma.ExternalTeacherProfileWhereInput> | null
   parentLinks?: Prisma.ParentLinkListRelationFilter
@@ -472,6 +473,7 @@ export type UserOrderByWithRelationInput = {
   feedback?: Prisma.FeedbackOrderByRelationAggregateInput
   studentProfile?: Prisma.StudentProfileOrderByWithRelationInput
   mockRegistrations?: Prisma.MockExamRegistrationOrderByRelationAggregateInput
+  paperExamSheets?: Prisma.PaperExamSheetOrderByRelationAggregateInput
   teacherProfile?: Prisma.TeacherProfileOrderByWithRelationInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileOrderByWithRelationInput
   parentLinks?: Prisma.ParentLinkOrderByRelationAggregateInput
@@ -570,6 +572,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   feedback?: Prisma.FeedbackListRelationFilter
   studentProfile?: Prisma.XOR<Prisma.StudentProfileNullableScalarRelationFilter, Prisma.StudentProfileWhereInput> | null
   mockRegistrations?: Prisma.MockExamRegistrationListRelationFilter
+  paperExamSheets?: Prisma.PaperExamSheetListRelationFilter
   teacherProfile?: Prisma.XOR<Prisma.TeacherProfileNullableScalarRelationFilter, Prisma.TeacherProfileWhereInput> | null
   externalTeacherProfile?: Prisma.XOR<Prisma.ExternalTeacherProfileNullableScalarRelationFilter, Prisma.ExternalTeacherProfileWhereInput> | null
   parentLinks?: Prisma.ParentLinkListRelationFilter
@@ -727,6 +730,7 @@ export type UserCreateInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -822,6 +826,7 @@ export type UserUncheckedCreateInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -917,6 +922,7 @@ export type UserUpdateInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -1012,6 +1018,7 @@ export type UserUncheckedUpdateInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -2257,6 +2264,22 @@ export type UserUpdateOneRequiredWithoutAccountDeletionRequestsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAccountDeletionRequestsInput, Prisma.UserUpdateWithoutAccountDeletionRequestsInput>, Prisma.UserUncheckedUpdateWithoutAccountDeletionRequestsInput>
 }
 
+export type UserCreateNestedOneWithoutPaperExamSheetsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPaperExamSheetsInput, Prisma.UserUncheckedCreateWithoutPaperExamSheetsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPaperExamSheetsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutPaperExamSheetsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPaperExamSheetsInput, Prisma.UserUncheckedCreateWithoutPaperExamSheetsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPaperExamSheetsInput
+  upsert?: Prisma.UserUpsertWithoutPaperExamSheetsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPaperExamSheetsInput, Prisma.UserUpdateWithoutPaperExamSheetsInput>, Prisma.UserUncheckedUpdateWithoutPaperExamSheetsInput>
+}
+
 export type UserCreateWithoutPasswordResetTokensInput = {
   id?: string
   phone?: string | null
@@ -2291,6 +2314,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -2385,6 +2409,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -2495,6 +2520,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -2589,6 +2615,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -2683,6 +2710,7 @@ export type UserCreateWithoutSmsMessagesAsRecipientInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -2777,6 +2805,7 @@ export type UserUncheckedCreateWithoutSmsMessagesAsRecipientInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -2876,6 +2905,7 @@ export type UserCreateWithoutSmsMessagesAsCreatorInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -2970,6 +3000,7 @@ export type UserUncheckedCreateWithoutSmsMessagesAsCreatorInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -3080,6 +3111,7 @@ export type UserUpdateWithoutSmsMessagesAsRecipientInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -3174,6 +3206,7 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsRecipientInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -3279,6 +3312,7 @@ export type UserUpdateWithoutSmsMessagesAsCreatorInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -3373,6 +3407,7 @@ export type UserUncheckedUpdateWithoutSmsMessagesAsCreatorInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -3467,6 +3502,7 @@ export type UserCreateWithoutSmsBatchesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -3561,6 +3597,7 @@ export type UserUncheckedCreateWithoutSmsBatchesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -3671,6 +3708,7 @@ export type UserUpdateWithoutSmsBatchesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -3765,6 +3803,7 @@ export type UserUncheckedUpdateWithoutSmsBatchesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -3859,6 +3898,7 @@ export type UserCreateWithoutSmsTemplatesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -3953,6 +3993,7 @@ export type UserUncheckedCreateWithoutSmsTemplatesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -4063,6 +4104,7 @@ export type UserUpdateWithoutSmsTemplatesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -4157,6 +4199,7 @@ export type UserUncheckedUpdateWithoutSmsTemplatesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -4250,6 +4293,7 @@ export type UserCreateWithoutStudentProfileInput = {
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -4344,6 +4388,7 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -4454,6 +4499,7 @@ export type UserUpdateWithoutStudentProfileInput = {
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -4548,6 +4594,7 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -4643,6 +4690,7 @@ export type UserCreateWithoutTeacherProfileInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
   childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
@@ -4737,6 +4785,7 @@ export type UserUncheckedCreateWithoutTeacherProfileInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
   childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
@@ -4847,6 +4896,7 @@ export type UserUpdateWithoutTeacherProfileInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
   childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
@@ -4941,6 +4991,7 @@ export type UserUncheckedUpdateWithoutTeacherProfileInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
   childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
@@ -5035,6 +5086,7 @@ export type UserCreateWithoutExternalTeacherProfileInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
   childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
@@ -5129,6 +5181,7 @@ export type UserUncheckedCreateWithoutExternalTeacherProfileInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
   childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
@@ -5239,6 +5292,7 @@ export type UserUpdateWithoutExternalTeacherProfileInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
   childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
@@ -5333,6 +5387,7 @@ export type UserUncheckedUpdateWithoutExternalTeacherProfileInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
   childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
@@ -5427,6 +5482,7 @@ export type UserCreateWithoutParentLinksInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
@@ -5521,6 +5577,7 @@ export type UserUncheckedCreateWithoutParentLinksInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
@@ -5620,6 +5677,7 @@ export type UserCreateWithoutChildLinksInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -5714,6 +5772,7 @@ export type UserUncheckedCreateWithoutChildLinksInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -5824,6 +5883,7 @@ export type UserUpdateWithoutParentLinksInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
@@ -5918,6 +5978,7 @@ export type UserUncheckedUpdateWithoutParentLinksInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
@@ -6023,6 +6084,7 @@ export type UserUpdateWithoutChildLinksInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -6117,6 +6179,7 @@ export type UserUncheckedUpdateWithoutChildLinksInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -6211,6 +6274,7 @@ export type UserCreateWithoutOwnedClassroomsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -6305,6 +6369,7 @@ export type UserUncheckedCreateWithoutOwnedClassroomsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -6404,6 +6469,7 @@ export type UserCreateWithoutAssistedClassroomsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -6498,6 +6564,7 @@ export type UserUncheckedCreateWithoutAssistedClassroomsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -6608,6 +6675,7 @@ export type UserUpdateWithoutOwnedClassroomsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -6702,6 +6770,7 @@ export type UserUncheckedUpdateWithoutOwnedClassroomsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -6807,6 +6876,7 @@ export type UserUpdateWithoutAssistedClassroomsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -6901,6 +6971,7 @@ export type UserUncheckedUpdateWithoutAssistedClassroomsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -6995,6 +7066,7 @@ export type UserCreateWithoutTeacherGroupsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -7089,6 +7161,7 @@ export type UserUncheckedCreateWithoutTeacherGroupsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -7199,6 +7272,7 @@ export type UserUpdateWithoutTeacherGroupsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -7293,6 +7367,7 @@ export type UserUncheckedUpdateWithoutTeacherGroupsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -7387,6 +7462,7 @@ export type UserCreateWithoutTeacherGroupMembershipsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -7481,6 +7557,7 @@ export type UserUncheckedCreateWithoutTeacherGroupMembershipsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -7591,6 +7668,7 @@ export type UserUpdateWithoutTeacherGroupMembershipsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -7685,6 +7763,7 @@ export type UserUncheckedUpdateWithoutTeacherGroupMembershipsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -7779,6 +7858,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -7873,6 +7953,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -7983,6 +8064,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -8077,6 +8159,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -8171,6 +8254,7 @@ export type UserCreateWithoutAttendancesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -8265,6 +8349,7 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -8375,6 +8460,7 @@ export type UserUpdateWithoutAttendancesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -8469,6 +8555,7 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -8563,6 +8650,7 @@ export type UserCreateWithoutSubmissionsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -8657,6 +8745,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -8767,6 +8856,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -8861,6 +8951,7 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -8955,6 +9046,7 @@ export type UserCreateWithoutDailyHomeworkMarksInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -9049,6 +9141,7 @@ export type UserUncheckedCreateWithoutDailyHomeworkMarksInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -9159,6 +9252,7 @@ export type UserUpdateWithoutDailyHomeworkMarksInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -9253,6 +9347,7 @@ export type UserUncheckedUpdateWithoutDailyHomeworkMarksInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -9347,6 +9442,7 @@ export type UserCreateWithoutTestDraftsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -9441,6 +9537,7 @@ export type UserUncheckedCreateWithoutTestDraftsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -9551,6 +9648,7 @@ export type UserUpdateWithoutTestDraftsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -9645,6 +9743,7 @@ export type UserUncheckedUpdateWithoutTestDraftsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -9739,6 +9838,7 @@ export type UserCreateWithoutTestAccessesReviewOpenedInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -9833,6 +9933,7 @@ export type UserUncheckedCreateWithoutTestAccessesReviewOpenedInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -9943,6 +10044,7 @@ export type UserUpdateWithoutTestAccessesReviewOpenedInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -10037,6 +10139,7 @@ export type UserUncheckedUpdateWithoutTestAccessesReviewOpenedInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -10131,6 +10234,7 @@ export type UserCreateWithoutAttemptSessionsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -10225,6 +10329,7 @@ export type UserUncheckedCreateWithoutAttemptSessionsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -10335,6 +10440,7 @@ export type UserUpdateWithoutAttemptSessionsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -10429,6 +10535,7 @@ export type UserUncheckedUpdateWithoutAttemptSessionsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -10523,6 +10630,7 @@ export type UserCreateWithoutTestResultsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -10617,6 +10725,7 @@ export type UserUncheckedCreateWithoutTestResultsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -10727,6 +10836,7 @@ export type UserUpdateWithoutTestResultsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -10821,6 +10931,7 @@ export type UserUncheckedUpdateWithoutTestResultsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -10915,6 +11026,7 @@ export type UserCreateWithoutTestItemMarksInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -11009,6 +11121,7 @@ export type UserUncheckedCreateWithoutTestItemMarksInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -11119,6 +11232,7 @@ export type UserUpdateWithoutTestItemMarksInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -11213,6 +11327,7 @@ export type UserUncheckedUpdateWithoutTestItemMarksInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -11307,6 +11422,7 @@ export type UserCreateWithoutTestAbsencesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -11401,6 +11517,7 @@ export type UserUncheckedCreateWithoutTestAbsencesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -11511,6 +11628,7 @@ export type UserUpdateWithoutTestAbsencesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -11605,6 +11723,7 @@ export type UserUncheckedUpdateWithoutTestAbsencesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -11699,6 +11818,7 @@ export type UserCreateWithoutResultAcknowledgementsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -11793,6 +11913,7 @@ export type UserUncheckedCreateWithoutResultAcknowledgementsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -11903,6 +12024,7 @@ export type UserUpdateWithoutResultAcknowledgementsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -11997,6 +12119,7 @@ export type UserUncheckedUpdateWithoutResultAcknowledgementsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -12091,6 +12214,7 @@ export type UserCreateWithoutEmailOtpsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -12185,6 +12309,7 @@ export type UserUncheckedCreateWithoutEmailOtpsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -12295,6 +12420,7 @@ export type UserUpdateWithoutEmailOtpsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -12389,6 +12515,7 @@ export type UserUncheckedUpdateWithoutEmailOtpsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -12483,6 +12610,7 @@ export type UserCreateWithoutAttemptsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -12577,6 +12705,7 @@ export type UserUncheckedCreateWithoutAttemptsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -12687,6 +12816,7 @@ export type UserUpdateWithoutAttemptsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -12781,6 +12911,7 @@ export type UserUncheckedUpdateWithoutAttemptsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -12875,6 +13006,7 @@ export type UserCreateWithoutMistakeEntriesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -12969,6 +13101,7 @@ export type UserUncheckedCreateWithoutMistakeEntriesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -13079,6 +13212,7 @@ export type UserUpdateWithoutMistakeEntriesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -13173,6 +13307,7 @@ export type UserUncheckedUpdateWithoutMistakeEntriesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -13267,6 +13402,7 @@ export type UserCreateWithoutPredictionsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -13361,6 +13497,7 @@ export type UserUncheckedCreateWithoutPredictionsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -13471,6 +13608,7 @@ export type UserUpdateWithoutPredictionsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -13565,6 +13703,7 @@ export type UserUncheckedUpdateWithoutPredictionsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -13659,6 +13798,7 @@ export type UserCreateWithoutColorTagsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -13753,6 +13893,7 @@ export type UserUncheckedCreateWithoutColorTagsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -13863,6 +14004,7 @@ export type UserUpdateWithoutColorTagsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -13957,6 +14099,7 @@ export type UserUncheckedUpdateWithoutColorTagsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -14051,6 +14194,7 @@ export type UserCreateWithoutStudentNotesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -14145,6 +14289,7 @@ export type UserUncheckedCreateWithoutStudentNotesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -14255,6 +14400,7 @@ export type UserUpdateWithoutStudentNotesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -14349,6 +14495,7 @@ export type UserUncheckedUpdateWithoutStudentNotesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -14443,6 +14590,7 @@ export type UserCreateWithoutUserPassesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -14537,6 +14685,7 @@ export type UserUncheckedCreateWithoutUserPassesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -14647,6 +14796,7 @@ export type UserUpdateWithoutUserPassesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -14741,6 +14891,7 @@ export type UserUncheckedUpdateWithoutUserPassesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -14835,6 +14986,7 @@ export type UserCreateWithoutBankTransactionsMatchedInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -14929,6 +15081,7 @@ export type UserUncheckedCreateWithoutBankTransactionsMatchedInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -15028,6 +15181,7 @@ export type UserCreateWithoutBankTransactionsImportedInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -15122,6 +15276,7 @@ export type UserUncheckedCreateWithoutBankTransactionsImportedInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -15232,6 +15387,7 @@ export type UserUpdateWithoutBankTransactionsMatchedInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -15326,6 +15482,7 @@ export type UserUncheckedUpdateWithoutBankTransactionsMatchedInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -15431,6 +15588,7 @@ export type UserUpdateWithoutBankTransactionsImportedInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -15525,6 +15683,7 @@ export type UserUncheckedUpdateWithoutBankTransactionsImportedInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -15619,6 +15778,7 @@ export type UserCreateWithoutPaymentsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -15713,6 +15873,7 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -15823,6 +15984,7 @@ export type UserUpdateWithoutPaymentsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -15917,6 +16079,7 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -16011,6 +16174,7 @@ export type UserCreateWithoutPurchasesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -16105,6 +16269,7 @@ export type UserUncheckedCreateWithoutPurchasesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -16215,6 +16380,7 @@ export type UserUpdateWithoutPurchasesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -16309,6 +16475,7 @@ export type UserUncheckedUpdateWithoutPurchasesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -16403,6 +16570,7 @@ export type UserCreateWithoutTuitionRefundsAsStudentInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -16497,6 +16665,7 @@ export type UserUncheckedCreateWithoutTuitionRefundsAsStudentInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -16596,6 +16765,7 @@ export type UserCreateWithoutCreatedTuitionRefundsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -16690,6 +16860,7 @@ export type UserUncheckedCreateWithoutCreatedTuitionRefundsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -16789,6 +16960,7 @@ export type UserCreateWithoutApprovedTuitionRefundsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -16883,6 +17055,7 @@ export type UserUncheckedCreateWithoutApprovedTuitionRefundsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -16982,6 +17155,7 @@ export type UserCreateWithoutPaidTuitionRefundsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -17076,6 +17250,7 @@ export type UserUncheckedCreateWithoutPaidTuitionRefundsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -17175,6 +17350,7 @@ export type UserCreateWithoutCancelledTuitionRefundsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -17269,6 +17445,7 @@ export type UserUncheckedCreateWithoutCancelledTuitionRefundsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -17379,6 +17556,7 @@ export type UserUpdateWithoutTuitionRefundsAsStudentInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -17473,6 +17651,7 @@ export type UserUncheckedUpdateWithoutTuitionRefundsAsStudentInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -17578,6 +17757,7 @@ export type UserUpdateWithoutCreatedTuitionRefundsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -17672,6 +17852,7 @@ export type UserUncheckedUpdateWithoutCreatedTuitionRefundsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -17777,6 +17958,7 @@ export type UserUpdateWithoutApprovedTuitionRefundsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -17871,6 +18053,7 @@ export type UserUncheckedUpdateWithoutApprovedTuitionRefundsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -17976,6 +18159,7 @@ export type UserUpdateWithoutPaidTuitionRefundsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -18070,6 +18254,7 @@ export type UserUncheckedUpdateWithoutPaidTuitionRefundsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -18175,6 +18360,7 @@ export type UserUpdateWithoutCancelledTuitionRefundsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -18269,6 +18455,7 @@ export type UserUncheckedUpdateWithoutCancelledTuitionRefundsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -18363,6 +18550,7 @@ export type UserCreateWithoutNotificationsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -18457,6 +18645,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -18567,6 +18756,7 @@ export type UserUpdateWithoutNotificationsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -18661,6 +18851,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -18755,6 +18946,7 @@ export type UserCreateWithoutNotificationPreferenceInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -18849,6 +19041,7 @@ export type UserUncheckedCreateWithoutNotificationPreferenceInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -18959,6 +19152,7 @@ export type UserUpdateWithoutNotificationPreferenceInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -19053,6 +19247,7 @@ export type UserUncheckedUpdateWithoutNotificationPreferenceInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -19147,6 +19342,7 @@ export type UserCreateWithoutNotificationDeliveriesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -19241,6 +19437,7 @@ export type UserUncheckedCreateWithoutNotificationDeliveriesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -19351,6 +19548,7 @@ export type UserUpdateWithoutNotificationDeliveriesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -19445,6 +19643,7 @@ export type UserUncheckedUpdateWithoutNotificationDeliveriesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -19539,6 +19738,7 @@ export type UserCreateWithoutLearningEventsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -19633,6 +19833,7 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -19743,6 +19944,7 @@ export type UserUpdateWithoutLearningEventsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -19837,6 +20039,7 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -19931,6 +20134,7 @@ export type UserCreateWithoutCreatedStaffTasksInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -20025,6 +20229,7 @@ export type UserUncheckedCreateWithoutCreatedStaffTasksInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -20135,6 +20340,7 @@ export type UserUpdateWithoutCreatedStaffTasksInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -20229,6 +20435,7 @@ export type UserUncheckedUpdateWithoutCreatedStaffTasksInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -20323,6 +20530,7 @@ export type UserCreateWithoutStaffTaskAssignmentsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -20417,6 +20625,7 @@ export type UserUncheckedCreateWithoutStaffTaskAssignmentsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -20527,6 +20736,7 @@ export type UserUpdateWithoutStaffTaskAssignmentsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -20621,6 +20831,7 @@ export type UserUncheckedUpdateWithoutStaffTaskAssignmentsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -20715,6 +20926,7 @@ export type UserCreateWithoutTaughtSchedulesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -20809,6 +21021,7 @@ export type UserUncheckedCreateWithoutTaughtSchedulesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -20919,6 +21132,7 @@ export type UserUpdateWithoutTaughtSchedulesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -21013,6 +21227,7 @@ export type UserUncheckedUpdateWithoutTaughtSchedulesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -21107,6 +21322,7 @@ export type UserCreateWithoutTeacherWorkDaysInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -21201,6 +21417,7 @@ export type UserUncheckedCreateWithoutTeacherWorkDaysInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -21311,6 +21528,7 @@ export type UserUpdateWithoutTeacherWorkDaysInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -21405,6 +21623,7 @@ export type UserUncheckedUpdateWithoutTeacherWorkDaysInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -21499,6 +21718,7 @@ export type UserCreateWithoutTeacherWorkExceptionsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -21593,6 +21813,7 @@ export type UserUncheckedCreateWithoutTeacherWorkExceptionsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -21703,6 +21924,7 @@ export type UserUpdateWithoutTeacherWorkExceptionsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -21797,6 +22019,7 @@ export type UserUncheckedUpdateWithoutTeacherWorkExceptionsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -21891,6 +22114,7 @@ export type UserCreateWithoutStudentGoalsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -21985,6 +22209,7 @@ export type UserUncheckedCreateWithoutStudentGoalsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -22095,6 +22320,7 @@ export type UserUpdateWithoutStudentGoalsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -22189,6 +22415,7 @@ export type UserUncheckedUpdateWithoutStudentGoalsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -22283,6 +22510,7 @@ export type UserCreateWithoutStreakFreezesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -22377,6 +22605,7 @@ export type UserUncheckedCreateWithoutStreakFreezesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -22487,6 +22716,7 @@ export type UserUpdateWithoutStreakFreezesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -22581,6 +22811,7 @@ export type UserUncheckedUpdateWithoutStreakFreezesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -22675,6 +22906,7 @@ export type UserCreateWithoutGoogleIdentityInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -22769,6 +23001,7 @@ export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -22879,6 +23112,7 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -22973,6 +23207,7 @@ export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -23067,6 +23302,7 @@ export type UserCreateWithoutGoogleOAuthStatesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -23161,6 +23397,7 @@ export type UserUncheckedCreateWithoutGoogleOAuthStatesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -23271,6 +23508,7 @@ export type UserUpdateWithoutGoogleOAuthStatesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -23365,6 +23603,7 @@ export type UserUncheckedUpdateWithoutGoogleOAuthStatesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -23459,6 +23698,7 @@ export type UserCreateWithoutGoogleLoginExchangesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -23553,6 +23793,7 @@ export type UserUncheckedCreateWithoutGoogleLoginExchangesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -23663,6 +23904,7 @@ export type UserUpdateWithoutGoogleLoginExchangesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -23757,6 +23999,7 @@ export type UserUncheckedUpdateWithoutGoogleLoginExchangesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -23850,6 +24093,7 @@ export type UserCreateWithoutFormulaReviewsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -23944,6 +24188,7 @@ export type UserUncheckedCreateWithoutFormulaReviewsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -24054,6 +24299,7 @@ export type UserUpdateWithoutFormulaReviewsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -24148,6 +24394,7 @@ export type UserUncheckedUpdateWithoutFormulaReviewsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -24242,6 +24489,7 @@ export type UserCreateWithoutProblemReviewsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -24336,6 +24584,7 @@ export type UserUncheckedCreateWithoutProblemReviewsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -24446,6 +24695,7 @@ export type UserUpdateWithoutProblemReviewsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -24540,6 +24790,7 @@ export type UserUncheckedUpdateWithoutProblemReviewsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -24634,6 +24885,7 @@ export type UserCreateWithoutStudyWeeklyGoalInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -24728,6 +24980,7 @@ export type UserUncheckedCreateWithoutStudyWeeklyGoalInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -24838,6 +25091,7 @@ export type UserUpdateWithoutStudyWeeklyGoalInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -24932,6 +25186,7 @@ export type UserUncheckedUpdateWithoutStudyWeeklyGoalInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -25026,6 +25281,7 @@ export type UserCreateWithoutFormulaReviewDaysInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -25120,6 +25376,7 @@ export type UserUncheckedCreateWithoutFormulaReviewDaysInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -25230,6 +25487,7 @@ export type UserUpdateWithoutFormulaReviewDaysInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -25324,6 +25582,7 @@ export type UserUncheckedUpdateWithoutFormulaReviewDaysInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -25418,6 +25677,7 @@ export type UserCreateWithoutFormulaReviewAttemptsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -25512,6 +25772,7 @@ export type UserUncheckedCreateWithoutFormulaReviewAttemptsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -25622,6 +25883,7 @@ export type UserUpdateWithoutFormulaReviewAttemptsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -25716,6 +25978,7 @@ export type UserUncheckedUpdateWithoutFormulaReviewAttemptsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -25810,6 +26073,7 @@ export type UserCreateWithoutFeedbackInput = {
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -25904,6 +26168,7 @@ export type UserUncheckedCreateWithoutFeedbackInput = {
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -26014,6 +26279,7 @@ export type UserUpdateWithoutFeedbackInput = {
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -26108,6 +26374,7 @@ export type UserUncheckedUpdateWithoutFeedbackInput = {
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -26202,6 +26469,7 @@ export type UserCreateWithoutStaffCapabilitiesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -26296,6 +26564,7 @@ export type UserUncheckedCreateWithoutStaffCapabilitiesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -26406,6 +26675,7 @@ export type UserUpdateWithoutStaffCapabilitiesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -26500,6 +26770,7 @@ export type UserUncheckedUpdateWithoutStaffCapabilitiesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -26595,6 +26866,7 @@ export type UserCreateWithoutStudyReviewRunsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -26689,6 +26961,7 @@ export type UserUncheckedCreateWithoutStudyReviewRunsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -26799,6 +27072,7 @@ export type UserUpdateWithoutStudyReviewRunsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -26893,6 +27167,7 @@ export type UserUncheckedUpdateWithoutStudyReviewRunsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -26987,6 +27262,7 @@ export type UserCreateWithoutStudyReviewResponsesInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -27081,6 +27357,7 @@ export type UserUncheckedCreateWithoutStudyReviewResponsesInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -27191,6 +27468,7 @@ export type UserUpdateWithoutStudyReviewResponsesInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -27285,6 +27563,7 @@ export type UserUncheckedUpdateWithoutStudyReviewResponsesInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -27378,6 +27657,7 @@ export type UserCreateWithoutMockRegistrationsInput = {
   staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -27472,6 +27752,7 @@ export type UserUncheckedCreateWithoutMockRegistrationsInput = {
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -27582,6 +27863,7 @@ export type UserUpdateWithoutMockRegistrationsInput = {
   staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -27676,6 +27958,7 @@ export type UserUncheckedUpdateWithoutMockRegistrationsInput = {
   staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -27771,6 +28054,7 @@ export type UserCreateWithoutDeviceTokensInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -27865,6 +28149,7 @@ export type UserUncheckedCreateWithoutDeviceTokensInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -27975,6 +28260,7 @@ export type UserUpdateWithoutDeviceTokensInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -28069,6 +28355,7 @@ export type UserUncheckedUpdateWithoutDeviceTokensInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -28163,6 +28450,7 @@ export type UserCreateWithoutAppleIdentityInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -28257,6 +28545,7 @@ export type UserUncheckedCreateWithoutAppleIdentityInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -28367,6 +28656,7 @@ export type UserUpdateWithoutAppleIdentityInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -28461,6 +28751,7 @@ export type UserUncheckedUpdateWithoutAppleIdentityInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -28555,6 +28846,7 @@ export type UserCreateWithoutAccountDeletionRequestsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
@@ -28649,6 +28941,7 @@ export type UserUncheckedCreateWithoutAccountDeletionRequestsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutStudentInput
   teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
   parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
@@ -28759,6 +29052,7 @@ export type UserUpdateWithoutAccountDeletionRequestsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
@@ -28853,6 +29147,7 @@ export type UserUncheckedUpdateWithoutAccountDeletionRequestsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  paperExamSheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutStudentNestedInput
   teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
   parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
@@ -28913,6 +29208,402 @@ export type UserUncheckedUpdateWithoutAccountDeletionRequestsInput = {
   testAbsences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutStudentNestedInput
 }
 
+export type UserCreateWithoutPaperExamSheetsInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  lastSeenAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalCreateNestedOneWithoutStudentInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  mockRegistrations?: Prisma.MockExamRegistrationCreateNestedManyWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutTeacherInput
+  assistedClassrooms?: Prisma.ClassroomCreateNestedManyWithoutAssistantTeacherInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpCreateNestedManyWithoutUserInput
+  testAccessesReviewOpened?: Prisma.TestAccessCreateNestedManyWithoutReviewOpenedByInput
+  testItemMarks?: Prisma.TestItemMarkCreateNestedManyWithoutStudentInput
+  testAbsences?: Prisma.TestAbsenceCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutPaperExamSheetsInput = {
+  id?: string
+  phone?: string | null
+  email?: string | null
+  username?: string | null
+  studentCode?: string | null
+  teacherCode?: string | null
+  firstName: string
+  lastName: string
+  passwordHash: string
+  mustChangePassword?: boolean
+  termsAcceptedAt?: Date | string | null
+  privacyVersion?: string | null
+  guardianConsentAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  role: $Enums.Role
+  avatarUrl?: string | null
+  lastSeenAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  calendarTokenHash?: string | null
+  calendarTokenVersion?: number | null
+  archivedAt?: Date | string | null
+  archivedById?: string | null
+  archiveReason?: string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedCreateNestedManyWithoutUserInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedCreateNestedManyWithoutUserInput
+  problemReviews?: Prisma.ProblemReviewUncheckedCreateNestedManyWithoutStudentInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedCreateNestedOneWithoutStudentInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedCreateNestedManyWithoutUserInput
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutAuthorInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  mockRegistrations?: Prisma.MockExamRegistrationUncheckedCreateNestedManyWithoutUserInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedCreateNestedOneWithoutUserInput
+  parentLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutParentInput
+  childLinks?: Prisma.ParentLinkUncheckedCreateNestedManyWithoutStudentInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedCreateNestedManyWithoutOwnerInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedCreateNestedManyWithoutStudentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  userPasses?: Prisma.UserPassUncheckedCreateNestedManyWithoutUserInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutStudentInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedCreateNestedManyWithoutStudentInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutStudentInput
+  testDrafts?: Prisma.TestDraftUncheckedCreateNestedManyWithoutOwnerInput
+  predictions?: Prisma.PredictionUncheckedCreateNestedManyWithoutStudentInput
+  colorTags?: Prisma.StudentColorTagUncheckedCreateNestedManyWithoutStudentInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutTeacherInput
+  assistedClassrooms?: Prisma.ClassroomUncheckedCreateNestedManyWithoutAssistantTeacherInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedCreateNestedManyWithoutStudentInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedCreateNestedManyWithoutUserInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedCreateNestedManyWithoutUserInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedCreateNestedManyWithoutTeacherInput
+  studentGoals?: Prisma.StudentGoalUncheckedCreateNestedManyWithoutStudentInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutStudentInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedCreateNestedManyWithoutTeacherInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedCreateNestedManyWithoutTeacherInput
+  studentNotes?: Prisma.StudentNoteUncheckedCreateNestedManyWithoutStudentInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutStudentInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCreatedByInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutApprovedByInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutPaidByInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedCreateNestedManyWithoutCancelledByInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedCreateNestedManyWithoutUserInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedCreateNestedOneWithoutUserInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutUserInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  smsBatches?: Prisma.SmsBatchUncheckedCreateNestedManyWithoutCreatedByInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutMatchedUserInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedCreateNestedManyWithoutImportedByInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedCreateNestedManyWithoutParentInput
+  emailOtps?: Prisma.EmailOtpUncheckedCreateNestedManyWithoutUserInput
+  testAccessesReviewOpened?: Prisma.TestAccessUncheckedCreateNestedManyWithoutReviewOpenedByInput
+  testItemMarks?: Prisma.TestItemMarkUncheckedCreateNestedManyWithoutStudentInput
+  testAbsences?: Prisma.TestAbsenceUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutPaperExamSheetsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPaperExamSheetsInput, Prisma.UserUncheckedCreateWithoutPaperExamSheetsInput>
+}
+
+export type UserUpsertWithoutPaperExamSheetsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPaperExamSheetsInput, Prisma.UserUncheckedUpdateWithoutPaperExamSheetsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPaperExamSheetsInput, Prisma.UserUncheckedCreateWithoutPaperExamSheetsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPaperExamSheetsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPaperExamSheetsInput, Prisma.UserUncheckedUpdateWithoutPaperExamSheetsInput>
+}
+
+export type UserUpdateWithoutPaperExamSheetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUpdateOneWithoutStudentNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  mockRegistrations?: Prisma.MockExamRegistrationUpdateManyWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUpdateManyWithoutTeacherNestedInput
+  assistedClassrooms?: Prisma.ClassroomUpdateManyWithoutAssistantTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUpdateManyWithoutUserNestedInput
+  testAccessesReviewOpened?: Prisma.TestAccessUpdateManyWithoutReviewOpenedByNestedInput
+  testItemMarks?: Prisma.TestItemMarkUpdateManyWithoutStudentNestedInput
+  testAbsences?: Prisma.TestAbsenceUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPaperExamSheetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  privacyVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianConsentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  calendarTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  calendarTokenVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archiveReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formulaReviews?: Prisma.FormulaReviewUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewDays?: Prisma.FormulaReviewDayUncheckedUpdateManyWithoutUserNestedInput
+  formulaReviewAttempts?: Prisma.FormulaReviewAttemptUncheckedUpdateManyWithoutUserNestedInput
+  problemReviews?: Prisma.ProblemReviewUncheckedUpdateManyWithoutStudentNestedInput
+  studyWeeklyGoal?: Prisma.StudyWeeklyGoalUncheckedUpdateOneWithoutStudentNestedInput
+  staffCapabilities?: Prisma.StaffCapabilityGrantUncheckedUpdateManyWithoutUserNestedInput
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutAuthorNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  mockRegistrations?: Prisma.MockExamRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  teacherProfile?: Prisma.TeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  externalTeacherProfile?: Prisma.ExternalTeacherProfileUncheckedUpdateOneWithoutUserNestedInput
+  parentLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutParentNestedInput
+  childLinks?: Prisma.ParentLinkUncheckedUpdateManyWithoutStudentNestedInput
+  teacherGroups?: Prisma.TeacherGroupUncheckedUpdateManyWithoutOwnerNestedInput
+  teacherGroupMemberships?: Prisma.TeacherGroupMemberUncheckedUpdateManyWithoutStudentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  userPasses?: Prisma.UserPassUncheckedUpdateManyWithoutUserNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutStudentNestedInput
+  mistakeEntries?: Prisma.MistakeEntryUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  dailyHomeworkMarks?: Prisma.DailyHomeworkMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutStudentNestedInput
+  testDrafts?: Prisma.TestDraftUncheckedUpdateManyWithoutOwnerNestedInput
+  predictions?: Prisma.PredictionUncheckedUpdateManyWithoutStudentNestedInput
+  colorTags?: Prisma.StudentColorTagUncheckedUpdateManyWithoutStudentNestedInput
+  ownedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutTeacherNestedInput
+  assistedClassrooms?: Prisma.ClassroomUncheckedUpdateManyWithoutAssistantTeacherNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  attemptSessions?: Prisma.TestAttemptSessionUncheckedUpdateManyWithoutStudentNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewRuns?: Prisma.StudyReviewRunUncheckedUpdateManyWithoutUserNestedInput
+  studyReviewResponses?: Prisma.StudyReviewResponseUncheckedUpdateManyWithoutUserNestedInput
+  createdStaffTasks?: Prisma.StaffTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  staffTaskAssignments?: Prisma.StaffTaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+  taughtSchedules?: Prisma.ClassScheduleUncheckedUpdateManyWithoutTeacherNestedInput
+  studentGoals?: Prisma.StudentGoalUncheckedUpdateManyWithoutStudentNestedInput
+  streakFreezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutStudentNestedInput
+  teacherWorkDays?: Prisma.TeacherWorkDayUncheckedUpdateManyWithoutTeacherNestedInput
+  teacherWorkExceptions?: Prisma.TeacherWorkExceptionUncheckedUpdateManyWithoutTeacherNestedInput
+  studentNotes?: Prisma.StudentNoteUncheckedUpdateManyWithoutStudentNestedInput
+  tuitionRefundsAsStudent?: Prisma.TuitionRefundUncheckedUpdateManyWithoutStudentNestedInput
+  createdTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCreatedByNestedInput
+  approvedTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutApprovedByNestedInput
+  paidTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutPaidByNestedInput
+  cancelledTuitionRefunds?: Prisma.TuitionRefundUncheckedUpdateManyWithoutCancelledByNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  googleOAuthStates?: Prisma.GoogleOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  googleLoginExchanges?: Prisma.GoogleLoginExchangeUncheckedUpdateManyWithoutUserNestedInput
+  deviceTokens?: Prisma.DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+  appleIdentity?: Prisma.AppleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  accountDeletionRequests?: Prisma.AccountDeletionRequestUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreference?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  notificationDeliveries?: Prisma.NotificationDeliveryUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsRecipient?: Prisma.SmsMessageUncheckedUpdateManyWithoutUserNestedInput
+  smsMessagesAsCreator?: Prisma.SmsMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsBatches?: Prisma.SmsBatchUncheckedUpdateManyWithoutCreatedByNestedInput
+  smsTemplates?: Prisma.SmsTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  bankTransactionsMatched?: Prisma.BankTransactionUncheckedUpdateManyWithoutMatchedUserNestedInput
+  bankTransactionsImported?: Prisma.BankTransactionUncheckedUpdateManyWithoutImportedByNestedInput
+  resultAcknowledgements?: Prisma.ResultAcknowledgementUncheckedUpdateManyWithoutParentNestedInput
+  emailOtps?: Prisma.EmailOtpUncheckedUpdateManyWithoutUserNestedInput
+  testAccessesReviewOpened?: Prisma.TestAccessUncheckedUpdateManyWithoutReviewOpenedByNestedInput
+  testItemMarks?: Prisma.TestItemMarkUncheckedUpdateManyWithoutStudentNestedInput
+  testAbsences?: Prisma.TestAbsenceUncheckedUpdateManyWithoutStudentNestedInput
+}
+
 
 /**
  * Count Type UserCountOutputType
@@ -28926,6 +29617,7 @@ export type UserCountOutputType = {
   staffCapabilities: number
   feedback: number
   mockRegistrations: number
+  paperExamSheets: number
   parentLinks: number
   childLinks: number
   teacherGroups: number
@@ -28990,6 +29682,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   staffCapabilities?: boolean | UserCountOutputTypeCountStaffCapabilitiesArgs
   feedback?: boolean | UserCountOutputTypeCountFeedbackArgs
   mockRegistrations?: boolean | UserCountOutputTypeCountMockRegistrationsArgs
+  paperExamSheets?: boolean | UserCountOutputTypeCountPaperExamSheetsArgs
   parentLinks?: boolean | UserCountOutputTypeCountParentLinksArgs
   childLinks?: boolean | UserCountOutputTypeCountChildLinksArgs
   teacherGroups?: boolean | UserCountOutputTypeCountTeacherGroupsArgs
@@ -29103,6 +29796,13 @@ export type UserCountOutputTypeCountFeedbackArgs<ExtArgs extends runtime.Types.E
  */
 export type UserCountOutputTypeCountMockRegistrationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.MockExamRegistrationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPaperExamSheetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaperExamSheetWhereInput
 }
 
 /**
@@ -29518,6 +30218,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   feedback?: boolean | Prisma.User$feedbackArgs<ExtArgs>
   studentProfile?: boolean | Prisma.User$studentProfileArgs<ExtArgs>
   mockRegistrations?: boolean | Prisma.User$mockRegistrationsArgs<ExtArgs>
+  paperExamSheets?: boolean | Prisma.User$paperExamSheetsArgs<ExtArgs>
   teacherProfile?: boolean | Prisma.User$teacherProfileArgs<ExtArgs>
   externalTeacherProfile?: boolean | Prisma.User$externalTeacherProfileArgs<ExtArgs>
   parentLinks?: boolean | Prisma.User$parentLinksArgs<ExtArgs>
@@ -29672,6 +30373,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   feedback?: boolean | Prisma.User$feedbackArgs<ExtArgs>
   studentProfile?: boolean | Prisma.User$studentProfileArgs<ExtArgs>
   mockRegistrations?: boolean | Prisma.User$mockRegistrationsArgs<ExtArgs>
+  paperExamSheets?: boolean | Prisma.User$paperExamSheetsArgs<ExtArgs>
   teacherProfile?: boolean | Prisma.User$teacherProfileArgs<ExtArgs>
   externalTeacherProfile?: boolean | Prisma.User$externalTeacherProfileArgs<ExtArgs>
   parentLinks?: boolean | Prisma.User$parentLinksArgs<ExtArgs>
@@ -29748,6 +30450,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     feedback: Prisma.$FeedbackPayload<ExtArgs>[]
     studentProfile: Prisma.$StudentProfilePayload<ExtArgs> | null
     mockRegistrations: Prisma.$MockExamRegistrationPayload<ExtArgs>[]
+    paperExamSheets: Prisma.$PaperExamSheetPayload<ExtArgs>[]
     teacherProfile: Prisma.$TeacherProfilePayload<ExtArgs> | null
     externalTeacherProfile: Prisma.$ExternalTeacherProfilePayload<ExtArgs> | null
     parentLinks: Prisma.$ParentLinkPayload<ExtArgs>[]
@@ -30236,6 +30939,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   feedback<T extends Prisma.User$feedbackArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$feedbackArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FeedbackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   studentProfile<T extends Prisma.User$studentProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studentProfileArgs<ExtArgs>>): Prisma.Prisma__StudentProfileClient<runtime.Types.Result.GetResult<Prisma.$StudentProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   mockRegistrations<T extends Prisma.User$mockRegistrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mockRegistrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MockExamRegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  paperExamSheets<T extends Prisma.User$paperExamSheetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$paperExamSheetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaperExamSheetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   teacherProfile<T extends Prisma.User$teacherProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$teacherProfileArgs<ExtArgs>>): Prisma.Prisma__TeacherProfileClient<runtime.Types.Result.GetResult<Prisma.$TeacherProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   externalTeacherProfile<T extends Prisma.User$externalTeacherProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$externalTeacherProfileArgs<ExtArgs>>): Prisma.Prisma__ExternalTeacherProfileClient<runtime.Types.Result.GetResult<Prisma.$ExternalTeacherProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   parentLinks<T extends Prisma.User$parentLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$parentLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParentLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -30944,6 +31648,30 @@ export type User$mockRegistrationsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.MockExamRegistrationScalarFieldEnum | Prisma.MockExamRegistrationScalarFieldEnum[]
+}
+
+/**
+ * User.paperExamSheets
+ */
+export type User$paperExamSheetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaperExamSheet
+   */
+  select?: Prisma.PaperExamSheetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaperExamSheet
+   */
+  omit?: Prisma.PaperExamSheetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaperExamSheetInclude<ExtArgs> | null
+  where?: Prisma.PaperExamSheetWhereInput
+  orderBy?: Prisma.PaperExamSheetOrderByWithRelationInput | Prisma.PaperExamSheetOrderByWithRelationInput[]
+  cursor?: Prisma.PaperExamSheetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaperExamSheetScalarFieldEnum | Prisma.PaperExamSheetScalarFieldEnum[]
 }
 
 /**

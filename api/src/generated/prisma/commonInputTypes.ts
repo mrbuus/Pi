@@ -1367,6 +1367,23 @@ export type EnumAttendanceStatusNullableWithAggregatesFilter<$PrismaModel = neve
   _max?: Prisma.NestedEnumAttendanceStatusNullableFilter<$PrismaModel>
 }
 
+export type EnumPaperExamImportStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.PaperExamImportStatus | Prisma.EnumPaperExamImportStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PaperExamImportStatus[] | Prisma.ListEnumPaperExamImportStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PaperExamImportStatus[] | Prisma.ListEnumPaperExamImportStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPaperExamImportStatusFilter<$PrismaModel> | $Enums.PaperExamImportStatus
+}
+
+export type EnumPaperExamImportStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PaperExamImportStatus | Prisma.EnumPaperExamImportStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PaperExamImportStatus[] | Prisma.ListEnumPaperExamImportStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PaperExamImportStatus[] | Prisma.ListEnumPaperExamImportStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPaperExamImportStatusWithAggregatesFilter<$PrismaModel> | $Enums.PaperExamImportStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPaperExamImportStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPaperExamImportStatusFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -2655,6 +2672,23 @@ export type NestedEnumAttendanceStatusNullableWithAggregatesFilter<$PrismaModel 
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAttendanceStatusNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAttendanceStatusNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumPaperExamImportStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.PaperExamImportStatus | Prisma.EnumPaperExamImportStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PaperExamImportStatus[] | Prisma.ListEnumPaperExamImportStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PaperExamImportStatus[] | Prisma.ListEnumPaperExamImportStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPaperExamImportStatusFilter<$PrismaModel> | $Enums.PaperExamImportStatus
+}
+
+export type NestedEnumPaperExamImportStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PaperExamImportStatus | Prisma.EnumPaperExamImportStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PaperExamImportStatus[] | Prisma.ListEnumPaperExamImportStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PaperExamImportStatus[] | Prisma.ListEnumPaperExamImportStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPaperExamImportStatusWithAggregatesFilter<$PrismaModel> | $Enums.PaperExamImportStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPaperExamImportStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPaperExamImportStatusFilter<$PrismaModel>
 }
 
 
