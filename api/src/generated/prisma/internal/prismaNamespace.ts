@@ -11590,6 +11590,7 @@ export const StudentProfileScalarFieldEnum = {
   branch: 'branch',
   section: 'section',
   tuitionAmount: 'tuitionAmount',
+  tuitionAgreed: 'tuitionAgreed',
   tuitionPlan: 'tuitionPlan',
   tuitionNote: 'tuitionNote',
   joinedOn: 'joinedOn',

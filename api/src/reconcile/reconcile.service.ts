@@ -720,8 +720,8 @@ export class ReconcileService {
       this.prisma.bankTransaction.count({ where }),
       this.prisma.bankTransaction.findMany({
         where,
-        // Бүгд, шийдэх — хуулгын дарааллаар (эрт нь дээр)
-        orderBy: [{ bookedAt: query.lane === 'manual' || query.lane === 'all' ? 'asc' : 'desc' }, { id: 'asc' }],
+        // Хамгийн сүүлийн гүйлгээ хамгийн дээр (эзэн 2026-11-12)
+        orderBy: [{ bookedAt: 'desc' }, { id: 'desc' }],
         take: query.limit ?? 50,
         skip: query.offset ?? 0,
         select: {

@@ -343,6 +343,9 @@ model StudentProfile {
   branch        String? // "Баруун 4" | "Зүүн 4"
   section       String? // "12-2" — бүртгэлд тэмдэглэсэн ангийн шошго (label)
   tuitionAmount Int?
+  // Тохирсон (хөнгөлөлттэй) бүтэн жилийн дүн — Админ/Багш+ гараар тавина (эзэн 2026-11-12:
+  // нэг гэрээс 2 хүүхэд 10% гэх мэт). Шийтийн синк ХӨНДӨХГҮЙ (tuitionAmount-ыг синк дарж бичдэг).
+  tuitionAgreed Int?
   tuitionPlan   TuitionPlan?
   tuitionNote   String?
   joinedOn      DateTime?    @db.Date

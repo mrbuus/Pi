@@ -64,6 +64,7 @@ const STUDENT_SELECT = {
       grade: true,
       tuitionPlan: true,
       tuitionAmount: true,
+      tuitionAgreed: true,
       joinedOn: true,
       leftOn: true,
     },
@@ -185,6 +186,7 @@ export class PaymentsLedgerService {
       const { plan, ...ledger } = computeLedger({
         plan: profile?.tuitionPlan ?? null,
         tuitionAmount: profile?.tuitionAmount ?? null,
+        agreed: profile?.tuitionAgreed ?? null,
         tier: tierFor(profile?.grade, classroom?.name, classroom ? days.get(classroom.id) : null).tier,
         startDate,
         leftOn,

@@ -320,3 +320,31 @@ describe('blockSources — сар бүрийг аль төлбөр дүүргэ�
     expect(out['2026-11']).toEqual([{ paymentId: 'late', amount: 100_000 }]);
   });
 });
+
+describe('Тохирсон (хөнгөлөлттэй) бүтэн жилийн дүн — гараар тавьсан', () => {
+  const paid = [pay(350_000, null, '2026-05-25'), pay(1_900_000, null, '2026-07-03')];
+
+  it('2,250,000 (10% хөнгөлөлт) гэж тавиад яг төлсөн → өргүй, бүх сар төлсөн', () => {
+    const r = computeLedger(base({ plan: 'FULL_YEAR', tuitionAmount: 2_500_000, agreed: 2_250_000, payments: paid }));
+    expect(r.plan).toMatchObject({ kind: 'FULL_YEAR', total: 2_250_000, discounted: true });
+    expect(r).toMatchObject({ owedNow: 0, remaining: 0, credit: 0 });
+    expect(states(r).every((s) => s === 'PAID' || s === 'OFF')).toBe(true);
+  });
+
+  it('тавиагүй бол шатлалын үнээр 250,000 дутуу; шийтээс ирсэн tuitionAmount гэрээ болохгүй', () => {
+    const r = computeLedger(base({ plan: 'FULL_YEAR', tuitionAmount: 2_250_000, payments: paid }));
+    expect(r.plan.total).toBe(g12.fullYear);
+    expect(r.remaining).toBe(250_000);
+  });
+
+  it('хөнгөлөлттэй дүнгээс бага төлсөн бол үлдэгдэл нь тэр дүнгээр', () => {
+    const r = computeLedger(base({ plan: 'FULL_YEAR', agreed: 2_250_000, payments: [pay(350_000, null, '2026-09-01')] }));
+    expect(r.remaining).toBe(1_900_000);
+  });
+
+  it('шатлалын үнээс их, хэт бага дүн, сар бүрийн багцад үйлчлэхгүй', () => {
+    expect(computeLedger(base({ plan: 'FULL_YEAR', agreed: 2_850_000, payments: paid })).plan.total).toBe(g12.fullYear);
+    expect(computeLedger(base({ plan: 'FULL_YEAR', agreed: 300_000, payments: paid })).plan.total).toBe(g12.fullYear);
+    expect(computeLedger(base({ plan: 'MONTHLY', agreed: 2_250_000, payments: [pay(350_000, '2026-09')] })).plan.kind).toBe('MONTHLY');
+  });
+});
