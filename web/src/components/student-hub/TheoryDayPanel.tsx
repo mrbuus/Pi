@@ -9,7 +9,7 @@ import { Meta } from "@/components/ui/Meta";
 import { api } from "@/lib/api";
 import PhotoPages from "./PhotoPages";
 import PhotoSetSender, { sentTime } from "./PhotoSetSender";
-import { THEORY_MAX_PAGES, type TheoryDayV2, type TheoryListDay, type TheoryPhotoSet } from "./photo-types";
+import { editDeadline, THEORY_MAX_PAGES, type TheoryDayV2, type TheoryListDay, type TheoryPhotoSet } from "./photo-types";
 
 function AssignedTag() {
   return (
@@ -101,6 +101,13 @@ export default function TheoryDayPanel({
     onChange?.();
   }
 
+  async function remove() {
+    const next = await api<TheoryDayV2>(base, { method: "DELETE" });
+    setDay((prev) => ({ ...next, classroomName: next.classroomName || prev?.classroomName || "" }));
+    setFlash(false);
+    onChange?.();
+  }
+
   if (error && !day) return <ErrorState message={error} onRetry={() => setRetry((n) => n + 1)} />;
   if (!day) return <PanelSkeleton />;
 
@@ -174,6 +181,8 @@ export default function TheoryDayPanel({
                   sent={{ keys: p.imageKeys, pages: p.pages, at: p.createdAt }}
                   canEdit
                   onSave={save}
+                  onDelete={remove}
+                  editableUntil={editDeadline(p.createdAt)}
                   purpose="theory"
                   maxPages={THEORY_MAX_PAGES}
                   crop

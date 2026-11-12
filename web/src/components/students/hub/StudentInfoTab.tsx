@@ -1,5 +1,6 @@
 "use client";
 
+import { classNames } from "@/lib/classTrack";
 import { useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { Check, History, Pencil, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/kit/button";
@@ -301,7 +302,7 @@ export default function StudentInfoTab({
               <Field
                 id="v-classroom"
                 label="Анги"
-                value={detail.currentClassroom?.name ?? (p?.grade ? `${p.grade}-р анги` : null)}
+                value={classNames(detail.currentClassroom, detail.otherClassrooms) ?? (p?.grade ? `${p.grade}-р анги` : null)}
               />
               <Field id="v-grade" label="Анги (жил)" value={p?.grade ? `${p.grade}-р анги` : null} />
               <Field id="v-section" label="Секц" value={p?.section} />

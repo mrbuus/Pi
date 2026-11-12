@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { addDaysKey, ubDateKey } from '../attendance/board-logic';
 import { dateKey, parseDateOnly, todayUB } from '../common/date';
+import { PHOTO_EDIT_CLOSED, photoEditable } from '../common/photo-edit';
 import {
   deadlineClosed,
   deadlineKey,
@@ -67,7 +68,8 @@ import {
 } from './homework-comments';
 
 const PDF_MAX_BYTES = 25 * 1024 * 1024;
-const MAX_PAGES = 6;
+/** Гэрийн даалгаврын зураг: ≤15 хуудас (эзэн 2026-11-12; өмнө 6) */
+const MAX_PAGES = 15;
 /** loadProblems-ийн процессын санах ой: autosave/шалгах бүрт бодлого дахин уншихгүй */
 const PROBLEMS_TTL_MS = 60_000;
 const PROBLEMS_CACHE_MAX = 200;
@@ -1586,6 +1588,9 @@ export class HomeworkPracticeService {
           return tx.homeworkPhoto.update({ where: { id: current.id }, data: { caption } });
         return current;
       }
+      // Солих: илгээснээс хойш 5 минутын дотор, эсвэл багш «Буцаах» дарсан үед (эзэн 2026-11-12)
+      if (current && !current.returnedAt && !photoEditable(current.createdAt))
+        throw new ForbiddenException(PHOTO_EDIT_CLOSED);
       await tx.homeworkPhoto.updateMany({
         where: { studentId, classroomId: body.classroomId as string, lessonDate, deletedAt: null },
         data: { deletedAt: new Date() },
@@ -1646,10 +1651,13 @@ export class HomeworkPracticeService {
   async deletePhoto(studentId: string, id: string) {
     const photo = await this.prisma.homeworkPhoto.findUnique({
       where: { id },
-      select: { studentId: true, deletedAt: true },
+      select: { studentId: true, deletedAt: true, createdAt: true },
     });
     if (!photo || photo.studentId !== studentId)
       throw new NotFoundException('Зураг олдсонгүй');
+    // Буруу илгээснээ 5 минутын дотор л буцааж устгана (эзэн 2026-11-12)
+    if (!photo.deletedAt && !photoEditable(photo.createdAt))
+      throw new ForbiddenException(PHOTO_EDIT_CLOSED);
     if (!photo.deletedAt)
       await this.prisma.homeworkPhoto.updateMany({
         where: { id, deletedAt: null },

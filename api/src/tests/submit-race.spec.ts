@@ -7,7 +7,7 @@ import { SessionAlreadyFinalizedError, TestsService } from './tests.service';
  */
 function setup(txImpl: (ops: unknown[]) => Promise<unknown>) {
   const prisma = {
-    enrollment: { findFirst: jest.fn().mockResolvedValue(null) },
+    enrollment: { findFirst: jest.fn().mockResolvedValue(null), findMany: jest.fn().mockResolvedValue([]) },
     testResult: {
       findUnique: jest.fn().mockResolvedValue(null),
       upsert: jest.fn().mockReturnValue('upsert-op'),

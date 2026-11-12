@@ -2,7 +2,7 @@
  * Зургууд → НЭГ PDF (эзэн 2026-10-18, D13). Хөтөч дээр:
  *   1) зураг бүрийг canvas-аар JPEG болгон шахна (урт тал ≤1600px, q≈0.72), эргүүлэлтийг хэрэгжүүлнэ.
  *      Хуудас PDF_PAGE_BUDGET-ээс том бол чанарыг алхам алхмаар бууруулж, хэрэгтэй бол
- *      хэмжээг багасгана — 10 хуудас ≈ 3 МБ-аас хэтрэхгүй (S3 хадгалалт, утасны дата хямд)
+ *      хэмжээг багасгана — 10 хуудас ≈ 3 МБ, 20 хуудас ≈ 7 МБ-аас хэтрэхгүй (S3 хадгалалт, утасны дата хямд)
  *   2) `@cantoo/pdf-lib`-ээр зураг бүрийг өөрийн харьцаатай нэг хуудас болгоно
  *   3) `save({ useObjectStreams: true })` → `application/pdf` File
  * HEIC: iOS Safari сонгох үед өөрөө JPEG болгодог; бусад хөтөч задалж чадахгүй бол
@@ -13,7 +13,8 @@
 
 import { canvasToJpeg, decodeUpright, releaseCanvas, type UprightImage } from "./imageNormalize";
 
-export const PDF_MAX_PAGES = 10;
+/** Хатуу дээд хязгаар (онолын зураг 20); дуудагч `maxPages`-ээр багасгана */
+export const PDF_MAX_PAGES = 20;
 export const PDF_LONG_SIDE = 1600;
 export const PDF_JPEG_QUALITY = 0.72;
 /** Нэг хуудасны зорилтот дээд хэмжээ (байт). Дэвтрийн зураг 1600px-д ихэвчлэн 200–300 КБ */

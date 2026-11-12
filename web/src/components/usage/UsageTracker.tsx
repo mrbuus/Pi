@@ -15,7 +15,7 @@ import { apiUrl, getToken } from "@/lib/api";
  * Сервер ч мөн дахин цэвэрлэнэ (api/src/usage/usage-normalize.ts).
  * ========================================================================== */
 
-type UsageEvent = { kind: "page" | "click"; path: string; target?: string };
+type UsageEvent = { kind: "page" | "click" | "error"; path: string; target?: string };
 
 const FLUSH_MS = 20_000;
 const MAX_BATCH = 50;
@@ -80,6 +80,45 @@ function push(e: UsageEvent) {
   }
   queue.push(e);
   if (queue.length >= MAX_BATCH) flush();
+}
+
+/** Хөтөч/утасны товч тодорхойлолт: «SamsungBrowser27 Chrome125 Android10 SM-A105F mem2» */
+function browserTag(): string {
+  const ua = navigator.userAgent;
+  const pick = (re: RegExp) => re.exec(ua)?.slice(1).join("") ?? "";
+  const parts = [
+    pick(/(SamsungBrowser)\/(\d+)/),
+    pick(/(Chrome|CriOS|FxiOS|Firefox)\/(\d+)/),
+    pick(/(Version)\/(\d+)/),
+    pick(/(Android) ?(\d+)/),
+    pick(/(iPhone OS |iPad; CPU OS )(\d+)/).replace(/[^A-Za-z0-9]/g, ""),
+    pick(/; ((?:SM|GT|Redmi|M\d|CPH|RMX|V\d|Pixel|HUAWEI|HONOR)[A-Za-z0-9 -]{1,14})[;)]/),
+    /; wv\)/.test(ua) ? "webview" : "",
+  ];
+  const mem = (navigator as { deviceMemory?: number }).deviceMemory;
+  if (mem) parts.push(`mem${mem}`);
+  return parts.filter(Boolean).join(" ");
+}
+
+/**
+ * Техникийн алдааг бүртгэнэ (эзэн 2026-11-12: Samsung утаснаас зураг илгээгдэхгүй — аль
+ * шатанд, ямар хөтөч дээр гэдгийг олох). `area` — тогтмол шошго («photo/build»),
+ * `detail` — хөтчийн алдааны нэр/мессеж. Нэр, зураг, агуулга илгээхгүй.
+ */
+export function trackError(area: string, detail: string) {
+  try {
+    const target = `err:${area} ${browserTag()} ${detail}`.slice(0, 280);
+    push({ kind: "error", path: cleanPath(window.location.pathname), target });
+    flush();
+  } catch {
+    /* бүртгэл бол туслах мэдээлэл */
+  }
+}
+
+/** Алдааны объектоос богино тайлбар: «NotReadableError: …» */
+export function errorDetail(e: unknown): string {
+  if (e instanceof Error) return `${e.name}: ${e.message}`.slice(0, 120);
+  return String(e).slice(0, 120);
 }
 
 export default function UsageTracker() {

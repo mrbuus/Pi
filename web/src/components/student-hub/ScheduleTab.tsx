@@ -27,7 +27,8 @@ export default function ScheduleTab() {
       </section>
       <section>
         <h2 className="mb-3 font-bold text-brand-soft">Ойрын өдрүүд</h2>
-        <UpcomingAgenda classroomId={me.data.classroomId} />
+        {/* classroomId өгөхгүй — сервер сурагчийн БҮХ ангиар (математик + Нийгэм) хязгаарлана */}
+        <UpcomingAgenda />
       </section>
     </div>
   );

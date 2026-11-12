@@ -7,6 +7,7 @@ DELETE /api/chapters/:id
 DELETE /api/classrooms/:id
 DELETE /api/finance/expenses/:id
 DELETE /api/goals/:id
+DELETE /api/lesson-day/:classroomId/:date/photos
 DELETE /api/lessons/theory/:id
 DELETE /api/me/passes/:userPassId
 DELETE /api/notes/:id

@@ -1,5 +1,6 @@
 "use client";
 
+import { classNames } from "@/lib/classTrack";
 import {
   ArrowRightLeft,
   CalendarCheck,
@@ -85,7 +86,7 @@ export default function StudentOverview({
           <Meta
             className="mt-1 text-sm text-ink-dim"
             items={[
-              classroom?.name ?? <span key="nc">Ангигүй</span>,
+              classNames(classroom, detail.otherClassrooms) ?? <span key="nc">Ангигүй</span>,
               detail.studentCode && (
                 <span key="code" className="font-mono text-xs">
                   {detail.studentCode}

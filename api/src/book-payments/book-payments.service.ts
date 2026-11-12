@@ -1,3 +1,4 @@
+import { mainFirst } from '../common/class-track';
 import {
   BadRequestException,
   Injectable,
@@ -351,7 +352,7 @@ export class BookPaymentsService {
           select: {
             classroomId: true,
             leftAt: true,
-            classroom: { select: { id: true, name: true, archived: true } },
+            classroom: { select: { id: true, name: true, archived: true, subject: true } },
           },
         },
       },
@@ -384,8 +385,9 @@ export class BookPaymentsService {
   async studentBooks(studentId: string, userId: string) {
     await assertInternalTeachingStaff(this.prisma, userId);
     const s = await this.student(studentId);
-    const current = s.enrollments.filter(
-      (e) => !e.leftAt && !e.classroom.archived,
+    // Хоёр ангитай бол үндсэн (математикийн) анги эхэнд — ном тэр ангийнх
+    const current = mainFirst(
+      s.enrollments.filter((e) => !e.leftAt && !e.classroom.archived),
     );
     const [rows, suggested, sheetChecks] = await Promise.all([
       this.prisma.bookPayment.findMany({
@@ -497,8 +499,9 @@ export class BookPaymentsService {
       } else if (active) classroomId = active.classroomId;
       else
         classroomId =
-          s.enrollments.find((e) => !e.leftAt && !e.classroom.archived)
-            ?.classroomId ?? null;
+          mainFirst(
+            s.enrollments.filter((e) => !e.leftAt && !e.classroom.archived),
+          )[0]?.classroomId ?? null;
       const check = classroomId
         ? await this.prisma.classCheck.findFirst({
             where: { classroomId, bookKey, deletedAt: null },

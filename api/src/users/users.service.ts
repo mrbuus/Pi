@@ -1,3 +1,4 @@
+import { mainFirst } from '../common/class-track';
 import {
   BadRequestException,
   ConflictException,
@@ -867,8 +868,11 @@ export class UsersService {
         enrollments: {
           where: includeArchived ? {} : { leftAt: null },
           orderBy: { joinedAt: 'desc' },
-          take: 1,
-          select: { classroom: { select: { id: true, name: true, grade: true } } },
+          // идэвхтэй жагсаалтад бүх анги (математик + Нийгэм); архивт сүүлийнх л хэрэгтэй
+          ...(includeArchived ? { take: 1 } : {}),
+          select: {
+            classroom: { select: { id: true, name: true, grade: true, subject: true } },
+          },
         },
         // Аппад бүртгүүлсэн эцэг эхийн утас — сурагчийн хайлтад (эзэн 2026-11-10)
         childLinks: { select: { parent: { select: { phone: true } } } },
@@ -877,14 +881,18 @@ export class UsersService {
       take: 5000,
     });
     return users.map(({ enrollments, childLinks, ...u }) => {
-      const latest = enrollments[0]?.classroom ?? null;
+      // Хоёр ангитай бол үндсэн (математикийн) анги; бусад нь otherClassrooms-д
+      const pick = ({ id, name, grade }: { id: string; name: string; grade: number | null }) => ({ id, name, grade });
+      const ordered = mainFirst(enrollments);
+      const latest = ordered[0] ? pick(ordered[0].classroom) : null;
+      const otherClassrooms = ordered.slice(1).map((e) => pick(e.classroom));
       const parentPhones = childLinks
         .map((l) => l.parent.phone)
         .filter((p): p is string => !!p);
       // Архивын жагсаалтад: сүүлийн анги (сэргээхэд урьдчилан сонгоно)
       if (includeArchived)
         return { ...u, parentPhones, currentClassroom: null, lastClassroom: latest };
-      return { ...u, parentPhones, currentClassroom: latest };
+      return { ...u, parentPhones, currentClassroom: latest, otherClassrooms };
     });
   }
 
@@ -1392,20 +1400,26 @@ export class UsersService {
     });
     if (!user) throw new NotFoundException('Хэрэглэгч олдсонгүй');
 
-    const activeEnrollment = await this.prisma.enrollment.findFirst({
-      where: { studentId: targetId, leftAt: null },
-      include: {
-        classroom: {
-          select: {
-            id: true,
-            name: true,
-            grade: true,
-            teacherId: true,
-            assistantTeacherId: true,
+    // Хоёр ангид зэрэг суудаг сурагч (математик + Нийгэм): үндсэн анги эхэнд
+    const activeEnrollments = mainFirst(
+      await this.prisma.enrollment.findMany({
+        where: { studentId: targetId, leftAt: null },
+        orderBy: { joinedAt: 'desc' },
+        include: {
+          classroom: {
+            select: {
+              id: true,
+              name: true,
+              grade: true,
+              subject: true,
+              teacherId: true,
+              assistantTeacherId: true,
+            },
           },
         },
-      },
-    });
+      }),
+    );
+    const activeEnrollment = activeEnrollments[0] ?? null;
 
     // Багш (TEACHER) бүх идэвхтэй сурагчийг УНШИХ эрхтэй (эзэн 2026-10-22) —
     // өөрийн ангийн шалгалтыг тайлсан. Зөвхөн унших: засах/архивлах маршрутууд
@@ -1483,6 +1497,12 @@ export class UsersService {
             grade: activeEnrollment.classroom.grade,
           }
         : null,
+      // Зэрэг сууж буй бусад анги (ж: Нийгэм)
+      otherClassrooms: activeEnrollments.slice(1).map((e) => ({
+        id: e.classroom.id,
+        name: e.classroom.name,
+        grade: e.classroom.grade,
+      })),
       lastClassroom: lastEnrollment?.classroom ?? null,
       classHistory,
       counts: {
