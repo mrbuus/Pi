@@ -458,6 +458,7 @@ export const ModelName = {
   ProductItem: 'ProductItem',
   Purchase: 'Purchase',
   ExpenseRecord: 'ExpenseRecord',
+  TuitionExtension: 'TuitionExtension',
   TuitionSettlement: 'TuitionSettlement',
   TuitionRefund: 'TuitionRefund',
   StudentWithdrawal: 'StudentWithdrawal',
@@ -560,7 +561,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "bankAllocation" | "bankPayerHint" | "bankCursor" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "teacherWorkHours" | "teacherBankAccount" | "teacherPayRate" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "bookPayment" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment" | "homeworkQuiz" | "homeworkQuizScore" | "makeupVisit" | "makeupVisitTest"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "bankAllocation" | "bankPayerHint" | "bankCursor" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionExtension" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "teacherWorkHours" | "teacherBankAccount" | "teacherPayRate" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "bookPayment" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment" | "homeworkQuiz" | "homeworkQuizScore" | "makeupVisit" | "makeupVisitTest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -5075,6 +5076,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ExpenseRecordCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ExpenseRecordCountAggregateOutputType> | number
+        }
+      }
+    }
+    TuitionExtension: {
+      payload: Prisma.$TuitionExtensionPayload<ExtArgs>
+      fields: Prisma.TuitionExtensionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TuitionExtensionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TuitionExtensionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TuitionExtensionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TuitionExtensionPayload>
+        }
+        findFirst: {
+          args: Prisma.TuitionExtensionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TuitionExtensionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TuitionExtensionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TuitionExtensionPayload>
+        }
+        findMany: {
+          args: Prisma.TuitionExtensionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TuitionExtensionPayload>[]
+        }
+        create: {
+          args: Prisma.TuitionExtensionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TuitionExtensionPayload>
+        }
+        createMany: {
+          args: Prisma.TuitionExtensionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TuitionExtensionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TuitionExtensionPayload>[]
+        }
+        delete: {
+          args: Prisma.TuitionExtensionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TuitionExtensionPayload>
+        }
+        update: {
+          args: Prisma.TuitionExtensionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TuitionExtensionPayload>
+        }
+        deleteMany: {
+          args: Prisma.TuitionExtensionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TuitionExtensionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TuitionExtensionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TuitionExtensionPayload>[]
+        }
+        upsert: {
+          args: Prisma.TuitionExtensionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TuitionExtensionPayload>
+        }
+        aggregate: {
+          args: Prisma.TuitionExtensionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTuitionExtension>
+        }
+        groupBy: {
+          args: Prisma.TuitionExtensionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TuitionExtensionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TuitionExtensionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TuitionExtensionCountAggregateOutputType> | number
         }
       }
     }
@@ -12504,6 +12579,21 @@ export const ExpenseRecordScalarFieldEnum = {
 export type ExpenseRecordScalarFieldEnum = (typeof ExpenseRecordScalarFieldEnum)[keyof typeof ExpenseRecordScalarFieldEnum]
 
 
+export const TuitionExtensionScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  month: 'month',
+  days: 'days',
+  reason: 'reason',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
+} as const
+
+export type TuitionExtensionScalarFieldEnum = (typeof TuitionExtensionScalarFieldEnum)[keyof typeof TuitionExtensionScalarFieldEnum]
+
+
 export const TuitionSettlementScalarFieldEnum = {
   id: 'id',
   studentId: 'studentId',
@@ -14979,6 +15069,7 @@ export type GlobalOmitConfig = {
   productItem?: Prisma.ProductItemOmit
   purchase?: Prisma.PurchaseOmit
   expenseRecord?: Prisma.ExpenseRecordOmit
+  tuitionExtension?: Prisma.TuitionExtensionOmit
   tuitionSettlement?: Prisma.TuitionSettlementOmit
   tuitionRefund?: Prisma.TuitionRefundOmit
   studentWithdrawal?: Prisma.StudentWithdrawalOmit

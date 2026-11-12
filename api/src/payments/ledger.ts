@@ -155,6 +155,15 @@ export interface LedgerInput {
   year?: AcademicYear;
   /** Багш+ гараар «бүтэн жил» гэж тооцсон (TuitionSettlement) */
   settled?: boolean;
+  /** Шийтийн «Хугацаа» нүд (сар бүрийн багц): ажилтны бичсэн «08/04-09/14» — үүнийг үнэн гэж үзнэ */
+  periods?: Record<MonthKey, MonthPeriod>;
+  /** Сайтаас сунгасан төлөх хугацаа (сар бүрийн багц): тэр сар ба түүнээс хойших бүх сар шилжинэ */
+  extensions?: { month: MonthKey; days: number }[];
+}
+
+export interface MonthPeriod {
+  from: DateKey;
+  to: DateKey;
 }
 
 export interface MonthBlock {
@@ -170,6 +179,10 @@ export interface MonthBlock {
   paidOn: DateKey | null;
   /** Төлөгдөх өдрөөс хэдэн хоног хоцорч бүрэн төлөгдсөн (цагтаа бол 0) */
   lateDays: number;
+  /** Сар бүрийн багц: энэ төлбөрийн хамрах хугацаа «09/14 – 10/14» (бусад багцад байхгүй) */
+  period?: MonthPeriod;
+  /** Энэ сард сайтаас сунгасан хоног (шалтгааныг ledger.service өгнө) */
+  extDays?: number;
 }
 
 export interface ResolvedPlan {
@@ -224,6 +237,52 @@ const inRange = (n: number | null, lo: number, hi: number): n is number =>
   n != null && Number.isFinite(n) && n >= lo && n <= hi;
 
 const monthOf = (d: DateKey): MonthKey => d.slice(0, 7);
+
+/** Өдөр нэмэх */
+const plusDays = (d: DateKey, n: number): DateKey =>
+  new Date(Date.parse(`${d}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
+
+/** Нэг сарын дараах ижил өдөр (сарын сүүлээр хязгаарлана: 01/31 → 02/28) */
+export function plusMonth(d: DateKey): DateKey {
+  const [y, m, day] = d.split('-').map(Number);
+  const ny = m === 12 ? y + 1 : y;
+  const nm = m === 12 ? 1 : m + 1;
+  const last = new Date(Date.UTC(ny, nm, 0)).getUTCDate();
+  return `${ny}-${pad2(nm)}-${pad2(Math.min(day, last))}`;
+}
+
+/**
+ * Сар бүрийн багцын хугацаа (эзэн 2026-11-12): шийтийн «Хугацаа»-тай адил гинжин —
+ * сар бүр өмнөх сарын дууссан өдрөөс эхэлнэ. Эх сурвалж (давуу эрэмбээр):
+ *  1) Сайтаас сунгасан хоног — тэр сарын эхлэх (төлөх) өдрийг шилжүүлж, ДАРААГИЙН бүх сар
+ *     дагаж шилжинэ; сунгалтаас хойш шийтийн хуучин хугацааг үл тооно.
+ *  2) Шийтийн хугацаа (ажилтны бичсэн, сунгалт орсон байж болно: «08/04-09/14»).
+ *  3) Өмнөх сарын дууссан өдөр; эхний сард — сууж эхэлсэн өдрийн тоогоор.
+ */
+export function monthlyPeriods(
+  months: MonthKey[],
+  firstDue: (m: MonthKey) => DateKey,
+  sheet: Record<MonthKey, MonthPeriod> = {},
+  extensions: { month: MonthKey; days: number }[] = [],
+): Map<MonthKey, MonthPeriod & { extDays: number }> {
+  const ext = new Map<MonthKey, number>();
+  for (const e of extensions) if (e.days > 0) ext.set(e.month, (ext.get(e.month) ?? 0) + e.days);
+  const out = new Map<MonthKey, MonthPeriod & { extDays: number }>();
+  let prevEnd: DateKey | null = null;
+  let shifted = false;
+  for (const m of months) {
+    const extDays = ext.get(m) ?? 0;
+    // Өмнөх сард сунгалт орсон бол шийтийн (хуучин) хугацааг авахгүй — гинжээр үргэлжилнэ
+    const s = shifted ? undefined : sheet[m];
+    if (extDays) shifted = true;
+    const base = s?.from ?? prevEnd ?? firstDue(m);
+    const from = extDays ? plusDays(base, extDays) : base;
+    const to = s && !extDays && s.to > s.from ? s.to : plusMonth(from);
+    out.set(m, { from, to, extDays });
+    prevEnd = to;
+  }
+  return out;
+}
 
 /** Хоёр өдрийн зөрүү (хоногоор) */
 const daysBetween = (from: DateKey, to: DateKey): number =>
@@ -401,8 +460,10 @@ export function computeLedger(input: LedgerInput): LedgerResult {
 
   // 1) Сар бүрийн ногдох дүн ба төлөгдөх өдөр
   const dues = new Map<MonthKey, { due: number; dueOn: DateKey }>();
+  const periods = new Map<MonthKey, MonthPeriod & { extDays: number }>();
   if (plan.kind === 'MONTHLY') {
-    for (const m of active) dues.set(m, { due: plan.fee, dueOn: `${m}-${day}` });
+    for (const [m, p] of monthlyPeriods(active, (x) => `${x}-${day}`, input.periods, input.extensions)) periods.set(m, p);
+    for (const m of active) dues.set(m, { due: plan.fee, dueOn: periods.get(m)!.from });
   } else if (plan.kind === 'FULL_YEAR') {
     split(plan.total, active.length).forEach((d, i) =>
       dues.set(active[i], { due: d, dueOn: startDue! }),
@@ -468,7 +529,17 @@ export function computeLedger(input: LedgerInput): LedgerResult {
             : 'FUTURE';
     const paidOn = state === 'PAID' && d.due > 0 ? coveredOn(need) : null;
     const lateDays = paidOn && paidOn > d.dueOn ? daysBetween(d.dueOn, paidOn) : 0;
-    return { month, state, due: d.due, paid, dueOn: d.dueOn, paidOn, lateDays };
+    const pr = periods.get(month);
+    return {
+      month,
+      state,
+      due: d.due,
+      paid,
+      dueOn: d.dueOn,
+      paidOn,
+      lateDays,
+      ...(pr ? { period: { from: pr.from, to: pr.to }, ...(pr.extDays ? { extDays: pr.extDays } : {}) } : {}),
+    };
   });
 
   // 3) Хураангуй

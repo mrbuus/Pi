@@ -67,7 +67,7 @@ function MonthCard({
             items={[
               monthName(block.month),
               <span key="p" className="tabular-nums">
-                {periodOf(block.month, ledger.row.startDate, ledger.year.months[0])}
+                {block.period ? `${dayLabel(block.period.from)}–${dayLabel(block.period.to)}` : periodOf(block.month, ledger.row.startDate, ledger.year.months[0])}
               </span>,
               STATE_LABEL[block.state],
               !hidden && block.due ? `${mnt(block.paid)} / ${mnt(block.due)}` : null,
