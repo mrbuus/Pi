@@ -862,6 +862,23 @@ describe('ClassChecksService', () => {
         bookKey: 'SHEET3',
         title: 'Хариултын хуудас 3',
       });
+      // Клиент дугаараа өөрөө сонгож болохгүй
+      await expect(
+        service.create('c1', { bookKey: 'SHEET7', amount: 3000 }, 'teacher'),
+      ).rejects.toThrow('Номоо сонгоно уу');
+      // Зэрэг нээхэд unique индекс → ойлгомжтой алдаа
+      prisma.classCheck.findMany.mockResolvedValueOnce([]);
+      prisma.classCheck.create.mockRejectedValueOnce({ code: 'P2002' });
+      await expect(
+        service.create('c1', { bookKey: 'SHEET', amount: 3000 }, 'teacher'),
+      ).rejects.toThrow('дөнгөж нээлээ');
+      prisma.classCheck.findMany.mockResolvedValueOnce([
+        { bookKey: 'SHEET1' },
+        { bookKey: 'SHEET2' },
+      ]);
+      await service
+        .create('c1', { bookKey: 'SHEET', amount: 3000 }, 'teacher')
+        .catch(() => undefined);
       // deletedAt шүүлтгүй уншина — устгасан чек ч дугаар эзэлнэ
       expect(prisma.classCheck.findMany).toHaveBeenLastCalledWith({
         where: { classroomId: 'c1', bookKey: { startsWith: 'SHEET' } },

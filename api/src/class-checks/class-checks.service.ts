@@ -11,6 +11,7 @@ import {
   isBookKey,
   nextSheetKey,
   SHEET_KIND,
+  sheetNumber,
 } from '../book-payments/book-payments.logic';
 import {
   BookPaymentsService,
@@ -367,6 +368,9 @@ export class ClassChecksService {
   async create(classroomId: string, dto: CreateClassCheckDto, userId: string) {
     const role = await this.access(classroomId, userId);
     let bookKey = dto.bookKey ?? null;
+    // Хуудасны дугаарыг клиент өөрөө сонгож болохгүй — зөвхөн «SHEET» төрөл
+    if (bookKey !== null && sheetNumber(bookKey) !== null)
+      throw new BadRequestException('Номоо сонгоно уу');
     // «Хариултын хуудас» — дугаарыг сервер өгнө: энэ ангийн дараагийн хуудас
     // (устгасан чекийн дугаарыг дахин ашиглахгүй — хуучин төлбөр шинэ чект наалдахгүй)
     if (bookKey === SHEET_KIND) {
@@ -408,10 +412,20 @@ export class ClassChecksService {
       throw new BadRequestException(
         `Нээлттэй чек ${OPEN_CHECKS_MAX}-аас олон байж болохгүй — дууссаныг нь хаана уу`,
       );
-    const created = await this.prisma.classCheck.create({
-      data: { classroomId, title, amount, bookKey, createdById: userId },
-      select: CHECK_SELECT,
-    });
+    let created: CheckRow;
+    try {
+      created = await this.prisma.classCheck.create({
+        data: { classroomId, title, amount, bookKey, createdById: userId },
+        select: CHECK_SELECT,
+      });
+    } catch (err) {
+      // Хоёр багш зэрэг ижил ном/хуудас нээвэл unique индекс нэгийг нь буцаана
+      if (bookKey && isUniqueViolation(err))
+        throw new BadRequestException(
+          `«${title}» чекийг өөр багш дөнгөж нээлээ — хуудсаа шинэчилнэ үү`,
+        );
+      throw err;
+    }
     await this.audit.record({
       actorId: userId,
       actorRole: role,

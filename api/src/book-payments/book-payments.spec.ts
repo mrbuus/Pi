@@ -538,6 +538,29 @@ describe('BookPaymentsService', () => {
     });
   });
 
+  describe('хариултын хуудас', () => {
+    it('сурагчийн ангид нээгдээгүй дугаараар бичихгүй; нээгдсэн бол болно', async () => {
+      const { service, prisma, active } = setup();
+      await expect(
+        service.setFromProfile(
+          's1',
+          'SHEET9',
+          { status: 'PAID', amount: 3000 },
+          'teacher',
+        ),
+      ).rejects.toThrow('Ном олдсонгүй');
+      expect(active()).toHaveLength(0);
+      prisma.classCheck.findFirst.mockResolvedValue({ id: 'k9', amount: 3000 });
+      await service.setFromProfile(
+        's1',
+        'SHEET9',
+        { status: 'PAID' },
+        'teacher',
+      );
+      expect(active()[0]).toMatchObject({ bookKey: 'SHEET9', amount: 3000 });
+    });
+  });
+
   describe('самбар', () => {
     it('Багш тоог бүгдийг, мөнгөнөөс зөвхөн өөрийн хураасныг харна', async () => {
       const { service, mark, prisma } = setup();

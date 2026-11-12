@@ -20,6 +20,7 @@ import {
   lockedElsewhere,
   samePayment,
   SHEET_KIND,
+  sheetNumber,
   sortCollectors,
   type PaymentValue,
 } from './book-payments.logic';
@@ -434,6 +435,25 @@ export class BookPaymentsService {
     const actorRole = await assertInternalTeachingStaff(this.prisma, userId);
     if (!isBookKey(bookKey)) throw new NotFoundException('Ном олдсонгүй');
     const s = await this.student(studentId);
+    // Хариултын хуудас: зөвхөн сурагчийн сууж байсан ангид нээгдсэн, эсвэл өөрөө
+    // бүртгэлтэй дугаар — дурын SHEETn-ээр зохиомол мөр үүсгэхгүй
+    if (sheetNumber(bookKey) !== null) {
+      const [check, own] = await Promise.all([
+        this.prisma.classCheck.findFirst({
+          where: {
+            bookKey,
+            deletedAt: null,
+            classroomId: { in: s.enrollments.map((e) => e.classroomId) },
+          },
+          select: { id: true },
+        }),
+        this.prisma.bookPayment.findFirst({
+          where: { studentId, bookKey },
+          select: { id: true },
+        }),
+      ]);
+      if (!check && !own) throw new NotFoundException('Ном олдсонгүй');
+    }
     let value: PaymentValue | null = null;
     let checkId: string | null = null;
     if (dto.status !== 'NONE') {
