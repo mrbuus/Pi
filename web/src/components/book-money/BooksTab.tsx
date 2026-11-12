@@ -86,8 +86,7 @@ export default function BooksTab({ studentId }: { studentId: string }) {
   return (
     <div className="space-y-4">
       <section className="chunky p-4 md:p-6">
-        <h2 className="mb-1 font-bold text-brand-soft">Номын мөнгө</h2>
-        <p className="mb-3 text-sm text-ink-dim">Дугуй товчоор шууд тэмдэглэнэ. Өөр багш авсан, дүн өөр бол гурван цэгээр оруулна</p>
+        <h2 className="mb-3 font-bold text-brand-soft">Ном, хариултын хуудас</h2>
         <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line">
           {data.books.map((b) => (
             <li key={b.key}>

@@ -6,7 +6,12 @@ import {
 } from '@nestjs/common';
 import { Role } from '../generated/prisma/enums';
 import { AuditService } from '../audit/audit.service';
-import { bookTitle, isBookKey } from '../book-payments/book-payments.logic';
+import {
+  bookTitle,
+  isBookKey,
+  nextSheetKey,
+  SHEET_KIND,
+} from '../book-payments/book-payments.logic';
 import {
   BookPaymentsService,
   type ShapedBookPayment,
@@ -361,7 +366,20 @@ export class ClassChecksService {
 
   async create(classroomId: string, dto: CreateClassCheckDto, userId: string) {
     const role = await this.access(classroomId, userId);
-    const bookKey = dto.bookKey ?? null;
+    let bookKey = dto.bookKey ?? null;
+    // «Хариултын хуудас» — дугаарыг сервер өгнө: энэ ангийн дараагийн хуудас
+    // (устгасан чекийн дугаарыг дахин ашиглахгүй — хуучин төлбөр шинэ чект наалдахгүй)
+    if (bookKey === SHEET_KIND) {
+      const prior = await this.prisma.classCheck.findMany({
+        where: { classroomId, bookKey: { startsWith: SHEET_KIND } },
+        select: { bookKey: true },
+      });
+      bookKey = nextSheetKey(
+        prior.flatMap((c) => (c.bookKey ? [c.bookKey] : [])),
+      );
+      if (!bookKey)
+        throw new BadRequestException('Хариултын хуудасны чек хэт олон байна');
+    }
     if (bookKey !== null && !isBookKey(bookKey))
       throw new BadRequestException('Номоо сонгоно уу');
     // Номын чекийн нэр = номын нэр (бүх ангид ижил, самбарт нэгдэнэ)
@@ -370,8 +388,7 @@ export class ClassChecksService {
     const amount = cleanCheckAmount(dto.amount ?? null);
     if (Number.isNaN(amount)) throw new BadRequestException('Дүн буруу байна');
     if (bookKey) {
-      if (amount === null)
-        throw new BadRequestException('Номын үнээ оруулна уу');
+      if (amount === null) throw new BadRequestException('Үнээ оруулна уу');
       // Нэг ангид нэг номын ганц чек — давхар нээвэл тоо хоёр хуваагдана
       const existing = await this.prisma.classCheck.findFirst({
         where: { classroomId, bookKey, deletedAt: null },
@@ -438,7 +455,7 @@ export class ClassChecksService {
       if (!title) throw new BadRequestException('Чекийн нэрээ бичнэ үү');
       if (title !== before.title) {
         if (before.bookKey)
-          throw new BadRequestException('Номын чекийн нэрийг солихгүй');
+          throw new BadRequestException('Энэ чекийн нэрийг солихгүй');
         data.title = title;
       }
     }
@@ -448,7 +465,7 @@ export class ClassChecksService {
         throw new BadRequestException('Дүн буруу байна');
       // Үнэ солиход өмнө тэмдэглэсэн сурагчдын дүн хэвээр (мөр бүр өөрийн дүнтэй)
       if (before.bookKey && amount === null)
-        throw new BadRequestException('Номын үнээ оруулна уу');
+        throw new BadRequestException('Үнээ оруулна уу');
       if (amount !== before.amount) data.amount = amount;
     }
     if (dto.archived === true && !before.archivedAt) {

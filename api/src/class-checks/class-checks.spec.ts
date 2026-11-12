@@ -832,10 +832,41 @@ describe('ClassChecksService', () => {
       });
       await expect(
         service.create('c1', { bookKey: 'E2' }, 'teacher'),
-      ).rejects.toThrow('Номын үнээ оруулна уу');
+      ).rejects.toThrow('Үнээ оруулна уу');
       await expect(
         service.create('c1', { bookKey: 'X9', amount: 1 }, 'teacher'),
       ).rejects.toThrow('Номоо сонгоно уу');
+    });
+
+    it('хариултын хуудас: дугаарыг сервер өгнө, устгасан чекийн дугаарыг давтахгүй', async () => {
+      const { service, prisma } = setup();
+      prisma.classCheck.findFirst.mockResolvedValue(null);
+      prisma.classCheck.create.mockImplementation(
+        ({ data }: { data: Record<string, unknown> }) =>
+          Promise.resolve(checkRow(data)),
+      );
+      prisma.classCheck.findMany.mockResolvedValueOnce([]);
+      await expect(
+        service.create('c1', { bookKey: 'SHEET', amount: 3000 }, 'teacher'),
+      ).resolves.toMatchObject({
+        bookKey: 'SHEET1',
+        title: 'Хариултын хуудас 1',
+      });
+      prisma.classCheck.findMany.mockResolvedValueOnce([
+        { bookKey: 'SHEET1' },
+        { bookKey: 'SHEET2' },
+      ]);
+      await expect(
+        service.create('c1', { bookKey: 'SHEET', amount: 3000 }, 'teacher'),
+      ).resolves.toMatchObject({
+        bookKey: 'SHEET3',
+        title: 'Хариултын хуудас 3',
+      });
+      // deletedAt шүүлтгүй уншина — устгасан чек ч дугаар эзэлнэ
+      expect(prisma.classCheck.findMany).toHaveBeenLastCalledWith({
+        where: { classroomId: 'c1', bookKey: { startsWith: 'SHEET' } },
+        select: { bookKey: true },
+      });
     });
 
     it('нэг ангид нэг номын ганц чек (нуусан байсан ч)', async () => {
@@ -861,7 +892,7 @@ describe('ClassChecksService', () => {
       ).rejects.toThrow('нэрийг солихгүй');
       await expect(
         service.update('c1', 'k1', { amount: null }, 'teacher'),
-      ).rejects.toThrow('Номын үнээ оруулна уу');
+      ).rejects.toThrow('Үнээ оруулна уу');
     });
 
     it('тэмдэглэхэд ClassCheckMark биш, BookPayment-т бичнэ', async () => {

@@ -2,13 +2,17 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Role } from '../generated/prisma/enums';
 import {
   BOOKS,
+  bookOrder,
+  bookTitle,
   classBookSummary,
   cleanBookAmount,
   cleanBookNote,
   collectorTotals,
   isBookKey,
   lockedElsewhere,
+  nextSheetKey,
   samePayment,
+  sortCollectors,
 } from './book-payments.logic';
 import {
   BookPaymentsService,
@@ -16,7 +20,7 @@ import {
 } from './book-payments.service';
 
 describe('«Номын мөнгө» — цэвэр функц', () => {
-  it('номын жагсаалт: 8 ном, түлхүүр давхардахгүй', () => {
+  it('номын жагсаалт: 7 ном; «Шалгалт-1» ном биш', () => {
     expect(BOOKS.map((b) => b.title)).toEqual([
       'E-1',
       'E-2',
@@ -25,12 +29,52 @@ describe('«Номын мөнгө» — цэвэр функц', () => {
       'Хавтгай-2',
       'Огторгуй',
       'Pi test',
-      'Шалгалт-1',
     ]);
     expect(new Set(BOOKS.map((b) => b.key)).size).toBe(BOOKS.length);
     expect(isBookKey('E2')).toBe(true);
     expect(isBookKey('e2')).toBe(false);
+    expect(isBookKey('SHALGALT1')).toBe(false);
     expect(isBookKey(null)).toBe(false);
+  });
+
+  it('хариултын хуудас: SHEET1…SHEET99, нэр, дараагийн дугаар', () => {
+    expect(isBookKey('SHEET1')).toBe(true);
+    expect(isBookKey('SHEET99')).toBe(true);
+    expect(isBookKey('SHEET')).toBe(false);
+    expect(isBookKey('SHEET0')).toBe(false);
+    expect(isBookKey('SHEET100')).toBe(false);
+    expect(bookTitle('SHEET2')).toBe('Хариултын хуудас 2');
+    expect(bookTitle('E2')).toBe('E-2');
+    expect(nextSheetKey([])).toBe('SHEET1');
+    expect(nextSheetKey(['SHEET1', 'E2', 'SHEET3'])).toBe('SHEET4');
+    expect(nextSheetKey(['SHEET99'])).toBeNull();
+    expect(bookOrder('E1')).toBeLessThan(bookOrder('PITEST'));
+    expect(bookOrder('PITEST')).toBeLessThan(bookOrder('SHEET1'));
+    expect(bookOrder('SHEET1')).toBeLessThan(bookOrder('SHEET2'));
+  });
+
+  it('авсан багшийн дараалал: эзний өгсөн 11 нэр эхэнд, үлдсэн нь нэрээр', () => {
+    const p = (firstName: string, lastName = '') => ({ firstName, lastName });
+    const sorted = sortCollectors([
+      p('Анар'),
+      p('Заяа'),
+      p('Эмүжин', 'У.'),
+      p('Бадрал'),
+      p('Эмүжин', 'А.'),
+      p('Баасанжав'),
+      p('Өсөхбаяр'),
+      p('Дуламсүрэн'),
+    ]);
+    expect(sorted.map((x) => `${x.firstName}${x.lastName}`)).toEqual([
+      'Баасанжав',
+      'Дуламсүрэн',
+      'Бадрал',
+      'Өсөхбаяр',
+      'Заяа',
+      'Анар',
+      'ЭмүжинА.',
+      'ЭмүжинУ.',
+    ]);
   });
 
   it('дүн: 0 зөвшөөрнө (үнэгүй өгсөн), сөрөг/бутархай/хэт их = буруу', () => {

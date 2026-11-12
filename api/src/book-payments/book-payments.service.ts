@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import type { SetBookPaymentDto } from './book-payments.dto';
 import {
   BOOKS,
+  bookOrder,
   bookTitle,
   classBookSummary,
   cleanBookAmount,
@@ -18,6 +19,8 @@ import {
   isBookKey,
   lockedElsewhere,
   samePayment,
+  SHEET_KIND,
+  sortCollectors,
   type PaymentValue,
 } from './book-payments.logic';
 
@@ -365,19 +368,39 @@ export class BookPaymentsService {
     const current = s.enrollments.filter(
       (e) => !e.leftAt && !e.classroom.archived,
     );
-    const [rows, suggested] = await Promise.all([
+    const [rows, suggested, sheetChecks] = await Promise.all([
       this.prisma.bookPayment.findMany({
         where: { studentId },
         orderBy: { createdAt: 'desc' },
         select: ROW_SELECT,
       }),
       this.suggestedAmounts(current.map((e) => e.classroomId)),
+      this.prisma.classCheck.findMany({
+        where: {
+          // Зөвхөн одоогийн анги — гарсан ангид дараа нь нээсэн хуудас хамаарахгүй
+          classroomId: { in: current.map((e) => e.classroomId) },
+          bookKey: { startsWith: SHEET_KIND },
+          deletedAt: null,
+        },
+        select: { bookKey: true },
+      }),
     ]);
+    const sheetKeys = sheetChecks.flatMap((c) =>
+      c.bookKey ? [c.bookKey] : [],
+    );
     const shaped = await this.shape(rows);
     const active = new Map(
       shaped.filter((r) => !r.voidedAt).map((r) => [r.bookKey, r]),
     );
     const seen = new Set<string>();
+    // Бүх ном + одоогийн ангид нээгдсэн, эсвэл өөрөө бүртгэлтэй хариултын хуудас
+    const keys = [
+      ...new Set([
+        ...BOOKS.map((b) => b.key as string),
+        ...sheetKeys,
+        ...rows.map((r) => r.bookKey),
+      ]),
+    ].sort((a, b) => bookOrder(a) - bookOrder(b));
     return {
       student: { id: s.id, firstName: s.firstName, lastName: s.lastName },
       // Одоогийн анги эхэнд, дараа нь өмнө сууж байсан ангиуд (давхардалгүй)
@@ -388,11 +411,11 @@ export class BookPaymentsService {
           name: e.classroom.name,
           current: !e.leftAt && !e.classroom.archived,
         })),
-      books: BOOKS.map((b) => ({
-        key: b.key,
-        title: b.title,
-        suggestedAmount: suggested.get(b.key) ?? null,
-        payment: active.get(b.key) ?? null,
+      books: keys.map((key) => ({
+        key,
+        title: bookTitle(key),
+        suggestedAmount: suggested.get(key) ?? null,
+        payment: active.get(key) ?? null,
       })),
       history: shaped.map((r) => ({ ...r, title: bookTitle(r.bookKey) })),
     };
@@ -469,7 +492,7 @@ export class BookPaymentsService {
     return row ? (await this.shape([row]))[0] : null;
   }
 
-  /** «Хэн авсан» сонгогч — идэвхтэй Админ, Багш+, Багш (нэрээр) */
+  /** «Хэн авсан» сонгогч — идэвхтэй Админ, Багш+, Багш (эзний дарааллаар); me = анхдагч сонголт */
   async collectors(userId: string) {
     await assertInternalTeachingStaff(this.prisma, userId);
     const rows = await this.prisma.user.findMany({
@@ -480,11 +503,7 @@ export class BookPaymentsService {
       },
       select: { id: true, firstName: true, lastName: true, role: true },
     });
-    return rows.sort(
-      (a, b) =>
-        a.firstName.localeCompare(b.firstName, 'mn') ||
-        a.lastName.localeCompare(b.lastName, 'mn'),
-    );
+    return { me: userId, staff: sortCollectors(rows) };
   }
 
   // ───────────────────────── Самбар ─────────────────────────
@@ -544,7 +563,14 @@ export class BookPaymentsService {
       roster.set(e.classroomId, list);
     }
 
-    const books = BOOKS.map((b) => {
+    const allKeys = [
+      ...new Set([
+        ...checks.map((c) => c.bookKey!),
+        ...payments.map((p) => p.bookKey),
+      ]),
+    ].sort((a, b) => bookOrder(a) - bookOrder(b));
+    const books = allKeys.map((key) => {
+      const b = { key, title: bookTitle(key) };
       const bookPayments = payments.filter((p) => p.bookKey === b.key);
       const bookChecks = checks.filter((c) => c.bookKey === b.key);
       const ids = new Set([
@@ -594,7 +620,7 @@ export class BookPaymentsService {
             )
           : null,
       };
-    }).filter((b) => b.classes.length > 0 || b.paid > 0);
+    });
 
     const collectors = collectorTotals(payments)
       .filter((t) => seeAllMoney || t.collectedById === userId)

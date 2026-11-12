@@ -7,7 +7,7 @@ export interface BookPerson {
   role?: string | null;
 }
 
-/** API-ийн BOOKS-тай ижил (api/src/book-payments/book-payments.logic.ts) */
+/** API-ийн BOOKS-тай ижил (api/src/book-payments/book-payments.logic.ts). Хариултын хуудас ном БИШ */
 export const BOOKS = [
   { key: "E1", title: "E-1" },
   { key: "E2", title: "E-2" },
@@ -16,8 +16,10 @@ export const BOOKS = [
   { key: "HAVTGAI2", title: "Хавтгай-2" },
   { key: "OGTORGUI", title: "Огторгуй" },
   { key: "PITEST", title: "Pi test" },
-  { key: "SHALGALT1", title: "Шалгалт-1" },
 ] as const;
+
+/** Хариултын хуудасны чек нээх төрөл — дугаарыг (1, 2 …) сервер автоматаар өгнө */
+export const SHEET_KIND = "SHEET";
 
 /** API-ийн BOOK_AMOUNT_MAX-тай ижил */
 export const BOOK_AMOUNT_MAX = 1_000_000;

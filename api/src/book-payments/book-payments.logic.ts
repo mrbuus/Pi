@@ -12,19 +12,80 @@ export const BOOKS = [
   { key: 'HAVTGAI2', title: 'Хавтгай-2' },
   { key: 'OGTORGUI', title: 'Огторгуй' },
   { key: 'PITEST', title: 'Pi test' },
-  { key: 'SHALGALT1', title: 'Шалгалт-1' },
 ] as const;
-
-export type BookKey = (typeof BOOKS)[number]['key'];
 
 const BOOK_TITLE = new Map<string, string>(BOOKS.map((b) => [b.key, b.title]));
 
-export function isBookKey(raw: unknown): raw is BookKey {
-  return typeof raw === 'string' && BOOK_TITLE.has(raw);
+/**
+ * Хариултын хуудасны мөнгө (эзэн 2026-11-12) — ном БИШ, гэхдээ яг адил бүртгэгдэнэ
+ * (сурагч × зүйл, анги сольсон ч зөрөхгүй). Түлхүүр SHEET1, SHEET2 … — дугаарыг
+ * анги бүрт сервер автоматаар өгнө (тэр ангийн дараагийн хуудас).
+ */
+export const SHEET_KIND = 'SHEET';
+export const SHEET_MAX = 99;
+const SHEET_RE = /^SHEET([1-9]\d?)$/;
+
+/** SHEET3 → 3; хариултын хуудас биш бол null */
+export function sheetNumber(key: string): number | null {
+  const m = SHEET_RE.exec(key);
+  return m ? Number(m[1]) : null;
+}
+
+/** Бүртгэж болох зүйл: ном эсвэл хариултын хуудас */
+export function isBookKey(raw: unknown): raw is string {
+  return typeof raw === 'string' && (BOOK_TITLE.has(raw) || SHEET_RE.test(raw));
 }
 
 export function bookTitle(key: string): string {
-  return BOOK_TITLE.get(key) ?? key;
+  const n = sheetNumber(key);
+  return n !== null ? `Хариултын хуудас ${n}` : (BOOK_TITLE.get(key) ?? key);
+}
+
+/** Тэр ангид өмнө нээсэн хуудаснуудын (устгасныг оролцуулаад) дараагийн дугаар */
+export function nextSheetKey(existingKeys: readonly string[]): string | null {
+  const max = Math.max(0, ...existingKeys.map((k) => sheetNumber(k) ?? 0));
+  return max >= SHEET_MAX ? null : `${SHEET_KIND}${max + 1}`;
+}
+
+/** Жагсаалтын дараалал: номууд (BOOKS-ийн дарааллаар), дараа нь хуудаснууд дугаараар */
+export function bookOrder(key: string): number {
+  const i = BOOKS.findIndex((b) => b.key === key);
+  return i >= 0 ? i : 100 + (sheetNumber(key) ?? 99);
+}
+
+/**
+ * «Мөнгийг авсан багш» сонгогчийн дараалал (эзэн 2026-11-12): эхлээд эдгээр нэр
+ * энэ дарааллаар, үлдсэн нь нэрийн дарааллаар.
+ */
+export const COLLECTOR_ORDER = [
+  'Баасанжав',
+  'Дуламсүрэн',
+  'Баасансүрэн',
+  'Бадрал',
+  'Энхсайхан',
+  'Ундаръяа',
+  'Ганзаяа',
+  'Өсөхбаяр',
+  'Даариймаа',
+  'Болортуяа',
+  'Заяа',
+] as const;
+
+export function sortCollectors<
+  T extends { firstName: string; lastName: string },
+>(people: readonly T[]): T[] {
+  const rank = (p: T) => {
+    const i = (COLLECTOR_ORDER as readonly string[]).indexOf(
+      p.firstName.trim(),
+    );
+    return i < 0 ? COLLECTOR_ORDER.length : i;
+  };
+  return [...people].sort(
+    (a, b) =>
+      rank(a) - rank(b) ||
+      a.firstName.localeCompare(b.firstName, 'mn') ||
+      a.lastName.localeCompare(b.lastName, 'mn'),
+  );
 }
 
 export const BOOK_NOTE_MAX = 200;
@@ -176,10 +237,7 @@ export function collectorTotals(
     b.count += 1;
     b.sum += p.amount ?? 0;
   }
-  const order = new Map<string, number>(BOOKS.map((b, i) => [b.key, i]));
   for (const t of by.values())
-    t.byBook.sort(
-      (a, b) => (order.get(a.bookKey) ?? 99) - (order.get(b.bookKey) ?? 99),
-    );
+    t.byBook.sort((a, b) => bookOrder(a.bookKey) - bookOrder(b.bookKey));
   return [...by.values()].sort((a, b) => b.sum - a.sum || b.count - a.count);
 }
