@@ -199,7 +199,11 @@ export const ModelName = {
   HomeworkQuiz: 'HomeworkQuiz',
   HomeworkQuizScore: 'HomeworkQuizScore',
   MakeupVisit: 'MakeupVisit',
-  MakeupVisitTest: 'MakeupVisitTest'
+  MakeupVisitTest: 'MakeupVisitTest',
+  PaperExam: 'PaperExam',
+  PaperExamItem: 'PaperExamItem',
+  PaperExamSheet: 'PaperExamSheet',
+  PaperExamImport: 'PaperExamImport'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -2529,6 +2533,73 @@ export const MakeupVisitTestScalarFieldEnum = {
 } as const
 
 export type MakeupVisitTestScalarFieldEnum = (typeof MakeupVisitTestScalarFieldEnum)[keyof typeof MakeupVisitTestScalarFieldEnum]
+
+
+export const PaperExamScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  heldOn: 'heldOn',
+  itemCount: 'itemCount',
+  published: 'published',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type PaperExamScalarFieldEnum = (typeof PaperExamScalarFieldEnum)[keyof typeof PaperExamScalarFieldEnum]
+
+
+export const PaperExamItemScalarFieldEnum = {
+  id: 'id',
+  examId: 'examId',
+  number: 'number',
+  answerKey: 'answerKey',
+  points: 'points',
+  area: 'area',
+  voided: 'voided'
+} as const
+
+export type PaperExamItemScalarFieldEnum = (typeof PaperExamItemScalarFieldEnum)[keyof typeof PaperExamItemScalarFieldEnum]
+
+
+export const PaperExamSheetScalarFieldEnum = {
+  id: 'id',
+  examId: 'examId',
+  importId: 'importId',
+  studentId: 'studentId',
+  rawCode: 'rawCode',
+  rawLastName: 'rawLastName',
+  rawFirstName: 'rawFirstName',
+  groupLabel: 'groupLabel',
+  groupTeacher: 'groupTeacher',
+  classroomId: 'classroomId',
+  answers: 'answers',
+  totalScore: 'totalScore',
+  maxScore: 'maxScore',
+  supersededAt: 'supersededAt',
+  supersededByImportId: 'supersededByImportId',
+  createdAt: 'createdAt'
+} as const
+
+export type PaperExamSheetScalarFieldEnum = (typeof PaperExamSheetScalarFieldEnum)[keyof typeof PaperExamSheetScalarFieldEnum]
+
+
+export const PaperExamImportScalarFieldEnum = {
+  id: 'id',
+  examId: 'examId',
+  fileName: 'fileName',
+  fileSha256: 'fileSha256',
+  sheetCount: 'sheetCount',
+  matchedCount: 'matchedCount',
+  status: 'status',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  revertedAt: 'revertedAt',
+  revertedById: 'revertedById'
+} as const
+
+export type PaperExamImportScalarFieldEnum = (typeof PaperExamImportScalarFieldEnum)[keyof typeof PaperExamImportScalarFieldEnum]
 
 
 export const SortOrder = {

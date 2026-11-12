@@ -10,6 +10,7 @@ import { UsageController } from '../usage/usage.controller';
 import { HomeworkMarksController } from '../assignments/homework-marks.controller';
 import { TeacherGroupsController } from '../teacher-groups/teacher-groups.controller';
 import { ParentsController } from '../parents/parents.controller';
+import { PaperExamsController } from '../paper-exams/paper-exams.controller';
 
 /**
  * Мөнгөний маршрутуудын эрхийн хамгаалалт — 2026-09-26 (G02–G03).
@@ -53,10 +54,17 @@ describe('Хэрэглээний бүртгэл — нэгтгэлийг зөв�
 });
 
 describe('Гэрийн даалгаврын хугацаа — зөвхөн ажилтан (сурагч өөрчлөхгүй)', () => {
-  it.each(['getDeadline', 'setDeadline'] as const)('%s — ADMIN/TEACHER_PLUS/TEACHER', (name) => {
-    expect(guardsOf(HomeworkMarksController)).toContain(RolesGuard);
-    expect(rolesOf(HomeworkMarksController.prototype[name])).toEqual(['ADMIN', 'TEACHER_PLUS', 'TEACHER']);
-  });
+  it.each(['getDeadline', 'setDeadline'] as const)(
+    '%s — ADMIN/TEACHER_PLUS/TEACHER',
+    (name) => {
+      expect(guardsOf(HomeworkMarksController)).toContain(RolesGuard);
+      expect(rolesOf(HomeworkMarksController.prototype[name])).toEqual([
+        'ADMIN',
+        'TEACHER_PLUS',
+        'TEACHER',
+      ]);
+    },
+  );
 });
 
 describe('Аюулгүй байдлын аудит 2026-11-05', () => {
@@ -66,7 +74,44 @@ describe('Аюулгүй байдлын аудит 2026-11-05', () => {
     expect(rolesOf(h)).toEqual(['ADMIN']);
   });
   it('эцэг эхийн холболт хүсэх — PARENT', () => {
-    expect(rolesOf(ParentsController.prototype.requestLink)).toEqual(['PARENT']);
+    expect(rolesOf(ParentsController.prototype.requestLink)).toEqual([
+      'PARENT',
+    ]);
+  });
+});
+
+describe('Цаасан шалгалт (OMR) — эрх', () => {
+  const proto = PaperExamsController.prototype;
+  it('controller нь JwtAuthGuard + RolesGuard-тай', () => {
+    expect(guardsOf(PaperExamsController)).toContain(RolesGuard);
+  });
+  it.each(['my', 'myDetail'] as const)(
+    '%s — зөвхөн STUDENT (өөрийн дүн токеноос)',
+    (name) => {
+      expect(rolesOf(proto[name])).toEqual(['STUDENT']);
+    },
+  );
+  it.each(['list', 'board'] as const)('%s — ажилтан', (name) => {
+    expect(rolesOf(proto[name])).toEqual(['ADMIN', 'TEACHER_PLUS', 'TEACHER']);
+  });
+  it.each([
+    'create',
+    'update',
+    'remove',
+    'saveItems',
+    'importFile',
+    'imports',
+    'revert',
+    'link',
+    'searchStudents',
+  ] as const)('%s — зөвхөн ADMIN/TEACHER_PLUS', (name) => {
+    expect(rolesOf(proto[name])).toEqual(['ADMIN', 'TEACHER_PLUS']);
+  });
+  it('БҮХ маршрут @Roles-тэй', () => {
+    const names = Object.getOwnPropertyNames(proto).filter(
+      (n) => n !== 'constructor' && typeof (proto as any)[n] === 'function',
+    );
+    expect(names.filter((n) => !rolesOf((proto as any)[n]))).toEqual([]);
   });
 });
 
@@ -190,10 +235,17 @@ describe('Night-1 route guards across six roles', () => {
 
 describe('Номын QR (scan) — нэвтэрсэн хэрэглэгч, бодолтыг scan-gate шийднэ', () => {
   it('JwtAuthGuard + RolesGuard, бүх нэвтэрсэн role', () => {
-    expect(guardsOf(ScanController)).toEqual(expect.arrayContaining([JwtAuthGuard, RolesGuard]));
-    expect(rolesOf(ScanController.prototype.lookup)?.sort()).toEqual(
-      ['ADMIN', 'BUYER', 'PARENT', 'STUDENT', 'TEACHER', 'TEACHER_PLUS'],
+    expect(guardsOf(ScanController)).toEqual(
+      expect.arrayContaining([JwtAuthGuard, RolesGuard]),
     );
+    expect(rolesOf(ScanController.prototype.lookup)?.sort()).toEqual([
+      'ADMIN',
+      'BUYER',
+      'PARENT',
+      'STUDENT',
+      'TEACHER',
+      'TEACHER_PLUS',
+    ]);
   });
 });
 
@@ -210,57 +262,129 @@ import {
 // @nestjs/throttler-ийн THROTTLER_LIMIT метадатын түлхүүр
 const THROTTLER_LIMIT = 'THROTTLER:LIMIT';
 
-const ALL_SIX = ['ADMIN', 'BUYER', 'PARENT', 'STUDENT', 'TEACHER', 'TEACHER_PLUS'];
+const ALL_SIX = [
+  'ADMIN',
+  'BUYER',
+  'PARENT',
+  'STUDENT',
+  'TEACHER',
+  'TEACHER_PLUS',
+];
 
 function routeOf(controller: object, handler: object) {
   const prefix = String(Reflect.getMetadata(PATH_METADATA, controller) ?? '');
   const path = String(Reflect.getMetadata(PATH_METADATA, handler) ?? '');
   const method = RequestMethod[Reflect.getMetadata(METHOD_METADATA, handler)];
-  const parts = [prefix, path].map((p) => p.replace(/^\/+|\/+$/g, '')).filter(Boolean);
+  const parts = [prefix, path]
+    .map((p) => p.replace(/^\/+|\/+$/g, ''))
+    .filter(Boolean);
   return `${method} /api/${parts.join('/')}`;
 }
 
-function expectRoleMatrix(controller: object, handler: object, allowed: string[]) {
+function expectRoleMatrix(
+  controller: object,
+  handler: object,
+  allowed: string[],
+) {
   for (const role of [undefined, ...Object.values(Role)]) {
     const context = {
       getHandler: () => handler,
       getClass: () => controller,
       switchToHttp: () => ({
-        getRequest: () => ({ user: role ? { userId: 'synthetic-user', role } : undefined }),
+        getRequest: () => ({
+          user: role ? { userId: 'synthetic-user', role } : undefined,
+        }),
       }),
     } as unknown as ExecutionContext;
-    expect(roleGuard.canActivate(context)).toBe(!!role && allowed.includes(role));
+    expect(roleGuard.canActivate(context)).toBe(
+      !!role && allowed.includes(role),
+    );
   }
 }
 
 describe('Гар утасны апп — шинэ маршрутын эрх', () => {
   const guarded: [string, object, object, string[]][] = [
-    ['POST /api/devices', DevicesController, DevicesController.prototype.register, ALL_SIX],
-    ['DELETE /api/devices/:token', DevicesController, DevicesController.prototype.unregister, ALL_SIX],
-    ['POST /api/auth/google/native/link', NativeAuthController, NativeAuthController.prototype.googleLink, ALL_SIX],
-    ['POST /api/auth/apple/link', NativeAuthController, NativeAuthController.prototype.appleLink, ALL_SIX],
-    ['POST /api/me/deletion-request', AccountDeletionController, AccountDeletionController.prototype.create, ALL_SIX],
-    ['GET /api/me/deletion-request', AccountDeletionController, AccountDeletionController.prototype.mine, ALL_SIX],
-    ['GET /api/admin/deletion-requests', AdminDeletionRequestsController, AdminDeletionRequestsController.prototype.list, ['ADMIN']],
-    ['PATCH /api/admin/deletion-requests/:id', AdminDeletionRequestsController, AdminDeletionRequestsController.prototype.review, ['ADMIN']],
+    [
+      'POST /api/devices',
+      DevicesController,
+      DevicesController.prototype.register,
+      ALL_SIX,
+    ],
+    [
+      'DELETE /api/devices/:token',
+      DevicesController,
+      DevicesController.prototype.unregister,
+      ALL_SIX,
+    ],
+    [
+      'POST /api/auth/google/native/link',
+      NativeAuthController,
+      NativeAuthController.prototype.googleLink,
+      ALL_SIX,
+    ],
+    [
+      'POST /api/auth/apple/link',
+      NativeAuthController,
+      NativeAuthController.prototype.appleLink,
+      ALL_SIX,
+    ],
+    [
+      'POST /api/me/deletion-request',
+      AccountDeletionController,
+      AccountDeletionController.prototype.create,
+      ALL_SIX,
+    ],
+    [
+      'GET /api/me/deletion-request',
+      AccountDeletionController,
+      AccountDeletionController.prototype.mine,
+      ALL_SIX,
+    ],
+    [
+      'GET /api/admin/deletion-requests',
+      AdminDeletionRequestsController,
+      AdminDeletionRequestsController.prototype.list,
+      ['ADMIN'],
+    ],
+    [
+      'PATCH /api/admin/deletion-requests/:id',
+      AdminDeletionRequestsController,
+      AdminDeletionRequestsController.prototype.review,
+      ['ADMIN'],
+    ],
   ];
 
-  it.each(guarded)('%s — JwtAuthGuard + RolesGuard + role матриц', (route, controller, handler, roles) => {
-    expect(routeOf(controller, handler)).toBe(route);
-    const guards = [...guardsOf(controller), ...guardsOf(handler)];
-    expect(guards).toEqual(expect.arrayContaining([JwtAuthGuard, RolesGuard]));
-    expect([...(rolesOf(handler) ?? rolesOf(controller) ?? [])].sort()).toEqual([...roles].sort());
-    expectRoleMatrix(controller, handler, roles);
-  });
+  it.each(guarded)(
+    '%s — JwtAuthGuard + RolesGuard + role матриц',
+    (route, controller, handler, roles) => {
+      expect(routeOf(controller, handler)).toBe(route);
+      const guards = [...guardsOf(controller), ...guardsOf(handler)];
+      expect(guards).toEqual(
+        expect.arrayContaining([JwtAuthGuard, RolesGuard]),
+      );
+      expect(
+        [...(rolesOf(handler) ?? rolesOf(controller) ?? [])].sort(),
+      ).toEqual([...roles].sort());
+      expectRoleMatrix(controller, handler, roles);
+    },
+  );
 
   it.each([
     ['POST /api/auth/google/native', NativeAuthController.prototype.google],
     ['POST /api/auth/apple', NativeAuthController.prototype.apple],
-  ])('%s — нэвтрээгүй хүнд нээлттэй, login-той ижил чанга хязгаар', (route, handler) => {
-    expect(routeOf(NativeAuthController, handler)).toBe(route);
-    expect([...guardsOf(NativeAuthController), ...guardsOf(handler)]).not.toContain(JwtAuthGuard);
-    expect(Reflect.getMetadata(THROTTLER_LIMIT + 'default', handler)).toBe(10);
-  });
+  ])(
+    '%s — нэвтрээгүй хүнд нээлттэй, login-той ижил чанга хязгаар',
+    (route, handler) => {
+      expect(routeOf(NativeAuthController, handler)).toBe(route);
+      expect([
+        ...guardsOf(NativeAuthController),
+        ...guardsOf(handler),
+      ]).not.toContain(JwtAuthGuard);
+      expect(Reflect.getMetadata(THROTTLER_LIMIT + 'default', handler)).toBe(
+        10,
+      );
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -275,24 +399,67 @@ import { ActivityController } from '../activity/activity.controller';
 
 describe('Бие даан суралцах — шинэ маршрутын эрх (сурагч өөрөө)', () => {
   const routes: [string, object, object, string[]][] = [
-    ['GET /api/review/problems/due', ProblemReviewController, ProblemReviewController.prototype.due, ['STUDENT']],
-    ['POST /api/review/problems/:id/answer', ProblemReviewController, ProblemReviewController.prototype.answer, ['STUDENT']],
-    ['GET /api/study/weekly-goal', WeeklyGoalController, WeeklyGoalController.prototype.get, ['STUDENT']],
-    ['PUT /api/study/weekly-goal', WeeklyGoalController, WeeklyGoalController.prototype.set, ['STUDENT']],
-    ['GET /api/recommend/chapter-match', RecommendController, RecommendController.prototype.chapterMatch, ['STUDENT', 'BUYER']],
-    ['GET /api/recommend/next', RecommendController, RecommendController.prototype.next, ['STUDENT', 'BUYER']],
-    ['GET /api/activity/streak', ActivityController, ActivityController.prototype.streak, ['STUDENT']],
+    [
+      'GET /api/review/problems/due',
+      ProblemReviewController,
+      ProblemReviewController.prototype.due,
+      ['STUDENT'],
+    ],
+    [
+      'POST /api/review/problems/:id/answer',
+      ProblemReviewController,
+      ProblemReviewController.prototype.answer,
+      ['STUDENT'],
+    ],
+    [
+      'GET /api/study/weekly-goal',
+      WeeklyGoalController,
+      WeeklyGoalController.prototype.get,
+      ['STUDENT'],
+    ],
+    [
+      'PUT /api/study/weekly-goal',
+      WeeklyGoalController,
+      WeeklyGoalController.prototype.set,
+      ['STUDENT'],
+    ],
+    [
+      'GET /api/recommend/chapter-match',
+      RecommendController,
+      RecommendController.prototype.chapterMatch,
+      ['STUDENT', 'BUYER'],
+    ],
+    [
+      'GET /api/recommend/next',
+      RecommendController,
+      RecommendController.prototype.next,
+      ['STUDENT', 'BUYER'],
+    ],
+    [
+      'GET /api/activity/streak',
+      ActivityController,
+      ActivityController.prototype.streak,
+      ['STUDENT'],
+    ],
   ];
 
-  it.each(routes)('%s — JwtAuthGuard + RolesGuard + role матриц', (route, controller, handler, roles) => {
-    expect(routeOf(controller, handler)).toBe(route);
-    const guards = [...guardsOf(controller), ...guardsOf(handler)];
-    expect(guards).toEqual(expect.arrayContaining([JwtAuthGuard, RolesGuard]));
-    expect([...(rolesOf(handler) ?? rolesOf(controller) ?? [])].sort()).toEqual([...roles].sort());
-    expectRoleMatrix(controller, handler, roles);
-  });
+  it.each(routes)(
+    '%s — JwtAuthGuard + RolesGuard + role матриц',
+    (route, controller, handler, roles) => {
+      expect(routeOf(controller, handler)).toBe(route);
+      const guards = [...guardsOf(controller), ...guardsOf(handler)];
+      expect(guards).toEqual(
+        expect.arrayContaining([JwtAuthGuard, RolesGuard]),
+      );
+      expect(
+        [...(rolesOf(handler) ?? rolesOf(controller) ?? [])].sort(),
+      ).toEqual([...roles].sort());
+      expectRoleMatrix(controller, handler, roles);
+    },
+  );
 
   it('маршрутын замд сурагчийн ID байхгүй (өөр сурагчийн өгөгдөл уншиж болохгүй)', () => {
-    for (const [route] of routes) expect(route).not.toMatch(/student|userId|:studentId/i);
+    for (const [route] of routes)
+      expect(route).not.toMatch(/student|userId|:studentId/i);
   });
 });

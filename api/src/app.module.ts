@@ -48,6 +48,7 @@ import { InsightsModule } from './insights/insights.module';
 import { LeadsModule } from './leads/leads.module';
 import { PlacementModule } from './placement/placement.module';
 import { MockExamsModule } from './mock-exams/mock-exams.module';
+import { PaperExamsModule } from './paper-exams/paper-exams.module';
 import { LessonsModule } from './lessons/lessons.module';
 import { GatewaysModule } from './gateways/gateways.module';
 import { NotesModule } from './notes/notes.module';
@@ -167,6 +168,7 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     LeadsModule,
     PlacementModule,
     MockExamsModule,
+    PaperExamsModule,
     LessonsModule,
     GatewaysModule,
     ProgressModule,

@@ -545,7 +545,11 @@ export const ModelName = {
   HomeworkQuiz: 'HomeworkQuiz',
   HomeworkQuizScore: 'HomeworkQuizScore',
   MakeupVisit: 'MakeupVisit',
-  MakeupVisitTest: 'MakeupVisitTest'
+  MakeupVisitTest: 'MakeupVisitTest',
+  PaperExam: 'PaperExam',
+  PaperExamItem: 'PaperExamItem',
+  PaperExamSheet: 'PaperExamSheet',
+  PaperExamImport: 'PaperExamImport'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -561,7 +565,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "bankAllocation" | "bankPayerHint" | "bankCursor" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionExtension" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "teacherWorkHours" | "teacherBankAccount" | "teacherPayRate" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "bookPayment" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment" | "homeworkQuiz" | "homeworkQuizScore" | "makeupVisit" | "makeupVisitTest"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "bankAllocation" | "bankPayerHint" | "bankCursor" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionExtension" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "teacherWorkHours" | "teacherBankAccount" | "teacherPayRate" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "bookPayment" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment" | "homeworkQuiz" | "homeworkQuizScore" | "makeupVisit" | "makeupVisitTest" | "paperExam" | "paperExamItem" | "paperExamSheet" | "paperExamImport"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -11591,6 +11595,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PaperExam: {
+      payload: Prisma.$PaperExamPayload<ExtArgs>
+      fields: Prisma.PaperExamFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaperExamFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaperExamFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamPayload>
+        }
+        findFirst: {
+          args: Prisma.PaperExamFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaperExamFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamPayload>
+        }
+        findMany: {
+          args: Prisma.PaperExamFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamPayload>[]
+        }
+        create: {
+          args: Prisma.PaperExamCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamPayload>
+        }
+        createMany: {
+          args: Prisma.PaperExamCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaperExamCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamPayload>[]
+        }
+        delete: {
+          args: Prisma.PaperExamDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamPayload>
+        }
+        update: {
+          args: Prisma.PaperExamUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamPayload>
+        }
+        deleteMany: {
+          args: Prisma.PaperExamDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaperExamUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaperExamUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamPayload>[]
+        }
+        upsert: {
+          args: Prisma.PaperExamUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamPayload>
+        }
+        aggregate: {
+          args: Prisma.PaperExamAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePaperExam>
+        }
+        groupBy: {
+          args: Prisma.PaperExamGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperExamGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaperExamCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperExamCountAggregateOutputType> | number
+        }
+      }
+    }
+    PaperExamItem: {
+      payload: Prisma.$PaperExamItemPayload<ExtArgs>
+      fields: Prisma.PaperExamItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaperExamItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaperExamItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamItemPayload>
+        }
+        findFirst: {
+          args: Prisma.PaperExamItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaperExamItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamItemPayload>
+        }
+        findMany: {
+          args: Prisma.PaperExamItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamItemPayload>[]
+        }
+        create: {
+          args: Prisma.PaperExamItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamItemPayload>
+        }
+        createMany: {
+          args: Prisma.PaperExamItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaperExamItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamItemPayload>[]
+        }
+        delete: {
+          args: Prisma.PaperExamItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamItemPayload>
+        }
+        update: {
+          args: Prisma.PaperExamItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.PaperExamItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaperExamItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaperExamItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.PaperExamItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamItemPayload>
+        }
+        aggregate: {
+          args: Prisma.PaperExamItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePaperExamItem>
+        }
+        groupBy: {
+          args: Prisma.PaperExamItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperExamItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaperExamItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperExamItemCountAggregateOutputType> | number
+        }
+      }
+    }
+    PaperExamSheet: {
+      payload: Prisma.$PaperExamSheetPayload<ExtArgs>
+      fields: Prisma.PaperExamSheetFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaperExamSheetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamSheetPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaperExamSheetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamSheetPayload>
+        }
+        findFirst: {
+          args: Prisma.PaperExamSheetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamSheetPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaperExamSheetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamSheetPayload>
+        }
+        findMany: {
+          args: Prisma.PaperExamSheetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamSheetPayload>[]
+        }
+        create: {
+          args: Prisma.PaperExamSheetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamSheetPayload>
+        }
+        createMany: {
+          args: Prisma.PaperExamSheetCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaperExamSheetCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamSheetPayload>[]
+        }
+        delete: {
+          args: Prisma.PaperExamSheetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamSheetPayload>
+        }
+        update: {
+          args: Prisma.PaperExamSheetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamSheetPayload>
+        }
+        deleteMany: {
+          args: Prisma.PaperExamSheetDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaperExamSheetUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaperExamSheetUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamSheetPayload>[]
+        }
+        upsert: {
+          args: Prisma.PaperExamSheetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamSheetPayload>
+        }
+        aggregate: {
+          args: Prisma.PaperExamSheetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePaperExamSheet>
+        }
+        groupBy: {
+          args: Prisma.PaperExamSheetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperExamSheetGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaperExamSheetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperExamSheetCountAggregateOutputType> | number
+        }
+      }
+    }
+    PaperExamImport: {
+      payload: Prisma.$PaperExamImportPayload<ExtArgs>
+      fields: Prisma.PaperExamImportFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaperExamImportFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamImportPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaperExamImportFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamImportPayload>
+        }
+        findFirst: {
+          args: Prisma.PaperExamImportFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamImportPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaperExamImportFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamImportPayload>
+        }
+        findMany: {
+          args: Prisma.PaperExamImportFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamImportPayload>[]
+        }
+        create: {
+          args: Prisma.PaperExamImportCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamImportPayload>
+        }
+        createMany: {
+          args: Prisma.PaperExamImportCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaperExamImportCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamImportPayload>[]
+        }
+        delete: {
+          args: Prisma.PaperExamImportDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamImportPayload>
+        }
+        update: {
+          args: Prisma.PaperExamImportUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamImportPayload>
+        }
+        deleteMany: {
+          args: Prisma.PaperExamImportDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaperExamImportUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaperExamImportUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamImportPayload>[]
+        }
+        upsert: {
+          args: Prisma.PaperExamImportUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamImportPayload>
+        }
+        aggregate: {
+          args: Prisma.PaperExamImportAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePaperExamImport>
+        }
+        groupBy: {
+          args: Prisma.PaperExamImportGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperExamImportGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaperExamImportCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperExamImportCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -13943,6 +14243,73 @@ export const MakeupVisitTestScalarFieldEnum = {
 export type MakeupVisitTestScalarFieldEnum = (typeof MakeupVisitTestScalarFieldEnum)[keyof typeof MakeupVisitTestScalarFieldEnum]
 
 
+export const PaperExamScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  heldOn: 'heldOn',
+  itemCount: 'itemCount',
+  published: 'published',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type PaperExamScalarFieldEnum = (typeof PaperExamScalarFieldEnum)[keyof typeof PaperExamScalarFieldEnum]
+
+
+export const PaperExamItemScalarFieldEnum = {
+  id: 'id',
+  examId: 'examId',
+  number: 'number',
+  answerKey: 'answerKey',
+  points: 'points',
+  area: 'area',
+  voided: 'voided'
+} as const
+
+export type PaperExamItemScalarFieldEnum = (typeof PaperExamItemScalarFieldEnum)[keyof typeof PaperExamItemScalarFieldEnum]
+
+
+export const PaperExamSheetScalarFieldEnum = {
+  id: 'id',
+  examId: 'examId',
+  importId: 'importId',
+  studentId: 'studentId',
+  rawCode: 'rawCode',
+  rawLastName: 'rawLastName',
+  rawFirstName: 'rawFirstName',
+  groupLabel: 'groupLabel',
+  groupTeacher: 'groupTeacher',
+  classroomId: 'classroomId',
+  answers: 'answers',
+  totalScore: 'totalScore',
+  maxScore: 'maxScore',
+  supersededAt: 'supersededAt',
+  supersededByImportId: 'supersededByImportId',
+  createdAt: 'createdAt'
+} as const
+
+export type PaperExamSheetScalarFieldEnum = (typeof PaperExamSheetScalarFieldEnum)[keyof typeof PaperExamSheetScalarFieldEnum]
+
+
+export const PaperExamImportScalarFieldEnum = {
+  id: 'id',
+  examId: 'examId',
+  fileName: 'fileName',
+  fileSha256: 'fileSha256',
+  sheetCount: 'sheetCount',
+  matchedCount: 'matchedCount',
+  status: 'status',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  revertedAt: 'revertedAt',
+  revertedById: 'revertedById'
+} as const
+
+export type PaperExamImportScalarFieldEnum = (typeof PaperExamImportScalarFieldEnum)[keyof typeof PaperExamImportScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -14857,6 +15224,20 @@ export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
     
 
+
+/**
+ * Reference to a field of type 'PaperExamImportStatus'
+ */
+export type EnumPaperExamImportStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaperExamImportStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PaperExamImportStatus[]'
+ */
+export type ListEnumPaperExamImportStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaperExamImportStatus[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -15157,6 +15538,10 @@ export type GlobalOmitConfig = {
   homeworkQuizScore?: Prisma.HomeworkQuizScoreOmit
   makeupVisit?: Prisma.MakeupVisitOmit
   makeupVisitTest?: Prisma.MakeupVisitTestOmit
+  paperExam?: Prisma.PaperExamOmit
+  paperExamItem?: Prisma.PaperExamItemOmit
+  paperExamSheet?: Prisma.PaperExamSheetOmit
+  paperExamImport?: Prisma.PaperExamImportOmit
 }
 
 /* Types for Logging */

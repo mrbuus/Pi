@@ -68,6 +68,7 @@ model User {
   feedback               Feedback[]
   studentProfile         StudentProfile?
   mockRegistrations      MockExamRegistration[]
+  paperExamSheets        PaperExamSheet[]
   teacherProfile         TeacherProfile?
   externalTeacherProfile ExternalTeacherProfile?
 
@@ -3666,4 +3667,102 @@ model MakeupVisitTest {
 
   @@index([visitId])
   @@index([testId])
+}
+
+// ============================================================================
+// Цаасан шалгалт — OMR машин эсвэл Excel-ээс оруулсан дүн (docs/PLAN-OMR.md).
+// Бодлогын санд холбогдохгүй: бодлого = дугаар + түлхүүр + агуулгын ангилал.
+// Сурагчийн түүхий хариуг хадгална → түлхүүр засахад оноо дахин бодогдоно.
+// Устгах бүр зөөлөн (deletedAt / supersededAt / REVERTED).
+// ============================================================================
+enum PaperExamImportStatus {
+  CONFIRMED
+  REVERTED
+}
+
+model PaperExam {
+  id          String    @id @default(cuid())
+  title       String
+  heldOn      DateTime  @db.Date
+  itemCount   Int
+  /// Сурагчид харагдах эсэх (дүн, жагсаалт)
+  published   Boolean   @default(false)
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  items   PaperExamItem[]
+  sheets  PaperExamSheet[]
+  imports PaperExamImport[]
+
+  @@index([deletedAt, heldOn])
+}
+
+model PaperExamItem {
+  id        String    @id @default(cuid())
+  examId    String
+  exam      PaperExam @relation(fields: [examId], references: [id], onDelete: Cascade)
+  number    Int
+  /// Зөв хариу «A»…«E»; null = түлхүүргүй (зөвхөн зөв/буруугаар орсон дүнд хамаарахгүй)
+  answerKey String?
+  points    Int       @default(1)
+  /// БҮТ-ийн агуулгын ангилал (paper-exams/paper-exam-logic.ts CONTENT_AREAS)
+  area      String?
+  /// Хүчингүй болгосон бодлого — оноо, хувьд тооцогдохгүй
+  voided    Boolean   @default(false)
+
+  @@unique([examId, number])
+}
+
+model PaperExamSheet {
+  id          String          @id @default(cuid())
+  examId      String
+  exam        PaperExam       @relation(fields: [examId], references: [id], onDelete: Cascade)
+  importId    String
+  import      PaperExamImport @relation(fields: [importId], references: [id], onDelete: Cascade)
+  /// null = файлын шифр/нэр сурагчтай таараагүй — ажилтан гараар холбоно
+  studentId   String?
+  student     User?           @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  rawCode     String
+  rawLastName String
+  rawFirstName String
+  /// Файлын шийт/гарчгаас: «Баг 27», «Болор-Эрдэнэ»
+  groupLabel  String
+  groupTeacher String?
+  /// Импортын үеийн сурагчийн анги (Багш өөрийн ангийнхаа мөрийг харна)
+  classroomId String?
+  /// Бодлого бүрийн хариу: «A»…«E», «» хоосон, «*» давхар будсан, «+» зөв, «-» буруу
+  answers     Json
+  totalScore  Float
+  maxScore    Float
+  /// Шинэ импорт эсвэл буцаалтаар хүчингүй болсон мөч
+  supersededAt DateTime?
+  /// Энэ мөрийг орлосон импорт (буцаахад хуучин мөрийг сэргээнэ)
+  supersededByImportId String?
+  createdAt   DateTime        @default(now())
+
+  @@unique([examId, studentId], map: "PaperExamSheet_active_student_key", where: { supersededAt: null })
+  @@index([examId, supersededAt])
+  @@index([studentId])
+  @@index([importId])
+}
+
+model PaperExamImport {
+  id           String                @id @default(cuid())
+  examId       String
+  exam         PaperExam             @relation(fields: [examId], references: [id], onDelete: Cascade)
+  fileName     String
+  fileSha256   String
+  sheetCount   Int
+  matchedCount Int
+  status       PaperExamImportStatus @default(CONFIRMED)
+  createdById  String
+  createdAt    DateTime              @default(now())
+  revertedAt   DateTime?
+  revertedById String?
+
+  sheets PaperExamSheet[]
+
+  @@index([examId, createdAt])
 }

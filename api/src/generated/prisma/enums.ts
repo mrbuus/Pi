@@ -542,3 +542,11 @@ export const HomeworkAttemptStatus = {
 } as const
 
 export type HomeworkAttemptStatus = (typeof HomeworkAttemptStatus)[keyof typeof HomeworkAttemptStatus]
+
+
+export const PaperExamImportStatus = {
+  CONFIRMED: 'CONFIRMED',
+  REVERTED: 'REVERTED'
+} as const
+
+export type PaperExamImportStatus = (typeof PaperExamImportStatus)[keyof typeof PaperExamImportStatus]

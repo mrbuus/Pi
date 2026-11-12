@@ -1,0 +1,106 @@
+-- Цаасан шалгалт (OMR / Excel) — зөвхөн шинэ хүснэгт нэмнэ, одоо байгааг хөндөхгүй (docs/PLAN-OMR.md)
+-- CreateEnum
+CREATE TYPE "PaperExamImportStatus" AS ENUM ('CONFIRMED', 'REVERTED');
+
+-- CreateTable
+CREATE TABLE "PaperExam" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "heldOn" DATE NOT NULL,
+    "itemCount" INTEGER NOT NULL,
+    "published" BOOLEAN NOT NULL DEFAULT false,
+    "createdById" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "PaperExam_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PaperExamItem" (
+    "id" TEXT NOT NULL,
+    "examId" TEXT NOT NULL,
+    "number" INTEGER NOT NULL,
+    "answerKey" TEXT,
+    "points" INTEGER NOT NULL DEFAULT 1,
+    "area" TEXT,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "PaperExamItem_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PaperExamSheet" (
+    "id" TEXT NOT NULL,
+    "examId" TEXT NOT NULL,
+    "importId" TEXT NOT NULL,
+    "studentId" TEXT,
+    "rawCode" TEXT NOT NULL,
+    "rawLastName" TEXT NOT NULL,
+    "rawFirstName" TEXT NOT NULL,
+    "groupLabel" TEXT NOT NULL,
+    "groupTeacher" TEXT,
+    "classroomId" TEXT,
+    "answers" JSONB NOT NULL,
+    "totalScore" DOUBLE PRECISION NOT NULL,
+    "maxScore" DOUBLE PRECISION NOT NULL,
+    "supersededAt" TIMESTAMP(3),
+    "supersededByImportId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PaperExamSheet_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PaperExamImport" (
+    "id" TEXT NOT NULL,
+    "examId" TEXT NOT NULL,
+    "fileName" TEXT NOT NULL,
+    "fileSha256" TEXT NOT NULL,
+    "sheetCount" INTEGER NOT NULL,
+    "matchedCount" INTEGER NOT NULL,
+    "status" "PaperExamImportStatus" NOT NULL DEFAULT 'CONFIRMED',
+    "createdById" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "revertedAt" TIMESTAMP(3),
+    "revertedById" TEXT,
+
+    CONSTRAINT "PaperExamImport_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE INDEX "PaperExam_deletedAt_heldOn_idx" ON "PaperExam"("deletedAt", "heldOn");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PaperExamItem_examId_number_key" ON "PaperExamItem"("examId", "number");
+
+-- CreateIndex
+CREATE INDEX "PaperExamSheet_examId_supersededAt_idx" ON "PaperExamSheet"("examId", "supersededAt");
+
+-- CreateIndex
+CREATE INDEX "PaperExamSheet_studentId_idx" ON "PaperExamSheet"("studentId");
+
+-- CreateIndex
+CREATE INDEX "PaperExamSheet_importId_idx" ON "PaperExamSheet"("importId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PaperExamSheet_active_student_key" ON "PaperExamSheet"("examId", "studentId") WHERE ("supersededAt" IS NULL);
+
+-- CreateIndex
+CREATE INDEX "PaperExamImport_examId_createdAt_idx" ON "PaperExamImport"("examId", "createdAt");
+
+-- AddForeignKey
+ALTER TABLE "PaperExamItem" ADD CONSTRAINT "PaperExamItem_examId_fkey" FOREIGN KEY ("examId") REFERENCES "PaperExam"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PaperExamSheet" ADD CONSTRAINT "PaperExamSheet_examId_fkey" FOREIGN KEY ("examId") REFERENCES "PaperExam"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PaperExamSheet" ADD CONSTRAINT "PaperExamSheet_importId_fkey" FOREIGN KEY ("importId") REFERENCES "PaperExamImport"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PaperExamSheet" ADD CONSTRAINT "PaperExamSheet_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PaperExamImport" ADD CONSTRAINT "PaperExamImport_examId_fkey" FOREIGN KEY ("examId") REFERENCES "PaperExam"("id") ON DELETE CASCADE ON UPDATE CASCADE;

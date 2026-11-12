@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { ScanLine, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { LoadingState } from "@/components/ui/StateBlock";
@@ -232,7 +232,7 @@ function StaffTestsView({ role }: { role: string | null }) {
       {!isTeacher && !loading && !error && <ContinueBanner tests={tests} />}
 
       {/* Хоёр ангилал: Тест (сэдвийн дасгал) / Шалгалт (сэдвийн шалгалт, сорил) */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {(
           [
             { key: "TEST", label: "Тест", count: testCount, hint: "сэдвийн дасгал" },
@@ -264,7 +264,17 @@ function StaffTestsView({ role }: { role: string | null }) {
             <span className="ml-2 hidden text-xs opacity-70 sm:inline">{tb.hint}</span>
           </button>
         ))}
+        {isTeacher && (
+          <Link
+            href="/app/paper-exams"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line px-4 text-sm font-bold text-ink-dim transition hover:border-brand hover:text-ink"
+          >
+            <ScanLine className="size-4" aria-hidden /> Цаасан шалгалт
+            <span className="hidden text-xs font-normal opacity-70 sm:inline">OMR, Excel-ийн дүн</span>
+          </Link>
+        )}
       </div>
+
 
       {/* Ажилтны «Шалгалт» таб: бүлэг, 3 шүүлтүүр, мөр дэлгэрэхэд Тойм/Дүн/Бодлого/Тохиргоо */}
       {/* key={tab}: таб солигдоход шүүлтүүр, нээлттэй мөр шинээр эхэлнэ */}
