@@ -5,7 +5,21 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SheetsClient } from '../sheet-sync/sheets.client';
 import { toCell, colLetter } from '../sheet-sync/sheet-book';
 import { assignRowKeys, findCycles, normText, SHEET } from '../sheet-sync/payment-plan';
-import { receiptTokens, writeTuition, type RowState } from '../sheet-sync/sheet-pay-writer';
+import { MATH_PRICES, receiptTokens, SOCIAL_PRICES, writeTuition, type RowState } from '../sheet-sync/sheet-pay-writer';
+
+/** Хуудас бүрийн «Сууж эхэлсэн», «Хэлбэр» багана (0-ээс) */
+const LAYOUT = {
+  MAIN: { tab: SHEET.MAIN, start: 10, form: 13, prices: MATH_PRICES, sequential: false },
+  // «Нийгэм» хуудасны гарчиг хуучирсан (L «9-10», O «10-11», дараа нь R «8-9», U «9-10» …) — ажилтнууд
+  // L-д 9-р сар, O-д 10, R-д 11, U-д 12-р сарыг бичдэг. Тиймээс сарыг баганын дарааллаар тооцно.
+  SOCIAL: { tab: SHEET.SOCIAL, start: 8, form: 10, prices: SOCIAL_PRICES, sequential: true },
+} as const;
+
+/** «2026-09» + n сар */
+const addMonths = (m: string, n: number) => {
+  const t = Number(m.slice(0, 4)) * 12 + Number(m.slice(5, 7)) - 1 + n;
+  return `${Math.floor(t / 12)}-${String((t % 12) + 1).padStart(2, '0')}`;
+};
 
 export interface DemoSheetWrite {
   studentId: string;
@@ -47,28 +61,31 @@ export class DemoSheetService {
     return !!this.client;
   }
 
-  async writeTuition(parts: { studentId: string; amount: number }[], bookedAt: Date): Promise<DemoSheetWrite[]> {
+  /** layout: MAIN — математик («Суудал баталгаажуулалт»), SOCIAL — нийгэм («Нийгэм» хуудас) */
+  async writeTuition(parts: { studentId: string; amount: number }[], bookedAt: Date, layout: keyof typeof LAYOUT = 'MAIN'): Promise<DemoSheetWrite[]> {
     if (!this.client || !parts.length) return [];
+    const L = LAYOUT[layout];
     const date = new Date(bookedAt.getTime() + 8 * 3_600_000).toISOString().slice(0, 10);
-    const tab = `'${SHEET.MAIN}'`;
+    const tab = `'${L.tab}'`;
     try {
       const [raw, shown] = await Promise.all([this.client.readRange(`${tab}!A1:BA`, 'UNFORMATTED_VALUE'), this.client.readRange(`${tab}!A1:BA`, 'FORMATTED_VALUE')]);
       const rows = raw.map((r, i) => r.map((v, c) => toCell(v, shown[i]?.[c])));
-      const cycles = findCycles(rows, SHEET.MAIN, []);
+      const found = findCycles(rows, L.tab, []);
+      const cycles = L.sequential && found.length ? found.map((c, i) => ({ ...c, month: addMonths(found[0].month, i) })) : found;
       const keys = assignRowKeys(rows, 2);
       const byKey = new Map([...keys].map(([i, k]) => [k, i]));
       const out: DemoSheetWrite[] = [];
       for (const p of parts) {
-        const links = await this.prisma.sheetRow.findMany({ where: { tab: SHEET.MAIN, studentId: p.studentId }, select: { rowKey: true } });
+        const links = await this.prisma.sheetRow.findMany({ where: { tab: L.tab, studentId: p.studentId, goneAt: null }, select: { rowKey: true } });
         const user = await this.prisma.user.findUnique({ where: { id: p.studentId }, select: { firstName: true, lastName: true } });
         const idx = links.map((l) => byKey.get(l.rowKey)).find((i) => i != null);
         if (idx == null || !user) {
-          out.push({ studentId: p.studentId, ok: false, reason: '«Суудал баталгаажуулалт»-д энэ хүүхдийн мөр алга — ажилтан гараар бичнэ үү' });
+          out.push({ studentId: p.studentId, ok: false, reason: `«${L.tab}»-д энэ хүүхдийн мөр алга — ажилтан гараар бичнэ үү` });
           continue;
         }
         const row = rows[idx];
         if (normText(row[2]).toLowerCase() !== normText(user.firstName).toLowerCase()) {
-          out.push({ studentId: p.studentId, ok: false, reason: `${idx + 1}-р мөрийн нэр таарсангүй` });
+          out.push({ studentId: p.studentId, ok: false, reason: `«${L.tab}» ${idx + 1}-р мөрийн нэр таарсангүй` });
           continue;
         }
         const r = idx + 1;
@@ -78,8 +95,8 @@ export class DemoSheetService {
           return !!b && Math.abs((b.red ?? 0) - 0.62) < 0.03 && Math.abs((b.green ?? 0) - 0.77) < 0.03 && Math.abs((b.blue ?? 0) - 0.91) < 0.03;
         };
         const state: RowState = {
-          start: typeof row[10] === 'string' && /^\d{4}-/.test(row[10]) ? row[10] : null,
-          form: normText(row[13]) || null,
+          start: typeof row[L.start] === 'string' && /^\d{4}-/.test(row[L.start] as string) ? (row[L.start] as string) : null,
+          form: normText(row[L.form]) || null,
           cycles: cycles.map(({ month, col }) => ({
             month,
             amount: typeof row[col] === 'number' ? (row[col] as number) : 0,
@@ -89,7 +106,7 @@ export class DemoSheetService {
             skip: blue(col),
           })),
         };
-        const w = writeTuition(state, { amount: p.amount, date });
+        const w = writeTuition(state, { amount: p.amount, date }, L.prices);
         const c = state.cycles[w.idx];
         const col = cycles[w.idx].col;
         await this.client.writeValues([{ range: `${tab}!${colLetter(col)}${r}:${colLetter(col + 2)}${r}`, values: [[c.amount, c.period ?? '', c.receipts.join(', ')]] }]);

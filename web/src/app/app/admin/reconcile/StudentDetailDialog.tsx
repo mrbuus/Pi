@@ -67,7 +67,7 @@ function MonthCard({
             items={[
               monthName(block.month),
               <span key="p" className="tabular-nums">
-                {periodOf(block.month, ledger.row.startDate, ledger.year.months[0])}
+                {block.period ? `${dayLabel(block.period.from)}–${dayLabel(block.period.to)}` : periodOf(block.month, ledger.row.startDate, ledger.year.months[0])}
               </span>,
               STATE_LABEL[block.state],
               !hidden && block.due ? `${mnt(block.paid)} / ${mnt(block.due)}` : null,
@@ -124,7 +124,7 @@ function BankLine({ b, onUndo }: { b: BankItem; onUndo: () => void }) {
         </p>
         <p className="truncate font-medium text-ink">{b.description || "Утгагүй гүйлгээ"}</p>
         <p className="text-ink-dim">
-          <Meta items={[b.kindLabel, b.counterparty ? `Данс ${b.counterparty}` : null, b.sender, b.kind === "TUITION" ? (b.inSheet ? "Шийтэд бүртгэлтэй" : "Шинэ төлбөр") : null]} />
+          <Meta items={[b.kindLabel, b.counterparty ? `Данс ${b.counterparty}` : null, b.sender, b.kind === "TUITION" || b.kind === "SOCIAL" ? (b.inSheet ? "Шийтэд бүртгэлтэй" : "Шинэ төлбөр") : null]} />
         </p>
       </div>
       <Button size="sm" variant="ghost" onClick={onUndo} aria-label={`${mnt(b.amount)}-ийн хуваарилалтыг буцаах`}>

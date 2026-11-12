@@ -112,6 +112,7 @@ export const ModelName = {
   ProductItem: 'ProductItem',
   Purchase: 'Purchase',
   ExpenseRecord: 'ExpenseRecord',
+  TuitionExtension: 'TuitionExtension',
   TuitionSettlement: 'TuitionSettlement',
   TuitionRefund: 'TuitionRefund',
   StudentWithdrawal: 'StudentWithdrawal',
@@ -1164,6 +1165,21 @@ export const ExpenseRecordScalarFieldEnum = {
 } as const
 
 export type ExpenseRecordScalarFieldEnum = (typeof ExpenseRecordScalarFieldEnum)[keyof typeof ExpenseRecordScalarFieldEnum]
+
+
+export const TuitionExtensionScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  month: 'month',
+  days: 'days',
+  reason: 'reason',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById'
+} as const
+
+export type TuitionExtensionScalarFieldEnum = (typeof TuitionExtensionScalarFieldEnum)[keyof typeof TuitionExtensionScalarFieldEnum]
 
 
 export const TuitionSettlementScalarFieldEnum = {

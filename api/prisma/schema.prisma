@@ -1607,6 +1607,7 @@ model BankTransaction {
 // гүйлгээний дүн. Устгахгүй: буцаахад revokedAt (TUITION-ийн Payment REVERSED).
 enum BankAllocKind {
   TUITION // сургалтын төлбөр → Payment CONFIRMED
+  SOCIAL // нийгмийн сургалтын төлбөр (утгад «нийгэм») — үндсэн анги нь Нийгэм бол Payment, үгүй бол зөвхөн бүртгэл
   BOOK // ном (E1, E2, Хавтгайн геометр…)
   ANSWER_SHEET // шалгалтын хариултын хуудас (1,000₮/ш)
   STAFF_FINE // ажилтны заалны торгууль
@@ -1786,6 +1787,24 @@ model ExpenseRecord {
 // (revokedAt = null) байвал тухайн хичээлийн жилийн бүх сар «төлсөн», гэрээний
 // дүн = бодит төлсөн дүн. Устгахгүй: буцаахад revokedAt, дахин тооцоход шинэ мөр.
 // User-тэй relation зориуд тавиагүй (User моделийг өөрчлөхгүй, AuditLog-той адил).
+// Сар бүрийн төлбөрийн хугацаа сунгах (эзэн 2026-11-12): хүүхэд өвчтэй, чөлөөтэй, төв ажиллаагүй
+// гэх мэт — тэр сарын төлөх өдөр N хоногоор хойшилж, дараагийн бүх сар дагаж шилжинэ. Хэмжээ
+// хязгааргүй. Зөвхөн сар бүрийн багцад (бүтэн жилд үл хамаарна). Зөөлөн устгал.
+model TuitionExtension {
+  id          String    @id @default(cuid())
+  studentId   String
+  /** «YYYY-MM» — аль сарын төлөх өдрөөс эхлэн шилжих */
+  month       String
+  days        Int
+  reason      String
+  createdById String
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+  deletedById String?
+
+  @@index([studentId])
+}
+
 model TuitionSettlement {
   id          String    @id @default(cuid())
   studentId   String

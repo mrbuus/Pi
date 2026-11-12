@@ -17,7 +17,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { ledgersFor, primaryEnrollment } from '../payments/ledger-load';
 import { dropPaidUp, paidUpOn } from './huulga-paidup';
-import { DemoSheetService } from './demo-sheet.service';
+import { DemoSheetService, type DemoSheetWrite } from './demo-sheet.service';
+import { SHEET } from '../sheet-sync/payment-plan';
 import { todayKeyUB } from '../payments/ledger';
 import { coveredThrough, parseKhanStatement, readXlsxGrid, shiftDay, StatementFormatError } from './khan-statement';
 import {
@@ -80,7 +81,10 @@ type Part = { kind: AllocKind; amount: number; studentId: string | null; payment
 const LINK_WINDOW_MS = 3 * 86_400_000;
 type ExistingPayment = { id: string; userId: string; amount: number; at: number };
 
-const STUDENT_PART: AllocKind[] = ['TUITION', 'BOOK', 'ANSWER_SHEET'];
+const STUDENT_PART: AllocKind[] = ['TUITION', 'SOCIAL', 'BOOK', 'ANSWER_SHEET'];
+/** Сургалтын мөнгө (математик эсвэл нийгэм) */
+const isTuitionLike = (k: AllocKind) => k === 'TUITION' || k === 'SOCIAL';
+const SOCIAL_CLASS = /нийгэм/i;
 const ubDay = (d: Date) => todayKeyUB(d);
 const chunks = <T>(xs: T[], n: number) => Array.from({ length: Math.ceil(xs.length / n) }, (_, i) => xs.slice(i * n, i * n + n));
 
@@ -177,15 +181,20 @@ export class ReconcileService {
           phone: true,
           archivedAt: true,
           studentProfile: { select: { fatherPhone: true, motherPhone: true } },
+          enrollments: { where: { leftAt: null }, orderBy: { joinedAt: 'desc' }, select: { classroom: { select: { name: true, type: true, archived: true } } } },
         },
       }),
       this.prisma.bankPayerHint.findMany({ where: { count: { gt: 0 } }, select: { kind: true, value: true, studentId: true } }),
     ]);
+    // Нийгэмд суудаг: үндсэн анги нь Нийгэм, эсвэл шийтийн «Нийгэм» хуудсанд мөртэй (математикт суудаг ч нийгэмд явдаг)
+    const socialRows = await this.prisma.sheetRow.findMany({ where: { tab: SHEET.SOCIAL, goneAt: null, studentId: { not: null } }, select: { studentId: true } });
+    const socialIds = new Set(socialRows.map((r) => r.studentId!));
     const roster: RosterStudent[] = students.map((s) => ({
       id: s.id,
       firstName: s.firstName,
       lastName: s.lastName,
       archived: !!s.archivedAt,
+      social: socialIds.has(s.id) || s.enrollments.some((e) => SOCIAL_CLASS.test(e.classroom.name)),
       phones: [...new Set([s.phone, s.studentProfile?.fatherPhone, s.studentProfile?.motherPhone].map(normalizePhone).filter((p): p is string => !!p))],
     }));
     return buildMatchIndex(roster, hints as PayerHint[]);
@@ -214,11 +223,25 @@ export class ReconcileService {
     return out;
   }
 
+  /**
+   * Үндсэн анги нь Нийгэм хүүхдүүд — вэбийн төлбөр нь нийгмийнх тул нийгмийн мөнгө Payment
+   * болно. Бусад (математикт суудаг) хүүхдийн нийгмийн мөнгийг вэбийн төлбөрт тоолохгүй.
+   */
+  private async socialPrimary(ids: (string | null | undefined)[], db: Prisma.TransactionClient = this.prisma): Promise<Set<string>> {
+    const uniq = [...new Set(ids.filter((x): x is string => !!x))];
+    if (!uniq.length) return new Set();
+    const users = await db.user.findMany({
+      where: { id: { in: uniq } },
+      select: { id: true, enrollments: { where: { leftAt: null }, orderBy: { joinedAt: 'desc' }, select: { classroom: { select: { name: true, type: true, archived: true } } } } },
+    });
+    return new Set(users.filter((u) => SOCIAL_CLASS.test(primaryEnrollment(u.enrollments)?.classroom.name ?? '')).map((u) => u.id));
+  }
+
   /** Санал → автоматаар хуваарилах хэсгүүд (итгэлтэй үед л), үгүй бол null. */
   private autoParts(row: OpenRow, s: RowSuggestion): Part[] | null {
     if (s.held || !s.confident) return null;
     const kid = s.decision === 'AUTO' ? s.candidates[0]?.studentId ?? null : null;
-    if (s.kind === 'TUITION') return kid && !s.split ? [{ kind: 'TUITION', amount: row.amount, studentId: kid }] : null;
+    if (s.kind === 'TUITION' || s.kind === 'SOCIAL') return kid && !s.split ? [{ kind: s.kind, amount: row.amount, studentId: kid }] : null;
     if (s.kind === 'BOOK' || s.kind === 'ANSWER_SHEET') return [{ kind: s.kind, amount: row.amount, studentId: kid }];
     if (s.kind === 'STAFF_FINE' || s.kind === 'EXPENSE') return [{ kind: s.kind, amount: row.amount, studentId: null }];
     return null;
@@ -246,7 +269,9 @@ export class ReconcileService {
     const idx = await this.matchIndex();
     const raw = open.map((row) => ({ row, s: this.suggest(row, idx) }));
     const kidIds = raw.flatMap(({ s }) => s.candidates.map((c) => c.studentId));
-    const [paidUp, pool] = await Promise.all([this.paidUp(kidIds), this.existingPayments(kidIds)]);
+    const [paidUp, pool, primarySocial] = await Promise.all([this.paidUp(kidIds), this.existingPayments(kidIds), this.socialPrimary(kidIds)]);
+    // Вэбийн төлбөрт тоологдох хэсэг: математик, эсвэл үндсэн анги нь Нийгэм хүүхдийн нийгэм
+    const tracked = (p: Part) => p.kind === 'TUITION' || (p.kind === 'SOCIAL' && !!p.studentId && primarySocial.has(p.studentId));
     const planned: { row: OpenRow; s: RowSuggestion; parts: Part[] | null }[] = raw.map(({ row, s }) => {
       const f = dropPaidUp(s, ubDay(row.bookedAt), paidUp, (id) => this.recordedNear(pool, id, row.bookedAt));
       return { row, s: f, parts: this.autoParts(row, f) };
@@ -254,8 +279,14 @@ export class ReconcileService {
     const toAllocate: { row: OpenRow; s: RowSuggestion; parts: Part[] }[] = [];
     const toSuggest: { id: string; s: RowSuggestion }[] = [];
     for (const { row, s, parts } of planned) {
+      // Математикт суудаг хүүхдийн нийгмийн мөнгө вэбийн төлбөр биш — шууд бүртгэнэ, шийтээс хойш бол «Нийгэм» хуудсанд бичнэ
+      if (parts && parts.some((p) => p.kind === 'SOCIAL') && !parts.some(tracked)) {
+        toAllocate.push({ row, s, parts });
+        if (afterSheet(row)) toSheet.push({ row, parts });
+        continue;
+      }
       // Сургалтын хэсэг шийтийн төлбөртэй холбогдохгүй бол автоматаар шинэ төлбөр үүсгэхгүй
-      if (parts && parts.every((p) => p.kind !== 'TUITION' || this.link(p, row, pool))) {
+      if (parts && parts.every((p) => !tracked(p) || this.link(p, row, pool))) {
         toAllocate.push({ row, s, parts });
         continue;
       }
@@ -264,7 +295,7 @@ export class ReconcileService {
         toSheet.push({ row, parts });
         continue;
       }
-      const combo = this.sheetCombo(row, s, pool);
+      const combo = this.sheetCombo(row, s, pool, primarySocial);
       if (combo) toAllocate.push({ row, s: { ...s, reason: 'Ажилтан шийтэд бүртгэснээр' }, parts: combo });
       else toSuggest.push({ id: row.id, s: parts ? { ...s, unrecorded: true, reason: `${s.reason}: шийтэд бүртгэгдээгүй` } : { ...s, unrecorded: undefined } });
     }
@@ -294,8 +325,11 @@ export class ReconcileService {
    * бичигдсэнийг харна). «Шийтэд хөтлөгдсөн өдөр» хүртэлх гүйлгээг ДАХИН бичихгүй.
    */
   private async writeSheet(row: { id: string; accountNo?: string | null; bookedAt: Date }, parts: Part[]) {
-    const kids = parts.filter((p) => p.kind === 'TUITION' && p.studentId).map((p) => ({ studentId: p.studentId!, amount: p.amount }));
-    if (!kids.length || !this.demoSheet.enabled) return [];
+    const money = parts.filter((p) => isTuitionLike(p.kind) && p.studentId);
+    if (!money.length || !this.demoSheet.enabled) return [];
+    // Нийгмийн мөнгө, эсвэл үндсэн анги нь Нийгэм хүүхэд → «Нийгэм» хуудас; бусад → «Суудал баталгаажуулалт»
+    const primarySocial = await this.socialPrimary(money.map((p) => p.studentId));
+    const kids = money.map((p) => ({ studentId: p.studentId!, amount: p.amount, social: p.kind === 'SOCIAL' || primarySocial.has(p.studentId!) }));
     // Атомар эзэмшинэ: зэрэг ажиллалт эсвэл буцаасны дараах дахин хуваарилалт шийтэд ДАВХАР бичихгүй.
     // Нэг гүйлгээ шийтэд нэг л удаа бичигдэнэ (буцаасан бол тэр нүдийг ажилтан гараар засна).
     const claimed = await this.prisma.$executeRaw`
@@ -304,14 +338,25 @@ export class ReconcileService {
     if (!claimed)
       return kids.map((k) => ({ studentId: k.studentId, ok: false, reason: 'Энэ гүйлгээг шийтэд өмнө нь бичсэн — шаардлагатай бол тэр нүдийг гараар засна уу' }));
     const through = row.accountNo ? (await this.prisma.bankCursor.findUnique({ where: { accountNo: row.accountNo }, select: { sheetThrough: true } }))?.sheetThrough : null;
-    const writes =
+    const writes: DemoSheetWrite[] =
       !through || ubDay(row.bookedAt) <= through
         ? kids.map((k) => ({
             studentId: k.studentId,
             ok: false,
             reason: through ? `${through.slice(5).replace('-', '/')} хүртэл ажилтан шийтэд хөтөлсөн тул бичсэнгүй` : '«Шийтэд хөтлөгдсөн өдөр» тэмдэглээгүй тул бичсэнгүй',
           }))
-        : await this.demoSheet.writeTuition(kids, row.bookedAt);
+        : [
+            ...(await this.demoSheet.writeTuition(kids.filter((k) => !k.social), row.bookedAt)),
+            ...(await this.demoSheet.writeTuition(kids.filter((k) => k.social), row.bookedAt, 'SOCIAL')),
+          ];
+    // Хуулгаас үүссэн төлбөрийн сарыг шийтэд бичсэн сараар (өмнөх өртэй сард орсон бол тэр сар)
+    const months = new Map(writes.filter((w) => w.ok && w.month).map((w) => [w.studentId, w.month!]));
+    if (months.size)
+      for (const a of await this.prisma.bankAllocation.findMany({
+        where: { bankTxId: row.id, revokedAt: null, studentId: { in: [...months.keys()] }, paymentId: { startsWith: 'bank_' } },
+        select: { paymentId: true, studentId: true },
+      }))
+        await this.prisma.payment.update({ where: { id: a.paymentId! }, data: { forMonth: months.get(a.studentId!) } });
     await this.prisma.$executeRaw`
       UPDATE "BankTransaction" SET "suggestion" = COALESCE("suggestion", '{}'::jsonb) || jsonb_build_object('sheetWrites', ${JSON.stringify(writes)}::jsonb)
       WHERE id = ${row.id}`;
@@ -326,11 +371,17 @@ export class ReconcileService {
    * шинжээр таарсныг шийтийн бүртгэл баталсан. Үлдэгдэл нь E1/E2 номын үнэ бол
    * (сургалт + ном) ном болгоно. Шинэ төлбөр ҮҮСГЭХГҮЙ, зөвхөн холбоно.
    */
-  private sheetCombo(row: OpenRow, s: RowSuggestion, pool: ExistingPayment[]): Part[] | null {
-    if (row.direction !== 'CREDIT' || s.decision === 'NONE' || s.held || (s.kind !== 'TUITION' && !s.split)) return null;
+  private sheetCombo(row: OpenRow, s: RowSuggestion, pool: ExistingPayment[], primarySocial: Set<string>): Part[] | null {
+    if (row.direction !== 'CREDIT' || s.decision === 'NONE' || s.held || (!isTuitionLike(s.kind) && !s.split)) return null;
     const t = row.bookedAt.getTime();
-    // Утганд нэр эсвэл утас нь бичигдсэн хүүхэд л (овог, данс ганцаараа хангалтгүй — 9/01-нд олон хүүхэд 350,000 төлдөг)
-    const kids = [...new Set(s.candidates.filter((c) => c.signals.includes('NAME') || c.signals.includes('PHONE')).map((c) => c.studentId))];
+    // Утганд нэр эсвэл утас нь бичигдсэн хүүхэд л (овог, данс ганцаараа хангалтгүй — 9/01-нд олон хүүхэд 350,000 төлдөг).
+    // Нийгмийн мөнгийг зөвхөн үндсэн анги нь Нийгэм хүүхдийн (нийгмийн) төлбөртэй холбоно — математикийн төлбөртэй биш.
+    const social = s.kind === 'SOCIAL';
+    const kids = [
+      ...new Set(
+        s.candidates.filter((c) => (c.signals.includes('NAME') || c.signals.includes('PHONE')) && (!social || primarySocial.has(c.studentId))).map((c) => c.studentId),
+      ),
+    ];
     const options = kids.map((k) => pool.filter((p) => p.userId === k && Math.abs(p.at - t) <= LINK_WINDOW_MS).slice(0, 3));
     if (options.every((o) => !o.length)) return null;
     const found: { pays: ExistingPayment[]; rest: number }[] = [];
@@ -354,7 +405,7 @@ export class ReconcileService {
     if (found.length !== 1) return null;
     const { pays, rest } = found[0];
     for (const p of pays) pool.splice(pool.indexOf(p), 1);
-    const parts: Part[] = pays.map((p) => ({ kind: 'TUITION', amount: p.amount, studentId: p.userId, paymentId: p.id }));
+    const parts: Part[] = pays.map((p) => ({ kind: social ? 'SOCIAL' : 'TUITION', amount: p.amount, studentId: p.userId, paymentId: p.id }));
     if (rest > 0) parts.push({ kind: 'BOOK', amount: rest, studentId: pays[0].userId });
     return parts;
   }
@@ -379,7 +430,7 @@ export class ReconcileService {
 
   /** Сургалтын хэсгийг шийтийн төлбөртэй холбоно (нэг хүүхэд, ижил дүн, ±3 хоног, хамгийн ойр). Pool-оос хасна. */
   private link(part: Part, row: { bookedAt: Date }, pool: ExistingPayment[]): boolean {
-    if (part.kind !== 'TUITION' || !part.studentId) return false;
+    if (!isTuitionLike(part.kind) || !part.studentId) return false;
     const t = row.bookedAt.getTime();
     let best = -1;
     for (let i = 0; i < pool.length; i++) {
@@ -423,6 +474,10 @@ export class ReconcileService {
       items = items.filter((i) => stillOpen.has(i.row.id));
       if (!items.length) return 0;
     }
+    const primarySocial = await this.socialPrimary(
+      items.flatMap((i) => i.parts.filter((p) => p.kind === 'SOCIAL').map((p) => p.studentId)),
+      tx,
+    );
     const payments: Prisma.PaymentCreateManyInput[] = [];
     const allocs: Prisma.BankAllocationCreateManyInput[] = [];
     const rowUpdates: { id: string; s: RowSuggestion | null; status: BankMatchStatus; uid: string | null }[] = [];
@@ -430,7 +485,8 @@ export class ReconcileService {
       for (const p of parts) {
         const id = randomUUID();
         let paymentId: string | null = p.paymentId ?? null;
-        if (p.kind === 'TUITION' && p.studentId && !paymentId) {
+        // Математикт суудаг хүүхдийн нийгмийн мөнгө вэбийн (математикийн) төлбөр болохгүй
+        if ((p.kind === 'TUITION' || (p.kind === 'SOCIAL' && primarySocial.has(p.studentId ?? ''))) && p.studentId && !paymentId) {
           paymentId = `bank_${id}`;
           payments.push({
             id: paymentId,
@@ -447,7 +503,7 @@ export class ReconcileService {
         }
         allocs.push({ id, bankTxId: row.id, kind: p.kind, amount: p.amount, studentId: p.studentId, paymentId, auto, createdById: auto ? null : actor.id });
       }
-      const tuitionKid = parts.find((p) => p.kind === 'TUITION')?.studentId ?? null;
+      const tuitionKid = parts.find((p) => isTuitionLike(p.kind))?.studentId ?? null;
       rowUpdates.push({
         id: row.id,
         s: s ?? null,
@@ -486,8 +542,8 @@ export class ReconcileService {
     if (sum !== row.amount)
       throw new BadRequestException(`Хэсгүүдийн нийлбэр (${sum.toLocaleString('en-US')}₮) гүйлгээний дүнтэй (${row.amount.toLocaleString('en-US')}₮) тэнцүү байх ёстой`);
     for (const p of parts) {
-      if (p.kind === 'TUITION' && !p.studentId) throw new BadRequestException('Сургалтын төлбөрт хүүхэд сонгоно уу');
-      if (row.direction === 'DEBIT' && p.kind === 'TUITION') throw new BadRequestException('Зарлагыг сургалтын төлбөр болгож болохгүй');
+      if (isTuitionLike(p.kind) && !p.studentId) throw new BadRequestException('Сургалтын төлбөрт хүүхэд сонгоно уу');
+      if (row.direction === 'DEBIT' && isTuitionLike(p.kind)) throw new BadRequestException('Зарлагыг сургалтын төлбөр болгож болохгүй');
       if (!STUDENT_PART.includes(p.kind)) p.studentId = null;
     }
     const kidIds = [...new Set(parts.map((p) => p.studentId).filter((x): x is string => !!x))];
@@ -501,7 +557,8 @@ export class ReconcileService {
       const revoked = await this.revokeAllocations(tx, id, actor);
       // Шийтэд аль хэдийн байгаа бол холбоно, байхгүй бол шинэ төлбөр (хүн баталсан)
       const pool = await this.existingPayments(kidIds, tx); // tx дотор: дөнгөж цуцалсан холбоос дахин чөлөөтэй
-      for (const p of parts) this.link(p, row, pool);
+      const primarySocial = await this.socialPrimary(kidIds, tx);
+      for (const p of parts) if (p.kind !== 'SOCIAL' || primarySocial.has(p.studentId!)) this.link(p, row, pool);
       await this.writeAllocations(tx, [{ row: row as OpenRow, parts }], actor, false);
       return revoked;
     });
@@ -691,7 +748,7 @@ export class ReconcileService {
   }
 
   private laneWhere(lane: RowLane): Prisma.BankTransactionWhereInput {
-    const tuitionAlloc = { some: { kind: 'TUITION' as const, revokedAt: null } };
+    const tuitionAlloc = { some: { kind: { in: ['TUITION' as const, 'SOCIAL' as const] }, revokedAt: null } };
     switch (lane) {
       case 'all':
         return {};
@@ -700,7 +757,7 @@ export class ReconcileService {
       case 'tuition':
         return { resolvedAt: { not: null }, allocations: tuitionAlloc };
       case 'other':
-        return { resolvedAt: { not: null }, inSheet: false, direction: 'CREDIT', allocations: { none: { kind: 'TUITION', revokedAt: null } } };
+        return { resolvedAt: { not: null }, inSheet: false, direction: 'CREDIT', allocations: { none: { kind: { in: ['TUITION', 'SOCIAL'] }, revokedAt: null } } };
       case 'expense':
         return { resolvedAt: { not: null }, inSheet: false, direction: 'DEBIT' };
       case 'sheet':

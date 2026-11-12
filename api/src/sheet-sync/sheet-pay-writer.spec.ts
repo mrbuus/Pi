@@ -1,4 +1,4 @@
-import { CycleState, periodText, receiptTokens, RowState, writeTuition } from './sheet-pay-writer';
+import { CycleState, owedGap, periodText, receiptTokens, RowState, SOCIAL_PRICES, writeTuition } from './sheet-pay-writer';
 
 const MONTHS = ['2026-06', '2026-07', '2026-08', '2026-09', '2026-10', '2026-11', '2026-12'];
 const row = (start: string | null, form: string | null, cells: Partial<Record<string, Partial<CycleState>>> = {}): RowState => ({
@@ -53,5 +53,49 @@ describe('sheet-pay-writer', () => {
     const r = row('2026-09-01', 'Бүтэн', { '2026-06': { skip: true }, '2026-07': { skip: true }, '2026-08': { skip: true } });
     writeTuition(r, { amount: 2_500_000, date: '2026-09-04' });
     expect(cell(r, '2026-09')).toMatchObject({ amount: 2_500_000, period: 'бүтэн' });
+  });
+
+  it('10-р сараа төлөөгүй хүүхэд 11-р сард төлбөл 10-р сард орно (эзэн 2026-11-12)', () => {
+    const r = row('2026-09-28', 'суудал', {
+      '2026-09': { amount: 350_000, period: '09/28-10/28' },
+      '2026-11': { amount: 350_000, period: null },
+    });
+    expect(owedGap(r, 5)).toBe(4);
+    expect(writeTuition(r, { amount: 350_000, date: '2026-11-20' })).toEqual({ idx: 4, mode: 'NEW' });
+    expect(cell(r, '2026-10')).toMatchObject({ amount: 350_000, period: '10/28-11/28' });
+  });
+
+  it('хоосон сар өр биш: нэг нүдэнд хоёр сарынх, цэнхэр сар, бүтэн жил', () => {
+    // 10-р сард 700,000 (9, 10-р сар хоёулаа)
+    const two = row('2026-09-01', 'суудал', { '2026-10': { amount: 700_000, period: '09/01-11/01' } });
+    expect(owedGap(two, 4)).toBe(-1);
+    const blue = row('2026-09-01', 'сар бүр', { '2026-09': { amount: 350_000 }, '2026-10': { skip: true }, '2026-11': { amount: 350_000 } });
+    expect(owedGap(blue, 5)).toBe(-1);
+    const full = row('2026-09-01', 'Бүтэн', { '2026-09': { amount: 350_000 }, '2026-11': { amount: 2_150_000 } });
+    expect(owedGap(full, 5)).toBe(-1);
+    // Сууж эхлэхээс өмнөх сар өр биш
+    const late = row('2026-10-05', 'сар бүр', { '2026-10': { amount: 350_000, period: '10/05-11/05' } });
+    expect(writeTuition(late, { amount: 350_000, date: '2026-11-04' }).idx).toBe(5);
+  });
+
+  it('нийгэм: сар төлсний дараах үлдэгдэл эхний нүдэнд нийлж «бүтэн» (300,000 + 1,200,000)', () => {
+    const r = row('2026-09-08', 'сар бүр', { '2026-09': { amount: 300_000, period: '09/16-10/16', receipts: ['09/16'] } });
+    expect(writeTuition(r, { amount: 1_200_000, date: '2026-10-08' }, SOCIAL_PRICES)).toEqual({ idx: 3, mode: 'FULL_MERGE' });
+    expect(cell(r, '2026-09')).toMatchObject({ amount: 1_500_000, period: 'бүтэн', receipts: ['09/16', '10/08'] });
+  });
+
+  it('нийгэм: 700,000 + 800,000 = бүтэн жил нэг нүдэнд', () => {
+    const r = row('2026-09-17', 'бүтэн', { '2026-06': { skip: true }, '2026-07': { skip: true }, '2026-08': { skip: true } });
+    writeTuition(r, { amount: 700_000, date: '2026-09-19' }, SOCIAL_PRICES);
+    expect(cell(r, '2026-09')).toMatchObject({ amount: 700_000, period: 'бүтэн' });
+    writeTuition(r, { amount: 800_000, date: '2026-10-05' }, SOCIAL_PRICES);
+    expect(cell(r, '2026-09')).toMatchObject({ amount: 1_500_000, period: 'бүтэн' });
+    expect(cell(r, '2026-10').amount).toBe(0);
+  });
+
+  it('нийгэм: сар бүр 300,000', () => {
+    const r = row('2026-09-17', 'сар бүр', { '2026-09': { amount: 300_000, period: '09/17-10/17' } });
+    expect(writeTuition(r, { amount: 300_000, date: '2026-10-08' }, SOCIAL_PRICES)).toEqual({ idx: 4, mode: 'NEW' });
+    expect(cell(r, '2026-10').period).toBe('10/17-11/17');
   });
 });

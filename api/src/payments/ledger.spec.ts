@@ -2,6 +2,8 @@ import {
   ACADEMIC_YEAR,
   PRICE_TIERS,
   amountThrough,
+  monthlyPeriods,
+  plusMonth,
   computeLedger,
   promiseState,
   resolvePlan,
@@ -346,5 +348,48 @@ describe('Тохирсон (хөнгөлөлттэй) бүтэн жилийн д
     expect(computeLedger(base({ plan: 'FULL_YEAR', agreed: 2_850_000, payments: paid })).plan.total).toBe(g12.fullYear);
     expect(computeLedger(base({ plan: 'FULL_YEAR', agreed: 300_000, payments: paid })).plan.total).toBe(g12.fullYear);
     expect(computeLedger(base({ plan: 'MONTHLY', agreed: 2_250_000, payments: [pay(350_000, '2026-09')] })).plan.kind).toBe('MONTHLY');
+  });
+});
+
+describe('Сар бүрийн хугацаа — шийтийн хугацаа, сунгалт (эзэн 2026-11-12)', () => {
+  const months = ['2026-09', '2026-10', '2026-11', '2026-12'];
+  const first = (m: string) => `${m}-01`;
+  const view = (r: ReturnType<typeof monthlyPeriods>) => [...r.values()].map((p) => `${p.from}..${p.to}`);
+
+  it('сунгалтгүй: сар бүр өмнөх сарын дууссан өдрөөс', () => {
+    expect(view(monthlyPeriods(months.slice(0, 2), first))).toEqual(['2026-09-01..2026-10-01', '2026-10-01..2026-11-01']);
+  });
+
+  it('шийтийн хугацаа («09/04-10/04») үнэн; дараагийн сар гинжээр үргэлжилнэ', () => {
+    const r = monthlyPeriods(months.slice(0, 3), first, { '2026-09': { from: '2026-09-04', to: '2026-10-04' } });
+    expect(view(r)).toEqual(['2026-09-04..2026-10-04', '2026-10-04..2026-11-04', '2026-11-04..2026-12-04']);
+  });
+
+  it('шийтэд ажилтан сунгасан («08/04-09/14» маягийн 41 тохиолдол) → дараагийнх нь 14-нөөс', () => {
+    const r = monthlyPeriods(months.slice(0, 2), first, { '2026-09': { from: '2026-09-04', to: '2026-10-14' } });
+    expect(view(r)).toEqual(['2026-09-04..2026-10-14', '2026-10-14..2026-11-14']);
+  });
+
+  it('Гэрэлт-Од: 9-р сарыг 10 хоногоор сунгавал 09/14–10/14, дараагийн бүх сар шилжиж, шийтийн хуучин хугацааг үл тооно', () => {
+    const sheet = { '2026-09': { from: '2026-09-04', to: '2026-10-04' }, '2026-10': { from: '2026-10-04', to: '2026-11-04' } };
+    const r = monthlyPeriods(months.slice(0, 3), first, sheet, [{ month: '2026-09', days: 10 }]);
+    expect(view(r)).toEqual(['2026-09-14..2026-10-14', '2026-10-14..2026-11-14', '2026-11-14..2026-12-14']);
+    expect(r.get('2026-09')!.extDays).toBe(10);
+  });
+
+  it('хэд хэдэн сунгалт нэмэгдэнэ; сарын сүүлийн өдрийг хэтрүүлэхгүй (01/31 → 02/28)', () => {
+    const r = monthlyPeriods(['2026-10', '2026-11'], first, {}, [{ month: '2026-11', days: 7 }, { month: '2026-11', days: 14 }]);
+    expect(view(r)).toEqual(['2026-10-01..2026-11-01', '2026-11-22..2026-12-22']);
+    expect(plusMonth('2027-01-31')).toBe('2027-02-28');
+    expect(plusMonth('2026-12-15')).toBe('2027-01-15');
+  });
+
+  it('ledger: сунгасан хугацаа өр, «хэтэрсэн хоног»-д тусна; бүтэн жилд үл хамаарна', () => {
+    const before = computeLedger(base({ today: '2026-09-10', startDate: '2026-09-01', payments: [] }));
+    expect(before.blocks[0].state).toBe('OWED');
+    const after = computeLedger(base({ today: '2026-09-10', startDate: '2026-09-01', payments: [], extensions: [{ month: '2026-09', days: 13 }] }));
+    expect(after.blocks[0]).toMatchObject({ state: 'FUTURE', dueOn: '2026-09-14', period: { from: '2026-09-14', to: '2026-10-14' }, extDays: 13 });
+    const full = computeLedger(base({ plan: 'FULL_YEAR', tuitionAmount: 2_500_000, extensions: [{ month: '2026-09', days: 13 }] }));
+    expect(full.blocks[0].period).toBeUndefined();
   });
 });

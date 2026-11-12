@@ -14,6 +14,19 @@ export interface MonthBlock {
   paidOn: string | null;
   /** Хугацаанаас хэдэн хоног хоцорч бүрэн төлөгдсөн (цагтаа бол 0) */
   lateDays: number;
+  /** Сар бүрийн багц: энэ төлбөрийн хамрах хугацаа (шийтийн «Хугацаа»-тай ижил) */
+  period?: { from: string; to: string };
+  /** Энэ сард сунгасан хоног */
+  extDays?: number;
+}
+
+export interface LedgerExtension {
+  id: string;
+  month: string;
+  days: number;
+  reason: string;
+  at: string;
+  authorName: string | null;
 }
 
 export interface YearView {
@@ -170,5 +183,7 @@ export interface StudentLedger {
   refunds: LedgerRefund[];
   /** Сар бүрийг дүүргэсэн төлбөр (огноогоор хуучнаас) — Багш+-д дүн null */
   sources?: Record<string, { paymentId: string; amount: number | null }[]>;
+  /** Сар бүрийн төлбөрийн хугацааны сунгалт */
+  extensions?: LedgerExtension[];
   amountsHidden?: boolean;
 }

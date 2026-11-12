@@ -99,3 +99,36 @@ describe('сурсан данс, утас', () => {
     expect(r.candidates[0].studentId).toBe('b');
   });
 });
+
+describe('нийгмийн төлбөр (эзэн 2026-11-12)', () => {
+  // Ижил нэртэй хоёр хүүхэд: нэг нь математикт, нөгөө нь нийгэмд суудаг
+  const r2 = [
+    S('math', 'Батмөнх', 'Хонгорзул', ['99182538']),
+    { ...S('soc', 'Мөнхзул', 'Хонгорзул', ['89819079']), social: true },
+    S('both', 'Баатархүү', 'Насанбүтэдмаа', ['60696985']),
+  ];
+  const i2 = buildMatchIndex(
+    r2.map((s) => (s.id === 'both' ? { ...s, social: true } : s)),
+    [],
+  );
+  const mm = (d: string) => matchTransaction({ description: d, counterparty: null }, i2);
+
+  it('«нийгэм» гэсэн гүйлгээг нийгэмд суудаг хүүхдэд л ононо', () => {
+    const r = mm('Хонгорзул нийгэм 2027');
+    expect(r.candidates.map((c) => c.studentId)).toEqual(['soc']);
+    expect(r.social).toEqual({ known: true });
+  });
+  it('латинаар «niigm», «Niigmiin angi» ч таньна', () => {
+    expect(mm('EB -B.Nasanbutedmaa 60696985 niigm 2027')).toMatchObject({ decision: 'AUTO', social: { known: true } });
+    expect(mm('Niigmiin angi M.Khongorzul').candidates.map((c) => c.studentId)).toEqual(['soc']);
+  });
+  it('нийгэмд суудаг хүүхэд таарахгүй бол хасахгүй, гэхдээ «known: false»', () => {
+    const r = mm('Батмөнх 99182538 нийгэм');
+    expect(r.candidates[0].studentId).toBe('math');
+    expect(r.social).toEqual({ known: false });
+  });
+  it('«нийгэм» үггүй бол математикийн хүүхэд хасагдахгүй', () => {
+    expect(mm('Батмөнх Хонгорзул 99182538').decision).toBe('AUTO');
+    expect(mm('Батмөнх Хонгорзул 99182538').social).toBeUndefined();
+  });
+});

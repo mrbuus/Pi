@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -12,7 +13,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
-import { LedgerBoardQueryDto, LedgerPayDto, LedgerSettleDto } from './dto/ledger.dto';
+import { LedgerBoardQueryDto, LedgerExtendDto, LedgerPayDto, LedgerSettleDto } from './dto/ledger.dto';
 import { FinanceCapabilityGuard } from './finance-capability.guard';
 import { PaymentsLedgerService } from './ledger.service';
 import {
@@ -75,6 +76,20 @@ export class PaymentsLedgerController {
     @Req() req: AuthedRequest,
   ) {
     const res = await this.ledger.settle(id, dto, { id: req.user.userId, role: req.user.role });
+    return amountsHiddenFor(req.user.role) ? redactRowResult(res) : res;
+  }
+
+  /** Сар бүрийн төлбөрийн төлөх хугацааг сунгана (тэр сар ба түүнээс хойших бүх сар шилжинэ). */
+  @Post('student/:id/extensions')
+  async extend(@Param('id') id: string, @Body() dto: LedgerExtendDto, @Req() req: AuthedRequest) {
+    const res = await this.ledger.extend(id, dto, { id: req.user.userId, role: req.user.role });
+    return amountsHiddenFor(req.user.role) ? redactRowResult(res) : res;
+  }
+
+  /** Сунгалтыг цуцлах (зөөлөн — мөр үлдэнэ) */
+  @Delete('student/:id/extensions/:extId')
+  async unextend(@Param('id') id: string, @Param('extId') extId: string, @Req() req: AuthedRequest) {
+    const res = await this.ledger.unextend(id, extId, { id: req.user.userId, role: req.user.role });
     return amountsHiddenFor(req.user.role) ? redactRowResult(res) : res;
   }
 }
