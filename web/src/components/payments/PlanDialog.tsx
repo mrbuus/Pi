@@ -28,6 +28,7 @@ export default function PlanDialog({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const value = Number(amount.replace(/\D/g, "")) || 0;
+  const discount = kind === "FULL_YEAR" && value >= 800_000 && value < priceOf("FULL_YEAR");
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,7 +37,13 @@ export default function PlanDialog({
     try {
       await api(`/users/${encodeURIComponent(row.id)}/profile`, {
         method: "PATCH",
-        body: { tuitionPlan: kind, tuitionAmount: value || priceOf(kind), ...(start ? { joinedOn: start } : {}) },
+        body: {
+          tuitionPlan: kind,
+          tuitionAmount: value || priceOf(kind),
+          // Бүтэн жилд үнийн жагсаалтаас БАГА дүн = тохирсон (хөнгөлөлттэй) гэрээ; эс бөгөөс стандарт үнэ
+          tuitionAgreed: discount ? value : null,
+          ...(start ? { joinedOn: start } : {}),
+        },
       });
       toast.success("Багц хадгалагдлаа");
       onSaved();
@@ -70,7 +77,9 @@ export default function PlanDialog({
           hint={
             kind === "INSTALLMENT" && tier.installmentFirst
               ? `Эхний төлбөр ${mnt(tier.installmentFirst)} 12-р сар хүртэл, үлдэгдэл 12/20-нд`
-              : `Үнийн жагсаалт: ${mnt(priceOf(kind))}`
+              : discount
+                ? `Хөнгөлөлттэй гэрээ: ${mnt(value)} төлөгдвөл жилийн төлбөр бүрэн гэж тооцно (үнийн жагсаалт ${mnt(priceOf(kind))})`
+                : `Үнийн жагсаалт: ${mnt(priceOf(kind))}`
           }
         >
           <input

@@ -107,7 +107,7 @@ export async function ledgersFor(
       select: {
         id: true,
         studentProfile: {
-          select: { grade: true, tuitionPlan: true, tuitionAmount: true, joinedOn: true, leftOn: true },
+          select: { grade: true, tuitionPlan: true, tuitionAmount: true, tuitionAgreed: true, joinedOn: true, leftOn: true },
         },
         enrollments: {
           where: { leftAt: null },
@@ -141,6 +141,7 @@ export async function ledgersFor(
       computeLedger({
         plan: profile?.tuitionPlan ?? null,
         tuitionAmount: profile?.tuitionAmount ?? null,
+        agreed: profile?.tuitionAgreed ?? null,
         tier: tierFor(profile?.grade, classroom?.name, classroom ? days.get(classroom.id) : null).tier,
         startDate: dateKey(profile?.joinedOn),
         leftOn: dateKey(profile?.leftOn),

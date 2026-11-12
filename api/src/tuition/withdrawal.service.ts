@@ -129,6 +129,7 @@ export class WithdrawalService {
             grade: true,
             tuitionPlan: true,
             tuitionAmount: true,
+            tuitionAgreed: true,
             joinedOn: true,
           },
         },
@@ -182,6 +183,7 @@ export class WithdrawalService {
     const ledger = computeLedger({
       plan: profile?.tuitionPlan ?? null,
       tuitionAmount: profile?.tuitionAmount ?? null,
+      agreed: profile?.tuitionAgreed ?? null,
       tier,
       startDate,
       leftOn: null,

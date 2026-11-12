@@ -82,6 +82,13 @@ export class UpdateUserProfileDto {
   @Min(0)
   tuitionAmount?: number;
 
+  /** Тохирсон (хөнгөлөлттэй) бүтэн жилийн дүн; null = стандарт үнэ */
+  @ApiPropertyOptional({ type: Number, minimum: 0, nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  tuitionAgreed?: number | null;
+
   @ApiPropertyOptional({ enum: TuitionPlan })
   @IsOptional()
   @IsEnum(TuitionPlan)

@@ -142,6 +142,8 @@ export interface LedgerPayment {
 export interface LedgerInput {
   plan: PlanKind | null;
   tuitionAmount: number | null;
+  /** Тохирсон (хөнгөлөлттэй) бүтэн жилийн дүн — гараар тавьсан (StudentProfile.tuitionAgreed) */
+  agreed?: number | null;
   tier: PriceTier;
   /** Сурагч суж эхэлсэн өдөр (StudentProfile.joinedOn) */
   startDate: DateKey | null;
@@ -187,6 +189,8 @@ export interface ResolvedPlan {
    * хугацаандаа, эсвэл нэг дор бүтэн жилийн дүн
    */
   autoFull?: boolean;
+  /** Тохирсон (хөнгөлөлттэй) бүтэн жилийн дүнгээр тооцсон */
+  discounted?: boolean;
   /** Бүтэн жилийн дүн төлсөн ч хугацаа хэтэрсэн — Багш+ шалгаж гараар «Бүрэн» болгоно */
   fullYearLate?: boolean;
 }
@@ -390,6 +394,10 @@ export function computeLedger(input: LedgerInput): LedgerResult {
   // Гараар бүтэн жил: гэрээ = бодит төлсөн дүн → идэвхтэй сар бүр «төлсөн»
   // (0₮ ч байж болно), илүү төлөлт ч, өр ч үгүй. Буцаалтад мөн энэ гэрээ.
   if (plan.settled) plan = { ...plan, total: paidTotal, first: paidTotal };
+  // Тохирсон (хөнгөлөлттэй) бүтэн жил (эзэн 2026-11-12): гэрээ = гараар тавьсан дүн — төлчихвөл
+  // өргүй, «Бүтэн». Зөвхөн шатлалын үнээс БАГА, бүтэн жилийн багцад (tuitionAmount биш — түүнийг синк бичдэг).
+  else if (plan.kind === 'FULL_YEAR' && inRange(input.agreed ?? null, 800_000, plan.total - 1))
+    plan = { ...plan, total: input.agreed!, first: Math.min(plan.first, input.agreed!), discounted: true };
 
   // 1) Сар бүрийн ногдох дүн ба төлөгдөх өдөр
   const dues = new Map<MonthKey, { due: number; dueOn: DateKey }>();

@@ -1143,6 +1143,7 @@ export class UsersService {
       'branch',
       'section',
       'tuitionAmount',
+      'tuitionAgreed',
       'tuitionPlan',
       'tuitionNote',
       'joinedOn',
@@ -1241,6 +1242,7 @@ export class UsersService {
             branch: dto.branch,
             section: dto.section,
             tuitionAmount: dto.tuitionAmount,
+            tuitionAgreed: dto.tuitionAgreed,
             tuitionPlan: dto.tuitionPlan,
             tuitionNote: dto.tuitionNote,
             joinedOn: dto.joinedOn ? new Date(dto.joinedOn) : undefined,
@@ -1262,6 +1264,9 @@ export class UsersService {
             ...(dto.section !== undefined ? { section: dto.section } : {}),
             ...(dto.tuitionAmount !== undefined
               ? { tuitionAmount: dto.tuitionAmount }
+              : {}),
+            ...(dto.tuitionAgreed !== undefined
+              ? { tuitionAgreed: dto.tuitionAgreed }
               : {}),
             ...(dto.tuitionPlan !== undefined
               ? { tuitionPlan: dto.tuitionPlan }

@@ -3,6 +3,7 @@
 import { Camera } from "lucide-react";
 import { useRef, useState } from "react";
 import { api, fileUrl, uploadFile } from "@/lib/api";
+import { looksLikeImage, prepareAvatar } from "@/lib/avatarImage";
 
 export interface ProfileMe {
   firstName: string;
@@ -34,13 +35,14 @@ export default function ProfilePhoto({
     e.target.value = "";
     if (!file) return;
     setError("");
-    if (!file.type.startsWith("image/")) {
+    if (!looksLikeImage(file)) {
       setError("Зөвхөн зургийн файл (JPG, PNG гэх мэт) сонгоно уу");
       return;
     }
     setUploading(true);
     try {
-      const { key } = await uploadFile(file);
+      // Утас, компьютер аль алинаас нэг хэвийн жижиг JPEG болгож явуулна
+      const { key } = await uploadFile(await prepareAvatar(file));
       const res = await api<{ avatarUrl: string }>("/auth/me/avatar", {
         method: "POST",
         body: { key },
