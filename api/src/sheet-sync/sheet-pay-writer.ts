@@ -34,6 +34,23 @@ export const FULL_YEAR_PRICE = 2_500_000;
 export const MONTH_MAX = 350_000;
 /** Үүнээс бага төлбөр бол үргэлж өмнөх сарын нэмэлт. */
 export const TOP_UP_MAX = 100_000;
+
+/** Хичээлийн үнэ: математик (4 өдөр 350 мянга / 2.5 сая), нийгэм (300 мянга / 1.5 сая). */
+export interface WriterPrices {
+  fullMin: number;
+  fullPrice: number;
+  monthMax: number;
+  /** Хамгийн бага сарын төлбөр — нэг нүдэнд хэдэн сарынх бичигдсэнийг тооцоход */
+  monthMin: number;
+  topUpMax: number;
+  /**
+   * Нийгэм: сар төлсний дараа үлдэгдлээ төлбөл ажилтан хичээлийн жилийн эхний нүдэнд нийлүүлж
+   * «бүтэн» болгодог (300,000 + 1,200,000 = 1,500,000; 700,000 + 800,000)
+   */
+  mergeYear?: boolean;
+}
+export const MATH_PRICES: WriterPrices = { fullMin: FULL_YEAR_MIN, fullPrice: FULL_YEAR_PRICE, monthMax: MONTH_MAX, monthMin: 300_000, topUpMax: TOP_UP_MAX };
+export const SOCIAL_PRICES: WriterPrices = { fullMin: 700_000, fullPrice: 1_500_000, monthMax: 300_000, monthMin: 300_000, topUpMax: TOP_UP_MAX, mergeYear: true };
 const pad2 = (n: number) => String(n).padStart(2, '0');
 const PERIOD = /^(\d{1,2})\/(\d{1,2})\s*-\s*(\d{1,2})\/(\d{1,2})/;
 
@@ -77,6 +94,21 @@ function nextPeriod(state: RowState, idx: number, payDate: string): string {
 export type WriteMode = 'NEW' | 'TOP_UP' | 'FULL_MERGE';
 
 /**
+ * Өмнө нь төлөгдөөгүй үлдсэн сар (эзэн 2026-11-12): 10-р сараа төлөөгүй хүүхэд 11-р сард
+ * төлбөл мөнгө 10-р сард орно. Сүүлийн бөглөсөн сараас ӨМНӨХ, хичээлийн жилийн, сууж
+ * эхэлснээс хойших, цэнхэр биш (суусан), хоосон хамгийн эхний сар. Бүтэн жилийн мөрөнд үгүй;
+ * нэг нүдэнд хэдэн сарынх бичигдсэн (10-р сард 700,000 = 9, 10-р сар) бол нийт дүн хүрч байвал үгүй.
+ */
+export function owedGap(state: RowState, last: number, prices: WriterPrices = MATH_PRICES): number {
+  if (last < 0 || state.cycles.some((c) => filled(c) && (isFull(c) || c.amount >= prices.fullMin))) return -1;
+  const floor = [SCHOOL_START, state.start?.slice(0, 7) ?? ''].sort().at(-1)!;
+  const span = state.cycles.filter((c, i) => i <= last && c.month >= floor && !c.skip);
+  const paid = span.reduce((t, c) => t + c.amount, 0);
+  if (paid >= span.length * prices.monthMin) return -1;
+  return state.cycles.findIndex((c, i) => i < last && c.month >= floor && !c.skip && !filled(c));
+}
+
+/**
  * Нэг төлбөрийг мөрийн төлөвт бичнэ (төлөвийг өөрчилнө).
  * - Сүүлийн бөглөсөн сар «бүтэн» бөгөөд 2.5 саяас бага → үлдэгдэл түүнд нэмэгдэнэ.
  * - 1 саяас их төлбөр, сүүлийн сар урьдчилгаа (хугацаагүй, эсвэл хичээлийн жилийнх бөгөөд
@@ -85,16 +117,29 @@ export type WriteMode = 'NEW' | 'TOP_UP' | 'FULL_MERGE';
  * - Бусад үед сүүлийн бөглөсөн сарын дараах цэнхэр биш (суусан) сар.
  * Давхардсан нүдэнд дүнг нэмж, баримтын огноог «, MM/DD» гэж залгана.
  */
-export function writeTuition(state: RowState, pay: { amount: number; date: string }): { idx: number; mode: WriteMode } {
+export function writeTuition(state: RowState, pay: { amount: number; date: string }, prices: WriterPrices = MATH_PRICES): { idx: number; mode: WriteMode } {
   const receipt = pay.date.slice(5).replace('-', '/');
   let last = -1;
   state.cycles.forEach((c, i) => filled(c) && (last = i));
   const L = last >= 0 ? state.cycles[last] : null;
+  const year = state.cycles.map((c, i) => ({ c, i })).filter(({ c }) => c.month >= SCHOOL_START && filled(c));
+  const yearSum = year.reduce((t, { c }) => t + c.amount, 0);
   let mode: WriteMode = 'NEW';
   let idx = -1;
-  if (L && isFull(L) && L.amount < FULL_YEAR_PRICE) mode = 'FULL_MERGE';
-  else if (L && pay.amount >= FULL_YEAR_MIN && L.amount < FULL_YEAR_MIN && (!L.period || (L.month >= SCHOOL_START && /бүтэн|хагас/i.test(state.form ?? '')))) mode = 'FULL_MERGE';
-  else if (L && L.amount > 0 && !isFull(L) && pay.amount < FULL_YEAR_MIN && (pay.amount < TOP_UP_MAX || L.amount + pay.amount <= MONTH_MAX)) mode = 'TOP_UP';
+  const gap = owedGap(state, last, prices);
+  if (L && isFull(L) && L.amount < prices.fullPrice) mode = 'FULL_MERGE';
+  else if (prices.mergeYear && year.length && pay.amount >= prices.fullMin && yearSum + pay.amount <= prices.fullPrice) {
+    mode = 'FULL_MERGE';
+    last = year[0].i;
+  } else if (L && pay.amount >= prices.fullMin && L.amount < prices.fullMin && (!L.period || (L.month >= SCHOOL_START && /бүтэн|хагас/i.test(state.form ?? '')))) mode = 'FULL_MERGE';
+  else if (gap >= 0 && pay.amount < prices.fullMin) {
+    // Өртэй сар нөхнө: тэр сарын дутууг (эсвэл бүтэн сарыг) — үлдсэн нь ч мөн тэнд (ажилтан засна)
+    const c = state.cycles[gap];
+    c.period = nextPeriod(state, gap, pay.date);
+    c.amount += pay.amount;
+    c.receipts.push(receipt);
+    return { idx: gap, mode: 'NEW' };
+  } else if (L && L.amount > 0 && !isFull(L) && pay.amount < prices.fullMin && (pay.amount < prices.topUpMax || L.amount + pay.amount <= prices.monthMax)) mode = 'TOP_UP';
   if (mode !== 'NEW') idx = last;
   else {
     const from = last >= 0 ? last + 1 : 0;
@@ -108,7 +153,7 @@ export function writeTuition(state: RowState, pay: { amount: number; date: strin
   else if (mode === 'NEW')
     // Бүтэн жилийн төлбөр шинэ нүдэнд: хичээлийн жилийн эхэнд «бүтэн», харин 9-р сарыг
     // сараар төлсний дараах үлдэгдэл бол дараагийн сарын хугацаатай (ажилтны бичлэгээр)
-    c.period = pay.amount >= FULL_YEAR_MIN && (!L || L.month < SCHOOL_START) ? 'бүтэн' : nextPeriod(state, idx, pay.date);
+    c.period = pay.amount >= prices.fullMin && (!L || L.month < SCHOOL_START) ? 'бүтэн' : nextPeriod(state, idx, pay.date);
   c.amount += pay.amount;
   c.receipts.push(receipt);
   return { idx, mode };

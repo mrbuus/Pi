@@ -17,6 +17,8 @@ export interface RosterStudent {
   /** Хүүхэд, аав, ээжийн 8 оронтой дугаар */
   phones: string[];
   archived: boolean;
+  /** Нийгэмд суудаг: үндсэн анги нь Нийгэм, эсвэл шийтийн «Нийгэм» хуудсанд мөртэй */
+  social?: boolean;
 }
 
 export interface PayerHint {
@@ -49,7 +51,15 @@ export type MatchDecision =
 export interface MatchResult {
   decision: MatchDecision;
   candidates: MatchCandidate[];
+  /** Утгад «нийгэм» — known: нийгэмд суудаг хүүхэд л үлдсэн эсэх */
+  social?: { known: boolean };
 }
+
+/**
+ * Нийгмийн хичээлийн төлбөр (эзэн 2026-11-12): «Нийгэм», «нийгмийн анги», «niigem»,
+ * «niigm», «Niigmiin». Математикийн төлбөрт холихгүй, нийгэмд суудаг хүүхдэд л ононо.
+ */
+export const SOCIAL_WORD = /нийг[эе]?м|nii?g[eiy]*m/iu;
 
 // ── Бичвэр ─────────────────────────────────────────────────────────────────
 
@@ -227,6 +237,19 @@ export function matchTransaction(tx: { description: string; counterparty: string
     if (singles.has(ini) || viaLatin) hit(id, 'SURNAME');
   }
 
+  // «Нийгэм» гэсэн гүйлгээ: нийгэмд суудаг хүүхэд таарвал бусдыг хасна — ижил нэртэй
+  // математикийн хүүхдэд (Батмөнх Хонгорзул ↔ Мөнхзул Хонгорзул) мөнгө орохгүй. Харин
+  // математикийн хүүхэд илүү баттай таарвал (утас + нэр ↔ зөвхөн нэр) хасахгүй — хүн шийднэ
+  const socialTx = SOCIAL_WORD.test(text);
+  const isSocial = (id: string) => !!idx.roster.get(id)!.social;
+  const best = (pick: (id: string) => boolean) => Math.max(0, ...[...signals].filter(([id]) => pick(id)).map(([, s]) => s.size));
+  const socialKnown = socialTx && best(isSocial) > 0 && best(isSocial) >= best((id) => !isSocial(id));
+  if (socialKnown) for (const id of [...signals.keys()]) if (!isSocial(id)) signals.delete(id);
+  const res = matchCore(signals, idx, all);
+  return socialTx ? { ...res, social: { known: socialKnown } } : res;
+}
+
+function matchCore(signals: Map<string, Set<MatchSignal>>, idx: MatchIndex, all: string[]): MatchResult {
   // Архивласан (гарсан) хүүхэд идэвхтэйтэй тэнцвэл ар тал руу
   const cands: MatchCandidate[] = [...signals.entries()]
     .map(([studentId, s]) => ({ studentId, signals: [...s], score: s.size - (idx.roster.get(studentId)!.archived ? 0.5 : 0) }))
