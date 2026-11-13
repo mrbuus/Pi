@@ -96,6 +96,8 @@ abstract final class NavData {
   static const _storeAdmin = NavLink('/app/admin/store', 'Дэлгүүрийн удирдлага', AppIcons.store);
   static const _internal = NavLink('/app/internal', 'Бодлогын ноорог', AppIcons.draft);
   static const _import = NavLink('/app/import', 'Word импорт', AppIcons.document);
+  // Номын мөнгө (эзэн 2026-11-12) — бүх төвийн багш, вэбийн nav-data.ts-тэй ижил байрлал
+  static const _bookMoney = NavLink('/app/book-money', 'Номын мөнгө', AppIcons.theory);
   static const _store = NavLink('/app/store', 'Дэлгүүр', AppIcons.store);
 
   // Дэд табын холбоосууд (богино шошго нь дээд мөрөнд). Вэбийн `ClassHubTabs`-ийн
@@ -239,6 +241,7 @@ abstract final class NavData {
       _videos,
       _tests,
       _schedule,
+      _bookMoney,
       _classes,
       _lessonFlow,
       _students,
@@ -252,6 +255,7 @@ abstract final class NavData {
       _lessonFlow,
       _teacherHours,
       _internal,
+      _bookMoney,
       _import,
       _library,
       _videos,
@@ -275,6 +279,7 @@ abstract final class NavData {
       NavLink('/app/admin/v2', 'v2 ажлын хяналт', AppIcons.tests),
       NavLink('/app/admin/capabilities', 'Эрхийн матриц', AppIcons.shield),
       _internal,
+      _bookMoney,
       _import,
       NavLink('/app/teacher', 'Багшийн самбар', AppIcons.classes),
       _teacherHours,
@@ -319,6 +324,7 @@ abstract final class NavData {
 
   static const _group = <String, NavGroup>{
     '/app/internal': NavGroup.internal,
+    '/app/book-money': NavGroup.internal,
     '/app/study/history': NavGroup.learn,
     '/app/groups': NavGroup.classes,
     '/app/study': NavGroup.learn,

@@ -57,7 +57,9 @@ void main() {
   test('ажилтны «Бусад» — дэд табд орсныг давтахгүй', () {
     final teacher = NavData.moreGroups(UserRole.teacher);
     // Хуваарийн хэсгээс гарсан хуудсууд «Бусад»-ын «Анги» бүлэгт — нэг ч хуудас хасагдаагүй.
-    expect(teacher.map((g) => g.$1), [NavGroup.classes, NavGroup.personal]);
+    // «Дотоод» бүлэгт «Номын мөнгө» (эзэн 2026-11-12, бүх төвийн багш).
+    expect(teacher.map((g) => g.$1), [NavGroup.classes, NavGroup.internal, NavGroup.personal]);
+    expect(teacher[1].$2.map((l) => l.path), ['/app/book-money']);
     expect(teacher.first.$2.map((l) => l.path), [
       '/app/classes',
       '/app/lesson-flow',
@@ -69,9 +71,17 @@ void main() {
     expect(admin, contains('/app/admin/analytics'));
     for (final role in [UserRole.teacherPlus, UserRole.admin]) {
       final more = NavData.moreGroups(role).expand((g) => g.$2).map((l) => l.path);
-      expect(more, containsAll(['/app/classes', '/app/lesson-flow', '/app/teacher-hours', '/app/dismissal']), reason: '$role');
+      expect(
+        more,
+        containsAll(['/app/classes', '/app/lesson-flow', '/app/teacher-hours', '/app/dismissal']),
+        reason: '$role',
+      );
     }
     expect(admin, containsAll(['/app/library', '/app/admin/capabilities', '/app/internal']));
+    for (final role in [UserRole.teacher, UserRole.teacherPlus, UserRole.admin]) {
+      final more = NavData.moreGroups(role).expand((g) => g.$2).map((l) => l.path);
+      expect(more, contains('/app/book-money'), reason: '$role');
+    }
   });
 
   test('зам аль хэсэгт хамаарах: хамгийн урт угтвар, «Бусад»-ын холбоос -1', () {

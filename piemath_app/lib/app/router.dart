@@ -6,6 +6,7 @@ import '../core/auth/session.dart';
 import '../core/auth/user_role.dart';
 import '../features/admin_oversight/admin_oversight_routes.dart';
 import '../features/auth/auth_routes.dart';
+import '../features/book_money/book_money_routes.dart';
 import '../features/books/books_routes.dart';
 import '../features/buyer/buyer_routes.dart';
 import '../features/classrooms_admin/classrooms_admin_routes.dart';
@@ -22,6 +23,7 @@ import '../features/lesson_flow/lesson_flow_routes.dart';
 import '../features/my_class/my_class_routes.dart';
 import '../features/notifications/notifications_routes.dart';
 import '../features/online_students/online_routes.dart';
+import '../features/paper_exams/paper_exams_routes.dart';
 import '../features/parent/parent_routes.dart';
 import '../features/passes/passes_routes.dart';
 import '../features/payments/payments_routes.dart';
@@ -88,6 +90,8 @@ final allFeatureRoutes = <FeatureRoutes>[
   storeAdminRoutes,
   internalDraftsRoutes,
   adminOversightRoutes,
+  bookMoneyRoutes,
+  paperExamsRoutes,
   _manageRoutes,
 ];
 
