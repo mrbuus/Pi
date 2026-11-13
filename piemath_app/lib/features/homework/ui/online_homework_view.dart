@@ -10,6 +10,7 @@ import '../../../core/ui/ui.dart';
 import '../../../shared/anim/animation_slot.dart';
 import '../data/homework_models.dart';
 import '../data/homework_repository.dart';
+import '../domain/photo_rules.dart';
 import 'composer/notebook_composer_screen.dart';
 import 'homework_badges.dart';
 import 'homework_providers.dart';
@@ -64,7 +65,7 @@ class AssignmentCard extends ConsumerWidget {
       context,
       title: resend ? 'Дахин илгээх' : 'Даалгавар илгээх',
       subtitle: a.title,
-      maxPages: PhotoDocumentLimits.homeworkMaxPages,
+      maxPages: homeworkPhotoMaxPages,
       noteLabel: 'Багшид тэмдэглэл (заавал биш)',
       initialNote: a.submission?.studentNote ?? '',
       onSubmit: (pages, note, progress, cancel) async {
@@ -72,7 +73,7 @@ class AssignmentCard extends ConsumerWidget {
           ref,
           pages,
           purpose: UploadPurpose.homework,
-          maxPages: PhotoDocumentLimits.homeworkMaxPages,
+          maxPages: homeworkPhotoMaxPages,
           fileName: uploadFileName('daalgavar', a.lessonDate ?? UbDateTime.now().dateKey),
           onProgress: progress,
           cancel: cancel,

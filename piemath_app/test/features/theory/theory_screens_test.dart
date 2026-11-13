@@ -12,27 +12,27 @@ import '../student_fixtures.dart';
 import '../student_harness.dart';
 
 List<Map<String, Object?>> theoryList() => [
-      {
-        'classroomId': 'c1',
-        'classroomName': '12-р анги',
-        'date': '2026-10-30',
-        'topic': 'Илтгэгч функц',
-        'tests': <Object?>[],
-        'count': 2,
-        'uploaders': ['Т. Ану'],
-        'canUpload': true,
-      },
-      {
-        'classroomId': 'c1',
-        'classroomName': '12-р анги',
-        'date': '2026-10-28',
-        'topic': null,
-        'tests': ['Логарифм 1'],
-        'count': 0,
-        'uploaders': <Object?>[],
-        'canUpload': true,
-      },
-    ];
+  {
+    'classroomId': 'c1',
+    'classroomName': '12-р анги',
+    'date': '2026-10-30',
+    'topic': 'Илтгэгч функц',
+    'tests': <Object?>[],
+    'count': 2,
+    'uploaders': ['Т. Ану'],
+    'canUpload': true,
+  },
+  {
+    'classroomId': 'c1',
+    'classroomName': '12-р анги',
+    'date': '2026-10-28',
+    'topic': null,
+    'tests': ['Логарифм 1'],
+    'count': 0,
+    'uploaders': <Object?>[],
+    'canUpload': true,
+  },
+];
 
 Future<void> _wait(WidgetTester tester, {int frames = 16}) async {
   for (var i = 0; i < frames; i++) {
@@ -40,15 +40,20 @@ Future<void> _wait(WidgetTester tester, {int frames = 16}) async {
   }
 }
 
-Map<String, Object?> dayWithMine() {
+/// Өөрийн зурагтай өдөр; [ago] — хэдийн өмнө илгээсэн (5 минутын дүрэм, эзэн 2026-11-12).
+Map<String, Object?> dayWithMine({Duration ago = const Duration(minutes: 1)}) {
   final d = theoryDayJson();
   final set = Map<String, Object?>.of((d['photos']! as List).first as Map<String, Object?>)
     ..['id'] = 's2'
     ..['isMine'] = true
     ..['uploaderName'] = 'Тест Сурагч'
     ..['isAssigned'] = false
-    ..['imageKeys'] = ['mine1.pdf'];
-  return {...d, 'photos': [set]};
+    ..['imageKeys'] = ['mine1.pdf']
+    ..['createdAt'] = DateTime.now().toUtc().subtract(ago).toIso8601String();
+  return {
+    ...d,
+    'photos': [set],
+  };
 }
 
 void main() {
@@ -58,7 +63,12 @@ void main() {
     testWidgets('өдрүүд, сэдэв/тест, зургийн тоо, «Илгээх», сарын гарчиг', (tester) async {
       final list = [
         ...theoryList(),
-        {...theoryList().last, 'date': '2026-09-15', 'canUpload': false, 'tests': ['Вектор']},
+        {
+          ...theoryList().last,
+          'date': '2026-09-15',
+          'canUpload': false,
+          'tests': ['Вектор'],
+        },
       ];
       final http = FakeHttp()..json('GET', '/student-hub/theory', list);
       await pumpStudentRoute(tester, http: http, location: '/app/theory');
@@ -156,7 +166,11 @@ void main() {
 
     testWidgets('алдаа: дахин оролдох', (tester) async {
       final http = FakeHttp()
-        ..on('GET', '/student-hub/theory', (_) => const FakeResponse(<String, Object?>{'message': 'Алдаа'}, status: 500))
+        ..on(
+          'GET',
+          '/student-hub/theory',
+          (_) => const FakeResponse(<String, Object?>{'message': 'Алдаа'}, status: 500),
+        )
         ..on('GET', '/student-hub/theory', (_) => FakeResponse(theoryList()));
       await pumpStudentRoute(tester, http: http, location: '/app/theory');
       await settle(tester);
@@ -214,7 +228,7 @@ void main() {
       await settle(tester);
       await tester.tap(find.text('Онолын зураг илгээх'));
       await _wait(tester);
-      expect(find.text('0/10'), findsOneWidget);
+      expect(find.text('0/20'), findsOneWidget);
       await tester.tap(find.text('Камер'));
       await _wait(tester);
       await tester.tap(find.text('Болсон'));
@@ -222,7 +236,9 @@ void main() {
       await tester.tap(find.text('Илгээх (1 хуудас)'));
       await _wait(tester, frames: 20);
       final post = http.requests.firstWhere((r) => r.method == 'POST');
-      expect(post.data, {'imageKeys': ['k-theory-1.pdf']});
+      expect(post.data, {
+        'imageKeys': ['k-theory-1.pdf'],
+      });
       expect(http.count('GET', '/lesson-day/c1/2026-10-30/photos'), 2, reason: 'өдөр шинэчлэгдсэн');
       // Жагсаалт доор түр зогссон (Riverpod 3) — буцаж ирэхэд хуучин тоогоор үлдэлгүй дахин ачаална.
       router.pop();
@@ -230,21 +246,33 @@ void main() {
       expect(http.count('GET', '/student-hub/theory'), 2, reason: 'жагсаалтын зургийн тоо хуучирч үлдэхгүй');
     });
 
-    testWidgets('өөрийн зураг: «Зургаа солих», устгахад баталгаажуулалт → хоосон багц илгээнэ', (tester) async {
+    testWidgets('өөрийн зураг: «Зургаа солих», устгахад баталгаажуулалт → DELETE (5 минутын дотор)', (tester) async {
       final http = FakeHttp()
         ..json('GET', '/lesson-day/c1/2026-10-30/photos', dayWithMine())
-        ..json('POST', '/lesson-day/c1/2026-10-30/photos', theoryDayJson(photos: false));
+        ..json('DELETE', '/lesson-day/c1/2026-10-30/photos', theoryDayJson(photos: false));
       await pumpStudentRoute(tester, http: http, location: '/app/theory/c1/2026-10-30');
       await settle(tester);
       expect(find.text('Зургаа солих'), findsOneWidget);
       expect(find.text('Таны зураг'), findsOneWidget);
+      expect(find.text('Буруу илгээсэн бол 5 минутын дотор устгаж, сольж болно'), findsOneWidget);
       await tester.tap(find.text('Устгах'));
       await settle(tester);
       expect(find.text('Зургаа устгах уу?'), findsOneWidget);
       await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text('Устгах')));
       await settle(tester);
-      final post = http.requests.firstWhere((r) => r.method == 'POST');
-      expect(post.data, {'imageKeys': <Object?>[]});
+      // Хоосон жагсаалтаар POST хийхгүй — сервер зөөлөн устгалын тусдаа маршрут
+      expect(http.count('DELETE', '/lesson-day/c1/2026-10-30/photos'), 1);
+      expect(http.requests.where((r) => r.method == 'POST'), isEmpty);
+    });
+
+    testWidgets('5 минут өнгөрсөн: өөрийн зургийг солих, устгах товчгүй', (tester) async {
+      final http = FakeHttp()
+        ..json('GET', '/lesson-day/c1/2026-10-30/photos', dayWithMine(ago: const Duration(minutes: 6)));
+      await pumpStudentRoute(tester, http: http, location: '/app/theory/c1/2026-10-30');
+      await settle(tester);
+      expect(find.text('Таны зураг'), findsOneWidget);
+      expect(find.text('Зургаа солих'), findsNothing);
+      expect(find.text('Устгах'), findsNothing);
     });
 
     testWidgets('илгээх эрхгүй (canUpload=false): товч байхгүй', (tester) async {

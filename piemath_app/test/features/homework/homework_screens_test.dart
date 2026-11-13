@@ -22,22 +22,37 @@ class _Photos {
   final uploader = FakePhotoSetUploader();
 
   List<Override> get overrides => [
-        todayKeyProvider.overrideWithValue(_today),
-        photoSourceProvider.overrideWithValue(source),
-        photoProcessorProvider.overrideWithValue(processor),
-        photoSetUploaderProvider.overrideWithValue(uploader),
-      ];
+    todayKeyProvider.overrideWithValue(_today),
+    photoSourceProvider.overrideWithValue(source),
+    photoProcessorProvider.overrideWithValue(processor),
+    photoSetUploaderProvider.overrideWithValue(uploader),
+  ];
 }
 
 FakeHttp classroomHttp({List<Map<String, Object?>>? days}) =>
     FakeHttp()..json('GET', '/homework/my', {'days': days ?? fixtureDays()});
 
+/// 10-30-ны илгээсэн зургийг [ago]-ийн өмнө илгээсэн болгоно (5 минутын дүрэм, эзэн 2026-11-12).
+List<Map<String, Object?>> photoDays(Duration ago, {String? returnedAt}) => [
+  for (final d in fixtureDays())
+    d['photo'] is Map
+        ? {
+            ...d,
+            'photo': {
+              ...(d['photo']! as Map<String, Object?>),
+              'uploadedAt': DateTime.now().toUtc().subtract(ago).toIso8601String(),
+              'returnedAt': returnedAt,
+            },
+          }
+        : d,
+];
+
 /// Босоо гүйлгэгчээр (өдрийн зурвасын хэвтээ жагсаалтаас ялгаж) хүртэл гүйлгэнэ.
 Future<void> scrollTo(WidgetTester tester, Finder target, {double delta = 300}) => tester.scrollUntilVisible(
-      target,
-      delta,
-      scrollable: find.byWidgetPredicate((w) => w is Scrollable && w.axisDirection == AxisDirection.down).first,
-    );
+  target,
+  delta,
+  scrollable: find.byWidgetPredicate((w) => w is Scrollable && w.axisDirection == AxisDirection.down).first,
+);
 
 /// Маршрутын шилжилт (~450мс) дуустал хүлээнэ.
 Future<void> _wait(WidgetTester tester, {int frames = 16}) async {
@@ -89,12 +104,17 @@ void main() {
     testWidgets('зураг илгээх: камер → тайрах → илгээх, POST /homework/photos', (tester) async {
       final photos = _Photos();
       final http = classroomHttp()
-        ..json('POST', '/homework/photos', {'id': 'ph9', 'fileKey': 'k-homework-1.pdf', 'pages': 1, 'uploadedAt': '2026-11-02T04:00:00.000Z'});
+        ..json('POST', '/homework/photos', {
+          'id': 'ph9',
+          'fileKey': 'k-homework-1.pdf',
+          'pages': 1,
+          'uploadedAt': '2026-11-02T04:00:00.000Z',
+        });
       await pumpStudentRoute(tester, http: http, location: '/app/homework', overrides: photos.overrides);
       await settle(tester);
       await tester.tap(find.text('Дэвтрийн зураг илгээх').first);
       await _wait(tester);
-      expect(find.text('0/6'), findsOneWidget);
+      expect(find.text('0/15'), findsOneWidget);
       await _addPhotoAndSend(tester, 'Илгээх (1 хуудас)');
       final post = http.requests.firstWhere((r) => r.method == 'POST' && r.path == '/homework/photos');
       expect(post.data, {'classroomId': 'c1', 'date': _today, 'fileKey': 'k-homework-1.pdf', 'pages': 1});
@@ -103,8 +123,27 @@ void main() {
       expect(http.count('GET', '/homework/my'), 2, reason: 'илгээсний дараа жагсаалт шинэчлэгдэнэ');
     });
 
+    testWidgets('илгээж чадаагүй: алдааг хүүхдэд тайван харуулж, техникийн бүртгэлд (POST /usage) илгээнэ', (tester) async {
+      final http = classroomHttp()
+        ..error('POST', '/homework/photos', 500)
+        ..json('POST', '/usage', {'accepted': 1}, status: 202);
+      await pumpStudentRoute(tester, http: http, location: '/app/homework', overrides: _Photos().overrides);
+      await settle(tester);
+      await tester.tap(find.text('Дэвтрийн зураг илгээх').first);
+      await _wait(tester);
+      await _addPhotoAndSend(tester, 'Илгээх (1 хуудас)');
+      final usage = http.requests.where((r) => r.path == '/usage').single;
+      final event = ((usage.data as Map)['events'] as List).single as Map;
+      expect(event['kind'], 'error');
+      expect(event['path'], '/app/homework');
+      expect(event['target'], startsWith('err:photo/save app '));
+      expect(event['target'], endsWith('n 1 ApiError server 500'));
+      expect(find.textContaining('500'), findsNothing);
+    });
+
     testWidgets('илгээсэн зураг: харах, дахин илгээх, устгах (баталгаажуулалттай)', (tester) async {
-      final http = classroomHttp()..json('DELETE', '/homework/photos/ph1', <String, Object?>{});
+      final http = classroomHttp(days: photoDays(const Duration(minutes: 1)))
+        ..json('DELETE', '/homework/photos/ph1', <String, Object?>{});
       await pumpStudentRoute(tester, http: http, location: '/app/homework', overrides: _Photos().overrides);
       await settle(tester);
       await scrollTo(tester, find.text('Зураг илгээсэн, 3 хуудас'), delta: 400);
@@ -112,6 +151,7 @@ void main() {
       await tester.pump();
       expect(find.text('Харах'), findsOneWidget);
       expect(find.text('Дахин илгээх'), findsOneWidget);
+      expect(find.text('Буруу илгээсэн бол 5 минутын дотор устгаж, сольж болно'), findsOneWidget);
       await tester.tap(find.text('Устгах'));
       await settle(tester);
       expect(find.text('Зургийг устгах уу?'), findsOneWidget);
@@ -125,6 +165,27 @@ void main() {
       expect(http.count('DELETE', '/homework/photos/ph1'), 1);
     });
 
+    testWidgets('5 минут өнгөрсөн: зөвхөн «Харах» (устгах, солих товчгүй)', (tester) async {
+      final http = classroomHttp(days: photoDays(const Duration(minutes: 6)));
+      await pumpStudentRoute(tester, http: http, location: '/app/homework', overrides: _Photos().overrides);
+      await settle(tester);
+      await scrollTo(tester, find.text('Зураг илгээсэн, 3 хуудас'), delta: 400);
+      expect(find.text('Харах'), findsOneWidget);
+      expect(find.text('Дахин илгээх'), findsNothing);
+      expect(find.text('Устгах'), findsNothing);
+      expect(find.text('Буруу илгээсэн бол 5 минутын дотор устгаж, сольж болно'), findsNothing);
+    });
+
+    testWidgets('багш буцаасан: хугацаа өнгөрсөн ч «Дахин илгээх», устгахгүй', (tester) async {
+      final http = classroomHttp(days: photoDays(const Duration(days: 1), returnedAt: '2026-10-31T02:00:00.000Z'));
+      await pumpStudentRoute(tester, http: http, location: '/app/homework', overrides: _Photos().overrides);
+      await settle(tester);
+      await scrollTo(tester, find.text('Зураг илгээсэн, 3 хуудас'), delta: 400);
+      expect(find.text('Багш буцаасан — сэтгэгдлийг уншаад засаж, дахин илгээнэ үү'), findsOneWidget);
+      expect(find.text('Дахин илгээх'), findsOneWidget);
+      expect(find.text('Устгах'), findsNothing);
+    });
+
     testWidgets('14 хоногоос хуучин өдөр: илгээх боломжгүй, «PDF» үг харагдахгүй', (tester) async {
       await pumpStudentRoute(tester, http: classroomHttp(), location: '/app/homework', overrides: _Photos().overrides);
       await settle(tester);
@@ -136,7 +197,12 @@ void main() {
 
     testWidgets('онлайн тест (B хувилбар): нэр цэвэрлэгдэнэ, дарахад бодох дэлгэц', (tester) async {
       final http = classroomHttp()..json('POST', '/homework/attempts', fixtureAttempt());
-      final router = await pumpStudentRoute(tester, http: http, location: '/app/homework', overrides: _Photos().overrides);
+      final router = await pumpStudentRoute(
+        tester,
+        http: http,
+        location: '/app/homework',
+        overrides: _Photos().overrides,
+      );
       await settle(tester);
       expect(find.text('Логарифм 3'), findsWidgets);
       expect(find.text('Эхлээгүй'), findsOneWidget);
@@ -159,7 +225,16 @@ void main() {
               'opened': false,
               'lessonsLeft': 1,
               'items': [
-                {'testId': 't9', 'title': 'Тест 9', 'variantLabel': 'А', 'kind': 'CLASS', 'problemCount': 10, 'timeLimitMin': 40, 'locked': false, 'rounds': <Object?>[]},
+                {
+                  'testId': 't9',
+                  'title': 'Тест 9',
+                  'variantLabel': 'А',
+                  'kind': 'CLASS',
+                  'problemCount': 10,
+                  'timeLimitMin': 40,
+                  'locked': false,
+                  'rounds': <Object?>[],
+                },
               ],
             },
             {
@@ -179,7 +254,13 @@ void main() {
                   'timeLimitMin': null,
                   'locked': false,
                   'rounds': [
-                    {'round': 1, 'attemptId': 'x1', 'status': 'SUBMITTED', 'score': {'correct': 6, 'total': 10}, 'submittedAt': null},
+                    {
+                      'round': 1,
+                      'attemptId': 'x1',
+                      'status': 'SUBMITTED',
+                      'score': {'correct': 6, 'total': 10},
+                      'submittedAt': null,
+                    },
                   ],
                 },
               ],
@@ -187,7 +268,12 @@ void main() {
           ],
         })
         ..json('POST', '/homework/redo/attempts', fixtureAttempt());
-      final router = await pumpStudentRoute(tester, http: http, location: '/app/homework', overrides: _Photos().overrides);
+      final router = await pumpStudentRoute(
+        tester,
+        http: http,
+        location: '/app/homework',
+        overrides: _Photos().overrides,
+      );
       await settle(tester);
       await scrollTo(tester, find.text('Нээгдэхэд 1 хичээл үлдсэн'));
       expect(find.text('Дахин бодох'), findsWidgets);
@@ -203,7 +289,12 @@ void main() {
     });
 
     testWidgets('14 хоногт хичээл алга: хоосон төлөв', (tester) async {
-      await pumpStudentRoute(tester, http: classroomHttp(days: []), location: '/app/homework', overrides: _Photos().overrides);
+      await pumpStudentRoute(
+        tester,
+        http: classroomHttp(days: []),
+        location: '/app/homework',
+        overrides: _Photos().overrides,
+      );
       await settle(tester);
       expect(find.text('Сүүлийн 14 хоногт хичээл алга'), findsOneWidget);
     });
@@ -221,7 +312,12 @@ void main() {
     });
 
     testWidgets('«Жилийн түүх» товч → түүхийн дэлгэц', (tester) async {
-      final router = await pumpStudentRoute(tester, http: classroomHttp(), location: '/app/homework', overrides: _Photos().overrides);
+      final router = await pumpStudentRoute(
+        tester,
+        http: classroomHttp(),
+        location: '/app/homework',
+        overrides: _Photos().overrides,
+      );
       await settle(tester);
       await tester.tap(find.byTooltip('Жилийн түүх'));
       await settle(tester);
@@ -257,7 +353,10 @@ void main() {
       await tester.enterText(find.byType(TextField), 'Дахин бичлээ');
       await _addPhotoAndSend(tester, 'Илгээх (1 хуудас)');
       final post = http.requests.firstWhere((r) => r.path == '/assignments/a1/submit');
-      expect(post.data, {'imageKeys': ['k-homework-1.pdf'], 'note': 'Дахин бичлээ'});
+      expect(post.data, {
+        'imageKeys': ['k-homework-1.pdf'],
+        'note': 'Дахин бичлээ',
+      });
       expect(find.text('Даалгавар илгээгдлээ'), findsOneWidget);
     });
 
@@ -282,10 +381,25 @@ void main() {
 
   group('Жилийн түүх (homework-marks/my)', () {
     List<Map<String, Object?>> marks() => [
-          {'date': '2026-10-27T00:00:00.000Z', 'status': 'DONE', 'comment': 'Сайн хийжээ', 'classroom': {'id': 'c1', 'name': '12-р анги'}},
-          {'date': '2026-10-29T00:00:00.000Z', 'status': 'PARTIAL', 'comment': null, 'classroom': {'id': 'c1', 'name': '12-р анги'}},
-          {'date': '2026-09-15T00:00:00.000Z', 'status': 'NOT_DONE', 'comment': ' ', 'classroom': {'id': 'c1', 'name': '12-р анги'}},
-        ];
+      {
+        'date': '2026-10-27T00:00:00.000Z',
+        'status': 'DONE',
+        'comment': 'Сайн хийжээ',
+        'classroom': {'id': 'c1', 'name': '12-р анги'},
+      },
+      {
+        'date': '2026-10-29T00:00:00.000Z',
+        'status': 'PARTIAL',
+        'comment': null,
+        'classroom': {'id': 'c1', 'name': '12-р анги'},
+      },
+      {
+        'date': '2026-09-15T00:00:00.000Z',
+        'status': 'NOT_DONE',
+        'comment': ' ',
+        'classroom': {'id': 'c1', 'name': '12-р анги'},
+      },
+    ];
 
     testWidgets('нийлбэр, сараар бүлэглэсэн, шинэ нь эхэнд', (tester) async {
       final http = FakeHttp()..json('GET', '/homework-marks/my', marks());
@@ -309,7 +423,10 @@ void main() {
       await tester.tap(find.byTooltip('Өмнөх он'));
       await settle(tester);
       expect(find.text('2025 он'), findsOneWidget);
-      final years = http.requests.where((r) => r.path == '/homework-marks/my').map((r) => r.queryParameters['year']).toList();
+      final years = http.requests
+          .where((r) => r.path == '/homework-marks/my')
+          .map((r) => r.queryParameters['year'])
+          .toList();
       expect(years, [2026, 2025]);
       expect(tester.widget<IconButton>(find.widgetWithIcon(IconButton, AppIcons.forward)).onPressed, isNotNull);
     });

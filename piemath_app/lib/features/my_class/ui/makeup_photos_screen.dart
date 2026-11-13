@@ -35,6 +35,7 @@ class _MakeupPhotosScreenState extends ConsumerState<MakeupPhotosScreen> {
       title: 'Дэвтрийн зураг',
       subtitle: '${dayTitle(item.date)}, ${PhotoDocumentLimits.theoryMaxPages} хүртэл хуудас',
       maxPages: PhotoDocumentLimits.theoryMaxPages,
+      usagePath: '/app/makeup',
       onSubmit: (pages, _, progress, cancel) async {
         final (file, _) = await uploadPhotoSet(
           ref,

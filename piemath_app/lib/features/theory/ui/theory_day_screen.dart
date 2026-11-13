@@ -7,7 +7,9 @@ import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/ui/ui.dart';
 import '../../homework/domain/homework_logic.dart' show dayLabel;
+import '../../homework/domain/photo_rules.dart';
 import '../../homework/ui/composer/notebook_composer_screen.dart';
+import '../../homework/ui/photo_edit_window.dart';
 import '../../my_class/data/my_class_repository.dart' as hub show theoryDayProvider;
 import '../data/theory_models.dart';
 import '../data/theory_repository.dart';
@@ -100,14 +102,15 @@ class TheoryUploadActions extends ConsumerWidget {
     final ok = await NotebookComposerScreen.open(
       context,
       title: 'Онолын зураг илгээх',
-      subtitle: '$_subtitle, ${PhotoDocumentLimits.theoryMaxPages} хүртэл хуудас',
-      maxPages: PhotoDocumentLimits.theoryMaxPages,
+      subtitle: '$_subtitle, $theoryPhotoMaxPages хүртэл хуудас',
+      maxPages: theoryPhotoMaxPages,
+      usagePath: '/app/theory',
       onSubmit: (pages, _, progress, cancel) async {
         final (file, _) = await uploadPhotoSet(
           ref,
           pages,
           purpose: UploadPurpose.theory,
-          maxPages: PhotoDocumentLimits.theoryMaxPages,
+          maxPages: theoryPhotoMaxPages,
           fileName: uploadFileName('onol', day.date),
           onProgress: progress,
           cancel: cancel,
@@ -132,7 +135,7 @@ class TheoryUploadActions extends ConsumerWidget {
     );
     if (yes != true) return;
     try {
-      await ref.read(theoryRepositoryProvider).savePhotos(day.classroomId, day.date, const []);
+      await ref.read(theoryRepositoryProvider).removePhotos(day.classroomId, day.date);
       _refreshAfterChange(ref);
     } on ApiError catch (e) {
       if (context.mounted) ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(e.message)));
@@ -142,6 +145,16 @@ class TheoryUploadActions extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mine = day.mine;
+    if (mine == null) return _actions(context, ref, mine: null, inWindow: false);
+    // Илгээснээс 5 минутын дотор л солих / устгах (эзэн 2026-11-12) — хугацаа дуусахад товч алга болно
+    return PhotoEditWindow(
+      sentAt: mine.createdAt,
+      builder: (context, inWindow) => _actions(context, ref, mine: mine, inWindow: inWindow),
+    );
+  }
+
+  Widget _actions(BuildContext context, WidgetRef ref, {required TheoryPhotoSet? mine, required bool inWindow}) {
+    if (mine != null && !inWindow && !day.assignedToMe) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -151,24 +164,29 @@ class TheoryUploadActions extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: AppSpace.sm),
             child: Text('Багш таныг энэ өдрийн онолын зургийг авахаар томилсон', style: context.text.bodyMedium),
           ),
-        Wrap(
-          spacing: AppSpace.sm,
-          runSpacing: AppSpace.xs,
-          children: [
-            FilledButton.icon(
-              onPressed: () => _upload(context, ref),
-              icon: const Icon(AppIcons.camera, size: 18),
-              label: Text(mine == null ? 'Онолын зураг илгээх' : 'Зургаа солих'),
-            ),
-            if (mine != null)
-              TextButton.icon(
-                onPressed: () => _delete(context, ref),
-                style: TextButton.styleFrom(foregroundColor: context.colors.error),
-                icon: const Icon(AppIcons.trash, size: 18),
-                label: const Text('Устгах'),
+        if (mine == null || inWindow)
+          Wrap(
+            spacing: AppSpace.sm,
+            runSpacing: AppSpace.xs,
+            children: [
+              FilledButton.icon(
+                onPressed: () => _upload(context, ref),
+                icon: const Icon(AppIcons.camera, size: 18),
+                label: Text(mine == null ? 'Онолын зураг илгээх' : 'Зургаа солих'),
               ),
-          ],
-        ),
+              if (mine != null)
+                TextButton.icon(
+                  onPressed: () => _delete(context, ref),
+                  style: TextButton.styleFrom(foregroundColor: context.colors.error),
+                  icon: const Icon(AppIcons.trash, size: 18),
+                  label: const Text('Устгах'),
+                ),
+            ],
+          ),
+        if (mine != null && inWindow) ...[
+          const SizedBox(height: AppSpace.xs),
+          Text(photoEditHint, style: context.text.bodySmall?.copyWith(color: context.colors.inkDim)),
+        ],
       ],
     );
   }
