@@ -261,7 +261,8 @@ const PRIMARY_BY_ROLE: Record<string, string[]> = {
   STUDENT: ["/app/homework", "/app/my-class", "/app/theory"],
   TEACHER: ["/app/schedule", "/app/library", "/app/tests"],
   TEACHER_PLUS: ["/app/schedule", "/app/payments", "/app/admin/students"],
-  ADMIN: ["/app/admin/students", "/app/admin/leads", "/app/schedule"],
+  // «Элсэлт»-ийн оронд «Шалгалт» (эзэн 2026-11-14) — Элсэлт «Бусад» дотор хэвээр
+  ADMIN: ["/app/admin/students", "/app/tests", "/app/schedule"],
   BUYER: ["/app/library", "/app/videos", "/app/schedule"],
   PARENT: ["/app/schedule"],
 };
