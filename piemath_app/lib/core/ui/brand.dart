@@ -23,6 +23,31 @@ class BrandLogo extends StatelessWidget {
   }
 }
 
+/// Бүтэн лого (дугуй тэмдэг + «Shine ireeduin ezed» бичвэр, вэбийн `LogoMark`). Хар горимд бичвэр нь цагаан
+/// хувилбар. Өргөн : өндөр ≈ 2.26 : 1.
+class BrandLogoFull extends StatelessWidget {
+  const BrandLogoFull({super.key, this.width = 280});
+
+  final double width;
+
+  static const aspect = 840 / 372;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final px = (width * MediaQuery.devicePixelRatioOf(context)).round();
+    return Image.asset(
+      dark ? 'assets/brand/logo-full-dark.png' : 'assets/brand/logo-full.png',
+      width: width,
+      height: width / aspect,
+      cacheWidth: px,
+      semanticLabel: AppStrings.orgName,
+      filterQuality: FilterQuality.medium,
+      gaplessPlayback: true,
+    );
+  }
+}
+
 /// Лого + «Piemath» + «Шинэ ирээдүйн эзэд».
 class BrandMark extends StatelessWidget {
   const BrandMark({super.key, this.logoSize = 44, this.showOrg = true});

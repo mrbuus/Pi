@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Урам өгөх мөчүүд</title>
+<!--
+  Piemath — С3 нэгж тойрог (ачаалал), С5 давхар зураас (шалгалт), С8 долоо хоногийн нүд,
+  С11 цэвэр самбар (багш). docs/ANIMATION-RESEARCH-2026-11.md §3.2.
+  Гадны сангүй: зөвхөн SVG + Web Animations. Апп-д Flutter CustomPainter-ээр хийнэ.
+-->
+<style>
+  @font-face { font-family: Onest; src: url(../../assets/fonts/Onest-Regular.ttf); font-weight: 400; }
+  @font-face { font-family: Onest; src: url(../../assets/fonts/Onest-SemiBold.ttf); font-weight: 600; }
+  @font-face { font-family: Onest; src: url(../../assets/fonts/Onest-Bold.ttf); font-weight: 700; }
+  @font-face { font-family: Unbounded; src: url(../../assets/fonts/Unbounded-SemiBold.ttf); font-weight: 600; }
+
+  :root {
+    --page: #E9EDF4; --bg: #F5F7FB; --surface: #FFFFFF; --line: #D7DBE3; --line-strong: #7A808D;
+    --ink: #181E2A; --ink-dim: #4E5564; --brand: #273F74; --brand-bright: #3D6BC4; --brand-tint: #E3EBFA;
+    --brand-lip: #142E62; --lip: #C5CBD6; --success: #1E7A35; --btn-text: #FFFFFF;
+    --board: #273F74; --board-lip: #142E62; --chalk: #FFFFFF; --chalk-dim: #C9D7F5;
+  }
+  :root[data-theme="dark"] {
+    --page: #090C10; --bg: #0F1319; --surface: #1A1E26; --line: #383D48; --line-strong: #808693;
+    --ink: #E3E6ED; --ink-dim: #B2B8C3; --brand: #AFC4EF; --brand-bright: #76B6F7; --brand-tint: #1E2B47;
+    --brand-lip: #7C93C4; --lip: #2B303A; --success: #6FCF8F; --btn-text: #0F1D3A;
+    --board: #1E2B47; --board-lip: #0B1428; --chalk: #E3E6ED; --chalk-dim: #AFC4EF;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--page); color: var(--ink);
+    font-family: Onest, "DejaVu Sans", system-ui, sans-serif; font-size: 15px; line-height: 1.45;
+    padding: 24px 16px 48px;
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+  .lead { color: var(--ink-dim); margin: 0 0 16px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 20px; }
+  label.chk { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  label.chk input { width: 18px; height: 18px; accent-color: #273F74; }
+  .ctl {
+    font: inherit; font-weight: 600; font-size: 14px; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; cursor: pointer; box-shadow: 0 3px 0 var(--lip);
+  }
+  .ctl:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--lip); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; }
+  .demo h2 { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  .demo .when { color: var(--ink-dim); font-size: 13px; margin: 0 0 10px; min-height: 38px; }
+  .stage {
+    position: relative; height: 320px; border-radius: 22px; background: var(--bg); border: 8px solid var(--surface);
+    outline: 1px solid var(--line); overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 16px; text-align: center;
+  }
+  .row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .status { font-size: 13px; color: var(--ink-dim); margin-top: 8px; min-height: 20px; }
+  .t { font-weight: 600; font-size: 16px; }
+  .s { color: var(--ink-dim); font-size: 13px; }
+  .dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; display: inline-block; vertical-align: middle; margin: 0 7px; }
+
+  /* С5 */
+  .score { display: flex; align-items: baseline; gap: 4px; margin-top: 6px; position: relative; }
+  .score .n { font-family: Unbounded, Onest, sans-serif; font-weight: 600; font-size: 52px; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; min-width: 1.3em; text-align: right; }
+  .score .of { font-family: Unbounded, Onest, sans-serif; font-weight: 600; font-size: 20px; color: var(--ink-dim); }
+  .ul { display: block; margin: 2px auto 0; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 600; margin-top: 10px; }
+
+  /* С8 */
+  .week { display: flex; gap: 8px; margin: 16px 0 6px; }
+  .cell { width: 32px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-dim); }
+  .box { width: 32px; height: 32px; border-radius: 8px; border: 1px dashed var(--line-strong); position: relative; }
+  .box.on::after, .box .blk {
+    content: ''; position: absolute; inset: -1px; border-radius: 8px; background: var(--brand); box-shadow: 0 3px 0 var(--brand-lip);
+  }
+  .box .blk { display: block; }
+  .count { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+  .odo { position: relative; width: 34px; height: 40px; overflow: hidden; font-family: Unbounded, Onest, sans-serif; font-weight: 600; font-size: 30px; line-height: 40px; color: var(--brand); }
+  .odo span { position: absolute; left: 0; right: 0; text-align: center; }
+  .count .lbl { text-align: left; font-size: 13px; color: var(--ink-dim); line-height: 1.3; }
+
+  /* С11 */
+  .board {
+    position: relative; width: 254px; height: 200px; background: var(--board); border-radius: 12px;
+    box-shadow: 0 8px 0 var(--board-lip); color: var(--chalk); text-align: left; overflow: hidden;
+  }
+  .board .lay { position: absolute; inset: 0; padding: 16px 18px; }
+  .brow { display: grid; grid-template-columns: 40px 52px 1fr 22px; align-items: center; height: 40px; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.14); }
+  .brow b { font-weight: 600; }
+  .brow .r { text-align: right; padding-right: 8px; color: var(--chalk-dim); font-variant-numeric: tabular-nums; }
+  .final { display: flex; flex-direction: column; justify-content: center; }
+  .final .t { color: var(--chalk); font-size: 17px; line-height: 1.3; }
+  .final .s { color: var(--chalk-dim); margin-top: 8px; }
+  .eraser {
+    position: absolute; top: 18px; left: -48px; width: 40px; height: 164px; border-radius: 8px;
+    background: #D7DBE3; box-shadow: inset -6px 0 0 #7A808D; visibility: hidden;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Урам өгөх мөчүүд</h1>
+  <p class="lead">Кодоор зурах дөрвөн мөч: файлгүй, өнгө токеноос, цайвар/харанхуй горимд автомат</p>
+  <div class="bar">
+    <label class="chk"><input type="checkbox" id="opt-dark"> Харанхуй горим</label>
+    <label class="chk"><input type="checkbox" id="opt-reduce"> Хөдөлгөөн багасгах</label>
+    <button class="ctl" id="all">Бүгдийг дахин тоглуулах</button>
+  </div>
+
+  <div class="grid">
+    <!-- С3 -->
+    <section class="demo" id="d-loop">
+      <h2>С3 Нэгж тойрог</h2>
+      <p class="when">Бүтэн дэлгэцийн хүлээлт: 400мс хүлээгээд гарна, гарсан бол 600мс-ээс багагүй, 1.6с үетэй гогцоо</p>
+      <div class="stage">
+        <svg class="loop" width="260" height="130" viewBox="0 0 260 130" aria-hidden="true"></svg>
+        <div class="t" style="margin-top:8px" id="loop-text">Шалгалтыг бэлдэж байна</div>
+      </div>
+      <div class="row">
+        <button class="ctl" data-load="250">Хурдан ачаалал 250мс</button>
+        <button class="ctl" data-load="2500">Удаан ачаалал 2.5с</button>
+      </div>
+      <div class="status" id="loop-status"></div>
+    </section>
+
+    <!-- С5 -->
+    <section class="demo" id="d-score">
+      <h2>С5 Давхар зураас</h2>
+      <p class="when">Шалгалт илгээж оноо гарахад, 1.2с, нэг удаа. Оноо эхний кадраас уншигдана</p>
+      <div class="stage">
+        <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
+          <circle class="ring" cx="32" cy="32" r="28" fill="none" stroke="var(--brand)" stroke-width="4.5" stroke-linecap="round" transform="rotate(-90 32 32)"/>
+          <path class="tick" d="M19 33 L28 42 L46 23" fill="none" stroke="var(--brand)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="t" style="margin-top:8px">Шалгалт илгээгдлээ</div>
+        <div class="s">Хавтгай 1<span class="dot"></span>7-р тест</div>
+        <div class="score" aria-label="50-аас 42 оноо"><span class="n">42</span><span class="of">/50</span></div>
+        <svg class="ul" width="150" height="16" viewBox="0 0 150 16" aria-hidden="true">
+          <path class="u1" d="M6 5 Q75 2 144 5" fill="none" stroke="var(--brand)" stroke-width="3" stroke-linecap="round"/>
+          <path class="u2" d="M14 12 Q75 9 136 12" fill="none" stroke="var(--brand)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <div class="chip"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10 V2 M2.5 5.5 L6 2 L9.5 5.5" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Өмнөхөөс 6 оноо дээш</div>
+      </div>
+      <div class="row"><button class="ctl" data-replay="score">Дахин</button></div>
+    </section>
+
+    <!-- С8 -->
+    <section class="demo" id="d-week">
+      <h2>С8 Долоо хоногийн нүд</h2>
+      <p class="when">Долоо хоногийн зорилго биелэхэд, 1.0с, нэг удаа. «Алдлаа» анимац хэзээ ч үгүй</p>
+      <div class="stage">
+        <div class="t">Энэ долоо хоногийн зорилго биеллээ</div>
+        <div class="s">Зорилго: долоо хоногт 2 өдөр</div>
+        <div class="week" id="week"></div>
+        <div class="count">
+          <div class="odo"><span class="o1">3</span><span class="o2">4</span></div>
+          <div class="lbl">долоо хоног<br>дараалан</div>
+        </div>
+      </div>
+      <div class="row"><button class="ctl" data-replay="week">Дахин</button></div>
+    </section>
+
+    <!-- С11 -->
+    <section class="demo" id="d-board">
+      <h2>С11 Цэвэр самбар</h2>
+      <p class="when">Багш өнөөдрийн бүх ангиа тэмдэглэсэн үед, өдөрт нэг удаа, 1.6с. Товшвол алгасна</p>
+      <div class="stage" id="board-stage">
+        <div class="board">
+          <div class="lay final">
+            <div class="t">Өнөөдрийн бүх анги тэмдэглэгдлээ</div>
+            <div class="s">4 анги<span class="dot"></span>110 сурагч</div>
+            <div class="s" style="margin-top:14px">Маргааш 09:00<span class="dot"></span>10А</div>
+          </div>
+          <div class="lay rows" id="rows"></div>
+          <div class="eraser"></div>
+        </div>
+      </div>
+      <div class="row"><button class="ctl" data-replay="board">Дахин</button></div>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const optDark = $('#opt-dark'), optReduce = $('#opt-reduce');
+  const reduced = () => optReduce.checked || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const DECEL = 'cubic-bezier(0.05, 0.7, 0.1, 1)';
+  const STD = 'cubic-bezier(0.2, 0, 0, 1)';
+  // expressive spring (ζ≈0.8) — бага зэрэг суух
+  const SETTLE = 'cubic-bezier(0.34, 1.25, 0.64, 1)';
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  if (matchMedia('(prefers-color-scheme: dark)').matches) optDark.checked = true;
+  const applyTheme = () => (document.documentElement.dataset.theme = optDark.checked ? 'dark' : 'light');
+  applyTheme();
+
+  // ---------- С3 Нэгж тойрог ----------
+  const loopSvg = $('#d-loop .loop');
+  loopSvg.innerHTML = `
+    <line x1="10" y1="65" x2="250" y2="65" stroke="var(--line)" stroke-width="1.5"/>
+    <line x1="60" y1="15" x2="60" y2="115" stroke="var(--line)" stroke-width="1.5"/>
+    <circle cx="60" cy="65" r="40" fill="none" stroke="var(--line-strong)" stroke-width="1.5"/>
+    <line class="rad" x1="60" y1="65" stroke="var(--brand)" stroke-width="2"/>
+    <line class="proj" y1="0" stroke="var(--line-strong)" stroke-width="1.5" stroke-dasharray="3 4"/>
+    <path class="wave" fill="none" stroke="var(--brand-bright)" stroke-width="3" stroke-linecap="round"/>
+    <circle class="pt" r="6" fill="var(--brand)"/>
+    <circle class="pt2" r="4" fill="var(--brand-bright)"/>`;
+  const L = { rad: $('.rad', loopSvg), proj: $('.proj', loopSvg), wave: $('.wave', loopSvg), pt: $('.pt', loopSvg), pt2: $('.pt2', loopSvg) };
+  const PERIOD = 1600, X0 = 120, X1 = 250, R = 40, CX = 60, CY = 65;
+  let loopOn = false, loopT0 = 0;
+  function drawLoop(theta) {
+    const px = CX + R * Math.cos(theta), py = CY - R * Math.sin(theta);
+    L.rad.setAttribute('x2', px); L.rad.setAttribute('y2', py);
+    L.pt.setAttribute('cx', px); L.pt.setAttribute('cy', py);
+    L.proj.setAttribute('x1', px); L.proj.setAttribute('y1', py); L.proj.setAttribute('x2', X0); L.proj.setAttribute('y2', py);
+    L.pt2.setAttribute('cx', X0); L.pt2.setAttribute('cy', py);
+    let d = '';
+    for (let x = X0; x <= X1; x += 3) {
+      const y = CY - R * Math.sin(theta - ((x - X0) / (X1 - X0)) * Math.PI * 2);
+      d += (x === X0 ? 'M' : 'L') + x + ' ' + y.toFixed(2);
+    }
+    L.wave.setAttribute('d', d);
+  }
+  function loopFrame(now) {
+    if (!loopOn) return;
+    drawLoop((((now - loopT0) % PERIOD) / PERIOD) * Math.PI * 2);
+    requestAnimationFrame(loopFrame);
+  }
+  const stageLoop = $('#d-loop .stage');
+  function showLoop(on) {
+    stageLoop.style.visibility = on ? 'visible' : 'hidden';
+    if (on && !reduced()) { if (!loopOn) { loopOn = true; loopT0 = performance.now(); requestAnimationFrame(loopFrame); } }
+    else { loopOn = false; drawLoop(Math.PI / 2); }
+    $('#loop-text').textContent = on && reduced() ? 'Түр хүлээнэ үү' : 'Шалгалтыг бэлдэж байна';
+  }
+  // LoadingGate: 400мс хүлээж байгаад, гарсан бол 600мс-ээс багагүй
+  let loadRun = 0;
+  async function simulateLoad(ms) {
+    const my = ++loadRun;
+    const st = $('#loop-status');
+    showLoop(false);
+    st.textContent = `Ачаалж байна (${ms}мс)`;
+    const t0 = performance.now();
+    let shownAt = null;
+    const timer = setTimeout(() => { if (my === loadRun) { shownAt = performance.now(); showLoop(true); } }, 400);
+    await wait(ms);
+    if (my !== loadRun) return;
+    clearTimeout(timer);
+    if (shownAt === null) {
+      st.textContent = '400мс-ээс өмнө дууссан тул юу ч харуулаагүй';
+      showLoop(true); // дэмо: дараа нь гогцоог дахин харуулж байх
+      return;
+    }
+    const shown = performance.now() - shownAt;
+    if (shown < 600) await wait(600 - shown);
+    if (my !== loadRun) return;
+    st.textContent = `Гогцоо ${Math.round(performance.now() - shownAt)}мс харагдаад агуулга гарсан`;
+    showLoop(true);
+  }
+  document.querySelectorAll('[data-load]').forEach((b) => (b.onclick = () => simulateLoad(+b.dataset.load)));
+
+  // ---------- С5 Давхар зураас ----------
+  async function playScore() {
+    const root = $('#d-score');
+    const ring = $('.ring', root), tick = $('.tick', root), n = $('.n', root), u1 = $('.u1', root), u2 = $('.u2', root), chip = $('.chip', root);
+    const rl = ring.getTotalLength(), tl = tick.getTotalLength(), l1 = u1.getTotalLength(), l2 = u2.getTotalLength();
+    root.getAnimations({ subtree: true }).forEach((a) => a.cancel());
+    const set = (p, len) => { p.style.strokeDasharray = len; p.style.strokeDashoffset = len; };
+    const target = 42;
+    if (reduced()) {
+      [ring, tick, u1, u2].forEach((p) => { p.style.strokeDasharray = 'none'; p.style.strokeDashoffset = 0; });
+      n.textContent = target; chip.style.opacity = 1; return;
+    }
+    set(ring, rl); set(tick, tl); set(u1, l1); set(u2, l2);
+    chip.style.opacity = 0;
+    // K1 тойрог + check (280мс; тойрог эхний 55%, check 40%-иас)
+    ring.animate([{ strokeDashoffset: rl }, { strokeDashoffset: 0 }], { duration: 154, easing: STD, fill: 'forwards' });
+    tick.animate([{ strokeDashoffset: tl }, { strokeDashoffset: 0 }], { duration: 168, delay: 112, easing: STD, fill: 'forwards' });
+    $('svg', root).animate([{ transform: 'scale(0.8)' }, { transform: 'scale(1)' }], { duration: 420, easing: SETTLE });
+    // K2 оноо тоологдоно (энд ч гэсэн эцсийн тоо эхнээс нь уншигдана: aria-label)
+    const t0 = performance.now() + 280;
+    await new Promise((resolve) => {
+      const step = (now) => {
+        const u = Math.min(1, Math.max(0, (now - t0) / 600));
+        const e = 1 - Math.pow(1 - u, 3);
+        n.textContent = Math.round(e * target);
+        if (u < 1) requestAnimationFrame(step); else resolve();
+      };
+      requestAnimationFrame(step);
+    });
+    // K3 давхар зураас
+    u1.animate([{ strokeDashoffset: l1 }, { strokeDashoffset: 0 }], { duration: 170, easing: STD, fill: 'forwards' });
+    u2.animate([{ strokeDashoffset: l2 }, { strokeDashoffset: 0 }], { duration: 170, delay: 80, easing: STD, fill: 'forwards' });
+    // K4 шошго
+    chip.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 180, delay: 250, easing: DECEL, fill: 'forwards' });
+  }
+
+  // ---------- С8 Долоо хоногийн нүд ----------
+  const DAYS = ['Да', 'Мя', 'Лх', 'Пү', 'Ба', 'Бя', 'Ня'];
+  const DONE = [0, 2];
+  const TODAY = 3;
+  $('#week').innerHTML = DAYS.map((d, i) => `<div class="cell"><div class="box ${DONE.includes(i) ? 'on' : ''}" data-i="${i}"></div>${d}</div>`).join('');
+  function playWeek() {
+    const root = $('#d-week');
+    root.getAnimations({ subtree: true }).forEach((a) => a.cancel());
+    const box = $(`.box[data-i="${TODAY}"]`, root);
+    box.innerHTML = '<span class="blk"></span>';
+    const blk = $('.blk', box), o1 = $('.o1', root), o2 = $('.o2', root);
+    if (reduced()) {
+      o1.style.transform = 'translateY(-40px)'; o2.style.transform = 'translateY(0)'; return;
+    }
+    o1.style.transform = 'translateY(0)'; o2.style.transform = 'translateY(40px)';
+    // K2 блок дээрээс бууж суух
+    blk.animate(
+      [{ transform: 'translateY(-22px)', opacity: 0 }, { transform: 'translateY(-22px)', opacity: 1, offset: 0.15 }, { transform: 'translateY(0)', opacity: 1 }],
+      { duration: 420, easing: SETTLE, fill: 'backwards' }
+    );
+    // K3 тоолуур
+    const opts = { duration: 380, delay: 480, easing: DECEL, fill: 'forwards' };
+    o1.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-40px)' }], opts);
+    o2.animate([{ transform: 'translateY(40px)' }, { transform: 'translateY(0)' }], opts);
+  }
+
+  // ---------- С11 Цэвэр самбар ----------
+  const CLASSES = [['10А', '09:00', '28/30'], ['11Б', '11:00', '25/26'], ['12В', '14:00', '30/30'], ['10Г', '16:00', '27/29']];
+  $('#rows').innerHTML = CLASSES.map(([c, t, r]) =>
+    `<div class="brow"><b>${c}</b><span>${t}</span><span class="r">${r}</span>
+     <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path class="ck" d="M3 9.5 L7.5 14 L15 5" fill="none" stroke="var(--chalk)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`
+  ).join('');
+  let boardSkip = null;
+  async function playBoard() {
+    const root = $('#d-board');
+    root.getAnimations({ subtree: true }).forEach((a) => a.cancel());
+    const rows = $('#rows'), fin = $('.final', root), er = $('.eraser', root);
+    const cks = [...root.querySelectorAll('.ck')];
+    rows.style.clipPath = 'inset(0 0 0 0)';
+    er.style.visibility = 'hidden';
+    if (reduced()) { rows.style.clipPath = 'inset(0 0 0 100%)'; fin.style.opacity = 1; return; }
+    fin.style.opacity = 0;
+    const anims = [];
+    // K1 мөр бүрийн check 80мс зөрүүтэй
+    cks.forEach((p, i) => {
+      const len = p.getTotalLength();
+      p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+      anims.push(p.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: 200, delay: i * 80, easing: STD, fill: 'forwards' }));
+    });
+    // K2 арчуур
+    er.style.visibility = 'visible';
+    const W = 254;
+    anims.push(er.animate([{ transform: 'translateX(0)' }, { transform: `translateX(${W + 56}px)` }], { duration: 600, delay: 670, easing: 'cubic-bezier(0.4, 0, 0.6, 1)', fill: 'forwards' }));
+    anims.push(rows.animate([{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(0 0 0 100%)' }], { duration: 600, delay: 690, easing: 'cubic-bezier(0.4, 0, 0.6, 1)', fill: 'forwards' }));
+    // K3 цэвэр самбарын бичвэр
+    anims.push(fin.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, delay: 1240, easing: DECEL, fill: 'forwards' }));
+    boardSkip = () => anims.forEach((a) => a.finish());
+  }
+  $('#board-stage').addEventListener('pointerdown', () => boardSkip && boardSkip());
+
+  // ---------- Удирдлага ----------
+  const players = { score: playScore, week: playWeek, board: playBoard };
+  document.querySelectorAll('[data-replay]').forEach((b) => (b.onclick = () => players[b.dataset.replay]()));
+  function playAll() { showLoop(true); playScore(); playWeek(); playBoard(); }
+  $('#all').onclick = playAll;
+  optDark.onchange = applyTheme;
+  optReduce.onchange = playAll;
+  document.addEventListener('visibilitychange', () => { if (document.hidden) loopOn = false; else showLoop(stageLoop.style.visibility !== 'hidden'); });
+  playAll();
+})();
+</script>
+</body>
+</html>

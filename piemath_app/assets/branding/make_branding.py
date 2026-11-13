@@ -43,3 +43,16 @@ place(768, 0.80).save(HERE / "splash-dark.png")
 # Android 12 splash icon (дугуй маск 2/3-д багтана)
 place(960, 0.42).save(HERE / "splash-android12.png")
 print("ok", m.size)
+
+# Бүтэн лого (эзэн 2026-11-14: апп нээгдэхэд бүтэн лого хамгийн түрүүнд). flutter_native_splash зургийг
+# 4x нягтралтай гэж үздэг: 1120px өргөн = 280pt. Бичвэр хар горимд цагаан хувилбар (вэбийн LogoMark).
+FULL = HERE.parent.parent.parent / "web/public"
+for src, out in (("logo-full.png", "splash-full-light.png"), ("logo-full-dark.png", "splash-full-dark.png")):
+    full = Image.open(FULL / src).convert("RGBA")
+    full = full.crop(full.getchannel("A").getbbox())
+    w = 1120
+    h = round(full.height * w / full.width)
+    canvas = Image.new("RGBA", (w + 64, h + 64), (0, 0, 0, 0))
+    canvas.alpha_composite(full.resize((w, h), Image.LANCZOS), (32, 32))
+    canvas.save(HERE / out)
+print("full ok")

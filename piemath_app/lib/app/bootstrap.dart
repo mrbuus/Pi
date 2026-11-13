@@ -20,7 +20,12 @@ import 'theme_mode.dart';
 ///
 /// Эхний кадр хүртэл зөвхөн зайлшгүй зүйл (prefs, түвшин, токен). Push (Firebase) зэрэг
 /// хүлээж болох ажил эхний кадрын дараа — `docs/PERF-OFFLINE.md` §4.
+/// Апп нээгдэхэд бүтэн лого хамгийн багадаа энэ хугацаанд харагдана (эзэн 2026-11-14). Хөдөлгүүр асахад
+/// энэ хугацаа аль хэдийн өнгөрсөн бол (удаан утас) нэмэлт хүлээлтгүй.
+const brandSplashMin = Duration(milliseconds: 600);
+
 Future<void> bootstrap() async {
+  final launch = Stopwatch()..start();
   WidgetsFlutterBinding.ensureInitialized();
   if (kReleaseMode) {
     // Release-д log хэвлэхгүй (нэр, утас, токен log-д үлдэхгүй — SECURITY §3).
@@ -28,8 +33,11 @@ Future<void> bootstrap() async {
   }
   // Edge-to-edge: Android 15+ (targetSdk 35) заавал; доод хувилбарт ч ижил харагдана.
   unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
-  final (prefs, _, cacheDir) =
-      await (SharedPreferences.getInstance(), DevicePerf.detect(), resolveApiCacheDirectory()).wait;
+  final (prefs, _, cacheDir) = await (
+    SharedPreferences.getInstance(),
+    DevicePerf.detect(),
+    resolveApiCacheDirectory(),
+  ).wait;
   final container = ProviderContainer(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
@@ -44,11 +52,18 @@ Future<void> bootstrap() async {
   // GET кэшийг эрт үүсгэнэ: сесс сэргэмэгц (SignedIn) хэрэглэгчийн хавтас нээгдэж,
   // нүүр дэлгэц өмнөх өгөгдлөөр шууд зурагдана; нэвтрээгүй бол үлдэгдлийг цэвэрлэнэ.
   container.read(responseCacheSessionSyncProvider);
-  WidgetsBinding.instance.addObserver(MemoryPressureObserver([
-    () => container.read(responseCacheProvider).clearMemory(),
-    () => container.read(fileBytesCacheProvider).clearMemory(),
-  ]));
-  unawaited(container.read(sessionProvider.notifier).restore());
+  WidgetsBinding.instance.addObserver(
+    MemoryPressureObserver([
+      () => container.read(responseCacheProvider).clearMemory(),
+      () => container.read(fileBytesCacheProvider).clearMemory(),
+    ]),
+  );
+  final left = brandSplashMin - launch.elapsed;
+  unawaited(
+    container
+        .read(sessionProvider.notifier)
+        .restore(notBefore: left > Duration.zero ? Future<void>.delayed(left) : null),
+  );
   runApp(UncontrolledProviderScope(container: container, child: const PiemathApp()));
   // Push бүртгэл (Firebase эхлүүлэлт) — эхний кадрын дараа, хэрэглэгч дэлгэцээ харж эхэлсний
   // дараа. Сонсогч `fireImmediately`-тэй тул сэргээсэн сесс ч алдагдалгүй бүртгэгдэнэ.

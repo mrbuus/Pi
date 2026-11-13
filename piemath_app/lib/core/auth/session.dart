@@ -56,9 +56,10 @@ class SessionController extends Notifier<SessionState> {
   @override
   SessionState build() => const SessionRestoring();
 
-  /// Апп асахад нэг удаа (bootstrap).
-  Future<void> restore() async {
+  /// Апп асахад нэг удаа (bootstrap). [notBefore] дуустал эхлэх дэлгэц (бүтэн лого) хэвээр үлдэнэ.
+  Future<void> restore({Future<void>? notBefore}) async {
     final auth = await _store.read();
+    if (notBefore != null) await notBefore;
     if (auth == null) {
       state = const SignedOut();
       return;

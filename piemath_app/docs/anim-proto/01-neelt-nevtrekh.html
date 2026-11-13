@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Нээлт ба нэвтрэх</title>
+<!--
+  Piemath — С1 «Язгуур шугам» (нээлт) ба С2 «Хөх тууз» (нэвтрэх) загвар.
+  docs/ANIMATION-RESEARCH-2026-11.md §3.2. Гадны сангүй, зөвхөн SVG + Web Animations.
+  Апп-д Flutter CustomPainter-ээр хийнэ; энд зөвхөн хөдөлгөөн, хугацааг харуулах зорилготой.
+-->
+<style>
+  @font-face { font-family: Onest; src: url(../../assets/fonts/Onest-Regular.ttf); font-weight: 400; }
+  @font-face { font-family: Onest; src: url(../../assets/fonts/Onest-SemiBold.ttf); font-weight: 600; }
+  @font-face { font-family: Onest; src: url(../../assets/fonts/Onest-Bold.ttf); font-weight: 700; }
+  @font-face { font-family: Unbounded; src: url(../../assets/fonts/Unbounded-SemiBold.ttf); font-weight: 600; }
+
+  :root {
+    --page: #E9EDF4; --bg: #F5F7FB; --surface: #FFFFFF; --line: #D7DBE3; --ink: #181E2A; --ink-dim: #4E5564;
+    --brand: #273F74; --brand-bright: #3D6BC4; --brand-tint: #E3EBFA; --on-brand: #FFFFFF;
+    --btn: #273F74; --btn-lip: #142E62; --btn-text: #FFFFFF; --lip: #C5CBD6; --error: #B3261E;
+    --splash: #FFFFFF; --band: #273F74; --band-text: #FFFFFF; --band-dim: #C9D7F5; --wordmark: #273F74;
+    --frame: #10141B;
+  }
+  :root[data-theme="dark"] {
+    --page: #090C10; --bg: #0F1319; --surface: #1A1E26; --line: #383D48; --ink: #E3E6ED; --ink-dim: #B2B8C3;
+    --brand: #AFC4EF; --brand-bright: #76B6F7; --brand-tint: #1E2B47; --on-brand: #0F1D3A;
+    --btn: #AFC4EF; --btn-lip: #7C93C4; --btn-text: #0F1D3A; --lip: #2B303A; --error: #F28B82;
+    --splash: #273F74; --band: #273F74; --band-text: #E3E6ED; --band-dim: #AFC4EF; --wordmark: #9AB7F2;
+    --frame: #2A2F38;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--page); color: var(--ink);
+    font-family: Onest, "DejaVu Sans", system-ui, sans-serif; font-size: 15px; line-height: 1.45;
+    padding: 24px 16px 48px;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; display: grid; grid-template-columns: 392px 1fr; gap: 32px; align-items: start; }
+  @media (max-width: 860px) { .wrap { grid-template-columns: 1fr; justify-items: center; } }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+  .lead { color: var(--ink-dim); margin: 0 0 20px; }
+  .panel h2 { font-size: 16px; font-weight: 600; margin: 20px 0 8px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; }
+  .seg button, .ctl {
+    font: inherit; font-weight: 600; font-size: 14px; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 10px; padding: 9px 14px; cursor: pointer;
+    box-shadow: 0 3px 0 var(--lip);
+  }
+  .seg button[aria-pressed="true"] { background: var(--btn); color: var(--btn-text); border-color: var(--btn); box-shadow: 0 3px 0 var(--btn-lip); }
+  .ctl:active, .seg button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--lip); }
+  label.chk { display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer; }
+  label.chk input { width: 18px; height: 18px; accent-color: #273F74; }
+  .frames { list-style: none; padding: 0; margin: 0; }
+  .frames li { padding: 6px 10px; border-radius: 8px; color: var(--ink-dim); border-left: 3px solid transparent; }
+  .frames li.on { color: var(--ink); background: var(--surface); border-left-color: var(--brand-bright); }
+  .note { color: var(--ink-dim); font-size: 13px; }
+
+  /* Утасны хүрээ */
+  .phone { width: 392px; height: 752px; border-radius: 44px; background: var(--frame); padding: 16px; }
+  .screen { position: relative; width: 360px; height: 720px; border-radius: 30px; overflow: hidden; background: var(--bg); }
+  .layer { position: absolute; inset: 0; }
+
+  /* Нүүр */
+  .home { background: var(--bg); padding: 0 16px; }
+  .home .top { height: 68px; display: flex; align-items: center; gap: 10px; }
+  .home .top .slot { width: 32px; height: 32px; flex: none; }
+  .wm { line-height: 1.15; }
+  .wm b { display: block; font-weight: 700; font-size: 18px; color: var(--wordmark); }
+  .wm span { font-size: 12px; color: var(--ink-dim); }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px;
+  }
+  .card h3 { margin: 0 0 4px; font-size: 13px; font-weight: 600; color: var(--ink-dim); }
+  .card .big { font-size: 18px; font-weight: 600; }
+  .meta { display: flex; align-items: center; gap: 8px; color: var(--ink-dim); font-size: 13px; margin-top: 4px; }
+  .dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; display: inline-block; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-weight: 600; font-size: 15px;
+    height: 48px; padding: 0 18px; border: 0; border-radius: 12px; background: var(--btn); color: var(--btn-text);
+    box-shadow: 0 4px 0 var(--btn-lip); cursor: pointer; position: relative;
+  }
+  .btn.small { height: 40px; font-size: 14px; margin-top: 10px; }
+  .nav {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 64px; background: var(--surface); border-top: 1px solid var(--line);
+    display: grid; grid-template-columns: repeat(4, 1fr); font-size: 12px; font-weight: 600; color: var(--ink-dim);
+  }
+  .nav div { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+  .nav div i { width: 22px; height: 4px; border-radius: 2px; background: transparent; }
+  .nav div.on { color: var(--brand); }
+  .nav div.on i { background: var(--brand); }
+
+  /* Нээлт */
+  .splash { background: var(--splash); }
+  .logo { position: absolute; left: 124px; top: 300px; width: 112px; height: 112px; transform-origin: 0 0; }
+  .logo svg { width: 100%; height: 100%; display: block; }
+  .cap { position: absolute; left: 0; right: 0; bottom: 96px; text-align: center; font-size: 12px; color: var(--ink-dim); }
+  :root[data-theme="dark"] .cap { color: #AFC4EF; }
+
+  /* Нэвтрэх */
+  .login { background: var(--bg); padding: 56px 20px 0; }
+  .login .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; }
+  .login .brand svg { width: 56px; height: 56px; }
+  .login .brand b { display: block; font-weight: 700; font-size: 26px; color: var(--wordmark); line-height: 1.1; }
+  .login .brand span { font-size: 13px; color: var(--ink-dim); }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-dim); margin-bottom: 6px; }
+  .field input {
+    width: 100%; height: 48px; border-radius: 12px; border: 1px solid #7A808D; background: var(--surface); color: var(--ink);
+    font: inherit; font-size: 16px; padding: 0 14px;
+  }
+  :root[data-theme="dark"] .field input { border-color: #808693; }
+  .login .btn { width: 100%; margin-top: 10px; }
+  .err { color: var(--error); font-size: 13px; min-height: 20px; margin-top: 10px; }
+  .btn .label { transition: none; }
+  .btn .spin { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; }
+  .band {
+    position: absolute; background: var(--band); color: var(--band-text); border-radius: 12px; overflow: hidden;
+    padding: 0 20px; display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .band .in { opacity: 0; padding-bottom: 18px; }
+  .band b { display: block; font-size: 20px; font-weight: 700; }
+  .band .meta { color: var(--band-dim); }
+  .after { position: absolute; left: 16px; right: 16px; top: 166px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="phone"><div class="screen" id="screen"></div></div>
+
+  <div class="panel">
+    <h1>Нээлт ба нэвтрэх</h1>
+    <p class="lead">С1 «Язгуур шугам» ба С2 «Хөх тууз». Хугацаа, кадрын дараалал нь баримттай ижил</p>
+
+    <div class="controls seg" role="group" aria-label="Дэлгэц">
+      <button id="sc-launch" aria-pressed="true">Нээлт</button>
+      <button id="sc-login" aria-pressed="false">Нэвтрэх</button>
+      <button class="ctl" id="replay">Дахин тоглуулах</button>
+    </div>
+
+    <h2>Тохиргоо</h2>
+    <label class="chk"><input type="checkbox" id="opt-dark"> Харанхуй горим</label>
+    <label class="chk"><input type="checkbox" id="opt-reduce"> Хөдөлгөөн багасгах</label>
+    <label class="chk"><input type="checkbox" id="opt-slow"> Удаан ачаалал (сүлжээ сул)</label>
+    <label class="chk"><input type="checkbox" id="opt-wrong"> Нууц үг буруу (зөвхөн нэвтрэх)</label>
+
+    <h2>Кадр</h2>
+    <ul class="frames" id="frames"></ul>
+    <p class="note">Нээлтийн үед дэлгэц дээр товшвол шууд эцсийн төлөв рүү алгасна. Нэвтрэх дэлгэцэд «Нэвтрэх» товчийг дар</p>
+  </div>
+</div>
+
+<script>
+(() => {
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = (s, r = document) => r.querySelector(s);
+  const screen = $('#screen');
+  const opt = { dark: $('#opt-dark'), reduce: $('#opt-reduce'), slow: $('#opt-slow'), wrong: $('#opt-wrong') };
+  const reduced = () => opt.reduce.checked || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const DECEL = 'cubic-bezier(0.05, 0.7, 0.1, 1)';
+  const STD = 'cubic-bezier(0.2, 0, 0, 1)';
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  let run = 0; // тоглолт бүрийн дугаар — дахин эхлүүлэхэд өмнөхийг зогсооно
+  let skipTo = null;
+
+  // Хөтчийн цайвар/харанхуй горимыг анхдагч болгох
+  if (matchMedia('(prefers-color-scheme: dark)').matches) opt.dark.checked = true;
+  const applyTheme = () => document.documentElement.dataset.theme = opt.dark.checked ? 'dark' : 'light';
+  applyTheme();
+
+  // Хязгааргүйн тэмдэг (Бернуллийн лемнискат), логоны 192 нүдний координатаар
+  function lemniscate(cx, cy, a, n = 160) {
+    let d = '';
+    for (let i = 0; i <= n; i++) {
+      const t = (i / n) * Math.PI * 2;
+      const s = Math.sin(t), c = Math.cos(t), k = 1 + s * s;
+      const x = cx + (a * c) / k, y = cy + (a * s * c) / k;
+      d += (i ? 'L' : 'M') + x.toFixed(2) + ' ' + y.toFixed(2);
+    }
+    return d + 'Z';
+  }
+  const RAD = 'M21 127 L75 127 L86 156 L103 75 L184 75';
+  const INF = lemniscate(134, 114, 25);
+
+  function logoSvg(withTrace) {
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 192 192');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.innerHTML =
+      '<circle cx="96" cy="96" r="96" fill="#273F74"/>' +
+      `<path d="${RAD}" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="miter" stroke-miterlimit="10"/>` +
+      `<path d="${INF}" fill="none" stroke="#FFFFFF" stroke-width="4.5"/>` +
+      (withTrace
+        ? `<path class="t-rad" d="${RAD}" fill="none" stroke="#76B6F7" stroke-width="5.4" stroke-linejoin="miter" stroke-miterlimit="10" visibility="hidden"/>` +
+          `<path class="t-inf" d="${INF}" fill="none" stroke="#76B6F7" stroke-width="5" visibility="hidden"/>` +
+          '<circle class="pen" r="5.5" fill="#FFFFFF" stroke="#76B6F7" stroke-width="2" visibility="hidden"/>'
+        : '');
+    return svg;
+  }
+
+  // Кадрын жагсаалт
+  const FRAMES = {
+    launch: [
+      'K0 Систем: статик лого (native splash)',
+      'K1 Flutter-ийн эхний кадр, ижил лого',
+      'K2 Язгуур шугам, хязгааргүй дахин зурагдана',
+      'K3 Цэнхэр бэх цагаан руу буцна',
+      'K4 Лого толгой руу, нүүр гарна',
+    ],
+    login: [
+      'K1 Товч дарагдаж уруул нимгэрнэ',
+      'K2 Хүлээлт 400мс-ээс уртсавал товчинд гогцоо',
+      'K3 Товч тэлж хөх тууз болно',
+      'K4 Нүүрний картууд гарна',
+    ],
+  };
+  let scene = 'launch';
+  function setFrames() {
+    $('#frames').innerHTML = FRAMES[scene].map((f, i) => `<li data-i="${i}">${f}</li>`).join('');
+  }
+  function mark(i) {
+    document.querySelectorAll('#frames li').forEach((li) => li.classList.toggle('on', +li.dataset.i === i));
+  }
+
+  // Нүүр дэлгэц (хоёр урсгалд дундын)
+  function homeLayer({ withTop = true } = {}) {
+    const el = document.createElement('div');
+    el.className = 'layer home';
+    el.innerHTML = `
+      ${withTop ? `<div class="top"><div class="slot"></div><div class="wm"><b>Piemath</b><span>Шинэ ирээдүйн эзэд</span></div></div>` : ''}
+      <div class="cards">
+        <div class="card"><h3>Өнөөдөр</h3><div class="big">Сайн байна уу, Номин</div>
+          <div class="meta">10Б анги<span class="dot"></span>Мягмар, 11 сарын 17</div></div>
+        <div class="card"><h3>Дараагийн хичээл</h3><div class="big">15:00 Квадрат тэгшитгэл</div>
+          <div class="meta">2-р танхим<span class="dot"></span>90 минут</div></div>
+        <div class="card"><h3>Гэрийн даалгавар</h3><div class="big">12 бодлого</div>
+          <div class="meta">Хугацаа Лхагва 20:00</div>
+          <button class="btn small" tabindex="-1">Зураг илгээх</button></div>
+      </div>
+      <div class="nav"><div class="on"><i></i>Нүүр</div><div><i></i>Хуваарь</div><div><i></i>Даалгавар</div><div><i></i>Бусад</div></div>`;
+    return el;
+  }
+
+  function stagger(container, rm) {
+    const items = [...container.querySelectorAll('.card')];
+    items.forEach((c, i) => {
+      if (rm) return;
+      c.animate(
+        [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }],
+        { duration: 200, delay: i * 30, easing: DECEL, fill: 'backwards' }
+      );
+    });
+  }
+
+  // ---------- С1 Нээлт ----------
+  async function playLaunch() {
+    const my = ++run;
+    const alive = () => my === run;
+    screen.innerHTML = '';
+    const rm = reduced();
+
+    const home = homeLayer();
+    home.style.visibility = 'hidden';
+    const splash = document.createElement('div');
+    splash.className = 'layer splash';
+    const cap = document.createElement('div');
+    cap.className = 'cap';
+    splash.append(cap);
+    const logo = document.createElement('div');
+    logo.className = 'logo';
+    const svg = logoSvg(true);
+    logo.append(svg);
+    screen.append(home, splash, logo);
+
+    const tRad = svg.querySelector('.t-rad'), tInf = svg.querySelector('.t-inf'), pen = svg.querySelector('.pen');
+    const lenR = tRad.getTotalLength(), lenI = tInf.getTotalLength();
+
+    let skipped = false;
+    skipTo = () => { skipped = true; };
+
+    // K0 — native splash (загварт харуулах зорилгоор 600мс)
+    mark(0); cap.textContent = 'Систем: статик лого';
+    await wait(600); if (!alive()) return;
+    mark(1); cap.textContent = 'Flutter: ижил лого, солилт харагдахгүй';
+    const appStart = performance.now();
+    const readyAt = appStart + (opt.slow.checked ? 2600 : 350); // сесс шалгах дуусах агшин
+
+    if (rm) {
+      await wait(300); if (!alive()) return;
+      return finishLaunch({ logo, splash, home, cap, rm: true, alive });
+    }
+    await wait(80); if (!alive()) return;
+
+    // K2 — дахин зурах
+    if (!skipped) {
+      mark(2); cap.textContent = '';
+      for (const [p, len] of [[tRad, lenR], [tInf, lenI]]) {
+        p.style.strokeDasharray = len; p.style.strokeDashoffset = len; p.setAttribute('visibility', 'visible');
+      }
+      const a1 = tRad.animate([{ strokeDashoffset: lenR }, { strokeDashoffset: 0 }], { duration: 400, easing: STD, fill: 'forwards' });
+      const a2 = tInf.animate([{ strokeDashoffset: lenI }, { strokeDashoffset: 0 }], { duration: 300, delay: 300, easing: STD, fill: 'forwards' });
+      await Promise.race([a2.finished, new Promise((r) => { const iv = setInterval(() => { if (skipped || !alive()) { clearInterval(iv); r(); } }, 16); })]);
+      a1.finish(); a2.finish();
+      if (!alive()) return;
+      // K3 — цагаан руу буцна
+      mark(3);
+      const s1 = tRad.animate([{ stroke: '#76B6F7' }, { stroke: '#FFFFFF' }], { duration: skipped ? 1 : 120, fill: 'forwards' });
+      tInf.animate([{ stroke: '#76B6F7' }, { stroke: '#FFFFFF' }], { duration: skipped ? 1 : 120, fill: 'forwards' });
+      await s1.finished; if (!alive()) return;
+    }
+
+    // Удаан ачаалал: хязгааргүйн дагуу цэг гүйнэ
+    if (!skipped && performance.now() < readyAt) {
+      cap.textContent = 'Удаан ачаалал: цэг хязгааргүйн дагуу гүйнэ';
+      pen.setAttribute('visibility', 'visible');
+      await new Promise((resolve) => {
+        const t0 = performance.now();
+        const step = (now) => {
+          if (!alive()) return resolve();
+          if (now >= readyAt || skipped) return resolve();
+          const u = ((now - t0) % 1200) / 1200;
+          const pt = tInf.getPointAtLength(u * lenI);
+          pen.setAttribute('cx', pt.x); pen.setAttribute('cy', pt.y);
+          requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      });
+      pen.setAttribute('visibility', 'hidden');
+      if (!alive()) return;
+    }
+    return finishLaunch({ logo, splash, home, cap, rm: false, alive });
+  }
+
+  async function finishLaunch({ logo, splash, home, cap, rm, alive }) {
+    mark(4); cap.textContent = '';
+    skipTo = null;
+    home.style.visibility = 'visible';
+    const slot = home.querySelector('.slot').getBoundingClientRect();
+    const sr = screen.getBoundingClientRect();
+    const dx = slot.left - sr.left - 124, dy = slot.top - sr.top - 300, s = 32 / 112;
+    if (rm) {
+      logo.style.transform = `translate(${dx}px, ${dy}px) scale(${s})`;
+      splash.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, fill: 'forwards' });
+      return;
+    }
+    const wm = home.querySelector('.wm');
+    const mv = logo.animate(
+      [{ transform: 'none' }, { transform: `translate(${dx}px, ${dy}px) scale(${s})` }],
+      { duration: 320, easing: DECEL, fill: 'forwards' }
+    );
+    splash.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, easing: STD, fill: 'forwards' });
+    wm.animate([{ opacity: 0, transform: 'translateX(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 200, delay: 160, easing: DECEL, fill: 'backwards' });
+    stagger(home, false);
+    await mv.finished;
+  }
+
+  // ---------- С2 Нэвтрэх ----------
+  function playLogin() {
+    ++run;
+    skipTo = null;
+    screen.innerHTML = '';
+    const el = document.createElement('div');
+    el.className = 'layer login';
+    el.innerHTML = `
+      <div class="brand"><span class="lg"></span><div><b>Piemath</b><span>Шинэ ирээдүйн эзэд</span></div></div>
+      <div class="field"><label for="ph">Утасны дугаар</label><input id="ph" inputmode="numeric" value="8800 0000" readonly></div>
+      <div class="field"><label for="pw">Нууц үг</label><input id="pw" type="password" value="88000000" readonly></div>
+      <button class="btn" id="go"><span class="label">Нэвтрэх</span><span class="spin"></span></button>
+      <div class="err" id="err" role="alert"></div>`;
+    el.querySelector('.lg').append(logoSvg(false));
+    screen.append(el);
+    const go = el.querySelector('#go');
+
+    // Товчны доторх жижиг гогцоо: хязгааргүйн дагуу цэг
+    const spin = go.querySelector('.spin');
+    spin.innerHTML = `<svg width="44" height="22" viewBox="0 0 50 24" aria-hidden="true">
+      <path class="sp" d="${lemniscate(25, 12, 20)}" fill="none" stroke="currentColor" stroke-opacity="0.45" stroke-width="2.4"/>
+      <circle class="sd" r="3.6" fill="currentColor"/></svg>`;
+    let spinning = false;
+    function spinLoop() {
+      const p = spin.querySelector('.sp'), d = spin.querySelector('.sd'), len = p.getTotalLength();
+      const t0 = performance.now();
+      const step = (now) => {
+        if (!spinning) return;
+        const pt = p.getPointAtLength((((now - t0) % 1200) / 1200) * len);
+        d.setAttribute('cx', pt.x); d.setAttribute('cy', pt.y);
+        requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+
+    mark(-1);
+    go.addEventListener('click', async () => {
+      if (go.disabled) return;
+      const my = run;
+      const alive = () => my === run;
+      const rm = reduced();
+      go.disabled = true;
+      el.querySelector('#err').textContent = '';
+      mark(0);
+      if (!rm) {
+        go.animate(
+          [{ transform: 'none', boxShadow: '0 4px 0 var(--btn-lip)' }, { transform: 'translateY(3px)', boxShadow: '0 1px 0 var(--btn-lip)' }, { transform: 'none', boxShadow: '0 4px 0 var(--btn-lip)' }],
+          { duration: 220, easing: STD }
+        );
+      }
+      const total = opt.slow.checked ? 2200 : 900;
+      const t0 = performance.now();
+      // 400мс хүлээж байгаад л ачааллын дүрс
+      const loaderTimer = setTimeout(() => {
+        if (!alive()) return;
+        mark(1);
+        go.querySelector('.label').style.visibility = 'hidden';
+        spin.style.display = 'flex';
+        if (!rm) { spinning = true; spinLoop(); }
+        else { const p = spin.querySelector('.sp'); const pt = p.getPointAtLength(0); const d = spin.querySelector('.sd'); d.setAttribute('cx', pt.x); d.setAttribute('cy', pt.y); }
+      }, 400);
+      await wait(total); if (!alive()) return;
+      // Ачааллын дүрс гарсан бол 600мс-ээс багагүй
+      if (performance.now() - t0 > 400) {
+        const shownFor = performance.now() - t0 - 400;
+        if (shownFor < 600) { await wait(600 - shownFor); if (!alive()) return; }
+      }
+      clearTimeout(loaderTimer);
+      spinning = false;
+      spin.style.display = 'none';
+      go.querySelector('.label').style.visibility = 'visible';
+
+      if (opt.wrong.checked) {
+        el.querySelector('#err').textContent = 'Утасны дугаар эсвэл нууц үг буруу байна';
+        if (!rm) {
+          go.animate(
+            [{ transform: 'none' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'none' }],
+            { duration: 250, easing: 'linear' }
+          );
+        }
+        go.disabled = false;
+        mark(-1);
+        return;
+      }
+
+      // K3 — товч тэлж тууз болно
+      mark(2);
+      const sr = screen.getBoundingClientRect(), br = go.getBoundingClientRect();
+      const band = document.createElement('div');
+      band.className = 'band';
+      band.innerHTML = `<div class="in"><b>Сайн байна уу, Номин</b><div class="meta">10Б анги<span class="dot"></span>B27120001</div></div>`;
+      const from = { left: br.left - sr.left, top: br.top - sr.top, width: br.width, height: br.height, radius: 12 };
+      const to = { left: 0, top: 0, width: 360, height: 150, radius: 0 };
+      Object.assign(band.style, { left: from.left + 'px', top: from.top + 'px', width: from.width + 'px', height: from.height + 'px' });
+      const home = homeLayer({ withTop: false });
+      home.style.background = 'var(--bg)';
+      home.querySelector('.card').remove(); // мэндчилгээ туузан дээр байгаа тул давхардуулахгүй
+      const after = document.createElement('div');
+      after.className = 'after';
+      after.append(home.querySelector('.cards'));
+      home.append(after);
+      home.style.visibility = 'hidden';
+      screen.append(home, band);
+      go.style.visibility = 'hidden';
+
+      const dur = rm ? 0 : 360;
+      const kf = (o) => ({ left: o.left + 'px', top: o.top + 'px', width: o.width + 'px', height: o.height + 'px', borderRadius: o.radius + 'px' });
+      const grow = band.animate([kf(from), kf(to)], { duration: dur, easing: DECEL, fill: 'forwards' });
+      el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: rm ? 0 : 150, fill: 'forwards' });
+      await grow.finished; if (!alive()) return;
+      band.querySelector('.in').animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: rm ? 0 : 180, easing: DECEL, fill: 'forwards' });
+      // K4 — картууд
+      mark(3);
+      home.style.visibility = 'visible';
+      stagger(after, rm);
+    });
+  }
+
+  // ---------- Удирдлага ----------
+  function play() {
+    setFrames();
+    if (scene === 'launch') playLaunch(); else playLogin();
+  }
+  function setScene(s) {
+    scene = s;
+    $('#sc-launch').setAttribute('aria-pressed', s === 'launch');
+    $('#sc-login').setAttribute('aria-pressed', s === 'login');
+    play();
+  }
+  $('#sc-launch').onclick = () => setScene('launch');
+  $('#sc-login').onclick = () => setScene('login');
+  $('#replay').onclick = play;
+  opt.dark.onchange = () => { applyTheme(); play(); };
+  opt.reduce.onchange = play;
+  opt.slow.onchange = play;
+  opt.wrong.onchange = () => { if (scene === 'login') play(); };
+  screen.addEventListener('pointerdown', () => { if (skipTo) skipTo(); });
+  play();
+})();
+</script>
+</body>
+</html>
