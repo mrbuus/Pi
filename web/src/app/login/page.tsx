@@ -10,6 +10,7 @@ import LoginNotice from "@/components/auth/LoginNotice";
 import { rememberPreference, saveRememberPreference } from "@/components/auth/remember";
 import InfoHint from "@/components/ui/InfoHint";
 import { api, homeForRole, nextFromLocation, setAuth } from "@/lib/api";
+import { saveSecurityNudge, type SecurityNudge } from "@/lib/securityNudge";
 
 /**
  * Нэвтрэх хуудас.
@@ -111,7 +112,7 @@ export default function LoginPage() {
     if (!validate()) return;
     setLoading(true);
     try {
-      const res = await api<{ accessToken: string; role: string }>(
+      const res = await api<{ accessToken: string; role: string; securityNudge?: SecurityNudge }>(
         "/auth/login",
         { method: "POST", body: { identifier, password, remember }, auth: false },
       );
@@ -120,6 +121,8 @@ export default function LoginPage() {
         localStorage.setItem("login_identifier", identifier);
       }
       setAuth(res.accessToken, res.role, remember);
+      // Нууц үг = утасны дугаар хэвээр бол апп дотор зөөлөн сануулна (SecurityNudge)
+      saveSecurityNudge(res.securityNudge, password);
       router.push(nextFromLocation() ?? homeForRole(res.role));
     } catch (err) {
       // Backend нь аль талбар буруу болохыг ЗОРИУДААР хэлдэггүй (хэрэглэгч
