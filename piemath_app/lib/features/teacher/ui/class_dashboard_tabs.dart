@@ -37,11 +37,20 @@ Widget _riskPills(BuildContext context, DashStudent s) {
 
 /// «Тойм»: сүүлийн хоногуудын тоо, төлбөрийн төлөв (эрхтэй бол), анхаарах сурагчид.
 class ClassOverviewTab extends StatelessWidget {
-  const ClassOverviewTab({super.key, required this.detail, required this.today, required this.onRefresh});
+  const ClassOverviewTab({
+    super.key,
+    required this.detail,
+    required this.today,
+    required this.onRefresh,
+    this.onOpenPayments,
+  });
 
   final DashDetail detail;
   final String today;
   final Future<void> Function() onRefresh;
+
+  /// «Төлбөр» таб руу (Админ, Багш+) — вэбийн «Сар бүрээр».
+  final VoidCallback? onOpenPayments;
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +120,18 @@ class ClassOverviewTab extends StatelessWidget {
           ),
           if (pay != null && pay.values.any((n) => n > 0)) ...[
             const SizedBox(height: AppSpace.lg),
-            const SectionHeader(title: 'Энэ сарын төлбөр', padding: EdgeInsets.zero),
+            SectionHeader(
+              title: 'Энэ сарын төлбөр',
+              padding: EdgeInsets.zero,
+              trailing: onOpenPayments == null
+                  ? null
+                  : TextButton(
+                      key: const ValueKey('overview-payments'),
+                      style: TextButton.styleFrom(minimumSize: const Size(teacherTap, teacherTap)),
+                      onPressed: onOpenPayments,
+                      child: const Text('Сар бүрээр'),
+                    ),
+            ),
             const SizedBox(height: AppSpace.sm),
             AppCard(
               child: Wrap(

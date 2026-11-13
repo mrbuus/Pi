@@ -97,24 +97,15 @@ void main() {
       expect(http.count('GET', '/classrooms'), 0);
     });
 
-    testWidgets('анги тараах: нэрээ бичиж баталгаажуулна', (tester) async {
+    testWidgets('«Анги тараах» товч бүрмөсөн алга (эзэн 2026-11-10); самбар руу орно', (tester) async {
       final http = classroomsHttp();
       await pumpClassrooms(tester, const ClassroomsAdminScreen(), http: http, role: 'TEACHER_PLUS', userId: 't2');
       await tester.tap(find.byTooltip('12А, үйлдэл'));
       await settle(tester);
-      await tester.tap(find.text('Анги тараах'));
-      await settle(tester);
-      expect(find.text('«12А» ангийг тараах уу'), findsOneWidget);
-      await tester.enterText(find.byType(TextField).last, '12');
-      await tester.tap(find.text('Ангийг тараах'));
-      await settle(tester);
-      expect(find.text('Ангийн нэр таарахгүй байна'), findsOneWidget);
-      expect(http.count('POST', '/classrooms/c1/disband'), 0);
-      await tester.enterText(find.byType(TextField).last, '12А');
-      await tester.tap(find.text('Ангийг тараах'));
-      await settle(tester, frames: 20);
-      expect(http.count('POST', '/classrooms/c1/disband'), 1);
-      expect(find.text('2 сурагчийг ангиас гаргалаа. Түүх хадгалагдсан'), findsOneWidget);
+      expect(find.text('Удирдах'), findsOneWidget);
+      expect(find.text('Ангийн самбар'), findsOneWidget);
+      expect(find.text('Анги тараах'), findsNothing);
+      expect(http.requests.where((r) => r.path.contains('disband')), isEmpty);
     });
 
     testWidgets('таблет: зүүн жагсаалт, баруун дэлгэрэнгүй', (tester) async {

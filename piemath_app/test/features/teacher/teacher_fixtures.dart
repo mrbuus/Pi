@@ -90,9 +90,28 @@ FakeResponse echoAttendance(Map<String, Object?> body, {Map<String, String> exis
   });
 }
 
-FakeHttp boardHttp({Map<String, Object?>? board}) => FakeHttp()
+FakeHttp boardHttp({
+  Map<String, Object?>? board,
+  Map<String, Object?>? quiz,
+  List<Object?> visits = const [],
+  List<Object?> homeBadges = const [],
+}) => FakeHttp()
   ..json('GET', '/attendance/classrooms/c1/board', board ?? boardJson())
-  ..json('GET', '/attendance/classrooms/c1/marks', marksJson());
+  ..json('GET', '/attendance/classrooms/c1/marks', marksJson())
+  ..json('GET', '/classrooms/c1/homework-quiz', quiz ?? quizJson())
+  ..json('GET', '/makeup-visits', visits)
+  ..json('GET', '/makeup-visits/home', homeBadges);
+
+/// `GET /classrooms/c1/homework-quiz` — [problemCount] null бол шалгалтгүй.
+Map<String, Object?> quizJson({int? problemCount, Map<String, num> scores = const {}}) => {
+  'date': testDate,
+  'quiz': problemCount == null
+      ? null
+      : {'id': 'q1', 'problemCount': problemCount, 'updatedAt': '2026-11-02T07:00:00.000Z', 'updatedBy': 'Б. Болд'},
+  'scores': [
+    for (final e in scores.entries) {'studentId': e.key, 'score': e.value, 'updatedAt': '2026-11-02T07:05:00.000Z'},
+  ],
+};
 
 // ───────── Ангийн самбар (`/class-dashboard*`) ─────────
 
@@ -188,8 +207,13 @@ Map<String, Object?> dashDetail({
       students ??
       [
         dashStudent('s1', 'Тэмүүжин', 'Бат', code: 'B27120001', risk: ['LOW_ATTENDANCE', 'LOW_SCORE'], makeup: 2),
-        dashStudent('s2', 'Анужин', 'Дорж', flags: [
-          {'id': 'f1', 'kind': 'IMPROVED', 'note': null},
-        ]),
+        dashStudent(
+          's2',
+          'Анужин',
+          'Дорж',
+          flags: [
+            {'id': 'f1', 'kind': 'IMPROVED', 'note': null},
+          ],
+        ),
       ],
 };

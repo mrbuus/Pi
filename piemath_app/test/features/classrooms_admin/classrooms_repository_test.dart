@@ -108,14 +108,7 @@ void main() {
   group('Эрх (вэбтэй ижил)', () {
     test('Админ: бүгд', () {
       const a = ClassroomsAccess(role: UserRole.admin, userId: 'a');
-      expect([
-        a.canManage,
-        a.canEditInfo,
-        a.canArchive,
-        a.canAssignTeachers,
-        a.canDisband,
-        a.canCreate,
-      ], everyElement(isTrue));
+      expect([a.canManage, a.canEditInfo, a.canArchive, a.canAssignTeachers, a.canCreate], everyElement(isTrue));
       expect(a.canOpenDismissal, isTrue);
     });
 
@@ -125,7 +118,6 @@ void main() {
       expect(p.canEditInfo, isFalse);
       expect(p.canArchive, isFalse);
       expect(p.canAssignTeachers, isTrue);
-      expect(p.canDisband, isTrue);
       final yes = ClassroomDetail.fromJson(detail(roomA, const []));
       final no = ClassroomDetail.fromJson(detail(roomA, const [], canManageStudents: false));
       expect(p.canManageStudents(yes), isTrue);
@@ -173,7 +165,7 @@ void main() {
       expect(http.requests.single.queryParameters['q'], 'Ан');
     });
 
-    test('нэмэх, хасах (зөөлөн), шилжүүлэх, багш, засах, архивлах, тараах — зам ба бие', () async {
+    test('нэмэх, хасах (зөөлөн), шилжүүлэх, багш, засах, архивлах — зам ба бие', () async {
       final http = classroomsHttp()..json('DELETE', '/classrooms/c1?confirmCode=20261104', {'archived': true});
       final repo = _repo(http);
       await repo.enroll('c1', 'u1');
@@ -186,7 +178,6 @@ void main() {
       expect(requestBody(http, 'PATCH', '/classrooms/c1'), {'name': '12А шинэ', 'grade': 11});
       await repo.archive('c1', '20261104');
       expect(http.count('DELETE', '/classrooms/c1?confirmCode=20261104'), 1);
-      expect(await repo.disband('c1'), 2);
       // Хэзээ ч бүр мөсөн устгах хүсэлт явуулахгүй — зөвхөн архивын DELETE (сервер `archived: true`)
       expect(http.requests.where((r) => r.method == 'DELETE').map((r) => r.path), [
         '/classrooms/c1?confirmCode=20261104',

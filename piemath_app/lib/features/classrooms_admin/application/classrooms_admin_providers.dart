@@ -21,7 +21,7 @@ final classroomsAdminRepositoryProvider = Provider<ClassroomsAdminRepository>(
 /// | Ангиуд, дэлгэрэнгүй, бүртгэл нээх | тийм | тийм | үгүй |
 /// | Сурагч нэмэх, хасах, шилжүүлэх (дэлгэрэнгүй) | тийм | `canManageStudents` | үгүй |
 /// | Бүртгэлээс шилжүүлэх, анги заах | тийм | тийм | үгүй |
-/// | Ангийн багш оноох, анги тараах, шинэ анги | тийм | тийм | үгүй |
+/// | Ангийн багш оноох, шинэ анги | тийм | тийм | үгүй |
 /// | Ангийн мэдээлэл засах, архивлах | тийм | үгүй | үгүй |
 /// | Тарах цаг | бүх анги | өөрийн анги | өөрийн анги |
 class ClassroomsAccess {
@@ -39,7 +39,6 @@ class ClassroomsAccess {
   bool get canEditInfo => isAdmin;
   bool get canArchive => isAdmin;
   bool get canAssignTeachers => canManage;
-  bool get canDisband => canManage;
   bool get canCreate => canManage;
   bool get canTransferInRegistry => canManage;
 

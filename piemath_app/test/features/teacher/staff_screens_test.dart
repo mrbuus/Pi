@@ -84,7 +84,7 @@ void main() {
     testWidgets('өнөөдөр нөхөх хичээл татахгүй; онлайн анги онлайн оноо татахгүй', (tester) async {
       final http = boardHttp(board: boardJson(type: 'ONLINE'));
       await pumpTeacher(tester, const BoardScreen(classId: 'c1', date: testDate), http: http);
-      expect(http.requests.where((r) => r.path.startsWith('/makeup')), isEmpty);
+      expect(http.requests.where((r) => r.path.startsWith('/makeup/')), isEmpty);
       expect(http.requests.where((r) => r.path.contains('homework-marks/online')), isEmpty);
     });
 

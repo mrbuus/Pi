@@ -9,7 +9,10 @@ import '../data/class_dashboard_models.dart';
 import '../data/teacher_models.dart';
 import 'class_codes_tab.dart';
 import 'class_dashboard_tabs.dart';
+import 'class_payments_tab.dart';
 import 'staff_widgets.dart';
+import 'teacher_icons.dart';
+import 'teacher_widgets.dart';
 import 'today_overview.dart';
 
 enum _Sort { name, risk, attendance }
@@ -322,7 +325,8 @@ class _ClassTile extends StatelessWidget {
 }
 
 /// Ангийн самбар (`/app/classes/:id`): вэбтэй ижил `GET /class-dashboard/classes/:id`.
-/// «Тойм», «Сурагчид», «Код», «Нөхөх».
+/// «Тойм», «Сурагчид», «Төлбөр» (зөвхөн Админ, Багш+), «Код», «Нөхөх»; толгойд «Чек» товч.
+/// Дотоод ажилтан бичвэрийг сонгож хуулна (эзэн 2026-11-10).
 class ClassDetailScreen extends ConsumerWidget {
   const ClassDetailScreen({super.key, required this.classId});
 
@@ -332,13 +336,41 @@ class ClassDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(classDashboardDetailProvider(classId));
     final today = ref.watch(teacherTodayProvider).dateKey;
+    // Ангийн төлбөрийн самбар — зөвхөн Админ, Багш+ (Багш төлбөрийн дүн харахгүй).
+    final payments = ref.watch(canManageProvider);
+    final tabs = [
+      'Тойм',
+      'Сурагчид',
+      if (payments) 'Төлбөр',
+      'Код',
+      'Нөхөх',
+    ];
+    final d = async.value;
+    final open = d?.openChecks ?? 0;
     return DefaultTabController(
-      length: 4,
+      length: tabs.length,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(async.value?.name ?? 'Анги'),
+          title: Text(d?.name ?? 'Анги'),
           actions: [
-            if (async.value?.permissions.manageClass ?? false)
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpace.xs),
+              child: TextButton.icon(
+                key: const ValueKey('class-checks'),
+                style: TextButton.styleFrom(minimumSize: const Size(teacherTap, teacherTap)),
+                onPressed: () async {
+                  await context.push('/app/classes/${Uri.encodeComponent(classId)}/checks', extra: d?.name);
+                  // Буцаж ирэхэд нээлттэй чекийн тоо шинэчлэгдэнэ.
+                  ref.invalidate(classDashboardDetailProvider(classId));
+                },
+                icon: const Icon(TeacherIcons.clipboardCheck, size: 18),
+                label: Text(
+                  open > 0 ? 'Чек $open' : 'Чек',
+                  semanticsLabel: open > 0 ? 'Чек, нээлттэй $open' : 'Чек',
+                ),
+              ),
+            ),
+            if (d?.permissions.manageClass ?? false)
               IconButton(
                 tooltip: 'Удирдах',
                 icon: const Icon(AppIcons.settings),
@@ -347,15 +379,10 @@ class ClassDetailScreen extends ConsumerWidget {
                 ),
               ),
           ],
-          bottom: const TabBar(
+          bottom: TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.start,
-            tabs: [
-              Tab(text: 'Тойм'),
-              Tab(text: 'Сурагчид'),
-              Tab(text: 'Код'),
-              Tab(text: 'Нөхөх'),
-            ],
+            tabs: [for (final t in tabs) Tab(text: t)],
           ),
         ),
         body: async.when(
@@ -370,23 +397,33 @@ class ClassDetailScreen extends ConsumerWidget {
             Future<void> refresh() => ref
                 .refresh(classDashboardDetailProvider(classId).future)
                 .then((_) {}, onError: (_) {});
-            return TabBarView(
-              children: [
-                ClassOverviewTab(detail: d, today: today, onRefresh: refresh),
-                ClassStudentsTab(detail: d, onRefresh: refresh),
-                ClassCodesTab(
-                  students: [
-                    for (final s in d.students)
-                      RosterStudent(
-                        id: s.id,
-                        firstName: s.firstName,
-                        lastName: s.lastName,
-                        studentCode: s.studentCode,
-                      ),
+            return SelectionArea(
+              child: Builder(
+                builder: (context) => TabBarView(
+                  children: [
+                    ClassOverviewTab(
+                      detail: d,
+                      today: today,
+                      onRefresh: refresh,
+                      onOpenPayments: payments ? () => DefaultTabController.of(context).animateTo(2) : null,
+                    ),
+                    ClassStudentsTab(detail: d, onRefresh: refresh),
+                    if (payments) ClassPaymentsTab(classId: classId),
+                    ClassCodesTab(
+                      students: [
+                        for (final s in d.students)
+                          RosterStudent(
+                            id: s.id,
+                            firstName: s.firstName,
+                            lastName: s.lastName,
+                            studentCode: s.studentCode,
+                          ),
+                      ],
+                    ),
+                    ClassMakeupTab(classId: classId, today: today),
                   ],
                 ),
-                ClassMakeupTab(classId: classId, today: today),
-              ],
+              ),
             );
           },
         ),

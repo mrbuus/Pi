@@ -90,6 +90,30 @@ class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
                       ],
                     ],
             ),
+            // 406 нөхөх өрөө — хуваарьгүй, ӨДӨР БҮР (эзэн 2026-11-08).
+            AppCard(
+              key: const ValueKey('room406-link'),
+              onTap: () => context.push('/app/teacher/room406?date=$key'),
+              child: Row(
+                children: [
+                  Icon(AppIcons.doorOpen, color: context.colors.brand),
+                  const SizedBox(width: AppSpace.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('406 нөхөх өрөө', style: context.text.titleSmall),
+                        Text(
+                          'Хуваарьгүй, өдөр бүр',
+                          style: context.text.bodySmall?.copyWith(color: context.colors.inkDim),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(AppIcons.forward, color: context.colors.inkDim),
+                ],
+              ),
+            ),
             const SectionHeader(
               title: 'Хэрэгсэл',
               padding: EdgeInsets.only(top: AppSpace.md, bottom: AppSpace.sm),

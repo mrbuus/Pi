@@ -51,6 +51,7 @@ void main() {
       'lib/features/learning/data/lesson_repository.dart', // зөвхөн YouTube хост (isPlayableVideoUri)
       'lib/features/scan/ui/scan_result_screen.dart', // YouTube бодолт
       'lib/features/exam/ui/widgets/review_parts.dart', // YouTube бодолт
+      'lib/features/teacher/ui/class_checks_screen.dart', // tel: (Чекийн сурагчийн утас)
     };
     final callers = [
       for (final f in sources)

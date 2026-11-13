@@ -9,7 +9,7 @@ import '../../../shared/native/native.dart';
 import '../application/classrooms_admin_providers.dart';
 import '../data/classrooms_admin_models.dart';
 
-/// Ангийн удирдлагын доороос гарах маягтууд (засах, багш оноох, архивлах, тараах, шинэ анги, сурагч нэмэх).
+/// Ангийн удирдлагын доороос гарах маягтууд (засах, багш оноох, архивлах, шинэ анги, сурагч нэмэх).
 /// Бүгд `showFormSheet` эсвэл `showSelectSheet` дээр; амжилттай бол `true`, хаавал `null`.
 
 const _noTeacher = '';
@@ -190,30 +190,6 @@ Future<bool?> showArchiveSheet(BuildContext context, WidgetRef ref, AdminClassro
       await repo.archive(c.id, v.text('code'));
       return true;
     },
-  );
-}
-
-/// Анги тараах (Админ, Багш+): идэвхтэй бүх сурагчийн бичилт хаагдана, түүх үлдэнэ. Ангийн нэрийг бичиж
-/// баталгаажуулна (вэбтэй ижил). Хэдэн сурагч гарсныг буцаана.
-Future<int?> showDisbandSheet(BuildContext context, WidgetRef ref, AdminClassroom c) {
-  final repo = ref.read(classroomsAdminRepositoryProvider);
-  return showFormSheet<int>(
-    context,
-    title: '«${c.name}» ангийг тараах уу',
-    subtitle:
-        'Идэвхтэй ${c.studentCount} сурагчийг ангиас гаргана. Ирцийн түүх хадгалагдана. '
-        'Баталгаажуулахын тулд ангийн нэрийг бичнэ үү',
-    submitLabel: 'Ангийг тараах',
-    initialSize: FormSheet.midSize,
-    fields: [
-      FormTextField(
-        name: 'confirm',
-        label: 'Ангийн нэр',
-        required: true,
-        validator: (t) => t == c.name.trim() ? null : 'Ангийн нэр таарахгүй байна',
-      ),
-    ],
-    onSubmit: (_) => repo.disband(c.id),
   );
 }
 

@@ -22,4 +22,16 @@ abstract final class TeacherIcons {
   static const IconData listFilter = LucideIcons.listFilter;
   static const IconData userRoundCheck = LucideIcons.userRoundCheck;
   static const IconData bookCheck = LucideIcons.bookCheck;
+  // Давалгаа 6: шалгалтаар шалгах, нөхөлт, чек
+  static const IconData clipboardCheck = LucideIcons.clipboardCheck;
+  static const IconData pencil = LucideIcons.pencil;
+  static const IconData eyeOff = LucideIcons.eyeOff;
+  static const IconData arrowRightLeft = LucideIcons.repeat;
+  static const IconData userPlus = LucideIcons.userPlus;
+  static const IconData notebookPen = LucideIcons.notebookPen;
+  static const IconData history = LucideIcons.history;
+  static const IconData ban = LucideIcons.ban;
+  static const IconData users = LucideIcons.users;
+  static const IconData link2 = LucideIcons.link2;
+  static const IconData chevronLeft = LucideIcons.chevronLeft;
 }
