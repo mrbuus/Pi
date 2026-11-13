@@ -252,6 +252,9 @@ void main() {
       expect(find.text('Сорил 3'), findsOneWidget);
       expect(find.text('18/20'), findsOneWidget);
 
+      // Таб олширсон тул мөр хөндлөн гүйнэ — эхлээд харагдуулна
+      await tester.ensureVisible(find.text('Тэмдэглэл'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Тэмдэглэл'));
       await settle(tester, frames: 20);
       expect(find.text('Ээж нь уулзахыг хүссэн'), findsOneWidget);

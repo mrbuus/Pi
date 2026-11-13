@@ -7,6 +7,7 @@ import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
+import '../application/student_calendar_providers.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_repository.dart';
 import '../data/teacher_today.dart';
@@ -64,6 +65,8 @@ class _BodyState extends ConsumerState<_Body> {
     final showGuardians = canSeeGuardianPhones(viewerRole);
     final c = context.colors;
     final history = d.classHistory.reversed.toList();
+    // Анги: одоогийн анги (математик + Нийгэм зэрэг бол хоёулаа, вэб 2026-11-12), ангигүй бол түвшин
+    final classes = ref.watch(studentClassNamesProvider(d.id)).value;
     return RefreshIndicator(
       onRefresh: () => ref.refresh(studentDetailProvider(d.id).future).then((_) {}, onError: (_) {}),
       child: ListView(
@@ -96,7 +99,7 @@ class _BodyState extends ConsumerState<_Body> {
                   ('Код', d.studentCode),
                   ('Утас', d.phone),
                   ('Имэйл', d.email),
-                  ('Анги', d.grade == null ? null : '${d.grade}-р анги'),
+                  ('Анги', classes ?? (d.grade == null ? null : '${d.grade}-р анги')),
                   ('Сургууль', d.school),
                   if (showGuardians) ...[
                     ('Эцгийн утас', d.fatherPhone),

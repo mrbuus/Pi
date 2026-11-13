@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/files/files.dart';
 import '../../../../core/network/api_error.dart';
 import '../../../../core/ui/ui.dart';
+import '../../data/photo_error_reporter.dart';
 import '../../data/photo_processor.dart';
 import '../../domain/photo_quality.dart';
 import 'crop_screen.dart';
@@ -24,6 +25,7 @@ class NotebookComposerScreen extends ConsumerStatefulWidget {
     this.noteLabel,
     this.initialNote = '',
     this.submitLabel = 'Илгээх',
+    this.usagePath = '/app/homework',
   });
 
   final String title;
@@ -36,6 +38,9 @@ class NotebookComposerScreen extends ConsumerStatefulWidget {
   final String initialNote;
   final String submitLabel;
 
+  /// Зургийн техникийн алдааны бүртгэлийн зам (`POST /usage` kind=error).
+  final String usagePath;
+
   /// Амжилттай илгээвэл `true`.
   static Future<bool> open(
     BuildContext context, {
@@ -46,6 +51,7 @@ class NotebookComposerScreen extends ConsumerStatefulWidget {
     String? noteLabel,
     String initialNote = '',
     String submitLabel = 'Илгээх',
+    String usagePath = '/app/homework',
   }) async {
     final ok = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
@@ -58,6 +64,7 @@ class NotebookComposerScreen extends ConsumerStatefulWidget {
           noteLabel: noteLabel,
           initialNote: initialNote,
           submitLabel: submitLabel,
+          usagePath: usagePath,
         ),
       ),
     );
@@ -135,6 +142,7 @@ class _NotebookComposerScreenState extends ConsumerState<NotebookComposerScreen>
       final e = await _captureAndCrop();
       if (e != null && mounted && _room > 0) setState(() => _entries.add(e));
     } on PlatformException catch (e) {
+      _report('read', e);
       if (mounted) _permissionOrOpenError(e);
     }
   }
@@ -151,6 +159,7 @@ class _NotebookComposerScreenState extends ConsumerState<NotebookComposerScreen>
       }
       if (mounted) setState(() => _entries.addAll(added));
     } on PlatformException catch (e) {
+      _report('read', e);
       if (mounted) _permissionOrOpenError(e);
     }
   }
@@ -161,6 +170,7 @@ class _NotebookComposerScreenState extends ConsumerState<NotebookComposerScreen>
       final e = await _captureAndCrop();
       if (e != null && mounted && i < _entries.length) setState(() => _entries[i] = e);
     } on PlatformException catch (e) {
+      _report('read', e);
       if (mounted) _permissionOrOpenError(e);
     }
   }
@@ -178,6 +188,20 @@ class _NotebookComposerScreenState extends ConsumerState<NotebookComposerScreen>
         break;
     }
   }
+
+  /// Техникийн алдааг бүртгэнэ (вэбийн `trackError`) — хэрэглэгчид юу ч харагдахгүй.
+  void _report(String stage, Object e) {
+    if (!mounted) return;
+    ref
+        .read(photoErrorReporterProvider)
+        .report(path: widget.usagePath, stage: stage, detail: 'n ${_entries.length} ${PhotoErrorReporter.describe(e)}');
+  }
+
+  static String _stage(PhotoUploadPhase? p) => switch (p) {
+    PhotoUploadPhase.uploading => 'upload',
+    PhotoUploadPhase.saving => 'save',
+    _ => 'build',
+  };
 
   Future<void> _submit() async {
     final cancel = CancelToken();
@@ -200,8 +224,11 @@ class _NotebookComposerScreenState extends ConsumerState<NotebookComposerScreen>
     } on UploadCancelled {
       if (mounted) setState(() => _error = null);
     } on ApiError catch (e) {
+      // 403 (5 минут өнгөрсөн гэх мэт) нь техникийн алдаа биш — бүртгэхгүй
+      if (e.kind != ApiErrorKind.forbidden) _report(_stage(_phase), e);
       if (mounted) setState(() => _error = e.message);
-    } catch (_) {
+    } catch (e) {
+      _report(_stage(_phase), e);
       if (mounted) setState(() => _error = 'Илгээж чадсангүй. Дахин оролдоно уу.');
     } finally {
       if (mounted) {

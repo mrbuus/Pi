@@ -6,9 +6,11 @@ import '../../../core/files/files.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
 import '../data/account_repository.dart';
+import '../data/avatar_image.dart';
 
 /// Профайл зураг солих/нэмэх — вэбийн `ProfilePhoto`: `POST /uploads` (FileUploader) → `POST /auth/me/avatar {key}`.
 /// Камер/галерейн зөвшөөрлийг сонголт хийх үед л систем асууна. Алдаа гарвал хуучин зураг хэвээр.
+/// Илгээхийн өмнө 512px дөрвөлжин JPEG болгоно (вэб 2026-11-12: HEIC, EXIF эргэлт, том файл).
 class AvatarChangeButton extends ConsumerStatefulWidget {
   const AvatarChangeButton({super.key, required this.hasAvatar});
 
@@ -55,8 +57,9 @@ class _AvatarChangeButtonState extends ConsumerState<AvatarChangeButton> {
       final source = ref.read(photoSourceProvider);
       final PhotoPage? page = camera ? await source.takePhoto() : (await source.pickFromGallery(limit: 1)).firstOrNull;
       if (page == null) return;
+      final bytes = await ref.read(avatarProcessorProvider).prepare(page.bytes);
       final uploaded = await ref.read(fileUploaderProvider).upload(
-            bytes: page.bytes,
+            bytes: bytes,
             name: 'avatar.jpg',
             mime: 'image/jpeg',
             purpose: UploadPurpose.general,

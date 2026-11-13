@@ -65,7 +65,7 @@ class StudentHomeScreen extends ConsumerWidget {
             else if (ov == null)
               const _DashboardSkeleton()
             else if (inClass) ...[
-              TodayCard(today: ov.today, todayKey: today.dateKey),
+              TodayCard(today: ov.today, others: ov.todayOther, todayKey: today.dateKey),
               const SizedBox(height: AppSpace.md),
               IntrinsicHeight(
                 child: Row(
@@ -178,17 +178,22 @@ class _Greeting extends ConsumerWidget {
   }
 }
 
-/// Өнөөдрийн хичээл + түргэн үйлдэл (онол илгээх, даалгавар) — нүүрний гол карт.
+/// Өнөөдрийн хичээл + түргэн үйлдэл (онол илгээх, даалгавар) — нүүрний гол карт. Хоёр ангид зэрэг суудаг
+/// сурагчид (математик + Нийгэм, вэб 2026-11-12) нөгөө ангийн хичээл ч цагаар нь эрэмбэлэгдэж гарна.
 class TodayCard extends StatelessWidget {
-  const TodayCard({super.key, required this.today, required this.todayKey});
+  const TodayCard({super.key, required this.today, required this.todayKey, this.others = const []});
 
   final HubToday? today;
+  final List<HubToday> others;
   final String todayKey;
 
   @override
   Widget build(BuildContext context) {
     final t = today;
     final c = context.colors;
+    final lessons = t == null
+        ? const <HubToday>[]
+        : ([t, ...others]..sort((a, b) => a.startMinute.compareTo(b.startMinute)));
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -198,33 +203,34 @@ class TodayCard extends StatelessWidget {
           if (t == null)
             const DashedNote('Өнөөдөр хичээлгүй')
           else
-            InkWell(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              onTap: () => context.push(dayPath(todayKey, t.classroomId)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpace.xs),
-                child: Row(
-                  children: [
-                    RoomBadge(room: t.room, size: 48),
-                    const SizedBox(width: AppSpace.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            timeRange(t.startMinute, t.endMinute) ?? '',
-                            style: context.text.displaySmall?.copyWith(fontSize: 22),
-                          ),
-                          const SizedBox(height: 2),
-                          Meta(items: [t.topic, t.classroomName]),
-                        ],
+            for (final t in lessons)
+              InkWell(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                onTap: () => context.push(dayPath(todayKey, t.classroomId)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpace.xs),
+                  child: Row(
+                    children: [
+                      RoomBadge(room: t.room, size: 48),
+                      const SizedBox(width: AppSpace.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              timeRange(t.startMinute, t.endMinute) ?? '',
+                              style: context.text.displaySmall?.copyWith(fontSize: 22),
+                            ),
+                            const SizedBox(height: 2),
+                            Meta(items: [t.topic, t.classroomName]),
+                          ],
+                        ),
                       ),
-                    ),
-                    Icon(AppIcons.forward, size: 18, color: c.inkDim),
-                  ],
+                      Icon(AppIcons.forward, size: 18, color: c.inkDim),
+                    ],
+                  ),
                 ),
               ),
-            ),
           const SizedBox(height: AppSpace.lg),
           Row(
             children: [
@@ -531,7 +537,10 @@ class PaidUntilCard extends ConsumerWidget {
                           style: context.text.displaySmall?.copyWith(fontSize: 22),
                         ),
                         const SizedBox(height: AppSpace.xs),
-                        Text(title, style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: tone.fg(c))),
+                        Text(
+                          title,
+                          style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: tone.fg(c)),
+                        ),
                         const SizedBox(height: 2),
                         Text(hint, style: context.text.bodySmall),
                       ],
@@ -546,10 +555,7 @@ class PaidUntilCard extends ConsumerWidget {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        'Төлбөрийн дэлгэрэнгүй',
-                        style: context.text.labelLarge?.copyWith(color: c.brand),
-                      ),
+                      child: Text('Төлбөрийн дэлгэрэнгүй', style: context.text.labelLarge?.copyWith(color: c.brand)),
                     ),
                     Icon(AppIcons.forward, size: 18, color: c.brand),
                   ],
@@ -612,10 +618,7 @@ class _AnnouncementTile extends StatelessWidget {
     final created = parseApiInstant(a.createdAt);
     return Container(
       padding: const EdgeInsets.all(AppSpace.md),
-      decoration: BoxDecoration(
-        color: context.colors.surfaceSunken,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-      ),
+      decoration: BoxDecoration(color: context.colors.surfaceSunken, borderRadius: BorderRadius.circular(AppRadius.md)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

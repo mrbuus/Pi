@@ -250,11 +250,15 @@ class _WithdrawalSheetState extends ConsumerState<WithdrawalSheet> {
                     minTileHeight: AppSizes.minTap,
                     controlAffinity: ListTileControlAffinity.leading,
                     value: checked,
-                    onChanged: d.leave && !checked ? null : (_) => _toggle(d.date),
+                    onChanged: d.assumed || (d.leave && !checked) ? null : (_) => _toggle(d.date),
                     title: Text(
                       [
                         monthDay(d.date),
-                        d.status == null ? 'Ирц бүртгээгүй' : (attendanceLabel[d.status] ?? d.status!),
+                        d.assumed
+                            ? 'Вэбд ирц бүртгэхээс өмнө, суусанд тооцно'
+                            : d.status == null
+                            ? 'Ирц бүртгээгүй'
+                            : (attendanceLabel[d.status] ?? d.status!),
                         ?d.note,
                       ].join('  '),
                       style: context.text.bodyMedium,
@@ -350,7 +354,9 @@ class WithdrawalSummaryView extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 data.refund > 0
-                    ? 'Төлсөн ${formatMnt(data.paid)}, суусан ${formatMnt(data.owed)}'
+                    ? 'Төлсөн ${formatMnt(data.paid)}'
+                          '${data.refundedBefore > 0 ? ', өмнө буцаасан ${formatMnt(data.refundedBefore)}' : ''}'
+                          ', суусан ${formatMnt(data.owed)}'
                     : 'Суусан хичээлийн төлбөр (${formatMnt(data.owed)}) төлсөн дүнгээс (${formatMnt(data.paid)}) '
                           'их буюу тэнцүү тул буцаах дүн алга',
                 style: dim,
@@ -402,7 +408,8 @@ class WithdrawalSummaryView extends StatelessWidget {
                           cy.full
                               ? 'Бүтэн сар'
                               : [
-                                  'Гарсан сар: ${cy.lessons} хичээл',
+                                  'Гарсан сар: ${cy.lessons} хичээл'
+                                      '${cy.assumed > 0 ? ' (${cy.assumed} нь вэбээс өмнө, суусанд тооцсон)' : ''}',
                                   if (cy.leaveDay != null) 'чөлөө 1 (${monthDay(cy.leaveDay!)}) хассан',
                                   if (cy.extraDays.isNotEmpty)
                                     '${cy.extraDays.length} өдөр хассан (${cy.extraDays.map(monthDay).join(', ')})',
@@ -418,7 +425,12 @@ class WithdrawalSummaryView extends StatelessWidget {
               Divider(color: c.line),
               Row(
                 children: [
-                  for (final (label, v) in [('Суусан', data.owed), ('Төлсөн', data.paid), ('Буцаах', data.refund)])
+                  for (final (label, v) in [
+                    ('Суусан', data.owed),
+                    ('Төлсөн', data.paid),
+                    if (data.refundedBefore > 0) ('Өмнө буцаасан', data.refundedBefore),
+                    ('Буцаах', data.refund),
+                  ])
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -440,6 +452,16 @@ class WithdrawalSummaryView extends StatelessWidget {
                       Text(formatMnt(pay.amount), style: context.text.bodySmall),
                     ],
                   ),
+              ],
+              if (data.noSchedule) ...[
+                const SizedBox(height: AppSpace.sm),
+                Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    'Ангийн хуваарь алга тул хичээлийн тоо бодогдоогүй — хуваариа оруулаад дахин шалгана уу',
+                    style: context.text.bodyMedium?.copyWith(color: c.warning),
+                  ),
+                ),
               ],
               if (last != null && !last.full && last.counted > 0) ...[
                 const SizedBox(height: AppSpace.xs),

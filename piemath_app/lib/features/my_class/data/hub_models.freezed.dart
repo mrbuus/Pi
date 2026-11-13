@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$HubOverview {
 
- List<HubClassroom> get classrooms; AttendanceTotals get attendance; HomeworkTotals get homework; HubToday? get today; LatestMark? get latestMark;
+ List<HubClassroom> get classrooms; AttendanceTotals get attendance; HomeworkTotals get homework; HubToday? get today;/// Хоёр ангид зэрэг суудаг сурагчийн (математик + Нийгэм) өнөөдрийн нөгөө ангийн хичээл (вэб 2026-11-12).
+ List<HubToday> get todayOther; LatestMark? get latestMark;
 /// Create a copy of HubOverview
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $HubOverviewCopyWith<HubOverview> get copyWith => _$HubOverviewCopyWithImpl<HubO
 @override
 bool operator ==(Object other) {
   final _this = this as HubOverview;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HubOverview&&const DeepCollectionEquality().equals(other.classrooms, _this.classrooms)&&(identical(other.attendance, _this.attendance) || other.attendance == _this.attendance)&&(identical(other.homework, _this.homework) || other.homework == _this.homework)&&(identical(other.today, _this.today) || other.today == _this.today)&&(identical(other.latestMark, _this.latestMark) || other.latestMark == _this.latestMark));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HubOverview&&const DeepCollectionEquality().equals(other.classrooms, _this.classrooms)&&(identical(other.attendance, _this.attendance) || other.attendance == _this.attendance)&&(identical(other.homework, _this.homework) || other.homework == _this.homework)&&(identical(other.today, _this.today) || other.today == _this.today)&&const DeepCollectionEquality().equals(other.todayOther, _this.todayOther)&&(identical(other.latestMark, _this.latestMark) || other.latestMark == _this.latestMark));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as HubOverview;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.classrooms),_this.attendance,_this.homework,_this.today,_this.latestMark);
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.classrooms),_this.attendance,_this.homework,_this.today,const DeepCollectionEquality().hash(_this.todayOther),_this.latestMark);
 }
 
 @override
 String toString() {
   final _this = this as HubOverview;
-  return 'HubOverview(classrooms: ${_this.classrooms}, attendance: ${_this.attendance}, homework: ${_this.homework}, today: ${_this.today}, latestMark: ${_this.latestMark})';
+  return 'HubOverview(classrooms: ${_this.classrooms}, attendance: ${_this.attendance}, homework: ${_this.homework}, today: ${_this.today}, todayOther: ${_this.todayOther}, latestMark: ${_this.latestMark})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $HubOverviewCopyWith<$Res>  {
   factory $HubOverviewCopyWith(HubOverview value, $Res Function(HubOverview) _then) = _$HubOverviewCopyWithImpl;
 @useResult
 $Res call({
- List<HubClassroom> classrooms, AttendanceTotals attendance, HomeworkTotals homework, HubToday? today, LatestMark? latestMark
+ List<HubClassroom> classrooms, AttendanceTotals attendance, HomeworkTotals homework, HubToday? today, List<HubToday> todayOther, LatestMark? latestMark
 });
 
 
@@ -71,13 +72,14 @@ class _$HubOverviewCopyWithImpl<$Res>
 
 /// Create a copy of HubOverview
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? classrooms = null,Object? attendance = null,Object? homework = null,Object? today = freezed,Object? latestMark = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? classrooms = null,Object? attendance = null,Object? homework = null,Object? today = freezed,Object? todayOther = null,Object? latestMark = freezed,}) {
   return _then(HubOverview(
 classrooms: null == classrooms ? _self.classrooms : classrooms // ignore: cast_nullable_to_non_nullable
 as List<HubClassroom>,attendance: null == attendance ? _self.attendance : attendance // ignore: cast_nullable_to_non_nullable
 as AttendanceTotals,homework: null == homework ? _self.homework : homework // ignore: cast_nullable_to_non_nullable
 as HomeworkTotals,today: freezed == today ? _self.today : today // ignore: cast_nullable_to_non_nullable
-as HubToday?,latestMark: freezed == latestMark ? _self.latestMark : latestMark // ignore: cast_nullable_to_non_nullable
+as HubToday?,todayOther: null == todayOther ? _self.todayOther : todayOther // ignore: cast_nullable_to_non_nullable
+as List<HubToday>,latestMark: freezed == latestMark ? _self.latestMark : latestMark // ignore: cast_nullable_to_non_nullable
 as LatestMark?,
   ));
 }
@@ -205,10 +207,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<HubClassroom> classrooms,  AttendanceTotals attendance,  HomeworkTotals homework,  HubToday? today,  LatestMark? latestMark)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<HubClassroom> classrooms,  AttendanceTotals attendance,  HomeworkTotals homework,  HubToday? today,  List<HubToday> todayOther,  LatestMark? latestMark)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HubOverview() when $default != null:
-return $default(_that.classrooms,_that.attendance,_that.homework,_that.today,_that.latestMark);case _:
+return $default(_that.classrooms,_that.attendance,_that.homework,_that.today,_that.todayOther,_that.latestMark);case _:
   return orElse();
 
 }
@@ -226,10 +228,10 @@ return $default(_that.classrooms,_that.attendance,_that.homework,_that.today,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<HubClassroom> classrooms,  AttendanceTotals attendance,  HomeworkTotals homework,  HubToday? today,  LatestMark? latestMark)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<HubClassroom> classrooms,  AttendanceTotals attendance,  HomeworkTotals homework,  HubToday? today,  List<HubToday> todayOther,  LatestMark? latestMark)  $default,) {final _that = this;
 switch (_that) {
 case _HubOverview():
-return $default(_that.classrooms,_that.attendance,_that.homework,_that.today,_that.latestMark);case _:
+return $default(_that.classrooms,_that.attendance,_that.homework,_that.today,_that.todayOther,_that.latestMark);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -246,10 +248,10 @@ return $default(_that.classrooms,_that.attendance,_that.homework,_that.today,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<HubClassroom> classrooms,  AttendanceTotals attendance,  HomeworkTotals homework,  HubToday? today,  LatestMark? latestMark)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<HubClassroom> classrooms,  AttendanceTotals attendance,  HomeworkTotals homework,  HubToday? today,  List<HubToday> todayOther,  LatestMark? latestMark)?  $default,) {final _that = this;
 switch (_that) {
 case _HubOverview() when $default != null:
-return $default(_that.classrooms,_that.attendance,_that.homework,_that.today,_that.latestMark);case _:
+return $default(_that.classrooms,_that.attendance,_that.homework,_that.today,_that.todayOther,_that.latestMark);case _:
   return null;
 
 }
@@ -261,7 +263,7 @@ return $default(_that.classrooms,_that.attendance,_that.homework,_that.today,_th
 @JsonSerializable()
 
 class _HubOverview implements HubOverview {
-  const _HubOverview({ List<HubClassroom> classrooms = const <HubClassroom>[], required this.attendance, required this.homework, this.today, this.latestMark}): _classrooms = classrooms;
+  const _HubOverview({ List<HubClassroom> classrooms = const <HubClassroom>[], required this.attendance, required this.homework, this.today,  List<HubToday> todayOther = const <HubToday>[], this.latestMark}): _classrooms = classrooms,_todayOther = todayOther;
   factory _HubOverview.fromJson(Map<String, dynamic> json) => _$HubOverviewFromJson(json);
 
  final  List<HubClassroom> _classrooms;
@@ -274,6 +276,15 @@ class _HubOverview implements HubOverview {
 @override final  AttendanceTotals attendance;
 @override final  HomeworkTotals homework;
 @override final  HubToday? today;
+/// Хоёр ангид зэрэг суудаг сурагчийн (математик + Нийгэм) өнөөдрийн нөгөө ангийн хичээл (вэб 2026-11-12).
+ final  List<HubToday> _todayOther;
+/// Хоёр ангид зэрэг суудаг сурагчийн (математик + Нийгэм) өнөөдрийн нөгөө ангийн хичээл (вэб 2026-11-12).
+@override@JsonKey() List<HubToday> get todayOther {
+  if (_todayOther is EqualUnmodifiableListView) return _todayOther;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_todayOther);
+}
+
 @override final  LatestMark? latestMark;
 
 /// Create a copy of HubOverview
@@ -289,18 +300,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _HubOverview&&const DeepCollectionEquality().equals(other.classrooms, _classrooms)&&(identical(other.attendance, attendance) || other.attendance == attendance)&&(identical(other.homework, homework) || other.homework == homework)&&(identical(other.today, today) || other.today == today)&&(identical(other.latestMark, latestMark) || other.latestMark == latestMark));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _HubOverview&&const DeepCollectionEquality().equals(other.classrooms, _classrooms)&&(identical(other.attendance, attendance) || other.attendance == attendance)&&(identical(other.homework, homework) || other.homework == homework)&&(identical(other.today, today) || other.today == today)&&const DeepCollectionEquality().equals(other.todayOther, _todayOther)&&(identical(other.latestMark, latestMark) || other.latestMark == latestMark));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_classrooms),attendance,homework,today,latestMark);
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_classrooms),attendance,homework,today,const DeepCollectionEquality().hash(_todayOther),latestMark);
 }
 
 @override
 String toString() {
-    return 'HubOverview(classrooms: $classrooms, attendance: $attendance, homework: $homework, today: $today, latestMark: $latestMark)';
+    return 'HubOverview(classrooms: $classrooms, attendance: $attendance, homework: $homework, today: $today, todayOther: $todayOther, latestMark: $latestMark)';
 }
 
 
@@ -311,7 +322,7 @@ abstract mixin class _$HubOverviewCopyWith<$Res> implements $HubOverviewCopyWith
   factory _$HubOverviewCopyWith(_HubOverview value, $Res Function(_HubOverview) _then) = __$HubOverviewCopyWithImpl;
 @override @useResult
 $Res call({
- List<HubClassroom> classrooms, AttendanceTotals attendance, HomeworkTotals homework, HubToday? today, LatestMark? latestMark
+ List<HubClassroom> classrooms, AttendanceTotals attendance, HomeworkTotals homework, HubToday? today, List<HubToday> todayOther, LatestMark? latestMark
 });
 
 
@@ -328,13 +339,14 @@ class __$HubOverviewCopyWithImpl<$Res>
 
 /// Create a copy of HubOverview
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? classrooms = null,Object? attendance = null,Object? homework = null,Object? today = freezed,Object? latestMark = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? classrooms = null,Object? attendance = null,Object? homework = null,Object? today = freezed,Object? todayOther = null,Object? latestMark = freezed,}) {
   return _then(_HubOverview(
 classrooms: null == classrooms ? _self._classrooms : classrooms // ignore: cast_nullable_to_non_nullable
 as List<HubClassroom>,attendance: null == attendance ? _self.attendance : attendance // ignore: cast_nullable_to_non_nullable
 as AttendanceTotals,homework: null == homework ? _self.homework : homework // ignore: cast_nullable_to_non_nullable
 as HomeworkTotals,today: freezed == today ? _self.today : today // ignore: cast_nullable_to_non_nullable
-as HubToday?,latestMark: freezed == latestMark ? _self.latestMark : latestMark // ignore: cast_nullable_to_non_nullable
+as HubToday?,todayOther: null == todayOther ? _self._todayOther : todayOther // ignore: cast_nullable_to_non_nullable
+as List<HubToday>,latestMark: freezed == latestMark ? _self.latestMark : latestMark // ignore: cast_nullable_to_non_nullable
 as LatestMark?,
   ));
 }
@@ -3051,7 +3063,8 @@ as LateRange?,
 /// @nodoc
 mixin _$DayHomework {
 
-@JsonKey(unknownEnumValue: _nullEnum) HomeworkStatus? get status; String? get comment; String? get checkedOn;
+@JsonKey(unknownEnumValue: _nullEnum) HomeworkStatus? get status; String? get comment; String? get checkedOn;/// Шалгалтаар даалгавар шалгасан оноо (эзэн 2026-11-08 19:08); байхгүй бол null.
+ HubQuiz? get quiz;
 /// Create a copy of DayHomework
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3065,20 +3078,20 @@ $DayHomeworkCopyWith<DayHomework> get copyWith => _$DayHomeworkCopyWithImpl<DayH
 @override
 bool operator ==(Object other) {
   final _this = this as DayHomework;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DayHomework&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.comment, _this.comment) || other.comment == _this.comment)&&(identical(other.checkedOn, _this.checkedOn) || other.checkedOn == _this.checkedOn));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DayHomework&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.comment, _this.comment) || other.comment == _this.comment)&&(identical(other.checkedOn, _this.checkedOn) || other.checkedOn == _this.checkedOn)&&(identical(other.quiz, _this.quiz) || other.quiz == _this.quiz));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as DayHomework;
-  return Object.hash(runtimeType,_this.status,_this.comment,_this.checkedOn);
+  return Object.hash(runtimeType,_this.status,_this.comment,_this.checkedOn,_this.quiz);
 }
 
 @override
 String toString() {
   final _this = this as DayHomework;
-  return 'DayHomework(status: ${_this.status}, comment: ${_this.comment}, checkedOn: ${_this.checkedOn})';
+  return 'DayHomework(status: ${_this.status}, comment: ${_this.comment}, checkedOn: ${_this.checkedOn}, quiz: ${_this.quiz})';
 }
 
 
@@ -3089,11 +3102,11 @@ abstract mixin class $DayHomeworkCopyWith<$Res>  {
   factory $DayHomeworkCopyWith(DayHomework value, $Res Function(DayHomework) _then) = _$DayHomeworkCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(unknownEnumValue: _nullEnum) HomeworkStatus? status, String? comment, String? checkedOn
+@JsonKey(unknownEnumValue: _nullEnum) HomeworkStatus? status, String? comment, String? checkedOn, HubQuiz? quiz
 });
 
 
-
+$HubQuizCopyWith<$Res>? get quiz;
 
 }
 /// @nodoc
@@ -3106,15 +3119,28 @@ class _$DayHomeworkCopyWithImpl<$Res>
 
 /// Create a copy of DayHomework
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = freezed,Object? comment = freezed,Object? checkedOn = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = freezed,Object? comment = freezed,Object? checkedOn = freezed,Object? quiz = freezed,}) {
   return _then(DayHomework(
 status: freezed == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as HomeworkStatus?,comment: freezed == comment ? _self.comment : comment // ignore: cast_nullable_to_non_nullable
 as String?,checkedOn: freezed == checkedOn ? _self.checkedOn : checkedOn // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,quiz: freezed == quiz ? _self.quiz : quiz // ignore: cast_nullable_to_non_nullable
+as HubQuiz?,
   ));
 }
+/// Create a copy of DayHomework
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$HubQuizCopyWith<$Res>? get quiz {
+    if (_self.quiz == null) {
+    return null;
+  }
 
+  return $HubQuizCopyWith<$Res>(_self.quiz!, (value) {
+    return _then(_self.copyWith(quiz: value));
+  });
+}
 }
 
 
@@ -3196,10 +3222,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(unknownEnumValue: _nullEnum)  HomeworkStatus? status,  String? comment,  String? checkedOn)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(unknownEnumValue: _nullEnum)  HomeworkStatus? status,  String? comment,  String? checkedOn,  HubQuiz? quiz)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DayHomework() when $default != null:
-return $default(_that.status,_that.comment,_that.checkedOn);case _:
+return $default(_that.status,_that.comment,_that.checkedOn,_that.quiz);case _:
   return orElse();
 
 }
@@ -3217,10 +3243,10 @@ return $default(_that.status,_that.comment,_that.checkedOn);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(unknownEnumValue: _nullEnum)  HomeworkStatus? status,  String? comment,  String? checkedOn)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(unknownEnumValue: _nullEnum)  HomeworkStatus? status,  String? comment,  String? checkedOn,  HubQuiz? quiz)  $default,) {final _that = this;
 switch (_that) {
 case _DayHomework():
-return $default(_that.status,_that.comment,_that.checkedOn);case _:
+return $default(_that.status,_that.comment,_that.checkedOn,_that.quiz);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3237,10 +3263,10 @@ return $default(_that.status,_that.comment,_that.checkedOn);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(unknownEnumValue: _nullEnum)  HomeworkStatus? status,  String? comment,  String? checkedOn)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(unknownEnumValue: _nullEnum)  HomeworkStatus? status,  String? comment,  String? checkedOn,  HubQuiz? quiz)?  $default,) {final _that = this;
 switch (_that) {
 case _DayHomework() when $default != null:
-return $default(_that.status,_that.comment,_that.checkedOn);case _:
+return $default(_that.status,_that.comment,_that.checkedOn,_that.quiz);case _:
   return null;
 
 }
@@ -3252,12 +3278,14 @@ return $default(_that.status,_that.comment,_that.checkedOn);case _:
 @JsonSerializable()
 
 class _DayHomework implements DayHomework {
-  const _DayHomework({@JsonKey(unknownEnumValue: _nullEnum) this.status, this.comment, this.checkedOn});
+  const _DayHomework({@JsonKey(unknownEnumValue: _nullEnum) this.status, this.comment, this.checkedOn, this.quiz});
   factory _DayHomework.fromJson(Map<String, dynamic> json) => _$DayHomeworkFromJson(json);
 
 @override@JsonKey(unknownEnumValue: _nullEnum) final  HomeworkStatus? status;
 @override final  String? comment;
 @override final  String? checkedOn;
+/// Шалгалтаар даалгавар шалгасан оноо (эзэн 2026-11-08 19:08); байхгүй бол null.
+@override final  HubQuiz? quiz;
 
 /// Create a copy of DayHomework
 /// with the given fields replaced by the non-null parameter values.
@@ -3272,18 +3300,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DayHomework&&(identical(other.status, status) || other.status == status)&&(identical(other.comment, comment) || other.comment == comment)&&(identical(other.checkedOn, checkedOn) || other.checkedOn == checkedOn));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DayHomework&&(identical(other.status, status) || other.status == status)&&(identical(other.comment, comment) || other.comment == comment)&&(identical(other.checkedOn, checkedOn) || other.checkedOn == checkedOn)&&(identical(other.quiz, quiz) || other.quiz == quiz));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,status,comment,checkedOn);
+    return Object.hash(runtimeType,status,comment,checkedOn,quiz);
 }
 
 @override
 String toString() {
-    return 'DayHomework(status: $status, comment: $comment, checkedOn: $checkedOn)';
+    return 'DayHomework(status: $status, comment: $comment, checkedOn: $checkedOn, quiz: $quiz)';
 }
 
 
@@ -3294,11 +3322,11 @@ abstract mixin class _$DayHomeworkCopyWith<$Res> implements $DayHomeworkCopyWith
   factory _$DayHomeworkCopyWith(_DayHomework value, $Res Function(_DayHomework) _then) = __$DayHomeworkCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(unknownEnumValue: _nullEnum) HomeworkStatus? status, String? comment, String? checkedOn
+@JsonKey(unknownEnumValue: _nullEnum) HomeworkStatus? status, String? comment, String? checkedOn, HubQuiz? quiz
 });
 
 
-
+@override $HubQuizCopyWith<$Res>? get quiz;
 
 }
 /// @nodoc
@@ -3311,12 +3339,298 @@ class __$DayHomeworkCopyWithImpl<$Res>
 
 /// Create a copy of DayHomework
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = freezed,Object? comment = freezed,Object? checkedOn = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = freezed,Object? comment = freezed,Object? checkedOn = freezed,Object? quiz = freezed,}) {
   return _then(_DayHomework(
 status: freezed == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as HomeworkStatus?,comment: freezed == comment ? _self.comment : comment // ignore: cast_nullable_to_non_nullable
 as String?,checkedOn: freezed == checkedOn ? _self.checkedOn : checkedOn // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,quiz: freezed == quiz ? _self.quiz : quiz // ignore: cast_nullable_to_non_nullable
+as HubQuiz?,
+  ));
+}
+
+/// Create a copy of DayHomework
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$HubQuizCopyWith<$Res>? get quiz {
+    if (_self.quiz == null) {
+    return null;
+  }
+
+  return $HubQuizCopyWith<$Res>(_self.quiz!, (value) {
+    return _then(_self.copyWith(quiz: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$HubQuiz {
+
+ double get score; int get problemCount;
+/// Create a copy of HubQuiz
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$HubQuizCopyWith<HubQuiz> get copyWith => _$HubQuizCopyWithImpl<HubQuiz>(this as HubQuiz, _$identity);
+
+  /// Serializes this HubQuiz to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as HubQuiz;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HubQuiz&&(identical(other.score, _this.score) || other.score == _this.score)&&(identical(other.problemCount, _this.problemCount) || other.problemCount == _this.problemCount));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as HubQuiz;
+  return Object.hash(runtimeType,_this.score,_this.problemCount);
+}
+
+@override
+String toString() {
+  final _this = this as HubQuiz;
+  return 'HubQuiz(score: ${_this.score}, problemCount: ${_this.problemCount})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $HubQuizCopyWith<$Res>  {
+  factory $HubQuizCopyWith(HubQuiz value, $Res Function(HubQuiz) _then) = _$HubQuizCopyWithImpl;
+@useResult
+$Res call({
+ double score, int problemCount
+});
+
+
+
+
+}
+/// @nodoc
+class _$HubQuizCopyWithImpl<$Res>
+    implements $HubQuizCopyWith<$Res> {
+  _$HubQuizCopyWithImpl(this._self, this._then);
+
+  final HubQuiz _self;
+  final $Res Function(HubQuiz) _then;
+
+/// Create a copy of HubQuiz
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? score = null,Object? problemCount = null,}) {
+  return _then(HubQuiz(
+score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
+as double,problemCount: null == problemCount ? _self.problemCount : problemCount // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [HubQuiz].
+extension HubQuizPatterns on HubQuiz {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _HubQuiz value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _HubQuiz() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _HubQuiz value)  $default,){
+final _that = this;
+switch (_that) {
+case _HubQuiz():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _HubQuiz value)?  $default,){
+final _that = this;
+switch (_that) {
+case _HubQuiz() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double score,  int problemCount)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _HubQuiz() when $default != null:
+return $default(_that.score,_that.problemCount);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double score,  int problemCount)  $default,) {final _that = this;
+switch (_that) {
+case _HubQuiz():
+return $default(_that.score,_that.problemCount);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double score,  int problemCount)?  $default,) {final _that = this;
+switch (_that) {
+case _HubQuiz() when $default != null:
+return $default(_that.score,_that.problemCount);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _HubQuiz implements HubQuiz {
+  const _HubQuiz({required this.score, this.problemCount = 0});
+  factory _HubQuiz.fromJson(Map<String, dynamic> json) => _$HubQuizFromJson(json);
+
+@override final  double score;
+@override@JsonKey() final  int problemCount;
+
+/// Create a copy of HubQuiz
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$HubQuizCopyWith<_HubQuiz> get copyWith => __$HubQuizCopyWithImpl<_HubQuiz>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$HubQuizToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _HubQuiz&&(identical(other.score, score) || other.score == score)&&(identical(other.problemCount, problemCount) || other.problemCount == problemCount));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,score,problemCount);
+}
+
+@override
+String toString() {
+    return 'HubQuiz(score: $score, problemCount: $problemCount)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$HubQuizCopyWith<$Res> implements $HubQuizCopyWith<$Res> {
+  factory _$HubQuizCopyWith(_HubQuiz value, $Res Function(_HubQuiz) _then) = __$HubQuizCopyWithImpl;
+@override @useResult
+$Res call({
+ double score, int problemCount
+});
+
+
+
+
+}
+/// @nodoc
+class __$HubQuizCopyWithImpl<$Res>
+    implements _$HubQuizCopyWith<$Res> {
+  __$HubQuizCopyWithImpl(this._self, this._then);
+
+  final _HubQuiz _self;
+  final $Res Function(_HubQuiz) _then;
+
+/// Create a copy of HubQuiz
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? score = null,Object? problemCount = null,}) {
+  return _then(_HubQuiz(
+score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
+as double,problemCount: null == problemCount ? _self.problemCount : problemCount // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -4176,7 +4490,8 @@ as TestClosedReason?,
 /// @nodoc
 mixin _$HubTestDetail {
 
- String get testId; String get title; String? get variant; String get date; List<HubProblem> get problems;
+ String get testId; String get title; String? get variant; String get date;/// А хувилбар (ангид хийдэг) — хариу хэзээ ч ирэхгүй, «Хариу харах» товчгүй (вэб 2026-11-10).
+ bool get answersHidden; List<HubProblem> get problems;
 /// Create a copy of HubTestDetail
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -4190,20 +4505,20 @@ $HubTestDetailCopyWith<HubTestDetail> get copyWith => _$HubTestDetailCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as HubTestDetail;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HubTestDetail&&(identical(other.testId, _this.testId) || other.testId == _this.testId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.variant, _this.variant) || other.variant == _this.variant)&&(identical(other.date, _this.date) || other.date == _this.date)&&const DeepCollectionEquality().equals(other.problems, _this.problems));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HubTestDetail&&(identical(other.testId, _this.testId) || other.testId == _this.testId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.variant, _this.variant) || other.variant == _this.variant)&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.answersHidden, _this.answersHidden) || other.answersHidden == _this.answersHidden)&&const DeepCollectionEquality().equals(other.problems, _this.problems));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as HubTestDetail;
-  return Object.hash(runtimeType,_this.testId,_this.title,_this.variant,_this.date,const DeepCollectionEquality().hash(_this.problems));
+  return Object.hash(runtimeType,_this.testId,_this.title,_this.variant,_this.date,_this.answersHidden,const DeepCollectionEquality().hash(_this.problems));
 }
 
 @override
 String toString() {
   final _this = this as HubTestDetail;
-  return 'HubTestDetail(testId: ${_this.testId}, title: ${_this.title}, variant: ${_this.variant}, date: ${_this.date}, problems: ${_this.problems})';
+  return 'HubTestDetail(testId: ${_this.testId}, title: ${_this.title}, variant: ${_this.variant}, date: ${_this.date}, answersHidden: ${_this.answersHidden}, problems: ${_this.problems})';
 }
 
 
@@ -4214,7 +4529,7 @@ abstract mixin class $HubTestDetailCopyWith<$Res>  {
   factory $HubTestDetailCopyWith(HubTestDetail value, $Res Function(HubTestDetail) _then) = _$HubTestDetailCopyWithImpl;
 @useResult
 $Res call({
- String testId, String title, String? variant, String date, List<HubProblem> problems
+ String testId, String title, String? variant, String date, bool answersHidden, List<HubProblem> problems
 });
 
 
@@ -4231,13 +4546,14 @@ class _$HubTestDetailCopyWithImpl<$Res>
 
 /// Create a copy of HubTestDetail
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? testId = null,Object? title = null,Object? variant = freezed,Object? date = null,Object? problems = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? testId = null,Object? title = null,Object? variant = freezed,Object? date = null,Object? answersHidden = null,Object? problems = null,}) {
   return _then(HubTestDetail(
 testId: null == testId ? _self.testId : testId // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,variant: freezed == variant ? _self.variant : variant // ignore: cast_nullable_to_non_nullable
 as String?,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
-as String,problems: null == problems ? _self.problems : problems // ignore: cast_nullable_to_non_nullable
+as String,answersHidden: null == answersHidden ? _self.answersHidden : answersHidden // ignore: cast_nullable_to_non_nullable
+as bool,problems: null == problems ? _self.problems : problems // ignore: cast_nullable_to_non_nullable
 as List<HubProblem>,
   ));
 }
@@ -4323,10 +4639,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String testId,  String title,  String? variant,  String date,  List<HubProblem> problems)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String testId,  String title,  String? variant,  String date,  bool answersHidden,  List<HubProblem> problems)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HubTestDetail() when $default != null:
-return $default(_that.testId,_that.title,_that.variant,_that.date,_that.problems);case _:
+return $default(_that.testId,_that.title,_that.variant,_that.date,_that.answersHidden,_that.problems);case _:
   return orElse();
 
 }
@@ -4344,10 +4660,10 @@ return $default(_that.testId,_that.title,_that.variant,_that.date,_that.problems
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String testId,  String title,  String? variant,  String date,  List<HubProblem> problems)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String testId,  String title,  String? variant,  String date,  bool answersHidden,  List<HubProblem> problems)  $default,) {final _that = this;
 switch (_that) {
 case _HubTestDetail():
-return $default(_that.testId,_that.title,_that.variant,_that.date,_that.problems);case _:
+return $default(_that.testId,_that.title,_that.variant,_that.date,_that.answersHidden,_that.problems);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -4364,10 +4680,10 @@ return $default(_that.testId,_that.title,_that.variant,_that.date,_that.problems
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String testId,  String title,  String? variant,  String date,  List<HubProblem> problems)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String testId,  String title,  String? variant,  String date,  bool answersHidden,  List<HubProblem> problems)?  $default,) {final _that = this;
 switch (_that) {
 case _HubTestDetail() when $default != null:
-return $default(_that.testId,_that.title,_that.variant,_that.date,_that.problems);case _:
+return $default(_that.testId,_that.title,_that.variant,_that.date,_that.answersHidden,_that.problems);case _:
   return null;
 
 }
@@ -4379,13 +4695,15 @@ return $default(_that.testId,_that.title,_that.variant,_that.date,_that.problems
 @JsonSerializable()
 
 class _HubTestDetail implements HubTestDetail {
-  const _HubTestDetail({required this.testId, required this.title, this.variant, required this.date,  List<HubProblem> problems = const <HubProblem>[]}): _problems = problems;
+  const _HubTestDetail({required this.testId, required this.title, this.variant, required this.date, this.answersHidden = false,  List<HubProblem> problems = const <HubProblem>[]}): _problems = problems;
   factory _HubTestDetail.fromJson(Map<String, dynamic> json) => _$HubTestDetailFromJson(json);
 
 @override final  String testId;
 @override final  String title;
 @override final  String? variant;
 @override final  String date;
+/// А хувилбар (ангид хийдэг) — хариу хэзээ ч ирэхгүй, «Хариу харах» товчгүй (вэб 2026-11-10).
+@override@JsonKey() final  bool answersHidden;
  final  List<HubProblem> _problems;
 @override@JsonKey() List<HubProblem> get problems {
   if (_problems is EqualUnmodifiableListView) return _problems;
@@ -4407,18 +4725,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _HubTestDetail&&(identical(other.testId, testId) || other.testId == testId)&&(identical(other.title, title) || other.title == title)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.date, date) || other.date == date)&&const DeepCollectionEquality().equals(other.problems, _problems));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _HubTestDetail&&(identical(other.testId, testId) || other.testId == testId)&&(identical(other.title, title) || other.title == title)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.date, date) || other.date == date)&&(identical(other.answersHidden, answersHidden) || other.answersHidden == answersHidden)&&const DeepCollectionEquality().equals(other.problems, _problems));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,testId,title,variant,date,const DeepCollectionEquality().hash(_problems));
+    return Object.hash(runtimeType,testId,title,variant,date,answersHidden,const DeepCollectionEquality().hash(_problems));
 }
 
 @override
 String toString() {
-    return 'HubTestDetail(testId: $testId, title: $title, variant: $variant, date: $date, problems: $problems)';
+    return 'HubTestDetail(testId: $testId, title: $title, variant: $variant, date: $date, answersHidden: $answersHidden, problems: $problems)';
 }
 
 
@@ -4429,7 +4747,7 @@ abstract mixin class _$HubTestDetailCopyWith<$Res> implements $HubTestDetailCopy
   factory _$HubTestDetailCopyWith(_HubTestDetail value, $Res Function(_HubTestDetail) _then) = __$HubTestDetailCopyWithImpl;
 @override @useResult
 $Res call({
- String testId, String title, String? variant, String date, List<HubProblem> problems
+ String testId, String title, String? variant, String date, bool answersHidden, List<HubProblem> problems
 });
 
 
@@ -4446,13 +4764,14 @@ class __$HubTestDetailCopyWithImpl<$Res>
 
 /// Create a copy of HubTestDetail
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? testId = null,Object? title = null,Object? variant = freezed,Object? date = null,Object? problems = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? testId = null,Object? title = null,Object? variant = freezed,Object? date = null,Object? answersHidden = null,Object? problems = null,}) {
   return _then(_HubTestDetail(
 testId: null == testId ? _self.testId : testId // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,variant: freezed == variant ? _self.variant : variant // ignore: cast_nullable_to_non_nullable
 as String?,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
-as String,problems: null == problems ? _self._problems : problems // ignore: cast_nullable_to_non_nullable
+as String,answersHidden: null == answersHidden ? _self.answersHidden : answersHidden // ignore: cast_nullable_to_non_nullable
+as bool,problems: null == problems ? _self._problems : problems // ignore: cast_nullable_to_non_nullable
 as List<HubProblem>,
   ));
 }

@@ -68,6 +68,22 @@ Map<String, dynamic> _$HomeworkMarkEntryToJson(_HomeworkMarkEntry instance) =>
       'classroom': instance.classroom,
     };
 
+_HomeworkQuizEntry _$HomeworkQuizEntryFromJson(Map<String, dynamic> json) =>
+    _HomeworkQuizEntry(
+      date: json['date'] as String,
+      classroom: json['classroom'] as String? ?? '',
+      score: (json['score'] as num?)?.toDouble() ?? 0,
+      problemCount: (json['problemCount'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$HomeworkQuizEntryToJson(_HomeworkQuizEntry instance) =>
+    <String, dynamic>{
+      'date': instance.date,
+      'classroom': instance.classroom,
+      'score': instance.score,
+      'problemCount': instance.problemCount,
+    };
+
 _AssignmentRef _$AssignmentRefFromJson(Map<String, dynamic> json) =>
     _AssignmentRef(
       title: json['title'] as String? ?? '',
@@ -193,6 +209,11 @@ _ChildStudent _$ChildStudentFromJson(
           ?.map((e) => HomeworkMarkEntry.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const <HomeworkMarkEntry>[],
+  homeworkQuizzes:
+      (json['homeworkQuizzes'] as List<dynamic>?)
+          ?.map((e) => HomeworkQuizEntry.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const <HomeworkQuizEntry>[],
   submissions:
       (json['submissions'] as List<dynamic>?)
           ?.map((e) => SubmissionEntry.fromJson(e as Map<String, dynamic>))
@@ -220,6 +241,7 @@ Map<String, dynamic> _$ChildStudentToJson(_ChildStudent instance) =>
       'classroom': instance.classroom,
       'attendances': instance.attendances,
       'dailyHomeworkMarks': instance.dailyHomeworkMarks,
+      'homeworkQuizzes': instance.homeworkQuizzes,
       'submissions': instance.submissions,
       'testResults': instance.testResults,
       'payments': instance.payments,

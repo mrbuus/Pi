@@ -10,7 +10,10 @@ Map<String, Object?> _map(Object? j) => (j! as Map).cast<String, Object?>();
 List<Object?> _list(Object? j) => (j as List?) ?? const [];
 String? _str(Object? v) => v is String ? v : null;
 int _int(Object? v, [int fallback = 0]) => v is num ? v.toInt() : fallback;
-List<String> _strings(Object? v) => [for (final x in _list(v)) if (x is String) x];
+List<String> _strings(Object? v) => [
+  for (final x in _list(v))
+    if (x is String) x,
+];
 
 /// Багшийн тэмдэглэгээ (танхимын загвар).
 enum HomeworkMark {
@@ -35,10 +38,10 @@ enum HwItemStatus {
   submitted;
 
   static HwItemStatus parse(Object? v) => switch (v) {
-        'SUBMITTED' => submitted,
-        'IN_PROGRESS' => inProgress,
-        _ => notStarted,
-      };
+    'SUBMITTED' => submitted,
+    'IN_PROGRESS' => inProgress,
+    _ => notStarted,
+  };
 }
 
 @immutable
@@ -98,10 +101,16 @@ class HwItem {
   final bool late;
 }
 
-/// Илгээсэн дэвтрийн зураг (нэг баримт, 6 хүртэл хуудас).
+/// Илгээсэн дэвтрийн зураг (нэг баримт, 15 хүртэл хуудас).
 @immutable
 class HwPhoto {
-  const HwPhoto({required this.id, required this.fileKey, required this.pages, required this.uploadedAt});
+  const HwPhoto({
+    required this.id,
+    required this.fileKey,
+    required this.pages,
+    required this.uploadedAt,
+    this.returnedAt,
+  });
 
   static HwPhoto? parse(Object? json) {
     if (json is! Map) return null;
@@ -111,6 +120,7 @@ class HwPhoto {
       fileKey: m['fileKey']! as String,
       pages: _int(m['pages'], 1),
       uploadedAt: parseApiInstant(_str(m['uploadedAt'])),
+      returnedAt: parseApiInstant(_str(m['returnedAt'])),
     );
   }
 
@@ -118,6 +128,11 @@ class HwPhoto {
   final String fileKey;
   final int pages;
   final DateTime? uploadedAt;
+
+  /// Багш «Буцаах» дарсан — засаад дахин илгээнэ (5 минутын хязгааргүй).
+  final DateTime? returnedAt;
+
+  bool get returned => returnedAt != null;
 }
 
 /// Хичээлийн нэг өдөр (`GET /homework/my`).
@@ -167,17 +182,17 @@ class HwDay {
   String get id => '$date/$classroomId';
 
   HwDay withPhoto(HwPhoto? p) => HwDay(
-        date: date,
-        classroomId: classroomId,
-        classroomName: classroomName,
-        deadlineAt: deadlineAt,
-        items: items,
-        photo: p,
-        mark: mark,
-        markComment: markComment,
-        upcoming: upcoming,
-        topic: topic,
-      );
+    date: date,
+    classroomId: classroomId,
+    classroomName: classroomName,
+    deadlineAt: deadlineAt,
+    items: items,
+    photo: p,
+    mark: mark,
+    markComment: markComment,
+    upcoming: upcoming,
+    topic: topic,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -200,7 +215,12 @@ enum AssignmentStatus {
 
 @immutable
 class MySubmission {
-  const MySubmission({required this.imageKeys, required this.studentNote, required this.reviewNote, required this.submittedAt});
+  const MySubmission({
+    required this.imageKeys,
+    required this.studentNote,
+    required this.reviewNote,
+    required this.submittedAt,
+  });
 
   static MySubmission? parse(Object? json) {
     if (json is! Map) return null;
@@ -240,7 +260,9 @@ class Assignment {
   factory Assignment.fromJson(Object? json) {
     final m = _map(json);
     final lesson = m['lesson'] is Map ? (m['lesson']! as Map).cast<String, Object?>() : const <String, Object?>{};
-    final classroom = m['classroom'] is Map ? (m['classroom']! as Map).cast<String, Object?>() : const <String, Object?>{};
+    final classroom = m['classroom'] is Map
+        ? (m['classroom']! as Map).cast<String, Object?>()
+        : const <String, Object?>{};
     return Assignment(
       id: m['id']! as String,
       title: _str(m['title']) ?? '',
@@ -280,10 +302,10 @@ enum CheckResult {
   blank;
 
   static CheckResult parse(Object? v) => switch (v) {
-        'CORRECT' => correct,
-        'WRONG' => wrong,
-        _ => blank,
-      };
+    'CORRECT' => correct,
+    'WRONG' => wrong,
+    _ => blank,
+  };
 }
 
 Map<String, CheckResult>? parseResults(Object? v) {
@@ -400,9 +422,7 @@ class HwReview {
     return HwReview(
       locked: v['locked'] == true,
       opensAt: parseApiInstant(_str(v['opensAt'])),
-      items: items is Map
-          ? {for (final e in items.entries) e.key as String: HwReviewItem.fromJson(e.value)}
-          : const {},
+      items: items is Map ? {for (final e in items.entries) e.key as String: HwReviewItem.fromJson(e.value)} : const {},
     );
   }
 
@@ -432,7 +452,8 @@ class HwAttempt {
 
   factory HwAttempt.fromJson(Object? json) {
     final m = _map(json);
-    final problems = [for (final p in _list(m['problems'])) HwProblem.fromJson(p)]..sort((a, b) => a.order.compareTo(b.order));
+    final problems = [for (final p in _list(m['problems'])) HwProblem.fromJson(p)]
+      ..sort((a, b) => a.order.compareTo(b.order));
     return HwAttempt(
       attemptId: m['attemptId']! as String,
       submitted: m['status'] == 'SUBMITTED',

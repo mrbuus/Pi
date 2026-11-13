@@ -1522,7 +1522,8 @@ as String?,
 /// @nodoc
 mixin _$ReportHomework {
 
- ReportAssignments get assignments; ReportDailyMarks get dailyMarks;
+ ReportAssignments get assignments; ReportDailyMarks get dailyMarks;/// Энэ долоо хоногт шалгалтаар шалгасан даалгаврын оноо (эзэн 2026-11-08 19:08), огноогоор.
+ List<ReportQuiz> get quizzes;
 /// Create a copy of ReportHomework
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1536,20 +1537,20 @@ $ReportHomeworkCopyWith<ReportHomework> get copyWith => _$ReportHomeworkCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as ReportHomework;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReportHomework&&(identical(other.assignments, _this.assignments) || other.assignments == _this.assignments)&&(identical(other.dailyMarks, _this.dailyMarks) || other.dailyMarks == _this.dailyMarks));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReportHomework&&(identical(other.assignments, _this.assignments) || other.assignments == _this.assignments)&&(identical(other.dailyMarks, _this.dailyMarks) || other.dailyMarks == _this.dailyMarks)&&const DeepCollectionEquality().equals(other.quizzes, _this.quizzes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ReportHomework;
-  return Object.hash(runtimeType,_this.assignments,_this.dailyMarks);
+  return Object.hash(runtimeType,_this.assignments,_this.dailyMarks,const DeepCollectionEquality().hash(_this.quizzes));
 }
 
 @override
 String toString() {
   final _this = this as ReportHomework;
-  return 'ReportHomework(assignments: ${_this.assignments}, dailyMarks: ${_this.dailyMarks})';
+  return 'ReportHomework(assignments: ${_this.assignments}, dailyMarks: ${_this.dailyMarks}, quizzes: ${_this.quizzes})';
 }
 
 
@@ -1560,7 +1561,7 @@ abstract mixin class $ReportHomeworkCopyWith<$Res>  {
   factory $ReportHomeworkCopyWith(ReportHomework value, $Res Function(ReportHomework) _then) = _$ReportHomeworkCopyWithImpl;
 @useResult
 $Res call({
- ReportAssignments assignments, ReportDailyMarks dailyMarks
+ ReportAssignments assignments, ReportDailyMarks dailyMarks, List<ReportQuiz> quizzes
 });
 
 
@@ -1577,11 +1578,12 @@ class _$ReportHomeworkCopyWithImpl<$Res>
 
 /// Create a copy of ReportHomework
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? assignments = null,Object? dailyMarks = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? assignments = null,Object? dailyMarks = null,Object? quizzes = null,}) {
   return _then(ReportHomework(
 assignments: null == assignments ? _self.assignments : assignments // ignore: cast_nullable_to_non_nullable
 as ReportAssignments,dailyMarks: null == dailyMarks ? _self.dailyMarks : dailyMarks // ignore: cast_nullable_to_non_nullable
-as ReportDailyMarks,
+as ReportDailyMarks,quizzes: null == quizzes ? _self.quizzes : quizzes // ignore: cast_nullable_to_non_nullable
+as List<ReportQuiz>,
   ));
 }
 /// Create a copy of ReportHomework
@@ -1684,10 +1686,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ReportAssignments assignments,  ReportDailyMarks dailyMarks)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ReportAssignments assignments,  ReportDailyMarks dailyMarks,  List<ReportQuiz> quizzes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ReportHomework() when $default != null:
-return $default(_that.assignments,_that.dailyMarks);case _:
+return $default(_that.assignments,_that.dailyMarks,_that.quizzes);case _:
   return orElse();
 
 }
@@ -1705,10 +1707,10 @@ return $default(_that.assignments,_that.dailyMarks);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ReportAssignments assignments,  ReportDailyMarks dailyMarks)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ReportAssignments assignments,  ReportDailyMarks dailyMarks,  List<ReportQuiz> quizzes)  $default,) {final _that = this;
 switch (_that) {
 case _ReportHomework():
-return $default(_that.assignments,_that.dailyMarks);case _:
+return $default(_that.assignments,_that.dailyMarks,_that.quizzes);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1725,10 +1727,10 @@ return $default(_that.assignments,_that.dailyMarks);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ReportAssignments assignments,  ReportDailyMarks dailyMarks)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ReportAssignments assignments,  ReportDailyMarks dailyMarks,  List<ReportQuiz> quizzes)?  $default,) {final _that = this;
 switch (_that) {
 case _ReportHomework() when $default != null:
-return $default(_that.assignments,_that.dailyMarks);case _:
+return $default(_that.assignments,_that.dailyMarks,_that.quizzes);case _:
   return null;
 
 }
@@ -1740,11 +1742,20 @@ return $default(_that.assignments,_that.dailyMarks);case _:
 @JsonSerializable()
 
 class _ReportHomework implements ReportHomework {
-  const _ReportHomework({this.assignments = const ReportAssignments(), this.dailyMarks = const ReportDailyMarks()});
+  const _ReportHomework({this.assignments = const ReportAssignments(), this.dailyMarks = const ReportDailyMarks(),  List<ReportQuiz> quizzes = const <ReportQuiz>[]}): _quizzes = quizzes;
   factory _ReportHomework.fromJson(Map<String, dynamic> json) => _$ReportHomeworkFromJson(json);
 
 @override@JsonKey() final  ReportAssignments assignments;
 @override@JsonKey() final  ReportDailyMarks dailyMarks;
+/// Энэ долоо хоногт шалгалтаар шалгасан даалгаврын оноо (эзэн 2026-11-08 19:08), огноогоор.
+ final  List<ReportQuiz> _quizzes;
+/// Энэ долоо хоногт шалгалтаар шалгасан даалгаврын оноо (эзэн 2026-11-08 19:08), огноогоор.
+@override@JsonKey() List<ReportQuiz> get quizzes {
+  if (_quizzes is EqualUnmodifiableListView) return _quizzes;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_quizzes);
+}
+
 
 /// Create a copy of ReportHomework
 /// with the given fields replaced by the non-null parameter values.
@@ -1759,18 +1770,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReportHomework&&(identical(other.assignments, assignments) || other.assignments == assignments)&&(identical(other.dailyMarks, dailyMarks) || other.dailyMarks == dailyMarks));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReportHomework&&(identical(other.assignments, assignments) || other.assignments == assignments)&&(identical(other.dailyMarks, dailyMarks) || other.dailyMarks == dailyMarks)&&const DeepCollectionEquality().equals(other.quizzes, _quizzes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,assignments,dailyMarks);
+    return Object.hash(runtimeType,assignments,dailyMarks,const DeepCollectionEquality().hash(_quizzes));
 }
 
 @override
 String toString() {
-    return 'ReportHomework(assignments: $assignments, dailyMarks: $dailyMarks)';
+    return 'ReportHomework(assignments: $assignments, dailyMarks: $dailyMarks, quizzes: $quizzes)';
 }
 
 
@@ -1781,7 +1792,7 @@ abstract mixin class _$ReportHomeworkCopyWith<$Res> implements $ReportHomeworkCo
   factory _$ReportHomeworkCopyWith(_ReportHomework value, $Res Function(_ReportHomework) _then) = __$ReportHomeworkCopyWithImpl;
 @override @useResult
 $Res call({
- ReportAssignments assignments, ReportDailyMarks dailyMarks
+ ReportAssignments assignments, ReportDailyMarks dailyMarks, List<ReportQuiz> quizzes
 });
 
 
@@ -1798,11 +1809,12 @@ class __$ReportHomeworkCopyWithImpl<$Res>
 
 /// Create a copy of ReportHomework
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? assignments = null,Object? dailyMarks = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? assignments = null,Object? dailyMarks = null,Object? quizzes = null,}) {
   return _then(_ReportHomework(
 assignments: null == assignments ? _self.assignments : assignments // ignore: cast_nullable_to_non_nullable
 as ReportAssignments,dailyMarks: null == dailyMarks ? _self.dailyMarks : dailyMarks // ignore: cast_nullable_to_non_nullable
-as ReportDailyMarks,
+as ReportDailyMarks,quizzes: null == quizzes ? _self._quizzes : quizzes // ignore: cast_nullable_to_non_nullable
+as List<ReportQuiz>,
   ));
 }
 
@@ -1825,6 +1837,285 @@ $ReportDailyMarksCopyWith<$Res> get dailyMarks {
     return _then(_self.copyWith(dailyMarks: value));
   });
 }
+}
+
+
+/// @nodoc
+mixin _$ReportQuiz {
+
+ String get date; String get classroom; double get score; int get problemCount;
+/// Create a copy of ReportQuiz
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ReportQuizCopyWith<ReportQuiz> get copyWith => _$ReportQuizCopyWithImpl<ReportQuiz>(this as ReportQuiz, _$identity);
+
+  /// Serializes this ReportQuiz to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ReportQuiz;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReportQuiz&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.classroom, _this.classroom) || other.classroom == _this.classroom)&&(identical(other.score, _this.score) || other.score == _this.score)&&(identical(other.problemCount, _this.problemCount) || other.problemCount == _this.problemCount));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ReportQuiz;
+  return Object.hash(runtimeType,_this.date,_this.classroom,_this.score,_this.problemCount);
+}
+
+@override
+String toString() {
+  final _this = this as ReportQuiz;
+  return 'ReportQuiz(date: ${_this.date}, classroom: ${_this.classroom}, score: ${_this.score}, problemCount: ${_this.problemCount})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ReportQuizCopyWith<$Res>  {
+  factory $ReportQuizCopyWith(ReportQuiz value, $Res Function(ReportQuiz) _then) = _$ReportQuizCopyWithImpl;
+@useResult
+$Res call({
+ String date, String classroom, double score, int problemCount
+});
+
+
+
+
+}
+/// @nodoc
+class _$ReportQuizCopyWithImpl<$Res>
+    implements $ReportQuizCopyWith<$Res> {
+  _$ReportQuizCopyWithImpl(this._self, this._then);
+
+  final ReportQuiz _self;
+  final $Res Function(ReportQuiz) _then;
+
+/// Create a copy of ReportQuiz
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? date = null,Object? classroom = null,Object? score = null,Object? problemCount = null,}) {
+  return _then(ReportQuiz(
+date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as String,classroom: null == classroom ? _self.classroom : classroom // ignore: cast_nullable_to_non_nullable
+as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
+as double,problemCount: null == problemCount ? _self.problemCount : problemCount // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ReportQuiz].
+extension ReportQuizPatterns on ReportQuiz {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ReportQuiz value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ReportQuiz() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ReportQuiz value)  $default,){
+final _that = this;
+switch (_that) {
+case _ReportQuiz():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ReportQuiz value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ReportQuiz() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String date,  String classroom,  double score,  int problemCount)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ReportQuiz() when $default != null:
+return $default(_that.date,_that.classroom,_that.score,_that.problemCount);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String date,  String classroom,  double score,  int problemCount)  $default,) {final _that = this;
+switch (_that) {
+case _ReportQuiz():
+return $default(_that.date,_that.classroom,_that.score,_that.problemCount);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String date,  String classroom,  double score,  int problemCount)?  $default,) {final _that = this;
+switch (_that) {
+case _ReportQuiz() when $default != null:
+return $default(_that.date,_that.classroom,_that.score,_that.problemCount);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ReportQuiz implements ReportQuiz {
+  const _ReportQuiz({required this.date, this.classroom = '', this.score = 0, this.problemCount = 0});
+  factory _ReportQuiz.fromJson(Map<String, dynamic> json) => _$ReportQuizFromJson(json);
+
+@override final  String date;
+@override@JsonKey() final  String classroom;
+@override@JsonKey() final  double score;
+@override@JsonKey() final  int problemCount;
+
+/// Create a copy of ReportQuiz
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ReportQuizCopyWith<_ReportQuiz> get copyWith => __$ReportQuizCopyWithImpl<_ReportQuiz>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ReportQuizToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReportQuiz&&(identical(other.date, date) || other.date == date)&&(identical(other.classroom, classroom) || other.classroom == classroom)&&(identical(other.score, score) || other.score == score)&&(identical(other.problemCount, problemCount) || other.problemCount == problemCount));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,date,classroom,score,problemCount);
+}
+
+@override
+String toString() {
+    return 'ReportQuiz(date: $date, classroom: $classroom, score: $score, problemCount: $problemCount)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ReportQuizCopyWith<$Res> implements $ReportQuizCopyWith<$Res> {
+  factory _$ReportQuizCopyWith(_ReportQuiz value, $Res Function(_ReportQuiz) _then) = __$ReportQuizCopyWithImpl;
+@override @useResult
+$Res call({
+ String date, String classroom, double score, int problemCount
+});
+
+
+
+
+}
+/// @nodoc
+class __$ReportQuizCopyWithImpl<$Res>
+    implements _$ReportQuizCopyWith<$Res> {
+  __$ReportQuizCopyWithImpl(this._self, this._then);
+
+  final _ReportQuiz _self;
+  final $Res Function(_ReportQuiz) _then;
+
+/// Create a copy of ReportQuiz
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? date = null,Object? classroom = null,Object? score = null,Object? problemCount = null,}) {
+  return _then(_ReportQuiz(
+date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as String,classroom: null == classroom ? _self.classroom : classroom // ignore: cast_nullable_to_non_nullable
+as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
+as double,problemCount: null == problemCount ? _self.problemCount : problemCount // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
 }
 
 

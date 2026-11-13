@@ -85,25 +85,47 @@ Future<List<ClassroomRef>?> _classes(BuildContext context, WidgetRef ref) async 
 SelectOption<String> _classOption(ClassroomRef c) =>
     SelectOption(c.id, c.name, subtitle: c.students == null ? null : '${c.students} сурагч');
 
-/// Анги солих (`POST /classrooms/:id/enroll`). Хуучин ангийн дүн, ирц түүхэнд үлдэнэ.
+/// Сонгосон анги одоогийн ангиас өөр чиглэлийнх (математик ↔ Нийгэм) бол «нэмж бүртгэнэ» — одоогийн анги
+/// хэвээр (вэбийн `ChangeClassDialog`, сервер `classrooms.service enroll` ижил чиглэлийнхийг л хаадаг).
+bool addsClass(ClassroomRef? current, ClassroomRef? picked) =>
+    current != null && picked != null && current.track != picked.track;
+
+/// Анги солих (`POST /classrooms/:id/enroll`). Хуучин ангийн дүн, ирц түүхэнд үлдэнэ. Өөр чиглэлийн анги
+/// сонговол одоогийн ангидаа хэвээр, шинэ ангид НЭМЖ бүртгэнэ — хоёр ангид зэрэг сууна (эзэн 2026-11-12).
+/// [otherClassIds] — зэрэг сууж буй бусад анги (жагсаалтаас хасна).
 Future<String?> changeClass(
   BuildContext context,
   WidgetRef ref, {
   required String studentId,
   required String name,
   String? currentClassId,
+  List<String> otherClassIds = const [],
 }) async {
   final rooms = await _classes(context, ref);
   if (rooms == null || !context.mounted) return null;
+  ClassroomRef? current;
+  for (final c in rooms) {
+    if (c.id == currentClassId) current = c;
+  }
   final options = [
     for (final c in rooms)
-      if (c.id != currentClassId) _classOption(c),
+      if (c.id != currentClassId && !otherClassIds.contains(c.id))
+        addsClass(current, c)
+            ? SelectOption(
+                c.id,
+                c.name,
+                subtitle: [
+                  if (c.students != null) '${c.students} сурагч',
+                  '${current!.name} ангидаа хэвээр, нэмж бүртгэнэ',
+                ].join(', '),
+              )
+            : _classOption(c),
   ];
   final target = await showFormSheet<String>(
     context,
     title: 'Анги солих',
     subtitle: '$name. Хуучин ангийн дүн, ирц түүхэнд үлдэнэ',
-    submitLabel: 'Шилжүүлэх',
+    submitLabel: 'Хадгалах',
     fields: [FormSelectField<String>(name: 'class', label: 'Шинэ анги', options: options, required: true)],
     onSubmit: (v) async {
       final id = v.get<String>('class')!;
@@ -117,7 +139,12 @@ Future<String?> changeClass(
     orElse: () => ClassroomRef(id: target, name: 'шинэ'),
   );
   invalidateStudent(ref, studentId);
-  if (context.mounted) _snack(context, '$name ${room.name} анги руу шилжлээ');
+  if (context.mounted) {
+    _snack(
+      context,
+      addsClass(current, room) ? '$name ${room.name} ангид нэмэгдлээ' : '$name ${room.name} анги руу шилжлээ',
+    );
+  }
   return room.name;
 }
 

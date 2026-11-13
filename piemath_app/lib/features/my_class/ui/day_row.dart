@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/ui/ui.dart';
 import '../../../shared/marks/marks.dart';
+import '../../../shared/quiz_score/quiz_score.dart';
 import '../data/hub_models.dart';
 import '../domain/hub_logic.dart';
 
@@ -86,13 +87,15 @@ class DayRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpace.sm),
-                AttendanceMarkView(
-                  status: day.attendance?.status,
-                  lateRange: day.attendance?.lateRange,
-                  compact: true,
-                ),
+                AttendanceMarkView(status: day.attendance?.status, lateRange: day.attendance?.lateRange, compact: true),
                 const SizedBox(width: AppSpace.md),
-                HomeworkMarkView(status: day.homework.status, compact: true),
+                // Шалгалтын оноотой бол «Шалгаагүй» зураасны оронд хувь (эзэн 2026-11-08 19:08)
+                if (!(day.homework.quiz != null && day.homework.status == null))
+                  HomeworkMarkView(status: day.homework.status, compact: true),
+                if (day.homework.quiz case final q?) ...[
+                  if (day.homework.status != null) const SizedBox(width: AppSpace.xs),
+                  QuizScoreChip(score: q.score, problemCount: q.problemCount, compact: true),
+                ],
                 const SizedBox(width: AppSpace.xs),
                 Icon(AppIcons.forward, size: 16, color: c.inkDim),
               ],

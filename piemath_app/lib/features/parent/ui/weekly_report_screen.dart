@@ -6,6 +6,7 @@ import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
+import '../../../shared/quiz_score/quiz_score.dart';
 import '../data/parent_models.dart';
 import '../data/parent_repository.dart';
 import '../data/weekly_report.dart';
@@ -197,6 +198,26 @@ class WeeklyReportView extends StatelessWidget {
             '${r.homework.dailyMarks.partial} дутуу',
             '${r.homework.dailyMarks.notDone} хийгээгүй',
           ],
+          extra: [
+            for (final q in r.homework.quizzes)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpace.xs),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 48,
+                      child: Text(
+                        q.date.length >= 10 ? q.date.substring(5, 10) : q.date,
+                        style: context.text.bodySmall?.copyWith(color: context.colors.inkDim),
+                      ),
+                    ),
+                    Flexible(
+                      child: QuizScoreChip(score: q.score, problemCount: q.problemCount),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
         _Stat(
           title: 'Сэдвийн ахиц',
@@ -284,11 +305,14 @@ class _LessonRow extends StatelessWidget {
 }
 
 class _Stat extends StatelessWidget {
-  const _Stat({required this.title, required this.value, this.meta = const []});
+  const _Stat({required this.title, required this.value, this.meta = const [], this.extra = const []});
 
   final String title;
   final String value;
   final List<String?> meta;
+
+  /// Доорх нэмэлт мөрүүд (шалгалтын оноо).
+  final List<Widget> extra;
 
   @override
   Widget build(BuildContext context) {
@@ -302,6 +326,7 @@ class _Stat extends StatelessWidget {
             const SizedBox(height: AppSpace.xs),
             Text(value, style: context.text.titleLarge),
             Meta(items: meta),
+            ...extra,
           ],
         ),
       ),

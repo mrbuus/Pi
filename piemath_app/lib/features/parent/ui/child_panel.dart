@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/ui/ui.dart';
 import '../../../shared/payment_status/payment_status.dart';
+import '../../../shared/quiz_score/quiz_score.dart';
 import '../../payments/domain/org_info.dart';
 import '../../payments/domain/payment_history.dart';
 import '../../payments/ui/pay_info_card.dart';
@@ -75,7 +76,9 @@ class ChildPanel extends ConsumerWidget {
                   children: [
                     Semantics(header: true, child: Text(child.fullName, style: context.text.titleLarge)),
                     const SizedBox(height: 2),
-                    Meta(items: [if (grade != null) '$grade-р анги', child.classroom?.name, child.studentProfile?.school]),
+                    Meta(
+                      items: [if (grade != null) '$grade-р анги', child.classroom?.name, child.studentProfile?.school],
+                    ),
                     const SizedBox(height: AppSpace.sm),
                     const TonePill(icon: AppIcons.shield, hue: AppHue.success, label: 'Холболт баталгаажсан'),
                   ],
@@ -179,7 +182,8 @@ class _HomeworkCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Танхим: багшийн тэмдэглэгээ; онлайн: илгээлт. Тэмдэглэгээ байвал түүнийг (STATUS §7.11).
-    final useMarks = child.dailyHomeworkMarks.isNotEmpty || !child.isOnline;
+    final quizzes = child.homeworkQuizzes;
+    final useMarks = child.dailyHomeworkMarks.isNotEmpty || quizzes.isNotEmpty || !child.isOnline;
     return ParentListCard(
       title: 'Даалгавар',
       icon: AppIcons.homework,
@@ -194,6 +198,13 @@ class _HomeworkCard extends StatelessWidget {
                       ? m.classroom.name
                       : '${m.classroom.name}: ${m.comment}',
                   trailing: MarkLabel.homework(context, HomeworkMark.fromApi(m.status)),
+                ),
+              // Шалгалтаар даалгавар шалгасан оноо (эзэн 2026-11-08 19:08)
+              for (final q in quizzes)
+                ParentDatedRow(
+                  date: dayLabel(q.date),
+                  subtitle: q.classroom,
+                  trailing: QuizScoreChip(score: q.score, problemCount: q.problemCount),
                 ),
             ]
           : [
@@ -249,7 +260,7 @@ class _ResultRow extends StatelessWidget {
   }
 }
 
-String _initials(String? first, String? last) => [first?.trim() ?? '', last?.trim() ?? '']
-    .where((s) => s.isNotEmpty)
-    .map((s) => s.substring(0, 1).toUpperCase())
-    .join();
+String _initials(String? first, String? last) => [
+  first?.trim() ?? '',
+  last?.trim() ?? '',
+].where((s) => s.isNotEmpty).map((s) => s.substring(0, 1).toUpperCase()).join();
