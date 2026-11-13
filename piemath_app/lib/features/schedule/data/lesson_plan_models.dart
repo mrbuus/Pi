@@ -37,6 +37,7 @@ class PlanContext {
     this.photoStudentId,
     this.roster = const [],
     this.photoSuggestion,
+    this.updatedAt,
   });
 
   factory PlanContext.fromJson(Map<String, Object?> j) {
@@ -50,6 +51,7 @@ class PlanContext {
         for (final r in _list(j['roster'])) (id: _str(_map(r)['id']) ?? '', name: _str(_map(r)['name']) ?? 'Сурагч'),
       ],
       photoSuggestion: _str(j['photoSuggestion']),
+      updatedAt: _str(plan?['updatedAt']),
     );
   }
 
@@ -63,6 +65,10 @@ class PlanContext {
 
   /// Ээлжийн санал.
   final String? photoSuggestion;
+
+  /// Төлөвлөгөөний `updatedAt` (серверийн ISO бичвэр, ЯГ хэвээр) — хадгалахдаа `expectedUpdatedAt`-аар
+  /// буцааж илгээнэ; өөр хүн хооронд нь зассан бол сервер 409 (эзэн 2026-11-08). null = төлөвлөгөөгүй.
+  final String? updatedAt;
 
   String? nameOf(String? id) {
     for (final r in roster) {
@@ -92,6 +98,8 @@ class RoadmapUnit {
     required this.bookTitle,
     this.status = RoadmapStatus.todo,
     this.plannedOn,
+    this.doneOn,
+    this.laterOn,
   });
 
   final String testId;
@@ -106,6 +114,18 @@ class RoadmapUnit {
   /// Өөр өдөр төлөвлөсөн (`YYYY-MM-DD`).
   final String? plannedOn;
 
+  /// Анги хамгийн сүүлд хийсэн өдөр (`DONE` үед).
+  final String? doneOn;
+
+  /// Сонгосон өдрөөс ХОЙШ хийсэн өдөр (өнгөрсөн өдрийг засаж байхад) — төлөвт нөлөөлөхгүй.
+  final String? laterOn;
+
+  /// Анги энэ тестийг аль хэдийн хийсэн (өмнө нь, эсвэл засаж буй өдрөөс хойш) — вэбийн `isDone`.
+  bool get isDone => status == RoadmapStatus.done || laterOn != null;
+
+  /// «Хийчихсэн, 11.03»-ын огноо (вэбийн `doneDateOf`).
+  String? get doneDate => status == RoadmapStatus.done ? doneOn : laterOn;
+
   RoadmapUnit withStatus(RoadmapStatus next) => RoadmapUnit(
     testId: testId,
     short: short,
@@ -114,6 +134,8 @@ class RoadmapUnit {
     bookTitle: bookTitle,
     status: next,
     plannedOn: plannedOn,
+    doneOn: doneOn,
+    laterOn: laterOn,
   );
 }
 
@@ -140,6 +162,8 @@ class Roadmap {
               bookTitle: _str(book['title']) ?? '',
               status: _status(a['status']),
               plannedOn: _day(a['plannedOn']),
+              doneOn: _day(a['doneOn']),
+              laterOn: _day(a['laterOn']),
             ),
           );
         }

@@ -8,11 +8,12 @@ import '../../data/lesson_plan_models.dart';
 import '../../data/staff_schedule_repository.dart';
 
 /// Номын дарааллаар тест сонгох (вэбийн `day/TestPicker.tsx`, эзэн 2026-10-18): хамгийн сүүлд хийсний ДАРААХ
-/// тестүүд эхэнд санал болно; хийсэн, хассан тест сонголтод гарахгүй; үлдсэн нь тусгай тэмдэгтэй.
+/// тестүүд эхэнд санал болно; хассан тест сонголтод гарахгүй; үлдсэн нь тусгай тэмдэгтэй. Хийчихсэн тест
+/// жагсаалтад гарахгүй, ХАЙХАД гарна («Хийчихсэн, 11.03», эзэн 2026-11-08) — дахин сонговол давтлага болно.
 ///
 /// [onCustomTopicsChange] өгвөл хайлтын бичвэрийг бодлогын санд байхгүй ТУСДАА сэдэв болгож нэмнэ (эзэн 2026-10-31).
-/// «Энэ ангиас хасах» нь шууд нуугдаж, 5 секундын «Буцаах»-ын дараа серверт. Хассаныг буцаах API нь мөр устгадаг тул
-/// апп-д байхгүй (жагсаалтаар л харуулна).
+/// «Энэ ангиас хасах» (зөвхөн [canRemove]) нь шууд нуугдаж, 5 секундын «Буцаах»-ын дараа серверт. Хассан тестийг
+/// «Хассан тестүүд» дотроос буцаана — сервер зөөлөн (`deletedAt`) хасна.
 class TestPicker extends ConsumerStatefulWidget {
   const TestPicker({
     super.key,
@@ -40,7 +41,7 @@ class TestPicker extends ConsumerStatefulWidget {
   /// Сонгосон ТЕСТИЙН чипийг нуух (батлах цонх өөрөө жагсаадаг); сэдвийн чип үргэлж харагдана.
   final bool hideChips;
 
-  /// «Энэ ангиас хасах» (Багш+, Админ).
+  /// «Энэ ангиас хасах», хассаныг буцаах — зөвхөн Багш+, Админ (сервер ч хориглоно).
   final bool canRemove;
 
   @override
@@ -52,6 +53,9 @@ class _TestPickerState extends ConsumerState<TestPicker> {
 
   /// «Буцаах» хүлээж буй хасалт (харагдахгүй).
   final _removing = <String>{};
+
+  /// Буцааж буй (серверийн хариу хүлээж буй) хассан тест.
+  final _restoring = <String>{};
 
   ({String classroomId, String date}) get _key => (classroomId: widget.classroomId, date: widget.date);
 
@@ -104,6 +108,23 @@ class _TestPickerState extends ConsumerState<TestPicker> {
     }
   }
 
+  Future<void> _restore(RoadmapUnit u) async {
+    final repo = ref.read(staffScheduleRepositoryProvider);
+    final container = ProviderScope.containerOf(context, listen: false);
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    setState(() => _restoring.add(u.testId));
+    try {
+      await repo.restoreTestToClass(widget.classroomId, u.testId);
+      // Санал болгох жагсаалт серверээс дахин тооцогдоно.
+      container.invalidate(roadmapProvider(_key));
+      messenger?.showSnackBar(SnackBar(content: Text('${u.short} буцаагдлаа')));
+    } catch (e) {
+      messenger?.showSnackBar(SnackBar(content: Text(e is ApiError ? e.message : MutationResult.saveFailedMessage)));
+    } finally {
+      if (mounted) setState(() => _restoring.remove(u.testId));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(roadmapProvider(_key));
@@ -126,7 +147,7 @@ class _TestPickerState extends ConsumerState<TestPicker> {
     bool visible(RoadmapUnit u) =>
         keep.contains(u.testId) ||
         chosen.contains(u.testId) ||
-        (u.status != RoadmapStatus.done && u.status != RoadmapStatus.removed);
+        (u.status != RoadmapStatus.removed && (q.isNotEmpty || !u.isDone));
     final groups = <({String key, String topic, String book, List<RoadmapUnit> units})>[];
     for (final u in units) {
       if (!visible(u)) continue;
@@ -254,12 +275,13 @@ class _TestPickerState extends ConsumerState<TestPicker> {
                   selected: chosen.contains(u.testId),
                   enabled: chosen.contains(u.testId) || !full,
                   onTap: () => _toggle(map, u.testId),
-                  onRemove: widget.canRemove && u.status != RoadmapStatus.done ? () => _remove(u) : null,
+                  onRemove: widget.canRemove && !u.isDone ? () => _remove(u) : null,
                 ),
             ],
           ),
-        if (removed.isNotEmpty)
+        if (widget.canRemove && removed.isNotEmpty)
           ExpansionTile(
+            key: const ValueKey('picker:removed'),
             tilePadding: EdgeInsets.zero,
             minTileHeight: AppSizes.minTap,
             title: Text('Хассан тестүүд (${removed.length})', style: context.text.labelLarge),
@@ -268,9 +290,15 @@ class _TestPickerState extends ConsumerState<TestPicker> {
                 ListTile(
                   dense: true,
                   minTileHeight: AppSizes.minTap,
+                  contentPadding: EdgeInsets.zero,
                   leading: Icon(AppIcons.hide, size: 18, color: c.inkDim),
                   title: Text(u.short),
                   subtitle: Text(u.topic),
+                  trailing: TextButton(
+                    key: ValueKey('restore:${u.testId}'),
+                    onPressed: _restoring.contains(u.testId) ? null : () => _restore(u),
+                    child: const Text('Буцаах'),
+                  ),
                 ),
             ],
           ),
@@ -298,10 +326,16 @@ class _UnitRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final u = unit;
-    final tags = [
+    String short(String d) => d.substring(5).replaceAll('-', '.');
+    final tags = <Object?>[
       if (u.status == RoadmapStatus.skipped) 'Үлдсэн',
-      if (u.plannedOn != null) '${u.plannedOn!.substring(5).replaceAll('-', '.')} төлөвлөсөн',
-      if (u.status == RoadmapStatus.done) 'Хийсэн',
+      if (u.plannedOn != null) '${short(u.plannedOn!)} төлөвлөсөн',
+      if (u.isDone)
+        Meta(
+          key: ValueKey('done-tag:${u.testId}'),
+          items: ['Хийчихсэн', if (u.doneDate != null) short(u.doneDate!)],
+          style: context.text.bodySmall?.copyWith(color: c.success, fontWeight: FontWeight.w600),
+        ),
     ];
     return Row(
       children: [
@@ -331,7 +365,7 @@ class _UnitRow extends StatelessWidget {
                               color: u.status == RoadmapStatus.skipped && !selected ? c.warning : null,
                             ),
                           ),
-                          if (tags.isNotEmpty) Text(tags.join(', '), style: context.text.bodySmall),
+                          if (tags.isNotEmpty) Meta(items: tags),
                         ],
                       ),
                     ),

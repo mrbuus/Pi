@@ -160,11 +160,14 @@ class StaffScheduleRepository {
       _api.get('/schedule/$scheduleId/plan', query: {'date': date}, parse: (j) => PlanContext.fromJson(_map(j)));
 
   /// Орох тест (номын дарааллаар), нэмэлт сэдэв, тарах/үлдэх, онолын зураг илгээх сурагч.
+  /// [expectedUpdatedAt] — цонх нээх үеийн төлөвлөгөөний `updatedAt` (null = төлөвлөгөөгүй байсан). Өөр хүн
+  /// хооронд нь зассан бол сервер 409 «Энэ хичээлийн төлөвлөгөөг өөр хүн дөнгөж өөрчилсөн байна...» (дарж бичихгүй).
   Future<void> putPlan(
     String scheduleId, {
     required String date,
     required List<String> testIds,
     required List<String> customTopics,
+    required String? expectedUpdatedAt,
     String? dismissMode,
     String? photoStudentId,
   }) => _api.put<void>(
@@ -175,6 +178,7 @@ class StaffScheduleRepository {
       'customTopics': customTopics,
       'dismissMode': dismissMode,
       'photoStudentId': photoStudentId,
+      'expectedUpdatedAt': expectedUpdatedAt,
     },
   );
 
@@ -185,20 +189,28 @@ class StaffScheduleRepository {
   Future<Roadmap> roadmap(String classroomId, {required String date}) =>
       _api.get('/classrooms/$classroomId/roadmap', query: {'date': date}, parse: (j) => Roadmap.fromJson(_map(j)));
 
-  /// «Энэ ангиас хасах» (`REMOVED`). Буцаах (`null`) нь серверт мөр устгадаг тул апп-д байхгүй.
+  /// «Энэ ангиас хасах» (`REMOVED`).
   Future<void> removeTestFromClass(String classroomId, String testId) =>
       _api.put<void>('/classrooms/$classroomId/tests/$testId/status', body: {'status': 'REMOVED'});
+
+  /// Хассан тестийг буцаах (`null`) — сервер мөрийг зөөлөн (`deletedAt`) хасна (2026-11-10-аас).
+  Future<void> restoreTestToClass(String classroomId, String testId) =>
+      _api.put<void>('/classrooms/$classroomId/tests/$testId/status', body: {'status': null});
 
   /// Өдрийн хариунд байхгүй тестийн нэр, бодлогын дараалал.
   Future<List<PlanTest>> planTests(List<String> ids) =>
       _api.get('/schedule/plan-tests', query: {'ids': ids.join(',')}, parse: (j) => _list(j, PlanTest.fromJson));
 
-  /// Хичээлийн дараа батлах: хийсэн тест + хассан бодлого, сэдэв, тайлбар, бодсон бодлогын дугаар.
+  /// Хичээлийн дараа батлах: хийсэн тест + хассан бодлого, сэдвүүд, тайлбар, бодсон бодлогын дугаар.
+  /// Батламж төлөвлөгөөг (тест, сэдэв) бодит байдалтай тэнцүүлнэ — батлагдсан хичээлийн тест, сэдвийг ЗӨВХӨН
+  /// энд засна (эзэн 2026-11-08). [expectedConfirmedAt] — цонх нээх үеийн батламжийн `confirmedAt`
+  /// (null = батлаагүй); өөр хүн хооронд нь баталсан/зассан бол сервер 409.
   Future<void> confirmLesson(
     String scheduleId, {
     required String date,
     required List<({String testId, List<String> excluded})> tests,
-    String? topic,
+    required List<String> customTopics,
+    required String? expectedConfirmedAt,
     String? description,
     String? problemNumbers,
   }) => _api.put<void>(
@@ -208,7 +220,8 @@ class StaffScheduleRepository {
       'tests': [
         for (final t in tests) {'testId': t.testId, 'excludedProblemIds': t.excluded},
       ],
-      'topic': topic,
+      'customTopics': customTopics,
+      'expectedConfirmedAt': expectedConfirmedAt,
       'description': description,
       'problemNumbers': problemNumbers,
     },

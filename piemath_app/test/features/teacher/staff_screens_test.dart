@@ -355,7 +355,7 @@ void main() {
   group('Цагийн бүртгэл (#9)', () {
     testWidgets('Багш: /teacher-hours/me', (tester) async {
       final http = FakeHttp()..json('GET', '/teacher-hours/me', _hours('Н. Багш'));
-      await pumpTeacher(tester, const TeacherHoursScreen(), http: http);
+      await pumpTeacher(tester, const TeacherHoursScreen(initialTab: TeacherHoursTab.computed), http: http);
       expect(http.requests.map((r) => r.path), ['/teacher-hours/me']);
     });
 
@@ -369,7 +369,7 @@ void main() {
           ],
         })
         ..json('GET', '/teacher-hours/me', _hours('Н. Багш'));
-      await pumpTeacher(tester, const TeacherHoursScreen(), http: http, session: teacherSession(role: 'TEACHER_PLUS'));
+      await pumpTeacher(tester, const TeacherHoursScreen(initialTab: TeacherHoursTab.computed), http: http, session: teacherSession(role: 'TEACHER_PLUS'));
       expect(http.requests.last.path, '/teacher-hours/me');
     });
 
@@ -390,7 +390,7 @@ void main() {
             ]},
           ],
         });
-      await pumpTeacher(tester, const TeacherHoursScreen(), http: http, session: teacherSession(role: 'TEACHER_PLUS'));
+      await pumpTeacher(tester, const TeacherHoursScreen(initialTab: TeacherHoursTab.computed), http: http, session: teacherSession(role: 'TEACHER_PLUS'));
       expect(http.requests.last.path, '/teacher-hours');
       expect(find.text('Н. Багш'), findsOneWidget);
       expect(find.text('Б. Болор+'), findsOneWidget);
@@ -401,7 +401,7 @@ void main() {
 
     testWidgets('Админ: бүх багш, эрхийн жагсаалт асуухгүй', (tester) async {
       final http = FakeHttp()..json('GET', '/teacher-hours', _hours('Н. Багш'));
-      await pumpTeacher(tester, const TeacherHoursScreen(), http: http, session: teacherSession(role: 'ADMIN'));
+      await pumpTeacher(tester, const TeacherHoursScreen(initialTab: TeacherHoursTab.computed), http: http, session: teacherSession(role: 'ADMIN'));
       expect(http.requests.map((r) => r.path), ['/teacher-hours']);
     });
 
@@ -409,7 +409,7 @@ void main() {
       final http = FakeHttp()
         ..error('GET', '/staff-capabilities/me', 500)
         ..json('GET', '/teacher-hours/me', _hours('Н. Багш'));
-      await pumpTeacher(tester, const TeacherHoursScreen(), http: http, session: teacherSession(role: 'TEACHER_PLUS'));
+      await pumpTeacher(tester, const TeacherHoursScreen(initialTab: TeacherHoursTab.computed), http: http, session: teacherSession(role: 'TEACHER_PLUS'));
       expect(http.requests.last.path, '/teacher-hours/me');
     });
   });

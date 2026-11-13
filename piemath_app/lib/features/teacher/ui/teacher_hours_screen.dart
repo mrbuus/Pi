@@ -7,17 +7,90 @@ import '../../../core/ui/ui.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_models.dart';
 import '../domain/board_logic.dart';
+import 'teacher_hours_sheet_view.dart';
 import 'teacher_widgets.dart';
 
-/// Цагийн бүртгэл (`/app/teacher-hours`): сарын орсон хичээл, нийт цаг. Цагийн хөлс хадгалагддаггүй.
-class TeacherHoursScreen extends ConsumerStatefulWidget {
-  const TeacherHoursScreen({super.key});
+/// `/app/teacher-hours`-ийн харагдац (вэбийн `TeacherHoursTabs`).
+enum TeacherHoursTab {
+  /// «Ажилласан цаг» — гараар бөглөдөг хагас сарын хүснэгт (эзэн 2026-11-08), анхдагч.
+  sheet('Ажилласан цаг', 'Ажилласан цаг'),
 
-  @override
-  ConsumerState<TeacherHoursScreen> createState() => _TeacherHoursScreenState();
+  /// «Хуваариас тооцоолсон» — хуучин сарын тооцоо, лавлагаа болгон хэвээр (функц устгахгүй).
+  computed('Хуваариас тооцоолсон', 'Хуваариас');
+
+  const TeacherHoursTab(this.label, this.short);
+
+  /// Бүтэн нэр (дэлгэц уншигчид).
+  final String label;
+
+  /// Утсанд багтах богино нэр.
+  final String short;
 }
 
-class _TeacherHoursScreenState extends ConsumerState<TeacherHoursScreen> {
+/// Ажилласан цаг (`/app/teacher-hours`, вэбийн `TeacherHoursTabs`): «Ажилласан цаг» хүснэгт +
+/// «Хуваариас тооцоолсон». Хуваарийн хэсэгт ч «Ажлын өдөр»-ийн ард мөн хүснэгт байна.
+class TeacherHoursScreen extends StatefulWidget {
+  const TeacherHoursScreen({super.key, this.initialTab = TeacherHoursTab.sheet});
+
+  final TeacherHoursTab initialTab;
+
+  @override
+  State<TeacherHoursScreen> createState() => _TeacherHoursScreenState();
+}
+
+class _TeacherHoursScreenState extends State<TeacherHoursScreen> {
+  late TeacherHoursTab _tab = widget.initialTab;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Ажилласан цаг')),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.sm, AppSpace.gutter, AppSpace.xs),
+            child: SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<TeacherHoursTab>(
+                key: const ValueKey('teacher-hours-tab'),
+                showSelectedIcon: false,
+                segments: [
+                  for (final t in TeacherHoursTab.values)
+                    ButtonSegment(
+                      value: t,
+                      label: Semantics(
+                        label: t.label,
+                        excludeSemantics: true,
+                        child: Text(t.short, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ),
+                    ),
+                ],
+                selected: {_tab},
+                onSelectionChanged: (v) => setState(() => _tab = v.first),
+              ),
+            ),
+          ),
+          Expanded(
+            child: switch (_tab) {
+              TeacherHoursTab.sheet => const TeacherHoursSheetView(),
+              TeacherHoursTab.computed => const TeacherHoursComputedView(),
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// «Хуваариас тооцоолсон»: сарын орсон хичээл, нийт цаг. Цагийн хөлс хадгалагддаггүй.
+class TeacherHoursComputedView extends ConsumerStatefulWidget {
+  const TeacherHoursComputedView({super.key});
+
+  @override
+  ConsumerState<TeacherHoursComputedView> createState() => _TeacherHoursComputedViewState();
+}
+
+class _TeacherHoursComputedViewState extends ConsumerState<TeacherHoursComputedView> {
   String? _month;
 
   @override
@@ -27,63 +100,60 @@ class _TeacherHoursScreenState extends ConsumerState<TeacherHoursScreen> {
     final month = _month ?? current;
     final async = ref.watch(teacherHoursProvider(month));
     final monthDay = parseDateKey('$month-01')!;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Цагийн бүртгэл')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(AppSpace.gutter, 0, AppSpace.gutter, AppSpace.xxl),
-        children: [
-          Row(
-            children: [
-              IconButton(
-                tooltip: 'Өмнөх сар',
-                constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-                icon: const Icon(AppIcons.back),
-                onPressed: () => setState(() => _month = shiftMonth(month, -1)),
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(AppSpace.gutter, 0, AppSpace.gutter, AppSpace.xxl),
+      children: [
+        Row(
+          children: [
+            IconButton(
+              tooltip: 'Өмнөх сар',
+              constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
+              icon: const Icon(AppIcons.back),
+              onPressed: () => setState(() => _month = shiftMonth(month, -1)),
+            ),
+            Expanded(
+              child: Text(
+                DateMn.month(monthDay, withYear: true),
+                textAlign: TextAlign.center,
+                style: context.text.titleSmall,
               ),
-              Expanded(
-                child: Text(
-                  DateMn.month(monthDay, withYear: true),
-                  textAlign: TextAlign.center,
-                  style: context.text.titleSmall,
+            ),
+            IconButton(
+              tooltip: 'Дараагийн сар',
+              constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
+              icon: const Icon(AppIcons.forward),
+              onPressed: month.compareTo(current) >= 0 ? null : () => setState(() => _month = shiftMonth(month, 1)),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpace.sm),
+        ...async.when(
+          skipLoadingOnRefresh: false,
+          loading: () => [const LoadingState(cards: 2, padding: EdgeInsets.zero)],
+          error: (e, _) => [
+            SizedBox(
+              height: 300,
+              child: ErrorState(
+                message: errorText(e, 'Цагийн бүртгэл нээгдсэнгүй'),
+                onRetry: () => ref.invalidate(teacherHoursProvider(month)),
+              ),
+            ),
+          ],
+          data: (h) {
+            if (ref.watch(hoursAllScopeProvider).value ?? false) return _allRows(context, h);
+            final row = h.teachers.firstOrNull;
+            if (row == null || row.sessions.isEmpty) {
+              return [
+                const SizedBox(
+                  height: 260,
+                  child: EmptyState(icon: AppIcons.timer, title: 'Энэ сард орсон хичээл алга'),
                 ),
-              ),
-              IconButton(
-                tooltip: 'Дараагийн сар',
-                constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
-                icon: const Icon(AppIcons.forward),
-                onPressed: month.compareTo(current) >= 0 ? null : () => setState(() => _month = shiftMonth(month, 1)),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpace.sm),
-          ...async.when(
-            skipLoadingOnRefresh: false,
-            loading: () => [const LoadingState(cards: 2, padding: EdgeInsets.zero)],
-            error: (e, _) => [
-              SizedBox(
-                height: 300,
-                child: ErrorState(
-                  message: errorText(e, 'Цагийн бүртгэл нээгдсэнгүй'),
-                  onRetry: () => ref.invalidate(teacherHoursProvider(month)),
-                ),
-              ),
-            ],
-            data: (h) {
-              if (ref.watch(hoursAllScopeProvider).value ?? false) return _allRows(context, h);
-              final row = h.teachers.firstOrNull;
-              if (row == null || row.sessions.isEmpty) {
-                return [
-                  const SizedBox(
-                    height: 260,
-                    child: EmptyState(icon: AppIcons.timer, title: 'Энэ сард орсон хичээл алга'),
-                  ),
-                ];
-              }
-              return _rows(context, row);
-            },
-          ),
-        ],
-      ),
+              ];
+            }
+            return _rows(context, row);
+          },
+        ),
+      ],
     );
   }
 
@@ -106,8 +176,12 @@ class _TeacherHoursScreenState extends ConsumerState<TeacherHoursScreen> {
       AppCard(
         child: Row(
           children: [
-            Expanded(child: _Stat(label: 'Хичээл', value: '$lessons')),
-            Expanded(child: _Stat(label: 'Нийт цаг', value: hoursLabel(minutes))),
+            Expanded(
+              child: _Stat(label: 'Хичээл', value: '$lessons'),
+            ),
+            Expanded(
+              child: _Stat(label: 'Нийт цаг', value: hoursLabel(minutes)),
+            ),
           ],
         ),
       ),
@@ -125,7 +199,9 @@ class _TeacherHoursScreenState extends ConsumerState<TeacherHoursScreen> {
                   title: Text(r.teacherName, style: context.text.titleSmall),
                   subtitle: Text('${r.lessons} хичээл, ${hoursLabel(r.minutes)}', style: context.text.bodySmall),
                   children: [
-                    for (final s in ([...r.sessions]..sort((a, b) => a.date == b.date ? a.startMinute - b.startMinute : a.date.compareTo(b.date))))
+                    for (final s in ([
+                      ...r.sessions,
+                    ]..sort((a, b) => a.date == b.date ? a.startMinute - b.startMinute : a.date.compareTo(b.date))))
                       ListTile(
                         dense: true,
                         title: Text(switch (parseDateKey(s.date)) {

@@ -55,6 +55,7 @@ class LessonRecordInfo {
     this.confirmedAt,
     this.description,
     this.problemNumbersText,
+    this.attendanceMarked = 0,
   });
 
   factory LessonRecordInfo.fromJson(Map<String, Object?> j) => LessonRecordInfo(
@@ -66,6 +67,7 @@ class LessonRecordInfo {
     confirmedAt: _str(j['confirmedAt']),
     description: _str(j['description']),
     problemNumbersText: _str(j['problemNumbersText']),
+    attendanceMarked: _int(j['attendanceMarked']),
   );
 
   final String confirmedByName;
@@ -80,17 +82,27 @@ class LessonRecordInfo {
   /// Батлахад бичсэн тайлбар, бодсон бодлогын дугаар («1-12, 15»).
   final String? description;
   final String? problemNumbersText;
+
+  /// Ирц тэмдэглэгдсэн сурагчийн тоо (0 бол ирцийг зурагт харуулахгүй).
+  final int attendanceMarked;
 }
 
 /// Ангид бодитоор хийсэн тест (`done[]`, `ClassTestSession`).
 class DoneTest {
-  const DoneTest({required this.sessionId, this.testId, this.manualTitle, this.excludedProblemIds = const []});
+  const DoneTest({
+    required this.sessionId,
+    this.testId,
+    this.manualTitle,
+    this.excludedProblemIds = const [],
+    this.studentWork = 0,
+  });
 
   factory DoneTest.fromJson(Map<String, Object?> j) => DoneTest(
     sessionId: _str(j['sessionId']) ?? '',
     testId: _str(j['testId']),
     manualTitle: _str(j['manualTitle']),
     excludedProblemIds: [for (final p in _list(j['excludedProblemIds'])) ?_str(p)],
+    studentWork: _int(j['studentWork']),
   );
 
   final String sessionId;
@@ -99,6 +111,9 @@ class DoneTest {
   /// Гараар бүртгэсэн (бодлогын сангүй) тестийн нэр.
   final String? manualTitle;
   final List<String> excludedProblemIds;
+
+  /// Энэ тестээр тэмдэглэгээ/гэрийн даалгавар хийсэн сурагчийн тоо — батлах цонхонд хасахад анхааруулна.
+  final int studentWork;
 }
 
 /// `GET /schedule/day-plan` — өдрийн нэг мөр (нэг хичээл).
@@ -129,6 +144,7 @@ class DayLesson {
     this.record,
     this.done = const [],
     this.photoStudentName,
+    this.dismissalAt,
   });
 
   factory DayLesson.fromJson(Map<String, Object?> j, String date) {
@@ -163,6 +179,7 @@ class DayLesson {
       record: j['record'] is Map ? LessonRecordInfo.fromJson(_map(j['record'])) : null,
       done: [for (final d in _list(j['done'])) DoneTest.fromJson(_map(d))],
       photoStudentName: _str(_map(plan?['photoStudent'])['name']),
+      dismissalAt: _str(j['dismissalAt']),
     );
   }
 
@@ -202,6 +219,9 @@ class DayLesson {
   /// Онолын зураг илгээх сурагч (төлөвлөгөө).
   final String? photoStudentName;
 
+  /// Анги тарсан агшин (ISO, UTC) — `/app/dismissal`-ийн бичлэг.
+  final String? dismissalAt;
+
   bool get planned => planTestIds.isNotEmpty || topic != null || customTopics.isNotEmpty;
 
   DayLesson withStaff({StaffRef? lead, StaffRef? assistant}) => DayLesson(
@@ -230,6 +250,7 @@ class DayLesson {
     record: record,
     done: done,
     photoStudentName: photoStudentName,
+    dismissalAt: dismissalAt,
   );
 }
 
@@ -279,6 +300,8 @@ class DayPlan {
     this.rosterInRange = true,
     this.lessons = const [],
     this.tests = const {},
+    this.mealCook,
+    this.mealFood,
   });
 
   factory DayPlan.fromJson(Map<String, Object?> j) {
@@ -286,6 +309,7 @@ class DayPlan {
     final viewer = _map(j['viewer']);
     final roster = j['roster'] is Map ? _map(j['roster']) : null;
     final holiday = j['holiday'] is Map ? _map(j['holiday']) : null;
+    final meal = j['meal'] is Map ? _map(j['meal']) : null;
     return DayPlan(
       date: date,
       today: _dateKey(j['today']) ?? date,
@@ -298,6 +322,8 @@ class DayPlan {
       rosterInRange: roster == null || roster['inRange'] != false,
       lessons: [for (final e in _list(j['entries'])) DayLesson.fromJson(_map(e), date)],
       tests: {for (final MapEntry(:key, :value) in _map(j['tests']).entries) key: PlanTest.fromJson(_map(value))},
+      mealCook: StaffRef.maybe(meal?['cook']),
+      mealFood: _str(meal?['food']),
     );
   }
 
@@ -319,6 +345,10 @@ class DayPlan {
   final List<DayLesson> lessons;
   final Map<String, PlanTest> tests;
 
+  /// Амралтын өдрийн (Бямба, Ням) хоол: хэн хийх, юу хийх.
+  final StaffRef? mealCook;
+  final String? mealFood;
+
   DayPlan withLessons(List<DayLesson> next) => DayPlan(
     date: date,
     today: today,
@@ -331,6 +361,8 @@ class DayPlan {
     rosterInRange: rosterInRange,
     lessons: next,
     tests: tests,
+    mealCook: mealCook,
+    mealFood: mealFood,
   );
 }
 

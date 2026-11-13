@@ -10,7 +10,9 @@ import '../../../../shared/native/native.dart';
 import '../../data/lesson_plan_models.dart';
 import '../../data/staff_schedule_models.dart';
 import '../../data/staff_schedule_repository.dart';
+import '../../domain/lesson_road.dart';
 import '../../domain/staff_schedule_logic.dart';
+import '../../domain/test_names.dart';
 import 'staff_actions.dart';
 import 'test_picker.dart';
 
@@ -44,10 +46,34 @@ void _snack(ScaffoldMessengerState? m, String text) => m
   ..showSnackBar(SnackBar(content: Text(text)));
 
 /// Төлөвлөгөө засах (Багш+, Админ). Хадгалбал `true`.
-Future<bool> showPlanEditor(BuildContext context, {required DayLesson lesson, required String date}) async {
+///
+/// Батлагдсан хичээлийн тест, сэдвийг энд биш батлах цонхноос засна (эзэн 2026-11-08) — [canConfirm] бол
+/// «Хийсэн тестийг засах» товч энэ цонхыг хаагаад батлах цонхыг нээнэ ([tests] — өдрийн тестийн нэр).
+Future<bool> showPlanEditor(
+  BuildContext context, {
+  required DayLesson lesson,
+  required String date,
+  Map<String, PlanTest> tests = const {},
+  bool canConfirm = false,
+  bool canRemoveTests = true,
+}) async {
   final messenger = ScaffoldMessenger.maybeOf(context);
-  final saved = await _sheet<bool>(context, (scroll) => PlanEditor(lesson: lesson, date: date, controller: scroll));
+  final host = Navigator.of(context).context;
+  var openConfirm = false;
+  final saved = await _sheet<bool>(
+    context,
+    (scroll) => PlanEditor(
+      lesson: lesson,
+      date: date,
+      controller: scroll,
+      tests: tests,
+      onEditConfirmed: canConfirm ? () => openConfirm = true : null,
+    ),
+  );
   if (saved == true) _snack(messenger, 'Төлөвлөгөө хадгалагдлаа');
+  if (openConfirm && host.mounted) {
+    await showConfirmSheet(host, lesson: lesson, date: date, tests: tests, canRemoveTests: canRemoveTests);
+  }
   return saved == true;
 }
 
@@ -79,6 +105,7 @@ class _SheetFrame extends StatelessWidget {
     required this.footer,
     required this.dirty,
     this.error,
+    this.notice,
   });
 
   final String title;
@@ -88,6 +115,9 @@ class _SheetFrame extends StatelessWidget {
   final List<Widget> footer;
   final bool dirty;
   final String? error;
+
+  /// Доод товчны дээрх анхааруулга (алдаа биш).
+  final String? notice;
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +169,23 @@ class _SheetFrame extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (notice != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpace.sm),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Icon(AppIcons.info, size: 18, color: c.warning),
+                          ),
+                          const SizedBox(width: AppSpace.sm),
+                          Expanded(
+                            child: Text(notice!, key: const ValueKey('sheet:notice'), style: context.text.bodyMedium),
+                          ),
+                        ],
+                      ),
+                    ),
                   if (error != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: AppSpace.sm),
@@ -181,11 +228,24 @@ String _errorText(Object e) => e is ApiError ? e.message : MutationResult.saveFa
 /// Төлөвлөгөө засах цонхны бие: орох тест (номын дарааллаар), нэмэлт сэдэв, хичээлийн дараа тарах/үлдэх,
 /// онолын зураг илгээх сурагч, тэмдэглэл (ирцийн самбарынхтай нэг бичлэг).
 class PlanEditor extends ConsumerStatefulWidget {
-  const PlanEditor({super.key, required this.lesson, required this.date, required this.controller});
+  const PlanEditor({
+    super.key,
+    required this.lesson,
+    required this.date,
+    required this.controller,
+    this.tests = const {},
+    this.onEditConfirmed,
+  });
 
   final DayLesson lesson;
   final String date;
   final ScrollController controller;
+
+  /// Өдрийн тестийн нэр (батлагдсан хичээлийн «Хийсэн тест»-д).
+  final Map<String, PlanTest> tests;
+
+  /// Батлагдсан хичээл: «Хийсэн тестийг засах» — цонх хаагдсаны дараа батлах цонх нээгдэнэ.
+  final VoidCallback? onEditConfirmed;
 
   @override
   ConsumerState<PlanEditor> createState() => _PlanEditorState();
@@ -228,6 +288,23 @@ class _PlanEditorState extends ConsumerState<PlanEditor> {
 
   bool get _noteChanged => _note.text.trim() != (widget.lesson.noteBody ?? '').trim();
 
+  /// Батлагдсан хичээл: энэ цонхыг хаагаад батлах цонх (хадгалаагүй өөрчлөлттэй бол асууна).
+  Future<void> _editConfirmed() async {
+    final nav = Navigator.of(context);
+    if (_planChanged || _noteChanged) {
+      final ok = await confirmAction(
+        context,
+        title: 'Хадгалаагүй өөрчлөлт байна',
+        message: 'Хаавал өөрчлөлт алдагдана',
+        confirmLabel: 'Хаах',
+        cancelLabel: 'Үргэлжлүүлэх',
+      );
+      if (!ok) return;
+    }
+    widget.onEditConfirmed?.call();
+    nav.pop(false);
+  }
+
   Future<void> _pickPhoto(PlanContext ctx) async {
     final picked = await showSelectSheet<String>(
       context,
@@ -260,8 +337,10 @@ class _PlanEditorState extends ConsumerState<PlanEditor> {
           customTopics: _topics,
           dismissMode: _dismiss,
           photoStudentId: _photo,
+          // Өөр хүн хооронд нь зассан бол сервер 409 — дарж бичихгүй.
+          expectedUpdatedAt: _initial!.updatedAt,
         );
-        // Дахин хадгалахад өөрчлөлтгүй гэж үзнэ.
+        // Дахин хадгалахад өөрчлөлтгүй гэж үзнэ (updatedAt шинэчлэгдсэн тул цонх хаагдана).
         _initial = PlanContext(
           testIds: _tests,
           customTopics: _topics,
@@ -269,6 +348,7 @@ class _PlanEditorState extends ConsumerState<PlanEditor> {
           photoStudentId: _photo,
           roster: _initial!.roster,
           photoSuggestion: _initial!.photoSuggestion,
+          updatedAt: _initial!.updatedAt,
         );
       }
       if (_noteChanged) await repo.putNote(widget.lesson.scheduleId, date: widget.date, body: _note.text.trim());
@@ -276,6 +356,11 @@ class _PlanEditorState extends ConsumerState<PlanEditor> {
       container.invalidate(planContextProvider(_key));
       nav.pop(true);
     } catch (e) {
+      // Зэрэг засвар: дахин нээхэд шинэ төлөвлөгөө ачаалагдана.
+      if (e is ApiError && e.kind == ApiErrorKind.conflict) {
+        refreshSchedule(container);
+        container.invalidate(planContextProvider(_key));
+      }
       if (mounted) {
         setState(() {
           _busy = false;
@@ -329,16 +414,25 @@ class _PlanEditorState extends ConsumerState<PlanEditor> {
         ),
       ],
       children: [
-        const _Section('Орох тест'),
-        TestPicker(
-          classroomId: l.classroomId,
-          date: widget.date,
-          selected: _tests,
-          onChanged: (ids) => setState(() => _tests = ids),
-          customTopics: _topics,
-          onCustomTopicsChange: (t) => setState(() => _topics = t),
-          canRemove: true,
-        ),
+        if (l.record != null) ...[
+          const _Section('Хийсэн тест'),
+          _ConfirmedTests(
+            lesson: l,
+            tests: widget.tests,
+            onEdit: widget.onEditConfirmed == null ? null : () => unawaited(_editConfirmed()),
+          ),
+        ] else ...[
+          const _Section('Орох тест'),
+          TestPicker(
+            classroomId: l.classroomId,
+            date: widget.date,
+            selected: _tests,
+            onChanged: (ids) => setState(() => _tests = ids),
+            customTopics: _topics,
+            onCustomTopicsChange: (t) => setState(() => _topics = t),
+            canRemove: true,
+          ),
+        ],
         const _Section('Хичээлийн дараа'),
         SegmentedButton<String>(
           key: const ValueKey('plan:dismiss'),
@@ -385,6 +479,55 @@ class _PlanEditorState extends ConsumerState<PlanEditor> {
           onChanged: (_) => setState(() {}),
           decoration: const InputDecoration(hintText: 'Ирцийн самбарын дээд хэсэгт багш нарт харагдана'),
         ),
+      ],
+    );
+  }
+}
+
+/// Батлагдсан хичээл: тест, сэдвийг төлөвлөгөөнөөс БИШ батлах цонхноос засна (эзэн 2026-11-08) — хийсэн тест,
+/// батламж, төлөвлөгөө гурав зөрөхгүй байхын тулд нэг л газар.
+class _ConfirmedTests extends StatelessWidget {
+  const _ConfirmedTests({required this.lesson, required this.tests, this.onEdit});
+
+  final DayLesson lesson;
+  final Map<String, PlanTest> tests;
+  final VoidCallback? onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final road = roadOf(lesson, tests);
+    final names = groupTestNames(road.today.map((x) => x.short));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (names.isEmpty && road.topics.isEmpty)
+          Text('Тест бүртгээгүй', style: context.text.bodyMedium?.copyWith(color: c.inkDim))
+        else ...[
+          if (names.isNotEmpty)
+            Text(names, key: const ValueKey('plan:confirmed-tests'), style: context.text.titleSmall),
+          if (road.topics.isNotEmpty) Text(road.topics.join(', '), style: context.text.bodyMedium),
+        ],
+        const SizedBox(height: AppSpace.sm),
+        Row(
+          children: [
+            Icon(AppIcons.badgeCheck, size: 18, color: c.success),
+            const SizedBox(width: AppSpace.sm),
+            Expanded(child: Text('Батлагдсан тул тест, сэдвийг батлах цонхноос засна', style: context.text.bodySmall)),
+          ],
+        ),
+        if (onEdit != null) ...[
+          const SizedBox(height: AppSpace.sm),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: OutlinedButton.icon(
+              key: const ValueKey('plan:edit-confirmed'),
+              onPressed: onEdit,
+              icon: const Icon(AppIcons.pencilLine, size: 18),
+              label: const Text('Хийсэн тестийг засах'),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -438,10 +581,9 @@ class _ConfirmSheetState extends ConsumerState<ConfirmSheet> {
     ];
     _rows = done.isNotEmpty ? done : [for (final id in l.planTestIds) (testId: id, excluded: <String>[])];
     _initialRows = [..._rows];
-    final record = l.record;
-    _topics = record != null
-        ? (record.topic != null && record.topic != l.topic ? [record.topic!] : <String>[])
-        : [...l.customTopics];
+    // Сэдвүүд — төлөвлөгөөнийх: батлахад төлөвлөгөө батламжтай тэнцдэг тул дахин нээхэд ч зөв (эзэн 2026-11-08).
+    // Батламжийн нэгтгэсэн сэдвийг («Тест 1, Тест 2») нэг сэдэв гэж авч давхардуулахгүй.
+    _topics = [...l.customTopics];
     _initialTopics = [..._topics];
     unawaited(_loadMissing());
   }
@@ -506,6 +648,7 @@ class _ConfirmSheetState extends ConsumerState<ConfirmSheet> {
       refreshSchedule(container);
       nav.pop(done);
     } catch (e) {
+      if (e is ApiError && e.kind == ApiErrorKind.conflict) refreshSchedule(container);
       if (mounted) {
         setState(() {
           _busy = false;
@@ -517,19 +660,27 @@ class _ConfirmSheetState extends ConsumerState<ConfirmSheet> {
 
   Future<void> _confirm() {
     final repo = ref.read(staffScheduleRepositoryProvider);
-    final topic = _topics.join(', ');
     return _run(
       () => repo.confirmLesson(
         widget.lesson.scheduleId,
         date: widget.date,
         tests: _rows,
-        topic: topic.isEmpty ? null : (topic.length > 200 ? topic.substring(0, 200) : topic),
+        customTopics: _topics,
+        // Өөр багш хооронд нь баталсан/зассан бол сервер 409 — дарж бичихгүй.
+        expectedConfirmedAt: widget.lesson.record?.confirmedAt,
         description: _description.text.trim().isEmpty ? null : _description.text.trim(),
         problemNumbers: _numbers.text.trim().isEmpty ? null : _numbers.text.trim(),
       ),
       'Батлагдлаа',
     );
   }
+
+  /// Хасаж буй тестээр сурагчид ажилласан бол: «Квадрат 1 — 3 сурагч».
+  List<String> get _removedWithWork => [
+    for (final d in widget.lesson.done)
+      if (d.testId != null && d.studentWork > 0 && !_rows.any((r) => r.testId == d.testId))
+        '${_info(d.testId!)?.short ?? 'Тест'} — ${d.studentWork} сурагч',
+  ];
 
   Future<void> _unconfirm() async {
     if (!await confirmAction(
@@ -556,12 +707,16 @@ class _ConfirmSheetState extends ConsumerState<ConfirmSheet> {
     ];
     final numbers = _numbers.text.trim();
     final parsed = parseProblemNumbers(numbers);
+    final removedWithWork = _removedWithWork;
     return _SheetFrame(
       title: '${shortClass(l.classroomName)}, батлах',
       subtitle: [_when(l, widget.date), if (record != null) '${record.confirmedByName} баталсан'].join(', '),
       controller: widget.controller,
       dirty: _dirty && !_busy,
       error: _error,
+      notice: removedWithWork.isEmpty
+          ? null
+          : '${removedWithWork.join(', ')} тэмдэглэсэн. Хасахад тэдний тэмдэглэл устахгүй, энэ өдрийн жагсаалтаас л гарна',
       footer: [
         if (record != null)
           TextButton(
