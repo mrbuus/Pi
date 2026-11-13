@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/ui/ui.dart';
 import '../../../shared/native/native.dart';
+import '../../paper_exams/paper_exams.dart';
 import '../data/authoring_models.dart';
 import '../data/authoring_repository.dart';
 import 'authoring_widgets.dart';
@@ -36,7 +37,7 @@ class _StaffTestsScreenState extends ConsumerState<StaffTestsScreen> {
   Widget build(BuildContext context) {
     final perms = ref.watch(authoringPermissionsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Шалгалт')),
+      appBar: AppBar(title: const Text('Шалгалт'), actions: const [PaperExamsEntryButton()]),
       floatingActionButton: perms.canAuthor
           ? FloatingActionButton.extended(
               key: const Key('new-test'),

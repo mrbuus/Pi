@@ -90,7 +90,7 @@ abstract final class NavData {
   static const _payments = NavLink('/app/payments', 'Төлбөр', AppIcons.card, short: 'Төлбөр');
   static const _leads = NavLink('/app/admin/leads', 'Элсэлт', AppIcons.enroll, short: 'Элсэлт');
   static const _sorils = NavLink('/app/admin/sorils', 'Жишиг сорил', AppIcons.tests);
-  static const _reconcile = NavLink('/app/admin/reconcile', 'Банкны тулгалт', AppIcons.bank);
+  static const _reconcile = NavLink('/app/admin/reconcile', 'Банкны хуулга', AppIcons.bank);
   static const _analytics = NavLink('/app/admin/analytics', 'Аналитик', AppIcons.chart);
   static const _sms = NavLink('/app/sms', 'Дугаарлуу мессеж', AppIcons.message);
   static const _storeAdmin = NavLink('/app/admin/store', 'Дэлгүүрийн удирдлага', AppIcons.store);
@@ -116,7 +116,7 @@ abstract final class NavData {
   static const _theoryTab = NavLink('/app/admin/theory', 'Онолын агуулга', AppIcons.document, short: 'Онол');
   static const _toolsTab = NavLink('/app/tools', 'Хэрэглэгдэхүүн', AppIcons.tools, short: 'Хэрэгсэл');
   static const _testsTab = NavLink('/app/tests', 'Шалгалт', AppIcons.exam, short: 'Шалгалт');
-  static const _reconcileTab = NavLink('/app/admin/reconcile', 'Банкны тулгалт', AppIcons.bank, short: 'Тулгалт');
+  static const _reconcileTab = NavLink('/app/admin/reconcile', 'Банкны хуулга', AppIcons.bank, short: 'Хуулга');
   static const _storeAdminTab = NavLink('/app/admin/store', 'Дэлгүүрийн удирдлага', AppIcons.store, short: 'Дэлгүүр');
   static const _scheduleTab = NavLink('/app/schedule', 'Хуваарь', AppIcons.calendar, short: 'Хуваарь');
   static const _studentsTab = NavLink('/app/admin/students', 'Сурагчид', AppIcons.students, short: 'Сурагчид');
@@ -134,7 +134,7 @@ abstract final class NavData {
   /// их). Ангиуд, Урсгал, Сурагчид, Тарах цаг, Цаг «Бусад»-д ([_byRole]).
   static const _staffSchedule = [_scheduleTab, _planner];
   static const _lessonFlow = NavLink('/app/lesson-flow', 'Хичээлийн урсгал', AppIcons.classes);
-  static const _teacherHours = NavLink('/app/teacher-hours', 'Цагийн бүртгэл', AppIcons.time);
+  static const _teacherHours = NavLink('/app/teacher-hours', 'Ажилласан цаг', AppIcons.time);
 
   /// Role бүрийн доод таб ба дээд дэд табууд (эзэн 2026-11-04: «Бусад»-д нуугдсаныг хэсэгт нь).
   /// Энд ороогүй цэс «Бусад»-д үлдэнэ ([moreGroups]) — нэг ч цэс хасагдахгүй.
