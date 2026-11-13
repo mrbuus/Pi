@@ -11,10 +11,17 @@ import '../application/teacher_providers.dart';
 import '../data/teacher_models.dart';
 import 'independent_tab.dart';
 import 'student_info_tab.dart';
+import 'student_lesson_history_tab.dart';
+import 'student_progress_extras.dart';
+import 'student_syllabus_tab.dart';
 import 'teacher_widgets.dart';
 
-/// Сурагчийн хуудас (`/app/students/:id`): Ангийн явц, Шалгалт, Тэмдэглэл, Бие даасан явц, Мэдээлэл (ангийн түүх, засах).
-/// Төлбөрөөс зөвхөн «хэдий хүртэл төлсөн» төлөв (энгийн багш мөнгөн дүн харахгүй).
+/// Сурагчийн хуудас (`/app/students/:id`): Ангийн явц, Шалгалт, Хичээлийн түүх (хуанли), Сэдэв хөтөлбөр,
+/// Тэмдэглэл, Бие даасан явц, Мэдээлэл (ангийн түүх, засах). Төлбөрөөс зөвхөн «хэдий хүртэл төлсөн» төлөв ба
+/// «Одоо гарвал буцаах дүн» (энгийн багш бусад мөнгөн дүн харахгүй — сервер өгөхгүй).
+///
+/// Шинэ таб нэмэх: [_baseTabs]-д нэг мөр (бүх ажилтанд), эсвэл эрхээс хамаарах бол дуудагч [extraTabs]-аар
+/// («Мэдээлэл»-ийн өмнө). Удирдлагын «Гарсан тооцоо» нь сүүлээсээ 2 дахь таб гэж тооцогддог.
 ///
 /// Удирдлагын хувилбар (`features/students_admin`, Багш+/Админ) энэ хуудсыг ДАВХАРДУУЛАХГҮЙ — [header]
 /// (төлөв, үйлдэл), [extraTabs] (Төлбөр, Гарсан тооцоо)-оор өргөтгөнө. [embedded] = таблетын баруун тал.
@@ -43,10 +50,7 @@ class StudentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tabs = <(String, Widget)>[
-      ('Ангийн явц', _ProgressTab(studentId: studentId)),
-      ('Шалгалт', _ExamsTab(studentId: studentId)),
-      ('Тэмдэглэл', StudentNotesTab(studentId: studentId)),
-      ('Бие даасан явц', IndependentTab(studentId: studentId)),
+      ..._baseTabs(studentId),
       for (final t in extraTabs) (t.label, t.child),
       ('Мэдээлэл', StudentInfoTab(studentId: studentId)),
     ];
@@ -77,6 +81,16 @@ class StudentScreen extends StatelessWidget {
   }
 }
 
+/// Бүх ажилтанд харагдах табууд (вэбийн `StudentProgress.tsx`-ийн дараалал).
+List<(String, Widget)> _baseTabs(String studentId) => [
+  ('Ангийн явц', _ProgressTab(studentId: studentId)),
+  ('Шалгалт', _ExamsTab(studentId: studentId)),
+  ('Хичээлийн түүх', StudentLessonHistoryTab(studentId: studentId)),
+  ('Сэдэв хөтөлбөр', StudentSyllabusTab(studentId: studentId)),
+  ('Тэмдэглэл', StudentNotesTab(studentId: studentId)),
+  ('Бие даасан явц', IndependentTab(studentId: studentId)),
+];
+
 /// [StudentScreen]-ийн нэмэлт таб.
 class StudentExtraTab {
   const StudentExtraTab(this.label, this.child);
@@ -101,7 +115,9 @@ class _ProgressTab extends ConsumerWidget {
       padding: const EdgeInsets.all(AppSpace.gutter),
       children: [
         PaidUntilCard(studentId: studentId, compact: true),
+        StudentRefundEstimateRow(studentId: studentId),
         const SizedBox(height: AppSpace.lg),
+        StudentMakeupHistory(studentId: studentId),
         Text('Сүүлийн 30 хоног', style: context.text.titleSmall),
         const SizedBox(height: AppSpace.sm),
         ...async.when(
