@@ -303,7 +303,10 @@ export class AuthService {
     loginAttempts.success(identifier);
     accountAttempts.success(user.id);
     accountSourceAttempts.success(sourceKey);
-    return this.issueToken(user.id, user.role, tokenTtl(dto.remember));
+    return {
+      ...this.issueToken(user.id, user.role, tokenTtl(dto.remember)),
+      ...securityNudge(dto.password, user),
+    };
   }
 
   /**
@@ -410,4 +413,18 @@ export class AuthService {
       role,
     };
   }
+}
+
+/**
+ * Нэвтэрсний дараах зөөлөн сануулга (эзэн 2026-11-14): нууц үг нь утасны дугаар хэвээр
+ * бол «Нууц үгээ солиорой» + Gmail холбох санал. АНХНЫ нэвтрэлтэд харуулахгүй
+ * (lastSeenAt = null — jwt.strategy анхны хүсэлтээр тэмдэглэнэ), дараагийнх бүрт
+ * харуулна. Хүчлэхгүй — вэб «Дараа» товчтой. Google-ээр нэвтэрвэл энд ирэхгүй.
+ */
+export function securityNudge(
+  password: string,
+  user: { phone: string | null; lastSeenAt: Date | null; googleIdentity?: unknown },
+): { securityNudge?: { passwordIsPhone: true; googleLinked: boolean } } {
+  if (!user.lastSeenAt || !isSameAsPhone(password, user.phone)) return {};
+  return { securityNudge: { passwordIsPhone: true, googleLinked: !!user.googleIdentity } };
 }

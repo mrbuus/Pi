@@ -12,6 +12,7 @@ import ClassHubTabs, { hubFor } from "@/components/nav/ClassHubTabs";
 import UserMenu from "@/components/nav/UserMenu";
 import ThemeToggle from "@/components/ThemeToggle";
 import UsageTracker from "@/components/usage/UsageTracker";
+import SecurityNudge from "@/components/auth/SecurityNudge";
 import { TopBarSlotProvider } from "@/components/nav/TopBarSlot";
 import { getPageTitle } from "@/components/nav/nav-data";
 import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
@@ -250,6 +251,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <UsageTracker />
+      {!examFullscreen && <SecurityNudge />}
       {!examFullscreen && (
         <BottomTabs
           role={displayRole ?? role}
