@@ -23,6 +23,7 @@ import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { toNationalMn } from '../notifications/phone';
 import { validatePasswordStrength } from '../auth/password-policy';
 import { buildRegistrationWorkbook, type RegistrationRow } from './registration-standard';
+import { guardTuitionFields } from './tuition-guard';
 import {
   nextSevenDigitStudentCode,
   parseClassroomLabel,
@@ -1141,6 +1142,9 @@ export class UsersService {
       throw new ForbiddenException('Ажилтны мэдээллийг зөвхөн Админ засна');
     if (target.role === Role.ADMIN && targetId !== actorId)
       throw new ForbiddenException('Өөр админы мэдээллийг засах боломжгүй');
+
+    // Тохирсон (хөнгөлөлттэй) дүнг зөвхөн Админ тавьж/арилгана — Багш+ багц засахад дарагдахгүй
+    dto = guardTuitionFields(dto, actorRole);
 
     const studentFields: (keyof UpdateUserProfileDto)[] = [
       'grade',
