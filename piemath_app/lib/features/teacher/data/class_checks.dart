@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/format/person_name.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_providers.dart';
+import '../../book_money/book_money.dart' show kBooks, kCheckAmountMax, kSheetKinds;
 
 // «Чек» (эзэн 2026-10-22) — ангийн нэртэй шалгах жагсаалт: «Номны мөнгө 25,000₮».
 // `api/src/class-checks` — бүх багш (ADMIN/TEACHER_PLUS/TEACHER) өөрийн харах ангидаа.
@@ -16,8 +17,8 @@ List<T> _list<T>(Object? j, T Function(Map<String, Object?>) f) => [
     if (e is Map) f(e.cast<String, Object?>()),
 ];
 
-/// API-ийн `CHECK_AMOUNT_MAX` (100 сая ₮).
-const checkAmountMax = 100000000;
+/// API-ийн `CHECK_AMOUNT_MAX` (100 сая ₮) — нэг эх сурвалж `book_money`.
+const checkAmountMax = kCheckAmountMax;
 
 /// API-ийн `CHECK_TITLE_MAX`.
 const checkTitleMax = 80;
@@ -256,21 +257,9 @@ class CheckStudentInfo {
   final List<CheckContact> contacts;
 }
 
-/// Номын чекийн төрлүүд (API-ийн `BOOKS` + хариултын хуудас) — нэрийг сервер өөрөө тавина.
-const checkBookKinds = [
-  (key: 'E1', title: 'E-1'),
-  (key: 'E2', title: 'E-2'),
-  (key: 'E3', title: 'E-3'),
-  (key: 'HAVTGAI1', title: 'Хавтгай-1'),
-  (key: 'HAVTGAI2', title: 'Хавтгай-2'),
-  (key: 'OGTORGUI', title: 'Огторгуй'),
-  (key: 'PITEST', title: 'Pi test'),
-  (key: 'SHEET', title: 'Нэгдсэн шалгалт'),
-  (key: 'CSHEET', title: 'Ангийн шалгалт'),
-];
-
-/// Хариултын хуудасны төрөл (үнийн жишээ бага).
-bool isSheetKind(String key) => key == 'SHEET' || key == 'CSHEET';
+/// Номын чекийн төрлүүд (API-ийн `BOOKS` + хариултын хуудас) — нэрийг сервер өөрөө тавина. Жагсаалт нэг
+/// газар (`book_money`-ийн [kBooks], [kSheetKinds]).
+const checkBookKinds = [...kBooks, ...kSheetKinds];
 
 class ClassChecksRepository {
   const ClassChecksRepository(this._api);
@@ -286,11 +275,16 @@ class ClassChecksRepository {
       _api.get('${_base(classId)}/students/${_enc(studentId)}', parse: CheckStudentInfo.fromJson);
 
   /// Шинэ чек: энгийн ([title]) эсвэл номын ([bookKey], үнэ заавал).
-  Future<ClassCheck> create(String classId, {String? title, int? amount, String? bookKey}) => _api.post(
-    _base(classId),
-    body: bookKey != null ? {'bookKey': bookKey, 'amount': amount} : {'title': title, 'amount': amount},
-    parse: (j) => ClassCheck.fromJson(_map(j)),
-  );
+  Future<ClassCheck> create(String classId, {String? title, int? amount, String? bookKey}) async {
+    final created = await _api.post(
+      _base(classId),
+      body: bookKey != null ? {'bookKey': bookKey, 'amount': amount} : {'title': title, 'amount': amount},
+      parse: (j) => ClassCheck.fromJson(_map(j)),
+    );
+    // Номын чек «Номын мөнгө» самбар, сурагчийн «Ном» табд харагдана
+    if (bookKey != null) _api.invalidateCache(_bookPayments);
+    return created;
+  }
 
   /// Нэр/дүн засах, нуух (`archived: true`), буцааж гаргах (`archived: false`).
   Future<ClassCheck> update(String classId, String checkId, Map<String, Object?> body) =>
@@ -300,11 +294,18 @@ class ClassChecksRepository {
   Future<void> remove(String classId, String checkId) => _api.delete<Object?>('${_base(classId)}/${_enc(checkId)}');
 
   /// Нэг сурагчийн тэмдэглэгээ — toggle биш, тодорхой утга.
-  Future<CheckMark> setMark(String classId, String checkId, String studentId, Map<String, Object?> body) => _api.put(
-    '${_base(classId)}/${_enc(checkId)}/students/${_enc(studentId)}',
-    body: body,
-    parse: (j) => CheckMark.fromJson(_map(j)),
-  );
+  /// Номын чекийн тэмдэглэгээ нь сурагчийн номын төлбөрийг өөрчилдөг тул `/book-payments` кэшийг цэвэрлэнэ.
+  Future<CheckMark> setMark(String classId, String checkId, String studentId, Map<String, Object?> body) async {
+    final saved = await _api.put(
+      '${_base(classId)}/${_enc(checkId)}/students/${_enc(studentId)}',
+      body: body,
+      parse: (j) => CheckMark.fromJson(_map(j)),
+    );
+    _api.invalidateCache(_bookPayments);
+    return saved;
+  }
+
+  static const _bookPayments = '/book-payments';
 }
 
 final classChecksRepositoryProvider = Provider<ClassChecksRepository>(

@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:piemath_app/features/exam/data/exam_models.dart';
 import 'package:piemath_app/features/exam/domain/test_list_logic.dart';
 import 'package:piemath_app/features/exam/ui/tests_list_screen.dart';
+import 'package:piemath_app/features/paper_exams/paper_exams.dart';
 
 import '../../helpers/fake_http.dart';
 import 'exam_test_app.dart';
@@ -48,7 +50,11 @@ void main() {
         deriveUpcoming: true,
         now: now,
       );
-      final past = TestRow.fromJson(const {'id': 'b', 'assignedAt': '2026-11-01T00:00:00Z'}, deriveUpcoming: true, now: now);
+      final past = TestRow.fromJson(
+        const {'id': 'b', 'assignedAt': '2026-11-01T00:00:00Z'},
+        deriveUpcoming: true,
+        now: now,
+      );
       final explicit = TestRow.fromJson(
         const {'id': 'c', 'upcoming': false, 'assignedAt': '2026-11-05T00:00:00Z'},
         deriveUpcoming: true,
@@ -184,6 +190,9 @@ void main() {
       final app = ExamTestApp(http);
       await app.pump(tester, location: '/app/tests');
       await tester.pumpAndSettle();
+      // 5 таб: «Эрэмбэ» нарийн дэлгэцэд гүйлгэж харагдана
+      await tester.ensureVisible(find.text('Эрэмбэ'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Эрэмбэ'));
       await tester.pumpAndSettle();
       expect(find.text('Логарифм 3'), findsOneWidget);
@@ -236,5 +245,45 @@ void main() {
       expect(find.text('Тестийн жагсаалт ачаалж чадсангүй'), findsOneWidget);
       await app.close(tester);
     });
+  });
+
+  group('«Нэгдсэн шалгалт» таб (вэбийн /app/tests?tab=paper)', () {
+    test('зөвхөн сурагчид, «Өгсөн, дүн»-гийн дараа', () {
+      expect(testsTabKeys(paper: true), ['give', 'done', 'paper', 'rank', 'soril']);
+      expect(testsTabKeys(paper: false), isNot(contains('paper')));
+    });
+
+    FakeHttp paperHttp() => FakeHttp()
+      ..json('GET', '/tests', <Object?>[])
+      ..json('GET', '/exam-results/my', {'exams': <Object?>[]})
+      ..json('GET', '/tests/my-results', <Object?>[])
+      ..json('GET', '/paper-exams/my', [
+        {
+          'id': 'e1',
+          'title': 'Нэгдсэн шалгалт 3',
+          'heldOn': '2026-11-10',
+          'totalScore': 1,
+          'maxScore': 3,
+          'pct': 33,
+          'rank': 5,
+          'participants': 40,
+        },
+      ]);
+
+    for (final loc in ['/app/tests?tab=paper', '/app/paper-exams']) {
+      testWidgets('$loc → «Нэгдсэн шалгалт» таб шууд нээгдэнэ', (tester) async {
+        final http = paperHttp();
+        final app = ExamTestApp(http);
+        await app.pump(tester, location: loc);
+        await tester.pumpAndSettle();
+        expect(find.byType(TestsListScreen), findsOneWidget);
+        final labels = [for (final t in tester.widgetList<Tab>(find.byType(Tab))) ?t.text];
+        expect(labels, ['Өгөх', 'Өгсөн, дүн', 'Нэгдсэн шалгалт', 'Эрэмбэ', 'Жишиг сорил']);
+        expect(find.byType(StudentPaperExams), findsOneWidget);
+        expect(find.textContaining('5-р байр, 40 сурагчаас'), findsOneWidget);
+        expect(http.count('GET', '/paper-exams/my'), 1);
+        await app.close(tester);
+      });
+    }
   });
 }

@@ -39,6 +39,22 @@ void main() {
       expect(appRedirect(const SignedOut(), u('/app')), '/login');
     });
 
+    test('W6-ийн шинэ зам: нэвтрээгүй бол login?next=, нэвтэрсэн бол шилжүүлэхгүй (эрхийг сервер шалгана)', () {
+      for (final path in [
+        '/app/classes/c1/checks',
+        '/app/teacher/room406?date=2026-11-14',
+        '/app/book-money',
+        '/app/paper-exams',
+        '/app/paper-exams/e1',
+        '/app/tests?tab=paper',
+      ]) {
+        expect(appRedirect(const SignedOut(), u(path)), '/login?next=${Uri.encodeComponent(path)}', reason: path);
+        expect(isPublicPath(u(path).path), isFalse, reason: path);
+        expect(appRedirect(signedIn(UserRole.teacher), u(path)), isNull, reason: path);
+        expect(appRedirect(signedIn(UserRole.student), u(path)), isNull, reason: path);
+      }
+    });
+
     test('нийтийн зам нэвтрэлтгүй нээгдэнэ', () {
       expect(appRedirect(const SignedOut(), u('/login')), isNull);
       expect(appRedirect(const SignedOut(), u('/books/300')), isNull);

@@ -16,8 +16,14 @@ import '../network/api_error.dart';
 /// 3) нийт [maxBytes]-аас хэтэрвэл алдаа.
 /// Хүүхдэд «PDF» гэдэг үг харуулахгүй — «зураг», «хуудас».
 abstract final class PhotoDocumentLimits {
-  static const homeworkMaxPages = 6;
-  static const theoryMaxPages = 10;
+  /// Гэрийн даалгаврын дэвтэр (API `homework-practice.service.ts` `MAX_PAGES`, эзэн 2026-11-12).
+  static const homeworkMaxPages = 15;
+
+  /// Онолын зураг (API `lesson-day.service.ts` `THEORY_MAX_PAGES`, эзэн 2026-11-12).
+  static const theoryMaxPages = 20;
+
+  /// Нөхөх тэмдэглэлийн зураг (API `lesson-day.service.ts` `MAX_PAGES`).
+  static const makeupMaxPages = 10;
   static const longSide = 1600;
   static const quality = 72;
   static const fallbackQualities = [60, 50, 42];
@@ -103,7 +109,13 @@ abstract class JpegCompressor {
 
   /// [width] өргөн, [height] өндөр хэмжээтэй (эргүүлэхээс өмнөх тэнхлэгээр), [quality] чанартай,
   /// [rotation] градус эргүүлсэн JPEG.
-  Future<Uint8List> compress(Uint8List bytes, {required int width, required int height, required int quality, required int rotation});
+  Future<Uint8List> compress(
+    Uint8List bytes, {
+    required int width,
+    required int height,
+    required int quality,
+    required int rotation,
+  });
 }
 
 /// Натив шахагч (flutter_image_compress) — EXIF чиглэлийг хэрэгжүүлж, мета өгөгдлийг хасна
@@ -128,7 +140,13 @@ class NativeJpegCompressor implements JpegCompressor {
   }
 
   @override
-  Future<Uint8List> compress(Uint8List bytes, {required int width, required int height, required int quality, required int rotation}) {
+  Future<Uint8List> compress(
+    Uint8List bytes, {
+    required int width,
+    required int height,
+    required int quality,
+    required int rotation,
+  }) {
     return FlutterImageCompress.compressWithList(
       bytes,
       minWidth: width,

@@ -318,7 +318,7 @@ BoardLesson? lessonAt(List<BoardLesson> lessons, int nowMinute) {
   return null;
 }
 
-/// `YYYY-MM` ± [delta] сар (цагийн бүртгэлийн сар солих).
+/// `YYYY-MM` ± [delta] сар (ажилласан цагийн сар солих).
 String shiftMonth(String month, int delta) {
   final y = int.parse(month.substring(0, 4));
   final m = int.parse(month.substring(5, 7));

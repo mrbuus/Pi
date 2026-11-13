@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:piemath_app/core/auth/user_role.dart';
 import 'package:piemath_app/features/book_money/book_money.dart';
 import 'package:piemath_app/features/book_money/book_money_routes.dart';
 import 'package:piemath_app/features/book_money/data/book_money_models.dart';
@@ -215,7 +214,8 @@ void main() {
     });
 
     testWidgets('хоосон: чек нээгдээгүй', (tester) async {
-      final http = FakeHttp()..json('GET', '/book-payments/dashboard', {'books': <Object?>[], 'collectors': <Object?>[]});
+      final http = FakeHttp()
+        ..json('GET', '/book-payments/dashboard', {'books': <Object?>[], 'collectors': <Object?>[]});
       await pumpInternal(tester, http: http, location: '/app/book-money');
       expect(find.text('Номын чек нээгдээгүй байна'), findsOneWidget);
     });
@@ -325,41 +325,6 @@ void main() {
       await tester.tap(find.text('Сурагчийн хуудаснаас засах'));
       await settle(tester);
       expect(find.text('ROUTE:/app/students/s1'), findsOneWidget);
-    });
-  });
-
-  group('ангийн номын чек нээх', () {
-    testWidgets('нээсэн ном идэвхгүй, үнэгүй бол алдаа, хуудасны төрөл серверт', (tester) async {
-      Object? created;
-      final http = FakeHttp()
-        ..json('POST', '/classrooms/c1/checks', {'id': 'k2', 'title': 'Нэгдсэн шалгалт 2', 'bookKey': 'SHEET2'});
-      await pumpInternal(
-        tester,
-        http: http,
-        role: UserRole.teacher,
-        home: Builder(
-          builder: (context) => TextButton(
-            onPressed: () async =>
-                created = await showNewBookCheckSheet(context, classroomId: 'c1', usedBookKeys: {'E1'}),
-            child: const Text('нээх'),
-          ),
-        ),
-      );
-      await tester.tap(find.text('нээх'));
-      await settle(tester);
-      final e1 = tester.widget<ChoiceChip>(find.byKey(const Key('book-kind-E1')));
-      expect(e1.onSelected, isNull);
-      await tester.tap(find.byKey(const Key('book-kind-SHEET')));
-      await settle(tester);
-      await tester.tap(find.byKey(const Key('book-check-open')));
-      await settle(tester);
-      expect(find.text('Үнээ оруулна уу'), findsOneWidget);
-      expect(http.count('POST', '/classrooms/c1/checks'), 0);
-      await tester.enterText(find.byKey(const Key('book-check-price')), '3000');
-      await tester.tap(find.byKey(const Key('book-check-open')));
-      await settle(tester);
-      expect(_body(http, 'POST', '/classrooms/c1/checks'), {'bookKey': 'SHEET', 'amount': 3000});
-      expect((created as Map)['id'], 'k2');
     });
   });
 }

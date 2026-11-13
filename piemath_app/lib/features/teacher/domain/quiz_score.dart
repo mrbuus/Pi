@@ -7,6 +7,20 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../shared/marks/marks.dart';
+import '../../../shared/quiz_score/quiz_score.dart';
+
+// Онооны хил, хувь, бичлэг нэг газар (`shared/quiz_score`) — энд зөвхөн самбарын нэмэлт (дундаж, оролт).
+export '../../../shared/quiz_score/quiz_score.dart'
+    show
+        formatPercent,
+        formatScore,
+        percentTone,
+        quizGreenFrom,
+        quizPercent,
+        quizRatioTone,
+        quizRedBelow,
+        quizTone,
+        toHundredths;
 
 /// Онооны өнгө: улаан = error, улбар шар = warning, ногоон = success (вэбийн `QuizTone`).
 typedef QuizTone = MarkTone;
@@ -17,35 +31,8 @@ const quizMaxProblems = 200;
 /// «Асуудалтай» болгох анхдагч хувь (шалгуурын minQuiz).
 const defaultMinQuiz = 50;
 
-/// Оноог зууны нэгээр бүхэл тоо болгоно (7.5 → 750).
-int toHundredths(num x) => (x * 100).round();
-
 bool _valid(num? score, num problemCount) =>
     score != null && score.isFinite && problemCount.isFinite && problemCount > 0;
-
-/// Оноо → өнгө. Оноогүй эсвэл буруу бодлогын тоо → null.
-QuizTone? quizTone(num? score, num problemCount) {
-  if (!_valid(score, problemCount)) return null;
-  final s = toHundredths(score!);
-  final c = toHundredths(problemCount);
-  if (2 * s < c) return MarkTone.error;
-  if (5 * s < 4 * c) return MarkTone.warning;
-  return MarkTone.success;
-}
-
-/// Аль хэдийн бодсон хувь → өнгө (сарын дундаж гэх мэт).
-QuizTone? percentTone(num? pct) {
-  if (pct == null || !pct.isFinite) return null;
-  if (pct < 50) return MarkTone.error;
-  if (pct < 80) return MarkTone.warning;
-  return MarkTone.success;
-}
-
-/// Оноо → хувь (0..100); оноогүй бол null.
-double? quizPercent(num? score, num problemCount) {
-  if (!_valid(score, problemCount)) return null;
-  return toHundredths(score!) * 100 / toHundredths(problemCount);
-}
 
 /// «Асуудалтай» (шалгуурын minQuiz): хувь < [minPct] эсэх. [minPct] = 0 бол хэзээ ч үгүй.
 bool quizBelow(num score, num problemCount, num minPct) {
@@ -72,12 +59,7 @@ QuizAverage? quizAverage(Iterable<num?> scores, num problemCount) {
   if (list.isEmpty || !problemCount.isFinite || problemCount <= 0) return null;
   final sum = list.fold<int>(0, (a, s) => a + toHundredths(s));
   final total = list.length * toHundredths(problemCount);
-  final tone = 2 * sum < total
-      ? MarkTone.error
-      : 5 * sum < 4 * total
-      ? MarkTone.warning
-      : MarkTone.success;
-  return QuizAverage(pct: sum * 100 / total, tone: tone, count: list.length);
+  return QuizAverage(pct: sum * 100 / total, tone: quizRatioTone(sum, total), count: list.length);
 }
 
 /// Өөр өөр бодлогын тоотой хэд хэдэн шалгалтын дундаж хувь (өдөр бүр ижил жинтэй). Хоосон бол null.
@@ -85,19 +67,6 @@ double? meanPercent(Iterable<({num score, num problemCount})> rows) {
   final pcts = [for (final r in rows) ?quizPercent(r.score, r.problemCount)];
   if (pcts.isEmpty) return null;
   return pcts.reduce((a, b) => a + b) / pcts.length;
-}
-
-/// Хувийг БҮХЭЛ хүртэл ДООШ тайрна (79,99 → «79%») — бичиг, өнгө хоёр хэзээ ч зөрөхгүй.
-String formatPercent(num pct) => '${(pct + 1e-9).floor()}%';
-
-/// Монгол бичлэг: 7.5 → «7,5», 8 → «8», 7.25 → «7,25».
-String formatScore(num score) {
-  final h = toHundredths(score);
-  final whole = h ~/ 100;
-  final frac = (h % 100).abs();
-  if (frac == 0) return '$whole';
-  final f = frac % 10 == 0 ? '${frac ~/ 10}' : frac.toString().padLeft(2, '0');
-  return '$whole,$f';
 }
 
 /// Оролтыг задлах үр дүн: [ok] бол [value] (null = цэвэрлэх), эс бөгөөс [error].

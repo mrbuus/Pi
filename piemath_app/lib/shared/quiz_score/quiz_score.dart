@@ -7,30 +7,48 @@ import '../marks/marks.dart';
 // сурагчийн хуудасны хуанлид харагдана. Цэвэр тооцоо = вэбийн `web/src/lib/quizScore.ts`
 // (= `api/src/homework-quiz/quiz-score.ts`). Өнгө (эзэн): 0 <= улаан < 50 <= улбар шар < 80 <= ногоон.
 // Хувийг хөвөгч тоогоор бус, ЗУУНЫ НЭГЭЭР бүхэл болгож харьцуулна (49,99% улаан, 80% ногоон).
+// Цэвэр тооцооны ЦОРЫН ГАНЦ эх сурвалж — самбарын `teacher/domain/quiz_score.dart` эндээс авна.
 
 /// Оноог зууны нэгээр бүхэл тоо болгоно (7.5 → 750).
 int toHundredths(num x) => (x * 100).round();
 
-bool _valid(num? score, int problemCount) => score != null && score.isFinite && problemCount > 0;
+bool _valid(num? score, num problemCount) =>
+    score != null && score.isFinite && problemCount.isFinite && problemCount > 0;
+
+/// Өнгөний хил НЭГ газар (эзэн): хувь < [quizRedBelow] улаан, < [quizGreenFrom] улбар шар, бусад ногоон.
+const quizRedBelow = 50;
+const quizGreenFrom = 80;
+
+/// [part]/[whole] харьцааны өнгө. Хоёулаа зууны нэгээр бүхэл — хөвөгч тооны алдаагүй (49,99% улаан,
+/// 80% ногоон).
+MarkTone quizRatioTone(int part, int whole) {
+  if (100 * part < quizRedBelow * whole) return MarkTone.error;
+  if (100 * part < quizGreenFrom * whole) return MarkTone.warning;
+  return MarkTone.success;
+}
 
 /// Оноо → өнгөний аяс. Оноогүй эсвэл буруу бодлогын тоо → null.
-MarkTone? quizTone(num? score, int problemCount) {
+MarkTone? quizTone(num? score, num problemCount) {
   if (!_valid(score, problemCount)) return null;
-  final s = toHundredths(score!);
-  final c = toHundredths(problemCount);
-  if (2 * s < c) return MarkTone.error;
-  if (5 * s < 4 * c) return MarkTone.warning;
+  return quizRatioTone(toHundredths(score!), toHundredths(problemCount));
+}
+
+/// Аль хэдийн бодсон хувь → өнгө (сарын дундаж гэх мэт).
+MarkTone? percentTone(num? pct) {
+  if (pct == null || !pct.isFinite) return null;
+  if (pct < quizRedBelow) return MarkTone.error;
+  if (pct < quizGreenFrom) return MarkTone.warning;
   return MarkTone.success;
 }
 
 /// Оноо → хувь (0..100); оноогүй бол null.
-double? quizPercent(num? score, int problemCount) {
+double? quizPercent(num? score, num problemCount) {
   if (!_valid(score, problemCount)) return null;
   return toHundredths(score!) * 100 / toHundredths(problemCount);
 }
 
 /// Хувийг БҮХЭЛ хүртэл доош тайрна (79,99 → «79%») — бичиг, өнгө хоёр зөрөхгүй.
-String formatPercent(double pct) => '${(pct + 1e-9).floor()}%';
+String formatPercent(num pct) => '${(pct + 1e-9).floor()}%';
 
 /// Монгол бичлэгээр: 7.5 → «7,5», 8 → «8», 7.25 → «7,25».
 String formatScore(num score) {

@@ -274,7 +274,7 @@ void main() {
     });
   });
 
-  testWidgets('цагийн бүртгэл: нийт ба хичээл бүр', (tester) async {
+  testWidgets('ажилласан цаг: нийт ба хичээл бүр', (tester) async {
     final http = FakeHttp()
       ..json('GET', '/teacher-hours/me', {
         'month': '2026-11',

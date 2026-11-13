@@ -8,6 +8,7 @@ import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/native/form_sheet.dart' show ThousandsFormatter;
 import '../../../shared/payment_status/money.dart';
+import '../../book_money/book_money.dart';
 import '../application/checks_controller.dart';
 import '../data/class_checks.dart';
 import '../domain/board_logic.dart';
@@ -34,6 +35,31 @@ String _who(CheckPerson? p) => p?.staff ?? 'Хэн нэгэн';
 
 enum _Filter { all, left, done }
 
+/// Номын чекийн хүүхдийн мөр → «⋯» хуудасны оролт (вэбийн `moreTarget`). Өөр ангид төлсөн бол түгжинэ.
+BookSheetTarget bookTargetOf({required ClassCheck check, required CheckPerson student, required String name}) {
+  final m = check.markOf(student.id);
+  final by = m?.collectedBy;
+  return BookSheetTarget(
+    studentId: student.id,
+    studentName: name,
+    bookTitle: check.title,
+    price: check.amount,
+    status: m == null
+        ? null
+        : m.checked
+        ? BookStatus.paid
+        : m.skipped
+        ? BookStatus.skipped
+        : null,
+    amount: m?.amount,
+    collectedBy: by == null
+        ? null
+        : BookPerson(id: by.id, firstName: by.firstName, lastName: by.lastName, role: by.role),
+    note: m?.note,
+    lockedClassName: m?.elsewhere == null ? null : (m!.elsewhere!.name ?? 'Өөр'),
+  );
+}
+
 /// `/app/classes/:id/checks` — ангийн чекүүд. Дарах бүрд шууд хадгалагдана.
 class ClassChecksScreen extends ConsumerStatefulWidget {
   const ClassChecksScreen({super.key, required this.classId, this.className});
@@ -47,7 +73,6 @@ class ClassChecksScreen extends ConsumerStatefulWidget {
 
 class _ClassChecksScreenState extends ConsumerState<ClassChecksScreen> {
   late final AppLifecycleListener _life;
-  String? _selectedId;
   bool _creating = false;
 
   @override
@@ -67,6 +92,14 @@ class _ClassChecksScreenState extends ConsumerState<ClassChecksScreen> {
     super.dispose();
   }
 
+  /// Дэлгэрэнгүй нь тусдаа хуудас (`MaterialPageRoute`): «Буцах», iOS-ийн зүүн захаас шудрах зангаа,
+  /// Android-ийн буцах товч бүгд жагсаалт руу буцаана (өмнө нь `PopScope`-оор шудралт хаагддаг байв).
+  void _open(String id) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => _CheckDetailPage(classId: widget.classId, className: widget.className, checkId: id),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final provider = classChecksProvider(widget.classId);
@@ -76,21 +109,11 @@ class _ClassChecksScreenState extends ConsumerState<ClassChecksScreen> {
     final s = ref.watch(provider);
     final ctl = ref.read(provider.notifier);
     final data = s.data;
-    final selected = _selectedId == null ? null : s.find(_selectedId!);
     final Widget body;
     if (data == null && s.error != null) {
       body = ErrorState(message: s.error!, onRetry: ctl.load);
     } else if (data == null) {
       body = const LoadingState(cards: 4);
-    } else if (selected != null) {
-      body = _CheckDetail(
-        key: ValueKey('detail-${selected.id}'),
-        classId: widget.classId,
-        check: selected,
-        data: data,
-        saving: s.saving,
-        onBack: () => setState(() => _selectedId = null),
-      );
     } else {
       body = _CheckList(
         classId: widget.classId,
@@ -98,31 +121,71 @@ class _ClassChecksScreenState extends ConsumerState<ClassChecksScreen> {
         creating: _creating,
         onCreate: () => setState(() => _creating = true),
         onCancelCreate: () => setState(() => _creating = false),
-        onCreated: (id) => setState(() {
-          _creating = false;
-          _selectedId = id;
-        }),
-        onOpen: (id) => setState(() => _selectedId = id),
+        onCreated: (id) {
+          setState(() => _creating = false);
+          _open(id);
+        },
+        onOpen: _open,
       );
     }
-    return PopScope(
-      canPop: selected == null,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && selected != null) setState(() => _selectedId = null);
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Чек'),
-              if (widget.className != null)
-                Text(widget.className!, style: context.text.bodySmall?.copyWith(color: context.colors.inkDim)),
-            ],
-          ),
-        ),
-        body: RefreshIndicator(onRefresh: ctl.load, child: body),
-      ),
+    return Scaffold(
+      appBar: _ChecksAppBar(className: widget.className),
+      body: RefreshIndicator(onRefresh: ctl.load, child: body),
+    );
+  }
+}
+
+class _ChecksAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _ChecksAppBar({this.className});
+
+  final String? className;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) => AppBar(
+    title: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Чек'),
+        if (className != null) Text(className!, style: context.text.bodySmall?.copyWith(color: context.colors.inkDim)),
+      ],
+    ),
+  );
+}
+
+/// Нэг чекийн хуудас — жагсаалттай ижил провайдероос (дарсан тэмдэглэгээ хоёуланд нь шууд харагдана).
+class _CheckDetailPage extends ConsumerWidget {
+  const _CheckDetailPage({required this.classId, required this.className, required this.checkId});
+
+  final String classId;
+  final String? className;
+  final String checkId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = classChecksProvider(classId);
+    final s = ref.watch(provider);
+    final data = s.data;
+    final check = s.find(checkId);
+    return Scaffold(
+      appBar: _ChecksAppBar(className: className),
+      body: data == null
+          ? const LoadingState(cards: 4)
+          : check == null
+          ? const EmptyState(icon: TeacherIcons.clipboardCheck, title: 'Чек олдсонгүй')
+          : RefreshIndicator(
+              onRefresh: ref.read(provider.notifier).load,
+              child: _CheckDetail(
+                key: ValueKey('detail-${check.id}'),
+                classId: classId,
+                check: check,
+                data: data,
+                saving: s.saving,
+                onBack: () => Navigator.of(context).maybePop(),
+              ),
+            ),
     );
   }
 }
@@ -405,6 +468,20 @@ class _CheckDetailState extends ConsumerState<_CheckDetail> {
 
   void _openInfo(CheckPerson p) => CheckStudentSheet.open(context, classId: widget.classId, student: p);
 
+  /// Номын чекийн «⋯» (вэбийн `BookMarkSheet` + `saveMore`): авсан багш, дүн, тайлбар, «Авахгүй». Өөр
+  /// ангид төлсөн хүүхэд түгжигдэнэ — сурагчийн хуудаснаас засна.
+  void _openMore(CheckPerson p, String name) {
+    final check = widget.check;
+    showBookMarkSheet(
+      context,
+      target: bookTargetOf(check: check, student: p, name: name),
+      onSave: (input) async {
+        if (mounted && _filter != _Filter.all) setState(() => _sticky.add(p.id));
+        _ctl.mark(check.id, p.id, input.toCheckMarkBody());
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -632,6 +709,7 @@ class _CheckDetailState extends ConsumerState<_CheckDetail> {
                   book: isBook ? (price: check.amount, readOnly: false) : null,
                   onToggle: () => _toggle(p.id),
                   onInfo: () => _openInfo(p),
+                  onMore: isBook ? () => _openMore(p, names[p.id] ?? shortName(p.firstName, p.lastName)) : null,
                 ),
             ],
           ),
@@ -818,6 +896,7 @@ class _StudentRow extends StatelessWidget {
     required this.onToggle,
     required this.onInfo,
     this.book,
+    this.onMore,
   });
 
   final String name;
@@ -829,6 +908,9 @@ class _StudentRow extends StatelessWidget {
   final ({int? price, bool readOnly})? book;
   final VoidCallback onToggle;
   final VoidCallback onInfo;
+
+  /// Номын чекийн дэлгэрэнгүй (авсан багш, дүн, авахгүй) — идэвхгүй мөрөнд гарахгүй.
+  final VoidCallback? onMore;
 
   @override
   Widget build(BuildContext context) {
@@ -896,6 +978,14 @@ class _StudentRow extends StatelessWidget {
                 ),
               ),
             ),
+            if (book != null && onMore != null && !disabled)
+              IconButton(
+                key: ValueKey('cs-more-$name'),
+                tooltip: '$name, дэлгэрэнгүй: авсан багш, дүн, авахгүй',
+                constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
+                onPressed: onMore,
+                icon: Icon(AppIcons.overflow, size: 20, color: c.inkDim),
+              ),
             Semantics(
               button: true,
               toggled: on,
@@ -1077,7 +1167,7 @@ class _CheckFormState extends State<_CheckForm> {
                 style: const TextStyle(fontSize: 16, fontFeatures: [FontFeature.tabularFigures()]),
                 decoration: InputDecoration(
                   labelText: _isBook ? 'Үнэ' : 'Нэг хүүхдийн дүн (заавал биш)',
-                  hintText: _isBook ? (isSheetKind(kind) ? '3,000' : '40,000') : '25,000',
+                  hintText: _isBook ? priceHint(kind) : '25,000',
                   suffixText: '₮',
                 ),
               ),

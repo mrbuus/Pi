@@ -150,9 +150,9 @@ class QuizLegendButton extends StatelessWidget {
                   children: [
                     const MathText(r'$0 \le$'),
                     chip(MarkTone.error, 'улаан'),
-                    const MathText(r'$< 50 \le$'),
+                    const MathText('\$< $quizRedBelow \\le\$'),
                     chip(MarkTone.warning, 'улбар шар'),
-                    const MathText(r'$< 80 \le$'),
+                    const MathText('\$< $quizGreenFrom \\le\$'),
                     chip(MarkTone.success, 'ногоон'),
                     const MathText(r'$\le 100$'),
                   ],

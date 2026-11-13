@@ -134,7 +134,7 @@ class _TeacherHoursComputedViewState extends ConsumerState<TeacherHoursComputedV
             SizedBox(
               height: 300,
               child: ErrorState(
-                message: errorText(e, 'Цагийн бүртгэл нээгдсэнгүй'),
+                message: errorText(e, 'Ажилласан цаг нээгдсэнгүй'),
                 onRetry: () => ref.invalidate(teacherHoursProvider(month)),
               ),
             ),

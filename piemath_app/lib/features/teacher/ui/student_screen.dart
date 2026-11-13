@@ -7,6 +7,7 @@ import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/marks/marks.dart';
 import '../../../shared/payment_status/paid_until_card.dart';
+import '../../book_money/book_money.dart';
 import '../application/teacher_providers.dart';
 import '../data/teacher_models.dart';
 import 'independent_tab.dart';
@@ -17,8 +18,9 @@ import 'student_syllabus_tab.dart';
 import 'teacher_widgets.dart';
 
 /// Сурагчийн хуудас (`/app/students/:id`): Ангийн явц, Шалгалт, Хичээлийн түүх (хуанли), Сэдэв хөтөлбөр,
-/// Тэмдэглэл, Бие даасан явц, Мэдээлэл (ангийн түүх, засах). Төлбөрөөс зөвхөн «хэдий хүртэл төлсөн» төлөв ба
-/// «Одоо гарвал буцаах дүн» (энгийн багш бусад мөнгөн дүн харахгүй — сервер өгөхгүй).
+/// Ном (номын мөнгө, бүх ажилтан — `api/src/book-payments`), Тэмдэглэл, Бие даасан явц, Мэдээлэл (ангийн
+/// түүх, засах). Төлбөрөөс зөвхөн «хэдий хүртэл төлсөн» төлөв ба «Одоо гарвал буцаах дүн» (энгийн багш
+/// бусад мөнгөн дүн харахгүй — сервер өгөхгүй).
 ///
 /// Шинэ таб нэмэх: [_baseTabs]-д нэг мөр (бүх ажилтанд), эсвэл эрхээс хамаарах бол дуудагч [extraTabs]-аар
 /// («Мэдээлэл»-ийн өмнө). Удирдлагын «Гарсан тооцоо» нь сүүлээсээ 2 дахь таб гэж тооцогддог.
@@ -81,12 +83,14 @@ class StudentScreen extends StatelessWidget {
   }
 }
 
-/// Бүх ажилтанд харагдах табууд (вэбийн `StudentProgress.tsx`-ийн дараалал).
+/// Бүх ажилтанд харагдах табууд (вэбийн `StudentProgress.tsx`-ийн дараалал). Нэгдсэн шалгалтын дүн
+/// вэбд ажилтны сурагчийн хуудсанд байхгүй (зөвхөн сурагчийн өөрийн `/app/tests?tab=paper`).
 List<(String, Widget)> _baseTabs(String studentId) => [
   ('Ангийн явц', _ProgressTab(studentId: studentId)),
   ('Шалгалт', _ExamsTab(studentId: studentId)),
   ('Хичээлийн түүх', StudentLessonHistoryTab(studentId: studentId)),
   ('Сэдэв хөтөлбөр', StudentSyllabusTab(studentId: studentId)),
+  ('Ном', StudentBooksTab(studentId: studentId)),
   ('Тэмдэглэл', StudentNotesTab(studentId: studentId)),
   ('Бие даасан явц', IndependentTab(studentId: studentId)),
 ];

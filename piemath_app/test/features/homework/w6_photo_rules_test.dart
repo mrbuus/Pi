@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:piemath_app/core/files/photo_document.dart';
 import 'package:piemath_app/core/network/api_error.dart';
 import 'package:piemath_app/features/homework/data/photo_error_reporter.dart';
 import 'package:piemath_app/features/homework/domain/photo_rules.dart';
@@ -13,6 +14,10 @@ void main() {
   test('хуудасны дээд тоо (сервертэй ижил)', () {
     expect(homeworkPhotoMaxPages, 15);
     expect(theoryPhotoMaxPages, 20);
+    // Нэг эх сурвалж: core-ийн тогтмол (API `homework-practice` 15, `lesson-day` онол 20, нөхөх 10)
+    expect(PhotoDocumentLimits.homeworkMaxPages, homeworkPhotoMaxPages);
+    expect(PhotoDocumentLimits.theoryMaxPages, theoryPhotoMaxPages);
+    expect(PhotoDocumentLimits.makeupMaxPages, 10);
   });
 
   test('5 минутын цонх: дотор нь засна, хил дээр болон дараа нь үгүй, цаг мэдэгдэхгүй бол үгүй', () {

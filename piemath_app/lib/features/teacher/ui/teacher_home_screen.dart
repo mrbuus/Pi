@@ -125,7 +125,7 @@ class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
                 _Link(
                   icon: AppIcons.timer,
                   hue: AppHue.teal,
-                  label: 'Цагийн бүртгэл',
+                  label: 'Ажилласан цаг',
                   onTap: () => context.push('/app/teacher-hours'),
                 ),
                 _Link(

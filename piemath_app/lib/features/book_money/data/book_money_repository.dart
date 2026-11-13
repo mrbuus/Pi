@@ -8,8 +8,8 @@ import 'book_money_models.dart';
 
 String _enc(String v) => Uri.encodeComponent(v);
 
-/// `api/src/book-payments` (Админ, Багш+, Багш — төвийн багш бүр) ба ангийн номын чек нээх
-/// (`POST /classrooms/:id/checks`, `api/src/class-checks`).
+/// `api/src/book-payments` (Админ, Багш+, Багш — төвийн багш бүр). Ангийн номын чек нээх, тэмдэглэх нь
+/// `teacher/data/class_checks.dart`-д (вэбийн `ClassChecksPanel`-тай адил нэг урсгал).
 ///
 /// Мөр хэзээ ч устахгүй: «Арилгах» (`status: NONE`) нь идэвхтэй мөрийг `voidedAt`-аар хаана.
 class BookMoneyRepository {
@@ -32,19 +32,6 @@ class BookMoneyRepository {
     body: input.toJson(),
     parse: (j) => j is Map ? BookPayment.fromJson(j) : null,
   );
-
-  /// Ангийн номын/хуудасны чек нээх. [bookKey] нь [kBooks]-ийн түлхүүр эсвэл `SHEET`/`CSHEET`
-  /// (дугаарыг сервер өгнө). Үнэ заавал. Буцаах нь серверийн `ClassCheck` (түүхий JSON).
-  Future<Json> createBookCheck(String classroomId, {required String bookKey, required int amount}) async {
-    final res = await _api.post(
-      '/classrooms/${_enc(classroomId)}/checks',
-      body: {'bookKey': bookKey, 'amount': amount},
-      parse: (j) => j is Map ? j.cast<String, Object?>() : <String, Object?>{},
-    );
-    // Самбар, сурагчийн «Ном» табын жагсаалт шинэ чекийг харуулна
-    _api.invalidateCache(_base);
-    return res;
-  }
 }
 
 final bookMoneyRepositoryProvider = Provider<BookMoneyRepository>(

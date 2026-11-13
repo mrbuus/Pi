@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:piemath_app/features/teacher/domain/board_logic.dart';
 import 'package:piemath_app/features/teacher/domain/quiz_score.dart';
 import 'package:piemath_app/shared/marks/marks.dart';
+import 'package:piemath_app/shared/quiz_score/quiz_score.dart' as shared;
 
 // = api/src/homework-quiz/quiz-score.spec.ts-ийн хил (вэб, API, апп ижил дүн).
 void main() {
@@ -117,6 +118,25 @@ void main() {
       const r = DayRec(att: AttendanceStatus.present);
       expect(awaitingCheck(r, homework: true, sent: true), isTrue);
       expect(awaitingCheck(r, homework: true, sent: true, quizScored: true), isFalse);
+    });
+  });
+
+  group('нэг эх сурвалж (W6 нэгтгэл)', () {
+    test('самбар ба сурагчийн хуудас ижил функц, ижил хил', () {
+      expect(identical(quizTone, shared.quizTone), isTrue);
+      expect(identical(formatScore, shared.formatScore), isTrue);
+      expect(identical(percentTone, shared.percentTone), isTrue);
+      expect((quizRedBelow, quizGreenFrom), (50, 80));
+    });
+
+    test('дундаж, хувь, оноо гурвын өнгө ижил хилээр', () {
+      for (final (score, tone) in [(4.99, MarkTone.error), (5, MarkTone.warning), (8, MarkTone.success)]) {
+        expect(quizAverage([score], 10)!.tone, tone);
+        expect(percentTone(quizPercent(score, 10)), tone);
+        expect(quizTone(score, 10), tone);
+      }
+      // 49,996% → бичиг «49%», өнгө улаан (зөрөхгүй)
+      expect((formatPercent(49.996), percentTone(49.996)), ('49%', MarkTone.error));
     });
   });
 }

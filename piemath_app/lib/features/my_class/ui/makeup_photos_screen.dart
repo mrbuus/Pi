@@ -33,15 +33,15 @@ class _MakeupPhotosScreenState extends ConsumerState<MakeupPhotosScreen> {
     final ok = await NotebookComposerScreen.open(
       context,
       title: 'Дэвтрийн зураг',
-      subtitle: '${dayTitle(item.date)}, ${PhotoDocumentLimits.theoryMaxPages} хүртэл хуудас',
-      maxPages: PhotoDocumentLimits.theoryMaxPages,
+      subtitle: '${dayTitle(item.date)}, ${PhotoDocumentLimits.makeupMaxPages} хүртэл хуудас',
+      maxPages: PhotoDocumentLimits.makeupMaxPages,
       usagePath: '/app/makeup',
       onSubmit: (pages, _, progress, cancel) async {
         final (file, _) = await uploadPhotoSet(
           ref,
           pages,
           purpose: UploadPurpose.general,
-          maxPages: PhotoDocumentLimits.theoryMaxPages,
+          maxPages: PhotoDocumentLimits.makeupMaxPages,
           fileName: uploadFileName('nohoh', item.date),
           onProgress: progress,
           cancel: cancel,

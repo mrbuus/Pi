@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:piemath_app/features/book_money/book_money.dart';
 import 'package:piemath_app/features/teacher/data/class_checks.dart';
 import 'package:piemath_app/features/teacher/ui/class_checks_screen.dart';
 import 'package:piemath_app/features/teacher/ui/classes_screen.dart';
@@ -248,6 +249,33 @@ void main() {
     expect(find.text('Чекийг устгалаа'), findsOneWidget);
   });
 
+  testWidgets('дэлгэрэнгүй нь тусдаа хуудас: буцах сум, iOS зүүн захын шудралт жагсаалт руу', (tester) async {
+    Future<void> frames() async {
+      for (var i = 0; i < 20; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+    }
+
+    await pumpTeacher(tester, _screen, http: _http());
+    await tester.tap(find.text('Шалгалтын цаас'));
+    await frames();
+    final route = ModalRoute.of(tester.element(find.byKey(const ValueKey('check-back'))))!;
+    expect(route.popDisposition, RoutePopDisposition.pop);
+    expect(route is PageRoute && route.popGestureEnabled, isTrue);
+    // AppBar-ийн буцах сум
+    await tester.tap(find.byType(BackButton));
+    await frames();
+    expect(find.byKey(const ValueKey('check-back')), findsNothing);
+    expect(find.byKey(const ValueKey('check-new')), findsOneWidget);
+    // Зүүн захаас шудрах
+    await tester.tap(find.text('Шалгалтын цаас'));
+    await frames();
+    await tester.dragFrom(const Offset(5, 420), const Offset(300, 0));
+    await frames();
+    expect(find.byKey(const ValueKey('check-back')), findsNothing);
+    expect(find.byKey(const ValueKey('check-new')), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
   testWidgets('320dp утсан дээр жагсаалт, дэлгэрэнгүй халихгүй', (tester) async {
     await pumpTeacher(tester, _screen, http: _http(), size: const Size(320, 640));
     expect(tester.takeException(), isNull);
@@ -263,5 +291,126 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('class-checks')));
     await settle(tester);
     expect(find.text('ROUTE:/app/classes/c1/checks'), findsOneWidget);
+  });
+
+  group('номын чек (W6 залгаас, вэбийн BookMarkSheet)', () {
+    Map<String, Object?> bookList() => _list(
+      checks: [
+        _check(
+          'b1',
+          'E-2',
+          amount: 40000,
+          bookKey: 'E2',
+          marks: [
+            {
+              ..._mark('s2', true),
+              'amount': 40000,
+              'elsewhere': {'name': '12-4'},
+              'collectedBy': _person('t2', 'Сараа', 'Болд', role: 'TEACHER_PLUS'),
+            },
+            {..._mark('s1', false), 'skipped': true, 'note': 'Ахынхаа номыг хэрэглэнэ'},
+          ],
+        ),
+      ],
+    );
+
+    FakeHttp bookHttp() => FakeHttp()
+      ..json('GET', '/classrooms/c1/checks', bookList())
+      ..json('GET', '/book-payments/collectors', {
+        'me': 't1',
+        'staff': [_person('t1', 'Нараа', 'Бат', role: 'TEACHER'), _person('t2', 'Сараа', 'Болд', role: 'TEACHER_PLUS')],
+      })
+      ..on(
+        'PUT',
+        '/classrooms/c1/checks/b1/students/s3',
+        (req) => FakeResponse({..._mark('s3', (req.data as Map)['checked'] == true), 'amount': 40000}),
+      );
+
+    test('мөр → хуудасны оролт: төлөв, авсан багш, өөр анги түгжинэ', () {
+      final check = ClassCheck.fromJson((bookList()['checks']! as List).first as Map<String, Object?>);
+      final paidElsewhere = bookTargetOf(
+        check: check,
+        student: const CheckPerson(id: 's2', firstName: 'Анужин', lastName: 'Дорж'),
+        name: 'Д. Анужин',
+      );
+      expect(paidElsewhere.status, BookStatus.paid);
+      expect(paidElsewhere.lockedClassName, '12-4');
+      expect(paidElsewhere.collectedBy?.display, 'Б. Сараа+');
+      expect(paidElsewhere.price, 40000);
+      final skipped = bookTargetOf(
+        check: check,
+        student: const CheckPerson(id: 's1', firstName: 'Тэмүүжин', lastName: 'Бат'),
+        name: 'Б. Тэмүүжин',
+      );
+      expect(
+        (skipped.status, skipped.lockedClassName, skipped.note),
+        (BookStatus.skipped, null, 'Ахынхаа номыг хэрэглэнэ'),
+      );
+      final none = bookTargetOf(
+        check: check,
+        student: const CheckPerson(id: 's3', firstName: 'Сарнай', lastName: 'Ганаа'),
+        name: 'Г. Сарнай',
+      );
+      expect((none.status, none.amount, none.collectedBy), (null, null, null));
+    });
+
+    testWidgets('дэлгэрэнгүй товч → авсан багш сонгоод «Батлах»: ангийн чекийн тэмдэглэгээ', (tester) async {
+      final http = bookHttp();
+      await pumpTeacher(tester, _screen, http: http);
+      await tester.tap(find.text('E-2'));
+      await settle(tester);
+      await tester.tap(find.byKey(const ValueKey('cs-more-Г. Сарнай')));
+      await settle(tester, frames: 20);
+      expect(find.text('Мөнгийг авсан багш'), findsOneWidget);
+      await tester.tap(find.text('Сараа+'));
+      await settle(tester);
+      await tester.enterText(find.byKey(const Key('book-note')), 'Бэлнээр');
+      await tester.tap(find.byKey(const Key('book-confirm')));
+      await settle(tester, frames: 20);
+      expect(_body(http, 'PUT', '/classrooms/c1/checks/b1/students/s3'), {
+        'checked': true,
+        'amount': 40000,
+        'collectedById': 't2',
+        'note': 'Бэлнээр',
+      });
+      expect(find.text('Мөнгийг авсан багш'), findsNothing);
+    });
+
+    testWidgets('өөр ангид төлсөн: дугуй түгжээтэй, дэлгэрэнгүй нь сурагчийн хуудас руу заана', (tester) async {
+      final http = bookHttp();
+      await pumpTeacher(tester, _screen, http: http);
+      await tester.tap(find.text('E-2'));
+      await settle(tester);
+      await tester.tap(find.byKey(const ValueKey('cs-toggle-Д. Анужин')));
+      await settle(tester);
+      expect(http.count('PUT', '/classrooms/c1/checks/b1/students/s2'), 0);
+      await tester.tap(find.byKey(const ValueKey('cs-more-Д. Анужин')));
+      await settle(tester, frames: 20);
+      expect(find.textContaining('12-4 ангид байхдаа төлсөн'), findsOneWidget);
+      expect(find.text('Батлах'), findsNothing);
+      await tester.tap(find.text('Сурагчийн хуудаснаас засах'));
+      await settle(tester);
+      expect(find.text('ROUTE:/app/students/s2'), findsOneWidget);
+    });
+
+    testWidgets('шинэ чек: нээсэн ном идэвхгүй, хуудасны жишээ үнэ 3,000, ганц урсгал', (tester) async {
+      final http = FakeHttp()
+        ..json('GET', '/classrooms/c1/checks', bookList())
+        ..json('POST', '/classrooms/c1/checks', _check('b2', 'Нэгдсэн шалгалт 1', amount: 3000, bookKey: 'SHEET1'));
+      await pumpTeacher(tester, _screen, http: http);
+      await tester.tap(find.byKey(const ValueKey('check-new')));
+      await settle(tester);
+      expect(tester.widget<ChoiceChip>(find.byKey(const ValueKey('kind-E2'))).onSelected, isNull);
+      for (final k in [...kBooks, ...kSheetKinds]) {
+        expect(find.byKey(ValueKey('kind-${k.key}')), findsOneWidget);
+      }
+      await tester.tap(find.byKey(const ValueKey('kind-SHEET')));
+      await settle(tester);
+      expect(find.text('3,000'), findsOneWidget);
+      await tester.enterText(find.byKey(const ValueKey('check-amount')), '3000');
+      await tester.tap(find.byKey(const ValueKey('check-submit')));
+      await settle(tester, frames: 20);
+      expect(_body(http, 'POST', '/classrooms/c1/checks'), {'bookKey': 'SHEET', 'amount': 3000});
+    });
   });
 }

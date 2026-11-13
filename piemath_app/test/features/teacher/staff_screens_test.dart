@@ -42,7 +42,10 @@ void main() {
 
     FakeHttp http0() =>
         boardHttp(
-            board: boardJson(attendance: [attRow('s1', 'ABSENT'), attRow('s2', 'PRESENT')], homework: [hwRow('s2', 'DONE')]),
+            board: boardJson(
+              attendance: [attRow('s1', 'ABSENT'), attRow('s2', 'PRESENT')],
+              homework: [hwRow('s2', 'DONE')],
+            ),
           )
           ..json('GET', '/makeup/classrooms/c1', [
             {'studentId': 's1', 'studentName': 'Бат', 'date': past, 'reason': 'ABSENT', 'status': 'PENDING'},
@@ -60,8 +63,13 @@ void main() {
           });
 
     testWidgets('нөхөх хичээлийн төлөв (зөвхөн тасалсан сурагчид), «Онлайн» хайрцагт оноо', (tester) async {
-      final http = http0()..json('GET', '/classrooms/c1/homework-marks/online/s2', {'date': past, 'tests': <Object?>[]});
-      await pumpTeacher(tester, const BoardScreen(classId: 'c1', date: past), http: http);
+      final http = http0()
+        ..json('GET', '/classrooms/c1/homework-marks/online/s2', {'date': past, 'tests': <Object?>[]});
+      await pumpTeacher(
+        tester,
+        const BoardScreen(classId: 'c1', date: past),
+        http: http,
+      );
       expect(http.requests.any((r) => r.path == '/makeup/classrooms/c1' && r.queryParameters['date'] == past), isTrue);
       await reveal(tester, find.byKey(const ValueKey('card-s1')));
       expect(
@@ -83,7 +91,11 @@ void main() {
 
     testWidgets('өнөөдөр нөхөх хичээл татахгүй; онлайн анги онлайн оноо татахгүй', (tester) async {
       final http = boardHttp(board: boardJson(type: 'ONLINE'));
-      await pumpTeacher(tester, const BoardScreen(classId: 'c1', date: testDate), http: http);
+      await pumpTeacher(
+        tester,
+        const BoardScreen(classId: 'c1', date: testDate),
+        http: http,
+      );
       expect(http.requests.where((r) => r.path.startsWith('/makeup/')), isEmpty);
       expect(http.requests.where((r) => r.path.contains('homework-marks/online')), isEmpty);
     });
@@ -104,7 +116,11 @@ void main() {
           'totals': {'flagged': 1, 'students': 3},
         })
         ..error('GET', '/classrooms/c1/daily-summary', 400, 'Дүгнэлт бодогдоогүй');
-      await pumpTeacher(tester, const BoardScreen(classId: 'c1', date: testDate), http: http);
+      await pumpTeacher(
+        tester,
+        const BoardScreen(classId: 'c1', date: testDate),
+        http: http,
+      );
       expect(http.requests.where((r) => r.path.contains('attention')), isEmpty);
       await reveal(tester, find.text('Ангийн бусад мэдээлэл'));
       await tester.tap(find.text('Ангийн бусад мэдээлэл'));
@@ -120,15 +136,31 @@ void main() {
 
     testWidgets('Багш+: эцэг эхийн хүсэлт батлах', (tester) async {
       final http = boardHttp()
-        ..json('GET', '/classrooms/c1/attention', {'date': past, 'windowDays': 3, 'rows': <Object?>[], 'totals': {'flagged': 0, 'students': 3}})
+        ..json('GET', '/classrooms/c1/attention', {
+          'date': past,
+          'windowDays': 3,
+          'rows': <Object?>[],
+          'totals': {'flagged': 0, 'students': 3},
+        })
         ..json('GET', '/classrooms/c1/daily-summary', {
-          'stats': {'studentsTotal': 3, 'studentsMarked': 2, 'totalAttempts': 14, 'byState': <String, Object?>{}, 'byChapter': <String, Object?>{}},
+          'stats': {
+            'studentsTotal': 3,
+            'studentsMarked': 2,
+            'totalAttempts': 14,
+            'byState': <String, Object?>{},
+            'byChapter': <String, Object?>{},
+          },
         })
         ..json('GET', '/parent/links/pending', [
           {
             'id': 'l1',
             'parent': {'firstName': 'Болд', 'lastName': 'Ээж', 'phone': '99112233'},
-            'student': {'firstName': 'Тэмүүжин', 'lastName': 'Бат', 'phone': '88112233', 'studentProfile': {'grade': 11}},
+            'student': {
+              'firstName': 'Тэмүүжин',
+              'lastName': 'Бат',
+              'phone': '88112233',
+              'studentProfile': {'grade': 11},
+            },
           },
         ])
         ..json('POST', '/parent/links/l1/verify', {'ok': true});
@@ -155,7 +187,15 @@ void main() {
     FakeHttp http0({bool payments = true}) => FakeHttp()
       ..json('GET', '/parent/links/pending', <Object?>[])
       ..json('GET', '/users/students/pending-approval', [
-        {'id': 's9', 'firstName': 'Сараа', 'lastName': 'Гомбо', 'phone': '88001122', 'grade': 10, 'registeredAt': '2026-11-01T02:00:00.000Z', 'hasConfirmedPayment': false},
+        {
+          'id': 's9',
+          'firstName': 'Сараа',
+          'lastName': 'Гомбо',
+          'phone': '88001122',
+          'grade': 10,
+          'registeredAt': '2026-11-01T02:00:00.000Z',
+          'hasConfirmedPayment': false,
+        },
       ])
       ..on(
         'GET',
@@ -170,15 +210,17 @@ void main() {
                   'user': {'firstName': 'Тэмүүжин', 'lastName': 'Бат', 'phone': '99112233'},
                 },
               ])
-            : const FakeResponse(
-                {'statusCode': 403, 'message': 'Төлбөрийн эрх танд олгогдоогүй байна'},
-                status: 403,
-              ),
+            : const FakeResponse({'statusCode': 403, 'message': 'Төлбөрийн эрх танд олгогдоогүй байна'}, status: 403),
       );
 
     testWidgets('шинэ сурагчийг зөвшөөрөх: баталгаажуулалттай', (tester) async {
       final http = http0()..json('POST', '/users/students/s9/approve', {'ok': true});
-      await pumpTeacher(tester, const PendingActionsScreen(), http: http, session: teacherSession(role: 'ADMIN'));
+      await pumpTeacher(
+        tester,
+        const PendingActionsScreen(),
+        http: http,
+        session: teacherSession(role: 'ADMIN'),
+      );
       expect(http.requests.firstWhere((r) => r.path == '/payments').queryParameters['status'], 'PENDING');
       await tester.tap(find.widgetWithText(FilledButton, 'Зөвшөөрөх'));
       await settle(tester);
@@ -191,7 +233,12 @@ void main() {
 
     testWidgets('төлбөр баталгаажуулах: эрх олгохгүй, хоосон бие', (tester) async {
       final http = http0()..json('POST', '/payments/p1/confirm', {'ok': true});
-      await pumpTeacher(tester, const PendingActionsScreen(), http: http, session: teacherSession(role: 'ADMIN'));
+      await pumpTeacher(
+        tester,
+        const PendingActionsScreen(),
+        http: http,
+        session: teacherSession(role: 'ADMIN'),
+      );
       await tester.scrollUntilVisible(find.text('Баталгаажуулах'), 200, scrollable: find.byType(Scrollable).first);
       await tester.tap(find.widgetWithText(FilledButton, 'Баталгаажуулах'));
       await settle(tester);
@@ -205,7 +252,13 @@ void main() {
 
     testWidgets('финансын эрхгүй (403) → тайван мессеж', (tester) async {
       final http = http0(payments: false);
-      await pumpTeacher(tester, const PendingActionsScreen(), http: http, session: teacherSession(role: 'TEACHER_PLUS'), size: const Size(390, 2400));
+      await pumpTeacher(
+        tester,
+        const PendingActionsScreen(),
+        http: http,
+        session: teacherSession(role: 'TEACHER_PLUS'),
+        size: const Size(390, 2400),
+      );
       await settle(tester, frames: 20);
       expect(find.text('Төлбөрийн эрх танд олгогдоогүй байна', skipOffstage: false), findsOneWidget);
       expect(find.text(AppStrings.retry, skipOffstage: false), findsOneWidget);
@@ -215,11 +268,32 @@ void main() {
     testWidgets('элсэлтийн хүсэлт: төлөв солих PATCH', (tester) async {
       final http = FakeHttp()
         ..json('GET', '/leads', [
-          {'id': 'ld1', 'name': 'Оюун', 'phone': '99112233', 'subject': 'MATH', 'grade': 11, 'status': 'NEW', 'createdAt': '2026-11-02T01:00:00.000Z'},
-          {'id': 'ld2', 'name': 'Гэрэл', 'phone': '88112233', 'subject': 'BOTH', 'grade': 12, 'status': 'LOST', 'createdAt': '2026-11-01T01:00:00.000Z'},
+          {
+            'id': 'ld1',
+            'name': 'Оюун',
+            'phone': '99112233',
+            'subject': 'MATH',
+            'grade': 11,
+            'status': 'NEW',
+            'createdAt': '2026-11-02T01:00:00.000Z',
+          },
+          {
+            'id': 'ld2',
+            'name': 'Гэрэл',
+            'phone': '88112233',
+            'subject': 'BOTH',
+            'grade': 12,
+            'status': 'LOST',
+            'createdAt': '2026-11-01T01:00:00.000Z',
+          },
         ])
         ..json('PATCH', '/leads/ld1/status', {'id': 'ld1', 'status': 'CONTACTED'});
-      await pumpTeacher(tester, const LeadsScreen(), http: http, session: teacherSession(role: 'ADMIN'));
+      await pumpTeacher(
+        tester,
+        const LeadsScreen(),
+        http: http,
+        session: teacherSession(role: 'ADMIN'),
+      );
       expect(find.text('Оюун'), findsOneWidget);
       expect(find.text('Гэрэл'), findsNothing);
       expect(find.text('9911 2233'), findsOneWidget);
@@ -234,10 +308,23 @@ void main() {
     testWidgets('элсэлтийн төлөв хадгалагдахгүй бол буцаана', (tester) async {
       final http = FakeHttp()
         ..json('GET', '/leads', [
-          {'id': 'ld1', 'name': 'Оюун', 'phone': '99112233', 'subject': 'MATH', 'grade': 11, 'status': 'NEW', 'createdAt': '2026-11-02T01:00:00.000Z'},
+          {
+            'id': 'ld1',
+            'name': 'Оюун',
+            'phone': '99112233',
+            'subject': 'MATH',
+            'grade': 11,
+            'status': 'NEW',
+            'createdAt': '2026-11-02T01:00:00.000Z',
+          },
         ])
         ..error('PATCH', '/leads/ld1/status', 403, 'Танд эрх алга');
-      await pumpTeacher(tester, const LeadsScreen(), http: http, session: teacherSession(role: 'TEACHER_PLUS'));
+      await pumpTeacher(
+        tester,
+        const LeadsScreen(),
+        http: http,
+        session: teacherSession(role: 'TEACHER_PLUS'),
+      );
       await tester.tap(find.widgetWithText(ChoiceChip, 'Холбогдсон').last);
       await settle(tester);
       expect(find.text('Танд эрх алга'), findsOneWidget);
@@ -250,8 +337,20 @@ void main() {
       final http = FakeHttp()
         ..json('GET', '/announcements/manage', <Object?>[])
         ..json('GET', '/classrooms', [
-          {'id': 'c1', 'name': '12Б', 'type': 'IN_PERSON', 'grade': 12, '_count': {'enrollments': 20}},
-          {'id': 'c2', 'name': '11А', 'type': 'ONLINE', 'grade': 11, '_count': {'enrollments': 10}},
+          {
+            'id': 'c1',
+            'name': '12Б',
+            'type': 'IN_PERSON',
+            'grade': 12,
+            '_count': {'enrollments': 20},
+          },
+          {
+            'id': 'c2',
+            'name': '11А',
+            'type': 'ONLINE',
+            'grade': 11,
+            '_count': {'enrollments': 10},
+          },
         ])
         ..json('POST', '/announcements', {'id': 'a1'});
       await pumpTeacher(tester, const AnnouncementsScreen(), http: http);
@@ -291,7 +390,10 @@ void main() {
     });
 
     test('мэдэгдлийн ?class=&date= холбоос → самбар', () {
-      expect(teacherLinkRedirect(Uri.parse('/app/teacher?class=c1&date=2026-11-02')), '/app/teacher/board/c1?date=2026-11-02');
+      expect(
+        teacherLinkRedirect(Uri.parse('/app/teacher?class=c1&date=2026-11-02')),
+        '/app/teacher/board/c1?date=2026-11-02',
+      );
       expect(teacherLinkRedirect(Uri.parse('/app/teacher?class=c1')), '/app/teacher/board/c1');
       expect(teacherLinkRedirect(Uri.parse('/app/teacher?class=c1&date=bad')), '/app/teacher/board/c1');
       expect(teacherLinkRedirect(Uri.parse('/app/teacher?date=2026-11-02')), isNull);
@@ -299,7 +401,9 @@ void main() {
       expect(teacherLinkRedirect(Uri.parse('/app/teacher')), isNull);
     });
 
-    testWidgets('router: /app/teacher?class=&date= тэр анги, тэр өдрийг нээнэ; зөвхөн date → тэр өдрийн жагсаалт', (tester) async {
+    testWidgets('router: /app/teacher?class=&date= тэр анги, тэр өдрийг нээнэ; зөвхөн date → тэр өдрийн жагсаалт', (
+      tester,
+    ) async {
       final router = GoRouter(
         initialLocation: '/app/teacher?class=c1&date=2026-10-30',
         routes: [
@@ -309,7 +413,12 @@ void main() {
                 path: r.path,
                 redirect: r.redirect,
                 builder: (_, _) => const Text('HOME'),
-                routes: [GoRoute(path: 'board/:classId', builder: (_, s) => Text('BOARD:${s.pathParameters['classId']}:${s.uri.queryParameters['date']}'))],
+                routes: [
+                  GoRoute(
+                    path: 'board/:classId',
+                    builder: (_, s) => Text('BOARD:${s.pathParameters['classId']}:${s.uri.queryParameters['date']}'),
+                  ),
+                ],
               ),
         ],
       );
@@ -336,7 +445,12 @@ void main() {
           ],
           'notAttending': <Object?>[],
         });
-      await pumpTeacher(tester, const TeacherHomeScreen(), http: http, session: teacherSession(role: 'TEACHER_PLUS'));
+      await pumpTeacher(
+        tester,
+        const TeacherHomeScreen(),
+        http: http,
+        session: teacherSession(role: 'TEACHER_PLUS'),
+      );
       expect(find.text('1 хүүхэд ангид хуваарилагдаагүй'), findsOneWidget);
       await tester.scrollUntilVisible(find.text('Хүлээгдэж буй'), 200, scrollable: find.byType(Scrollable).first);
       expect(find.text('Хүлээгдэж буй'), findsOneWidget);
@@ -349,10 +463,13 @@ void main() {
       await tester.scrollUntilVisible(find.text('Зар тавих'), 200, scrollable: find.byType(Scrollable).first);
       expect(find.text('Зар тавих'), findsOneWidget);
       expect(find.text('Хүлээгдэж буй'), findsNothing);
+      // Вэбтэй адил нэр (W6): «Цагийн бүртгэл» биш
+      expect(find.text('Ажилласан цаг'), findsOneWidget);
+      expect(find.text('Цагийн бүртгэл'), findsNothing);
     });
   });
 
-  group('Цагийн бүртгэл (#9)', () {
+  group('Ажилласан цаг (#9)', () {
     testWidgets('Багш: /teacher-hours/me', (tester) async {
       final http = FakeHttp()..json('GET', '/teacher-hours/me', _hours('Н. Багш'));
       await pumpTeacher(tester, const TeacherHoursScreen(initialTab: TeacherHoursTab.computed), http: http);
@@ -369,7 +486,12 @@ void main() {
           ],
         })
         ..json('GET', '/teacher-hours/me', _hours('Н. Багш'));
-      await pumpTeacher(tester, const TeacherHoursScreen(initialTab: TeacherHoursTab.computed), http: http, session: teacherSession(role: 'TEACHER_PLUS'));
+      await pumpTeacher(
+        tester,
+        const TeacherHoursScreen(initialTab: TeacherHoursTab.computed),
+        http: http,
+        session: teacherSession(role: 'TEACHER_PLUS'),
+      );
       expect(http.requests.last.path, '/teacher-hours/me');
     });
 
@@ -385,12 +507,23 @@ void main() {
           'month': '2026-11',
           'teachers': [
             ..._hours('Н. Багш')['teachers']! as List,
-            {'teacherId': 'u2', 'teacherName': 'Б. Болор+', 'lessons': 3, 'minutes': 360, 'sessions': [
-              {'date': '2026-11-01', 'classroomName': '11А', 'startMinute': 600, 'endMinute': 720},
-            ]},
+            {
+              'teacherId': 'u2',
+              'teacherName': 'Б. Болор+',
+              'lessons': 3,
+              'minutes': 360,
+              'sessions': [
+                {'date': '2026-11-01', 'classroomName': '11А', 'startMinute': 600, 'endMinute': 720},
+              ],
+            },
           ],
         });
-      await pumpTeacher(tester, const TeacherHoursScreen(initialTab: TeacherHoursTab.computed), http: http, session: teacherSession(role: 'TEACHER_PLUS'));
+      await pumpTeacher(
+        tester,
+        const TeacherHoursScreen(initialTab: TeacherHoursTab.computed),
+        http: http,
+        session: teacherSession(role: 'TEACHER_PLUS'),
+      );
       expect(http.requests.last.path, '/teacher-hours');
       expect(find.text('Н. Багш'), findsOneWidget);
       expect(find.text('Б. Болор+'), findsOneWidget);
@@ -401,7 +534,12 @@ void main() {
 
     testWidgets('Админ: бүх багш, эрхийн жагсаалт асуухгүй', (tester) async {
       final http = FakeHttp()..json('GET', '/teacher-hours', _hours('Н. Багш'));
-      await pumpTeacher(tester, const TeacherHoursScreen(initialTab: TeacherHoursTab.computed), http: http, session: teacherSession(role: 'ADMIN'));
+      await pumpTeacher(
+        tester,
+        const TeacherHoursScreen(initialTab: TeacherHoursTab.computed),
+        http: http,
+        session: teacherSession(role: 'ADMIN'),
+      );
       expect(http.requests.map((r) => r.path), ['/teacher-hours']);
     });
 
@@ -409,7 +547,12 @@ void main() {
       final http = FakeHttp()
         ..error('GET', '/staff-capabilities/me', 500)
         ..json('GET', '/teacher-hours/me', _hours('Н. Багш'));
-      await pumpTeacher(tester, const TeacherHoursScreen(initialTab: TeacherHoursTab.computed), http: http, session: teacherSession(role: 'TEACHER_PLUS'));
+      await pumpTeacher(
+        tester,
+        const TeacherHoursScreen(initialTab: TeacherHoursTab.computed),
+        http: http,
+        session: teacherSession(role: 'TEACHER_PLUS'),
+      );
       expect(http.requests.last.path, '/teacher-hours/me');
     });
   });

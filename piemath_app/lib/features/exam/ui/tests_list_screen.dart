@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/session.dart';
+import '../../../core/auth/user_role.dart';
 import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
+import '../../paper_exams/paper_exams.dart';
 import '../../test_authoring/ui/staff_tests_screen.dart';
 import '../data/exam_models.dart';
 import '../data/exam_repository.dart';
@@ -53,7 +55,8 @@ final testsHubProvider = FutureProvider.autoDispose<TestsHub>((ref) async {
   );
 });
 
-/// `/app/tests` — шалгалт, тестийн жагсаалт. [initialTab] = `give | done | rank | soril` (вэбийн `?tab=`).
+/// `/app/tests` — шалгалт, тестийн жагсаалт. [initialTab] = `give | done | paper | rank | soril` (вэбийн
+/// `?tab=`). «Нэгдсэн шалгалт» (`paper`) зөвхөн сурагчид — `/paper-exams/my` нь STUDENT-ийн эрх.
 class TestsListScreen extends ConsumerStatefulWidget {
   const TestsListScreen({super.key, this.initialTab});
 
@@ -63,33 +66,44 @@ class TestsListScreen extends ConsumerStatefulWidget {
   ConsumerState<TestsListScreen> createState() => _TestsListScreenState();
 }
 
+/// Табын түлхүүр (вэбийн `StudentExamsHub.TABS`-ийн дараалал): «Нэгдсэн шалгалт» нь «Өгсөн, дүн»-гийн
+/// дараа, зөвхөн [paper] үед (сурагч).
+List<String> testsTabKeys({required bool paper}) => ['give', 'done', if (paper) 'paper', 'rank', 'soril'];
+
+const _tabLabels = {
+  'give': 'Өгөх',
+  'done': 'Өгсөн, дүн',
+  'paper': 'Нэгдсэн шалгалт',
+  'rank': 'Эрэмбэ',
+  'soril': 'Жишиг сорил',
+};
+
 class _TestsListScreenState extends ConsumerState<TestsListScreen> {
   String _query = '';
-
-  static const _tabs = ['give', 'done', 'rank', 'soril'];
 
   @override
   Widget build(BuildContext context) {
     // Ажилтан: тестийн жагсаалт + «Шинэ тест», «Засах» (test_authoring) — сурагчийн API дуудахгүй.
     final session = ref.watch(sessionProvider);
     if (session is SignedIn && session.role.isStaff) return const StaffTestsScreen();
+    final studentId = session is SignedIn && session.role == UserRole.student
+        ? (session.user?.id ?? session.auth.userId)
+        : null;
     final hub = ref.watch(testsHubProvider);
-    final initial = _tabs.indexOf(widget.initialTab ?? '');
+    final tabs = testsTabKeys(paper: studentId != null);
+    final initial = tabs.indexOf(widget.initialTab ?? '');
     return DefaultTabController(
-      length: _tabs.length,
+      // `?tab=` өөрчлөгдвөл (ж: `/app/paper-exams` → `/app/tests?tab=paper`) тэр таб нээгдэнэ
+      key: ValueKey('tests-tab-${widget.initialTab}-${tabs.length}'),
+      length: tabs.length,
       initialIndex: initial < 0 ? 0 : initial,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Шалгалт'),
-          bottom: const TabBar(
+          bottom: TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.start,
-            tabs: [
-              Tab(text: 'Өгөх'),
-              Tab(text: 'Өгсөн, дүн'),
-              Tab(text: 'Эрэмбэ'),
-              Tab(text: 'Жишиг сорил'),
-            ],
+            tabs: [for (final k in tabs) Tab(text: _tabLabels[k])],
           ),
         ),
         body: hub.when(
@@ -102,10 +116,14 @@ class _TestsListScreenState extends ConsumerState<TestsListScreen> {
           ),
           data: (h) => TabBarView(
             children: [
-              _TakeTab(hub: h, query: _query, onQuery: (q) => setState(() => _query = q)),
-              _DoneTab(rows: h.done),
-              _RankTab(results: h.results),
-              const MockExamsTab(),
+              for (final k in tabs)
+                switch (k) {
+                  'give' => _TakeTab(hub: h, query: _query, onQuery: (q) => setState(() => _query = q)),
+                  'done' => _DoneTab(rows: h.done),
+                  'paper' => StudentPaperExams(studentId: studentId!),
+                  'rank' => _RankTab(results: h.results),
+                  _ => const MockExamsTab(),
+                },
             ],
           ),
         ),

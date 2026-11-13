@@ -23,7 +23,7 @@ import 'ui/teacher_hours_screen.dart';
 /// - `/app/admin/leads` — элсэлтийн хүсэлтийн төлөв (Админ, Багш+).
 /// - `/app/teacher/board/:classId?date=YYYY-MM-DD` — ирц, даалгаврын самбар (огноогүй бол өнөөдөр).
 /// - `/app/teacher/room406?date=YYYY-MM-DD` — 406 нөхөх өрөө (хуваарьгүй, ямар ч өдөр).
-/// - `/app/teacher-hours` — цагийн бүртгэл.
+/// - `/app/teacher-hours` — ажилласан цаг.
 /// - `/app/classes`, `/app/classes/:id` — ангиуд, ангийн самбар.
 /// - `/app/classes/:id/assignments[/:assignmentId]` — онлайн даалгавар шалгах.
 /// - `/app/classes/:id/checks` — ангийн «Чек» (`extra` = ангийн нэр).
