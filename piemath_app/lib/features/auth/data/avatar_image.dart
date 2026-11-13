@@ -10,7 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// JPEG болгосноор аль ч төхөөрөмж дээр адилхан, хурдан ачаалагдана.
 const avatarMaxSide = 512;
 
-/// Төвөөс тайрах дөрвөлжин: эх зургаас (left, top, side) хэсгийг [out]×[out] болгоно (томруулахгүй).
+/// Төвөөс тайрах дөрвөлжин: эх зургаас (left, top, side) хэсгийг [out] x [out] болгоно (томруулахгүй).
 ({double left, double top, double side, int out}) avatarCrop(int width, int height) {
   final side = width < height ? width : height;
   final out = side < avatarMaxSide ? side : avatarMaxSide;

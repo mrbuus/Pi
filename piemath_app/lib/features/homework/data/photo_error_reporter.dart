@@ -24,7 +24,7 @@ class PhotoErrorReporter {
     return e.runtimeType.toString();
   }
 
-  /// `err:photo/<шат> app <платформ> <нэмэлт>` (≤280 тэмдэгт).
+  /// `err:photo/<шат> app <платформ> <нэмэлт>` (280 тэмдэгт хүртэл).
   static String target(String stage, String detail) {
     final s = 'err:photo/$stage app ${defaultTargetPlatform.name} $detail';
     return s.length > 280 ? s.substring(0, 280) : s;
