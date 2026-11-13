@@ -81,78 +81,126 @@ void main() {
       expect(await r.hasFinanceCapability(), isTrue);
     });
 
-    test('жагсаалт: status, limit, offset; «бүгд» бол status-гүй', () async {
-      final h = FakeHttp()..json('GET', '/reconcile/transactions', page([txJson()], total: 51));
+    test('мөр: lane, limit, offset, хайлт; check зөвхөн «Шийтэд хөтлөгдсөн»-д', () async {
+      final h = reconcileHttp(
+        rows: {
+          'manual': [rowJson()],
+        },
+      );
       final r = rec(h);
-      final p = await r.transactions(status: BankMatchStatus.ignored, offset: 50);
-      expect(p.total, 51);
-      expect(p.items.single.id, 't1');
-      expect(h.requests.last.queryParameters, {'status': 'IGNORED', 'limit': '50', 'offset': '50'});
-      await r.transactions();
-      expect(h.requests.last.queryParameters.containsKey('status'), isFalse);
+      final p = await r.rows(lane: Lane.manual, query: ' Болд ', checkOnly: true, offset: 50);
+      expect(p.items.single.id, 'r1');
+      expect(h.requests.last.queryParameters, {'lane': 'manual', 'limit': '50', 'offset': '50', 'q': 'Болд'});
+      await r.rows(lane: Lane.sheet, checkOnly: true, limit: 500);
+      expect(h.requests.last.queryParameters, {'lane': 'sheet', 'limit': '200', 'offset': '0', 'check': '1'});
     });
 
-    test('тоо: төлөв бүрийн total (limit=1), апп нэмж тооцохгүй', () async {
-      final h = FakeHttp();
-      summaryCounts(h, unmatched: 3, auto: 5, manual: 1, ignored: 2);
-      final s = await rec(h).summary();
-      expect([s.total, s.unmatched, s.autoMatched, s.manualMatched, s.ignored], [11, 3, 5, 1, 2]);
-      expect(h.requests.every((r) => r.queryParameters['limit'] == '1'), isTrue);
-      expect(h.requests.length, 5);
+    test('товч: курсор, жагсаалт бүрийн тоо серверээс, шийтэд бичих горим', () async {
+      final o = await rec(
+        reconcileHttp(
+          overview: overviewJson(sheetCheck: 2, sheetThrough: '2026-11-05', sheetWrite: {'url': 'x', 'demo': true}),
+        ),
+      ).overview();
+      expect(o.count(Lane.manual), 3);
+      expect(o.count(Lane.all), 12);
+      expect(o.sheetCheck, 2);
+      expect(o.cursor!.coveredThrough, '2026-11-12');
+      expect(o.cursor!.sheetThrough, '2026-11-05');
+      expect(o.sheetWriteDemo, isTrue);
+      expect((await rec(reconcileHttp(overview: overviewJson(cursor: false))).overview()).cursor, isNull);
     });
 
-    test('сурагч хайх: массив эсвэл items, кодоор хайвал тэр нь эхэнд', () async {
+    test('хүүхэд хайх: 2-оос бага тэмдэгтэд хүсэлтгүй; items, утас, бүтэн төлсөн', () async {
       final h = FakeHttp()
-        ..json('GET', '/users/search', {
-          'items': [
-            {'id': 'a', 'firstName': 'А', 'lastName': 'А', 'studentCode': 'B27120002'},
-            {'id': 'b', 'firstName': 'Б', 'lastName': 'Б', 'studentCode': 'B27120001'},
+        ..json('GET', '/reconcile/students', {
+          'items': [kidJson(paidUp: true)],
+        });
+      final r = rec(h);
+      expect(await r.searchStudents(' Б '), isEmpty);
+      expect(h.requests, isEmpty);
+      final items = await r.searchStudents(' Болд ');
+      expect(items.single.paidUp, isTrue);
+      expect(items.single.phones.first.value, '99001122');
+      expect(h.requests.single.queryParameters['q'], 'Болд');
+    });
+
+    test('хуваарилах: parts бие, хүүхдийн бус зориулалтад studentId-гүй; алдаа бол давтахгүй', () async {
+      final h = FakeHttp()
+        ..json('POST', '/reconcile/rows/r1/allocate', {
+          'ok': true,
+          'alsoResolved': 2,
+          'sheetWrites': [
+            {'studentId': 'k1', 'ok': true, 'cell': 'K14', 'month': '2026-11'},
           ],
         });
-      final hits = await rec(h).searchStudents(' b27120001 ');
-      expect(hits.map((x) => x.id), ['b', 'a']);
-      expect(h.requests.single.queryParameters['q'], 'b27120001');
+      final res = await rec(h).allocate('r1', const [
+        AllocPart(kind: AllocKind.tuition, amount: 300000, studentId: 'k1'),
+        AllocPart(kind: AllocKind.other, amount: 50000, studentId: 'k1'),
+      ]);
+      expect(h.requests.single.data, {
+        'parts': [
+          {'kind': 'TUITION', 'amount': 300000, 'studentId': 'k1'},
+          {'kind': 'OTHER', 'amount': 50000},
+        ],
+      });
+      expect(res.alsoResolved, 2);
+      expect(sheetWriteText(res.sheetWrites), 'Шийтэд бичлээ: K14 нүд, 11-р сар');
+
+      final h2 = FakeHttp()..on('POST', '/reconcile/rows/r1/allocate', (_) => const FakeResponse.network());
+      await expectLater(rec(h2).allocate('r1', const []), throwsA(isA<ApiError>()));
+      expect(h2.count('POST', '/reconcile/rows/r1/allocate'), 1);
     });
 
-    test('холбох: userId бие, серверийн хариу; алдаа бол давтахгүй', () async {
-      final h = FakeHttp()..json('POST', '/reconcile/t1/match', txJson(status: 'MANUAL_MATCHED'));
-      final t = await rec(h).match('t1', 'u9');
-      expect(h.requests.single.data, {'userId': 'u9'});
-      expect(t.status, BankMatchStatus.manualMatched);
-
-      final h2 = FakeHttp()..on('POST', '/reconcile/t1/match', (_) => const FakeResponse.network());
-      await expectLater(rec(h2).match('t1', 'u9'), throwsA(isA<ApiError>()));
-      expect(h2.count('POST', '/reconcile/t1/match'), 1);
+    test('буцаах, шийтэд хөтлөгдсөн өдөр: зам, бие; DELETE хэзээ ч үгүй', () async {
+      final h = FakeHttp()
+        ..json('POST', '/reconcile/rows/r%201/undo', {'ok': true})
+        ..json('POST', '/reconcile/sheet-through', {'marked': 7, 'reopened': 0});
+      final r = rec(h);
+      await r.undo('r 1');
+      expect(await r.markSheetThrough('2026-11-05'), 7);
+      expect(h.requests.last.data, {'through': '2026-11-05'});
+      expect(h.requests.where((x) => x.method == 'DELETE'), isEmpty);
     });
 
-    test('төлбөр биш: 204', () async {
-      final h = FakeHttp()..json('POST', '/reconcile/t1/ignore', null, status: 204);
-      await rec(h).ignore('t1');
-      expect(h.count('POST', '/reconcile/t1/ignore'), 1);
+    test('дэлгэрэнгүй: хүүхэд, хуулга; ledger алдаатай бол null', () async {
+      final h = FakeHttp()
+        ..json('GET', '/reconcile/students/k1', detailJson())
+        ..error('GET', '/payments/ledger/student/k1', 404, 'Анги алга');
+      final r = rec(h);
+      final d = await r.studentDetail('k1');
+      expect(d.contacts.map((c) => c.label), ['Өөрийн', 'Ээж']);
+      expect(d.bank.single.partial, isTrue);
+      expect(d.payers.single.count, 3);
+      expect(await r.studentLedger('k1'), isNull);
     });
 
-    test('импорт: multipart file (config-гүй), серверийн дүн; алдааг монголоор', () async {
-      final bytes = csvBytes();
-      final preview = StatementPreview.inspect('khan.csv', bytes);
+    test('импорт: multipart file, серверийн дүн; алдааг монголоор', () async {
+      final bytes = xlsxBytes();
+      final preview = StatementPreview.inspect('khan.xlsx', bytes);
       final h = FakeHttp()
         ..json('POST', '/reconcile/import', {
-          'totalRows': 1,
-          'imported': 1,
-          'skipped': 0,
-          'matched': 1,
-          'errors': <Object>[],
+          'rows': 10,
+          'newRows': 7,
+          'duplicates': 2,
+          'beforeSettled': 1,
+          'autoResolved': 4,
+          'inSheet': 0,
+          'open': 3,
         })
-        ..error('POST', '/reconcile/import', 400, 'Файл байхгүй байна');
+        ..error('POST', '/reconcile/import', 400, 'Хаан банкнаас татсан .xlsx хуулга оруулна уу');
       final r = rec(h);
       final res = await r.importStatement(bytes, preview);
-      expect(res.matched, 1);
+      expect(res.newRows, 7);
+      expect(
+        res.text,
+        'Хуулгад 10 гүйлгээ: шинээр 7 орж, 3 нь өмнө орсон тул алгасагдлаа. Автоматаар 4 шийдэгдэж, 3 гүйлгээ шийдэх жагсаалтад байна',
+      );
       final form = h.requests.first.data as FormData;
       expect(form.files.single.key, 'file');
-      expect(form.files.single.value.filename, 'khan.csv');
-      expect(form.fields, isEmpty);
+      expect(form.files.single.value.filename, 'khan.xlsx');
       await expectLater(
         r.importStatement(bytes, preview),
-        throwsA(isA<ApiError>().having((e) => e.message, 'message', 'Файл байхгүй байна')),
+        throwsA(isA<ApiError>().having((e) => e.message, 'message', 'Хаан банкнаас татсан .xlsx хуулга оруулна уу')),
       );
       expect(h.count('POST', '/reconcile/import'), 2);
     });

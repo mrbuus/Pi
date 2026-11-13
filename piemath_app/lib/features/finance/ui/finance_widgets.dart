@@ -5,11 +5,9 @@ import '../../../core/network/api_error.dart';
 import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
-import '../../../shared/native/native.dart';
 import '../../../shared/payment_status/money.dart';
 import '../application/finance_providers.dart';
 import '../data/finance_models.dart';
-import '../data/reconcile_models.dart';
 
 /// Эрхгүй хэрэглэгчид — төвийг сахисан, айлгахгүй бичвэр.
 class FinanceDenied extends StatelessWidget {
@@ -22,14 +20,14 @@ class FinanceDenied extends StatelessWidget {
       EmptyState(icon: AppIcons.shield, title: 'Энэ хэсэг танд нээгдээгүй', message: message);
 }
 
-/// Тулгалтын эрхийн хаалга: шалгаж байхад skeleton, эрхгүй бол [FinanceDenied], алдаа бол «Дахин оролдох».
+/// Банкны хуулгын эрхийн хаалга: шалгаж байхад skeleton, эрхгүй бол [FinanceDenied], алдаа бол «Дахин оролдох».
 /// Эрхгүй хэрэглэгчид [builder] огт зурагдахгүй — гүйлгээний API ч дуудагдахгүй.
 class ReconcileGate extends ConsumerWidget {
   const ReconcileGate({super.key, required this.builder});
 
   final Widget Function(BuildContext context, ReconcileAccess access) builder;
 
-  static const deniedMessage = 'Банкны тулгалтыг Админ болон санхүүгийн эрхтэй Багш+ хариуцна';
+  static const deniedMessage = 'Банкны хуулгыг Админ болон санхүүгийн эрхтэй Багш+ хариуцна';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -142,28 +140,6 @@ class BreakdownBar extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-/// Гүйлгээний төлөвийн чип (өнгө зөвхөн дүрсэнд).
-class BankStatusChip extends StatelessWidget {
-  const BankStatusChip(this.status, {super.key, this.compact = false});
-
-  final BankMatchStatus status;
-
-  /// Жагсаалтын мөрөнд богино шошго.
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final (icon, tone) = switch (status) {
-      BankMatchStatus.unmatched => (AppIcons.hourglass, ChipTone.warning),
-      BankMatchStatus.autoMatched => (AppIcons.success, ChipTone.success),
-      BankMatchStatus.manualMatched => (AppIcons.badgeCheck, ChipTone.info),
-      BankMatchStatus.ignored => (AppIcons.ban, ChipTone.neutral),
-      BankMatchStatus.unknown => (AppIcons.circleDot, ChipTone.neutral),
-    };
-    return MetaChip(label: compact ? status.short : status.label, icon: icon, tone: tone);
   }
 }
 

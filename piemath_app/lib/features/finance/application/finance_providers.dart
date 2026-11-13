@@ -66,7 +66,7 @@ final financeExpensesProvider = FutureProvider.autoDispose.family<List<ExpenseRe
   (ref, month) => ref.watch(financeRepositoryProvider).expenses(month),
 );
 
-/// Тулгалтын дээд талын тоонууд.
-final reconcileSummaryProvider = FutureProvider.autoDispose<ReconcileSummary>(
-  (ref) => ref.watch(reconcileRepositoryProvider).summary(),
+/// Банкны хуулгын товч: курсор (хуулга хэдий хүртэл орсон, шийтэд хөтлөгдсөн өдөр), жагсаалт бүрийн тоо.
+final reconcileOverviewProvider = FutureProvider.autoDispose<ReconcileOverview>(
+  (ref) => ref.watch(reconcileRepositoryProvider).overview(),
 );
