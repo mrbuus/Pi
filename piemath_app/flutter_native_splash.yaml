@@ -4,9 +4,9 @@
 # Хар горимд бичвэр нь цагаан хувилбар (вэбийн LogoMark-тай адил).
 flutter_native_splash:
   color: "#F5F7FB"
-  image: assets/branding/splash-full-light.png
+  image: assets/branding/splash-wordmark-light.png
   color_dark: "#0F1319"
-  image_dark: assets/branding/splash-full-dark.png
+  image_dark: assets/branding/splash-wordmark-dark.png
   # Android 12+ системийн splash зөвхөн дугуй тэмдэг зөвшөөрдөг (бичвэргүй) — бүтэн лого нь
   # Flutter-ийн эхлэх дэлгэцэд шууд дараа нь гарна.
   android_12:

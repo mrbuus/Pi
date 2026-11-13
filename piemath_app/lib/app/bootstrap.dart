@@ -14,18 +14,17 @@ import '../core/perf/perf_tier.dart';
 import '../features/exam/data/exam_draft_store.dart';
 import '../features/push/push_service.dart';
 import 'app.dart';
+import 'shell/splash_screen.dart';
 import 'theme_mode.dart';
 
 /// Апп эхлүүлэх: binding, тохиргоо, нэвтрэлт сэргээх.
 ///
 /// Эхний кадр хүртэл зөвхөн зайлшгүй зүйл (prefs, түвшин, токен). Push (Firebase) зэрэг
 /// хүлээж болох ажил эхний кадрын дараа — `docs/PERF-OFFLINE.md` §4.
-/// Апп нээгдэхэд бүтэн лого хамгийн багадаа энэ хугацаанд харагдана (эзэн 2026-11-14). Хөдөлгүүр асахад
-/// энэ хугацаа аль хэдийн өнгөрсөн бол (удаан утас) нэмэлт хүлээлтгүй.
-const brandSplashMin = Duration(milliseconds: 600);
+/// Логоны анимац ямар нэг шалтгаанаар дуусахгүй бол (эхлэх дэлгэц харагдаагүй г.м.) апп гацахгүй.
+const brandIntroMax = Duration(milliseconds: 2500);
 
 Future<void> bootstrap() async {
-  final launch = Stopwatch()..start();
   WidgetsFlutterBinding.ensureInitialized();
   if (kReleaseMode) {
     // Release-д log хэвлэхгүй (нэр, утас, токен log-д үлдэхгүй — SECURITY §3).
@@ -58,11 +57,11 @@ Future<void> bootstrap() async {
       () => container.read(fileBytesCacheProvider).clearMemory(),
     ]),
   );
-  final left = brandSplashMin - launch.elapsed;
+  // Логоны анимац (эхлэх дэлгэц) дуустал нүүр рүү шилжихгүй — бүтэн лого хамгийн түрүүнд (эзэн 2026-11-14).
   unawaited(
     container
         .read(sessionProvider.notifier)
-        .restore(notBefore: left > Duration.zero ? Future<void>.delayed(left) : null),
+        .restore(notBefore: brandIntroDone.future.timeout(brandIntroMax, onTimeout: () {})),
   );
   runApp(UncontrolledProviderScope(container: container, child: const PiemathApp()));
   // Push бүртгэл (Firebase эхлүүлэлт) — эхний кадрын дараа, хэрэглэгч дэлгэцээ харж эхэлсний

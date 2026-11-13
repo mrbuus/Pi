@@ -311,6 +311,12 @@ abstract final class AppRadius {
   static const double pill = 999;
 }
 
+/// Логоны тогтмол өнгө — горимоос хамаарахгүй (дугуй үргэлж хар хөх, тэмдэг цагаан; вэбийн logo-full*.png).
+abstract final class LogoInk {
+  static const navy = Color(0xFF273F74);
+  static const paper = Color(0xFFFFFFFF);
+}
+
 /// Хэмнэл — вэбийн `--dur-micro/base/enter`.
 abstract final class AppMotion {
   static const micro = Duration(milliseconds: 120);

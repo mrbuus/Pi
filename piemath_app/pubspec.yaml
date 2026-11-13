@@ -71,6 +71,7 @@ flutter:
 
   assets:
     - assets/brand/
+    - assets/brand/intro/
     - assets/login_hero/
     - assets/anim/
 
