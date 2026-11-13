@@ -19,6 +19,9 @@ abstract class HubOverview with _$HubOverview {
     required AttendanceTotals attendance,
     required HomeworkTotals homework,
     HubToday? today,
+
+    /// Хоёр ангид зэрэг суудаг сурагчийн (математик + Нийгэм) өнөөдрийн нөгөө ангийн хичээл (вэб 2026-11-12).
+    @Default(<HubToday>[]) List<HubToday> todayOther,
     LatestMark? latestMark,
   }) = _HubOverview;
 
@@ -49,11 +52,11 @@ abstract class AttendanceTotals with _$AttendanceTotals {
   factory AttendanceTotals.fromJson(Map<String, Object?> json) => _$AttendanceTotalsFromJson(json);
 
   int count(AttendanceStatus s) => switch (s) {
-        AttendanceStatus.present => present,
-        AttendanceStatus.late => late,
-        AttendanceStatus.absent => absent,
-        AttendanceStatus.excused => excused,
-      };
+    AttendanceStatus.present => present,
+    AttendanceStatus.late => late,
+    AttendanceStatus.absent => absent,
+    AttendanceStatus.excused => excused,
+  };
 }
 
 /// Бүх хугацааны даалгаврын тэмдэглэгээ. `rate` = (DONE + PARTIAL*0.5)/total (сервер).
@@ -72,10 +75,10 @@ abstract class HomeworkTotals with _$HomeworkTotals {
   factory HomeworkTotals.fromJson(Map<String, Object?> json) => _$HomeworkTotalsFromJson(json);
 
   int count(HomeworkStatus s) => switch (s) {
-        HomeworkStatus.done => done,
-        HomeworkStatus.partial => partial,
-        HomeworkStatus.notDone => notDone,
-      };
+    HomeworkStatus.done => done,
+    HomeworkStatus.partial => partial,
+    HomeworkStatus.notDone => notDone,
+  };
 }
 
 /// Өнөөдрийн хичээл (дуусаагүй эхнийх, бүгд дууссан бол сүүлийнх).
@@ -181,9 +184,20 @@ abstract class DayHomework with _$DayHomework {
     @JsonKey(unknownEnumValue: _nullEnum) HomeworkStatus? status,
     String? comment,
     String? checkedOn,
+
+    /// Шалгалтаар даалгавар шалгасан оноо (эзэн 2026-11-08 19:08); байхгүй бол null.
+    HubQuiz? quiz,
   }) = _DayHomework;
 
   factory DayHomework.fromJson(Map<String, Object?> json) => _$DayHomeworkFromJson(json);
+}
+
+/// Гэрийн даалгаврыг ангид богино шалгалтаар шалгасан оноо — бутархай байж болно (7,5).
+@freezed
+abstract class HubQuiz with _$HubQuiz {
+  const factory HubQuiz({required double score, @Default(0) int problemCount}) = _HubQuiz;
+
+  factory HubQuiz.fromJson(Map<String, Object?> json) => _$HubQuizFromJson(json);
 }
 
 @freezed
@@ -235,6 +249,9 @@ abstract class HubTestDetail with _$HubTestDetail {
     required String title,
     String? variant,
     required String date,
+
+    /// А хувилбар (ангид хийдэг) — хариу хэзээ ч ирэхгүй, «Хариу харах» товчгүй (вэб 2026-11-10).
+    @Default(false) bool answersHidden,
     @Default(<HubProblem>[]) List<HubProblem> problems,
   }) = _HubTestDetail;
 
@@ -381,12 +398,8 @@ abstract class Announcement with _$Announcement {
 /// `GET /assignments/my-classrooms` — ангийн төрөл (танхим/онлайн).
 @freezed
 abstract class MyClassroom with _$MyClassroom {
-  const factory MyClassroom({
-    required String id,
-    required String name,
-    @Default('IN_PERSON') String type,
-    int? grade,
-  }) = _MyClassroom;
+  const factory MyClassroom({required String id, required String name, @Default('IN_PERSON') String type, int? grade}) =
+      _MyClassroom;
 
   factory MyClassroom.fromJson(Map<String, Object?> json) => _$MyClassroomFromJson(json);
 }

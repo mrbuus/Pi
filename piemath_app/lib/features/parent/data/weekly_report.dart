@@ -59,9 +59,24 @@ abstract class ReportHomework with _$ReportHomework {
   const factory ReportHomework({
     @Default(ReportAssignments()) ReportAssignments assignments,
     @Default(ReportDailyMarks()) ReportDailyMarks dailyMarks,
+
+    /// Энэ долоо хоногт шалгалтаар шалгасан даалгаврын оноо (эзэн 2026-11-08 19:08), огноогоор.
+    @Default(<ReportQuiz>[]) List<ReportQuiz> quizzes,
   }) = _ReportHomework;
 
   factory ReportHomework.fromJson(Map<String, Object?> json) => _$ReportHomeworkFromJson(json);
+}
+
+@freezed
+abstract class ReportQuiz with _$ReportQuiz {
+  const factory ReportQuiz({
+    required String date,
+    @Default('') String classroom,
+    @Default(0) double score,
+    @Default(0) int problemCount,
+  }) = _ReportQuiz;
+
+  factory ReportQuiz.fromJson(Map<String, Object?> json) => _$ReportQuizFromJson(json);
 }
 
 @freezed

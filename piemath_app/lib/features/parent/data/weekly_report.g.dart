@@ -112,12 +112,33 @@ _ReportHomework _$ReportHomeworkFromJson(
   dailyMarks: json['dailyMarks'] == null
       ? const ReportDailyMarks()
       : ReportDailyMarks.fromJson(json['dailyMarks'] as Map<String, dynamic>),
+  quizzes:
+      (json['quizzes'] as List<dynamic>?)
+          ?.map((e) => ReportQuiz.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const <ReportQuiz>[],
 );
 
 Map<String, dynamic> _$ReportHomeworkToJson(_ReportHomework instance) =>
     <String, dynamic>{
       'assignments': instance.assignments,
       'dailyMarks': instance.dailyMarks,
+      'quizzes': instance.quizzes,
+    };
+
+_ReportQuiz _$ReportQuizFromJson(Map<String, dynamic> json) => _ReportQuiz(
+  date: json['date'] as String,
+  classroom: json['classroom'] as String? ?? '',
+  score: (json['score'] as num?)?.toDouble() ?? 0,
+  problemCount: (json['problemCount'] as num?)?.toInt() ?? 0,
+);
+
+Map<String, dynamic> _$ReportQuizToJson(_ReportQuiz instance) =>
+    <String, dynamic>{
+      'date': instance.date,
+      'classroom': instance.classroom,
+      'score': instance.score,
+      'problemCount': instance.problemCount,
     };
 
 _ReportAssignments _$ReportAssignmentsFromJson(Map<String, dynamic> json) =>

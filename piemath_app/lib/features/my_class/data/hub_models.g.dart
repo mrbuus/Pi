@@ -19,6 +19,11 @@ _HubOverview _$HubOverviewFromJson(Map<String, dynamic> json) => _HubOverview(
   today: json['today'] == null
       ? null
       : HubToday.fromJson(json['today'] as Map<String, dynamic>),
+  todayOther:
+      (json['todayOther'] as List<dynamic>?)
+          ?.map((e) => HubToday.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const <HubToday>[],
   latestMark: json['latestMark'] == null
       ? null
       : LatestMark.fromJson(json['latestMark'] as Map<String, dynamic>),
@@ -30,6 +35,7 @@ Map<String, dynamic> _$HubOverviewToJson(_HubOverview instance) =>
       'attendance': instance.attendance,
       'homework': instance.homework,
       'today': instance.today,
+      'todayOther': instance.todayOther,
       'latestMark': instance.latestMark,
     };
 
@@ -260,6 +266,9 @@ _DayHomework _$DayHomeworkFromJson(Map<String, dynamic> json) => _DayHomework(
   ),
   comment: json['comment'] as String?,
   checkedOn: json['checkedOn'] as String?,
+  quiz: json['quiz'] == null
+      ? null
+      : HubQuiz.fromJson(json['quiz'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$DayHomeworkToJson(_DayHomework instance) =>
@@ -267,7 +276,18 @@ Map<String, dynamic> _$DayHomeworkToJson(_DayHomework instance) =>
       'status': _$HomeworkStatusEnumMap[instance.status],
       'comment': instance.comment,
       'checkedOn': instance.checkedOn,
+      'quiz': instance.quiz,
     };
+
+_HubQuiz _$HubQuizFromJson(Map<String, dynamic> json) => _HubQuiz(
+  score: (json['score'] as num).toDouble(),
+  problemCount: (json['problemCount'] as num?)?.toInt() ?? 0,
+);
+
+Map<String, dynamic> _$HubQuizToJson(_HubQuiz instance) => <String, dynamic>{
+  'score': instance.score,
+  'problemCount': instance.problemCount,
+};
 
 _DayTheory _$DayTheoryFromJson(Map<String, dynamic> json) => _DayTheory(
   count: (json['count'] as num?)?.toInt() ?? 0,
@@ -333,6 +353,7 @@ _HubTestDetail _$HubTestDetailFromJson(Map<String, dynamic> json) =>
       title: json['title'] as String,
       variant: json['variant'] as String?,
       date: json['date'] as String,
+      answersHidden: json['answersHidden'] as bool? ?? false,
       problems:
           (json['problems'] as List<dynamic>?)
               ?.map((e) => HubProblem.fromJson(e as Map<String, dynamic>))
@@ -346,6 +367,7 @@ Map<String, dynamic> _$HubTestDetailToJson(_HubTestDetail instance) =>
       'title': instance.title,
       'variant': instance.variant,
       'date': instance.date,
+      'answersHidden': instance.answersHidden,
       'problems': instance.problems,
     };
 

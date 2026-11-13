@@ -49,10 +49,22 @@ abstract class HomeworkMarkEntry with _$HomeworkMarkEntry {
   factory HomeworkMarkEntry.fromJson(Map<String, Object?> json) => _$HomeworkMarkEntryFromJson(json);
 }
 
+/// Шалгалтаар даалгавар шалгасан оноо (эзэн 2026-11-08 19:08) — `homeworkQuizzes`, шинэ нь эхэнд.
+@freezed
+abstract class HomeworkQuizEntry with _$HomeworkQuizEntry {
+  const factory HomeworkQuizEntry({
+    required String date,
+    @Default('') String classroom,
+    @Default(0) double score,
+    @Default(0) int problemCount,
+  }) = _HomeworkQuizEntry;
+
+  factory HomeworkQuizEntry.fromJson(Map<String, Object?> json) => _$HomeworkQuizEntryFromJson(json);
+}
+
 @freezed
 abstract class AssignmentRef with _$AssignmentRef {
-  const factory AssignmentRef({@Default('') String title, String? dueDate, ClassroomRef? classroom}) =
-      _AssignmentRef;
+  const factory AssignmentRef({@Default('') String title, String? dueDate, ClassroomRef? classroom}) = _AssignmentRef;
 
   factory AssignmentRef.fromJson(Map<String, Object?> json) => _$AssignmentRefFromJson(json);
 }
@@ -129,6 +141,7 @@ abstract class ChildStudent with _$ChildStudent {
     ClassroomRef? classroom,
     @Default(<AttendanceEntry>[]) List<AttendanceEntry> attendances,
     @Default(<HomeworkMarkEntry>[]) List<HomeworkMarkEntry> dailyHomeworkMarks,
+    @Default(<HomeworkQuizEntry>[]) List<HomeworkQuizEntry> homeworkQuizzes,
     @Default(<SubmissionEntry>[]) List<SubmissionEntry> submissions,
     @Default(<TestResultEntry>[]) List<TestResultEntry> testResults,
     @Default(<ChildPayment>[]) List<ChildPayment> payments,

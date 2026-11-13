@@ -11,7 +11,8 @@ import '../domain/hub_logic.dart';
 import 'common.dart';
 
 /// Анги хийсэн тестийн бодлогууд (`/app/my-class/tests/:testId`): нөхцөл, сонголт (LaTeX), зураг,
-/// бодлого бүрийн зөв хариу товчоор нээгдэнэ (анхдагч нуусан — өөрийгөө шалгах).
+/// бодлого бүрийн зөв хариу товчоор нээгдэнэ (анхдагч нуусан — өөрийгөө шалгах). А хувилбарын (ангид хийдэг)
+/// тестийн хариу серверээс хэзээ ч ирэхгүй (`answersHidden`) — «Бүх хариу», «Хариу харах» товч гарахгүй (вэб 2026-11-10).
 /// 403 нь алдаа биш — «маргааш нээгдэнэ» / «танай анги хийгээгүй» гэж тайван тайлбарлана.
 class TestDetailScreen extends ConsumerStatefulWidget {
   const TestDetailScreen({super.key, required this.testId});
@@ -35,7 +36,7 @@ class _TestDetailScreenState extends ConsumerState<TestDetailScreen> {
         leading: const AppBackButton(),
         title: Text(ready == null ? 'Тест' : cleanTitle(ready.title, variant: ready.variant, fallback: ready.title)),
         actions: [
-          if (ready != null && ready.problems.isNotEmpty)
+          if (ready != null && ready.problems.isNotEmpty && !ready.answersHidden)
             TextButton.icon(
               icon: Icon(_revealAll ? AppIcons.hide : AppIcons.show, size: 18),
               label: Text(_revealAll ? 'Хариуг нуух' : 'Бүх хариу'),
@@ -59,7 +60,7 @@ class _TestDetailScreenState extends ConsumerState<TestDetailScreen> {
           TestDetailMissing() => const EmptyState(icon: AppIcons.fileQuestion, title: 'Тест олдсонгүй'),
           TestDetailReady(:final detail) => _Problems(
             detail: detail,
-            isOpen: (id) => _revealAll != _toggled.contains(id),
+            isOpen: (id) => !detail.answersHidden && _revealAll != _toggled.contains(id),
             onToggle: (id) => setState(() => _toggled.contains(id) ? _toggled.remove(id) : _toggled.add(id)),
           ),
         },
@@ -86,11 +87,26 @@ class _Problems extends StatelessWidget {
         if (i == 0) {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpace.md),
-            child: Meta(
-              items: [
-                dayTitle(detail.date),
-                if (detail.variant != null) '${detail.variant} хувилбар',
-                '${problems.length} бодлого',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Meta(
+                  items: [
+                    dayTitle(detail.date),
+                    if (detail.variant != null) '${detail.variant} хувилбар',
+                    '${problems.length} бодлого',
+                  ],
+                ),
+                if (detail.answersHidden) ...[
+                  const SizedBox(height: AppSpace.md),
+                  AppCard(
+                    lip: false,
+                    child: Text(
+                      'А хувилбарын тестийн хариу харагдахгүй',
+                      style: context.text.bodyMedium?.copyWith(color: context.colors.inkDim),
+                    ),
+                  ),
+                ],
               ],
             ),
           );
@@ -98,7 +114,13 @@ class _Problems extends StatelessWidget {
         final p = problems[i - 1];
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpace.md),
-          child: ProblemCard(problem: p, number: i, open: isOpen(p.id), onToggle: () => onToggle(p.id)),
+          child: ProblemCard(
+            problem: p,
+            number: i,
+            open: isOpen(p.id),
+            onToggle: () => onToggle(p.id),
+            hideToggle: detail.answersHidden,
+          ),
         );
       },
     );
@@ -113,12 +135,16 @@ class ProblemCard extends ConsumerWidget {
     required this.number,
     required this.open,
     required this.onToggle,
+    this.hideToggle = false,
   });
 
   final HubProblem problem;
   final int number;
   final bool open;
   final VoidCallback onToggle;
+
+  /// А хувилбар — «Хариу харах» товчгүй.
+  final bool hideToggle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -173,34 +199,36 @@ class ProblemCard extends ConsumerWidget {
               ],
             ),
           ],
-          const SizedBox(height: AppSpace.sm),
-          Wrap(
-            spacing: AppSpace.md,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              TextButton.icon(
-                icon: Icon(open ? AppIcons.hide : AppIcons.show, size: 18),
-                label: Text(open ? 'Хариуг нуух' : 'Хариу харах'),
-                onPressed: onToggle,
-              ),
-              if (open && answer.isNotEmpty)
-                Semantics(
-                  liveRegion: true,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('Хариу ', style: context.text.bodyMedium?.copyWith(color: c.inkDim)),
-                      if (correct != null)
-                        Text(correct.label, style: context.text.titleSmall?.copyWith(color: c.success))
-                      else
-                        Flexible(
-                          child: MathText(answer, style: context.text.titleSmall?.copyWith(color: c.success)),
-                        ),
-                    ],
-                  ),
+          if (!hideToggle) ...[
+            const SizedBox(height: AppSpace.sm),
+            Wrap(
+              spacing: AppSpace.md,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                TextButton.icon(
+                  icon: Icon(open ? AppIcons.hide : AppIcons.show, size: 18),
+                  label: Text(open ? 'Хариуг нуух' : 'Хариу харах'),
+                  onPressed: onToggle,
                 ),
-            ],
-          ),
+                if (open && answer.isNotEmpty)
+                  Semantics(
+                    liveRegion: true,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Хариу ', style: context.text.bodyMedium?.copyWith(color: c.inkDim)),
+                        if (correct != null)
+                          Text(correct.label, style: context.text.titleSmall?.copyWith(color: c.success))
+                        else
+                          Flexible(
+                            child: MathText(answer, style: context.text.titleSmall?.copyWith(color: c.success)),
+                          ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ],
       ),
     );

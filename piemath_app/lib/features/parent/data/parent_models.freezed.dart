@@ -1159,6 +1159,285 @@ $ClassroomRefCopyWith<$Res> get classroom {
 
 
 /// @nodoc
+mixin _$HomeworkQuizEntry {
+
+ String get date; String get classroom; double get score; int get problemCount;
+/// Create a copy of HomeworkQuizEntry
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$HomeworkQuizEntryCopyWith<HomeworkQuizEntry> get copyWith => _$HomeworkQuizEntryCopyWithImpl<HomeworkQuizEntry>(this as HomeworkQuizEntry, _$identity);
+
+  /// Serializes this HomeworkQuizEntry to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as HomeworkQuizEntry;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeworkQuizEntry&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.classroom, _this.classroom) || other.classroom == _this.classroom)&&(identical(other.score, _this.score) || other.score == _this.score)&&(identical(other.problemCount, _this.problemCount) || other.problemCount == _this.problemCount));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as HomeworkQuizEntry;
+  return Object.hash(runtimeType,_this.date,_this.classroom,_this.score,_this.problemCount);
+}
+
+@override
+String toString() {
+  final _this = this as HomeworkQuizEntry;
+  return 'HomeworkQuizEntry(date: ${_this.date}, classroom: ${_this.classroom}, score: ${_this.score}, problemCount: ${_this.problemCount})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $HomeworkQuizEntryCopyWith<$Res>  {
+  factory $HomeworkQuizEntryCopyWith(HomeworkQuizEntry value, $Res Function(HomeworkQuizEntry) _then) = _$HomeworkQuizEntryCopyWithImpl;
+@useResult
+$Res call({
+ String date, String classroom, double score, int problemCount
+});
+
+
+
+
+}
+/// @nodoc
+class _$HomeworkQuizEntryCopyWithImpl<$Res>
+    implements $HomeworkQuizEntryCopyWith<$Res> {
+  _$HomeworkQuizEntryCopyWithImpl(this._self, this._then);
+
+  final HomeworkQuizEntry _self;
+  final $Res Function(HomeworkQuizEntry) _then;
+
+/// Create a copy of HomeworkQuizEntry
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? date = null,Object? classroom = null,Object? score = null,Object? problemCount = null,}) {
+  return _then(HomeworkQuizEntry(
+date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as String,classroom: null == classroom ? _self.classroom : classroom // ignore: cast_nullable_to_non_nullable
+as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
+as double,problemCount: null == problemCount ? _self.problemCount : problemCount // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [HomeworkQuizEntry].
+extension HomeworkQuizEntryPatterns on HomeworkQuizEntry {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _HomeworkQuizEntry value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _HomeworkQuizEntry() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _HomeworkQuizEntry value)  $default,){
+final _that = this;
+switch (_that) {
+case _HomeworkQuizEntry():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _HomeworkQuizEntry value)?  $default,){
+final _that = this;
+switch (_that) {
+case _HomeworkQuizEntry() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String date,  String classroom,  double score,  int problemCount)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _HomeworkQuizEntry() when $default != null:
+return $default(_that.date,_that.classroom,_that.score,_that.problemCount);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String date,  String classroom,  double score,  int problemCount)  $default,) {final _that = this;
+switch (_that) {
+case _HomeworkQuizEntry():
+return $default(_that.date,_that.classroom,_that.score,_that.problemCount);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String date,  String classroom,  double score,  int problemCount)?  $default,) {final _that = this;
+switch (_that) {
+case _HomeworkQuizEntry() when $default != null:
+return $default(_that.date,_that.classroom,_that.score,_that.problemCount);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _HomeworkQuizEntry implements HomeworkQuizEntry {
+  const _HomeworkQuizEntry({required this.date, this.classroom = '', this.score = 0, this.problemCount = 0});
+  factory _HomeworkQuizEntry.fromJson(Map<String, dynamic> json) => _$HomeworkQuizEntryFromJson(json);
+
+@override final  String date;
+@override@JsonKey() final  String classroom;
+@override@JsonKey() final  double score;
+@override@JsonKey() final  int problemCount;
+
+/// Create a copy of HomeworkQuizEntry
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$HomeworkQuizEntryCopyWith<_HomeworkQuizEntry> get copyWith => __$HomeworkQuizEntryCopyWithImpl<_HomeworkQuizEntry>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$HomeworkQuizEntryToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _HomeworkQuizEntry&&(identical(other.date, date) || other.date == date)&&(identical(other.classroom, classroom) || other.classroom == classroom)&&(identical(other.score, score) || other.score == score)&&(identical(other.problemCount, problemCount) || other.problemCount == problemCount));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,date,classroom,score,problemCount);
+}
+
+@override
+String toString() {
+    return 'HomeworkQuizEntry(date: $date, classroom: $classroom, score: $score, problemCount: $problemCount)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$HomeworkQuizEntryCopyWith<$Res> implements $HomeworkQuizEntryCopyWith<$Res> {
+  factory _$HomeworkQuizEntryCopyWith(_HomeworkQuizEntry value, $Res Function(_HomeworkQuizEntry) _then) = __$HomeworkQuizEntryCopyWithImpl;
+@override @useResult
+$Res call({
+ String date, String classroom, double score, int problemCount
+});
+
+
+
+
+}
+/// @nodoc
+class __$HomeworkQuizEntryCopyWithImpl<$Res>
+    implements _$HomeworkQuizEntryCopyWith<$Res> {
+  __$HomeworkQuizEntryCopyWithImpl(this._self, this._then);
+
+  final _HomeworkQuizEntry _self;
+  final $Res Function(_HomeworkQuizEntry) _then;
+
+/// Create a copy of HomeworkQuizEntry
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? date = null,Object? classroom = null,Object? score = null,Object? problemCount = null,}) {
+  return _then(_HomeworkQuizEntry(
+date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as String,classroom: null == classroom ? _self.classroom : classroom // ignore: cast_nullable_to_non_nullable
+as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
+as double,problemCount: null == problemCount ? _self.problemCount : problemCount // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$AssignmentRef {
 
  String get title; String? get dueDate; ClassroomRef? get classroom;
@@ -2904,7 +3183,7 @@ as String,
 /// @nodoc
 mixin _$ChildStudent {
 
- String get id; String get firstName; String get lastName; String? get phone; ChildProfile? get studentProfile; ClassroomRef? get classroom; List<AttendanceEntry> get attendances; List<HomeworkMarkEntry> get dailyHomeworkMarks; List<SubmissionEntry> get submissions; List<TestResultEntry> get testResults; List<ChildPayment> get payments;
+ String get id; String get firstName; String get lastName; String? get phone; ChildProfile? get studentProfile; ClassroomRef? get classroom; List<AttendanceEntry> get attendances; List<HomeworkMarkEntry> get dailyHomeworkMarks; List<HomeworkQuizEntry> get homeworkQuizzes; List<SubmissionEntry> get submissions; List<TestResultEntry> get testResults; List<ChildPayment> get payments;
 /// Create a copy of ChildStudent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2918,20 +3197,20 @@ $ChildStudentCopyWith<ChildStudent> get copyWith => _$ChildStudentCopyWithImpl<C
 @override
 bool operator ==(Object other) {
   final _this = this as ChildStudent;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChildStudent&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.firstName, _this.firstName) || other.firstName == _this.firstName)&&(identical(other.lastName, _this.lastName) || other.lastName == _this.lastName)&&(identical(other.phone, _this.phone) || other.phone == _this.phone)&&(identical(other.studentProfile, _this.studentProfile) || other.studentProfile == _this.studentProfile)&&(identical(other.classroom, _this.classroom) || other.classroom == _this.classroom)&&const DeepCollectionEquality().equals(other.attendances, _this.attendances)&&const DeepCollectionEquality().equals(other.dailyHomeworkMarks, _this.dailyHomeworkMarks)&&const DeepCollectionEquality().equals(other.submissions, _this.submissions)&&const DeepCollectionEquality().equals(other.testResults, _this.testResults)&&const DeepCollectionEquality().equals(other.payments, _this.payments));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChildStudent&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.firstName, _this.firstName) || other.firstName == _this.firstName)&&(identical(other.lastName, _this.lastName) || other.lastName == _this.lastName)&&(identical(other.phone, _this.phone) || other.phone == _this.phone)&&(identical(other.studentProfile, _this.studentProfile) || other.studentProfile == _this.studentProfile)&&(identical(other.classroom, _this.classroom) || other.classroom == _this.classroom)&&const DeepCollectionEquality().equals(other.attendances, _this.attendances)&&const DeepCollectionEquality().equals(other.dailyHomeworkMarks, _this.dailyHomeworkMarks)&&const DeepCollectionEquality().equals(other.homeworkQuizzes, _this.homeworkQuizzes)&&const DeepCollectionEquality().equals(other.submissions, _this.submissions)&&const DeepCollectionEquality().equals(other.testResults, _this.testResults)&&const DeepCollectionEquality().equals(other.payments, _this.payments));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ChildStudent;
-  return Object.hash(runtimeType,_this.id,_this.firstName,_this.lastName,_this.phone,_this.studentProfile,_this.classroom,const DeepCollectionEquality().hash(_this.attendances),const DeepCollectionEquality().hash(_this.dailyHomeworkMarks),const DeepCollectionEquality().hash(_this.submissions),const DeepCollectionEquality().hash(_this.testResults),const DeepCollectionEquality().hash(_this.payments));
+  return Object.hash(runtimeType,_this.id,_this.firstName,_this.lastName,_this.phone,_this.studentProfile,_this.classroom,const DeepCollectionEquality().hash(_this.attendances),const DeepCollectionEquality().hash(_this.dailyHomeworkMarks),const DeepCollectionEquality().hash(_this.homeworkQuizzes),const DeepCollectionEquality().hash(_this.submissions),const DeepCollectionEquality().hash(_this.testResults),const DeepCollectionEquality().hash(_this.payments));
 }
 
 @override
 String toString() {
   final _this = this as ChildStudent;
-  return 'ChildStudent(id: ${_this.id}, firstName: ${_this.firstName}, lastName: ${_this.lastName}, phone: ${_this.phone}, studentProfile: ${_this.studentProfile}, classroom: ${_this.classroom}, attendances: ${_this.attendances}, dailyHomeworkMarks: ${_this.dailyHomeworkMarks}, submissions: ${_this.submissions}, testResults: ${_this.testResults}, payments: ${_this.payments})';
+  return 'ChildStudent(id: ${_this.id}, firstName: ${_this.firstName}, lastName: ${_this.lastName}, phone: ${_this.phone}, studentProfile: ${_this.studentProfile}, classroom: ${_this.classroom}, attendances: ${_this.attendances}, dailyHomeworkMarks: ${_this.dailyHomeworkMarks}, homeworkQuizzes: ${_this.homeworkQuizzes}, submissions: ${_this.submissions}, testResults: ${_this.testResults}, payments: ${_this.payments})';
 }
 
 
@@ -2942,7 +3221,7 @@ abstract mixin class $ChildStudentCopyWith<$Res>  {
   factory $ChildStudentCopyWith(ChildStudent value, $Res Function(ChildStudent) _then) = _$ChildStudentCopyWithImpl;
 @useResult
 $Res call({
- String id, String firstName, String lastName, String? phone, ChildProfile? studentProfile, ClassroomRef? classroom, List<AttendanceEntry> attendances, List<HomeworkMarkEntry> dailyHomeworkMarks, List<SubmissionEntry> submissions, List<TestResultEntry> testResults, List<ChildPayment> payments
+ String id, String firstName, String lastName, String? phone, ChildProfile? studentProfile, ClassroomRef? classroom, List<AttendanceEntry> attendances, List<HomeworkMarkEntry> dailyHomeworkMarks, List<HomeworkQuizEntry> homeworkQuizzes, List<SubmissionEntry> submissions, List<TestResultEntry> testResults, List<ChildPayment> payments
 });
 
 
@@ -2959,7 +3238,7 @@ class _$ChildStudentCopyWithImpl<$Res>
 
 /// Create a copy of ChildStudent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? firstName = null,Object? lastName = null,Object? phone = freezed,Object? studentProfile = freezed,Object? classroom = freezed,Object? attendances = null,Object? dailyHomeworkMarks = null,Object? submissions = null,Object? testResults = null,Object? payments = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? firstName = null,Object? lastName = null,Object? phone = freezed,Object? studentProfile = freezed,Object? classroom = freezed,Object? attendances = null,Object? dailyHomeworkMarks = null,Object? homeworkQuizzes = null,Object? submissions = null,Object? testResults = null,Object? payments = null,}) {
   return _then(ChildStudent(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,firstName: null == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
@@ -2969,7 +3248,8 @@ as String?,studentProfile: freezed == studentProfile ? _self.studentProfile : st
 as ChildProfile?,classroom: freezed == classroom ? _self.classroom : classroom // ignore: cast_nullable_to_non_nullable
 as ClassroomRef?,attendances: null == attendances ? _self.attendances : attendances // ignore: cast_nullable_to_non_nullable
 as List<AttendanceEntry>,dailyHomeworkMarks: null == dailyHomeworkMarks ? _self.dailyHomeworkMarks : dailyHomeworkMarks // ignore: cast_nullable_to_non_nullable
-as List<HomeworkMarkEntry>,submissions: null == submissions ? _self.submissions : submissions // ignore: cast_nullable_to_non_nullable
+as List<HomeworkMarkEntry>,homeworkQuizzes: null == homeworkQuizzes ? _self.homeworkQuizzes : homeworkQuizzes // ignore: cast_nullable_to_non_nullable
+as List<HomeworkQuizEntry>,submissions: null == submissions ? _self.submissions : submissions // ignore: cast_nullable_to_non_nullable
 as List<SubmissionEntry>,testResults: null == testResults ? _self.testResults : testResults // ignore: cast_nullable_to_non_nullable
 as List<TestResultEntry>,payments: null == payments ? _self.payments : payments // ignore: cast_nullable_to_non_nullable
 as List<ChildPayment>,
@@ -3081,10 +3361,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String firstName,  String lastName,  String? phone,  ChildProfile? studentProfile,  ClassroomRef? classroom,  List<AttendanceEntry> attendances,  List<HomeworkMarkEntry> dailyHomeworkMarks,  List<SubmissionEntry> submissions,  List<TestResultEntry> testResults,  List<ChildPayment> payments)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String firstName,  String lastName,  String? phone,  ChildProfile? studentProfile,  ClassroomRef? classroom,  List<AttendanceEntry> attendances,  List<HomeworkMarkEntry> dailyHomeworkMarks,  List<HomeworkQuizEntry> homeworkQuizzes,  List<SubmissionEntry> submissions,  List<TestResultEntry> testResults,  List<ChildPayment> payments)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChildStudent() when $default != null:
-return $default(_that.id,_that.firstName,_that.lastName,_that.phone,_that.studentProfile,_that.classroom,_that.attendances,_that.dailyHomeworkMarks,_that.submissions,_that.testResults,_that.payments);case _:
+return $default(_that.id,_that.firstName,_that.lastName,_that.phone,_that.studentProfile,_that.classroom,_that.attendances,_that.dailyHomeworkMarks,_that.homeworkQuizzes,_that.submissions,_that.testResults,_that.payments);case _:
   return orElse();
 
 }
@@ -3102,10 +3382,10 @@ return $default(_that.id,_that.firstName,_that.lastName,_that.phone,_that.studen
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String firstName,  String lastName,  String? phone,  ChildProfile? studentProfile,  ClassroomRef? classroom,  List<AttendanceEntry> attendances,  List<HomeworkMarkEntry> dailyHomeworkMarks,  List<SubmissionEntry> submissions,  List<TestResultEntry> testResults,  List<ChildPayment> payments)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String firstName,  String lastName,  String? phone,  ChildProfile? studentProfile,  ClassroomRef? classroom,  List<AttendanceEntry> attendances,  List<HomeworkMarkEntry> dailyHomeworkMarks,  List<HomeworkQuizEntry> homeworkQuizzes,  List<SubmissionEntry> submissions,  List<TestResultEntry> testResults,  List<ChildPayment> payments)  $default,) {final _that = this;
 switch (_that) {
 case _ChildStudent():
-return $default(_that.id,_that.firstName,_that.lastName,_that.phone,_that.studentProfile,_that.classroom,_that.attendances,_that.dailyHomeworkMarks,_that.submissions,_that.testResults,_that.payments);case _:
+return $default(_that.id,_that.firstName,_that.lastName,_that.phone,_that.studentProfile,_that.classroom,_that.attendances,_that.dailyHomeworkMarks,_that.homeworkQuizzes,_that.submissions,_that.testResults,_that.payments);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3122,10 +3402,10 @@ return $default(_that.id,_that.firstName,_that.lastName,_that.phone,_that.studen
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String firstName,  String lastName,  String? phone,  ChildProfile? studentProfile,  ClassroomRef? classroom,  List<AttendanceEntry> attendances,  List<HomeworkMarkEntry> dailyHomeworkMarks,  List<SubmissionEntry> submissions,  List<TestResultEntry> testResults,  List<ChildPayment> payments)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String firstName,  String lastName,  String? phone,  ChildProfile? studentProfile,  ClassroomRef? classroom,  List<AttendanceEntry> attendances,  List<HomeworkMarkEntry> dailyHomeworkMarks,  List<HomeworkQuizEntry> homeworkQuizzes,  List<SubmissionEntry> submissions,  List<TestResultEntry> testResults,  List<ChildPayment> payments)?  $default,) {final _that = this;
 switch (_that) {
 case _ChildStudent() when $default != null:
-return $default(_that.id,_that.firstName,_that.lastName,_that.phone,_that.studentProfile,_that.classroom,_that.attendances,_that.dailyHomeworkMarks,_that.submissions,_that.testResults,_that.payments);case _:
+return $default(_that.id,_that.firstName,_that.lastName,_that.phone,_that.studentProfile,_that.classroom,_that.attendances,_that.dailyHomeworkMarks,_that.homeworkQuizzes,_that.submissions,_that.testResults,_that.payments);case _:
   return null;
 
 }
@@ -3137,7 +3417,7 @@ return $default(_that.id,_that.firstName,_that.lastName,_that.phone,_that.studen
 @JsonSerializable()
 
 class _ChildStudent extends ChildStudent {
-  const _ChildStudent({required this.id, this.firstName = '', this.lastName = '', this.phone, this.studentProfile, this.classroom,  List<AttendanceEntry> attendances = const <AttendanceEntry>[],  List<HomeworkMarkEntry> dailyHomeworkMarks = const <HomeworkMarkEntry>[],  List<SubmissionEntry> submissions = const <SubmissionEntry>[],  List<TestResultEntry> testResults = const <TestResultEntry>[],  List<ChildPayment> payments = const <ChildPayment>[]}): _attendances = attendances,_dailyHomeworkMarks = dailyHomeworkMarks,_submissions = submissions,_testResults = testResults,_payments = payments,super._();
+  const _ChildStudent({required this.id, this.firstName = '', this.lastName = '', this.phone, this.studentProfile, this.classroom,  List<AttendanceEntry> attendances = const <AttendanceEntry>[],  List<HomeworkMarkEntry> dailyHomeworkMarks = const <HomeworkMarkEntry>[],  List<HomeworkQuizEntry> homeworkQuizzes = const <HomeworkQuizEntry>[],  List<SubmissionEntry> submissions = const <SubmissionEntry>[],  List<TestResultEntry> testResults = const <TestResultEntry>[],  List<ChildPayment> payments = const <ChildPayment>[]}): _attendances = attendances,_dailyHomeworkMarks = dailyHomeworkMarks,_homeworkQuizzes = homeworkQuizzes,_submissions = submissions,_testResults = testResults,_payments = payments,super._();
   factory _ChildStudent.fromJson(Map<String, dynamic> json) => _$ChildStudentFromJson(json);
 
 @override final  String id;
@@ -3158,6 +3438,13 @@ class _ChildStudent extends ChildStudent {
   if (_dailyHomeworkMarks is EqualUnmodifiableListView) return _dailyHomeworkMarks;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_dailyHomeworkMarks);
+}
+
+ final  List<HomeworkQuizEntry> _homeworkQuizzes;
+@override@JsonKey() List<HomeworkQuizEntry> get homeworkQuizzes {
+  if (_homeworkQuizzes is EqualUnmodifiableListView) return _homeworkQuizzes;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_homeworkQuizzes);
 }
 
  final  List<SubmissionEntry> _submissions;
@@ -3195,18 +3482,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChildStudent&&(identical(other.id, id) || other.id == id)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.studentProfile, studentProfile) || other.studentProfile == studentProfile)&&(identical(other.classroom, classroom) || other.classroom == classroom)&&const DeepCollectionEquality().equals(other.attendances, _attendances)&&const DeepCollectionEquality().equals(other.dailyHomeworkMarks, _dailyHomeworkMarks)&&const DeepCollectionEquality().equals(other.submissions, _submissions)&&const DeepCollectionEquality().equals(other.testResults, _testResults)&&const DeepCollectionEquality().equals(other.payments, _payments));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChildStudent&&(identical(other.id, id) || other.id == id)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.studentProfile, studentProfile) || other.studentProfile == studentProfile)&&(identical(other.classroom, classroom) || other.classroom == classroom)&&const DeepCollectionEquality().equals(other.attendances, _attendances)&&const DeepCollectionEquality().equals(other.dailyHomeworkMarks, _dailyHomeworkMarks)&&const DeepCollectionEquality().equals(other.homeworkQuizzes, _homeworkQuizzes)&&const DeepCollectionEquality().equals(other.submissions, _submissions)&&const DeepCollectionEquality().equals(other.testResults, _testResults)&&const DeepCollectionEquality().equals(other.payments, _payments));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,firstName,lastName,phone,studentProfile,classroom,const DeepCollectionEquality().hash(_attendances),const DeepCollectionEquality().hash(_dailyHomeworkMarks),const DeepCollectionEquality().hash(_submissions),const DeepCollectionEquality().hash(_testResults),const DeepCollectionEquality().hash(_payments));
+    return Object.hash(runtimeType,id,firstName,lastName,phone,studentProfile,classroom,const DeepCollectionEquality().hash(_attendances),const DeepCollectionEquality().hash(_dailyHomeworkMarks),const DeepCollectionEquality().hash(_homeworkQuizzes),const DeepCollectionEquality().hash(_submissions),const DeepCollectionEquality().hash(_testResults),const DeepCollectionEquality().hash(_payments));
 }
 
 @override
 String toString() {
-    return 'ChildStudent(id: $id, firstName: $firstName, lastName: $lastName, phone: $phone, studentProfile: $studentProfile, classroom: $classroom, attendances: $attendances, dailyHomeworkMarks: $dailyHomeworkMarks, submissions: $submissions, testResults: $testResults, payments: $payments)';
+    return 'ChildStudent(id: $id, firstName: $firstName, lastName: $lastName, phone: $phone, studentProfile: $studentProfile, classroom: $classroom, attendances: $attendances, dailyHomeworkMarks: $dailyHomeworkMarks, homeworkQuizzes: $homeworkQuizzes, submissions: $submissions, testResults: $testResults, payments: $payments)';
 }
 
 
@@ -3217,7 +3504,7 @@ abstract mixin class _$ChildStudentCopyWith<$Res> implements $ChildStudentCopyWi
   factory _$ChildStudentCopyWith(_ChildStudent value, $Res Function(_ChildStudent) _then) = __$ChildStudentCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String firstName, String lastName, String? phone, ChildProfile? studentProfile, ClassroomRef? classroom, List<AttendanceEntry> attendances, List<HomeworkMarkEntry> dailyHomeworkMarks, List<SubmissionEntry> submissions, List<TestResultEntry> testResults, List<ChildPayment> payments
+ String id, String firstName, String lastName, String? phone, ChildProfile? studentProfile, ClassroomRef? classroom, List<AttendanceEntry> attendances, List<HomeworkMarkEntry> dailyHomeworkMarks, List<HomeworkQuizEntry> homeworkQuizzes, List<SubmissionEntry> submissions, List<TestResultEntry> testResults, List<ChildPayment> payments
 });
 
 
@@ -3234,7 +3521,7 @@ class __$ChildStudentCopyWithImpl<$Res>
 
 /// Create a copy of ChildStudent
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? firstName = null,Object? lastName = null,Object? phone = freezed,Object? studentProfile = freezed,Object? classroom = freezed,Object? attendances = null,Object? dailyHomeworkMarks = null,Object? submissions = null,Object? testResults = null,Object? payments = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? firstName = null,Object? lastName = null,Object? phone = freezed,Object? studentProfile = freezed,Object? classroom = freezed,Object? attendances = null,Object? dailyHomeworkMarks = null,Object? homeworkQuizzes = null,Object? submissions = null,Object? testResults = null,Object? payments = null,}) {
   return _then(_ChildStudent(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,firstName: null == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
@@ -3244,7 +3531,8 @@ as String?,studentProfile: freezed == studentProfile ? _self.studentProfile : st
 as ChildProfile?,classroom: freezed == classroom ? _self.classroom : classroom // ignore: cast_nullable_to_non_nullable
 as ClassroomRef?,attendances: null == attendances ? _self._attendances : attendances // ignore: cast_nullable_to_non_nullable
 as List<AttendanceEntry>,dailyHomeworkMarks: null == dailyHomeworkMarks ? _self._dailyHomeworkMarks : dailyHomeworkMarks // ignore: cast_nullable_to_non_nullable
-as List<HomeworkMarkEntry>,submissions: null == submissions ? _self._submissions : submissions // ignore: cast_nullable_to_non_nullable
+as List<HomeworkMarkEntry>,homeworkQuizzes: null == homeworkQuizzes ? _self._homeworkQuizzes : homeworkQuizzes // ignore: cast_nullable_to_non_nullable
+as List<HomeworkQuizEntry>,submissions: null == submissions ? _self._submissions : submissions // ignore: cast_nullable_to_non_nullable
 as List<SubmissionEntry>,testResults: null == testResults ? _self._testResults : testResults // ignore: cast_nullable_to_non_nullable
 as List<TestResultEntry>,payments: null == payments ? _self._payments : payments // ignore: cast_nullable_to_non_nullable
 as List<ChildPayment>,

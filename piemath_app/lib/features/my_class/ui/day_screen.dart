@@ -7,6 +7,7 @@ import '../../../core/time/date_mn.dart';
 import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/marks/marks.dart';
+import '../../../shared/quiz_score/quiz_score.dart';
 import '../data/hub_models.dart';
 import '../data/my_class_repository.dart';
 import '../domain/hub_logic.dart';
@@ -154,14 +155,29 @@ class _MarksCard extends StatelessWidget {
                   spacing: AppSpace.sm,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    HomeworkMarkView(status: hw.status),
-                    if (hw.checkedOn != null && hw.status != null)
+                    if (hw.status != null || hw.quiz == null) HomeworkMarkView(status: hw.status),
+                    if (hw.checkedOn != null && (hw.status != null || hw.quiz != null))
                       Text('${dayShort(hw.checkedOn!)} шалгасан', style: context.text.bodySmall),
                   ],
                 ),
               ),
             ],
           ),
+          // Шалгалтаар шалгасан оноо (эзэн 2026-11-08 19:08)
+          if (hw.quiz case final q?) ...[
+            const SizedBox(height: AppSpace.sm),
+            Row(
+              children: [
+                SizedBox(width: 96, child: Text('Шалгалт', style: dim)),
+                Expanded(
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: QuizScoreChip(score: q.score, problemCount: q.problemCount, withLabel: false),
+                  ),
+                ),
+              ],
+            ),
+          ],
           if (hw.comment != null && hw.comment!.trim().isNotEmpty) ...[
             const SizedBox(height: AppSpace.md),
             TeacherComment(text: hw.comment!),
