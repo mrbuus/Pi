@@ -37,7 +37,15 @@ class MetaChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[Icon(icon, size: 14, color: color), const SizedBox(width: 6)],
-            Text(label, style: context.text.labelMedium?.copyWith(color: tone == ChipTone.neutral ? c.ink : color)),
+            // Урт шошго нарийн мөрөнд халихгүй, төгсгөлөөрөө таслагдана
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.text.labelMedium?.copyWith(color: tone == ChipTone.neutral ? c.ink : color),
+              ),
+            ),
           ],
         ),
       ),
