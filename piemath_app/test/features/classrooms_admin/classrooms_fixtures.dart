@@ -114,8 +114,7 @@ FakeHttp classroomsHttp({bool canManageStudents = true, FakeHandler? registry}) 
   ..json('POST', '/classrooms/c3/enroll', {'id': 'e3'})
   ..json('POST', '/classrooms/c1/remove-student', {'removed': true})
   ..json('PATCH', '/classrooms/c1', {'id': 'c1'})
-  ..json('PATCH', '/classrooms/c1/teachers', {'id': 'c1'})
-  ..json('POST', '/classrooms/c1/disband', {'disbanded': true, 'affectedStudentCount': 2});
+  ..json('PATCH', '/classrooms/c1/teachers', {'id': 'c1'});
 
 Map<String, Object?> requestBody(FakeHttp http, String method, String path) =>
     (http.requests.lastWhere((r) => r.method == method && r.path == path).data as Map).cast();

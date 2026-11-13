@@ -12,6 +12,7 @@ import '../data/staff_models.dart';
 import '../data/teacher_models.dart';
 import '../domain/board_logic.dart';
 import 'board_card.dart';
+import 'board_quiz.dart';
 import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
 
@@ -99,11 +100,25 @@ class BoardSummaryBar extends ConsumerWidget {
       ),
     );
     final c = context.colors;
+    // Тэмдэглээгүй ч шалгалтын оноотой бол «Тэмдэглээгүй»-д тоолохгүй (эзэн 2026-11-08).
+    final quiz = s.homework ? ref.watch(quizScoredProvider(args)).ids : const <String>{};
+    final covered = quiz.isEmpty
+        ? 0
+        : ref.watch(boardControllerProvider(args).select((b) => quizCoveredUnmarked(b.studentIds, b.recs, quiz)));
+    final k = s.counts;
+    final hwCounts = covered == 0
+        ? k
+        : StatusCounts(
+            attendance: k.attendance,
+            attUnmarked: k.attUnmarked,
+            homework: k.homework,
+            hwUnmarked: k.hwUnmarked - covered,
+          );
     final rows = [
       ('Ирц', attendanceCounts(context, s.counts, total: s.total)),
       (
         'Даалгавар',
-        homeworkCounts(context, s.homework ? s.counts : null, total: s.total, sent: s.sent, online: online),
+        homeworkCounts(context, s.homework ? hwCounts : null, total: s.total, sent: s.sent, online: online),
       ),
     ];
     final grid = Table(
@@ -506,7 +521,8 @@ class _BoardFiltersState extends ConsumerState<BoardFilters> {
   Widget build(BuildContext context) {
     final s = ref.watch(boardControllerProvider(widget.args));
     final c = context.colors;
-    final data = BoardFilterData(recs: s.recs, risk: s.risk, sent: s.sent.toSet(), online: widget.online);
+    final quiz = s.homework ? ref.watch(quizScoredProvider(widget.args)).ids : const <String>{};
+    final data = BoardFilterData(recs: s.recs, risk: s.risk, sent: s.sent.toSet(), online: widget.online, quiz: quiz);
     final ids = s.studentIds;
     int count(BoardFilter f) => ids.where((id) => data.matches(f, id)).length;
     final filter = widget.filter;
@@ -932,12 +948,14 @@ class BoardBulkActions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final homework = ref.watch(boardControllerProvider(args).select((s) => s.homework));
+    final quiz = homework ? ref.watch(quizScoredProvider(args)).ids : const <String>{};
     final s = ref.watch(
       boardControllerProvider(args).select(
         (s) => (
           present: bulkPresentCandidates(s.studentIds, s.recs).length,
-          done: bulkDoneCandidates(s.studentIds, s.recs).length,
-          skipped: bulkDoneSkipped(s.studentIds, s.recs),
+          done: bulkDoneCandidates(s.studentIds, s.recs, quizScored: quiz).length,
+          skipped: bulkDoneSkipped(s.studentIds, s.recs, quizScored: quiz),
           undoAtt: s.bulkAtt.length,
           undoHw: s.bulkHw.length,
           busy: s.bulkBusy,
@@ -964,7 +982,7 @@ class BoardBulkActions extends ConsumerWidget {
           count: s.done,
           undo: s.undoHw,
           busy: s.busy,
-          onApply: ctl.markAllDone,
+          onApply: () => ctl.markAllDone(quizScored: quiz),
           onUndo: ctl.undoAllDone,
         ),
     ];

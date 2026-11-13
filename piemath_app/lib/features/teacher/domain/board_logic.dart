@@ -291,17 +291,24 @@ List<String> bulkPresentCandidates(Iterable<String> ids, Map<String, DayRec> rec
     if ((recs[id] ?? DayRec.empty).att == null) id,
 ];
 
-/// «Бүгд хийсэн» — ирсэн/хоцорсон, даалгавар нь тэмдэглээгүй сурагчид.
-List<String> bulkDoneCandidates(Iterable<String> ids, Map<String, DayRec> recs) => [
-  for (final id in ids)
-    if ((recs[id] ?? DayRec.empty).attended && recs[id]!.hw == null) id,
-];
+/// «Бүгд хийсэн» — ирсэн/хоцорсон, даалгавар нь тэмдэглээгүй сурагчид. Шалгалтын оноотой сурагч
+/// ([quizScored]) орохгүй — даалгаврыг нь шалгасан (эзэн 2026-11-08).
+List<String> bulkDoneCandidates(Iterable<String> ids, Map<String, DayRec> recs, {Set<String> quizScored = const {}}) =>
+    [
+      for (final id in ids)
+        if ((recs[id] ?? DayRec.empty).attended && recs[id]!.hw == null && !quizScored.contains(id)) id,
+    ];
 
 /// «Бүгд хийсэн»-д алгасах (ирээгүй, ирц тэмдэглээгүй, даалгавар нь тэмдэглээгүй) сурагчийн тоо.
-int bulkDoneSkipped(Iterable<String> ids, Map<String, DayRec> recs) => ids.where((id) {
-  final r = recs[id] ?? DayRec.empty;
-  return !r.attended && r.hw == null;
-}).length;
+int bulkDoneSkipped(Iterable<String> ids, Map<String, DayRec> recs, {Set<String> quizScored = const {}}) =>
+    ids.where((id) {
+      final r = recs[id] ?? DayRec.empty;
+      return !r.attended && r.hw == null && !quizScored.contains(id);
+    }).length;
+
+/// Даалгавар тэмдэглээгүй ч шалгалтын оноотой сурагчийн тоо — «Тэмдэглээгүй»-ээс хасна (эзэн 2026-11-08).
+int quizCoveredUnmarked(Iterable<String> ids, Map<String, DayRec> recs, Set<String> quizScored) =>
+    ids.where((id) => (recs[id] ?? DayRec.empty).hw == null && quizScored.contains(id)).length;
 
 /// Одоо явагдаж буй хичээл (тухайн өдөр өнөөдөр бол). [nowMinute] — UB шөнө дундаас хойших минут.
 BoardLesson? lessonAt(List<BoardLesson> lessons, int nowMinute) {
@@ -385,7 +392,9 @@ String? previousLessonLabel(String? date) =>
 String riskText(List<RiskFlag>? flags) => flags == null ? '' : flags.map((f) => f.label).join(', ');
 
 /// Даалгавраа илгээсэн ч багш одоохондоо тэмдэглээгүй (эзэн 2026-11-03) — карт өөр өнгөөр тодорно.
-bool awaitingCheck(DayRec r, {required bool homework, required bool sent}) => homework && sent && r.hw == null;
+/// Шалгалтын оноотой бол даалгаврыг шалгасанд тооцно (эзэн 2026-11-08).
+bool awaitingCheck(DayRec r, {required bool homework, required bool sent, bool quizScored = false}) =>
+    homework && sent && r.hw == null && !quizScored;
 
 /// Хаалттай картын тэмдэглэлийн товч: ирцийн ба даалгаврын тэмдэглэл таслалаар.
 String notePreview(DayRec r, {required bool homework}) =>
@@ -473,7 +482,13 @@ enum BoardFilter {
 /// Шүүлтүүрт шаардлагатай өгөгдөл.
 @immutable
 class BoardFilterData {
-  const BoardFilterData({required this.recs, required this.risk, required this.sent, required this.online});
+  const BoardFilterData({
+    required this.recs,
+    required this.risk,
+    required this.sent,
+    required this.online,
+    this.quiz = const {},
+  });
 
   final Map<String, DayRec> recs;
   final Map<String, List<RiskFlag>> risk;
@@ -482,9 +497,13 @@ class BoardFilterData {
   /// Онлайнаар бодсон сурагчид.
   final Set<String> online;
 
+  /// Энэ өдрийн шалгалтын оноотой сурагчид — даалгаврын «Тэмдэглээгүй»-д тоолохгүй.
+  final Set<String> quiz;
+
   bool matches(BoardFilter f, String id) {
     final rec = recs[id] ?? DayRec.empty;
     return switch (f) {
+      BoardFilter.hwNone => rec.hw == null && !quiz.contains(id),
       BoardFilter.risk => (risk[id] ?? const []).isNotEmpty,
       BoardFilter.hwSent => sent.contains(id),
       BoardFilter.onlineYes => online.contains(id),
@@ -494,10 +513,7 @@ class BoardFilterData {
       BoardFilter.attAbsent ||
       BoardFilter.attExcused ||
       BoardFilter.attNone => BoardFilter.att(rec.att) == f,
-      BoardFilter.hwDone ||
-      BoardFilter.hwPartial ||
-      BoardFilter.hwNotDone ||
-      BoardFilter.hwNone => BoardFilter.hw(rec.hw) == f,
+      BoardFilter.hwDone || BoardFilter.hwPartial || BoardFilter.hwNotDone => BoardFilter.hw(rec.hw) == f,
     };
   }
 

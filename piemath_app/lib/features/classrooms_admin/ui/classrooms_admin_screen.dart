@@ -24,7 +24,8 @@ abstract final class ClassroomFilters {
 }
 
 /// Ангиуд (`/app/admin/classrooms`, вэбийн `ClassroomsClient`) — Админ, Багш+. Хайлт, шүүлтүүр, анги бүрийн
-/// «Удирдах», «Анги тараах»; шинэ анги. Таблетад баруун талд дэлгэрэнгүй.
+/// «Удирдах», «Ангийн самбар»; шинэ анги. Таблетад баруун талд дэлгэрэнгүй. «Анги тараах» товчийг бүрмөсөн
+/// авсан (эзэн 2026-11-10, вэбийн f7bcab8f) — API, өгөгдөл хэвээр.
 class ClassroomsAdminScreen extends ConsumerStatefulWidget {
   const ClassroomsAdminScreen({super.key});
 
@@ -65,14 +66,12 @@ class _ClassroomsAdminScreenState extends ConsumerState<ClassroomsAdminScreen> {
   void _open(AdminClassroom c) => context.push('/app/admin/classrooms/${Uri.encodeComponent(c.id)}');
 
   Future<void> _menu(AdminClassroom c) async {
-    final access = ref.read(classroomsAccessProvider);
     final picked = await showSelectSheet<String>(
       context,
       title: c.name,
       options: [
         const SelectOption('open', 'Удирдах', icon: AppIcons.settings),
         const SelectOption('board', 'Ангийн самбар', icon: AppIcons.chart),
-        if (access.canDisband) const SelectOption('disband', 'Анги тараах', icon: AppIcons.doorOpen),
       ],
     );
     if (!mounted) return;
@@ -81,21 +80,7 @@ class _ClassroomsAdminScreenState extends ConsumerState<ClassroomsAdminScreen> {
         _open(c);
       case 'board':
         await context.push('/app/classes/${Uri.encodeComponent(c.id)}');
-      case 'disband':
-        await _disband(c);
     }
-  }
-
-  Future<void> _disband(AdminClassroom c) async {
-    final n = await showDisbandSheet(context, ref, c);
-    if (n == null || !mounted) return;
-    _list.updateWhere((r) => r.id == c.id, (r) => r.copyWith(studentCount: 0));
-    ref
-      ..invalidate(adminClassroomsProvider)
-      ..invalidate(adminClassroomDetailProvider(c.id))
-      ..invalidate(registryProvider);
-    _lastQuery = null;
-    showSnack(context, '$n сурагчийг ангиас гаргалаа. Түүх хадгалагдсан');
   }
 
   Future<void> _create() async {

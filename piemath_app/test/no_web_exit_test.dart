@@ -53,6 +53,7 @@ void main() {
       'lib/features/exam/ui/widgets/review_parts.dart', // YouTube бодолт
       'lib/features/finance/ui/reconcile_sheets.dart', // tel: (хүүхдийн, эцэг эхийн утас)
       'lib/features/payments/ui/ledger_screens.dart', // tel: (сурагч, аав, ээж)
+      'lib/features/teacher/ui/class_checks_screen.dart', // tel: (Чекийн сурагчийн утас)
     };
     final callers = [
       for (final f in sources)

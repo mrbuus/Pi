@@ -11,8 +11,10 @@ import '../application/staff_providers.dart';
 import '../application/teacher_providers.dart';
 import '../domain/board_logic.dart';
 import 'board_card.dart';
+import 'board_guests.dart';
 import 'board_other_info.dart';
 import 'board_parts.dart';
+import 'board_quiz.dart';
 import 'criteria_sheet.dart';
 import 'day_pdf_card.dart';
 import 'lesson_extras.dart';
@@ -167,6 +169,7 @@ class _BoardBodyState extends ConsumerState<_BoardBody> {
         if (marks?.students.containsKey(id) ?? false) id,
     };
     final filter = _filter;
+    final quizScored = homework ? ref.watch(quizScoredProvider(args)).ids : const <String>{};
     final shown = filter == null
         ? order
         : ref
@@ -178,11 +181,14 @@ class _BoardBodyState extends ConsumerState<_BoardBody> {
                       risk: s.risk,
                       sent: s.sent.toSet(),
                       online: onlineIds,
+                      quiz: quizScored,
                     ).apply(filter, order),
                   ),
                 ),
               )
               .ids;
+    // Онооны талбаруудын «Дараах» дараалал — жагсаалтад харагдаж буйгаар.
+    if (homework) ref.read(quizFocusChainProvider(args)).order = shown;
     final wide = isBoardWide(context);
     final upcoming = lessonUpcoming(args.date, today.dateKey, today.hour * 60 + today.minute, p.lessons);
     const gutter = EdgeInsets.symmetric(horizontal: AppSpace.gutter);
@@ -246,6 +252,8 @@ class _BoardBodyState extends ConsumerState<_BoardBody> {
                 wide: wide,
               ),
               const SizedBox(height: AppSpace.sm),
+              // Шалгалтаар даалгавар шалгах (эзэн 2026-11-08) — шүүлтүүрийн доор.
+              if (homework) ...[QuizBar(args: args, studentIds: order), const SizedBox(height: AppSpace.sm)],
               if (upcoming) ...[const BoardUpcomingNote(), const SizedBox(height: AppSpace.sm)],
             ],
           ),
@@ -286,6 +294,16 @@ class _BoardBodyState extends ConsumerState<_BoardBody> {
             children: [
               const SizedBox(height: AppSpace.xs),
               BoardBulkActions(args: args, wide: wide),
+              // Нөхөлт: өөр ангиас нөхөж суусан сурагчид, нэмэх товч (эзэн 2026-11-08).
+              gap,
+              GuestSection(
+                hostId: args.classId,
+                hostName: p.classroom.name,
+                date: args.date,
+                today: today.dateKey,
+                homework: homework,
+                wide: wide,
+              ),
               if (p.isOnline) ...[gap, BoardOnlineClassLink(classId: p.classroom.id)],
               const SizedBox(height: AppSpace.lg),
               BoardLegend(args: args, onlineTests: hasOnline, past: past),

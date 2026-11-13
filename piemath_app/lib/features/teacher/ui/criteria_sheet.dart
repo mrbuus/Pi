@@ -148,6 +148,17 @@ class _CriteriaFormState extends ConsumerState<_CriteriaForm> {
             max: 6,
             onChanged: (v) => setState(() => _draft = d.copyWith(missingStreak: v)),
           ),
+          // Шалгалтаар даалгавар шалгасан оноо (эзэн 2026-11-08): 0 = тооцохгүй.
+          _StepRow(
+            label: 'Сүүлийн шалгалтын доод хувь',
+            value: d.minQuiz,
+            min: 0,
+            max: 100,
+            step: 5,
+            suffix: '%',
+            zeroLabel: 'Тооцохгүй',
+            onChanged: (v) => setState(() => _draft = d.copyWith(minQuiz: v)),
+          ),
           if (_error != null) ...[
             const SizedBox(height: AppSpace.sm),
             Text(_error!, style: context.text.bodySmall?.copyWith(color: c.error)),
@@ -189,6 +200,7 @@ class _StepRow extends StatelessWidget {
     required this.onChanged,
     this.step = 1,
     this.suffix = '',
+    this.zeroLabel,
   });
 
   final String label;
@@ -197,12 +209,17 @@ class _StepRow extends StatelessWidget {
   final int max;
   final int step;
   final String suffix;
+
+  /// 0 үед утгын оронд (ж: «Тооцохгүй»).
+  final String? zeroLabel;
   final ValueChanged<int> onChanged;
+
+  String get _shown => value == 0 && zeroLabel != null ? zeroLabel! : '$value$suffix';
 
   @override
   Widget build(BuildContext context) => Semantics(
     container: true,
-    label: '$label $value$suffix',
+    label: '$label $_shown',
     child: Row(
       children: [
         Expanded(
@@ -215,8 +232,14 @@ class _StepRow extends StatelessWidget {
           onPressed: value - step < min ? null : () => onChanged(value - step),
         ),
         SizedBox(
-          width: 52,
-          child: Text('$value$suffix', textAlign: TextAlign.center, style: context.text.titleSmall),
+          width: 84,
+          child: Text(
+            _shown,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.text.titleSmall,
+          ),
         ),
         IconButton(
           tooltip: '$label, нэмэгдүүлэх',

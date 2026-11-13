@@ -10,7 +10,8 @@ List<T> _list<T>(Object? j, T Function(Map<String, Object?>) f) => [
 
 /// Ангийн удирдлагын API (`api/src/classrooms/classrooms.controller.ts`). Эрхийг сервер шалгана:
 /// жагсаалт, дэлгэрэнгүй — ажилтан бүр; нэмэх/шилжүүлэх — Админ, Багш+; хасах — Админ эсвэл эрхтэй Багш+;
-/// засах, архивлах — Админ; багш оноох, тараах, шинэ анги — Админ, Багш+.
+/// засах, архивлах — Админ; багш оноох, шинэ анги — Админ, Багш+. «Анги тараах»-ыг апп-д
+/// гаргахгүй (эзэн 2026-11-10).
 class ClassroomsAdminRepository {
   const ClassroomsAdminRepository(this._api);
 
@@ -60,13 +61,6 @@ class ClassroomsAdminRepository {
   Future<void> archive(String id, String confirmCode) =>
       // ApiClient.delete-д query байхгүй тул замд бичнэ.
       _api.delete<Object?>('/classrooms/${_enc(id)}?confirmCode=${_enc(confirmCode)}');
-
-  /// Анги тараах — идэвхтэй бүх сурагчийн бичилт хаагдана (`leftAt`). Хэдэн сурагч гарсныг буцаана.
-  Future<int> disband(String id) => _api.post(
-    '/classrooms/${_enc(id)}/disband',
-    body: const <String, Object?>{},
-    parse: (j) => (asMap(j)['affectedStudentCount'] as num?)?.toInt() ?? 0,
-  );
 
   /// Шинэ анги (Админ, Багш+).
   Future<AdminClassroom> create({

@@ -277,6 +277,8 @@ void main() {
         'maxLates': 4,
         'minHomework': 60,
         'missingStreak': 2,
+        // Хуучин серверийн хариунд minQuiz байхгүй бол анхдагч 50 — ҮРГЭЛЖ илгээнэ (эзэн 2026-11-08).
+        'minQuiz': 50,
       });
       expect(http.count('GET', '/attendance/classrooms/c1/marks'), greaterThan(marksBefore));
     });

@@ -7,10 +7,13 @@ import 'package:go_router/go_router.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/marks/marks.dart';
 import '../application/board_controller.dart';
+import '../application/quiz_controller.dart';
 import '../application/staff_providers.dart';
 import '../data/staff_models.dart';
 import '../domain/board_logic.dart';
+import 'board_guests.dart';
 import 'board_note_sheet.dart';
+import 'board_quiz.dart';
 import 'online_homework_sheet.dart';
 import 'teacher_icons.dart';
 import 'teacher_widgets.dart';
@@ -74,9 +77,12 @@ class BoardStudentCard extends ConsumerWidget {
     final online = homework ? ref.watch(onlineMarksProvider(day).select((a) => a.value?.students[studentId])) : null;
     final makeupStatus = past ? ref.watch(dayMakeupProvider(day).select((a) => a.value?[studentId])) : null;
     final makeup = makeupStatus != null && showsMakeup(rec) ? makeupStatus : null;
+    // Нөхөлт: тэр өдөр өөр ангид/406-д нөхсөн (makeup-visits).
+    final visitNote = ref.watch(homeBadgesProvider(day).select((a) => a.value?[studentId]));
 
     final c = context.colors;
-    final awaiting = awaitingCheck(rec, homework: homework, sent: sent);
+    final quizScored = homework && ref.watch(quizScoredProvider(args).select((s) => s.contains(studentId)));
+    final awaiting = awaitingCheck(rec, homework: homework, sent: sent, quizScored: quizScored);
     final preview = notePreview(rec, homework: homework);
     void openNote() => BoardNoteSheet.open(context, args: args, studentId: studentId, name: name);
 
@@ -140,6 +146,11 @@ class BoardStudentCard extends ConsumerWidget {
                           padding: const EdgeInsets.only(left: 42, bottom: 2),
                           child: MakeupChip(status: makeup),
                         ),
+                      if (visitNote != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 42, bottom: 2),
+                          child: VisitNoteChip(note: visitNote, wide: true),
+                        ),
                       if (preview.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(left: 42),
@@ -170,6 +181,10 @@ class BoardStudentCard extends ConsumerWidget {
                         if (makeup != null) ...[
                           const SizedBox(width: 6),
                           Flexible(flex: 2, child: MakeupChip(status: makeup)),
+                        ],
+                        if (visitNote != null) ...[
+                          const SizedBox(width: 6),
+                          Flexible(flex: 2, child: VisitNoteChip(note: visitNote)),
                         ],
                         if (preview.isNotEmpty) ...[
                           const SizedBox(width: 6),
@@ -232,6 +247,8 @@ class _MarkRows extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     BoardController ctl() => ref.read(boardControllerProvider(args).notifier);
+    // Шалгалтаар шалгах горимд «Онлайн»-ы оронд онооны талбар (эзэн 2026-11-08).
+    final quizMax = homework ? ref.watch(homeworkQuizProvider(args).select((q) => q.max)) : null;
     final inline = wide && MediaQuery.sizeOf(context).width >= boardInlineBreakpoint;
     final lateExtra = rec.att == AttendanceStatus.late && rec.lateRange != null ? lateRangeShort(rec.lateRange!) : null;
     return Column(
@@ -278,21 +295,30 @@ class _MarkRows extends ConsumerWidget {
                   wide: inline,
                   onTap: () => ctl().setHomework(studentId, rec.hw == h ? null : h),
                 ),
-              // Онлайн тест байхгүй ч сурагч дэвтрийн зураг илгээсэн бол дарж харна (эзэн 2026-11-03).
-              OnlineBoxButton(
-                key: ValueKey('online-$studentId'),
-                kind: onlineBox(onlineTests: onlineTests, sent: sent, cell: online),
-                cell: online,
-                wide: inline,
-                label: onlineBoxLabel(name, onlineTests: onlineTests, sent: sent, cell: online),
-                onTap: () => OnlineHomeworkSheet.open(
-                  context,
+              if (quizMax != null)
+                QuizScoreInput(
+                  key: ValueKey('quiz-$studentId'),
                   args: args,
-                  className: className,
                   studentId: studentId,
                   name: name,
+                  max: quizMax,
+                )
+              else
+                // Онлайн тест байхгүй ч сурагч дэвтрийн зураг илгээсэн бол дарж харна (эзэн 2026-11-03).
+                OnlineBoxButton(
+                  key: ValueKey('online-$studentId'),
+                  kind: onlineBox(onlineTests: onlineTests, sent: sent, cell: online),
+                  cell: online,
+                  wide: inline,
+                  label: onlineBoxLabel(name, onlineTests: onlineTests, sent: sent, cell: online),
+                  onTap: () => OnlineHomeworkSheet.open(
+                    context,
+                    args: args,
+                    className: className,
+                    studentId: studentId,
+                    name: name,
+                  ),
                 ),
-              ),
             ],
           ),
         ],

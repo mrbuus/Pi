@@ -307,6 +307,7 @@ class DashDetail {
     required this.summary,
     this.payment,
     this.students = const [],
+    this.openChecks = 0,
   });
 
   factory DashDetail.fromJson(Map<String, Object?> j) {
@@ -324,6 +325,7 @@ class DashDetail {
       summary: DashSummary.fromJson(j['summary']),
       payment: pay is Map ? _paymentCounts(pay) : null,
       students: [for (final s in (j['students'] as List?) ?? const []) DashStudent.fromJson(_map(s))],
+      openChecks: _int(j['openChecks'], 0),
     );
   }
 
@@ -340,6 +342,9 @@ class DashDetail {
   /// Энэ сарын төлбөрийн төлөвөөр сурагчийн тоо; эрхгүй бол null.
   final Map<PayState, int>? payment;
   final List<DashStudent> students;
+
+  /// Нээлттэй «Чек»-ийн тоо (толгойн товчны тэмдэг).
+  final int openChecks;
 
   bool get isOnline => type == 'ONLINE';
 }

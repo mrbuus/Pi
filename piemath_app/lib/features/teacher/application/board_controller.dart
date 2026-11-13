@@ -395,8 +395,9 @@ class BoardController extends Notifier<BoardState> {
     if (!_disposed) state = state.copyWith(bulkBusy: false, bulkAtt: const []);
   }
 
-  Future<void> markAllDone() async {
-    final ids = bulkDoneCandidates(state.studentIds, state.recs);
+  /// [quizScored] — энэ өдрийн шалгалтын оноотой сурагчид (даалгаврыг нь шалгасан тул алгасна).
+  Future<void> markAllDone({Set<String> quizScored = const {}}) async {
+    final ids = bulkDoneCandidates(state.studentIds, state.recs, quizScored: quizScored);
     if (ids.isEmpty || state.bulkBusy) return;
     await _bulkHw(ids, HomeworkStatus.done, 'UNMARKED', undo: false);
   }

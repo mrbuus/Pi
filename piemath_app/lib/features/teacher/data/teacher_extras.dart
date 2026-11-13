@@ -114,6 +114,7 @@ class RiskCriteria {
     required this.maxLates,
     required this.minHomework,
     required this.missingStreak,
+    this.minQuiz = 50,
   });
 
   factory RiskCriteria.fromJson(Map<String, Object?> j) => RiskCriteria(
@@ -123,6 +124,7 @@ class RiskCriteria {
     maxLates: _int(j['maxLates'], 4),
     minHomework: _int(j['minHomework'], 60),
     missingStreak: _int(j['missingStreak'], 2),
+    minQuiz: _int(j['minQuiz'], 50),
   );
 
   static const windowChoices = [7, 14, 30, 60, 90];
@@ -134,6 +136,10 @@ class RiskCriteria {
   final int minHomework;
   final int missingStreak;
 
+  /// Цонх доторх сүүлийн шалгалтын (homework-quiz) хувь үүнээс бага бол «Асуудалтай»; 0 = тооцохгүй
+  /// (эзэн 2026-11-08). Илгээхгүй бол сервер 50 болгодог тул ҮРГЭЛЖ илгээнэ.
+  final int minQuiz;
+
   RiskCriteria copyWith({
     int? windowDays,
     int? minAttendance,
@@ -141,6 +147,7 @@ class RiskCriteria {
     int? maxLates,
     int? minHomework,
     int? missingStreak,
+    int? minQuiz,
   }) => RiskCriteria(
     windowDays: windowDays ?? this.windowDays,
     minAttendance: minAttendance ?? this.minAttendance,
@@ -148,6 +155,7 @@ class RiskCriteria {
     maxLates: maxLates ?? this.maxLates,
     minHomework: minHomework ?? this.minHomework,
     missingStreak: missingStreak ?? this.missingStreak,
+    minQuiz: minQuiz ?? this.minQuiz,
   );
 
   Map<String, Object?> toJson() => {
@@ -157,6 +165,7 @@ class RiskCriteria {
     'maxLates': maxLates,
     'minHomework': minHomework,
     'missingStreak': missingStreak,
+    'minQuiz': minQuiz,
   };
 
   @override
