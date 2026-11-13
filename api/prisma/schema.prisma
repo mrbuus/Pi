@@ -68,6 +68,7 @@ model User {
   feedback               Feedback[]
   studentProfile         StudentProfile?
   mockRegistrations      MockExamRegistration[]
+  paperExamSheets        PaperExamSheet[]
   teacherProfile         TeacherProfile?
   externalTeacherProfile ExternalTeacherProfile?
 
@@ -343,6 +344,9 @@ model StudentProfile {
   branch        String? // "Баруун 4" | "Зүүн 4"
   section       String? // "12-2" — бүртгэлд тэмдэглэсэн ангийн шошго (label)
   tuitionAmount Int?
+  // Тохирсон (хөнгөлөлттэй) бүтэн жилийн дүн — Админ/Багш+ гараар тавина (эзэн 2026-11-12:
+  // нэг гэрээс 2 хүүхэд 10% гэх мэт). Шийтийн синк ХӨНДӨХГҮЙ (tuitionAmount-ыг синк дарж бичдэг).
+  tuitionAgreed Int?
   tuitionPlan   TuitionPlan?
   tuitionNote   String?
   joinedOn      DateTime?    @db.Date
@@ -1086,6 +1090,8 @@ model TestProblem {
   points    Int     @default(1)
 
   @@id([testId, problemId])
+  // Бодлогоос тест рүү хайх (бүлгийн бодлогын A/B хувилбар) — үгүй бол бүтэн уншина
+  @@index([problemId])
 }
 
 // Тест аль ангиудад харагдахыг сонгоно — автоматаар бүх ангид харагдахгүй
@@ -1602,6 +1608,7 @@ model BankTransaction {
 // гүйлгээний дүн. Устгахгүй: буцаахад revokedAt (TUITION-ийн Payment REVERSED).
 enum BankAllocKind {
   TUITION // сургалтын төлбөр → Payment CONFIRMED
+  SOCIAL // нийгмийн сургалтын төлбөр (утгад «нийгэм») — үндсэн анги нь Нийгэм бол Payment, үгүй бол зөвхөн бүртгэл
   BOOK // ном (E1, E2, Хавтгайн геометр…)
   ANSWER_SHEET // шалгалтын хариултын хуудас (1,000₮/ш)
   STAFF_FINE // ажилтны заалны торгууль
@@ -1781,6 +1788,24 @@ model ExpenseRecord {
 // (revokedAt = null) байвал тухайн хичээлийн жилийн бүх сар «төлсөн», гэрээний
 // дүн = бодит төлсөн дүн. Устгахгүй: буцаахад revokedAt, дахин тооцоход шинэ мөр.
 // User-тэй relation зориуд тавиагүй (User моделийг өөрчлөхгүй, AuditLog-той адил).
+// Сар бүрийн төлбөрийн хугацаа сунгах (эзэн 2026-11-12): хүүхэд өвчтэй, чөлөөтэй, төв ажиллаагүй
+// гэх мэт — тэр сарын төлөх өдөр N хоногоор хойшилж, дараагийн бүх сар дагаж шилжинэ. Хэмжээ
+// хязгааргүй. Зөвхөн сар бүрийн багцад (бүтэн жилд үл хамаарна). Зөөлөн устгал.
+model TuitionExtension {
+  id          String    @id @default(cuid())
+  studentId   String
+  /** «YYYY-MM» — аль сарын төлөх өдрөөс эхлэн шилжих */
+  month       String
+  days        Int
+  reason      String
+  createdById String
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+  deletedById String?
+
+  @@index([studentId])
+}
+
 model TuitionSettlement {
   id          String    @id @default(cuid())
   studentId   String
@@ -3217,6 +3242,9 @@ model ClassCheck {
   title        String           @db.VarChar(80)
   /// Нэг сурагчийн мөнгөн дүн (₮), заавал биш
   amount       Int?
+  /// Номын чек (эзэн 2026-11-12): BOOKS-ийн түлхүүр (E2, HAVTGAI1 …). null = энгийн чек.
+  /// Номын чекийн тэмдэглэгээ ClassCheckMark-т БИШ, BookPayment-т хадгалагдана.
+  bookKey      String?          @db.VarChar(48)
   createdById  String
   createdAt    DateTime         @default(now())
   archivedAt   DateTime?
@@ -3242,6 +3270,38 @@ model ClassCheckMark {
 
   @@unique([checkId, studentId])
   @@index([studentId])
+}
+
+/// Номын мөнгө (эзэн 2026-11-12) — сурагч × ном. Чекээс ХАМААРАХГҮЙ хадгалагдана:
+/// чек нуугдсан/устсан, сурагч анги сольсон ч «хэн, аль ангид байхдаа, аль багшид,
+/// хэдийг өгсөн» нь үлдэнэ. Мөр хэзээ ч устахгүй, засагдахгүй — өөрчлөх бүрд хуучин
+/// мөр voidedAt авч, шинэ мөр үүснэ (бүтэн түүх). Идэвхтэй мөр (voidedAt IS NULL)
+/// сурагч × номд ГАНЦ — хэсэгчилсэн unique индекс зөвхөн SQL-д (миграци
+/// 20261112150000_book_payments). FK-гүй (ClassCheck-ийн адил). api/src/book-payments.
+model BookPayment {
+  id            String    @id @default(cuid())
+  studentId     String
+  bookKey       String    @db.VarChar(48)
+  /// PAID = мөнгөө өгсөн, SKIPPED = энэ номыг авахгүй
+  status        String    @db.VarChar(8)
+  /// Бодит өгсөн дүн (₮) — чекийн үнээс өөр байж болно (гэмтэлтэй ном −5,000 г.м.)
+  amount        Int?
+  /// Мөнгөө өгөх үед сууж байсан анги (тэр ангийн тооцоонд орно). null = ангигүй
+  classroomId   String?
+  /// Аль чекээр тэмдэглэсэн (байвал)
+  checkId       String?
+  /// Мөнгийг хүлээж авсан багш (PAID үед заавал)
+  collectedById String?
+  note          String?   @db.VarChar(200)
+  /// Тэмдэглэсэн хүн, цаг
+  createdById   String
+  createdAt     DateTime  @default(now())
+  voidedAt      DateTime?
+  voidedById    String?
+
+  @@index([studentId, bookKey])
+  @@index([classroomId, bookKey])
+  @@index([collectedById])
 }
 
 /// Нэвтрэх хуудасны тайлбар/зарлал (эзэн 2026-10-22, Агент D). Ганц мөр id="default";
@@ -3608,4 +3668,106 @@ model MakeupVisitTest {
 
   @@index([visitId])
   @@index([testId])
+}
+
+// ============================================================================
+// Цаасан шалгалт — OMR машин эсвэл Excel-ээс оруулсан дүн (docs/PLAN-OMR.md).
+// Бодлогын санд холбогдохгүй: бодлого = дугаар + түлхүүр + агуулгын ангилал.
+// Сурагчийн түүхий хариуг хадгална → түлхүүр засахад оноо дахин бодогдоно.
+// Устгах бүр зөөлөн (deletedAt / supersededAt / REVERTED).
+// ============================================================================
+enum PaperExamImportStatus {
+  CONFIRMED
+  REVERTED
+}
+
+model PaperExam {
+  id          String    @id @default(cuid())
+  title       String
+  heldOn      DateTime  @db.Date
+  itemCount   Int
+  /// Сурагчид харагдах эсэх (дүн, жагсаалт)
+  published   Boolean   @default(false)
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  items   PaperExamItem[]
+  sheets  PaperExamSheet[]
+  imports PaperExamImport[]
+
+  @@index([deletedAt, heldOn])
+}
+
+model PaperExamItem {
+  id        String    @id @default(cuid())
+  examId    String
+  exam      PaperExam @relation(fields: [examId], references: [id], onDelete: Cascade)
+  number    Int
+  /// Зөв хариу «A»…«E»; null = түлхүүргүй (зөвхөн зөв/буруугаар орсон дүнд хамаарахгүй)
+  answerKey String?
+  points    Int       @default(1)
+  /// БҮТ-ийн агуулгын ангилал (paper-exams/paper-exam-logic.ts CONTENT_AREAS)
+  area      String?
+  /// Сэдэв (бүлэг): «Модульт тэгшитгэл» … — чөлөөт бичвэр, санал болгох жагсаалттай
+  topic     String?
+  /// Бодлогод ашиглах томьёо — Томьёоны сангийн Formula.slug (дарааллаар)
+  formulaSlugs String[] @default([])
+  /// Хүчингүй болгосон бодлого — оноо, хувьд тооцогдохгүй
+  voided    Boolean   @default(false)
+
+  @@unique([examId, number])
+}
+
+model PaperExamSheet {
+  id          String          @id @default(cuid())
+  examId      String
+  exam        PaperExam       @relation(fields: [examId], references: [id], onDelete: Cascade)
+  importId    String
+  import      PaperExamImport @relation(fields: [importId], references: [id], onDelete: Cascade)
+  /// null = файлын шифр/нэр сурагчтай таараагүй — ажилтан гараар холбоно
+  studentId   String?
+  student     User?           @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  rawCode     String
+  rawLastName String
+  rawFirstName String
+  /// Файлын шийт/гарчгаас: «Баг 27», «Болор-Эрдэнэ»
+  groupLabel  String
+  groupTeacher String?
+  /// Импортын үеийн сурагчийн анги (Багш өөрийн ангийнхаа мөрийг харна)
+  classroomId String?
+  /// Бодлого бүрийн хариу: «A»…«E», «» хоосон, «*» давхар будсан, «+» зөв, «-» буруу
+  answers     Json
+  totalScore  Float
+  maxScore    Float
+  /// Шинэ импорт эсвэл буцаалтаар хүчингүй болсон мөч
+  supersededAt DateTime?
+  /// Энэ мөрийг орлосон импорт (буцаахад хуучин мөрийг сэргээнэ)
+  supersededByImportId String?
+  createdAt   DateTime        @default(now())
+
+  @@unique([examId, studentId], map: "PaperExamSheet_active_student_key", where: { supersededAt: null })
+  @@index([examId, supersededAt])
+  @@index([studentId])
+  @@index([importId])
+}
+
+model PaperExamImport {
+  id           String                @id @default(cuid())
+  examId       String
+  exam         PaperExam             @relation(fields: [examId], references: [id], onDelete: Cascade)
+  fileName     String
+  fileSha256   String
+  sheetCount   Int
+  matchedCount Int
+  status       PaperExamImportStatus @default(CONFIRMED)
+  createdById  String
+  createdAt    DateTime              @default(now())
+  revertedAt   DateTime?
+  revertedById String?
+
+  sheets PaperExamSheet[]
+
+  @@index([examId, createdAt])
 }

@@ -8,10 +8,10 @@ import { todayKeyUB } from "@/components/homework-practice/lib";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import PhotoSetSender from "./PhotoSetSender";
-import { HOMEWORK_MAX_PAGES, type HomeworkPhoto } from "./photo-types";
+import { editDeadline, HOMEWORK_MAX_PAGES, type HomeworkPhoto } from "./photo-types";
 
 /**
- * Гэрийн даалгаврын дэвтрийн зураг — тухайн хичээлийн өдөрт миний илгээсэн (≤6 хуудас,
+ * Гэрийн даалгаврын дэвтрийн зураг — тухайн хичээлийн өдөрт миний илгээсэн (≤15 хуудас,
  * 7 хоног хадгална). Илгээх, харах, дахин илгээх, устгах. Сервер `canSend`-ийг
  * дахин шалгана (POST /homework/photos, DELETE /homework/photos/:id).
  */
@@ -108,6 +108,8 @@ export default function HomeworkPhotoPanel({
         canEdit={canSend}
         onSave={save}
         onDelete={remove}
+        editableUntil={editDeadline(current?.uploadedAt)}
+        resendAlways={returned}
         purpose="homework"
         maxPages={HOMEWORK_MAX_PAGES}
         crop

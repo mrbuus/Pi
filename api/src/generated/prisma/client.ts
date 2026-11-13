@@ -364,6 +364,11 @@ export type Purchase = Prisma.PurchaseModel
  */
 export type ExpenseRecord = Prisma.ExpenseRecordModel
 /**
+ * Model TuitionExtension
+ * 
+ */
+export type TuitionExtension = Prisma.TuitionExtensionModel
+/**
  * Model TuitionSettlement
  * 
  */
@@ -718,6 +723,16 @@ export type ClassCheck = Prisma.ClassCheckModel
  */
 export type ClassCheckMark = Prisma.ClassCheckMarkModel
 /**
+ * Model BookPayment
+ * Номын мөнгө (эзэн 2026-11-12) — сурагч × ном. Чекээс ХАМААРАХГҮЙ хадгалагдана:
+ * чек нуугдсан/устсан, сурагч анги сольсон ч «хэн, аль ангид байхдаа, аль багшид,
+ * хэдийг өгсөн» нь үлдэнэ. Мөр хэзээ ч устахгүй, засагдахгүй — өөрчлөх бүрд хуучин
+ * мөр voidedAt авч, шинэ мөр үүснэ (бүтэн түүх). Идэвхтэй мөр (voidedAt IS NULL)
+ * сурагч × номд ГАНЦ — хэсэгчилсэн unique индекс зөвхөн SQL-д (миграци
+ * 20261112150000_book_payments). FK-гүй (ClassCheck-ийн адил). api/src/book-payments.
+ */
+export type BookPayment = Prisma.BookPaymentModel
+/**
  * Model LoginText
  * Нэвтрэх хуудасны тайлбар/зарлал (эзэн 2026-10-22, Агент D). Ганц мөр id="default";
  * зөвхөн ADMIN засна (PUT /auth/login-text), нийтэд уншигдана (GET). Энгийн текст.
@@ -833,3 +848,23 @@ export type MakeupVisit = Prisma.MakeupVisitModel
  * бичсэн сэдэв (title). Сэдвийг солиход хасагдсан мөр зөөлөн устна (түүх үлдэнэ).
  */
 export type MakeupVisitTest = Prisma.MakeupVisitTestModel
+/**
+ * Model PaperExam
+ * 
+ */
+export type PaperExam = Prisma.PaperExamModel
+/**
+ * Model PaperExamItem
+ * 
+ */
+export type PaperExamItem = Prisma.PaperExamItemModel
+/**
+ * Model PaperExamSheet
+ * 
+ */
+export type PaperExamSheet = Prisma.PaperExamSheetModel
+/**
+ * Model PaperExamImport
+ * 
+ */
+export type PaperExamImport = Prisma.PaperExamImportModel

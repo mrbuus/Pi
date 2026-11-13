@@ -1265,6 +1265,19 @@
   },
   {
     "gap": "UDRIIN-HICHEEL",
+    "file": "lesson-day/lesson-day.controller",
+    "controller": "LessonDayController",
+    "method": "DELETE",
+    "path": "/api/lesson-day/:classroomId/:date/photos",
+    "roles": [
+      "ADMIN",
+      "TEACHER",
+      "TEACHER_PLUS",
+      "STUDENT"
+    ]
+  },
+  {
+    "gap": "UDRIIN-HICHEEL",
     "file": "class-sessions/class-sessions.controller",
     "controller": "ClassSessionsController",
     "method": "GET",

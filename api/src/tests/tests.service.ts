@@ -1,3 +1,4 @@
+import { activeClasses } from '../common/class-track';
 import { randomInt } from 'crypto';
 import {
   BadRequestException,
@@ -1941,9 +1942,7 @@ export class TestsService {
         : [],
     };
 
-    const enrollment = await this.prisma.enrollment.findFirst({
-      where: { studentId, leftAt: null },
-    });
+    const [enrollment] = await activeClasses(this.prisma, studentId);
     const choiceOrder = asRecord(session.choiceOrder) as Record<
       string,
       number[]

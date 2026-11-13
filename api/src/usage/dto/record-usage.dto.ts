@@ -11,7 +11,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-export const USAGE_KINDS = ['page', 'click'] as const;
+// 'error' — клиентийн техникийн алдаа (зураг уншиж/илгээж чадаагүй; эзэн 2026-11-12)
+export const USAGE_KINDS = ['page', 'click', 'error'] as const;
 export const USAGE_DEVICES = ['mobile', 'tablet', 'desktop'] as const;
 
 export class UsageEventDto {

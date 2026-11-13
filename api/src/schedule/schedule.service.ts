@@ -1,3 +1,4 @@
+import { activeClasses } from '../common/class-track';
 import { groupTestNames } from '../common/test-names';
 import {
   BadRequestException,
@@ -1132,15 +1133,18 @@ export class ScheduleService {
   async forMe(userId: string, role: Role) {
     const today = todayUB();
     if (role === Role.STUDENT) {
-      const enrollment = await this.prisma.enrollment.findFirst({
-        where: { studentId: userId, leftAt: null },
-        select: { classroomId: true },
-      });
-      if (!enrollment) {
+      // Хоёр ангид зэрэг суудаг сурагч (математик + Нийгэм) — хоёр ангийн хуваарь нэг дор;
+      // classroomId = үндсэн (математикийн) анги
+      const classes = await activeClasses(this.prisma, userId);
+      if (!classes.length) {
         return { classroomId: null, entries: [] };
       }
-      const entries = await this.forClassroom(enrollment.classroomId);
-      return { classroomId: enrollment.classroomId, entries };
+      const entries = (
+        await Promise.all(classes.map((c) => this.forClassroom(c.classroomId)))
+      )
+        .flat()
+        .sort((a, b) => a.weekday - b.weekday || a.startMinute - b.startMinute);
+      return { classroomId: classes[0].classroomId, entries };
     }
     if (role === Role.TEACHER || role === Role.TEACHER_PLUS) {
       const entries = await this.prisma.classSchedule.findMany({

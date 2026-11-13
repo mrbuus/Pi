@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { api, fileUrl, uploadFile } from "@/lib/api";
+import { looksLikeImage, prepareAvatar } from "@/lib/avatarImage";
 import { Meta } from "@/components/ui/Meta";
 
 /* ============================================================================
@@ -58,9 +59,13 @@ export default function DashboardGreeting() {
     e.target.value = ""; // ижил файлыг дахин сонгоход ч onChange дуудагдана
     if (!file) return;
     setError("");
+    if (!looksLikeImage(file)) {
+      setError("Зөвхөн зургийн файл (JPG, PNG гэх мэт) сонгоно уу");
+      return;
+    }
     setUploading(true);
     try {
-      const { key } = await uploadFile(file);
+      const { key } = await uploadFile(await prepareAvatar(file));
       await api("/auth/me/avatar", { method: "POST", body: { key } });
       setMe((m) => (m ? { ...m, avatarUrl: key } : m));
     } catch (err) {

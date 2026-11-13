@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, CircleAlert, Clock3, Minus } from "lucide-react";
-import { blockLabel, dayLabel, monthName, monthNo, shortMnt } from "./ledgerFormat";
+import { blockLabel, dayLabel, monthName, monthNo, periodLabel, shortMnt } from "./ledgerFormat";
 import type { BlockState, MonthBlock } from "./ledgerTypes";
 
 /*
@@ -187,6 +187,12 @@ export function LargeBlocks({
               />
             )}
             <span className={`relative text-xs ${b.state === "PAID" ? "" : "text-ink-dim"}`}>{monthName(b.month)}</span>
+            {b.period && (
+              <span className={`relative text-[11px] leading-tight tabular-nums ${b.state === "PAID" ? "" : "text-ink-dim"}`}>
+                {periodLabel(b)}
+                {!!b.extDays && <span className="font-bold"> +{b.extDays} хоног</span>}
+              </span>
+            )}
             <span className="relative flex items-center gap-1">
               <LargeBody b={b} settled={settled} />
             </span>

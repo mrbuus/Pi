@@ -775,7 +775,7 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
     await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-27', fileKey: 'img.jpg', pages: 1 })).rejects.toThrow('PDF');
     // Серверт хуудас тоолоогүй PDF — клиентийн тоонд итгэхгүй
     await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-27', fileKey: 'nopages.pdf', pages: 2 })).rejects.toThrow('хуудс');
-    await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-27', fileKey: 'f1.pdf', pages: 7 })).rejects.toThrow('хуудас');
+    await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-27', fileKey: 'f1.pdf', pages: 16 })).rejects.toThrow('хуудас');
     await expect(svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-26', fileKey: 'f1.pdf', pages: 1 })).rejects.toBeInstanceOf(ForbiddenException);
     await expect(svc.addPhoto('s1', { classroomId: 'c9', date: '2026-10-27', fileKey: 'f1.pdf', pages: 1 })).rejects.toBeInstanceOf(ForbiddenException);
 
@@ -783,6 +783,21 @@ describe('HomeworkPracticeService — танхимын сурагчийн гэр
     await expect(svc.deletePhoto('s1', p2.id)).resolves.toEqual({ deleted: true });
     await expect(svc.deletePhoto('s1', p2.id)).resolves.toEqual({ deleted: true });
     expect((await svc.my('s1')).days[0].photo).toBeNull();
+  });
+
+  it('зураг: илгээснээс хойш 5 минут өнгөрвөл солих, устгахгүй; багш буцаасан бол дахин илгээнэ (эзэн 2026-11-12)', async () => {
+    const p1 = await svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-27', fileKey: 'f1.pdf', pages: 3 });
+    const row = env.photos.find((p) => p.id === p1.id)!;
+    row.createdAt = new Date(Date.now() - 6 * 60_000);
+    await expect(
+      svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-27', fileKey: 'f2.pdf', pages: 2 }),
+    ).rejects.toThrow('5 минут');
+    await expect(svc.deletePhoto('s1', p1.id)).rejects.toThrow('5 минут');
+    expect(row.deletedAt ?? null).toBeNull();
+    row.returnedAt = new Date();
+    const p2 = await svc.addPhoto('s1', { classroomId: 'c1', date: '2026-10-27', fileKey: 'f2.pdf', pages: 2 });
+    expect(p2.fileKey).toBe('f2.pdf');
+    expect(row.deletedAt).toBeInstanceOf(Date);
   });
 
   describe('хичээлийн өдөр бүр (СУРАГЧ V2)', () => {

@@ -186,7 +186,11 @@ describe('Attempt / LearningEvent — «устгах» = deletedAt', () => {
       },
     };
     const prisma: any = {
-      enrollment: { findFirst: jest.fn(async () => ({ classroomId: 'c1' })) },
+      enrollment: {
+        findMany: jest.fn(async () => [
+          { classroomId: 'c1', joinedAt: new Date(), classroom: { id: 'c1', name: '12-1', subject: null, grade: 12 } },
+        ]),
+      },
       problem: { findMany: jest.fn(async () => []) },
       $transaction: jest.fn(async (fn: any) => fn(tx)),
     };

@@ -1,3 +1,4 @@
+import { activeClasses } from '../common/class-track';
 import {
   BadRequestException,
   ForbiddenException,
@@ -97,9 +98,8 @@ export class AttemptsService {
 
   // Оройн тэмдэглэгээ — утас хураадаг танхимын горимын гол урсгал (SPEC §9.1.1)
   async eveningReport(dto: EveningReportDto, studentId: string) {
-    const enrollment = await this.prisma.enrollment.findFirst({
-      where: { studentId, leftAt: null },
-    });
+    // Хоёр ангитай сурагч: үндсэн (математикийн) анги
+    const [enrollment] = await activeClasses(this.prisma, studentId);
     if (!enrollment) {
       throw new ForbiddenException('Та идэвхтэй ангид бүртгэлгүй байна');
     }

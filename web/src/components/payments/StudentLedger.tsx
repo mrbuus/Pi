@@ -27,6 +27,7 @@ import ReversePaymentModal from "./ReversePaymentModal";
 import PayDialog from "./PayDialog";
 import NoteDialog from "./NoteDialog";
 import PlanDialog from "./PlanDialog";
+import ExtendDialog from "./ExtendDialog";
 import { RemoveFromTrainingDialog } from "@/components/students/StudentActions";
 import SettleSwitch from "./SettleSwitch";
 import { BlockLegend, LargeBlocks } from "./MonthBlocks";
@@ -73,6 +74,7 @@ export default function StudentLedger({ id }: { id: string }) {
   const [error, setError] = useState<string | null>(null);
   const [pay, setPay] = useState<{ month: string | null } | null>(null);
   const [noteOpen, setNoteOpen] = useState(false);
+  const [extendOpen, setExtendOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
   const [editing, setEditing] = useState<Payment | null>(null);
@@ -228,6 +230,13 @@ export default function StudentLedger({ id }: { id: string }) {
           <Button variant="outline" onClick={() => setNoteOpen(true)}>
             <MessageSquarePlus aria-hidden /> Тэмдэглэл
           </Button>
+          {/* Сар бүр төлдөг хүүхдэд л — бүтэн жилд сунгалт хамаарахгүй (эзэн 2026-11-12) */}
+          {r.plan.kind === "MONTHLY" && !r.plan.settled && (
+            <Button variant="outline" onClick={() => setExtendOpen(true)}>
+              <CalendarClock aria-hidden /> Хугацаа сунгах
+              {!!data.extensions?.length && <span className="rounded-full bg-ink/10 px-1.5 text-xs tabular-nums">{data.extensions.length}</span>}
+            </Button>
+          )}
           <Button variant="outline" onClick={() => setRefundOpen(true)}>
             <DoorOpen aria-hidden /> Сургалтаас хасах
           </Button>
@@ -369,6 +378,7 @@ export default function StudentLedger({ id }: { id: string }) {
         />
       )}
       {noteOpen && <NoteDialog studentId={r.id} studentName={name} onClose={() => setNoteOpen(false)} onSaved={load} />}
+      {extendOpen && <ExtendDialog data={data} onClose={() => setExtendOpen(false)} onSaved={load} />}
       {planOpen && <PlanDialog data={data} onClose={() => setPlanOpen(false)} onSaved={load} />}
       {refundOpen && (
         <RemoveFromTrainingDialog student={{ id: r.id, name }} onClose={() => setRefundOpen(false)} onDone={load} />

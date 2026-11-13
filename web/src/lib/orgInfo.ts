@@ -18,7 +18,7 @@ export const ORG = {
   shortName: "Шинэ Ирээдүйн Эзэд",
   slogan: "Чанартай сургалт, тогтвортой амжилт",
   tagline: 'Математик, Нийгэм судлалын хичээлээр "Элсэлтийн Ерөнхий Шалгалт"-нд бэлтгэнэ',
-  email: "Shineireedui2021@gmail.com",
+  email: "shineireedui2023@gmail.com",
   facebook: "https://www.facebook.com/Baasanjaw2022",
 } as const;
 

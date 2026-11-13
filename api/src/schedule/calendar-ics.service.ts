@@ -136,19 +136,18 @@ export class CalendarIcsService {
             select: { scheduleId: true },
           });
     if (role === Role.STUDENT) {
-      const enrollment = await this.prisma.enrollment.findFirst({
-        where: { studentId: userId, leftAt: null },
-        select: {
-          classroomId: true,
-          classroom: { select: { archived: true } },
-        },
-      });
-      if (!enrollment || enrollment.classroom.archived) {
+      const classIds = (
+        await this.prisma.enrollment.findMany({
+          where: { studentId: userId, leftAt: null, classroom: { archived: false } },
+          select: { classroomId: true },
+        })
+      ).map((e) => e.classroomId);
+      if (!classIds.length) {
         return { filename: 'pi.mn-huvaari.ics', ics: buildIcs([]) };
       }
       scheduleWhere = {
         ...activeRange,
-        classroomId: enrollment.classroomId,
+        classroomId: { in: classIds },
         classroom: { archived: false },
       };
     } else {

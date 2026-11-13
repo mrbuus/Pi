@@ -153,12 +153,18 @@ describe('ClassChecksService', () => {
       ),
     };
     const audit = { record: jest.fn().mockResolvedValue(undefined) };
+    const books = {
+      activeForClass: jest.fn().mockResolvedValue([]),
+      shape: jest.fn().mockResolvedValue([]),
+      markFromCheck: jest.fn().mockResolvedValue(null),
+    };
     const service = new ClassChecksService(
       prisma as never,
       dashboard as never,
       audit as never,
+      books as never,
     );
-    return { prisma, dashboard, audit, service };
+    return { prisma, dashboard, audit, books, service };
   }
 
   const now = new Date('2026-10-22T03:00:00Z');
@@ -167,6 +173,7 @@ describe('ClassChecksService', () => {
     classroomId: 'c1',
     title: 'Номны мөнгө',
     amount: 25000,
+    bookKey: null,
     createdById: 'teacher',
     createdAt: now,
     archivedAt: null,
@@ -280,6 +287,7 @@ describe('ClassChecksService', () => {
             classroomId: 'c1',
             title: 'Номны мөнгө',
             amount: 25000,
+            bookKey: null,
             createdById: 'teacher',
           },
         }),
@@ -801,6 +809,193 @@ describe('ClassChecksService', () => {
       });
       const b = await service.studentInfo('c1', 's1', 'admin');
       expect(b.inClass).toBe(false);
+    });
+  });
+
+  describe('номын чек', () => {
+    it('нээх: нэр = номын нэр, үнэ заавал, буруу түлхүүр → 400', async () => {
+      const { service, prisma } = setup();
+      prisma.classCheck.findFirst.mockResolvedValue(null);
+      prisma.classCheck.create.mockImplementation(
+        ({ data }: { data: Record<string, unknown> }) =>
+          Promise.resolve(checkRow(data)),
+      );
+      const made = await service.create(
+        'c1',
+        { bookKey: 'E2', amount: 40000 },
+        'teacher',
+      );
+      expect(made).toMatchObject({
+        title: 'E-2',
+        bookKey: 'E2',
+        amount: 40000,
+      });
+      await expect(
+        service.create('c1', { bookKey: 'E2' }, 'teacher'),
+      ).rejects.toThrow('Үнээ оруулна уу');
+      await expect(
+        service.create('c1', { bookKey: 'X9', amount: 1 }, 'teacher'),
+      ).rejects.toThrow('Номоо сонгоно уу');
+    });
+
+    it('хариултын хуудас: дугаарыг сервер өгнө, устгасан чекийн дугаарыг давтахгүй', async () => {
+      const { service, prisma } = setup();
+      prisma.classCheck.findFirst.mockResolvedValue(null);
+      prisma.classCheck.create.mockImplementation(
+        ({ data }: { data: Record<string, unknown> }) =>
+          Promise.resolve(checkRow(data)),
+      );
+      prisma.classCheck.findMany.mockResolvedValueOnce([]);
+      await expect(
+        service.create('c1', { bookKey: 'SHEET', amount: 3000 }, 'teacher'),
+      ).resolves.toMatchObject({
+        bookKey: 'SHEET1',
+        title: 'Нэгдсэн шалгалт 1',
+      });
+      prisma.classCheck.findMany.mockResolvedValueOnce([
+        { bookKey: 'SHEET1' },
+        { bookKey: 'SHEET2' },
+      ]);
+      await expect(
+        service.create('c1', { bookKey: 'SHEET', amount: 3000 }, 'teacher'),
+      ).resolves.toMatchObject({
+        bookKey: 'SHEET3',
+        title: 'Нэгдсэн шалгалт 3',
+      });
+      // Ангийн шалгалт: түлхүүр ангийн id-тай, дугаарлалт нэгдсэнээс тусдаа
+      prisma.classCheck.findMany.mockResolvedValueOnce([
+        { bookKey: 'CSHEET1:c1' },
+      ]);
+      prisma.classCheck.create.mockImplementationOnce(
+        ({ data }: { data: Record<string, unknown> }) =>
+          Promise.resolve(checkRow(data)),
+      );
+      await expect(
+        service.create('c1', { bookKey: 'CSHEET', amount: 2000 }, 'teacher'),
+      ).resolves.toMatchObject({ title: 'Ангийн шалгалт 2' });
+      expect(prisma.classCheck.findMany).toHaveBeenLastCalledWith({
+        where: { classroomId: 'c1', bookKey: { startsWith: 'CSHEET' } },
+        select: { bookKey: true },
+      });
+      await expect(
+        service.create(
+          'c1',
+          { bookKey: 'CSHEET1:cmuzbhtra000cc97nt5js9qeh', amount: 1 },
+          'teacher',
+        ),
+      ).rejects.toThrow('Номоо сонгоно уу');
+      // Клиент дугаараа өөрөө сонгож болохгүй
+      await expect(
+        service.create('c1', { bookKey: 'SHEET7', amount: 3000 }, 'teacher'),
+      ).rejects.toThrow('Номоо сонгоно уу');
+      // Зэрэг нээхэд unique индекс → ойлгомжтой алдаа
+      prisma.classCheck.findMany.mockResolvedValueOnce([]);
+      prisma.classCheck.create.mockRejectedValueOnce({ code: 'P2002' });
+      await expect(
+        service.create('c1', { bookKey: 'SHEET', amount: 3000 }, 'teacher'),
+      ).rejects.toThrow('дөнгөж нээлээ');
+      prisma.classCheck.findMany.mockResolvedValueOnce([
+        { bookKey: 'SHEET1' },
+        { bookKey: 'SHEET2' },
+      ]);
+      await service
+        .create('c1', { bookKey: 'SHEET', amount: 3000 }, 'teacher')
+        .catch(() => undefined);
+      // deletedAt шүүлтгүй уншина — устгасан чек ч дугаар эзэлнэ
+      expect(prisma.classCheck.findMany).toHaveBeenLastCalledWith({
+        where: { classroomId: 'c1', bookKey: { startsWith: 'SHEET' } },
+        select: { bookKey: true },
+      });
+    });
+
+    it('нэг ангид нэг номын ганц чек (нуусан байсан ч)', async () => {
+      const { service, prisma } = setup();
+      prisma.classCheck.findFirst.mockResolvedValueOnce({ archivedAt: null });
+      await expect(
+        service.create('c1', { bookKey: 'E2', amount: 40000 }, 'teacher'),
+      ).rejects.toThrow('аль хэдийн нээлттэй');
+      prisma.classCheck.findFirst.mockResolvedValueOnce({ archivedAt: now });
+      await expect(
+        service.create('c1', { bookKey: 'E2', amount: 40000 }, 'teacher'),
+      ).rejects.toThrow('нуусан байна');
+      expect(prisma.classCheck.create).not.toHaveBeenCalled();
+    });
+
+    it('нэрийг солихгүй, үнийг хоосолж болохгүй', async () => {
+      const { service, prisma } = setup();
+      prisma.classCheck.findFirst.mockResolvedValue(
+        checkRow({ title: 'E-2', bookKey: 'E2', amount: 40000 }),
+      );
+      await expect(
+        service.update('c1', 'k1', { title: 'Өөр нэр' }, 'teacher'),
+      ).rejects.toThrow('нэрийг солихгүй');
+      await expect(
+        service.update('c1', 'k1', { amount: null }, 'teacher'),
+      ).rejects.toThrow('Үнээ оруулна уу');
+    });
+
+    it('тэмдэглэхэд ClassCheckMark биш, BookPayment-т бичнэ', async () => {
+      const { service, prisma, books } = setup();
+      prisma.classCheck.findFirst.mockResolvedValue({
+        id: 'k1',
+        archivedAt: null,
+        bookKey: 'E2',
+        amount: 40000,
+      });
+      const res = await service.setMark(
+        'c1',
+        'k1',
+        's1',
+        { checked: true, collectedById: 'plus' },
+        'teacher',
+      );
+      expect(books.markFromCheck).toHaveBeenCalledWith(
+        expect.objectContaining({
+          classroomId: 'c1',
+          check: { id: 'k1', bookKey: 'E2', amount: 40000 },
+          studentId: 's1',
+          actorId: 'teacher',
+        }),
+      );
+      expect(prisma.classCheckMark.upsert).not.toHaveBeenCalled();
+      // markFromCheck null буцаавал (болиулсан) хоосон тэмдэглэгээ
+      expect(res).toMatchObject({ studentId: 's1', checked: false });
+    });
+
+    it('жагсаалт: өөр ангид төлсөн нь elsewhere, энд төлөөд гарсан нь former', async () => {
+      const { service, prisma, books } = setup();
+      prisma.enrollment.findMany.mockResolvedValue([
+        { student: { id: 's1', firstName: 'Ану', lastName: 'Бат' } },
+      ]);
+      prisma.classCheck.findMany
+        .mockResolvedValueOnce([checkRow({ title: 'E-2', bookKey: 'E2' })])
+        .mockResolvedValueOnce([]);
+      const paid = (studentId: string, classroomId: string) => ({
+        id: `p-${studentId}`,
+        studentId,
+        bookKey: 'E2',
+        status: 'PAID',
+        amount: 40000,
+        note: null,
+        classroom: { id: classroomId, name: classroomId },
+        collectedBy: null,
+        createdBy: null,
+        createdAt: now.toISOString(),
+        voidedAt: null,
+        voidedBy: null,
+      });
+      books.shape.mockResolvedValue([paid('s1', 'c5'), paid('gone', 'c1')]);
+      const res = await service.list('c1', 'teacher');
+      expect(books.activeForClass).toHaveBeenCalledWith('c1', ['E2'], ['s1']);
+      const marks = res.checks[0].marks as unknown as {
+        studentId: string;
+        elsewhere: unknown;
+      }[];
+      expect(marks.find((m) => m.studentId === 's1')?.elsewhere).toEqual({
+        name: 'c5',
+      });
+      expect(marks.find((m) => m.studentId === 'gone')?.elsewhere).toBeNull();
+      expect(res.former.map((p) => p.id)).toEqual(['gone']);
     });
   });
 });

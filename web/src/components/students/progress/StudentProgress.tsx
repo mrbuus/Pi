@@ -27,16 +27,18 @@ import LessonHistoryTab from "../hub/LessonHistoryTab";
 import SyllabusTab from "../calendar/SyllabusTab";
 import WithdrawalTab from "../withdrawal/WithdrawalTab";
 import PaymentsTab from "../hub/PaymentsTab";
+import BooksTab from "@/components/book-money/BooksTab";
 import StudentInfoTab from "../hub/StudentInfoTab";
 
-type TabKey = "class" | "exams" | "lessons" | "syllabus" | "payments" | "withdrawal" | "notes" | "independent" | "info";
-const ALL_TABS: TabKey[] = ["class", "exams", "lessons", "syllabus", "payments", "withdrawal", "notes", "independent", "info"];
+type TabKey = "class" | "exams" | "lessons" | "syllabus" | "payments" | "books" | "withdrawal" | "notes" | "independent" | "info";
+const ALL_TABS: TabKey[] = ["class", "exams", "lessons", "syllabus", "payments", "books", "withdrawal", "notes", "independent", "info"];
 const TAB_LABELS: Record<TabKey, string> = {
   class: "Ангийн явц",
   exams: "Шалгалт",
   lessons: "Хичээлийн түүх",
   syllabus: "Сэдэв хөтөлбөр",
   payments: "Төлбөр",
+  books: "Ном",
   withdrawal: "Гарсан тооцоо",
   notes: "Тэмдэглэл",
   independent: "Бие даасан явц",
@@ -172,6 +174,7 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
             onRetry={paymentsQ.reload}
           />
         )}
+        {tab === "books" && <BooksTab studentId={studentId} />}
         {tab === "withdrawal" && canSeeMoney && <WithdrawalTab studentId={studentId} />}
         {tab === "notes" && (
           <StudentNotesPanel
@@ -221,6 +224,7 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
             studentId={studentId}
             studentName={fullName(detail)}
             currentClassId={classId}
+            otherClassIds={(detail.otherClassrooms ?? []).map((c) => c.id)}
             onClose={() => setMoving(false)}
             onChanged={load}
           />

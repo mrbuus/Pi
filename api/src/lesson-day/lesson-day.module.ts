@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuditModule } from '../audit/audit.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { LessonDayController } from './lesson-day.controller';
 import { LessonDayService } from './lesson-day.service';
@@ -10,7 +11,7 @@ import { LessonDayService } from './lesson-day.service';
  * Үүрэг тооцоолол: ирц + ClassTestSession; төлөвлөгөө: LessonTopic.photoStudentId.
  */
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AuditModule],
   controllers: [LessonDayController],
   providers: [LessonDayService],
   exports: [LessonDayService],

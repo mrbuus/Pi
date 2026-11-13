@@ -148,10 +148,13 @@ export class AnnouncementsService {
     });
     if (!profile) return [];
 
-    const enrollment = await this.prisma.enrollment.findFirst({
-      where: { studentId: userId, leftAt: null },
-      select: { classroomId: true },
-    });
+    // Хоёр ангид зэрэг суудаг сурагч (математик + Нийгэм) хоёр ангийнхаа зарыг авна
+    const classIds = (
+      await this.prisma.enrollment.findMany({
+        where: { studentId: userId, leftAt: null },
+        select: { classroomId: true },
+      })
+    ).map((e) => e.classroomId);
 
     return this.prisma.announcement.findMany({
       where: {
@@ -164,12 +167,12 @@ export class AnnouncementsService {
           ...(profile.type === StudentType.ONLINE
             ? [{ audience: AnnouncementAudience.ALL_ONLINE }]
             : []),
-          ...(enrollment
+          ...(classIds.length
             ? [
-                { classroomId: enrollment.classroomId },
+                { classroomId: { in: classIds } },
                 {
                   classroomTargets: {
-                    some: { classroomId: enrollment.classroomId },
+                    some: { classroomId: { in: classIds } },
                   },
                 },
               ]

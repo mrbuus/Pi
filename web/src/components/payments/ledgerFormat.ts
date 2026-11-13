@@ -73,8 +73,11 @@ export const STATE_LABEL: Record<BlockState, string> = {
 };
 
 /** Блокийн бүтэн тайлбар — aria-label/title-д. settled = гараар бүтэн жил (дүнгүй). */
+/** «09/14 – 10/14» — сарын төлбөрийн хамрах хугацаа */
+export const periodLabel = (b: MonthBlock) => (b.period ? `${dayLabel(b.period.from)} – ${dayLabel(b.period.to)}` : "");
+
 export function blockLabel(b: MonthBlock, settled = false): string {
-  const head = `${monthName(b.month)}: ${STATE_LABEL[b.state]}`;
+  const head = `${monthName(b.month)}${b.period ? ` (${periodLabel(b)}${b.extDays ? `, ${b.extDays} хоног сунгасан` : ""})` : ""}: ${STATE_LABEL[b.state]}`;
   if (b.state === "OFF") return head;
   if (settled && b.state === "PAID") return `${head} (бүтэн жилд тооцсон)`;
   if (b.state === "PAID")

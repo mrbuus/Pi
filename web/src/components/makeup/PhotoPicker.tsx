@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/kit/button";
+import { errorDetail, trackError } from "@/components/usage/UsageTracker";
 import { fileUrl, uploadFile, type UploadPurpose } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import {
@@ -57,7 +58,7 @@ export default function PhotoPicker({
   fileName = "zurag.pdf",
   highlight = false,
   purpose = "general",
-  maxPages = PDF_MAX_PAGES,
+  maxPages = 10,
   crop = false,
   replaceLabel = "Солих",
   onDelete,
@@ -75,7 +76,7 @@ export default function PhotoPicker({
   highlight?: boolean;
   /** Хадгалах хугацаа: `theory` байнга, `homework` 7 хоног */
   purpose?: UploadPurpose;
-  /** Дээд хуудасны тоо (гэрийн даалгавар 6) */
+  /** Дээд хуудасны тоо (анхдагч 10; гэрийн даалгавар 15, онол 20) */
   maxPages?: number;
   /** Зураг сонгосны дараа тайрах алхам (алгасаж болно) */
   crop?: boolean;
@@ -127,6 +128,7 @@ export default function PhotoPicker({
     const next: Picked[] = [];
     let failed = 0;
     let heic = false;
+    let firstFail = "";
     setPreparing({ done: 0, total: chosen.length });
     try {
       const copies: (File | ImageReadError)[] = [];
@@ -149,6 +151,8 @@ export default function PhotoPicker({
         } catch (e) {
           failed++;
           if (e instanceof ImageReadError && e.heic) heic = true;
+          const src = chosen[i];
+          firstFail ||= `${errorDetail(e)} type ${src?.type || "none"} kb ${Math.round((src?.size ?? 0) / 1024)}`;
         }
         setPreparing({ done: i + 1, total: copies.length });
       }
@@ -157,6 +161,7 @@ export default function PhotoPicker({
       setPreparing(null);
     }
     if (failed) {
+      trackError("photo/read", `${failed}/${chosen.length} ${heic ? "heic " : ""}${firstFail}`);
       const tail = heic
         ? "Камерын тохиргоонд JPEG хэлбэр сонгоод дахин зураарай эсвэл өөр зураг сонгоно уу"
         : "Дахин зураарай эсвэл өөр зураг сонгоно уу";
@@ -221,20 +226,24 @@ export default function PhotoPicker({
   async function send() {
     setError("");
     setProgress(0);
+    let stage = "build";
     try {
       setPhase("build");
       const { file, pages: count } = await photosToPdf(
         picked.map((p) => ({ file: p.file, rotation: p.rotation })),
         { fileName, maxPages: max, onProgress: (d, t) => setProgress(Math.round((d / t) * 100)) },
       );
+      stage = `upload kb ${Math.round(file.size / 1024)}`;
       setPhase("upload");
       const { key } = await uploadFile(file, { purpose });
+      stage = "save";
       setPhase("save");
       await onSave([key], count);
       setPicked([]);
       setEditing(false);
       setJustSent(true);
     } catch (e) {
+      trackError(`photo/${stage}`, `n ${picked.length} ${purpose} ${errorDetail(e)}`);
       setError(e instanceof Error && e.message ? e.message : "Илгээж чадсангүй. Дахин оролдоно уу");
     } finally {
       setPhase("");

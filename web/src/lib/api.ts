@@ -21,6 +21,20 @@ function readAuth(key: string): string | null {
   return sessionStore()?.getItem(key) ?? localStorage.getItem(key);
 }
 
+/**
+ * Сервер токеныг хүлээн авахгүй (401) болсон: хугацаа дууссан (30 хоног / 12 цаг)
+ * эсвэл нууц үгээ өөр төхөөрөмжөөс сольсон. Хуучин токеныг үлдээвэл хуудас бүр
+ * «Алдаа гарлаа» гаргаж, хэрэглэгч дахин нэвтэрч чадахгүй гацдаг байсан
+ * (2026-11-12, ялангуяа утсаар). Одоо токеныг цэвэрлэж нэвтрэх хуудас руу шилжүүлнэ.
+ */
+function handleRejectedToken(sentToken: string) {
+  if (typeof window === "undefined" || getToken() !== sentToken) return;
+  clearAuth();
+  const { pathname, search } = window.location;
+  if (!pathname.startsWith("/app")) return; // нийтийн хуудсыг зүгээр л зочин болгоно
+  window.location.replace(`/login?expired=1&next=${encodeURIComponent(pathname + search)}`);
+}
+
 export function getToken(): string | null {
   return readAuth(TOKEN_KEY);
 }
@@ -249,6 +263,10 @@ export async function api<T = unknown>(
         : await res.json().catch(() => null)) as T & {
       message?: string | string[];
     };
+    // Нэвтрэх оролдлогын 401 (буруу нууц үг) нь токеноос хамааралгүй
+    if (res.status === 401 && token && !path.startsWith("/auth/login")) {
+      handleRejectedToken(token);
+    }
     if (opts.auth !== false && (requestSession !== sessionVersion || token !== getToken())) {
       throw new ApiError("Нэвтрэх төлөв өөрчлөгдсөн. Хуудсаа дахин нээнэ үү.", 401);
     }
@@ -375,6 +393,7 @@ export async function uploadFile(
       signal: AbortSignal.timeout(30_000), // 30с file upload-д
     });
     const data = await res.json().catch(() => null);
+    if (res.status === 401 && token) handleRejectedToken(token);
     if (requestSession !== sessionVersion || token !== getToken()) {
       throw new ApiError("Нэвтрэх төлөв өөрчлөгдсөн. Хуудсаа дахин нээнэ үү.", 401);
     }

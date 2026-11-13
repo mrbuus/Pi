@@ -7,10 +7,12 @@ DELETE /api/chapters/:id
 DELETE /api/classrooms/:id
 DELETE /api/finance/expenses/:id
 DELETE /api/goals/:id
+DELETE /api/lesson-day/:classroomId/:date/photos
 DELETE /api/lessons/theory/:id
 DELETE /api/me/passes/:userPassId
 DELETE /api/notes/:id
 DELETE /api/passes/:id
+DELETE /api/payments/ledger/student/:id/extensions/:extId
 DELETE /api/problems/:problemId
 DELETE /api/progress/student/:id/attempt/:attemptId
 DELETE /api/schedule/:id
@@ -284,6 +286,7 @@ POST /api/payments
 POST /api/payments/:id/confirm
 POST /api/payments/:id/reject
 POST /api/payments/:id/reverse
+POST /api/payments/ledger/student/:id/extensions
 POST /api/problems
 POST /api/progress/student/:id/assign-test
 POST /api/progress/student/:id/reset-chapter

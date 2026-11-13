@@ -60,3 +60,20 @@ describe('ангилал', () => {
     expect(c(784_000, 'Баянхонгор аймаг', none)).toMatchObject({ kind: 'OTHER', confident: false });
   });
 });
+
+describe('нийгмийн сургалт', () => {
+  const soc: MatchResult = { ...kid, social: { known: true } };
+  it('«нийгэм» гэсэн, хүүхэд нь нийгэмд суудаг → SOCIAL, итгэлтэй', () => {
+    expect(c(1_500_000, 'B.Nasanbutedmaa 60696985 niigm 2027', soc)).toMatchObject({ kind: 'SOCIAL', confident: true });
+    expect(c(300_000, 'Г.Эгшиглэн 96606018 НИЙГЭМ 2027 он', soc)).toMatchObject({ kind: 'SOCIAL', confident: true });
+  });
+  it('хүүхэд нь нийгэмд бүртгэлгүй → SOCIAL, хүн шалгана', () => {
+    expect(c(300_000, 'Хонгорзул нийгэм', { ...kid, social: { known: false } })).toMatchObject({ kind: 'SOCIAL', confident: false });
+  });
+  it('математик, нийгэм хоёулаа → хүн хуваана', () => {
+    expect(c(1_800_000, 'Сарнай мат нийгэм', soc)).toMatchObject({ kind: 'SOCIAL', confident: false });
+  });
+  it('«нийгэм» үггүй бол TUITION хэвээр', () => {
+    expect(c(1_500_000, 'nasanbutedmaa 13-3 mat')).toMatchObject({ kind: 'TUITION' });
+  });
+});

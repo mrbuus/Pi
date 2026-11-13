@@ -346,6 +346,7 @@ export type BankDirection = (typeof BankDirection)[keyof typeof BankDirection]
 
 export const BankAllocKind = {
   TUITION: 'TUITION',
+  SOCIAL: 'SOCIAL',
   BOOK: 'BOOK',
   ANSWER_SHEET: 'ANSWER_SHEET',
   STAFF_FINE: 'STAFF_FINE',
@@ -542,3 +543,11 @@ export const HomeworkAttemptStatus = {
 } as const
 
 export type HomeworkAttemptStatus = (typeof HomeworkAttemptStatus)[keyof typeof HomeworkAttemptStatus]
+
+
+export const PaperExamImportStatus = {
+  CONFIRMED: 'CONFIRMED',
+  REVERTED: 'REVERTED'
+} as const
+
+export type PaperExamImportStatus = (typeof PaperExamImportStatus)[keyof typeof PaperExamImportStatus]
