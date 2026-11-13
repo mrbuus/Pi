@@ -44,6 +44,38 @@ void main() {
     await scrollTo(tester, find.text('Шалгуур хангаагүй'));
   });
 
+  testWidgets('ангидаа орсны дараа өдрийг дотроос нь солино: сум, «Өнөөдөр», тэр өдрийн самбар ачаална', (
+    tester,
+  ) async {
+    final http = _http();
+    await pumpTeacher(tester, _screen, http: http);
+    String? lastDate() =>
+        http.requests.lastWhere((r) => r.path == '/attendance/classrooms/c1/board').queryParameters['date'] as String?;
+    expect(find.text('11-р сарын 2, Даваа'), findsOneWidget);
+    expect(lastDate(), testDate);
+    // Өнөөдөр харж байхад «Өнөөдөр» товч илүүц
+    expect(find.byKey(const ValueKey('board-date-today')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('board-date-prev')));
+    await settle(tester, frames: 20);
+    expect(find.text('11-р сарын 1, Ням'), findsOneWidget);
+    expect(lastDate(), '2026-11-01');
+    // Ангиасаа гараагүй — нөгөө л дэлгэц, ангийн нэр хэвээр
+    expect(find.byType(BoardScreen), findsOneWidget);
+    expect(find.text('12Б'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('board-date-today')));
+    await settle(tester, frames: 20);
+    expect(find.text('11-р сарын 2, Даваа'), findsOneWidget);
+    expect(lastDate(), testDate);
+
+    await tester.tap(find.byKey(const ValueKey('board-date-next')));
+    await settle(tester, frames: 20);
+    expect(find.text('11-р сарын 3, Мягмар'), findsOneWidget);
+    expect(lastDate(), '2026-11-03');
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('нэрээр эрэмбэлж дугаарлана (монгол цагаан толгой)', (tester) async {
     await pumpTeacher(tester, _screen, http: _http());
     expect(_inKey('card-s2', find.text('1')), findsOneWidget);

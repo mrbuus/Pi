@@ -26,6 +26,10 @@ export 'board_card.dart' show OnlineBoxButton;
 /// Ирц ба даалгаврын самбар (`/app/teacher/board/:classId?date=`) — вэбийн `Board`-ын дараалал:
 /// хичээлийн тэмдэглэл, наалддаг тойм, хэн тэмдэглэсэн, хичээлийн мэдээлэл, шүүлтүүр, сурагчдын карт,
 /// «Үлдсэнийг нэг дор», тайлбар (legend) хамгийн доор, ангийн бусад мэдээлэл. Товшилт бүр шууд хадгалагдана.
+///
+/// Ангидаа орсны дараа өдрийг дотроос нь солино (эзэн 2026-11-14): дээд талын огнооны мөр — өмнөх/дараагийн
+/// өдөр, огноо дээр дарж сонгох, «Өнөөдөр». Өдөр бүр өөрийн төлөвтэй ([_BoardDay] огноогоор түлхүүрлэгдэнэ) тул
+/// хадгалагдаж буй тэмдэглэгээ, poll, шүүлтүүр өдөр хооронд холилдохгүй.
 class BoardScreen extends ConsumerStatefulWidget {
   const BoardScreen({super.key, required this.classId, this.date});
 
@@ -39,9 +43,35 @@ class BoardScreen extends ConsumerStatefulWidget {
 }
 
 class _BoardScreenState extends ConsumerState<BoardScreen> {
+  late String _date = widget.date ?? ref.read(teacherTodayProvider).dateKey;
+
+  @override
+  Widget build(BuildContext context) => _BoardDay(
+    key: ValueKey('board-day:$_date'),
+    classId: widget.classId,
+    date: _date,
+    onDate: (d) {
+      if (d != _date) setState(() => _date = d);
+    },
+  );
+}
+
+/// Нэг ангийн нэг өдрийн самбар.
+class _BoardDay extends ConsumerStatefulWidget {
+  const _BoardDay({super.key, required this.classId, required this.date, required this.onDate});
+
+  final String classId;
+  final String date;
+  final ValueChanged<String> onDate;
+
+  @override
+  ConsumerState<_BoardDay> createState() => _BoardDayState();
+}
+
+class _BoardDayState extends ConsumerState<_BoardDay> {
   late final AppLifecycleListener _life;
 
-  late final BoardArgs _args = (classId: widget.classId, date: widget.date ?? ref.read(teacherTodayProvider).dateKey);
+  late final BoardArgs _args = (classId: widget.classId, date: widget.date);
 
   @override
   void initState() {
@@ -72,18 +102,18 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
       ),
     );
     final ctl = ref.read(boardControllerProvider(_args).notifier);
-    final day = parseDateKey(_args.date);
+    final today = ref.watch(teacherTodayProvider).dateKey;
     return Scaffold(
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(s.title ?? 'Ирц ба даалгавар'),
-            if (day != null)
-              Text(DateMn.longWithWeekday(day), style: context.text.bodySmall?.copyWith(color: context.colors.inkDim)),
+            Text(s.title ?? 'Ирц ба даалгавар', maxLines: 1, overflow: TextOverflow.ellipsis),
+            BoardDatePicker(date: _args.date, today: today, onDate: widget.onDate),
           ],
         ),
         actions: [
+          ...boardDayArrows(date: _args.date, today: today, onDate: widget.onDate),
           // Эрсдэлийн шалгуур — зөвхөн Багш+ / Админ (сервер `canEditCriteria`).
           if (s.criteria)
             IconButton(
@@ -112,6 +142,117 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Самбарын огнооны хязгаар: ирэх долоо хоногуудын хичээлийг урьдчилж нээхэд хангалттай.
+const boardFutureDays = 60;
+
+bool _canForward(UbDateTime day, UbDateTime now) => day.dayIndex < now.addDays(boardFutureDays).dayIndex;
+
+/// AppBar-ын «‹ ›» — өмнөх/дараагийн өдөр (ангиас гаралгүй).
+List<Widget> boardDayArrows({required String date, required String today, required ValueChanged<String> onDate}) {
+  final day = parseDateKey(date);
+  final now = parseDateKey(today);
+  if (day == null || now == null) return const [];
+  Widget arrow(IconData icon, String tip, VoidCallback? onTap, String key) => IconButton(
+    key: ValueKey(key),
+    tooltip: tip,
+    constraints: const BoxConstraints(minWidth: teacherTap, minHeight: teacherTap),
+    icon: Icon(icon),
+    onPressed: onTap,
+  );
+  return [
+    arrow(AppIcons.back, 'Өмнөх өдөр', () => onDate(day.addDays(-1).dateKey), 'board-date-prev'),
+    arrow(
+      AppIcons.forward,
+      'Дараагийн өдөр',
+      _canForward(day, now) ? () => onDate(day.addDays(1).dateKey) : null,
+      'board-date-next',
+    ),
+  ];
+}
+
+/// AppBar-ын гарчгийн доорх огноо: дарахад хуанли нээгдэнэ; өөр өдөр харж байвал хажууд нь «Өнөөдөр».
+class BoardDatePicker extends StatelessWidget {
+  const BoardDatePicker({super.key, required this.date, required this.today, required this.onDate});
+
+  /// Харж буй өдөр ба өнөөдөр (`YYYY-MM-DD`, UB).
+  final String date;
+  final String today;
+  final ValueChanged<String> onDate;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final day = parseDateKey(date);
+    final now = parseDateKey(today);
+    if (day == null || now == null) return const SizedBox.shrink();
+    final isToday = date == today;
+    final last = now.addDays(boardFutureDays);
+    final small = context.text.bodySmall;
+
+    Future<void> pick() async {
+      final picked = await showDatePicker(
+        context: context,
+        initialDate: DateTime(day.year, day.month, day.day),
+        currentDate: DateTime(now.year, now.month, now.day),
+        firstDate: DateTime(2024),
+        lastDate: DateTime(last.year, last.month, last.day),
+        helpText: 'Өдөр сонгох',
+      );
+      if (picked != null) onDate(UbDateTime(picked.year, picked.month, picked.day).dateKey);
+    }
+
+    return Row(
+      children: [
+        Flexible(
+          child: Semantics(
+            button: true,
+            label: '${DateMn.longWithWeekday(day)}, өдөр сонгох',
+            excludeSemantics: true,
+            child: InkWell(
+              key: const ValueKey('board-date-pick'),
+              onTap: pick,
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        DateMn.longWithWeekday(day),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: small?.copyWith(color: isToday ? c.inkDim : c.brand, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    Icon(AppIcons.expand, size: 14, color: isToday ? c.inkDim : c.brand),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (!isToday) ...[
+          const SizedBox(width: AppSpace.sm),
+          InkWell(
+            key: const ValueKey('board-date-today'),
+            onTap: () => onDate(today),
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: 2),
+              child: Text(
+                'Өнөөдөр',
+                style: small?.copyWith(color: c.brand, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
