@@ -22,11 +22,14 @@ Future<void> openSchedule(WidgetTester tester, FakeHttp http, UserRole role, {Si
   await settle(tester);
 }
 
+/// Өдрийн хуваарийн (agenda) хичээлийн карт — танхим гарчигт ОРОХГҮЙ (эзэн 2026-11-08).
+Finder lessonCard(String name) => find.descendant(of: find.byType(DayAgenda), matching: find.text(name));
+
 /// Өдрийн хуваарийн «12-1» хичээлийг нээнэ (agenda-ийн карт).
 Future<void> openLesson(WidgetTester tester) async {
-  await tester.ensureVisible(find.text('501 12-1'));
+  await tester.ensureVisible(lessonCard('12-1'));
   await settle(tester);
-  await tester.tap(find.text('501 12-1'));
+  await tester.tap(lessonCard('12-1'));
   await settle(tester);
 }
 
@@ -134,7 +137,7 @@ void main() {
     await settle(tester, frames: 20);
     // Буцаж ирэхэд кэшээс (дахин дуудахгүй).
     expect(planned().where((d) => d == first), hasLength(1));
-    expect(find.text('501 12-1'), findsOneWidget);
+    expect(lessonCard('12-1'), findsOneWidget);
   });
 
   testWidgets('тууз дээр өдөр товшиход тэр өдрийн хуваарь', (tester) async {
@@ -166,7 +169,7 @@ void main() {
     await settle(tester);
   });
 
-  testWidgets('нягт өдөр жагсаалтаар нээгдэнэ: цагийн бүлэг, танхим, товчоор хүснэгт рүү', (tester) async {
+  testWidgets('нягт өдөр жагсаалтаар нээгдэнэ: цагийн бүлэг, танхимгүй, товчоор хүснэгт рүү', (tester) async {
     final http = staffHttp(
       entries: (date) => [
         for (var i = 1; i <= 6; i++)
@@ -178,7 +181,9 @@ void main() {
     expect(find.byKey(const ValueKey('staff-day-list')), findsOneWidget);
     expect(find.text('15:00'), findsOneWidget);
     expect(find.text('6 анги'), findsOneWidget);
-    expect(find.descendant(of: find.byType(RoomBadge), matching: find.text('503')), findsOneWidget);
+    // Танхим өдрийн хуваарьт харагдахгүй (эзэн 2026-11-08).
+    expect(find.byType(RoomBadge), findsNothing);
+    expect(find.text('503'), findsNothing);
     expect(tester.takeException(), isNull);
 
     await tester.tap(find.byTooltip('Цагаар харах'));
@@ -207,7 +212,7 @@ void main() {
     // Анхдагч нь вэбтэй адил «Бүгд».
     final filter = find.byKey(const ValueKey('staff-schedule-filter'));
     expect(find.descendant(of: filter, matching: find.text('Бүгд')), findsOneWidget);
-    expect(find.text('301 11-2'), findsOneWidget);
+    expect(lessonCard('11-2'), findsOneWidget);
     await tester.tap(filter);
     await settle(tester);
     // Нэг цонхонд: Бүгд, Миний хичээл, багш бүр («+»-тэй), анги бүр.
@@ -216,8 +221,8 @@ void main() {
     }
     await tester.tap(find.text('12-1').last);
     await settle(tester);
-    expect(find.text('301 11-2'), findsNothing);
-    expect(find.text('501 12-1'), findsOneWidget);
+    expect(lessonCard('11-2'), findsNothing);
+    expect(lessonCard('12-1'), findsOneWidget);
     expect(find.descendant(of: filter, matching: find.text('12-1')), findsOneWidget);
 
     // Шүүлтүүр 7 хоногт ч хэвээр; ажлын өдөрт хамаарахгүй тул товч нуугдана.
@@ -236,13 +241,13 @@ void main() {
     await tester.tap(find.text('Миний хичээл'));
     await settle(tester);
     // Зохиомол өгөгдөлд «миний» хичээл алга.
-    expect(find.text('501 12-1'), findsNothing);
+    expect(lessonCard('12-1'), findsNothing);
     expect(find.text('Шүүлтүүрт тохирох хичээл алга'), findsOneWidget);
     await tester.tap(filter);
     await settle(tester);
     await tester.tap(find.text('Бүгд').last);
     await settle(tester);
-    expect(find.text('301 11-2'), findsOneWidget);
+    expect(lessonCard('11-2'), findsOneWidget);
   });
 
   group('засах хуудас', () {
@@ -344,11 +349,11 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Цуцлах'));
       await settle(tester);
       expect(find.byType(LessonDetail), findsNothing);
-      expect(find.text('501 12-1'), findsNothing);
+      expect(lessonCard('12-1'), findsNothing);
       expect(find.text('Хичээл цуцлагдлаа'), findsOneWidget);
       await tester.tap(find.text('Буцаах'));
       await settle(tester);
-      expect(find.text('501 12-1'), findsOneWidget);
+      expect(lessonCard('12-1'), findsOneWidget);
       await tester.pump(const Duration(seconds: 6));
       await settle(tester);
       expect(http.count('POST', '/schedule/s1/exceptions'), 0);
@@ -383,7 +388,7 @@ void main() {
       await tester.pump(const Duration(seconds: 6));
       await settle(tester);
       expect(http.count('DELETE', '/schedule/s1'), 0);
-      expect(find.text('501 12-1'), findsOneWidget);
+      expect(lessonCard('12-1'), findsOneWidget);
     });
   });
 
@@ -395,6 +400,48 @@ void main() {
     expect(find.byType(LessonDetail), findsOneWidget);
     expect(find.byType(BottomSheet), findsNothing);
     expect(find.text('Ахлах багш'), findsOneWidget);
+  });
+
+  testWidgets('«Ажлын өдөр» дотор «Ажилласан цаг» (вэбийн дэд таб), хэсгийн 3 сегмент хэвээр', (tester) async {
+    final http = staffHttp()
+      ..json('GET', '/teacher-hours/sheet', {
+        'period': {
+          'id': '2026-11-1',
+          'start': '2026-11-01',
+          'end': '2026-11-15',
+          'days': [for (var d = 1; d <= 15; d++) '2026-11-${d.toString().padLeft(2, '0')}'],
+          'prev': '2026-10-2',
+          'next': null,
+          'current': '2026-11-1',
+        },
+        'today': '2026-11-04',
+        'viewer': {'userId': 'u1', 'canEdit': false, 'seesPay': false},
+        'rows': [
+          {
+            'teacherId': 't1',
+            'name': 'Сарнай',
+            'cells': {'2026-11-04': 400},
+            'staffed': <String, Object?>{},
+          },
+        ],
+        'totalHundredths': 400,
+      });
+    await openSchedule(tester, http, UserRole.teacher);
+    expect(find.byKey(const ValueKey('workdays-sub:hours')), findsNothing);
+    await tester.tap(find.text('Ажлын өдөр'));
+    await settle(tester);
+    expect(find.byKey(const ValueKey('workdays-sub:roster')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('workdays-sub:hours')));
+    await settle(tester);
+    expect(http.count('GET', '/teacher-hours/sheet'), 1);
+    expect(find.text('2026 оны 11-р сар, 1–15'), findsOneWidget);
+    expect(find.text('Сарнай'), findsOneWidget);
+    // Хэсгийн үндсэн сегмент 3 хэвээр (утсанд багтана).
+    expect(
+      find.descendant(of: find.byKey(const ValueKey('staff-schedule-view')), matching: find.byType(Text)),
+      findsNWidgets(3),
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('товчнуудын хүрэх талбай 48dp-ээс багагүй', (tester) async {

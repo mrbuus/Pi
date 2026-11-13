@@ -12,7 +12,9 @@ import '../../data/staff_schedule_models.dart';
 import '../../data/staff_schedule_repository.dart';
 import '../../domain/agenda_scroll.dart';
 import '../../domain/day_overlay.dart';
+import '../../domain/lesson_road.dart';
 import '../../domain/staff_schedule_logic.dart';
+import 'day_export.dart';
 import 'lesson_detail.dart';
 import 'schedule_rows.dart';
 import 'staff_actions.dart';
@@ -182,7 +184,7 @@ class _DayPage extends ConsumerWidget {
             : null,
       );
     } else if (list) {
-      body = _LessonList(lessons: lessons, onOpen: onOpen, selectedId: selectedId);
+      body = _LessonList(lessons: lessons, tests: plan.tests, onOpen: onOpen, selectedId: selectedId);
     } else {
       body = _AutoScrollAgenda(
         key: ValueKey('agenda:$key'),
@@ -198,7 +200,8 @@ class _DayPage extends ConsumerWidget {
               id: l.scheduleId,
               start: UbDateTime(date.year, date.month, date.day, l.startMinute ~/ 60, l.startMinute % 60),
               end: UbDateTime(date.year, date.month, date.day, l.endMinute ~/ 60, l.endMinute % 60),
-              title: [?l.room, shortClass(l.classroomName)].join(' '),
+              // Танхим өдрийн хуваарьт ХАРАГДАХГҮЙ (эзэн 2026-11-08).
+              title: shortClass(l.classroomName),
               subtitle: l.lead != null ? staffRefLabel(l.lead!) : lessonTeacherLabel(l),
               color: l.moved != null ? context.colors.info : null,
               data: l,
@@ -335,6 +338,13 @@ class _DayHeader extends ConsumerWidget {
                   icon: const Icon(AppIcons.bellRing),
                   onPressed: () => unawaited(publishDay(context, date: plan.date, again: publishedAt != null)),
                 ),
+              if (counts.total > 0)
+                IconButton(
+                  key: const ValueKey('staff-day-export'),
+                  tooltip: 'Зураг хуваалцах',
+                  icon: const Icon(AppIcons.gallery),
+                  onPressed: () => unawaited(openDayExport(context, plan)),
+                ),
               IconButton(
                 tooltip: listMode ? 'Цагаар харах' : 'Жагсаалтаар харах',
                 icon: Icon(listMode ? AppIcons.schedule : AppIcons.listTodo),
@@ -380,9 +390,10 @@ class _Banner extends StatelessWidget {
 
 /// Жагсаалтаар: ижил цагт эхлэх хичээлүүд нэг карт (вэбийн «блок»), танхимын эрэмбээр.
 class _LessonList extends StatelessWidget {
-  const _LessonList({required this.lessons, required this.onOpen, required this.selectedId});
+  const _LessonList({required this.lessons, required this.tests, required this.onOpen, required this.selectedId});
 
   final List<DayLesson> lessons;
+  final Map<String, PlanTest> tests;
   final ValueChanged<DayLesson> onOpen;
   final String? selectedId;
 
@@ -405,12 +416,15 @@ class _LessonList extends StatelessWidget {
           children: [
             TimeGroupHeader(title: formatMinutes(g.start), count: g.lessons.length),
             LessonGroupCard(
+              showRoom: false,
               children: [
                 for (final l in g.lessons)
                   LessonRow(
                     room: l.room,
+                    showRoom: false,
                     title: shortClass(l.classroomName),
                     meta: [
+                      lessonTestsText(l, tests),
                       [
                         if (l.lead != null) staffRefLabel(l.lead!) else ?lessonTeacherLabel(l),
                         if (l.assistant != null) staffRefLabel(l.assistant!),

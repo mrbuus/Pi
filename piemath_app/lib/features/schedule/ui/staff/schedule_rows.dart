@@ -38,9 +38,12 @@ class TimeGroupHeader extends StatelessWidget {
 
 /// Нэг бүлгийн мөрүүд — нэг карт, мөр хооронд нарийн зураас.
 class LessonGroupCard extends StatelessWidget {
-  const LessonGroupCard({super.key, required this.children});
+  const LessonGroupCard({super.key, required this.children, this.showRoom = true});
 
   final List<Widget> children;
+
+  /// Мөрүүд танхимын тэмдэгтэй эсэх ([LessonRow.showRoom]-тэй ижил) — зураасны эхлэл.
+  final bool showRoom;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -52,7 +55,12 @@ class LessonGroupCard extends StatelessWidget {
         children: [
           for (final (i, child) in children.indexed) ...[
             // Зураас танхимын тэмдгийн ард эхэлнэ (тэмдгүүд нэг багана болж харагдана)
-            if (i > 0) Divider(height: 1, indent: AppSpace.lg + 40 + AppSpace.md, color: context.colors.line),
+            if (i > 0)
+              Divider(
+                height: 1,
+                indent: showRoom ? AppSpace.lg + 40 + AppSpace.md : AppSpace.lg,
+                color: context.colors.line,
+              ),
             child,
           ],
         ],
@@ -71,10 +79,14 @@ class LessonRow extends StatelessWidget {
     this.trailing,
     this.selected = false,
     this.onTap,
+    this.showRoom = true,
   });
 
   final String? room;
   final String title;
+
+  /// Танхимын тэмдэг. «Өдөр»-ийн хуваарьт танхим ХАРАГДАХГҮЙ (эзэн 2026-11-08), «7 хоног»-т харагдана.
+  final bool showRoom;
 
   /// [Meta]-ийн зүйлс, хоосныг алгасна.
   final List<Object?> meta;
@@ -95,8 +107,7 @@ class LessonRow extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(AppSpace.lg, AppSpace.sm, AppSpace.md, AppSpace.sm),
             child: Row(
               children: [
-                RoomBadge(room: room),
-                const SizedBox(width: AppSpace.md),
+                if (showRoom) ...[RoomBadge(room: room), const SizedBox(width: AppSpace.md)],
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

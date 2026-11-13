@@ -288,7 +288,7 @@ void main() {
           },
         ],
       });
-    await pumpTeacher(tester, const TeacherHoursScreen(), http: http);
+    await pumpTeacher(tester, const TeacherHoursScreen(initialTab: TeacherHoursTab.computed), http: http);
     expect(find.text('2026 оны 11-р сар'), findsOneWidget);
     expect(find.text('4 цаг'), findsOneWidget);
     expect(find.text('10:00–12:00'), findsOneWidget);

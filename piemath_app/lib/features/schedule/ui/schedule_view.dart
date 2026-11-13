@@ -10,6 +10,7 @@ import '../../my_class/ui/common.dart';
 import '../data/schedule_models.dart';
 import '../data/schedule_repository.dart';
 import '../domain/schedule_logic.dart';
+import '../domain/test_names.dart';
 
 /// Хуваарь: (сурагчид) 7 хоногийн тогтмол хуваарь + тодорхой 7 хоногийн хичээлүүд.
 /// «Хичээл» hub-ийн «Хуваарь» таб болон `/app/schedule` дэлгэц хоёулаа энийг хэрэглэнэ.
@@ -29,17 +30,12 @@ class ScheduleView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final now = today ?? UbDateTime.now();
     return RefreshIndicator(
-      onRefresh: () => refreshProviders(ref, [
-        if (showPattern) scheduleMeProvider,
-        scheduleWeekProvider(mondayOf(now).dateKey),
-      ]),
+      onRefresh: () =>
+          refreshProviders(ref, [if (showPattern) scheduleMeProvider, scheduleWeekProvider(mondayOf(now).dateKey)]),
       child: ListView(
         padding: const EdgeInsets.all(AppSpace.gutter),
         children: [
-          if (showPattern) ...[
-            _PatternSection(today: now),
-            const SizedBox(height: AppSpace.xl),
-          ],
+          if (showPattern) ...[_PatternSection(today: now), const SizedBox(height: AppSpace.xl)],
           WeekSection(today: now),
         ],
       ),
@@ -112,7 +108,10 @@ class PatternGrid extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       decoration: BoxDecoration(
                         border: Border(
-                          bottom: BorderSide(color: d == todayWeekday ? c.brandBright : c.line, width: d == todayWeekday ? 2 : 1),
+                          bottom: BorderSide(
+                            color: d == todayWeekday ? c.brandBright : c.line,
+                            width: d == todayWeekday ? 2 : 1,
+                          ),
                         ),
                       ),
                       child: Center(
@@ -163,10 +162,7 @@ class _PatternCell extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: AppSpace.sm),
           child: Column(
             children: [
-              Text(
-                hm(entry.startMinute),
-                style: context.text.labelMedium?.copyWith(fontWeight: FontWeight.w700),
-              ),
+              Text(hm(entry.startMinute), style: context.text.labelMedium?.copyWith(fontWeight: FontWeight.w700)),
               if (entry.room != null)
                 Text(entry.room!, style: context.text.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
             ],
@@ -227,7 +223,13 @@ class _WeekSectionState extends ConsumerState<WeekSection> {
           value: week,
           onRetry: () => ref.invalidate(scheduleWeekProvider(key)),
           loading: const SkeletonPulse(
-            child: Column(children: [SkeletonCard(), SizedBox(height: AppSpace.md), SkeletonCard()]),
+            child: Column(
+              children: [
+                SkeletonCard(),
+                SizedBox(height: AppSpace.md),
+                SkeletonCard(),
+              ],
+            ),
           ),
           compactError: true,
           builder: (data) {
@@ -342,7 +344,7 @@ class _WeekEntryRow extends StatelessWidget {
                 ),
                 Meta(items: [entry.classroomName, weekTeacherName(entry), subjectLabel(entry.subject)]),
                 if (entry.topic != null && entry.topic!.trim().isNotEmpty)
-                  Text(entry.topic!, style: context.text.bodyMedium),
+                  Text(regroupTopicText(entry.topic), style: context.text.bodyMedium),
                 if (moved)
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
@@ -375,10 +377,10 @@ class _Heading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        header: true,
-        child: Text(
-          text,
-          style: context.text.titleMedium?.copyWith(color: context.colors.brandSoft, fontWeight: FontWeight.w700),
-        ),
-      );
+    header: true,
+    child: Text(
+      text,
+      style: context.text.titleMedium?.copyWith(color: context.colors.brandSoft, fontWeight: FontWeight.w700),
+    ),
+  );
 }

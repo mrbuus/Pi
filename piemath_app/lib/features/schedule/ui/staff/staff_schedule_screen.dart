@@ -9,6 +9,7 @@ import '../../../../core/auth/user_role.dart';
 import '../../../../core/time/ub_time.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../shared/native/native.dart';
+import '../../../teacher/ui/teacher_hours_sheet_view.dart';
 import '../../data/staff_schedule_models.dart';
 import '../../data/staff_schedule_repository.dart';
 import '../../domain/staff_schedule_logic.dart';
@@ -47,6 +48,27 @@ class _ViewController extends Notifier<StaffScheduleView> {
   void set(StaffScheduleView v) => state = v;
 }
 
+/// «Ажлын өдөр» доторх дэд харагдац (вэбийн «Багшийн ажлын өдөр»-ийн ард «Ажилласан цаг» таб, эзэн 2026-11-10).
+/// Утсанд 4 дэх сегмент багтахгүй тул «Ажлын өдөр»-ийн дотор хоёр сонголтоор.
+enum WorkdaysSubView {
+  roster('Хүснэгт'),
+  hours('Ажилласан цаг');
+
+  const WorkdaysSubView(this.label);
+
+  final String label;
+}
+
+class _SubController extends Notifier<WorkdaysSubView> {
+  @override
+  WorkdaysSubView build() => WorkdaysSubView.roster;
+
+  void set(WorkdaysSubView v) => state = v;
+}
+
+/// «Ажлын өдөр»-ийн дэд харагдац.
+final workdaysSubViewProvider = NotifierProvider<_SubController, WorkdaysSubView>(_SubController.new);
+
 class _FilterController extends Notifier<ScheduleFilter> {
   // Вэбтэй адил анхдагчаар бүх хичээл (вэбийн өдрийн хуваарь шүүлтүүргүй, Багш ч бүгдийг харна).
   @override
@@ -72,7 +94,8 @@ StaffPermissions _perms(WidgetRef ref) {
 
 /// Ажилтны хуваарь (Багш, Багш+, Админ) — вэбийн `/app/schedule` (`StaffScheduleBuilder`).
 ///
-/// Нэг л удирдлагын мөр: «Өдөр | 7 хоног | Ажлын өдөр» сегмент; шүүлтүүр, онцгой өдөр нь AppBar-т
+/// Нэг л удирдлагын мөр: «Өдөр | 7 хоног | Ажлын өдөр» сегмент («Ажлын өдөр» дотор «Хүснэгт | Ажилласан
+/// цаг» дэд сонголт); шүүлтүүр, онцгой өдөр нь AppBar-т
 /// ([StaffScheduleActions]). Хэсгийн (hub) дэд табын мөр + энэ мөр + өдрийн тууз — өөр навигацийн мөргүй.
 /// Энгийн Багш Багш+-тай ИЖИЛ харагдацтай (эзэн 2026-10-22), зөвхөн засах товч гарахгүй.
 /// Засах эрхийг [StaffPermissions] вэб, API-ийн хамгаалалттай ижлээр тооцно.
@@ -89,12 +112,16 @@ class StaffScheduleScreen extends ConsumerWidget {
     final perms = _perms(ref);
     final view = ref.watch(staffScheduleViewProvider);
     final filter = ref.watch(staffScheduleFilterProvider);
+    final sub = ref.watch(workdaysSubViewProvider);
     // Идэвхгүй харагдацыг зурахгүй (вэбтэй адил буцаж ирэхэд шинэчлэгдэнэ). Хуваарийн хэсэг дэд табаа
     // хуруугаар солидог тул энд хэвтээ шудралтгүй — зөвхөн товчоор.
     final Widget body = switch (view) {
       StaffScheduleView.day => StaffDayTab(filter: filter, perms: perms, today: today),
       StaffScheduleView.week => StaffPatternTab(filter: filter, perms: perms, userId: userId, today: today),
-      StaffScheduleView.workdays => StaffWorkDaysTab(perms: perms, today: today),
+      StaffScheduleView.workdays => switch (sub) {
+        WorkdaysSubView.roster => StaffWorkDaysTab(perms: perms, today: today),
+        WorkdaysSubView.hours => const TeacherHoursSheetView(),
+      },
     };
     // Хэсгийн (hub) дотор өөрийн AppBar-ын мөр нуугдана (`toolbarHeight: 0`) — үйлдэл хэсгийн AppBar-т
     // гардаг тул энд давхар (дэлгэц уншигчид хоёр товч) үүсгэхгүй.
@@ -110,6 +137,14 @@ class StaffScheduleScreen extends ConsumerWidget {
               ref.read(staffScheduleViewProvider.notifier).set(v);
             },
           ),
+          if (view == StaffScheduleView.workdays)
+            _SubSwitch(
+              value: sub,
+              onChanged: (v) {
+                unawaited(HapticFeedback.selectionClick());
+                ref.read(workdaysSubViewProvider.notifier).set(v);
+              },
+            ),
           Expanded(child: body),
         ],
       ),
@@ -147,6 +182,37 @@ class _ViewSwitch extends StatelessWidget {
           ],
           selected: {value},
           onSelectionChanged: (s) => onChanged(s.first),
+        ),
+      ),
+    );
+  }
+}
+
+/// «Хүснэгт | Ажилласан цаг» — «Ажлын өдөр»-ийн дэд сонголт (жижиг, зүүн тийш).
+class _SubSwitch extends StatelessWidget {
+  const _SubSwitch({required this.value, required this.onChanged});
+
+  final WorkdaysSubView value;
+  final ValueChanged<WorkdaysSubView> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.xs, AppSpace.gutter, AppSpace.xs),
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: Wrap(
+          spacing: AppSpace.sm,
+          children: [
+            for (final v in WorkdaysSubView.values)
+              ChoiceChip(
+                key: ValueKey('workdays-sub:${v.name}'),
+                label: Text(v.label),
+                selected: value == v,
+                showCheckmark: false,
+                onSelected: (_) => onChanged(v),
+              ),
+          ],
         ),
       ),
     );

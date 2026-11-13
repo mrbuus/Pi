@@ -75,22 +75,30 @@ const _planContext = {
   'photoSuggestion': 'p2',
 };
 
-FakeHttp _http() => FakeHttp()
-  ..json('GET', '/schedule/s1/plan', _planContext)
-  ..json('GET', '/classrooms/c1/roadmap', _roadmap())
-  ..json('PUT', '/schedule/s1/plan', {'ok': true})
-  ..json('PUT', '/lesson-records/s1/note', {'ok': true})
-  ..json('PUT', '/classrooms/c1/tests/tC/status', {'ok': true})
-  ..json('PUT', '/lesson-records/s1/confirm', {'ok': true})
-  ..json('DELETE', '/lesson-records/s1/confirm?date=$_date', {'confirmed': false})
-  ..json('GET', '/schedule/plan-tests', [
-    {
-      'testId': 'tB',
-      'title': 'Квадрат 2',
-      'short': 'Квадрат 2',
-      'problemIds': ['q1', 'q2'],
-    },
-  ]);
+FakeHttp _http({Map<String, Object?>? planContext, Map<String, Object?>? roadmap, String? planConflict}) {
+  final http = FakeHttp()
+    ..json('GET', '/schedule/s1/plan', planContext ?? _planContext)
+    ..json('GET', '/classrooms/c1/roadmap', roadmap ?? _roadmap());
+  if (planConflict != null) {
+    http.error('PUT', '/schedule/s1/plan', 409, planConflict);
+  } else {
+    http.json('PUT', '/schedule/s1/plan', {'ok': true});
+  }
+  return http
+    ..json('PUT', '/lesson-records/s1/note', {'ok': true})
+    ..json('PUT', '/classrooms/c1/tests/tC/status', {'ok': true})
+    ..json('PUT', '/lesson-records/s1/confirm', {'ok': true})
+    ..json('DELETE', '/lesson-records/s1/confirm?date=$_date', {'confirmed': false})
+    ..json('GET', '/schedule/plan-tests', [
+      {
+        'testId': 'tB',
+        'title': 'Квадрат 2',
+        'short': 'Квадрат 2',
+        'problemIds': ['q1', 'q2'],
+      },
+    ])
+    ..json('PUT', '/classrooms/c1/tests/tE/status', {'ok': true});
+}
 
 DayLesson _lesson({Map<String, Object?>? record, List<Object?> done = const []}) =>
     DayLesson.fromJson({...lessonJson(id: 's1', date: _date), 'record': record, 'done': done}, _date);
@@ -202,6 +210,7 @@ void main() {
       'customTopics': ['Давталт'],
       'dismissMode': 'DISMISS',
       'photoStudentId': 'p2',
+      'expectedUpdatedAt': null,
     });
     final note = http.requests.lastWhere((r) => r.path == '/lesson-records/s1/note');
     expect(_body(note), {'date': _date, 'body': 'Тооны машин авчирна'});
@@ -276,7 +285,8 @@ void main() {
           'excludedProblemIds': ['p2'],
         },
       ],
-      'topic': null,
+      'customTopics': <String>[],
+      'expectedConfirmedAt': null,
       'description': null,
       'problemNumbers': '1-5, 7',
     });
@@ -317,6 +327,157 @@ void main() {
     await settle(tester, frames: 20);
     expect(http.requests.lastWhere((r) => r.path == '/schedule/plan-tests').queryParameters, {'ids': 'tB'});
     expect(find.byKey(const ValueKey('done:tB')), findsOneWidget);
+  });
+
+  group('төлөвлөгөө ↔ батламж ↔ хийсэн тест (эзэн 2026-11-08)', () {
+    const conflict = 'Энэ хичээлийн төлөвлөгөөг өөр хүн дөнгөж өөрчилсөн байна. Цонхоо хаагаад дахин нээнэ үү';
+
+    testWidgets('зэрэг засвар: expectedUpdatedAt илгээж, 409-ийн мессежийг харуулна', (tester) async {
+      final http = _http(
+        planContext: {
+          ..._planContext,
+          'plan': {...(_planContext['plan']! as Map), 'updatedAt': '2026-11-04T08:00:00.000Z'},
+        },
+        planConflict: conflict,
+      );
+      await _pump(tester, http, (c) => showPlanEditor(c, lesson: _lesson(), date: _date));
+      await tester.tap(find.byKey(const ValueKey('suggest:tB')));
+      await settle(tester);
+      await tester.tap(find.widgetWithText(FilledButton, 'Хадгалах'));
+      await settle(tester, frames: 20);
+      final put = http.requests.lastWhere((r) => r.path == '/schedule/s1/plan' && r.method == 'PUT');
+      expect(_body(put)['expectedUpdatedAt'], '2026-11-04T08:00:00.000Z');
+      expect(find.text(conflict), findsOneWidget);
+      // Цонх хаагдаагүй, дарж бичээгүй.
+      expect(find.byType(DraggableScrollableSheet), findsOneWidget);
+    });
+
+    testWidgets('батлагдсан хичээл: тестийг төлөвлөгөөнөөс биш батлах цонхноос засна', (tester) async {
+      final http = _http();
+      const tests = {
+        'tA': PlanTest(id: 'tA', title: 'Квадрат 1', short: 'Квадрат 1'),
+        'tB': PlanTest(id: 'tB', title: 'Квадрат 2', short: 'Квадрат 2'),
+      };
+      final lesson = _lesson(
+        record: {'confirmedByName': 'Болд+', 'confirmedAt': '2026-11-04T10:00:00.000Z'},
+        done: [
+          {'sessionId': 'x1', 'testId': 'tA', 'excludedProblemIds': <String>[]},
+          {'sessionId': 'x2', 'testId': 'tB', 'excludedProblemIds': <String>[]},
+        ],
+      );
+      await _pump(tester, http, (c) => showPlanEditor(c, lesson: lesson, date: _date, tests: tests, canConfirm: true));
+      expect(find.text('Хийсэн тест'), findsOneWidget);
+      expect(find.text('Квадрат 1, 2'), findsOneWidget);
+      expect(find.text('Батлагдсан тул тест, сэдвийг батлах цонхноос засна'), findsOneWidget);
+      expect(find.byKey(const ValueKey('picker:search')), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('plan:edit-confirmed')));
+      await settle(tester, frames: 20);
+      expect(find.text('12-1, батлах'), findsOneWidget);
+    });
+
+    testWidgets('батламж засах: expectedConfirmedAt, төлөвлөгөөний сэдэв, сурагчийн ажилтай тест хасахад анхааруулга', (
+      tester,
+    ) async {
+      final http = _http();
+      final lesson = DayLesson.fromJson({
+        ...lessonJson(id: 's1', date: _date),
+        'plan': {
+          'testIds': ['tA'],
+          'customTopics': ['Давталт'],
+        },
+        'record': {
+          'confirmedByName': 'Болд+',
+          'confirmedAt': '2026-11-04T10:00:00.000Z',
+          'topic': 'Квадрат 1, Давталт',
+        },
+        'done': [
+          {'sessionId': 'x1', 'testId': 'tA', 'excludedProblemIds': <String>[], 'studentWork': 3},
+        ],
+      }, _date);
+      await _pump(tester, http, (c) => showConfirmSheet(c, lesson: lesson, date: _date, tests: _tests));
+      // Батламжийн нэгтгэсэн сэдвийг нэг сэдэв гэж давхардуулахгүй — төлөвлөгөөний сэдэв.
+      expect(find.text('Сэдэв: Давталт'), findsOneWidget);
+      expect(find.byKey(const ValueKey('sheet:notice')), findsNothing);
+      await tester.tap(find.byTooltip('Квадрат 1 хасах'));
+      await settle(tester);
+      expect(
+        find.text(
+          'Квадрат 1 — 3 сурагч тэмдэглэсэн. Хасахад тэдний тэмдэглэл устахгүй, энэ өдрийн жагсаалтаас л гарна',
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(find.widgetWithText(FilledButton, 'Батлах'));
+      await settle(tester, frames: 20);
+      final put = http.requests.lastWhere((r) => r.path == '/lesson-records/s1/confirm');
+      expect(_body(put)['tests'], isEmpty);
+      expect(_body(put)['customTopics'], ['Давталт']);
+      expect(_body(put)['expectedConfirmedAt'], '2026-11-04T10:00:00.000Z');
+      expect(_body(put).containsKey('topic'), isFalse);
+    });
+
+    testWidgets('тест хайхад хийчихсэн тест «Хийчихсэн» огноотой, хассаныг буцаана', (tester) async {
+      final map = _roadmap();
+      final chapters = ((((map['books']! as List).first as Map)['topics']! as List).first as Map)['chapters']! as List;
+      ((chapters[0] as Map)['tests']! as List)[0] = {
+        'testId': 'tA',
+        'short': 'Квадрат 1',
+        'variant': 'A',
+        'status': 'DONE',
+        'doneOn': '2026-11-03',
+      };
+      chapters.add({
+        'chapterId': 'k4',
+        'tests': [
+          {'testId': 'tD', 'short': 'Квадрат 4', 'variant': 'A', 'status': 'TODO', 'laterOn': '2026-11-06'},
+        ],
+      });
+      chapters.add({
+        'chapterId': 'k5',
+        'tests': [
+          {'testId': 'tE', 'short': 'Квадрат 5', 'variant': 'A', 'status': 'REMOVED'},
+        ],
+      });
+      final http = _http(roadmap: map, planContext: {..._planContext, 'plan': null});
+      await _pump(tester, http, (c) => showPlanEditor(c, lesson: _lesson(), date: _date));
+      // Хийчихсэн (өмнө нь ч, хожим ч) тест жагсаалтад гарахгүй.
+      expect(find.byKey(const ValueKey('unit:tA')), findsNothing);
+      expect(find.byKey(const ValueKey('unit:tD')), findsNothing);
+      expect(Roadmap.fromJson(map).unit('tD')!.isDone, isTrue);
+
+      await tester.enterText(find.byKey(const ValueKey('picker:search')), 'Квадрат');
+      await settle(tester);
+      expect(find.byKey(const ValueKey('unit:tA')), findsOneWidget);
+      expect(find.byKey(const ValueKey('done-tag:tA')), findsOneWidget);
+      expect(find.text('11.03'), findsOneWidget);
+      expect(find.text('11.06'), findsOneWidget);
+      // Хийчихсэн тестийг ангиас хасахгүй.
+      expect(find.byTooltip('Квадрат 1, энэ ангиас хасах'), findsNothing);
+      expect(find.byTooltip('Квадрат 2, энэ ангиас хасах'), findsOneWidget);
+
+      await tester.enterText(find.byKey(const ValueKey('picker:search')), '');
+      await settle(tester);
+      await _scrollTo(tester, find.byKey(const ValueKey('picker:removed')));
+      await tester.tap(find.byKey(const ValueKey('picker:removed')));
+      await settle(tester);
+      await tester.tap(find.byKey(const ValueKey('restore:tE')));
+      await settle(tester, frames: 20);
+      final put = http.requests.lastWhere((r) => r.path == '/classrooms/c1/tests/tE/status');
+      expect(_body(put), {'status': null});
+    });
+
+    testWidgets('Багш (canRemove-гүй): ангиас хасах, хассан жагсаалт харагдахгүй', (tester) async {
+      final http = _http();
+      final lesson = _lesson(
+        done: [
+          {'sessionId': 'x1', 'testId': 'tA', 'excludedProblemIds': <String>[]},
+        ],
+      );
+      await _pump(tester, http, (c) => showConfirmSheet(c, lesson: lesson, date: _date, tests: _tests));
+      await tester.tap(find.byKey(const ValueKey('confirm:add')));
+      await settle(tester);
+      expect(find.byTooltip('Квадрат 2, энэ ангиас хасах'), findsNothing);
+      expect(find.byKey(const ValueKey('picker:removed')), findsNothing);
+    });
   });
 
   testWidgets('дэлгэрэнгүйд: Багш+ «Төлөвлөгөө засах», «Батлах»', (tester) async {

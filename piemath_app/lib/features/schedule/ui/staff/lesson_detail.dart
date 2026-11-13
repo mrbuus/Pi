@@ -9,7 +9,9 @@ import '../../../../shared/native/native.dart';
 import '../../data/staff_schedule_models.dart';
 import '../../data/staff_schedule_repository.dart';
 import '../../domain/day_overlay.dart';
+import '../../domain/lesson_road.dart';
 import '../../domain/staff_schedule_logic.dart';
+import '../../domain/test_names.dart';
 import 'plan_sheets.dart';
 import 'staff_actions.dart';
 
@@ -129,8 +131,10 @@ class _Body extends StatelessWidget {
     final l = lesson;
     final manage = perms.canManage(l.classroomId);
     final clashes = teacherClashes(plan.lessons);
-    final tests = [for (final id in l.planTestIds) ?plan.tests[id]];
+    final road = roadOf(l, plan.tests);
+    final testNames = groupTestNames(road.today.map((x) => x.short));
     final day = dayOf(date);
+    final canConfirm = plan.canConfirm && date.compareTo(plan.today) <= 0;
     final teacher = lessonTeacherLabel(l);
 
     // Цуцлах, устгах: баталгаажсаны дараа хуудсыг хааж, «Буцаах»-ыг дэлгэцийн доор (навигаторын context).
@@ -152,8 +156,8 @@ class _Body extends StatelessWidget {
         DetailHeader(
           title: shortClass(l.classroomName),
           subtitle: '${DateMn.longWithWeekday(day)}, ${formatMinutes(l.startMinute)}–${formatMinutes(l.endMinute)}',
+          // Танхим өдрийн хуваарьт ХАРАГДАХГҮЙ (эзэн 2026-11-08); солих нь «Танхим солих»-д.
           chips: [
-            if (l.room != null) MetaChip(label: '${l.room} тоот', icon: AppIcons.doorOpen),
             if (l.moved != null)
               MetaChip(label: 'Зөөгдсөн (${l.moved!.originalDate})', icon: AppIcons.upcoming, tone: ChipTone.info),
             if (subjectLabels[l.subject] case final s?) MetaChip(label: s),
@@ -187,7 +191,7 @@ class _Body extends StatelessWidget {
         _Line(
           icon: AppIcons.theory,
           label: 'Сэдэв',
-          text: l.topic ?? 'Сэдэв бичээгүй',
+          text: l.topic == null ? 'Сэдэв бичээгүй' : regroupTopicText(l.topic),
           trailing: perms.canStaff
               ? Row(
                   mainAxisSize: MainAxisSize.min,
@@ -207,7 +211,8 @@ class _Body extends StatelessWidget {
                 )
               : null,
         ),
-        if (tests.isNotEmpty) _Line(icon: AppIcons.tests, label: 'Тест', text: tests.map((t) => t.short).join(', ')),
+        if (testNames.isNotEmpty)
+          _Line(icon: AppIcons.tests, label: road.doneToday ? 'Хийсэн тест' : 'Тест', text: testNames),
         if (l.customTopics.isNotEmpty)
           _Line(icon: AppIcons.note, label: 'Нэмэлт сэдэв', text: l.customTopics.join(', ')),
         if (l.noteBody != null)
@@ -232,9 +237,16 @@ class _Body extends StatelessWidget {
             icon: AppIcons.pencilLine,
             label: 'Төлөвлөгөө засах',
             subtitle: 'Тест, сэдэв, тарах цаг, онолын зураг, тэмдэглэл',
-            onTap: () => showPlanEditor(context, lesson: l, date: date),
+            onTap: () => showPlanEditor(
+              context,
+              lesson: l,
+              date: date,
+              tests: plan.tests,
+              canConfirm: canConfirm,
+              canRemoveTests: perms.canPlan,
+            ),
           ),
-        if (plan.canConfirm && date.compareTo(plan.today) <= 0)
+        if (canConfirm)
           _ActionTile(
             icon: l.record != null ? AppIcons.badgeCheck : AppIcons.checklist,
             label: l.record != null ? 'Батламж засах' : 'Батлах',
