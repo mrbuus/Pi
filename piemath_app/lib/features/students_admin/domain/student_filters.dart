@@ -45,7 +45,11 @@ class StudentFilters {
   StudentFilters cleared() => StudentFilters(archived: archived);
 
   bool accepts(AdminStudent s) {
-    if (classroomId != null && s.shownClassroom?.id != classroomId) return false;
+    if (classroomId != null &&
+        s.shownClassroom?.id != classroomId &&
+        !(!s.archived && s.otherClassrooms.any((c) => c.id == classroomId))) {
+      return false;
+    }
     if (grade != null && s.grade != grade) return false;
     if (branch != null && s.branch != branch) return false;
     if (subject != null && subjectFromCode(s.studentCode) != subject) return false;
@@ -76,6 +80,11 @@ class StudentFacets {
     for (final s in all) {
       final c = s.shownClassroom;
       if (c != null && c.id.isNotEmpty) rooms[c.id] = c.name;
+      if (!s.archived) {
+        for (final o in s.otherClassrooms) {
+          if (o.id.isNotEmpty) rooms[o.id] = o.name;
+        }
+      }
       if (s.grade != null) grades.add(s.grade!);
       if (s.branch != null) branches.add(s.branch!);
     }
@@ -127,10 +136,27 @@ class StudentDirectory {
   StudentDirectory withStudents(List<AdminStudent> next) =>
       StudentDirectory(students: next, outstanding: outstanding, attention: attention);
 
-  /// Хайлт: код, нэр, овог, утас (вэбтэй ижил).
+  /// Утасны зөвхөн цифрүүд; урд талын +976 / 976-г хасна (вэбийн `phoneDigits`).
+  static String phoneDigits(String v) {
+    final d = v.replaceAll(RegExp(r'\D'), '');
+    return d.length > 8 && d.startsWith('976') ? d.substring(3) : d;
+  }
+
+  /// Хайлт: код, нэр, овог, нэвтрэх нэр, сурагч болон эцэг эхийн утас (аав, ээж, аппын холбоос) — вэбтэй ижил
+  /// (2026-11-10). Утсыг зай, зураас, +976-тай бичсэн ч олно (3+ орон бичсэн үед).
   static bool matches(AdminStudent s, String q) {
-    final hay = [s.studentCode, s.firstName, s.lastName, s.phone].whereType<String>().join(' ').toLowerCase();
-    return hay.contains(q.trim().toLowerCase());
+    final query = q.trim().toLowerCase();
+    final phones = [s.phone, s.fatherPhone, s.motherPhone, ...s.parentPhones].whereType<String>();
+    final hay = [
+      s.studentCode,
+      s.firstName,
+      s.lastName,
+      s.username,
+      ...phones,
+    ].whereType<String>().join(' ').toLowerCase();
+    if (hay.contains(query)) return true;
+    final digits = phoneDigits(query);
+    return digits.length >= 3 && phones.any((p) => phoneDigits(p).contains(digits));
   }
 
   bool inChip(AdminStudent s, String chip) => switch (chip) {

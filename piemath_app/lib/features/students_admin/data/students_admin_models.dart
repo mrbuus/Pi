@@ -40,15 +40,37 @@ enum TuitionPlan {
   }
 }
 
+/// Ангийн чиглэл (вэбийн `lib/classTrack.ts` = `api/src/common/class-track.ts`, эзэн 2026-11-12): сурагч
+/// чиглэл тус бүрт нэг ангид — математикийн анги + Нийгмийн ангид ЗЭРЭГ сууж болно. `subject` хоосон бол нэрээр.
+enum ClassTrack { math, socialStudies, sat }
+
+ClassTrack classTrack(String name, [String? subject]) => switch (subject) {
+  'MATH' => ClassTrack.math,
+  'SOCIAL_STUDIES' => ClassTrack.socialStudies,
+  'SAT' => ClassTrack.sat,
+  _ => name.toLowerCase().contains('нийгэм') ? ClassTrack.socialStudies : ClassTrack.math,
+};
+
+/// «12-4 (Баруун 4) + НИЙГЭМ (Зүүн 4)» — үндсэн анги эхэнд; ангигүй бол null.
+String? classNames(ClassroomRef? main, List<ClassroomRef> others) {
+  final names = [
+    if (main != null && main.name.isNotEmpty) main.name,
+    for (final o in others)
+      if (o.name.isNotEmpty) o.name,
+  ];
+  return names.isEmpty ? null : names.join(' + ');
+}
+
 /// Ангийн товч (жагсаалтын мөрийн анги, сүүлийн анги).
 class ClassroomRef {
-  const ClassroomRef({required this.id, required this.name, this.grade, this.students});
+  const ClassroomRef({required this.id, required this.name, this.grade, this.students, this.subject});
 
   factory ClassroomRef.fromJson(Map<String, Object?> j) => ClassroomRef(
     id: (j['id'] as String?) ?? '',
     name: (j['name'] as String?) ?? '',
     grade: _intOrNull(j['grade']),
     students: j['_count'] is Map ? _intOrNull(_map(j['_count'])['enrollments']) : null,
+    subject: _str(j['subject']),
   );
 
   static ClassroomRef? maybe(Object? j) => j is Map ? ClassroomRef.fromJson(_map(j)) : null;
@@ -59,6 +81,11 @@ class ClassroomRef {
 
   /// `GET /classrooms`-ийн `_count.enrollments` (сонгох жагсаалтад).
   final int? students;
+
+  /// `MATH`, `SOCIAL_STUDIES`, `SAT` эсвэл null (нэрээр таних).
+  final String? subject;
+
+  ClassTrack get track => classTrack(name, subject);
 }
 
 /// `GET /users?role=STUDENT[&archived=true]` — жагсаалтын нэг мөр.
@@ -84,6 +111,9 @@ class AdminStudent {
     this.joinedOn,
     this.currentClassroom,
     this.lastClassroom,
+    this.otherClassrooms = const [],
+    this.username,
+    this.parentPhones = const [],
   });
 
   factory AdminStudent.fromJson(Map<String, Object?> j) {
@@ -108,6 +138,12 @@ class AdminStudent {
       joinedOn: _str(p['joinedOn']),
       currentClassroom: ClassroomRef.maybe(j['currentClassroom']),
       lastClassroom: ClassroomRef.maybe(j['lastClassroom']),
+      otherClassrooms: _list(j['otherClassrooms'], ClassroomRef.fromJson),
+      username: _str(j['username']),
+      parentPhones: [
+        for (final p in (j['parentPhones'] is List ? j['parentPhones']! as List : const []))
+          if (p is String && p.trim().isNotEmpty) p.trim(),
+      ],
     );
   }
 
@@ -131,10 +167,20 @@ class AdminStudent {
   final ClassroomRef? currentClassroom;
   final ClassroomRef? lastClassroom;
 
+  /// Зэрэг сууж буй бусад анги (математик + Нийгэм, вэб 2026-11-12) — үндсэн анги [currentClassroom].
+  final List<ClassroomRef> otherClassrooms;
+  final String? username;
+
+  /// Аппад холбогдсон эцэг эхийн утас (ParentLink) — хайлтад.
+  final List<String> parentPhones;
+
   /// «Овог Нэр» (вэбийн `fullName`).
   String get fullName => _fullName(firstName, lastName);
 
   bool get archived => archivedAt != null;
+
+  /// Жагсаалтад харуулах ангийн нэр: идэвхтэй бол «12-4 + НИЙГЭМ (Зүүн 4)», архивт сүүлийн анги.
+  String? get shownClassNames => archived ? lastClassroom?.name : classNames(currentClassroom, otherClassrooms);
 
   /// Идэвхтэй бол одоогийн, архивт бол сүүлийн анги.
   ClassroomRef? get shownClassroom => archived ? lastClassroom : currentClassroom;
@@ -228,6 +274,7 @@ class AdminStudentDetail {
     this.createdAt,
     this.currentClassroom,
     this.lastClassroom,
+    this.otherClassrooms = const [],
     this.grade,
     this.school,
     this.branch,
@@ -252,6 +299,7 @@ class AdminStudentDetail {
       createdAt: _str(j['createdAt']),
       currentClassroom: ClassroomRef.maybe(j['currentClassroom']),
       lastClassroom: ClassroomRef.maybe(j['lastClassroom']),
+      otherClassrooms: _list(j['otherClassrooms'], ClassroomRef.fromJson),
       grade: _intOrNull(p['grade']),
       school: _str(p['school']),
       branch: _str(p['branch']),
@@ -274,6 +322,9 @@ class AdminStudentDetail {
   final String? createdAt;
   final ClassroomRef? currentClassroom;
   final ClassroomRef? lastClassroom;
+
+  /// Зэрэг сууж буй бусад анги (ж: Нийгэм).
+  final List<ClassroomRef> otherClassrooms;
   final int? grade;
   final String? school;
   final String? branch;
@@ -369,6 +420,7 @@ class WithdrawalCycle {
     required this.charge,
     this.leaveDay,
     this.extraDays = const [],
+    this.assumed = 0,
   });
 
   factory WithdrawalCycle.fromJson(Map<String, Object?> j) => WithdrawalCycle(
@@ -383,6 +435,7 @@ class WithdrawalCycle {
     ],
     counted: _int(j['counted']),
     charge: _int(j['charge']),
+    assumed: _int(j['assumed']),
   );
 
   final String start;
@@ -393,10 +446,20 @@ class WithdrawalCycle {
   final List<String> extraDays;
   final int counted;
   final int charge;
+
+  /// Вэбд ирц бүртгэхээс өмнөх (суусан гэж үзсэн) хичээл — 2026-11-08-аас өмнө хадгалсанд 0.
+  final int assumed;
 }
 
 class WithdrawalLessonDay {
-  const WithdrawalLessonDay({required this.date, this.status, this.note, this.leave = false, this.excluded = false});
+  const WithdrawalLessonDay({
+    required this.date,
+    this.status,
+    this.note,
+    this.leave = false,
+    this.excluded = false,
+    this.assumed = false,
+  });
 
   factory WithdrawalLessonDay.fromJson(Map<String, Object?> j) => WithdrawalLessonDay(
     date: (j['date'] as String?) ?? '',
@@ -404,6 +467,7 @@ class WithdrawalLessonDay {
     note: _str(j['note']),
     leave: j['leave'] == true,
     excluded: j['excluded'] == true,
+    assumed: j['assumed'] == true,
   );
 
   final String date;
@@ -415,6 +479,9 @@ class WithdrawalLessonDay {
 
   /// Гараар «тооцохгүй» болгосон өдөр.
   final bool excluded;
+
+  /// Вэбд ирц бүртгэхээс өмнөх — суусан гэж үзнэ, хасах боломжгүй.
+  final bool assumed;
 }
 
 /// `GET /tuition/withdrawal/preview` — тооцоог СЕРВЕР бодно, апп зөвхөн харуулна.
@@ -438,6 +505,9 @@ class WithdrawalPreview {
     this.historyLessons = 0,
     this.attendance = const {},
     this.homework = const {},
+    this.refundedBefore = 0,
+    this.webStart,
+    this.noSchedule = false,
   });
 
   factory WithdrawalPreview.fromJson(Map<String, Object?> j) {
@@ -467,6 +537,9 @@ class WithdrawalPreview {
       historyLessons: _int(h['lessons']),
       attendance: counts(h['attendance']),
       homework: counts(h['homework']),
+      refundedBefore: _int(r['refundedBefore']),
+      webStart: _str(j['webStart']),
+      noSchedule: j['noSchedule'] == true,
     );
   }
 
@@ -488,6 +561,15 @@ class WithdrawalPreview {
   final int historyLessons;
   final Map<String, int> attendance;
   final Map<String, int> homework;
+
+  /// Өмнө нь гаргасан буцаалт (төлсөн дүнгээс хассан).
+  final int refundedBefore;
+
+  /// Ангид вэбд ирц бүртгэж эхэлсэн өдөр.
+  final String? webStart;
+
+  /// Хуваарьгүй анги — хичээлийн тоо мэдэгдэхгүй.
+  final bool noSchedule;
 }
 
 /// `GET /tuition/withdrawal/student/:id` — хадгалсан тооцоо (хадгалсан агшнаараа).

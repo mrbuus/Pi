@@ -111,7 +111,14 @@ class _StudentsAdminScreenState extends ConsumerState<StudentsAdminScreen> {
       case StudentAction.open:
         _open(s);
       case StudentAction.moveClass:
-        await changeClass(context, ref, studentId: s.id, name: s.fullName, currentClassId: s.currentClassroom?.id);
+        await changeClass(
+          context,
+          ref,
+          studentId: s.id,
+          name: s.fullName,
+          currentClassId: s.currentClassroom?.id,
+          otherClassIds: [for (final c in s.otherClassrooms) c.id],
+        );
       case StudentAction.withdraw:
         await withdrawStudent(context, ref, studentId: s.id, name: s.fullName);
       case StudentAction.archive:
@@ -253,7 +260,7 @@ class _StudentsAdminScreenState extends ConsumerState<StudentsAdminScreen> {
         load: _load,
         reloadKey: _filters,
         itemKey: (s) => s.id,
-        searchHint: 'Код, нэр, утасны дугаараар хайх',
+        searchHint: 'Код, нэр, сурагч эсвэл эцэг эхийн утсаар хайх',
         filters: _chips(perms),
         initialFilter: _initialChip,
         countLabel: (n) => archived ? 'Архивт $n сурагч' : '$n сурагч',
@@ -293,14 +300,14 @@ class _StudentRow extends StatelessWidget {
     final s = student;
     final unassigned = !s.archived && (dir?.unassignedIds.contains(s.id) ?? false);
     final absent = !s.archived && (dir?.absentIds.contains(s.id) ?? false);
-    final room = s.shownClassroom;
+    final room = s.shownClassNames;
     final status = perms.canSeeMoney && !s.archived ? paymentStatusOf(s, dir?.outstanding ?? const {}) : null;
     final seen = parseApiInstant(s.lastSeenAt);
     return ItemRow(
       title: s.fullName,
       meta: [
         s.studentCode,
-        room?.name ?? (unassigned ? 'Хуваарилаагүй' : (s.grade == null ? null : '${s.grade}-р анги')),
+        room ?? (unassigned ? 'Хуваарилаагүй' : (s.grade == null ? null : '${s.grade}-р анги')),
         if (s.archived) s.archiveReason else (seen == null ? 'Ороогүй' : DateMn.relative(seen)),
       ],
       subtitle: unassigned || absent || status != null

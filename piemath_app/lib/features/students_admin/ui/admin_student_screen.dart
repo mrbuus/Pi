@@ -54,7 +54,14 @@ class StudentManageBar extends ConsumerWidget {
     final perms = ref.read(studentsPermsProvider);
     switch (a) {
       case StudentAction.moveClass:
-        await changeClass(context, ref, studentId: d.id, name: d.fullName, currentClassId: d.currentClassroom?.id);
+        await changeClass(
+          context,
+          ref,
+          studentId: d.id,
+          name: d.fullName,
+          currentClassId: d.currentClassroom?.id,
+          otherClassIds: [for (final c in d.otherClassrooms) c.id],
+        );
       case StudentAction.withdraw:
         if (await withdrawStudent(context, ref, studentId: d.id, name: d.fullName) && context.mounted) {
           // Хассаны дараа «Гарсан тооцоо» табыг нээнэ (вэбтэй ижил) — таб нэмэгдсэний дараа.
@@ -126,7 +133,7 @@ class StudentManageBar extends ConsumerWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 MetaChip(
-                  label: d.currentClassroom?.name ?? 'Ангигүй',
+                  label: classNames(d.currentClassroom, d.otherClassrooms) ?? 'Ангигүй',
                   icon: AppIcons.classes,
                   tone: d.currentClassroom == null && !d.archived ? ChipTone.warning : ChipTone.neutral,
                 ),

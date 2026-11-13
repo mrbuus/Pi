@@ -42,6 +42,22 @@ class StudentCalendarRepository {
     ],
   );
 
+  /// `GET /users/:id`-ийн одоогийн анги (+ зэрэг сууж буй бусад анги): «12-4 (Баруун 4) + НИЙГЭМ (Зүүн 4)».
+  /// Ижил GET-ийг [studentDetailProvider]-тэй зэрэг дуудвал ApiClient нэг хүсэлт болгоно.
+  Future<String?> classNames(String studentId) => _api.get(
+    '/users/${_enc(studentId)}',
+    parse: (j) {
+      final m = _map(j);
+      String? name(Object? c) =>
+          c is Map && c['name'] is String && (c['name'] as String).isNotEmpty ? c['name'] as String : null;
+      final names = [
+        ?name(m['currentClassroom']),
+        for (final o in (m['otherClassrooms'] is List ? m['otherClassrooms']! as List : const [])) ?name(o),
+      ];
+      return names.isEmpty ? null : names.join(' + ');
+    },
+  );
+
   Future<RefundEstimate> refundEstimate(String studentId) =>
       _api.get('/tuition/refund-estimate/${_enc(studentId)}', parse: (j) => RefundEstimate.fromJson(_map(j)));
 }
@@ -83,6 +99,15 @@ final studentMakeupHistoryProvider = FutureProvider.autoDispose.family<List<Make
     return await ref.watch(studentCalendarRepositoryProvider).makeupHistory(id);
   } catch (_) {
     return const [];
+  }
+});
+
+/// Сурагчийн анги(ууд)-ын нэр (хоёр ангид зэрэг суувал «+»-оор). Алдаа гарвал null.
+final studentClassNamesProvider = FutureProvider.autoDispose.family<String?, String>((ref, id) async {
+  try {
+    return await ref.watch(studentCalendarRepositoryProvider).classNames(id);
+  } catch (_) {
+    return null;
   }
 });
 
