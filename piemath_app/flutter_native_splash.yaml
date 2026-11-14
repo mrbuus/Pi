@@ -1,21 +1,21 @@
-# Үүсгэх: dart run flutter_native_splash:create
-# Бүтэн лого хамгийн түрүүнд (эзэн 2026-11-14): лого + «Shine ireeduin ezed» бичвэр. Дэвсгэр нь апп-ын `bg`
-# токентой ижил тул доорх Flutter-ийн эхлэх дэлгэц ([SplashScreen]) рүү анзаарагдахгүй шилжинэ.
-# Хар горимд бичвэр нь цагаан хувилбар (вэбийн LogoMark-тай адил).
+# Үүсгэх: dart run flutter_native_splash:create   (дараа нь: git checkout -- ios/Runner/Info.plist)
+# Эхний кадр = логоны анимацын ([BrandIntro]) эхний кадр (эзэн 2026-11-14): хар хөх дугуй дангаараа дэлгэцийн
+# голд. Зураг `make_branding.py intro`-оос (4x, дугуйн хэмжээ BrandIntro-тойгоо ижил); дэвсгэр апп-ын `bg` токен.
+# Дугуй хоёр горимд хар хөх хэвээр.
 flutter_native_splash:
   color: "#F5F7FB"
-  image: assets/branding/splash-wordmark-light.png
+  image: assets/branding/splash-disc.png
   color_dark: "#0F1319"
-  image_dark: assets/branding/splash-wordmark-dark.png
-  # Android 12+ системийн splash зөвхөн дугуй тэмдэг зөвшөөрдөг (бичвэргүй) — бүтэн лого нь
-  # Flutter-ийн эхлэх дэлгэцэд шууд дараа нь гарна.
+  image_dark: assets/branding/splash-disc.png
+  # Android 12+: системийн тэмдгийн байранд мөн адил дугуй (240dp зураг, 160dp маскны дотор). Тэмдгийн
+  # дэвсгэрийг апп-ын дэвсгэртэй ижил болгосон тул маск харагдахгүй — зөвхөн хар хөх дугуй.
   android_12:
     color: "#F5F7FB"
-    image: assets/branding/splash-android12.png
-    icon_background_color: "#273F74"
+    image: assets/branding/splash-disc-android12.png
+    icon_background_color: "#F5F7FB"
     color_dark: "#0F1319"
-    image_dark: assets/branding/splash-android12.png
-    icon_background_color_dark: "#273F74"
+    image_dark: assets/branding/splash-disc-android12.png
+    icon_background_color_dark: "#0F1319"
   fullscreen: false
   ios_content_mode: center
   android_gravity: center

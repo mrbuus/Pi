@@ -22,7 +22,7 @@ import 'theme_mode.dart';
 /// Эхний кадр хүртэл зөвхөн зайлшгүй зүйл (prefs, түвшин, токен). Push (Firebase) зэрэг
 /// хүлээж болох ажил эхний кадрын дараа — `docs/PERF-OFFLINE.md` §4.
 /// Логоны анимац ямар нэг шалтгаанаар дуусахгүй бол (эхлэх дэлгэц харагдаагүй г.м.) апп гацахгүй.
-const brandIntroMax = Duration(milliseconds: 2500);
+const brandIntroMax = Duration(milliseconds: 3000);
 
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();

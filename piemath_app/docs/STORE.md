@@ -10,9 +10,7 @@
 |---|---|---|
 | Android adaptive | `icon-foreground.png`, дэвсгэр `#273F74`, `icon-monochrome.png` (Android 13 өнгөт дүрс) | `flutter_launcher_icons.yaml` |
 | iOS | `icon-ios.png` (альфагүй, хөх дэвсгэр) | мөн адил |
-| Splash цайвар | цагаан дэвсгэр + хөх дугуй лого (`splash-light.png`) | `flutter_native_splash.yaml` |
-| Splash харанхуй | `#273F74` дэвсгэр + цагаан тэмдэг (`splash-dark.png`) | мөн адил |
-| Android 12+ | `splash-android12.png`, цайвар/харанхуй | мөн адил |
+| Splash (2 горим) | `bg` дэвсгэр + хар хөх дугуй дангаараа (`splash-disc.png`, Android 12: `splash-disc-android12.png`) = логоны анимацын эхний кадр | `flutter_native_splash.yaml`, `make_branding.py intro` |
 
 Логоны ард цагаан хайрцаггүй, харанхуй горимд хар хувилбар (RULES.md).
 
