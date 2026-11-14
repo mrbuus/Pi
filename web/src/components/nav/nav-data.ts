@@ -260,8 +260,10 @@ const PRIMARY_BY_ROLE: Record<string, string[]> = {
   GROUP_TEACHER: ["/app/library", "/app/videos"],
   STUDENT: ["/app/homework", "/app/my-class", "/app/theory"],
   TEACHER: ["/app/schedule", "/app/library", "/app/tests"],
-  TEACHER_PLUS: ["/app/schedule", "/app/payments", "/app/admin/students"],
-  ADMIN: ["/app/admin/students", "/app/admin/leads", "/app/schedule"],
+  // «Төлбөр»-ийн оронд «Шалгалт» (эзэн 2026-11-14; утсан дээр Төлбөрийг хамгийн бага нээдэг) — «Бусад»-д хэвээр
+  TEACHER_PLUS: ["/app/schedule", "/app/tests", "/app/admin/students"],
+  // «Элсэлт»-ийн оронд «Шалгалт» (эзэн 2026-11-14) — Элсэлт «Бусад» дотор хэвээр
+  ADMIN: ["/app/admin/students", "/app/tests", "/app/schedule"],
   BUYER: ["/app/library", "/app/videos", "/app/schedule"],
   PARENT: ["/app/schedule"],
 };
