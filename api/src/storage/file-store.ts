@@ -76,7 +76,8 @@ async function bodyBytes(body: unknown): Promise<Buffer> {
 /** Файлын зориулалт — хадгалах хугацааг тодорхойлно */
 export type FilePurpose = 'homework' | 'theory' | 'general';
 export const FILE_PURPOSES: readonly FilePurpose[] = ['homework', 'theory', 'general'];
-export const HOMEWORK_KEEP_DAYS = 7;
+// Эзэн 2026-11-14: 7 → 3 хоног (бодит өгөгдлөөр багш бүх зургийг 3 хоногийн дотор шалгадаг)
+export const HOMEWORK_KEEP_DAYS = 3;
 
 export function parsePurpose(value: unknown): FilePurpose {
   return FILE_PURPOSES.includes(value as FilePurpose) ? (value as FilePurpose) : 'general';
