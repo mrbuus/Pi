@@ -11,9 +11,9 @@ import { FileRetentionService } from './file-retention.service';
 
 describe('file-store — зориулалт ба хадгалах хугацаа', () => {
   const now = new Date('2026-10-22T08:00:00Z');
-  it('гэрийн даалгавар 7 хоног, онол болон бусад нь байнга', () => {
-    expect(HOMEWORK_KEEP_DAYS).toBe(7);
-    expect(expiresAtFor('homework', now)?.toISOString()).toBe('2026-10-29T08:00:00.000Z');
+  it('гэрийн даалгавар 3 хоног, онол болон бусад нь байнга', () => {
+    expect(HOMEWORK_KEEP_DAYS).toBe(3);
+    expect(expiresAtFor('homework', now)?.toISOString()).toBe('2026-10-25T08:00:00.000Z');
     expect(expiresAtFor('theory', now)).toBeNull();
     expect(expiresAtFor('general', now)).toBeNull();
   });

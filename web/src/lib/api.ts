@@ -303,7 +303,7 @@ export async function api<T = unknown>(
  */
 /**
  * Файлын зориулалт — хадгалах хугацааг тодорхойлно (эзэн 2026-10-22):
- * `homework` 7 хоногийн дараа устна, `theory` болон бусад нь байнга.
+ * `homework` 3 хоногийн дараа устна, `theory` болон бусад нь байнга.
  */
 export type UploadPurpose = "homework" | "theory" | "general";
 

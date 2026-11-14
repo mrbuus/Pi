@@ -1560,7 +1560,7 @@ export class HomeworkPracticeService {
     if (!returned)
       this.assertNotClosed(await loadDeadlineOverride(this.prisma, body.classroomId, date));
 
-    // Файл: өөрийн байршуулсан, «homework» зорилготой (7 хоног хадгалах), PDF
+    // Файл: өөрийн байршуулсан, «homework» зорилготой (3 хоног хадгалах), PDF
     const file = await this.prisma.storedFile.findUnique({
       where: { key: body.fileKey },
       select: { ownerId: true, mime: true, size: true, pages: true, expiresAt: true },

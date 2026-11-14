@@ -12,7 +12,7 @@ import { editDeadline, HOMEWORK_MAX_PAGES, type HomeworkPhoto } from "./photo-ty
 
 /**
  * Гэрийн даалгаврын дэвтрийн зураг — тухайн хичээлийн өдөрт миний илгээсэн (≤15 хуудас,
- * 7 хоног хадгална). Илгээх, харах, дахин илгээх, устгах. Сервер `canSend`-ийг
+ * 3 хоног хадгална). Илгээх, харах, дахин илгээх, устгах. Сервер `canSend`-ийг
  * дахин шалгана (POST /homework/photos, DELETE /homework/photos/:id).
  */
 export default function HomeworkPhotoPanel({
@@ -124,7 +124,7 @@ export default function HomeworkPhotoPanel({
           Илгээх хугацаа дууссан
         </p>
       )}
-      {sent && <p className="mt-2 text-xs text-ink-dim">7 хоног хадгална</p>}
+      {sent && <p className="mt-2 text-xs text-ink-dim">3 хоног хадгална</p>}
     </section>
   );
 }
