@@ -498,3 +498,11 @@ html.lenis,html.lenis body{height:auto}
 @media (pointer:fine){.sie .cur{display:block}}
 @media (prefers-reduced-motion:reduce){.sie .mq{animation:none}.sie .fly h1 .w{transition:none}}
 
+/* Танхимын сургалтын төлбөр (HomeTuition, 2026-11-05) — «Хандах эрх» хэсгийн доор */
+.sie .tuit{margin-top:40px}
+.sie .tuit .acc.tuit-grid{margin-top:16px}
+.sie .tuit .acc .a h3 small{font-size:15px;font-weight:500;color:var(--muted);letter-spacing:0}
+.sie .acc .a .tuit-list{list-style:none;margin-top:14px;display:grid;gap:10px}
+.sie .acc .a .tuit-list li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;color:var(--muted);font-size:15px;line-height:1.45}
+.sie .acc .a .tuit-list li b{color:var(--text);font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media (min-width:900px){.sie .tuit .acc.tuit-grid{grid-template-columns:1fr 1fr}}

@@ -148,7 +148,11 @@ describe('scoped schedule queries omit global staff work patterns', () => {
           where: unknown;
         }
       ).where,
-    ).toEqual({ schedule: { classroomId: { in: ['own'] } } });
+    ).toEqual({
+      // Зөөлөн устгасан хуваарь ба онцгой тохиолдол хөдөлгүүрт орохгүй
+      deletedAt: null,
+      schedule: { deletedAt: null, classroomId: { in: ['own'] } },
+    });
     expect(prisma.teacherWorkDay.findMany).not.toHaveBeenCalled();
     expect(prisma.teacherWorkException.findMany).not.toHaveBeenCalled();
     expect(prisma.user.findMany).not.toHaveBeenCalled();

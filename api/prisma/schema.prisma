@@ -1,7 +1,9 @@
 generator client {
-  provider     = "prisma-client"
-  output       = "../src/generated/prisma"
-  moduleFormat = "cjs"
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  moduleFormat    = "cjs"
+  // ClassSchedule-ийн зөөлөн устгалтай UNIQUE (зөвхөн deletedAt IS NULL мөрүүд)
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
@@ -59,11 +61,14 @@ model User {
   formulaReviews         FormulaReview[]
   formulaReviewDays       FormulaReviewDay[]
   formulaReviewAttempts   FormulaReviewAttempt[]
+  problemReviews          ProblemReview[]
+  studyWeeklyGoal         StudyWeeklyGoal?
 
   staffCapabilities      StaffCapabilityGrant[]
   feedback               Feedback[]
   studentProfile         StudentProfile?
   mockRegistrations      MockExamRegistration[]
+  paperExamSheets        PaperExamSheet[]
   teacherProfile         TeacherProfile?
   externalTeacherProfile ExternalTeacherProfile?
 
@@ -119,6 +124,12 @@ model User {
   googleIdentity       GoogleIdentity?
   googleOAuthStates    GoogleOAuthState[]
   googleLoginExchanges GoogleLoginExchange[]
+
+  // Piemath гар утасны апп (20261102120000_mobile_app_support): push токен,
+  // Apple-ээр нэвтрэх, бүртгэл устгах ХҮСЭЛТ (өгөгдөл устгахгүй, админ шийднэ).
+  deviceTokens             DeviceToken[]
+  appleIdentity            AppleIdentity?
+  accountDeletionRequests  AccountDeletionRequest[]
 
   // Secure schedule calendar feed tokens (G39). Only a one-way token hash is stored.
   calendarTokenHash    String?         @unique
@@ -333,6 +344,9 @@ model StudentProfile {
   branch        String? // "Баруун 4" | "Зүүн 4"
   section       String? // "12-2" — бүртгэлд тэмдэглэсэн ангийн шошго (label)
   tuitionAmount Int?
+  // Тохирсон (хөнгөлөлттэй) бүтэн жилийн дүн — Админ/Багш+ гараар тавина (эзэн 2026-11-12:
+  // нэг гэрээс 2 хүүхэд 10% гэх мэт). Шийтийн синк ХӨНДӨХГҮЙ (tuitionAmount-ыг синк дарж бичдэг).
+  tuitionAgreed Int?
   tuitionPlan   TuitionPlan?
   tuitionNote   String?
   joinedOn      DateTime?    @db.Date
@@ -828,6 +842,10 @@ model Problem {
   // YouTube бодолтын бичлэг (1000 бодлого) — youtube.com/watch, youtu.be, youtube.com/shorts
   youtubeUrl   String?
 
+  // Номд хэвлэх QR-ийн нууц код (pimath.mn/q/<код>) — token-оос тусдаа, таахын
+  // аргагүй 8 тэмдэгт. Хэвлэгдсэний дараа ХЭЗЭЭ Ч бүү өөрчил (scan/scan-code.ts).
+  scanCode     String?  @unique
+
   // 2-р хэсгийн (FILL_NUMBER) алхмын багц: [{ label: "1-1", boxes: ["a","b"], points: 3 }].
   // Багцын бүх нүд зөв → багцын оноо, нэг нь буруу → 0; 0 оноотой багц тооцогдохгүй.
   // Хоосон бол бодлого бүхэлдээ нэг зүйл (tests/exam-items.ts).
@@ -851,6 +869,7 @@ model Problem {
   choiceOptions ProblemChoice[] // бүтэцтэй сонголтууд (correct/wrong + алдааны шалтгаан)
   attempts      Attempt[]
   mistakeEntries MistakeEntry[]
+  problemReviews ProblemReview[]
   videos        Video[]
   testItems     TestProblem[]
   studyReviewItems StudyReviewItem[]
@@ -1054,8 +1073,12 @@ model TestDraft {
   revision  Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): ноорог устгах = deletedAt.
+  deletedAt   DateTime?
+  deletedById String?
 
   @@index([ownerId, updatedAt])
+  @@index([deletedAt])
 }
 
 model TestProblem {
@@ -1067,6 +1090,8 @@ model TestProblem {
   points    Int     @default(1)
 
   @@id([testId, problemId])
+  // Бодлогоос тест рүү хайх (бүлгийн бодлогын A/B хувилбар) — үгүй бол бүтэн уншина
+  @@index([problemId])
 }
 
 // Тест аль ангиудад харагдахыг сонгоно — автоматаар бүх ангид харагдахгүй
@@ -1303,6 +1328,9 @@ model Attempt {
   // New wrong attempts explicitly set this to null for durable collector retry.
   mistakeCollectedAt DateTime? @default(now())
   createdAt   DateTime @default(now())
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): оролдлого устгах = deletedAt; явц, идэвх, стрийк, аналитик бүгд устсаныг хасна.
+  deletedAt   DateTime?
+  deletedById String?
 
   @@index([studentId, occurredOn])
   @@index([problemId])
@@ -1407,9 +1435,13 @@ model StudentNote {
   // Төлбөрийн тэмдэглэл: эцэг эх «хэзээ төлнө» гэж амласан өдөр. Энэ өдөр
   // өнгөрөөд тэмдэглэлээс хойш баталгаажсан төлбөр ирээгүй бол «амлалт тасарсан».
   promisedOn   DateTime?       @db.Date
+  // Зөөлөн устгал (эзний хатуу дүрэм 2026-10-23): мөр үлдэнэ, уншихад deletedAt: null
+  deletedAt    DateTime?
+  deletedById  String?
 
   @@index([studentId, type])
   @@index([createdAt])
+  @@index([deletedAt])
 }
 
 // ============ Аудит лог (Audit Log) ============
@@ -1525,6 +1557,11 @@ enum BankMatchStatus {
   IGNORED // төлбөр биш гүйлгээ (цалин, түрээс…) — админ нуусан
 }
 
+enum BankDirection {
+  CREDIT // орлого
+  DEBIT // зарлага
+}
+
 model BankTransaction {
   id      String @id @default(cuid())
   // Банкны журналын дугаар — ИДЕМПОТЕНТ байдлын түлхүүр: ижил хуулгыг дахин
@@ -1532,10 +1569,22 @@ model BankTransaction {
   bankRef String @unique
 
   bookedAt     DateTime // гүйлгээ хийгдсэн огноо (хуулгаас)
-  amount       Int // ₮, зөвхөн ОРЛОГО (кредит) импортлоно
+  amount       Int // ₮, үргэлж эерэг; чиглэл нь direction-д
+  direction    BankDirection @default(CREDIT)
   description  String // гүйлгээний утга — утасны дугаар эндээс хайна
-  accountNo    String? // хүлээн авсан данс
-  counterparty String? // шилжүүлэгчийн нэр/данс (хуулгад байвал)
+  accountNo    String? // хуулгын данс (IBAN) — «бүрэн шийдсэн өдөр» данс бүрээр
+  counterparty String? // харьцсан данс (илгээгчийн данс) — «сурсан данс»-ны түлхүүр
+  closingBalance String? // гүйлгээний дараах үлдэгдэл (хуулгаас, түлхүүрт орсон)
+
+  // Тулгалтын санал (импорт ба гараар шийдвэр гарах бүрд дахин тооцно):
+  // { lane, kind, decision, candidates: [{ studentId, signals }], split?, reason }
+  suggestion   Json?
+  resolvedAt   DateTime? // бүх дүн хуваарилагдсан (эсвэл төлбөр биш гэж ангилагдсан) мөч
+  resolvedById String? // null + resolvedAt = систем автоматаар
+  // Ажилтан шийтэд аль хэдийн хөтөлсөн (BankCursor.sheetThrough-ээс өмнөх, систем тулгаж
+  // чадаагүй) — хуваарилалтгүйгээр «шийдэгдсэн»; «Шийдэх»-д харагдахгүй (эзэн 2026-11-06)
+  inSheet      Boolean   @default(false)
+  allocations  BankAllocation[]
 
   matchStatus   BankMatchStatus @default(UNMATCHED)
   matchedUserId String?
@@ -1551,6 +1600,73 @@ model BankTransaction {
 
   @@index([matchStatus, bookedAt])
   @@index([matchedUserId])
+  @@index([accountNo, bookedAt])
+}
+
+// Нэг банкны гүйлгээ → нэг буюу хэд хэдэн хэсэг (эзэн 2026-11-05): ах дүүгийн
+// хамтын шилжүүлэг, «сургалт + ном» хольсон төлбөр. Хэсгүүдийн нийлбэр =
+// гүйлгээний дүн. Устгахгүй: буцаахад revokedAt (TUITION-ийн Payment REVERSED).
+enum BankAllocKind {
+  TUITION // сургалтын төлбөр → Payment CONFIRMED
+  SOCIAL // нийгмийн сургалтын төлбөр (утгад «нийгэм») — үндсэн анги нь Нийгэм бол Payment, үгүй бол зөвхөн бүртгэл
+  BOOK // ном (E1, E2, Хавтгайн геометр…)
+  ANSWER_SHEET // шалгалтын хариултын хуудас (1,000₮/ш)
+  STAFF_FINE // ажилтны заалны торгууль
+  TRANSFER // өөрийн данс хоорондын шилжүүлэг
+  EXPENSE // зарлага (дебит)
+  OTHER // бусад
+}
+
+model BankAllocation {
+  id        String          @id @default(cuid())
+  bankTxId  String
+  bankTx    BankTransaction @relation(fields: [bankTxId], references: [id])
+  kind      BankAllocKind
+  amount    Int // ₮
+  studentId String? // хүүхэдтэй холбоотой хэсэгт (сургалт, ном, хариултын хуудас)
+  // TUITION-ийн төлбөр (хуулгаас үүссэн `bank_…` эсвэл шийтээс орсонтой холбосон). Нэг
+  // төлбөр нэг л ИДЭВХТЭЙ хэсэгтэй (зэрэг ажиллалтаас ӨС түвшинд) — буцаасан хэсэг
+  // түүхэнд үлдэж, тэр төлбөрийг дахин холбож болно.
+  paymentId String?
+  note      String?
+  auto      Boolean         @default(false) // систем автоматаар хуваарилсан
+  createdById String? // null = систем
+  createdAt DateTime        @default(now())
+  revokedAt DateTime?
+  revokedById String?
+
+  @@index([bankTxId])
+  @@index([studentId])
+  @@index([paymentId])
+  @@unique([paymentId], map: "BankAllocation_active_paymentId_key", where: { revokedAt: null })
+}
+
+// Гараар баталсан шийдвэрээс «сурсан» холбоос: илгээгчийн данс эсвэл утас →
+// хүүхэд. Дараагийн удаа тэр данснаас ирсэн гүйлгээ нэмэлт шүүлтүүргүй орно
+// (ах дүүгүй, утгад өөр хүүхдийн нэр байхгүй үед л — huulga-match.ts).
+model BankPayerHint {
+  id        String   @id @default(cuid())
+  kind      String // 'ACCOUNT' | 'PHONE'
+  value     String
+  studentId String
+  count     Int      @default(1)
+  lastAt    DateTime @default(now())
+
+  @@unique([kind, value, studentId])
+  @@index([kind, value])
+}
+
+// «Бүрэн шийдсэн өдөр» (эзэн 2026-11-05): тэр өдрийг хүртэлх бүх гүйлгээ
+// шийдэгдсэн. Дараагийн импорт түүнээс өмнөх мөрийг алгасна.
+model BankCursor {
+  accountNo      String   @id
+  settledThrough String // 'YYYY-MM-DD' (УБ)
+  // Импортлосон хуулгуудын бүтэн хамарсан сүүлийн өдөр: хуулгын сүүлийн өдөр
+  // бүтэн биш байж болох тул (14:00-д татсан) settledThrough түүнээс давахгүй.
+  coveredThrough String
+  // Ажилтан энэ өдрийг хүртэлх гүйлгээг шийтэд хөтөлсөн (шилжилтийн үе) — эзэн тэмдэглэнэ
+  sheetThrough   String?
+  updatedAt      DateTime @updatedAt
 }
 
 // Хуучин SIE- кодын архив — шинэ формат руу шилжүүлэхэд эх кодыг хадгална
@@ -1672,6 +1788,24 @@ model ExpenseRecord {
 // (revokedAt = null) байвал тухайн хичээлийн жилийн бүх сар «төлсөн», гэрээний
 // дүн = бодит төлсөн дүн. Устгахгүй: буцаахад revokedAt, дахин тооцоход шинэ мөр.
 // User-тэй relation зориуд тавиагүй (User моделийг өөрчлөхгүй, AuditLog-той адил).
+// Сар бүрийн төлбөрийн хугацаа сунгах (эзэн 2026-11-12): хүүхэд өвчтэй, чөлөөтэй, төв ажиллаагүй
+// гэх мэт — тэр сарын төлөх өдөр N хоногоор хойшилж, дараагийн бүх сар дагаж шилжинэ. Хэмжээ
+// хязгааргүй. Зөвхөн сар бүрийн багцад (бүтэн жилд үл хамаарна). Зөөлөн устгал.
+model TuitionExtension {
+  id          String    @id @default(cuid())
+  studentId   String
+  /** «YYYY-MM» — аль сарын төлөх өдрөөс эхлэн шилжих */
+  month       String
+  days        Int
+  reason      String
+  createdById String
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+  deletedById String?
+
+  @@index([studentId])
+}
+
 model TuitionSettlement {
   id          String    @id @default(cuid())
   studentId   String
@@ -1928,6 +2062,9 @@ model LearningEvent {
   durationMs Int?
   device     String?
   meta       Json?
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): бүлгийн явц цэвэрлэх = deletedAt; явц, аналитик бүгд устсаныг хасна.
+  deletedAt   DateTime?
+  deletedById String?
 
   // Дан @@index([userId]) байсныг ХАССАН (PERF-AUDIT.md §0 олдвор #8): доорх
   // composite [userId, occurredAt]-ийн prefix нь `WHERE userId = ...` query-г
@@ -2065,11 +2202,17 @@ model StaffTask {
   orderIndex    Int          @default(0)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): «устгах» = deletedAt бөглөнө,
+  // мөр DB-д үлдэнэ; уншилт бүрээс хасагдана. Устсан эцгийн дэд даалгавар
+  // дээд түвшний бие даасан даалгавар болж харагдана (хуучин SetNull-тэй ижил).
+  deletedAt     DateTime?
+  deletedById   String?
 
   assignees StaffTaskAssignee[]
 
   @@index([status, dueDate])
   @@index([dueDate])
+  @@index([deletedAt])
 }
 
 // Нэг даалгавар дээр олон ажилтан хамтарч болно (олон-олон холбоос).
@@ -2079,8 +2222,12 @@ model StaffTaskAssignee {
   userId     String
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   assignedAt DateTime  @default(now())
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): оноолт хасах = deletedAt; дахин оноовол мөр сэргэнэ (PK хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@id([taskId, userId])
+  @@index([deletedAt])
 }
 
 // ============ Хичээлийн хуваарь (Class Schedule) ============
@@ -2105,13 +2252,21 @@ model ClassSchedule {
   effectiveFrom DateTime
   effectiveTo   DateTime?
   createdAt     DateTime  @default(now())
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): «устгах» = deletedAt бөглөнө,
+  // мөр (сэдэв, онцгой тохиолдол, багшийн оноолт) DB-д үлдэнэ; хуваарийн
+  // хөдөлгүүр, жагсаалт, тоолол бүрээс хасагдана.
+  deletedAt     DateTime?
+  deletedById   String?
 
   exceptions ScheduleException[]
   topics     LessonTopic[]
   staffing   LessonStaffing[]
 
-  @@unique([classroomId, weekday, startMinute, effectiveFrom])
+  // Зөвхөн ИДЭВХТЭЙ мөрүүд дунд давтагдашгүй — устгасан хичээлийг ижил
+  // түлхүүрээр дахин үүсгэх боломжтой (20261104140000 миграци).
+  @@unique([classroomId, weekday, startMinute, effectiveFrom], where: { deletedAt: null })
   @@index([classroomId, weekday])
+  @@index([deletedAt])
 }
 
 // Тухайн долоо хоногийн НЭГ тохиолдол (occurrence) өөрчлөгдөх нь — цуцлагдах
@@ -2134,8 +2289,12 @@ model ScheduleException {
   newRoom        String?
   note           String?
   createdAt      DateTime              @default(now())
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): цуцлалт/шилжүүлгийг буцаах = deletedAt; ижил өдөр дахин тавибал мөр сэргэнэ (unique хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@unique([scheduleId, date])
+  @@index([deletedAt])
 }
 
 // Тухайн тохиолдол дээр багшийн товлосон "өнөөдөр орох сэдэв".
@@ -2160,8 +2319,12 @@ model LessonTopic {
   // Бодлогын санд байхгүй, багшийн бичсэн сэдвүүд («Иррац шалгалт» г.м., эзэн 2026-10-31) —
   // тесттэй зэрэг олон байж болно. title = тестүүдийн нэр + эдгээр (planTitle).
   customTopics   String[] @default([])
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): сэдэв/төлөвлөгөө арилгах = deletedAt; ижил өдөр дахин тавибал мөр сэргэнэ (unique хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@unique([scheduleId, date])
+  @@index([deletedAt])
 }
 
 // Амралтын өдрийн (Бямба, Ням) хоол (эзэн 2026-10-31): хэн хийх, юу хийх — чөлөөт бичвэр,
@@ -2196,8 +2359,12 @@ model LessonStaffing {
   assistantTeacherId String?
   updatedById        String
   updatedAt          DateTime      @updatedAt
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): оноолт арилгах = deletedAt; дахин оноовол мөр сэргэнэ (unique хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@unique([scheduleId, date])
+  @@index([deletedAt])
 }
 
 // ============ Багшийн долоо хоногийн ажлын өдрийн бүртгэл ============
@@ -2267,10 +2434,15 @@ model AcademicCalendarDay {
   note        String?
   createdById String
   createdAt   DateTime        @default(now())
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): «устгах» = deletedAt бөглөнө;
+  // хуваарийн хөдөлгүүр, ирц, төлбөр, хуанли бүрээс хасагдана.
+  deletedAt   DateTime?
+  deletedById String?
 
   classrooms AcademicCalendarDayClassroom[]
 
   @@index([date])
+  @@index([deletedAt])
 }
 
 // Онцгой өдөр (амралт/шалгалт) аль ангид хамаарахыг заана. Мөр байхгүй бол
@@ -2280,9 +2452,13 @@ model AcademicCalendarDayClassroom {
   classroomId   String
   calendarDay   AcademicCalendarDay @relation(fields: [calendarDayId], references: [id], onDelete: Cascade)
   classroom     Classroom           @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): анги хасах = deletedAt; дахин нэмбэл холбоос сэргэнэ (PK хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@id([calendarDayId, classroomId])
   @@index([classroomId])
+  @@index([deletedAt])
 }
 
 // ============ Сурагчийн зорилго (Student Goals) ============
@@ -2299,8 +2475,11 @@ model StudentGoal {
   subject     Subject?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  // Зөөлөн устгал (эзний хатуу дүрэм 2026-10-23)
+  deletedAt   DateTime?
 
   @@index([studentId, status])
+  @@index([deletedAt])
 }
 
 // ============ Стрийк хамгаалалт (Streak Freeze) ============
@@ -2406,6 +2585,45 @@ model FormulaReview {
   formula Formula @relation(fields: [formulaId], references: [id], onDelete: Cascade)
   @@id([userId, formulaId])
   @@index([userId, dueAt])
+}
+
+// Алдсан бодлогыг хугацаатайгаар давтах (SM-2-ийн хялбар хувилбар, 2026-11-04).
+// Дасгал, давтлага, тест, онлайн гэрийн даалгаварт буруу бодсон бодлого маргааш давтагдана;
+// давтлагаар зөв бодвол интервал уртасна, буруу бол дахин 1 хоног. Логик: mistakes/problem-review-scheduling.ts
+model ProblemReview {
+  id           String    @id @default(cuid())
+  studentId    String
+  problemId    String
+  dueAt        DateTime
+  intervalDays Int       @default(1)
+  ease         Float     @default(2.5)
+  reps         Int       @default(0)
+  lapses       Int       @default(0)
+  lastResult   String? // WRONG | CORRECT
+  source       String // PRACTICE | TEST | STUDY_REVIEW | HOMEWORK | REVIEW
+  // Эх үйл явдал: тест/гэрийн даалгаврын тест (хариу нээх хаалганд), Attempt/HomeworkAttempt/давтлагын ID
+  sourceTestId String?
+  sourceRefId  String?
+  // Сүүлийн үйл явдлын мөч — хоцорч ирсэн/давтагдсан үйл явдал хуваарийг дахин тэглэхгүй
+  lastEventAt  DateTime
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  student      User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  problem      Problem   @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, problemId])
+  @@index([studentId, dueAt])
+}
+
+// Сурагчийн өөрөө тавьсан 7 хоногийн зорилго (7-оос хэдэн өдөр). Арилгах = зөөлөн (deletedAt).
+model StudyWeeklyGoal {
+  id          String    @id @default(cuid())
+  studentId   String    @unique
+  daysPerWeek Int
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  student     User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
 model FormulaReviewDay {
@@ -2536,6 +2754,53 @@ model StaffCapabilityGrant {
 
   @@unique([userId, capability, scopeKey])
   @@index([userId, revokedAt, expiresAt])
+}
+
+// ============ Багшийн ажилласан цаг, данс, цагийн хөлс (эзэн 2026-11-08) ============
+// Эзний Excel «Цаг»-ийн веб хувилбар: хагас сар бүр (1–15, 16–сүүл) багш
+// бүрийн өдөр тутмын цаг. teacherId-г энгийн мөр болгож хадгална (LessonStaffing-
+// ийн конвенц) — багш архивлагдсан ч түүх үлдэнэ. Логик: src/teacher-hours/.
+
+// Нэг багшийн нэг өдрийн цаг. hundredths = цаг × 100 (7.5 цаг = 750) — бүхэл тоо
+// тул нийлбэрт хөвөгч цэгийн алдаа орохгүй. null = нүдийг арилгасан (мөр, аудит үлдэнэ).
+model TeacherWorkHours {
+  id          String   @id @default(cuid())
+  teacherId   String
+  date        DateTime @db.Date
+  hundredths  Int?
+  updatedById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([teacherId, date])
+  @@index([date])
+}
+
+// Багшийн цалингийн данс. Бүх ажилтан харна; багш өөрийнхөө дансыг, цаг бөглөх
+// эрхтэй (teacher-hours.edit) хүн бүх багшийнхыг засна. Аудитад дугаар нууцлагдана.
+model TeacherBankAccount {
+  teacherId     String   @id
+  bankName      String
+  accountNumber String
+  holderName    String
+  updatedById   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Цагийн хөлс (₮/цаг) — ЗӨВХӨН О. Баасанжав харж, тавина (teacher-hours/pay-rate-owner.ts).
+// effectiveFrom = хагас сарын эхний өдөр; тэр үеэс хойш өвлөгдөнө. Солиход хуучин
+// мөр deletedAt-аар хаагдаж шинэ мөр нэмэгдэнэ — түүх устахгүй.
+model TeacherPayRate {
+  id            String    @id @default(cuid())
+  teacherId     String
+  effectiveFrom DateTime  @db.Date
+  ratePerHour   Int
+  createdById   String
+  createdAt     DateTime  @default(now())
+  deletedAt     DateTime?
+
+  @@index([teacherId, effectiveFrom])
 }
 
 
@@ -2893,9 +3158,13 @@ model ClassTestStatus {
   updatedById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  // Зөөлөн устгал (эзний дүрэм 2026-10-23): тэмдэглэгээг буцаах (status = null) = deletedAt; дахин тавибал мөр сэргэнэ (unique хэвээр).
+  deletedAt   DateTime?
+  deletedById String?
 
   @@unique([classroomId, testId])
   @@index([classroomId])
+  @@index([deletedAt])
 }
 
 /// «Өмнө үзсэн сэдэв» (эзэн 2026-10-27): систем эхлэхээс ӨМНӨ анги үзсэн тестийг
@@ -2973,6 +3242,9 @@ model ClassCheck {
   title        String           @db.VarChar(80)
   /// Нэг сурагчийн мөнгөн дүн (₮), заавал биш
   amount       Int?
+  /// Номын чек (эзэн 2026-11-12): BOOKS-ийн түлхүүр (E2, HAVTGAI1 …). null = энгийн чек.
+  /// Номын чекийн тэмдэглэгээ ClassCheckMark-т БИШ, BookPayment-т хадгалагдана.
+  bookKey      String?          @db.VarChar(48)
   createdById  String
   createdAt    DateTime         @default(now())
   archivedAt   DateTime?
@@ -2998,6 +3270,38 @@ model ClassCheckMark {
 
   @@unique([checkId, studentId])
   @@index([studentId])
+}
+
+/// Номын мөнгө (эзэн 2026-11-12) — сурагч × ном. Чекээс ХАМААРАХГҮЙ хадгалагдана:
+/// чек нуугдсан/устсан, сурагч анги сольсон ч «хэн, аль ангид байхдаа, аль багшид,
+/// хэдийг өгсөн» нь үлдэнэ. Мөр хэзээ ч устахгүй, засагдахгүй — өөрчлөх бүрд хуучин
+/// мөр voidedAt авч, шинэ мөр үүснэ (бүтэн түүх). Идэвхтэй мөр (voidedAt IS NULL)
+/// сурагч × номд ГАНЦ — хэсэгчилсэн unique индекс зөвхөн SQL-д (миграци
+/// 20261112150000_book_payments). FK-гүй (ClassCheck-ийн адил). api/src/book-payments.
+model BookPayment {
+  id            String    @id @default(cuid())
+  studentId     String
+  bookKey       String    @db.VarChar(48)
+  /// PAID = мөнгөө өгсөн, SKIPPED = энэ номыг авахгүй
+  status        String    @db.VarChar(8)
+  /// Бодит өгсөн дүн (₮) — чекийн үнээс өөр байж болно (гэмтэлтэй ном −5,000 г.м.)
+  amount        Int?
+  /// Мөнгөө өгөх үед сууж байсан анги (тэр ангийн тооцоонд орно). null = ангигүй
+  classroomId   String?
+  /// Аль чекээр тэмдэглэсэн (байвал)
+  checkId       String?
+  /// Мөнгийг хүлээж авсан багш (PAID үед заавал)
+  collectedById String?
+  note          String?   @db.VarChar(200)
+  /// Тэмдэглэсэн хүн, цаг
+  createdById   String
+  createdAt     DateTime  @default(now())
+  voidedAt      DateTime?
+  voidedById    String?
+
+  @@index([studentId, bookKey])
+  @@index([classroomId, bookKey])
+  @@index([collectedById])
 }
 
 /// Нэвтрэх хуудасны тайлбар/зарлал (эзэн 2026-10-22, Агент D). Ганц мөр id="default";
@@ -3154,12 +3458,69 @@ model HomeworkPhoto {
   lessonDate  DateTime  @db.Date
   fileKey     String
   pages       Int
+  /// Сурагчийн бичсэн тайлбар (илгээхээс өмнө, ≤500 тэмдэгт) — файл 7 хоногт устсан ч мөр, тайлбар үлдэнэ
+  caption     String?
+  /// Багш «Буцаах» дарсан (эзэн 2026-11-05) — сурагч хугацаа хаагдсан ч дахин илгээж болно
+  returnedAt   DateTime?
+  returnedById String?
   createdAt   DateTime  @default(now())
   deletedAt   DateTime?
 
   @@index([studentId, classroomId, lessonDate])
   @@index([classroomId, lessonDate])
   @@index([fileKey])
+}
+
+// ---------------------------------------------------------------------------
+// Piemath гар утасны апп (20261102120000_mobile_app_support) — зөвхөн шинэ хүснэгт.
+// ---------------------------------------------------------------------------
+
+// FCM push токен. «Устгах» = revokedAt (мөр үлдэнэ, дахин бүртгэвэл сэргэнэ).
+model DeviceToken {
+  id         String    @id @default(cuid())
+  userId     String
+  token      String    @unique
+  platform   String // 'ios' | 'android'
+  appVersion String?
+  lastSeenAt DateTime  @default(now())
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Apple-ээр нэвтрэх (App Store 4.8). Google-тэй ижил: бүртгэл ҮҮСГЭХГҮЙ, зөвхөн холбосон хүн.
+model AppleIdentity {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  appleSubject String   @unique // identityToken-ийн `sub`
+  email        String? // privaterelay байж болно
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Бүртгэл устгах ХҮСЭЛТ (App Store 5.1.1(v)). Өгөгдлийг ХЭЗЭЭ Ч автоматаар
+// устгахгүй (прод өгөгдлийн дүрэм) — админ хянаж, гараар шийднэ.
+model AccountDeletionRequest {
+  id           String    @id @default(cuid())
+  userId       String
+  reason       String?
+  status       String    @default("PENDING") // PENDING | IN_REVIEW | RESOLVED | REJECTED
+  reviewedById String?
+  reviewedAt   DateTime?
+  reviewNote   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([userId])
 }
 
 /// Аппын хэрэглээний бүртгэл (эзэн 2026-11-04: «хүмүүс аль товч дээр илүү дарж, ямар ажил
@@ -3178,4 +3539,235 @@ model UiEvent {
 
   @@index([createdAt])
   @@index([role, createdAt])
+}
+
+/// Гэрийн даалгаврын хугацааг багш гараар тохируулсан (эзэн 2026-11-05: самбарын «Онлайн гэрийн
+/// даалгавар» мөрийн ард). lessonDate = даалгавар ӨГСӨН хичээлийн өдөр. Мөр байхгүй бол хугацаа =
+/// дараагийн хичээлийн өдрийн 00:00 (УБ), хоцорч илгээж болно (хуучин дүрэм хэвээр).
+/// allowLate = false бол хугацаа өнгөрмөгц онлайн тест эхлэх/хадгалах/илгээх, зураг явуулах хаагдана.
+model HomeworkDeadline {
+  id          String   @id @default(cuid())
+  classroomId String
+  lessonDate  DateTime @db.Date
+  dueAt       DateTime
+  allowLate   Boolean  @default(true)
+  setById     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([classroomId, lessonDate])
+}
+
+/// Гэрийн даалгавар дээрх СУРАГЧИД ХАРАГДАХ сэтгэгдэл (эзэн 2026-11-05). Багшийн дотоод тэмдэглэл
+/// (DailyHomeworkMark.comment)-ээс тусдаа. Нэг сурагч × анги × даалгавар өгсөн хичээлийн өдөр = нэг яриа:
+/// багш алдааг нь бичнэ, сурагч хариулж болно. ХЭЗЭЭ Ч устгахгүй (deletedAt зөвхөн зохиогч өөрөө нуухад).
+/// kind: NOTE — энгийн, RETURN — «Буцаах» дарахад бичсэн шалтгаан.
+model HomeworkComment {
+  id          String    @id @default(cuid())
+  classroomId String
+  studentId   String
+  lessonDate  DateTime  @db.Date
+  authorId    String
+  authorRole  Role
+  kind        String    @default("NOTE")
+  body        String
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+
+  @@index([studentId, classroomId, lessonDate])
+  @@index([classroomId, lessonDate])
+}
+
+/// Гэрийн даалгаврыг ангид богино шалгалтаар шалгах (эзэн 2026-11-08): ижил төрлийн, өөр тоотой
+/// бодлого. Нэг анги × нэг өдөр = нэг шалгалт. «Устгах» = deletedAt (оноонууд мөн deletedAt-тай нуугдана);
+/// дахин эхлүүлбэл ижил мөр сэргэж, оноо хоосноос эхэлнэ. Зөвхөн ажилтан харна.
+model HomeworkQuiz {
+  id           String              @id @default(cuid())
+  classroomId  String
+  date         DateTime            @db.Date
+  problemCount Int
+  createdById  String
+  updatedById  String
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  deletedAt    DateTime?
+  scores       HomeworkQuizScore[]
+
+  @@unique([classroomId, date])
+}
+
+/// Шалгалтын нэг сурагчийн оноо 0..problemCount, бутархай 2 хүртэл орон (7.5 — эзэн 2026-11-08 19:08;
+/// Decimal тул хөвөгч тооны алдаагүй). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
+model HomeworkQuizScore {
+  id          String       @id @default(cuid())
+  quizId      String
+  quiz        HomeworkQuiz @relation(fields: [quizId], references: [id], onDelete: Restrict)
+  studentId   String
+  score       Decimal      @db.Decimal(6, 2)
+  updatedById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@unique([quizId, studentId])
+  @@index([studentId])
+}
+
+/// Нөхөлт (эзэн 2026-11-08): өөрийн ангидаа хийж чадаагүй хичээлээ нөхсөн нэг удаа.
+/// - Өөр ангид суусан: hostClassroomId = зочилсон анги (ж: 12-4-ийн сурагч 12-6-д). Хийсэн
+///   тест = тэр ангийн тэр өдрийн хичээлийнх (ClassTestSession, эс бөгөөс төлөвлөгөө) —
+///   уншихдаа тооцно (makeup-visits/covered.logic.ts), энд хуулахгүй.
+/// - 406 өрөө: hostClassroomId = null. Хийсэн тестийг багш сонгоно → MakeupVisitTest.
+/// Давхардал: нэг сурагч, нэг өдөр, нэг газар (placeKey = hostClassroomId эсвэл "406")
+/// идэвхтэй ганц мөр. Устгах нь зөөлөн (deletedAt). Хэрэглэгч/ангийн FK-гүй (ClassCheck-ийн адил).
+model MakeupVisit {
+  id              String              @id @default(cuid())
+  studentId       String
+  date            DateTime            @db.Date
+  /// Зочилсон анги; null = 406 өрөө
+  hostClassroomId String?
+  /// hostClassroomId эсвэл "406" — давхардлын түлхүүр
+  placeKey        String
+  /// Нэмэх үеийн сурагчийн өөрийн анги (дараа анги сольсон ч түүх зөв үлдэнэ)
+  homeClassroomId String?
+  /// Багшийн тайлбар — заавал биш
+  comment         String?             @db.VarChar(500)
+  /// Зочилсон ангийн самбар дахь ирц, даалгавар (энгийн сурагчийнхтай ижил блок).
+  /// Attendance хүснэгтэд бичихгүй: сурагчийн ирцийн хувь хоёр дахин тоологдохгүй.
+  attStatus       AttendanceStatus?
+  lateRange       LateRange?
+  attNote         String?             @db.VarChar(200)
+  hwStatus        HomeworkMarkStatus?
+  hwNote          String?             @db.VarChar(200)
+  createdById     String
+  createdAt       DateTime            @default(now())
+  updatedById     String?
+  updatedAt       DateTime            @updatedAt
+  deletedAt       DateTime?
+  deletedById     String?
+  tests           MakeupVisitTest[]
+
+  @@unique([studentId, date, placeKey], where: { deletedAt: null })
+  @@index([placeKey, date])
+  @@index([homeClassroomId, date])
+  @@index([studentId, date])
+}
+
+/// 406 өрөөнд нөхөж хийсэн тест/сэдэв. testId = null бол бодлогын санд байхгүй, багшийн
+/// бичсэн сэдэв (title). Сэдвийг солиход хасагдсан мөр зөөлөн устна (түүх үлдэнэ).
+model MakeupVisitTest {
+  id          String      @id @default(cuid())
+  visitId     String
+  visit       MakeupVisit @relation(fields: [visitId], references: [id], onDelete: Restrict)
+  testId      String?
+  title       String      @db.VarChar(200)
+  createdById String
+  createdAt   DateTime    @default(now())
+  deletedAt   DateTime?
+  deletedById String?
+
+  @@index([visitId])
+  @@index([testId])
+}
+
+// ============================================================================
+// Цаасан шалгалт — OMR машин эсвэл Excel-ээс оруулсан дүн (docs/PLAN-OMR.md).
+// Бодлогын санд холбогдохгүй: бодлого = дугаар + түлхүүр + агуулгын ангилал.
+// Сурагчийн түүхий хариуг хадгална → түлхүүр засахад оноо дахин бодогдоно.
+// Устгах бүр зөөлөн (deletedAt / supersededAt / REVERTED).
+// ============================================================================
+enum PaperExamImportStatus {
+  CONFIRMED
+  REVERTED
+}
+
+model PaperExam {
+  id          String    @id @default(cuid())
+  title       String
+  heldOn      DateTime  @db.Date
+  itemCount   Int
+  /// Сурагчид харагдах эсэх (дүн, жагсаалт)
+  published   Boolean   @default(false)
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  items   PaperExamItem[]
+  sheets  PaperExamSheet[]
+  imports PaperExamImport[]
+
+  @@index([deletedAt, heldOn])
+}
+
+model PaperExamItem {
+  id        String    @id @default(cuid())
+  examId    String
+  exam      PaperExam @relation(fields: [examId], references: [id], onDelete: Cascade)
+  number    Int
+  /// Зөв хариу «A»…«E»; null = түлхүүргүй (зөвхөн зөв/буруугаар орсон дүнд хамаарахгүй)
+  answerKey String?
+  points    Int       @default(1)
+  /// БҮТ-ийн агуулгын ангилал (paper-exams/paper-exam-logic.ts CONTENT_AREAS)
+  area      String?
+  /// Сэдэв (бүлэг): «Модульт тэгшитгэл» … — чөлөөт бичвэр, санал болгох жагсаалттай
+  topic     String?
+  /// Бодлогод ашиглах томьёо — Томьёоны сангийн Formula.slug (дарааллаар)
+  formulaSlugs String[] @default([])
+  /// Хүчингүй болгосон бодлого — оноо, хувьд тооцогдохгүй
+  voided    Boolean   @default(false)
+
+  @@unique([examId, number])
+}
+
+model PaperExamSheet {
+  id          String          @id @default(cuid())
+  examId      String
+  exam        PaperExam       @relation(fields: [examId], references: [id], onDelete: Cascade)
+  importId    String
+  import      PaperExamImport @relation(fields: [importId], references: [id], onDelete: Cascade)
+  /// null = файлын шифр/нэр сурагчтай таараагүй — ажилтан гараар холбоно
+  studentId   String?
+  student     User?           @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  rawCode     String
+  rawLastName String
+  rawFirstName String
+  /// Файлын шийт/гарчгаас: «Баг 27», «Болор-Эрдэнэ»
+  groupLabel  String
+  groupTeacher String?
+  /// Импортын үеийн сурагчийн анги (Багш өөрийн ангийнхаа мөрийг харна)
+  classroomId String?
+  /// Бодлого бүрийн хариу: «A»…«E», «» хоосон, «*» давхар будсан, «+» зөв, «-» буруу
+  answers     Json
+  totalScore  Float
+  maxScore    Float
+  /// Шинэ импорт эсвэл буцаалтаар хүчингүй болсон мөч
+  supersededAt DateTime?
+  /// Энэ мөрийг орлосон импорт (буцаахад хуучин мөрийг сэргээнэ)
+  supersededByImportId String?
+  createdAt   DateTime        @default(now())
+
+  @@unique([examId, studentId], map: "PaperExamSheet_active_student_key", where: { supersededAt: null })
+  @@index([examId, supersededAt])
+  @@index([studentId])
+  @@index([importId])
+}
+
+model PaperExamImport {
+  id           String                @id @default(cuid())
+  examId       String
+  exam         PaperExam             @relation(fields: [examId], references: [id], onDelete: Cascade)
+  fileName     String
+  fileSha256   String
+  sheetCount   Int
+  matchedCount Int
+  status       PaperExamImportStatus @default(CONFIRMED)
+  createdById  String
+  createdAt    DateTime              @default(now())
+  revertedAt   DateTime?
+  revertedById String?
+
+  sheets PaperExamSheet[]
+
+  @@index([examId, createdAt])
 }

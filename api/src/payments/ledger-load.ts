@@ -10,6 +10,8 @@ import {
   tierFor,
   type DateKey,
   type LedgerResult,
+  type MonthKey,
+  type MonthPeriod,
 } from './ledger';
 
 export interface LedgerClassroom {
@@ -51,6 +53,7 @@ export async function classDays(
   if (!classroomIds.length) return out;
   const rows = await prisma.classSchedule.findMany({
     where: {
+      deletedAt: null,
       classroomId: { in: [...new Set(classroomIds)] },
       OR: [{ effectiveTo: null }, { effectiveTo: { gt: now } }],
     },
@@ -86,6 +89,65 @@ export async function settlements(
   return out;
 }
 
+/** Сайтаас сунгасан хугацаа (идэвхтэй) — хүүхэд бүрээр */
+export async function extensionsFor(prisma: PrismaService, studentIds: string[]) {
+  const out = new Map<string, { id: string; month: MonthKey; days: number; reason: string; createdById: string; createdAt: Date }[]>();
+  if (!studentIds.length) return out;
+  const rows = await prisma.tuitionExtension.findMany({
+    where: { studentId: { in: studentIds }, deletedAt: null },
+    orderBy: { createdAt: 'asc' },
+    select: { id: true, studentId: true, month: true, days: true, reason: true, createdById: true, createdAt: true },
+  });
+  for (const { studentId, ...e } of rows) (out.get(studentId) ?? out.set(studentId, []).get(studentId)!).push(e);
+  return out;
+}
+
+// Шийтийн сарын бүлэг: «Төлсөн дүн» багана, «Хугацаа» нь дараагийнх нь (O=6-7 … AY=6-7)
+const SHEET_MONTH_COLS = ['O', 'R', 'U', 'X', 'AA', 'AD', 'AG', 'AJ', 'AM', 'AP', 'AS', 'AV', 'AY'];
+const colIndex = (l: string) => [...l].reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0) - 1;
+const yearOf = (m: number) => (m >= 6 ? 2026 : 2027);
+const pad = (n: number) => String(n).padStart(2, '0');
+
+/**
+ * Шийтийн «Хугацаа» нүд → сар бүрийн хугацаа («08/04-09/14»). Хугацааны эхлэх сар
+ * бүлгийн сартай таарахгүй бол (ажилтны алдаа) авахгүй. Эзэн жагсаалт давуу, дараа нь «Сар бүр».
+ */
+export async function sheetPeriodsFor(prisma: PrismaService, studentIds: string[]) {
+  const out = new Map<string, Record<MonthKey, MonthPeriod>>();
+  if (!studentIds.length) return out;
+  const rows = await prisma.sheetRow.findMany({
+    where: { studentId: { in: studentIds }, goneAt: null, tab: { in: ['Суудал баталгаажуулалт', 'Сар бүр'] } },
+    select: { studentId: true, tab: true, cells: true },
+    orderBy: { tab: 'desc' }, // «Суудал…» сүүлд → давуу (дарж бичнэ)
+  });
+  for (const r of rows) {
+    const cells = (r.cells ?? {}) as Record<string, unknown>;
+    const mine = out.get(r.studentId!) ?? {};
+    SHEET_MONTH_COLS.forEach((col, i) => {
+      const month = `${yearOf(((5 + i) % 12) + 1)}-${pad(((5 + i) % 12) + 1)}`;
+      const text = String(cells[colLetterOf(colIndex(col) + 1)] ?? '');
+      const m = /^\s*(\d{1,2})\/(\d{1,2})\s*-\s*(\d{1,2})\/(\d{1,2})/.exec(text);
+      if (!m) return;
+      const from = `${yearOf(+m[1])}-${pad(+m[1])}-${pad(+m[2])}`;
+      const to = `${yearOf(+m[3])}-${pad(+m[3])}-${pad(+m[4])}`;
+      if (from.slice(0, 7) !== month || to <= from || Number.isNaN(Date.parse(from)) || Number.isNaN(Date.parse(to))) return;
+      mine[month] = { from, to };
+    });
+    out.set(r.studentId!, mine);
+  }
+  return out;
+}
+
+function colLetterOf(index: number): string {
+  let n = index + 1;
+  let s = '';
+  while (n > 0) {
+    s = String.fromCharCode(65 + ((n - 1) % 26)) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
+}
+
 const dateKey = (d: Date | null | undefined): DateKey | null =>
   d ? d.toISOString().slice(0, 10) : null;
 
@@ -106,7 +168,7 @@ export async function ledgersFor(
       select: {
         id: true,
         studentProfile: {
-          select: { grade: true, tuitionPlan: true, tuitionAmount: true, joinedOn: true, leftOn: true },
+          select: { grade: true, tuitionPlan: true, tuitionAmount: true, tuitionAgreed: true, joinedOn: true, leftOn: true },
         },
         enrollments: {
           where: { leftAt: null },
@@ -121,6 +183,7 @@ export async function ledgersFor(
     }),
     settlements(prisma, studentIds),
   ]);
+  const [extensions, sheetPeriods] = await Promise.all([extensionsFor(prisma, studentIds), sheetPeriodsFor(prisma, studentIds)]);
   const primary = new Map(users.map((u) => [u.id, primaryEnrollment(u.enrollments)?.classroom ?? null]));
   const days = await classDays(
     prisma,
@@ -140,6 +203,9 @@ export async function ledgersFor(
       computeLedger({
         plan: profile?.tuitionPlan ?? null,
         tuitionAmount: profile?.tuitionAmount ?? null,
+        agreed: profile?.tuitionAgreed ?? null,
+        periods: sheetPeriods.get(u.id),
+        extensions: extensions.get(u.id),
         tier: tierFor(profile?.grade, classroom?.name, classroom ? days.get(classroom.id) : null).tier,
         startDate: dateKey(profile?.joinedOn),
         leftOn: dateKey(profile?.leftOn),

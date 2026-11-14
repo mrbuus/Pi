@@ -14,6 +14,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import {
   ACADEMIC_YEAR,
+  blockSources,
   computeLedger,
   promiseState,
   tierFor,
@@ -26,9 +27,9 @@ import {
 import { withPlus } from '../revisions/revision-snapshot';
 import { AuditService } from '../audit/audit.service';
 import { PaymentsService, type PaymentActor } from './payments.service';
-import { classDays, primaryEnrollment, settlements } from './ledger-load';
+import { classDays, extensionsFor, primaryEnrollment, settlements, sheetPeriodsFor } from './ledger-load';
 import type { CreatePaymentDto } from './dto/payment.dto';
-import type { LedgerPayDto, LedgerSettleDto } from './dto/ledger.dto';
+import type { LedgerExtendDto, LedgerPayDto, LedgerSettleDto } from './dto/ledger.dto';
 
 /** Төлбөрийн хэсгийн нэг сурагчийн мөр — блок, өр, тэмдэглэл, амлалт. */
 export interface LedgerRow extends Omit<LedgerResult, 'plan'> {
@@ -63,6 +64,7 @@ const STUDENT_SELECT = {
       grade: true,
       tuitionPlan: true,
       tuitionAmount: true,
+      tuitionAgreed: true,
       joinedOn: true,
       leftOn: true,
     },
@@ -136,7 +138,7 @@ export class PaymentsLedgerService {
         },
       }),
       this.prisma.studentNote.findMany({
-        where: { studentId: { in: ids }, type: StudentNoteType.PAYMENT },
+        where: { studentId: { in: ids }, type: StudentNoteType.PAYMENT, deletedAt: null },
         orderBy: { createdAt: 'desc' },
         select: {
           studentId: true,
@@ -153,6 +155,7 @@ export class PaymentsLedgerService {
       ),
       settlements(this.prisma, ids),
     ]);
+    const [extensions, sheetPeriods] = await Promise.all([extensionsFor(this.prisma, ids), sheetPeriodsFor(this.prisma, ids)]);
     const authors = new Map(
       (
         await this.prisma.user.findMany({
@@ -184,6 +187,9 @@ export class PaymentsLedgerService {
       const { plan, ...ledger } = computeLedger({
         plan: profile?.tuitionPlan ?? null,
         tuitionAmount: profile?.tuitionAmount ?? null,
+        agreed: profile?.tuitionAgreed ?? null,
+        periods: sheetPeriods.get(u.id),
+        extensions: extensions.get(u.id),
         tier: tierFor(profile?.grade, classroom?.name, classroom ? days.get(classroom.id) : null).tier,
         startDate,
         leftOn,
@@ -275,6 +281,12 @@ export class PaymentsLedgerService {
       covered: number;
       /** Энэ сарын хугацаа нь болсон ч төлөгдөөгүй хэсэг */
       late: number;
+      /** Энэ сард төлөх ёстой сурагчдын тоо (Багш+-ийн дүнгүй зурваст) */
+      activeStudents: number;
+      /** Энэ сарын блок бүрэн төлөгдсөн сурагч */
+      paidStudents: number;
+      /** Энэ сарын хугацаа болсон ч дутуу сурагч */
+      lateStudents: number;
       owedStudents: number;
       owedNow: number;
       brokenPromises: number;
@@ -287,6 +299,9 @@ export class PaymentsLedgerService {
       expected: 0,
       covered: 0,
       late: 0,
+      activeStudents: 0,
+      paidStudents: 0,
+      lateStudents: 0,
       owedStudents: 0,
       owedNow: 0,
       brokenPromises: 0,
@@ -309,6 +324,9 @@ export class PaymentsLedgerService {
           s.expected += b.due;
           s.covered += b.paid;
           if (b.dueOn && b.dueOn <= today) s.late += b.due - b.paid;
+          s.activeStudents++;
+          if (b.state === 'PAID') s.paidStudents++;
+          else if (b.dueOn && b.dueOn <= today && b.paid < b.due) s.lateStudents++;
         }
         if (r.owedNow > 0) {
           s.owedStudents++;
@@ -454,7 +472,7 @@ export class PaymentsLedgerService {
         },
       }),
       this.prisma.studentNote.findMany({
-        where: { studentId: id, type: StudentNoteType.PAYMENT },
+        where: { studentId: id, type: StudentNoteType.PAYMENT, deletedAt: null },
         orderBy: { createdAt: 'desc' },
         select: {
           id: true,
@@ -482,6 +500,7 @@ export class PaymentsLedgerService {
       settlements(this.prisma, [id]),
     ]);
     const settlement = settled.get(id) ?? null;
+    const exts = (await extensionsFor(this.prisma, [id])).get(id) ?? [];
     const people = new Map(
       (
         await this.prisma.user.findMany({
@@ -492,6 +511,7 @@ export class PaymentsLedgerService {
                   ...notes.map((n) => n.createdById),
                   ...payments.map((p) => p.confirmedById).filter((x): x is string => !!x),
                   ...(settlement ? [settlement.createdById] : []),
+                  ...exts.map((e) => e.createdById),
                 ]),
               ],
             },
@@ -505,7 +525,19 @@ export class PaymentsLedgerService {
       .map((p) => dateKey(p.paidAt ?? p.createdAt)!);
     const daysPerWeek = row.classroom ? (days.get(row.classroom.id) ?? null) : null;
     const { tier } = tierFor(profile?.grade, row.classroom?.name, daysPerWeek);
+    // Сар бүрийг дүүргэсэн төлбөр — ledger-load-ийн адил зөвхөн баталгаажсан, paidAt-ийн өдрөөр
+    const sources = blockSources(
+      row.blocks,
+      payments
+        .filter((p) => p.status === PaymentStatus.CONFIRMED)
+        .map((p) => ({ id: p.id, amount: p.amount, forMonth: p.forMonth, paidOn: dateKey(p.paidAt) })),
+      row.plan.kind,
+      row.startDate,
+    );
     return {
+      sources,
+      /** Сунгалт (сар бүрийн багц) — шалтгаан, хэн, хэзээ */
+      extensions: exts.map((e) => ({ id: e.id, month: e.month, days: e.days, reason: e.reason, at: e.createdAt, authorName: people.get(e.createdById) ?? null })),
       year: this.yearView(),
       today,
       month: this.currentMonth(today),
@@ -624,6 +656,53 @@ export class PaymentsLedgerService {
         reason: dto.full ? (note ?? 'Бүтэн жилд тооцсон') : (note ?? 'Системийн тооцоонд буцаасан'),
       });
     const [row] = await this.rows({ id: studentId }, today);
+    return { row };
+  }
+
+  /**
+   * Сар бүрийн төлбөрийн хугацаа сунгах (эзэн 2026-11-12): тэр сарын төлөх өдөр N хоногоор
+   * хойшилж, дараагийн бүх сар дагаж шилжинэ. Зөвхөн сар бүрийн багцад — бүтэн/хагас жилд утгагүй.
+   */
+  async extend(studentId: string, dto: LedgerExtendDto, actor: PaymentActor) {
+    const [row] = await this.rows({ id: studentId });
+    if (!row) throw new NotFoundException('Сурагч олдсонгүй');
+    if (row.plan.kind !== 'MONTHLY') throw new BadRequestException('Хугацаа сунгах нь зөвхөн сар бүр төлдөг сурагчид');
+    if (!row.blocks.some((b) => b.month === dto.month && b.state !== 'OFF'))
+      throw new BadRequestException('Энэ сар сурагчийн суусан хугацаанд ороогүй');
+    const created = await this.prisma.tuitionExtension.create({
+      data: { studentId, month: dto.month, days: dto.days, reason: dto.reason.trim(), createdById: actor.id },
+    });
+    await this.audit.record({
+      actorId: actor.id,
+      actorRole: actor.role,
+      action: 'EXTEND',
+      entity: 'TuitionExtension',
+      entityId: created.id,
+      after: created,
+      reason: created.reason,
+    });
+    const [after] = await this.rows({ id: studentId });
+    return { row: after };
+  }
+
+  async unextend(studentId: string, extId: string, actor: PaymentActor) {
+    const ext = await this.prisma.tuitionExtension.findFirst({ where: { id: extId, studentId, deletedAt: null } });
+    if (!ext) throw new NotFoundException('Сунгалт олдсонгүй');
+    const removed = await this.prisma.tuitionExtension.update({
+      where: { id: ext.id },
+      data: { deletedAt: new Date(), deletedById: actor.id },
+    });
+    await this.audit.record({
+      actorId: actor.id,
+      actorRole: actor.role,
+      action: 'UNEXTEND',
+      entity: 'TuitionExtension',
+      entityId: ext.id,
+      before: ext,
+      after: removed,
+      reason: 'Сунгалтыг цуцалсан',
+    });
+    const [row] = await this.rows({ id: studentId });
     return { row };
   }
 }

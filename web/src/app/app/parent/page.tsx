@@ -17,6 +17,7 @@ import PaidUntilCard from "@/components/payments/PaidUntilCard";
 import { formatMnt } from "@/lib/orgInfo";
 import { STATUS_LABEL } from "@/components/payments/paymentHelpers";
 import { Meta } from "@/components/ui/Meta";
+import QuizScoreChip from "@/components/homework-quiz/QuizScoreChip";
 type Result = {
   id: string;
   totalScore: number;
@@ -57,6 +58,8 @@ type ParentLink = {
       status: string;
       classroom: { name: string };
     }[];
+    /** Шалгалтаар даалгавар шалгасан оноо (эзэн 2026-11-08 19:08), шинэ нь эхэнд */
+    homeworkQuizzes?: { date: string; classroom: string; score: number; problemCount: number }[];
     submissions?: {
       id: string;
       state: string;
@@ -106,6 +109,7 @@ function ChildPanel({
   const results = child.testResults ?? [],
     attendance = child.attendances ?? [],
     marks = child.dailyHomeworkMarks ?? [],
+    quizzes = child.homeworkQuizzes ?? [],
     submissions = child.submissions ?? [],
     payments = child.payments ?? [];
   return (
@@ -217,12 +221,18 @@ function ChildPanel({
                 {HOMEWORK[row.status] ?? "Тэмдэглэсэн"}
               </p>
             ))}
+            {quizzes.map((row, i) => (
+              <p key={`q-${row.date}-${i}`} className="flex flex-wrap items-center gap-x-1">
+                {row.date} — {row.classroom} —{" "}
+                <QuizScoreChip score={row.score} problemCount={row.problemCount} />
+              </p>
+            ))}
             {submissions.map((row) => (
               <p key={row.id}>
                 {row.assignment.title} — {HOMEWORK[row.state] ?? "Тэмдэглэсэн"}
               </p>
             ))}
-            {!attendance.length && !marks.length && !submissions.length && (
+            {!attendance.length && !marks.length && !quizzes.length && !submissions.length && (
               <p>Сүүлийн бүртгэл байхгүй байна.</p>
             )}
           </div>

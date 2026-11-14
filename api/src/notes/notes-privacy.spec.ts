@@ -81,6 +81,7 @@ describe('private pupil notes', () => {
     await service.list('pupil', undefined, 'plus', Role.TEACHER_PLUS);
     expect(db.studentNote.findMany.mock.calls[0][0].where).toEqual({
       studentId: 'pupil',
+      deletedAt: null,
       type: StudentNoteType.GENERAL,
     });
     await expect(

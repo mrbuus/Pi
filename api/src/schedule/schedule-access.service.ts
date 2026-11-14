@@ -41,7 +41,8 @@ export class ScheduleAccessService {
     destinationId?: string,
   ) {
     const schedule = await this.prisma.classSchedule.findUnique({
-      where: { id },
+      // Зөөлөн устгасан хуваарь = байхгүй (404)
+      where: { id, deletedAt: null },
       select: { classroomId: true },
     });
     if (!schedule) throw new NotFoundException('Хуваарь олдсонгүй');
@@ -51,7 +52,8 @@ export class ScheduleAccessService {
   }
   async topic(actor: ScheduleActor, id: string) {
     const schedule = await this.prisma.classSchedule.findUnique({
-      where: { id },
+      // Зөөлөн устгасан хуваарь = байхгүй (404)
+      where: { id, deletedAt: null },
       select: {
         classroomId: true,
         teacherId: true,
@@ -105,7 +107,8 @@ export class ScheduleAccessService {
   }
   async readSchedule(actor: ScheduleActor, id: string) {
     const row = await this.prisma.classSchedule.findUnique({
-      where: { id },
+      // Зөөлөн устгасан хуваарь = байхгүй (404)
+      where: { id, deletedAt: null },
       select: { classroomId: true },
     });
     if (!row) throw new NotFoundException('Хуваарь олдсонгүй');

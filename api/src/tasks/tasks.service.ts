@@ -29,14 +29,32 @@ const ASSIGNEE_USER_SELECT = {
   role: true,
 } satisfies Prisma.UserSelect;
 
+// Зөөлөн устгал (эзний дүрэм 2026-10-23): deletedAt-тай даалгавар ямар ч
+// уншилтад орохгүй.
+const NOT_DELETED = { deletedAt: null } satisfies Prisma.StaffTaskWhereInput;
+
+// Дээд түвшний даалгавар: эцэггүй, ЭСВЭЛ эцэг нь (зөөлөн) устсан. Хуучин хатуу
+// устгалд onDelete: SetNull дэд даалгаврыг бие даасан болгодог байсан —
+// parentTaskId-г дарж бичихгүйгээр ижил зан төлөвийг хадгална.
+const TOP_LEVEL = {
+  OR: [{ parentTaskId: null }, { parentTask: { deletedAt: { not: null } } }],
+} satisfies Prisma.StaffTaskWhereInput;
+
+// Хасагдсан (deletedAt) хариуцагч ямар ч уншилтад орохгүй
+const LIVE_ASSIGNEES = {
+  where: { deletedAt: null },
+  include: { user: { select: ASSIGNEE_USER_SELECT } },
+} satisfies Prisma.StaffTask$assigneesArgs;
+
 const TASK_INCLUDE = {
   createdBy: { select: { id: true, firstName: true, lastName: true } },
   classroom: { select: { id: true, name: true } },
-  assignees: { include: { user: { select: ASSIGNEE_USER_SELECT } } },
+  assignees: LIVE_ASSIGNEES,
   subtasks: {
+    where: NOT_DELETED,
     orderBy: { orderIndex: 'asc' as const },
     include: {
-      assignees: { include: { user: { select: ASSIGNEE_USER_SELECT } } },
+      assignees: LIVE_ASSIGNEES,
       classroom: { select: { id: true, name: true } },
     },
   },
@@ -76,7 +94,7 @@ export class TasksService {
     return {
       ...(q.status ? { status: q.status } : {}),
       ...(q.assigneeId
-        ? { assignees: { some: { userId: q.assigneeId } } }
+        ? { assignees: { some: { userId: q.assigneeId, deletedAt: null } } }
         : {}),
       ...(q.classroomId ? { classroomId: q.classroomId } : {}),
       ...(q.subject ? { subject: q.subject } : {}),
@@ -98,11 +116,16 @@ export class TasksService {
 
   private async assertParentIsTopLevel(parentTaskId: string) {
     const parent = await this.prisma.staffTask.findUnique({
-      where: { id: parentTaskId },
-      select: { id: true, parentTaskId: true },
+      where: { id: parentTaskId, ...NOT_DELETED },
+      select: {
+        id: true,
+        parentTaskId: true,
+        parentTask: { select: { deletedAt: true } },
+      },
     });
     if (!parent) throw new NotFoundException('Эцэг даалгавар олдсонгүй');
-    if (parent.parentTaskId) {
+    // Эцэг нь устсан дэд даалгавар дээд түвшинд тооцогдоно (TOP_LEVEL)
+    if (parent.parentTaskId && !parent.parentTask?.deletedAt) {
       throw new BadRequestException(
         'Дэд даалгаварт дахин дэд даалгавар нэмэх боломжгүй (нэг л түвшин дэмждэг)',
       );
@@ -144,8 +167,11 @@ export class TasksService {
     const match = this.buildFilterWhere(q);
     return this.prisma.staffTask.findMany({
       where: {
-        parentTaskId: null,
-        OR: [match, { subtasks: { some: match } }],
+        ...NOT_DELETED,
+        AND: [
+          TOP_LEVEL,
+          { OR: [match, { subtasks: { some: { ...match, ...NOT_DELETED } } }] },
+        ],
       },
       orderBy: [{ orderIndex: 'asc' }, { createdAt: 'asc' }],
       include: TASK_INCLUDE,
@@ -154,7 +180,7 @@ export class TasksService {
 
   async findOne(id: string) {
     const task = await this.prisma.staffTask.findUnique({
-      where: { id },
+      where: { id, ...NOT_DELETED },
       include: TASK_INCLUDE,
     });
     if (!task) throw new NotFoundException('Даалгавар олдсонгүй');
@@ -163,8 +189,8 @@ export class TasksService {
 
   private async findRaw(id: string) {
     const task = await this.prisma.staffTask.findUnique({
-      where: { id },
-      include: { assignees: true },
+      where: { id, ...NOT_DELETED },
+      include: { assignees: { where: { deletedAt: null } } },
     });
     if (!task) throw new NotFoundException('Даалгавар олдсонгүй');
     return task;
@@ -225,7 +251,7 @@ export class TasksService {
     await this.assertAssigneesExist(dto.assigneeIds);
 
     if (dto.assigneeIds) {
-      await this.prisma.staffTaskAssignee.deleteMany({ where: { taskId: id } });
+      await this.replaceAssignees(id, dto.assigneeIds, userId);
     }
 
     return this.prisma.staffTask.update({
@@ -242,17 +268,48 @@ export class TasksService {
         classroomId: dto.classroomId,
         subject: dto.subject,
         estimateHours: dto.estimateHours,
-        assignees: dto.assigneeIds?.length
-          ? { createMany: { data: dto.assigneeIds.map((uid) => ({ userId: uid })) } }
-          : undefined,
       },
       include: TASK_INCLUDE,
     });
   }
 
-  async remove(id: string) {
+  /**
+   * PATCH-ийн assigneeIds: жагсаалтад байхгүй хариуцагчийг ЗӨӨЛӨН хасна (deletedAt,
+   * мөр DB-д үлдэнэ), жагсаалтынхыг нэмнэ — өмнө хасагдсан бол тэр мөрийг сэргээнэ.
+   */
+  private async replaceAssignees(taskId: string, assigneeIds: string[], actorId: string) {
+    const ids = [...new Set(assigneeIds)];
+    await this.prisma.staffTaskAssignee.updateMany({
+      where: { taskId, deletedAt: null, userId: { notIn: ids } },
+      data: { deletedAt: new Date(), deletedById: actorId },
+    });
+    for (const userId of ids) await this.assign(taskId, userId);
+  }
+
+  /** Нэг хариуцагч оноох: шинэ бол үүсгэнэ, хасагдсан бол сэргээнэ, идэвхтэй бол хэвээр. */
+  private async assign(taskId: string, userId: string) {
+    const stored = await this.prisma.staffTaskAssignee.findUnique({
+      // soft-delete: revive — устсан мөрийг ч уншина (PK-г эзэлдэг)
+      where: { taskId_userId: { taskId, userId } },
+    });
+    if (!stored) {
+      await this.prisma.staffTaskAssignee.create({ data: { taskId, userId } });
+    } else if (stored.deletedAt) {
+      await this.prisma.staffTaskAssignee.update({
+        where: { taskId_userId: { taskId, userId } },
+        data: { deletedAt: null, deletedById: null, assignedAt: new Date() },
+      });
+    }
+  }
+
+  // ЗӨӨЛӨН устгал: мөр, оноолт, дэд даалгаврын холбоос DB-д үлдэнэ. Дэд
+  // даалгаварууд TOP_LEVEL-ээр бие даасан даалгавар болж харагдана.
+  async remove(id: string, actorId?: string) {
     await this.findRaw(id);
-    await this.prisma.staffTask.delete({ where: { id } });
+    await this.prisma.staffTask.update({
+      where: { id },
+      data: { deletedAt: new Date(), deletedById: actorId ?? null },
+    });
     return { id };
   }
 
@@ -262,21 +319,19 @@ export class TasksService {
       where: { id: dto.userId },
     });
     if (!user) throw new NotFoundException('Хэрэглэгч олдсонгүй');
-    await this.prisma.staffTaskAssignee.upsert({
-      where: { taskId_userId: { taskId, userId: dto.userId } },
-      create: { taskId, userId: dto.userId },
-      update: {},
-    });
+    await this.assign(taskId, dto.userId);
     return this.findOne(taskId);
   }
 
-  async removeAssignee(taskId: string, userId: string) {
+  // ЗӨӨЛӨН (эзний дүрэм 2026-10-23): оноолтын мөр deletedAt-тай DB-д үлдэнэ
+  async removeAssignee(taskId: string, userId: string, actorId?: string) {
     await this.findRaw(taskId);
-    await this.prisma.staffTaskAssignee
-      .delete({ where: { taskId_userId: { taskId, userId } } })
-      .catch(() => {
-        throw new NotFoundException('Энэ хэрэглэгч даалгаварт оноогдоогүй байна');
-      });
+    const { count } = await this.prisma.staffTaskAssignee.updateMany({
+      where: { taskId, userId, deletedAt: null },
+      data: { deletedAt: new Date(), deletedById: actorId ?? null },
+    });
+    if (!count)
+      throw new NotFoundException('Энэ хэрэглэгч даалгаварт оноогдоогүй байна');
     return this.findOne(taskId);
   }
 
@@ -294,7 +349,6 @@ export class TasksService {
   // АЧААЛАЛ харагдац: ажилтан бүрийн муж дахь даалгаврын тоо (төлөв тус бүрээр)
   // болон нийт тооцоолсон цагийг буцаана — хэн хэт ачаалалтай байгааг харуулна.
   async workload(q: WorkloadQueryDto) {
-    const where = this.dateRangeWhere(q.from, q.to);
 
     const staff = await this.prisma.user.findMany({
       where: { role: { in: STAFF_ROLES } },
@@ -303,11 +357,11 @@ export class TasksService {
     });
 
     const tasks = await this.prisma.staffTask.findMany({
-      where,
+      where: { ...this.dateRangeWhere(q.from, q.to), ...NOT_DELETED },
       select: {
         status: true,
         estimateHours: true,
-        assignees: { select: { userId: true } },
+        assignees: { where: { deletedAt: null }, select: { userId: true } },
       },
     });
 

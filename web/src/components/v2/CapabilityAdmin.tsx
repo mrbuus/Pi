@@ -25,7 +25,7 @@ import { byFirstName, staffNames, withPlus } from "@/lib/personName";
  * ========================================================================== */
 
 type StaffRole = "ADMIN" | "TEACHER_PLUS" | "TEACHER";
-type CapabilityId = "schedule.manage" | "finance.manage" | "time.review" | "payroll.view";
+type CapabilityId = "schedule.manage" | "finance.manage" | "time.review" | "payroll.view" | "teacher-hours.edit";
 
 interface StaffUser {
   id: string;
@@ -77,6 +77,14 @@ const CAPS: { id: CapabilityId; label: string; full: string; hint: string }[] = 
     label: "Цалин үзэх",
     full: "Цалингийн мэдээлэл үзэх",
     hint: "Цалингийн мэдээллийг харна (төлөвлөсөн цагаас тооцсон, цалин бодолтын систем биш)",
+  },
+  {
+    // Эзэн 2026-11-08: «Ажилласан цаг» хүснэгт бөглөх + бүх багшийн данс засах.
+    // Цагийн хөлс энэ эрхэд ОРОХГҮЙ (зөвхөн нэг хүнд кодоор холбосон).
+    id: "teacher-hours.edit",
+    label: "Цаг бөглөх",
+    full: "Ажилласан цаг бөглөх",
+    hint: "«Ажилласан цаг» хүснэгтэд бүх багшийн цагийг бөглөж, багшийн дансыг засна",
   },
 ];
 

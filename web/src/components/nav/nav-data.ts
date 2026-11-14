@@ -100,6 +100,8 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
     { href: "/app/tests", label: "Шалгалт", icon: "clipboard-check" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
+    // Номын мөнгө (эзэн 2026-11-12) — бүх багш; Багш мөнгөн дүнгээс зөвхөн өөрийн хураасныг харна
+    { href: "/app/book-money", label: "Номын мөнгө", icon: "book-open" },
     // Багш бүх анги, сурагчийг Багш+-тай адил ХАРНА (эзэн 2026-10-22); төлбөр, удирдлага нээгдэхгүй
     { href: "/app/classes", label: "Ангиуд", icon: "school" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
@@ -109,6 +111,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
   TEACHER_PLUS: [
     HOME.TEACHER_PLUS,
     { href: "/app/internal", label: "Бодлогын ноорог", icon: "pencil" },
+    { href: "/app/book-money", label: "Номын мөнгө", icon: "book-open" },
     { href: "/app/import", label: "Word импорт", icon: "file-text" },
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
     { href: "/app/videos", label: "Онлайн хичээл", icon: "play-circle" },
@@ -117,7 +120,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     // Хүсэлтүүд + Элсэлтийн удирдлага → нэг «Элсэлт», дотор нь табтай (эзэн 2026-10-13)
     { href: "/app/admin/leads", label: "Элсэлт", icon: "user-plus" },
     { href: "/app/admin/sorils", label: "Жишиг сорил", icon: "clipboard-list" },
-    { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
+    { href: "/app/admin/reconcile", label: "Банкны хуулга", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
@@ -132,6 +135,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     { href: "/app/admin/v2", label: "v2 ажлын хяналт", icon: "clipboard-list" },
     { href: "/app/admin/capabilities", label: "Эрхийн матриц", icon: "shield-check" },
     { href: "/app/internal", label: "Бодлогын ноорог", icon: "pencil" },
+    { href: "/app/book-money", label: "Номын мөнгө", icon: "book-open" },
     { href: "/app/import", label: "Word импорт", icon: "file-text" },
     { href: "/app/teacher", label: "Багшийн самбар", icon: "teacher" },
     { href: "/app/library", label: "Бодлогын сан", icon: "layers" },
@@ -140,11 +144,12 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
     // Хүсэлтүүд + Элсэлтийн удирдлага → нэг «Элсэлт», дотор нь табтай (эзэн 2026-10-13)
     { href: "/app/admin/leads", label: "Элсэлт", icon: "user-plus" },
     { href: "/app/admin/sorils", label: "Жишиг сорил", icon: "clipboard-list" },
-    { href: "/app/admin/reconcile", label: "Банкны тулгалт", icon: "building" },
+    { href: "/app/admin/reconcile", label: "Банкны хуулга", icon: "building" },
     { href: "/app/schedule", label: "Хуваарь", icon: "calendar" },
     { href: "/app/admin/theory", label: "Онолын агуулга", icon: "file-text" },
     { href: "/app/admin/students", label: "Сурагчид", icon: "users" },
     { href: "/app/admin/audit", label: "Аудит", icon: "shield-check" },
+    { href: "/app/admin/deletion-requests", label: "Устгах хүсэлт", icon: "user" },
     { href: "/app/admin/analytics", label: "Аналитик", icon: "bar-chart" },
     { href: "/app/admin/usage", label: "Хэрэглээ", icon: "bar-chart" },
     { href: "/app/sms", label: "Дугаарлуу мессеж", icon: "message-square" },
@@ -176,6 +181,7 @@ const NAV_BY_ROLE: Record<string, NavLink[]> = {
 // Маршрут бүрийг аль бүлэгт харьяалагдахыг тодорхойлно (нүүр хуудсуудаас бусад).
 const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/internal": "internal",
+  "/app/book-money": "internal",
   "/app/study/history": "learn",
   "/app/groups": "class",
   "/app/study": "learn",
@@ -220,6 +226,7 @@ const ITEM_GROUP: Record<string, GroupKey> = {
   "/app/admin/theory": "internal",
   "/app/admin/students": "class",
   "/app/admin/audit": "admin",
+  "/app/admin/deletion-requests": "admin",
   "/app/admin/analytics": "admin",
   "/app/admin/usage": "admin",
   "/app/payments": "finance",
@@ -253,8 +260,10 @@ const PRIMARY_BY_ROLE: Record<string, string[]> = {
   GROUP_TEACHER: ["/app/library", "/app/videos"],
   STUDENT: ["/app/homework", "/app/my-class", "/app/theory"],
   TEACHER: ["/app/schedule", "/app/library", "/app/tests"],
-  TEACHER_PLUS: ["/app/schedule", "/app/payments", "/app/admin/students"],
-  ADMIN: ["/app/admin/students", "/app/admin/leads", "/app/schedule"],
+  // «Төлбөр»-ийн оронд «Шалгалт» (эзэн 2026-11-14; утсан дээр Төлбөрийг хамгийн бага нээдэг) — «Бусад»-д хэвээр
+  TEACHER_PLUS: ["/app/schedule", "/app/tests", "/app/admin/students"],
+  // «Элсэлт»-ийн оронд «Шалгалт» (эзэн 2026-11-14) — Элсэлт «Бусад» дотор хэвээр
+  ADMIN: ["/app/admin/students", "/app/tests", "/app/schedule"],
   BUYER: ["/app/library", "/app/videos", "/app/schedule"],
   PARENT: ["/app/schedule"],
 };
@@ -360,7 +369,7 @@ const HUB_TITLE: Record<string, string> = {
   "/app/classes": "Ангиуд",
   "/app/lesson-flow": "Өдрийн хичээл",
   "/app/dismissal": "Анги тарах цаг",
-  "/app/teacher-hours": "Хуваарийн цаг",
+  "/app/teacher-hours": "Ажилласан цаг",
   "/app/planner": "Төлөвлөгч",
   "/app/insights": "Дүн шинжилгээ",
   "/app/admin/enrollment": "Элсэлтийн удирдлага",

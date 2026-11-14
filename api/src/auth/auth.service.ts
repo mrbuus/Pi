@@ -24,7 +24,7 @@ import {
 } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
-import { accountAttempts, loginAttempts } from './login-attempts';
+import { accountAttempts, accountSourceAttempts, loginAttempts } from './login-attempts';
 import { PasswordResetService } from './password-reset.service';
 import { type TokenTtl, tokenTtl } from './session-ttl';
 import {
@@ -248,7 +248,7 @@ export class AuthService {
     };
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto, ip = '') {
     // Утас / имэйл / username аль нэгээр нэвтэрнэ
     const identifier = (dto.identifier ?? dto.phone ?? '').trim();
     if (loginAttempts.isLocked(identifier)) {
@@ -276,9 +276,21 @@ export class AuthService {
         'Нэвтрэх мэдээлэл эсвэл нууц үг буруу байна',
       );
     }
+    // Бүртгэл + IP-ээр түгжинэ (2026-11-05 аудит): нэг эх сурвалжаас утас/имэйл/нэрийг ээлжлэн
+    // оролдож нэвтрэх нэрийн түгжээг тойрохыг хаана. Зөвхөн userId-ээр түгжвэл хэн ч бусдыг (зөв
+    // нууц үгтэй ч) түгжиж чадна — IP-тэй хослуулснаар хохирогч өөр сүлжээнээс нэвтэрнэ.
+    // Мессеж нь нэвтрэх нэрийн түгжээтэй ИЖИЛ.
+    const sourceKey = `${user.id}|${ip}`;
+    if (accountSourceAttempts.isLocked(sourceKey)) {
+      throw new HttpException(
+        'Олон удаа буруу оролдсон тул 15 минутын дараа дахин оролдоно уу. Нууц үгээ мартсан бол «Нууц үг сэргээх»-ийг ашиглана уу.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
     const ok = await bcrypt.compare(dto.password, user.passwordHash);
     if (!ok) {
       loginAttempts.failure(identifier);
+      accountSourceAttempts.failure(sourceKey);
       this.alertOwnerOnRepeatedFailures(user);
       throw new UnauthorizedException(
         'Нэвтрэх мэдээлэл эсвэл нууц үг буруу байна',
@@ -290,7 +302,11 @@ export class AuthService {
       );
     loginAttempts.success(identifier);
     accountAttempts.success(user.id);
-    return this.issueToken(user.id, user.role, tokenTtl(dto.remember));
+    accountSourceAttempts.success(sourceKey);
+    return {
+      ...this.issueToken(user.id, user.role, tokenTtl(dto.remember)),
+      ...securityNudge(dto.password, user),
+    };
   }
 
   /**
@@ -345,6 +361,13 @@ export class AuthService {
 
   // Профайл зураг — /uploads-аар өмнө нь хадгалсан файлын key-г холбоно
   async setAvatar(userId: string, key: string) {
+    // Зөвхөн ӨӨРИЙН оруулсан зураг (2026-11-05 аудит): өмнө нь өөр хүний файлын key-г аватар
+    // болгоод /files/:key-ээр хугацаагүй уншиж болдог байв (аватарын эрхийн салбараар).
+    const own = await this.prisma.storedFile.findFirst({
+      where: { key, ownerId: userId, mime: { startsWith: 'image/' } },
+      select: { key: true },
+    });
+    if (!own) throw new BadRequestException('Зураг олдсонгүй — дахин оруулна уу');
     await this.prisma.user.update({
       where: { id: userId },
       data: { avatarUrl: key },
@@ -390,4 +413,18 @@ export class AuthService {
       role,
     };
   }
+}
+
+/**
+ * Нэвтэрсний дараах зөөлөн сануулга (эзэн 2026-11-14): нууц үг нь утасны дугаар хэвээр
+ * бол «Нууц үгээ солиорой» + Gmail холбох санал. АНХНЫ нэвтрэлтэд харуулахгүй
+ * (lastSeenAt = null — jwt.strategy анхны хүсэлтээр тэмдэглэнэ), дараагийнх бүрт
+ * харуулна. Хүчлэхгүй — вэб «Дараа» товчтой. Google-ээр нэвтэрвэл энд ирэхгүй.
+ */
+export function securityNudge(
+  password: string,
+  user: { phone: string | null; lastSeenAt: Date | null; googleIdentity?: unknown },
+): { securityNudge?: { passwordIsPhone: true; googleLinked: boolean } } {
+  if (!user.lastSeenAt || !isSameAsPhone(password, user.phone)) return {};
+  return { securityNudge: { passwordIsPhone: true, googleLinked: !!user.googleIdentity } };
 }

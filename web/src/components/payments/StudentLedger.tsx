@@ -27,10 +27,11 @@ import ReversePaymentModal from "./ReversePaymentModal";
 import PayDialog from "./PayDialog";
 import NoteDialog from "./NoteDialog";
 import PlanDialog from "./PlanDialog";
+import ExtendDialog from "./ExtendDialog";
 import { RemoveFromTrainingDialog } from "@/components/students/StudentActions";
 import SettleSwitch from "./SettleSwitch";
 import { BlockLegend, LargeBlocks } from "./MonthBlocks";
-import { dayLabel, mnt, monthName, PLAN_LABEL, stampLabel } from "./ledgerFormat";
+import { dayLabel, isOwed, mnt, monthName, PLAN_LABEL, stampLabel } from "./ledgerFormat";
 import { METHOD_LABEL, STATUS_LABEL, errMsg } from "./paymentHelpers";
 import type { LedgerPayment, LedgerRow, StudentLedger as Data } from "./ledgerTypes";
 import type { Payment } from "./types";
@@ -73,6 +74,7 @@ export default function StudentLedger({ id }: { id: string }) {
   const [error, setError] = useState<string | null>(null);
   const [pay, setPay] = useState<{ month: string | null } | null>(null);
   const [noteOpen, setNoteOpen] = useState(false);
+  const [extendOpen, setExtendOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
   const [editing, setEditing] = useState<Payment | null>(null);
@@ -117,7 +119,7 @@ export default function StudentLedger({ id }: { id: string }) {
     ? "Бүтэнд тооцсон"
     : r.plan.guessed
       ? "Багц тодорхойгүй"
-      : `${PLAN_LABEL[r.plan.kind]} ${mnt(r.plan.kind === "MONTHLY" ? r.plan.fee : r.plan.total)}`;
+      : `${PLAN_LABEL[r.plan.kind]} ${mnt(r.plan.kind === "MONTHLY" ? r.plan.fee : r.plan.total)}`.trim();
   const name = `${r.firstName} ${r.lastName}`;
 
   return (
@@ -174,17 +176,33 @@ export default function StudentLedger({ id }: { id: string }) {
         )}
 
         <div className="grid grid-cols-3 gap-2 rounded-2xl bg-ink/[0.03] p-3 sm:gap-3">
-          <Stat label="Төлсөн" value={mnt(r.paidTotal)} />
-          <Stat
-            label="Өр"
-            value={mnt(r.owedNow)}
-            tone={r.owedNow > 0 ? "text-error" : "text-ink"}
-            sub={r.overdueDays > 0 ? `${r.overdueDays} хоног хэтэрсэн` : undefined}
-          />
-          {r.credit > 0 ? (
-            <Stat label="Илүү төлсөн" value={mnt(r.credit)} tone="text-info" />
+          {data.amountsHidden ? (
+            // Багш+ — зөвхөн төлөв (сервер дүнг хассан)
+            <>
+              <Stat label="Төлсөн хүртэл" value={r.coveredThrough ? monthName(r.coveredThrough) : "Үгүй"} />
+              <Stat
+                label="Өр"
+                value={isOwed(r) ? `${r.owedMonths} сар` : "Өргүй"}
+                tone={isOwed(r) ? "text-error" : "text-ink"}
+                sub={r.overdueDays > 0 ? `${r.overdueDays} хоног хэтэрсэн` : undefined}
+              />
+              <Stat label="Төлөлт" value={String(data.payments.length)} />
+            </>
           ) : (
-            <Stat label="Жилийн үлдэгдэл" value={mnt(r.remaining)} />
+            <>
+              <Stat label="Төлсөн" value={mnt(r.paidTotal)} />
+              <Stat
+                label="Өр"
+                value={mnt(r.owedNow)}
+                tone={r.owedNow > 0 ? "text-error" : "text-ink"}
+                sub={r.overdueDays > 0 ? `${r.overdueDays} хоног хэтэрсэн` : undefined}
+              />
+              {r.credit > 0 ? (
+                <Stat label="Илүү төлсөн" value={mnt(r.credit)} tone="text-info" />
+              ) : (
+                <Stat label="Жилийн үлдэгдэл" value={mnt(r.remaining)} />
+              )}
+            </>
           )}
         </div>
 
@@ -212,6 +230,13 @@ export default function StudentLedger({ id }: { id: string }) {
           <Button variant="outline" onClick={() => setNoteOpen(true)}>
             <MessageSquarePlus aria-hidden /> Тэмдэглэл
           </Button>
+          {/* Сар бүр төлдөг хүүхдэд л — бүтэн жилд сунгалт хамаарахгүй (эзэн 2026-11-12) */}
+          {r.plan.kind === "MONTHLY" && !r.plan.settled && (
+            <Button variant="outline" onClick={() => setExtendOpen(true)}>
+              <CalendarClock aria-hidden /> Хугацаа сунгах
+              {!!data.extensions?.length && <span className="rounded-full bg-ink/10 px-1.5 text-xs tabular-nums">{data.extensions.length}</span>}
+            </Button>
+          )}
           <Button variant="outline" onClick={() => setRefundOpen(true)}>
             <DoorOpen aria-hidden /> Сургалтаас хасах
           </Button>
@@ -276,7 +301,7 @@ export default function StudentLedger({ id }: { id: string }) {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className={`block font-bold tabular-nums ${muted ? "text-ink-dim line-through" : "text-ink"}`}>
-                      {mnt(p.amount)}
+                      {p.amount == null ? (st.text ?? "Төлөлт") : mnt(p.amount)}
                     </span>
                     <span className="block text-xs text-ink-dim">
                       <Meta
@@ -328,7 +353,7 @@ export default function StudentLedger({ id }: { id: string }) {
                     <span className="text-ink-dim"> {dayLabel(f.leftOn)}-нд гарсан</span>
                   </span>
                   <span className="font-bold tabular-nums text-ink">
-                    {f.refundAmount > 0 ? mnt(f.refundAmount) : `Дутуу ${mnt(f.shortfall)}`}
+                    {f.refundAmount == null ? "Буцаалт" : f.refundAmount > 0 ? mnt(f.refundAmount) : `Дутуу ${mnt(f.shortfall)}`}
                   </span>
                 </Link>
               </li>
@@ -353,6 +378,7 @@ export default function StudentLedger({ id }: { id: string }) {
         />
       )}
       {noteOpen && <NoteDialog studentId={r.id} studentName={name} onClose={() => setNoteOpen(false)} onSaved={load} />}
+      {extendOpen && <ExtendDialog data={data} onClose={() => setExtendOpen(false)} onSaved={load} />}
       {planOpen && <PlanDialog data={data} onClose={() => setPlanOpen(false)} onSaved={load} />}
       {refundOpen && (
         <RemoveFromTrainingDialog student={{ id: r.id, name }} onClose={() => setRefundOpen(false)} onDone={load} />

@@ -113,7 +113,9 @@ export default function BooksWorkspace({ initialCode }: { initialCode?: string }
     <Shell user={user}>
       <div className="grid gap-5 lg:grid-cols-[272px_292px_minmax(0,1fr)] lg:items-start">
         {/* 1. Ном */}
-        <aside className={`${solving ? "hidden lg:block" : ""} space-y-4 lg:sticky lg:top-24`}>
+        {/* Дэлгэцээс өндөр үед «Бусад номууд»-ын доод хэсэг харагддаггүй байв (тестэрийн санал
+            2026-11-05) — сэдвийн баганатай адил өөрийн гүйлгэх зурвастай */}
+        <aside className={`${solving ? "hidden lg:block" : ""} space-y-4 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1`}>
           <div className="relative overflow-hidden rounded-3xl bg-[var(--brand-navy)] text-[var(--brand-paper)]">
             <div className="hidden lg:block"><Book3D code={code} title={bookName} size={176} /></div>
             <div className="flex items-center gap-3 p-4 lg:hidden">

@@ -52,6 +52,24 @@ export class ConfirmLessonDto {
   @MaxLength(200)
   topic?: string | null;
 
+  /**
+   * Бодлогын санд байхгүй сэдвүүд (эзэн 2026-10-31) — өгвөл `topic`-ыг үл тооно. Батламж
+   * хичээлийн төлөвлөгөөг (тест, сэдэв) бодит байдалтай тэнцүүлнэ (эзэн 2026-11-08).
+   */
+  @ApiPropertyOptional({ type: [String], maxItems: 12 })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(12)
+  @IsString({ each: true })
+  @MaxLength(200, { each: true })
+  customTopics?: string[];
+
+  /** Цонх нээх үеийн батламжийн confirmedAt (null = батлаагүй). Өөр хүн хооронд нь баталсан бол 409. */
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'date-time' })
+  @IsOptional()
+  @IsString()
+  expectedConfirmedAt?: string | null;
+
   /** Чөлөөт тайлбар. undefined = өмнөхийг хадгална, "" / null = арилгана. */
   @ApiPropertyOptional({ type: String, nullable: true, maxLength: 1000 })
   @IsOptional()

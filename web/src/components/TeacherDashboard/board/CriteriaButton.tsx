@@ -17,6 +17,16 @@ const FIELDS: Array<{ key: NumKey; title: string; hint: (v: number) => string; m
   { key: "maxLates", title: "Хоцорсон", hint: (v) => `${v} ба түүнээс олон удаа`, min: 1, max: 10, step: 1 },
   { key: "minHomework", title: "Даалгавар", hint: (v) => `${v}%-иас бага бол (дутуу нь хагас)`, min: 0, max: 100, step: 5, unit: "%" },
   { key: "missingStreak", title: "Дараалан хийгээгүй", hint: (v) => `${v} ба түүнээс олон удаа`, min: 1, max: 6, step: 1 },
+  // Шалгалтаар даалгавар шалгасан оноо (эзэн 2026-11-08 19:08)
+  {
+    key: "minQuiz",
+    title: "Шалгалт",
+    hint: (v) => (v === 0 ? "Тооцохгүй" : `Сүүлийн шалгалт ${v}%-иас бага бол`),
+    min: 0,
+    max: 100,
+    step: 5,
+    unit: "%",
+  },
 ];
 
 const same = (a: Criteria, b: Criteria) => (Object.keys(a) as Array<keyof Criteria>).every((k) => a[k] === b[k]);

@@ -4,6 +4,31 @@ import { PrismaService } from '../prisma/prisma.service';
 import { calculateReadiness, ReadinessAttempt, ulaanbaatarDateOnly } from './readiness';
 import { readinessTopicCode } from './readiness-weights';
 
+export interface TopicChapterRow {
+  topic: string;
+  chapterId: string;
+  at: Date;
+}
+
+/** Сэдэв бүрээр сурагчийн хамгийн олон удаа бодсон бүлэг (тэнцвэл хамгийн сүүлд бодсон, дараа нь ID). */
+export function dominantChapters(rows: TopicChapterRow[]): Map<string, string> {
+  const stats = new Map<string, Map<string, { count: number; last: number }>>();
+  for (const row of rows) {
+    const byChapter = stats.get(row.topic) ?? new Map<string, { count: number; last: number }>();
+    const current = byChapter.get(row.chapterId) ?? { count: 0, last: 0 };
+    byChapter.set(row.chapterId, { count: current.count + 1, last: Math.max(current.last, row.at.getTime()) });
+    stats.set(row.topic, byChapter);
+  }
+  const out = new Map<string, string>();
+  for (const [topic, byChapter] of stats) {
+    const best = [...byChapter.entries()].sort(
+      ([a, x], [b, y]) => y.count - x.count || y.last - x.last || a.localeCompare(b),
+    )[0];
+    if (best) out.set(topic, best[0]);
+  }
+  return out;
+}
+
 @Injectable()
 export class ReadinessService {
   constructor(private readonly prisma: PrismaService) {}
@@ -20,14 +45,15 @@ export class ReadinessService {
     // window (roughly 109 days from the current snapshot).
     const since = new Date(asOf.getTime() - 110 * 86_400_000);
     const attempts = await this.prisma.attempt.findMany({
-      where: { studentId, occurredOn: { gte: since, lte: asOf }, problem: { deletedAt: null } },
+      where: { studentId, deletedAt: null, occurredOn: { gte: since, lte: asOf }, problem: { deletedAt: null } },
       select: {
         id: true, problemId: true, occurredOn: true, autoCorrect: true, selfState: true,
-        problem: { select: { analysis: { select: { topic: true } }, formulas: { select: { formula: { select: { topicSlugs: true } } } }, chapter: { select: { topic: { select: { name: true } } } } } },
+        problem: { select: { analysis: { select: { topic: true } }, formulas: { select: { formula: { select: { topicSlugs: true } } } }, chapter: { select: { id: true, topic: { select: { name: true } } } } } },
       },
       orderBy: [{ occurredOn: 'asc' }, { id: 'asc' }],
     });
     const data: ReadinessAttempt[] = [];
+    const topicChapters: TopicChapterRow[] = [];
     for (const attempt of attempts) {
       // Match AttemptsService.isSuccess: corrected/self-reported state takes
       // precedence over the original automatic correctness value.
@@ -46,9 +72,16 @@ export class ReadinessService {
       }
       const chapterTopic = readinessTopicCode(attempt.problem.chapter.topic?.name);
       if (chapterTopic) codes.add(chapterTopic);
-      for (const code of codes) data.push({ id: attempt.id, problemId: attempt.problemId, topic: code, at: attempt.occurredOn, correct: outcome });
+      for (const code of codes) {
+        data.push({ id: attempt.id, problemId: attempt.problemId, topic: code, at: attempt.occurredOn, correct: outcome });
+        topicChapters.push({ topic: code, chapterId: attempt.problem.chapter.id, at: attempt.occurredOn });
+      }
     }
-    return calculateReadiness(data, asOf);
+    const result = calculateReadiness(data, asOf);
+    // Сэдвээр дасгал нээхэд: тухайн сэдэвт сурагчийн хамгийн их бодсон бүлэг (нэмэлт, сонголттой талбар)
+    const chapters = dominantChapters(topicChapters);
+    const withChapter = <T extends { topic: string }>(t: T) => ({ ...t, chapterId: chapters.get(t.topic) ?? null });
+    return { ...result, topics: result.topics.map(withChapter), nextBestTopics: result.nextBestTopics.map(withChapter) };
   }
 
   private async assertCanRead(requesterId: string, role: Role, studentId: string) {

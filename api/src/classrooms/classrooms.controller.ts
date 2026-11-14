@@ -56,6 +56,14 @@ export class ClassroomsController {
     return this.classrooms.unassignedStudents();
   }
 
+  // «Бүртгэл» хуудас: идэвхтэй ростер + ангийн түүх (бүх элсэлт). `:id`-ээс
+  // ӨМНӨ байх ёстой — эс бөгөөс `:id`="registry" гэж уншиж 404 «Анги олдсонгүй».
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Get('registry')
+  registry() {
+    return this.classrooms.registry();
+  }
+
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get(':id')
   get(@Param('id') id: string, @Req() req: AuthedRequest) {

@@ -12,6 +12,8 @@ import { GoogleAuthController } from './google/google-auth.controller';
 import { GoogleAuthService } from './google/google-auth.service';
 import { LoginTextController } from './login-text.controller';
 import { LoginTextService } from './login-text.service';
+import { NativeAuthController } from './native/native-auth.controller';
+import { NativeAuthService } from './native/native-auth.service';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { LoginTextService } from './login-text.service';
     GoogleAuthController,
     ConsentController,
     LoginTextController,
+    // Гар утасны апп: Google idToken, Apple identityToken
+    NativeAuthController,
   ],
   providers: [
     AuthService,
@@ -39,6 +43,7 @@ import { LoginTextService } from './login-text.service';
     GoogleAuthService,
     ConsentService,
     LoginTextService,
+    NativeAuthService,
   ],
   // PasswordResetService-ийг UsersModule мөн ашиглана (ажилтан сурагчийн
   // өмнөөс код илгээх).

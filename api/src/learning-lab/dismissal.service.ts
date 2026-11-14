@@ -34,13 +34,14 @@ export class DismissalService {
       date &&
       (await this.prisma.lessonStaffing.count({
         where: {
+          deletedAt: null,
           date: dismissalDate(date),
-          schedule: { classroomId },
+          schedule: { deletedAt: null, classroomId },
           OR: [{ leadTeacherId: actorId }, { assistantTeacherId: actorId }],
         },
       }));
     const ownsSchedule = await this.prisma.classSchedule.count({
-      where: { classroomId, teacherId: actorId },
+      where: { classroomId, teacherId: actorId, deletedAt: null },
     });
     if (!staffed && !ownsSchedule)
       throw new ForbiddenException('Зөвхөн өөрийн ангийн цагийг тэмдэглэнэ.');

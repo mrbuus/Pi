@@ -94,3 +94,23 @@ export class LedgerSettleDto {
   @MaxLength(300)
   note?: string;
 }
+
+/** Сар бүрийн төлбөрийн хугацаа сунгах (эзэн 2026-11-12) — хэмжээ хязгааргүй, шалтгаан заавал */
+export class LedgerExtendDto {
+  @ApiProperty({ type: String, example: '2026-09' })
+  @Matches(/^\d{4}-(0[1-9]|1[0-2])$/, { message: 'Сар YYYY-MM хэлбэртэй байх ёстой' })
+  month: string;
+
+  @ApiProperty({ type: Number })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1, { message: 'Сунгах хоног 1-ээс багагүй' })
+  @Max(365)
+  days: number;
+
+  @ApiProperty({ type: String })
+  @IsString()
+  @MaxLength(300)
+  @Matches(/\S/, { message: 'Шалтгаанаа бичнэ үү' })
+  reason: string;
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, CircleAlert, Clock3, Minus } from "lucide-react";
-import { blockLabel, dayLabel, monthName, monthNo, shortMnt } from "./ledgerFormat";
+import { blockLabel, dayLabel, monthName, monthNo, periodLabel, shortMnt } from "./ledgerFormat";
 import type { BlockState, MonthBlock } from "./ledgerTypes";
 
 /*
@@ -122,8 +122,14 @@ function LargeBody({ b, settled }: { b: MonthBlock; settled: boolean }) {
     case "PARTIAL":
       return (
         <span className="relative tabular-nums">
-          {shortMnt(b.paid)}
-          <span className="text-ink-dim"> / {shortMnt(b.due)}</span>
+          {b.due == null ? (
+            <CircleAlert className="h-4 w-4 text-warning" aria-hidden />
+          ) : (
+            <>
+              {shortMnt(b.paid)}
+              <span className="text-ink-dim"> / {shortMnt(b.due)}</span>
+            </>
+          )}
         </span>
       );
     case "OWED":
@@ -151,17 +157,23 @@ export function LargeBlocks({
   current,
   onPick,
   settled = false,
+  gridClass = "grid grid-cols-3 gap-2 sm:grid-cols-9",
+  pickAll = false,
 }: {
   blocks: MonthBlock[];
   current?: string;
   onPick?: (month: string) => void;
   settled?: boolean;
+  /** Цонх дотор (нарийн) бол багана цөөн */
+  gridClass?: string;
+  /** Суусан бүх сарыг дарж болно (төлбөрийн эх сурвалж харах) — зөвхөн төлөх сар биш */
+  pickAll?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-3 gap-2 sm:grid-cols-9">
+    <div className={gridClass}>
       {blocks.map((b) => {
         const label = blockLabel(b, settled);
-        const pickable = onPick && (b.state === "OWED" || b.state === "PARTIAL" || b.state === "FUTURE");
+        const pickable = onPick && (pickAll ? b.state !== "OFF" : b.state === "OWED" || b.state === "PARTIAL" || b.state === "FUTURE");
         const cls = `relative flex min-h-16 flex-col justify-between overflow-hidden rounded-xl p-2 text-left text-sm font-semibold ${LARGE[b.state]} ${
           b.month === current ? "ring-2 ring-brand/40 ring-offset-2 ring-offset-surface" : ""
         }`;
@@ -175,6 +187,12 @@ export function LargeBlocks({
               />
             )}
             <span className={`relative text-xs ${b.state === "PAID" ? "" : "text-ink-dim"}`}>{monthName(b.month)}</span>
+            {b.period && (
+              <span className={`relative text-[11px] leading-tight tabular-nums ${b.state === "PAID" ? "" : "text-ink-dim"}`}>
+                {periodLabel(b)}
+                {!!b.extDays && <span className="font-bold"> +{b.extDays} хоног</span>}
+              </span>
+            )}
             <span className="relative flex items-center gap-1">
               <LargeBody b={b} settled={settled} />
             </span>
@@ -184,7 +202,7 @@ export function LargeBlocks({
           <button
             key={b.month}
             type="button"
-            aria-label={`${label}. Төлбөр бүртгэх`}
+            aria-label={pickAll ? `${label}. Төлбөрийг харах` : `${label}. Төлбөр бүртгэх`}
             title={label}
             onClick={() => onPick(b.month)}
             className={`${cls} transition hover:brightness-95`}

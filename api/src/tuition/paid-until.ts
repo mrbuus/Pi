@@ -62,3 +62,24 @@ export function computePaidUntil(input: PaidUntilInput): Date {
   finalDate.setUTCDate(finalDate.getUTCDate() + additionalDays);
   return finalDate;
 }
+
+/**
+ * «Хэдий хүртэл төлсөн» — төлбөрийн ledger-ээс (ажилтны төлбөрийн хуудастай НЭГ эх сурвалж,
+ * тестэрийн санал 2026-11-05). Сар бүр / хуваан / бүтэн жилийн аль ч төрөлд:
+ * - бүрэн төлөгдөөгүй дараагийн сар байвал → түүний төлөх өдрийн ӨМНӨХ өдөр;
+ * - бүх сар төлөгдсөн бол → сүүлийн төлөгдсөн сарын эцэс;
+ * - юу ч төлөөгүй бол → null.
+ */
+export function paidUntilFromLedger(l: {
+  coveredThrough: string | null;
+  nextDue: { dueOn: string } | null;
+}): Date | null {
+  if (!l.coveredThrough) return null;
+  if (l.nextDue) {
+    const d = new Date(`${l.nextDue.dueOn}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() - 1);
+    return d;
+  }
+  const [y, m] = l.coveredThrough.split('-').map(Number);
+  return new Date(Date.UTC(y, m, 0)); // тэр сарын сүүлийн өдөр
+}

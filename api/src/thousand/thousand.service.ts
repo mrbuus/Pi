@@ -44,6 +44,8 @@ import {
   youtubeEmbedUrl,
 } from './review-gate';
 import { buildYoutubeWorkbook, parseYoutubeWorkbook } from './youtube-sheet';
+import { normalizeVariant } from '../attendance/board-logic';
+import { isVariantA } from '../student-hub/student-hub.logic';
 
 export type ExamStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED';
 
@@ -93,6 +95,16 @@ export function resolveStudentReview(
     return { level, opensAt: level === 'NONE' ? opensAt : null, covered: true };
   }
   return { level: 'NONE', opensAt: null, covered: false };
+}
+
+/** А хувилбарын сорилын хариу/бодолт хэзээ ч нээгдэхгүй (эзэн 2026-11-10) */
+export function lockVariantA(
+  state: StudentReviewState,
+  test: { title: string; variantLabel: string | null },
+): StudentReviewState {
+  return isVariantA(normalizeVariant(test.variantLabel), test.title)
+    ? { ...state, level: 'NONE', opensAt: null }
+    : state;
 }
 
 @Injectable()
@@ -147,6 +159,7 @@ export class ThousandService {
       select: {
         id: true,
         title: true,
+        variantLabel: true,
         timeLimitMin: true,
         gradingMode: true,
         price: true,
@@ -213,6 +226,7 @@ export class ThousandService {
       select: {
         id: true,
         title: true,
+        variantLabel: true,
         timeLimitMin: true,
         gradingMode: true,
         chapterId: true,
@@ -251,10 +265,13 @@ export class ThousandService {
           (!!t.chapter?.bookId && scope.bookIds.includes(t.chapter.bookId));
         const review =
           status === 'SUBMITTED'
-            ? resolveStudentReview(
-                t.access,
-                { purchaseOrPass, submittedAt: session?.submittedAt ?? null },
-                now,
+            ? lockVariantA(
+                resolveStudentReview(
+                  t.access,
+                  { purchaseOrPass, submittedAt: session?.submittedAt ?? null },
+                  now,
+                ),
+                t,
               )
             : null;
         return {
@@ -279,6 +296,7 @@ export class ThousandService {
       select: {
         id: true,
         title: true,
+        variantLabel: true,
         type: true,
         deletedAt: true,
         chapterId: true,
@@ -345,10 +363,13 @@ export class ThousandService {
       scope.testIds.includes(test.id) ||
       (!!test.chapterId && scope.chapterIds.includes(test.chapterId)) ||
       (!!test.chapter?.bookId && scope.bookIds.includes(test.chapter.bookId));
-    const state = resolveStudentReview(
-      classRows,
-      { purchaseOrPass, submittedAt: session.submittedAt },
-      now,
+    const state = lockVariantA(
+      resolveStudentReview(
+        classRows,
+        { purchaseOrPass, submittedAt: session.submittedAt },
+        now,
+      ),
+      test,
     );
     if (!state.covered) {
       throw new ForbiddenException('Энэ шалгалт танай ангид оноогдоогүй байна');

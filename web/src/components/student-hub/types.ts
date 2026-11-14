@@ -24,6 +24,8 @@ export interface HubOverview {
     room: string | null;
     topic: string | null;
   } | null;
+  /** Хоёр ангид зэрэг суудаг сурагчийн өнөөдрийн нөгөө ангийн хичээл */
+  todayOther?: NonNullable<HubOverview["today"]>[];
   latestMark: { date: string; status: HomeworkStatus; comment: string | null } | null;
 }
 
@@ -62,7 +64,13 @@ export interface HubDay {
   tests: HubDayTest[];
   attendance: { status: AttendanceStatus; lateRange: LateRangeValue | null } | null;
   /** D өдрийн даалгаврыг дараагийн хичээлийн өдөр (checkedOn = D') тэмдэглэнэ */
-  homework: { status: HomeworkStatus | null; comment: string | null; checkedOn: string | null };
+  homework: {
+    status: HomeworkStatus | null;
+    comment: string | null;
+    checkedOn: string | null;
+    /** Шалгалтаар даалгавар шалгасан оноо (эзэн 2026-11-08 19:08); байхгүй бол талбаргүй */
+    quiz?: { score: number; problemCount: number };
+  };
   theory: { count: number; mine: boolean; canUpload: boolean; assignedToMe: boolean };
   homeworkPhoto: HubHomeworkPhoto | null;
   /** D ≥ today-13 ба D ≤ today */
@@ -103,7 +111,7 @@ export interface HubProblem {
   stem: string;
   imageKey: string | null;
   choices: HubProblemChoice[];
-  correctAnswer: string;
+  correctAnswer: string | null;
   hasVideo: boolean;
 }
 
@@ -113,6 +121,8 @@ export interface HubTestDetail {
   title: string;
   variant: string | null;
   date: string;
+  /** А хувилбар — хариу ирэхгүй, товч харуулахгүй */
+  answersHidden?: boolean;
   problems: HubProblem[];
 }
 

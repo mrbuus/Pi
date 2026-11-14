@@ -18,6 +18,7 @@ import { Role } from '../generated/prisma/enums';
 import {
   HomeworkAnswersDto,
   HomeworkPhotoDto,
+  HomeworkStudentCommentDto,
   StartHomeworkDto,
 } from './homework-practice.dto';
 import { HomeworkPracticeService } from './homework-practice.service';
@@ -91,6 +92,13 @@ export class HomeworkPracticeController {
   @Post('photos')
   addPhoto(@Body() dto: HomeworkPhotoDto, @Req() req: AuthedRequest) {
     return this.homework.addPhoto(req.user.userId, dto);
+  }
+
+  // Багшийн сэтгэгдэлд хариулах (эзэн 2026-11-05)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @Post('comments')
+  addComment(@Body() dto: HomeworkStudentCommentDto, @Req() req: AuthedRequest) {
+    return this.homework.addComment(req.user.userId, dto);
   }
 
   @Throttle({ default: { limit: 20, ttl: 60_000 } })

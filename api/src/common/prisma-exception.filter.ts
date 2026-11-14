@@ -50,6 +50,35 @@ function asPrismaError(exception: unknown): PrismaLikeError | null {
   return err.name.startsWith('PrismaClient') ? err : null;
 }
 
+/** P1001 хүрэхгүй · P1002 хугацаа · P1008 үйлдлийн хугацаа · P1017 сервер холболт хаасан */
+const TRANSIENT_CODES = new Set(['P1001', 'P1002', 'P1008', 'P1017']);
+/** @prisma/adapter-pg-ийн driverAdapterError.cause.kind */
+const TRANSIENT_KINDS = new Set([
+  'DatabaseNotReachable',
+  'ConnectionClosed',
+  'SocketTimeout',
+  'TooManyConnections',
+]);
+/** 57014 statement_timeout/цуцлагдсан · 57P01–57P03 сервер унтарч/эхэлж байна */
+const TRANSIENT_PG_CODES = new Set(['57014', '57P01', '57P02', '57P03']);
+
+export function isTransientDbError(err: PrismaLikeError): boolean {
+  if (err.code && TRANSIENT_CODES.has(err.code)) return true;
+  const cause = (
+    err.meta?.driverAdapterError as
+      | { cause?: { kind?: unknown; code?: unknown } }
+      | undefined
+  )?.cause;
+  if (!cause) return false;
+  if (typeof cause.kind === 'string' && TRANSIENT_KINDS.has(cause.kind))
+    return true;
+  return (
+    cause.kind === 'postgres' &&
+    typeof cause.code === 'string' &&
+    TRANSIENT_PG_CODES.has(cause.code)
+  );
+}
+
 interface Mapped {
   status: HttpStatus;
   message: string;
@@ -72,6 +101,17 @@ export function mapPrismaError(err: PrismaLikeError): Mapped | null {
 
   if (err.name === 'PrismaClientInitializationError') {
     // Өгөгдлийн сан унтарсан / холбогдож чадсангүй — түр зуурын доголдол.
+    return {
+      status: HttpStatus.SERVICE_UNAVAILABLE,
+      message: 'Өгөгдлийн сан түр ажиллахгүй байна. Дахин оролдоно уу',
+    };
+  }
+
+  // Түр зуурын холболтын доголдол (ӨС унтарсан, холболт тасарсан, statement_timeout,
+  // холболтын дээд тоо) — driver adapter (pg)-ийн алдаа KnownRequestError болж ирдэг
+  // тул Initialization-ээс гадна эндээс таньж 503 болгоно (клиент дахин оролдоно).
+  // docs/BACKEND-PERF.md «Найдвартай байдал».
+  if (isTransientDbError(err)) {
     return {
       status: HttpStatus.SERVICE_UNAVAILABLE,
       message: 'Өгөгдлийн сан түр ажиллахгүй байна. Дахин оролдоно уу',

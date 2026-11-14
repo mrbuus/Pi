@@ -1,8 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, Optional } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Prisma } from '../generated/prisma/client';
 import { SelfState } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { ProblemReviewService } from './problem-review.service';
 
 type MistakeSource = 'PRACTICE' | 'TEST';
 
@@ -14,13 +15,20 @@ interface CollectInput {
   sourceOccurredAt: Date;
   testTitle?: string | null;
   givenAnswer?: unknown;
+  /** Тестийн оролдлого бол тест (хугацаатай давталтын хариу нээх хаалганд) */
+  testId?: string | null;
 }
 
 @Injectable()
-export class MistakeCollector {
+export class MistakeCollector implements OnModuleDestroy {
   private readonly logger = new Logger(MistakeCollector.name);
+  /** Хүсэлтийн дараа ажиллаж буй цуглуулга — унтрахдаа дуусахыг хүлээнэ */
+  private readonly background = new Set<Promise<void>>();
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly reviews?: ProblemReviewService,
+  ) {}
 
   /**
    * Record one wrong-attempt event. A row lock and monotonically increasing
@@ -92,6 +100,16 @@ export class MistakeCollector {
           },
         });
       });
+      // Хугацаатай давталт: алдааны дэвтэр commit болсны дараа, тусдаа. recordWrong хэзээ ч
+      // шиддэггүй, идэмпотент (lastEventAt) — цуглуулгын үр дүнг өөрчлөхгүй.
+      await this.reviews?.recordWrong({
+        studentId: input.userId,
+        problemId: input.problemId,
+        source: input.source,
+        occurredAt: input.sourceOccurredAt,
+        sourceTestId: input.testId ?? null,
+        sourceRefId: input.sourceRefId,
+      });
       return true;
     } catch (error) {
       this.logger.error(
@@ -102,6 +120,32 @@ export class MistakeCollector {
     }
   }
 
+  /**
+   * Хүсэлтийн ЗАМААС ГАДУУР цуглуулна (docs/BACKEND-PERF.md). Нэг илгээлтийн
+   * буруу бодлого бүр ~8 query (transaction, мөр түгжээ) — 40 бодлоготой тестэд
+   * ~300 query хүсэлтийг барьж байсан. Дүн аль хэдийн commit болсон; алдаа
+   * гарвал мөр pending хэвээр үлдэж retryPending (5 мин) дахин авна.
+   * Дараалсан (зэрэг биш) — pool-ыг нэг илгээлт эзлэхгүй.
+   */
+  collectAttemptsInBackground(attemptIds: string[]): void {
+    if (attemptIds.length === 0) return;
+    const run = (async () => {
+      for (const id of attemptIds) await this.collectAttempt(id);
+    })().catch((error: unknown) => {
+      this.logger.error(
+        'Background mistake collection failed; attempts remain pending',
+        error instanceof Error ? error.stack : String(error),
+      );
+    });
+    this.background.add(run);
+    void run.finally(() => this.background.delete(run));
+  }
+
+  /** Graceful shutdown: эхэлсэн цуглуулгыг таслахгүй (SIGTERM → app.close) */
+  async onModuleDestroy(): Promise<void> {
+    await Promise.allSettled([...this.background]);
+  }
+
   /** Collect only the requested committed attempt; grading never scans globally. */
   async collectAttempt(attemptId: string): Promise<boolean> {
     try {
@@ -109,6 +153,7 @@ export class MistakeCollector {
         where: {
           id: attemptId,
           mistakeCollectedAt: null,
+          deletedAt: null,
           OR: [
             { autoCorrect: false },
             { selfState: { in: [SelfState.FAILED, SelfState.FIXED_AFTER_ERROR] } },
@@ -140,6 +185,7 @@ export class MistakeCollector {
         sourceOccurredAt: attempt.createdAt,
         testTitle: test?.title,
         givenAnswer: attempt.givenAnswer,
+        testId: attempt.testId,
       });
       if (collected) {
         await this.prisma.attempt.updateMany({
@@ -167,6 +213,7 @@ export class MistakeCollector {
         const pending = await this.prisma.attempt.findMany({
           where: {
             mistakeCollectedAt: null,
+            deletedAt: null,
             OR: [
               { autoCorrect: false },
               { selfState: { in: [SelfState.FAILED, SelfState.FIXED_AFTER_ERROR] } },

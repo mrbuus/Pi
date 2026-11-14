@@ -7,6 +7,7 @@ import {
   ATTENDANCE_ORDER,
   HOMEWORK_MARKS,
   HOMEWORK_ORDER,
+  HwSentIcon,
   RiskMark,
   TONE_SELECTED,
   TONE_TEXT,
@@ -28,7 +29,9 @@ import {
   type MakeupStatus,
 } from "./lib";
 import MakeupChip from "./MakeupChip";
-import { SentMark } from "./parts";
+import QuizScoreInput from "./QuizScoreInput";
+import type { QuizCellState } from "./useHomeworkQuiz";
+import VisitNoteChip, { type VisitNote } from "@/components/makeup-visits/VisitNoteChip";
 
 /** Ирц ба даалгаврын мөр ижил багануудтай — хоёр мөр босоогоор тэгширнэ */
 const COLS = "grid-cols-[1.5rem_repeat(4,minmax(0,1fr))] sm:grid-cols-[5.75rem_repeat(4,minmax(0,1fr))]";
@@ -135,6 +138,16 @@ export interface CardProps {
   onDrawer: (id: string) => void;
   /** «Онлайн» дэлгэрэнгүй (оноо, хугацаа, хариу, зураг) */
   onOnline: (id: string) => void;
+  /** Шалгалтаар шалгах горим (QuizBar): бодлогын тоо — null бол «Онлайн» нүд хэвээр */
+  quizMax?: number | null;
+  /** Энэ өдрийн шалгалтын оноо (горим нуугдсан ч) — оноотой бол «шалгаагүй» гэж тодруулахгүй */
+  quizScore?: number | null;
+  quizState?: QuizCellState | null;
+  onQuizScore?: (id: string, value: number | null, now?: boolean) => void;
+  onQuizFlush?: (id: string) => void;
+  onQuizInvalid?: (id: string, invalid: boolean) => void;
+  /** Нөхөлт: «12-6 ангид нөхөж суусан» (makeup-visits) — нэрийн доор */
+  visitNote?: VisitNote;
 }
 
 function StudentCardImpl({
@@ -157,6 +170,13 @@ function StudentCardImpl({
   onHwNote,
   onDrawer,
   onOnline,
+  quizMax = null,
+  quizScore = null,
+  quizState = null,
+  onQuizScore,
+  onQuizFlush,
+  onQuizInvalid,
+  visitNote,
 }: CardProps) {
   const detailId = `note-${id}`;
   const preview = [rec.attNote.trim(), homework ? rec.hwNote.trim() : ""].filter(Boolean).join(", ");
@@ -175,7 +195,8 @@ function StudentCardImpl({
   };
 
   // Даалгавраа илгээсэн ч багш одоохондоо тэмдэглээгүй (эзэн 2026-11-03) — өөр өнгөөр тодорно; тэмдэглэмэгц энгийн болно
-  const awaiting = homework && sent && rec.hw === null;
+  // Шалгалтын оноотой бол даалгаврыг шалгасанд тооцно (эзэн 2026-11-08)
+  const awaiting = homework && sent && rec.hw === null && quizScore === null;
   return (
     <li
       data-awaiting={awaiting || undefined}
@@ -198,14 +219,15 @@ function StudentCardImpl({
           >
             {name}
           </button>
-          {sent && <SentMark />}
-          {awaiting && <span className="shrink-0 rounded-full bg-brand-bright/15 px-1.5 py-0.5 text-[10px] font-bold text-brand-soft">Шалгаагүй</span>}
+          {/* Илгээсэн эсэхийг нэрийн ард давтахгүй (эзэн 2026-11-05) — картын өнгө, «Онлайн» товч хангалттай */}
+          {awaiting && <span className="sr-only">, даалгавраа илгээсэн, шалгаагүй</span>}
         </div>
         {makeup && (
           <span className="shrink-0 sm:pl-[2.625rem]">
             <MakeupChip status={makeup} />
           </span>
         )}
+        {visitNote && <VisitNoteChip note={visitNote} />}
         {!open && preview && (
           <button
             type="button"
@@ -244,8 +266,20 @@ function StudentCardImpl({
             className={cn(COLS, "rounded-lg bg-ink/[0.05] p-1")}
             leading={<RowLabel icon={NotebookPen} text="Даалгавар" className="text-ink-dim" />}
           >
-            {/* Онлайн тест байхгүй ч сурагч дэвтрийн зураг илгээсэн бол дарж харна (эзэн 2026-11-03) */}
-            {onlineTests || sent ? (
+            {/* Шалгалтаар шалгах горимд «Онлайн»-ы оронд онооны талбар (эзэн 2026-11-08) */}
+            {quizMax !== null && onQuizScore && onQuizFlush && onQuizInvalid ? (
+              <QuizScoreInput
+                id={id}
+                name={name}
+                max={quizMax}
+                score={quizScore}
+                state={quizState}
+                onScore={onQuizScore}
+                onFlush={onQuizFlush}
+                onInvalid={onQuizInvalid}
+              />
+            ) : /* Онлайн тест байхгүй ч сурагч дэвтрийн зураг илгээсэн бол дарж харна (эзэн 2026-11-03) */
+            onlineTests || sent ? (
               <button
                 type="button"
                 onClick={() => onOnline(id)}
@@ -265,14 +299,24 @@ function StudentCardImpl({
                     : "border-dashed border-line bg-transparent text-ink-dim/70 hover:border-ink/30 hover:text-ink",
                 )}
               >
-                <span className="inline-flex items-center gap-1">
-                  <Laptop className={cn("size-4 shrink-0", !online && !sent && "opacity-50")} aria-hidden />
-                  <span className="hidden sm:inline">Онлайн</span>
-                </span>
-                {online ? (
-                  <span className="max-w-full truncate font-bold tabular-nums">{scoreText(online.score, online.max)}</span>
+                {!online && sent ? (
+                  // Зураг илгээсэн, онлайн оноогүй — «Илгээсэн» гэж л (эзэн 2026-11-05)
+                  <span className="inline-flex min-w-0 items-center gap-1 font-semibold">
+                    <HwSentIcon className="size-4 shrink-0" aria-hidden />
+                    <span className="hidden truncate sm:inline">Илгээсэн</span>
+                  </span>
                 ) : (
-                  <Minus className="size-3.5 shrink-0 opacity-60" aria-hidden />
+                  <>
+                    <span className="inline-flex items-center gap-1">
+                      <Laptop className={cn("size-4 shrink-0", !online && "opacity-50")} aria-hidden />
+                      <span className="hidden sm:inline">Онлайн</span>
+                    </span>
+                    {online ? (
+                      <span className="max-w-full truncate font-bold tabular-nums">{scoreText(online.score, online.max)}</span>
+                    ) : (
+                      <Minus className="size-3.5 shrink-0 opacity-60" aria-hidden />
+                    )}
+                  </>
                 )}
               </button>
             ) : (

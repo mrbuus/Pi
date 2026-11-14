@@ -1,15 +1,17 @@
 "use client";
 
 import { useRef, useState, type KeyboardEvent } from "react";
-import { CalendarDays, LayoutGrid, UserCheck } from "lucide-react";
+import { CalendarDays, Clock, LayoutGrid, UserCheck } from "lucide-react";
 import { canManageAny } from "./pattern/model";
 import { useScheduleAccess } from "./pattern/access";
 import PatternOverview from "./PatternOverview";
 import SpecialDaysButton from "./special-days/SpecialDaysButton";
 import TeacherWorkDays from "./TeacherWorkDays";
 import WeekBuilder from "./WeekBuilder";
+import TeacherHoursTabs from "@/components/teacher-hours/TeacherHoursTabs";
+import { confirmDiscardUnsaved } from "@/lib/unsavedChanges";
 
-type TabKey = "overview" | "week" | "teachers";
+type TabKey = "overview" | "week" | "teachers" | "hours";
 
 const TABS: { key: TabKey; label: string; icon: typeof CalendarDays }[] = [
   // Дараалал (эзэн 2026-10-22): өдрийн хуваарь ЭХЭНД, анхдагчаар нээгдэнэ — 7 хоногийн
@@ -20,6 +22,8 @@ const TABS: { key: TabKey; label: string; icon: typeof CalendarDays }[] = [
   { key: "week", label: "Өдрийн хуваарь", icon: CalendarDays },
   { key: "overview", label: "Ерөнхий хуваарь", icon: LayoutGrid },
   { key: "teachers", label: "Багшийн ажлын өдөр", icon: UserCheck },
+  // Ажилласан цаг — багшийн ажлын өдрийн ард (эзэн 2026-11-10)
+  { key: "hours", label: "Ажилласан цаг", icon: Clock },
 ];
 
 /**
@@ -34,7 +38,12 @@ const TABS: { key: TabKey; label: string; icon: typeof CalendarDays }[] = [
  * DOM-д үлдээхгүй тул буцаж ирэхэд өгөгдөл нь шинэчлэгдэнэ.
  */
 export default function StaffScheduleBuilder({ role }: { role: string }) {
-  const [tab, setTab] = useState<TabKey>("week");
+  const [tab, setTabRaw] = useState<TabKey>("week");
+  // Ажилласан цагт хадгалагдаагүй нүд байвал табаас гарахаас өмнө асууна
+  const setTab = (next: TabKey) => {
+    if (tab === "hours" && next !== "hours" && !confirmDiscardUnsaved()) return;
+    setTabRaw(next);
+  };
   const access = useScheduleAccess(role);
   const canEdit = canManageAny(access);
   // Багшийн ажлын өдрийн хүснэгтийг Багш+ schedule.manage-гүйгээр засна (эзэн 2026-10-11)
@@ -95,6 +104,7 @@ export default function StaffScheduleBuilder({ role }: { role: string }) {
         {tab === "week" && <WeekBuilder />}
         {tab === "overview" && <PatternOverview access={access} />}
         {tab === "teachers" && <TeacherWorkDays readOnly={!canEditRoster} />}
+        {tab === "hours" && <TeacherHoursTabs />}
       </div>
     </div>
   );

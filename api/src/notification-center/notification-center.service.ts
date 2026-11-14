@@ -3,17 +3,44 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
+import { DevicesService } from '../devices/devices.service';
 import { EmailService } from '../notifications/email.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { NotificationKind } from '../generated/prisma/enums';
+import { NotificationKind, Role } from '../generated/prisma/enums';
+import { isQuietHoursUB } from './quiet-hours';
+import { TtlCache } from '../common/ttl-cache';
+
+/**
+ * Уншаагүй мэдэгдлийн тоо — апп, вэб хоёулаа 60 секунд тутам асуудаг.
+ * Хэрэглэгч тутам 15 секунд кэшлэнэ; мэдэгдэл үүсгэх/уншсан болгох бүрд
+ * тухайн хэрэглэгчийн түлхүүрийг шууд устгана (өөрийн үйлдэл даруй харагдана).
+ * Өөр процесс (скрипт) үүсгэсэн мэдэгдэл хамгийн ихдээ 15 секунд хоцорно.
+ * docs/BACKEND-PERF.md
+ */
+export const unreadCountCache = new TtlCache<{ count: number }>(15_000, 5_000);
 
 export interface NewNotification {
   kind: NotificationKind;
   title: string;
   body?: string | null;
   link?: string | null;
+  /**
+   * Нэмэлт push (FCM). Зөвхөн энд заасан үед л илгээнэ — бүх мэдэгдэл push болохгүй.
+   * body-г заагаагүй бол ерөнхий текст (хувийн мэдээлэл lock screen-д гарахгүй).
+   */
+  push?: PushOptions;
 }
+
+export interface PushOptions {
+  title?: string;
+  body?: string;
+  /** Апп доторх deep-link зам; заагаагүй бол notification.link, эсвэл /app/notifications */
+  path?: string;
+}
+
+const DEFAULT_PUSH_BODY = 'Апп дотроос дэлгэрэнгүйг харна уу';
 
 @Injectable()
 export class NotificationCenterService {
@@ -22,6 +49,7 @@ export class NotificationCenterService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly email: EmailService,
+    @Optional() private readonly devices?: DevicesService,
   ) {}
 
   /** Persist an in-app copy first; optional email failures never block the caller. */
@@ -37,7 +65,7 @@ export class NotificationCenterService {
     try {
       const recipients = await this.prisma.user.findMany({
         where: { id: { in: ids } },
-        select: { id: true, email: true },
+        select: { id: true, email: true, role: true },
       });
       if (recipients.length === 0) return;
 
@@ -50,6 +78,12 @@ export class NotificationCenterService {
           link: notification.link ?? null,
         })),
       });
+      for (const { id } of recipients) unreadCountCache.delete(id);
+
+      // Push: fire-and-forget — үндсэн хүсэлтийг хэзээ ч удаашруулахгүй, унагахгүй.
+      if (notification.push) {
+        void this.sendPush(recipients, notification, notification.push);
+      }
 
       if (!this.email.isConfigured()) return;
       const emailedRecipients = recipients.filter(
@@ -79,6 +113,34 @@ export class NotificationCenterService {
       // The underlying business action succeeded; an inbox outage must not undo it.
       this.logger.error(
         `Мэдэгдэл хадгалж чадсангүй: ${error instanceof Error ? error.message : 'unknown error'}`,
+      );
+    }
+  }
+
+  /** Алдаа шидэхгүй. Сурагчид 21:00–08:00 (УБ) push илгээхгүй; апп доторх мэдэгдэл аль хэдийн үүссэн. */
+  private async sendPush(
+    recipients: Array<{ id: string; role: Role }>,
+    notification: NewNotification,
+    push: PushOptions,
+  ): Promise<void> {
+    try {
+      if (!this.devices) return;
+      const quiet = isQuietHoursUB(new Date());
+      const ids = recipients
+        .filter((r) => !(quiet && r.role === Role.STUDENT))
+        .map((r) => r.id);
+      if (ids.length === 0) return;
+      await this.devices.sendToUsers(ids, {
+        title: push.title ?? notification.title,
+        body: push.body ?? DEFAULT_PUSH_BODY,
+        data: {
+          path: push.path ?? notification.link ?? '/app/notifications',
+          kind: notification.kind,
+        },
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Push мэдэгдэл илгээж чадсангүй: ${error instanceof Error ? error.message : 'unknown error'}`,
       );
     }
   }
@@ -123,9 +185,11 @@ export class NotificationCenterService {
   }
 
   unreadCount(userId: string) {
-    return this.prisma.notification
-      .count({ where: { userId, readAt: null } })
-      .then((count) => ({ count }));
+    return unreadCountCache.get(userId, () =>
+      this.prisma.notification
+        .count({ where: { userId, readAt: null } })
+        .then((count) => ({ count })),
+    );
   }
 
   async markRead(userId: string, id: string) {
@@ -140,6 +204,7 @@ export class NotificationCenterService {
         where: { id, userId, readAt: null },
         data: { readAt: new Date() },
       });
+      unreadCountCache.delete(userId);
     }
     return { read: true };
   }
@@ -149,6 +214,7 @@ export class NotificationCenterService {
       where: { userId, readAt: null },
       data: { readAt: new Date() },
     });
+    unreadCountCache.delete(userId);
     return { updated: result.count };
   }
 }

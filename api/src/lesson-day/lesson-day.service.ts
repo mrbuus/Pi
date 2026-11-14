@@ -4,11 +4,14 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import type { Prisma } from '../generated/prisma/client';
 import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../audit/audit.service';
 import { addDateDays, dateKey, parseDateOnly, todayUB } from '../common/date';
+import { PHOTO_EDIT_CLOSED, photoEditable } from '../common/photo-edit';
 import { shortName } from '../revisions/revision-snapshot';
 import {
   decisionOf,
@@ -40,6 +43,8 @@ const MAX_RANGE_DAYS = 186;
 const MAX_KEYS = 12;
 /** D13: нэг PDF ≤10 хуудас (хуучин хэлбэрийн ганц зураг ч зөвшөөрөгдөнө) */
 export const MAX_PAGES = 10;
+/** Онолын зураг: ≤20 хуудас (эзэн 2026-11-12); нөхөх тэмдэглэл MAX_PAGES хэвээр */
+export const THEORY_MAX_PAGES = 20;
 const IMAGE_MIME = /^image\/(png|jpe?g|webp|gif|heic|heif)$/;
 const PDF_MIME = 'application/pdf';
 /** key → хуудасны тоо (StoredFile-ийн агуулга key-тэй хамт өөрчлөгддөггүй) */
@@ -112,7 +117,10 @@ export const MAKEUP_KEEP_DAYS_AFTER_DECISION = 14;
 
 @Injectable()
 export class LessonDayService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly audit?: AuditService,
+  ) {}
 
   // ───────────────────────── Туслахууд ─────────────────────────
 
@@ -198,6 +206,7 @@ export class LessonDayService {
     userId: string,
     retained: string[],
     db: Prisma.TransactionClient | PrismaService = this.prisma,
+    maxPages = MAX_PAGES,
   ): Promise<string[]> {
     const unique = [...new Set(keys)];
     if (unique.length > MAX_KEYS)
@@ -216,8 +225,8 @@ export class LessonDayService {
     }
     const pages = await this.pageCounts(unique, db);
     const total = unique.reduce((n, k) => n + (pages.get(k) ?? 1), 0);
-    if (total > MAX_PAGES)
-      throw new BadRequestException(`Нийт ${MAX_PAGES} хүртэл хуудас (зураг) илгээнэ.`);
+    if (total > maxPages)
+      throw new BadRequestException(`Нийт ${maxPages} хүртэл хуудас (зураг) илгээнэ.`);
     return unique;
   }
 
@@ -637,7 +646,7 @@ export class LessonDayService {
       }),
       // dismissMode-ийг ХЭЗЭЭ Ч сонгохгүй (зөвхөн багшид)
       this.prisma.lessonTopic.findMany({
-        where: { date, schedule: { classroomId } },
+        where: { deletedAt: null, date, schedule: { deletedAt: null, classroomId } },
         select: { testIds: true, photoStudentId: true, title: true, chapterId: true },
       }),
       this.prisma.classTestSession.findMany({
@@ -768,18 +777,58 @@ export class LessonDayService {
         where: { classroomId, date, studentId: actor.userId },
         orderBy: { createdAt: 'asc' },
       });
-      const imageKeys = await this.ownImageKeys(keys, actor.userId, mine?.imageKeys ?? [], tx);
-      // Хоосон жагсаалтаар илгээж өмнөх зургаа устгахгүй (эзэн 2026-11-03; «өгөгдөл устгахгүй» дүрэм)
+      const active = !!mine?.imageKeys.length;
+      // Сурагч илгээснээс хойш 5 минутын дотор л солино (эзэн 2026-11-12)
+      if (kind === 'STUDENT' && mine && active && !photoEditable(mine.createdAt))
+        throw new ForbiddenException(PHOTO_EDIT_CLOSED);
+      const imageKeys = await this.ownImageKeys(
+        keys,
+        actor.userId,
+        mine?.imageKeys ?? [],
+        tx,
+        THEORY_MAX_PAGES,
+      );
+      // Хоосон жагсаалтаар илгээж өмнөх зургаа устгахгүй — устгах нь removeDayPhotos
       if (!imageKeys.length) throw new BadRequestException('Онолын зураг сонгоно уу.');
       if (mine)
         await tx.lessonPhoto.update({
           where: { id: mine.id },
-          data: { imageKeys, testIds: ctx.testIds },
+          // Устгасны дараах шинэ илгээлт — 5 минутын хугацаа шинээр эхэлнэ
+          data: { imageKeys, testIds: ctx.testIds, ...(active ? {} : { createdAt: new Date() }) },
         });
       else
         await tx.lessonPhoto.create({
           data: { classroomId, date, studentId: actor.userId, imageKeys, testIds: ctx.testIds },
         });
+    });
+    return this.dayPhotos(actor, classroomId, key);
+  }
+
+  /**
+   * Буруу илгээсэн онолын зургаа буцааж устгах (эзэн 2026-11-12): сурагч илгээснээс хойш
+   * 5 минутын дотор л. Мөр үлдэнэ (imageKeys хоосорно), файл S3-т хэвээр, хассан
+   * түлхүүрүүд аудитад бичигдэнэ — «өгөгдөл устгахгүй» дүрэм.
+   */
+  async removeDayPhotos(actor: Actor, classroomId: string, dateText: string) {
+    const date = this.day(dateText);
+    const key = dateKey(date);
+    const kind = await this.photoAccess(actor, classroomId, date);
+    const mine = await this.prisma.lessonPhoto.findFirst({
+      where: { classroomId, date, studentId: actor.userId },
+      orderBy: { createdAt: 'asc' },
+    });
+    if (!mine?.imageKeys.length) throw new NotFoundException('Зураг олдсонгүй');
+    if (kind === 'STUDENT' && !photoEditable(mine.createdAt))
+      throw new ForbiddenException(PHOTO_EDIT_CLOSED);
+    await this.prisma.lessonPhoto.update({ where: { id: mine.id }, data: { imageKeys: [] } });
+    await this.audit?.record({
+      actorId: actor.userId,
+      actorRole: actor.role,
+      action: 'THEORY_PHOTO_REMOVE',
+      entity: 'LessonPhoto',
+      entityId: mine.id,
+      before: { imageKeys: mine.imageKeys },
+      after: { imageKeys: [] },
     });
     return this.dayPhotos(actor, classroomId, key);
   }
@@ -801,7 +850,7 @@ export class LessonDayService {
     const className = new Map(enrollments.map((e) => [e.classroomId, e.classroom.name]));
     const [topics, photos, sessions] = await Promise.all([
       this.prisma.lessonTopic.findMany({
-        where: { date: { gte: from, lte: to }, schedule: { classroomId: { in: classIds } } },
+        where: { deletedAt: null, date: { gte: from, lte: to }, schedule: { deletedAt: null, classroomId: { in: classIds } } },
         select: { date: true, testIds: true, photoStudentId: true, schedule: { select: { classroomId: true } } },
       }),
       this.prisma.lessonPhoto.findMany({

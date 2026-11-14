@@ -91,7 +91,7 @@ export interface StudentRow {
   predictedEesh: number | null;
   risk: RiskFlag[];
   flags: ActiveFlag[];
-  payment: { state: PaymentState; tuitionAmount: number | null; paidThisMonth: number } | null;
+  payment: { state: PaymentState; tuitionAmount: number | null; paidThisMonth: number | null } | null;
 }
 
 export interface WeekRate {
@@ -320,17 +320,50 @@ export interface CheckMark {
   checked: boolean;
   updatedAt: string;
   updatedBy: CheckPerson | null;
+  // ── Доорх нь зөвхөн номын чекэд (ClassCheck.bookKey) ──
+  /** «Авахгүй» — энэ номыг авахгүй сурагч */
+  skipped?: boolean;
+  /** Мөнгийг хүлээж авсан багш */
+  collectedBy?: CheckPerson | null;
+  /** Бодит өгсөн дүн (чекийн үнээс өөр байж болно) */
+  amount?: number | null;
+  note?: string | null;
+  /** Өөр ангид байхдаа төлсөн — энэ ангийн мөнгөнд орохгүй, эндээс засахгүй */
+  elsewhere?: { name: string | null } | null;
 }
 
 export interface ClassCheck {
   id: string;
   title: string;
   amount: number | null;
+  /** Номын чек бол номын түлхүүр (E2 …), энгийн чек бол null */
+  bookKey?: string | null;
   createdAt: string;
   createdBy: CheckPerson | null;
   archivedAt: string | null;
   archivedBy: CheckPerson | null;
   marks: CheckMark[];
+}
+
+/** GET /classrooms/:id/checks/students/:studentId — нэр дарахад гарах товч мэдээлэл (төлбөргүй) */
+export interface CheckStudentContact {
+  kind: "student" | "father" | "mother" | "parent";
+  phone: string;
+  /** Аппад холбогдсон эцэг эхийн нэр */
+  name?: string;
+  appLinked?: boolean;
+}
+
+export interface CheckStudentInfo {
+  id: string;
+  firstName: string;
+  lastName: string;
+  studentCode: string | null;
+  classroomName: string;
+  /** Одоо энэ ангид байгаа эсэх (гарсан бол false) */
+  inClass: boolean;
+  guardianNote: string | null;
+  contacts: CheckStudentContact[];
 }
 
 export interface ClassChecksResponse {

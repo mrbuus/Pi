@@ -28,7 +28,7 @@ export class GoalsService {
 
   findAllForStudent(studentId: string) {
     return this.prisma.studentGoal.findMany({
-      where: { studentId },
+      where: { studentId, deletedAt: null },
       orderBy: [{ status: 'asc' }, { targetDate: 'asc' }],
     });
   }
@@ -37,7 +37,7 @@ export class GoalsService {
   // (өөр хэрэглэгчийн зорилго байгаа эсэхийг ч илчлэхгүй байхын тулд 403 биш 404).
   private async findOwnedOrThrow(id: string, studentId: string) {
     const goal = await this.prisma.studentGoal.findUnique({ where: { id } });
-    if (!goal || goal.studentId !== studentId) {
+    if (!goal || goal.studentId !== studentId || goal.deletedAt) {
       throw new NotFoundException('Зорилго олдсонгүй');
     }
     return goal;
@@ -64,7 +64,8 @@ export class GoalsService {
 
   async remove(id: string, studentId: string) {
     await this.findOwnedOrThrow(id, studentId);
-    await this.prisma.studentGoal.delete({ where: { id } });
+    // Зөөлөн устгал — мөр үлдэнэ (эзний хатуу дүрэм 2026-10-23)
+    await this.prisma.studentGoal.update({ where: { id }, data: { deletedAt: new Date() } });
     return { ok: true };
   }
 }

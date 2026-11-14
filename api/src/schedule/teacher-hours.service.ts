@@ -25,6 +25,7 @@ export class TeacherHoursService {
 
     const schedules = await this.prisma.classSchedule.findMany({
       where: {
+        deletedAt: null,
         effectiveFrom: { lte: end },
         OR: [{ effectiveTo: null }, { effectiveTo: { gte: start } }],
         ...(teacherId ? { teacherId } : { teacherId: { not: null } }),
@@ -36,10 +37,10 @@ export class TeacherHoursService {
     });
     const ids = schedules.map((s) => s.id);
     const [exceptions, holidays] = await Promise.all([
-      this.prisma.scheduleException.findMany({ where: { scheduleId: { in: ids } } }),
+      this.prisma.scheduleException.findMany({ where: { deletedAt: null, scheduleId: { in: ids } } }),
       this.prisma.academicCalendarDay.findMany({
-        where: { date: { gte: start, lte: end } },
-        include: { classrooms: { select: { classroomId: true } } },
+        where: { date: { gte: start, lte: end }, deletedAt: null },
+        include: { classrooms: { where: { deletedAt: null }, select: { classroomId: true } } },
       }),
     ]);
 

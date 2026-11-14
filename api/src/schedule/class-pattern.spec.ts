@@ -151,6 +151,8 @@ function makeService(opts: { rows?: any[]; classrooms?: any[] } = {}) {
   let seq = 0;
   const match = (r: any, w: any): boolean =>
     Object.entries(w ?? {}).every(([k, v]: [string, any]) => {
+      // deletedAt: null (зөөлөн устгал) — тестийн мөрөнд талбар байхгүй = идэвхтэй
+      if (v === null) return r[k] == null;
       if (v && typeof v === 'object' && !(v instanceof Date)) {
         if ('not' in v) return r[k] !== v.not;
         if ('notIn' in v) return !v.notIn.includes(r[k]);

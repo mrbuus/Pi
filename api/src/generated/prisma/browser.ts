@@ -302,6 +302,21 @@ export type UserPass = Prisma.UserPassModel
  */
 export type BankTransaction = Prisma.BankTransactionModel
 /**
+ * Model BankAllocation
+ * 
+ */
+export type BankAllocation = Prisma.BankAllocationModel
+/**
+ * Model BankPayerHint
+ * 
+ */
+export type BankPayerHint = Prisma.BankPayerHintModel
+/**
+ * Model BankCursor
+ * 
+ */
+export type BankCursor = Prisma.BankCursorModel
+/**
  * Model StudentCodeLegacy
  * 
  */
@@ -326,6 +341,11 @@ export type Purchase = Prisma.PurchaseModel
  * 
  */
 export type ExpenseRecord = Prisma.ExpenseRecordModel
+/**
+ * Model TuitionExtension
+ * 
+ */
+export type TuitionExtension = Prisma.TuitionExtensionModel
 /**
  * Model TuitionSettlement
  * 
@@ -494,6 +514,16 @@ export type StoredFile = Prisma.StoredFileModel
  */
 export type FormulaReview = Prisma.FormulaReviewModel
 /**
+ * Model ProblemReview
+ * 
+ */
+export type ProblemReview = Prisma.ProblemReviewModel
+/**
+ * Model StudyWeeklyGoal
+ * 
+ */
+export type StudyWeeklyGoal = Prisma.StudyWeeklyGoalModel
+/**
  * Model FormulaReviewDay
  * 
  */
@@ -538,6 +568,21 @@ export type LessonRotation = Prisma.LessonRotationModel
  * 
  */
 export type StaffCapabilityGrant = Prisma.StaffCapabilityGrantModel
+/**
+ * Model TeacherWorkHours
+ * 
+ */
+export type TeacherWorkHours = Prisma.TeacherWorkHoursModel
+/**
+ * Model TeacherBankAccount
+ * 
+ */
+export type TeacherBankAccount = Prisma.TeacherBankAccountModel
+/**
+ * Model TeacherPayRate
+ * 
+ */
+export type TeacherPayRate = Prisma.TeacherPayRateModel
 /**
  * Model StudyReviewRun
  * 
@@ -656,6 +701,16 @@ export type ClassCheck = Prisma.ClassCheckModel
  */
 export type ClassCheckMark = Prisma.ClassCheckMarkModel
 /**
+ * Model BookPayment
+ * Номын мөнгө (эзэн 2026-11-12) — сурагч × ном. Чекээс ХАМААРАХГҮЙ хадгалагдана:
+ * чек нуугдсан/устсан, сурагч анги сольсон ч «хэн, аль ангид байхдаа, аль багшид,
+ * хэдийг өгсөн» нь үлдэнэ. Мөр хэзээ ч устахгүй, засагдахгүй — өөрчлөх бүрд хуучин
+ * мөр voidedAt авч, шинэ мөр үүснэ (бүтэн түүх). Идэвхтэй мөр (voidedAt IS NULL)
+ * сурагч × номд ГАНЦ — хэсэгчилсэн unique индекс зөвхөн SQL-д (миграци
+ * 20261112150000_book_payments). FK-гүй (ClassCheck-ийн адил). api/src/book-payments.
+ */
+export type BookPayment = Prisma.BookPaymentModel
+/**
  * Model LoginText
  * Нэвтрэх хуудасны тайлбар/зарлал (эзэн 2026-10-22, Агент D). Ганц мөр id="default";
  * зөвхөн ADMIN засна (PUT /auth/login-text), нийтэд уншигдана (GET). Энгийн текст.
@@ -703,6 +758,21 @@ export type HomeworkCheck = Prisma.HomeworkCheckModel
  */
 export type HomeworkPhoto = Prisma.HomeworkPhotoModel
 /**
+ * Model DeviceToken
+ * 
+ */
+export type DeviceToken = Prisma.DeviceTokenModel
+/**
+ * Model AppleIdentity
+ * 
+ */
+export type AppleIdentity = Prisma.AppleIdentityModel
+/**
+ * Model AccountDeletionRequest
+ * 
+ */
+export type AccountDeletionRequest = Prisma.AccountDeletionRequestModel
+/**
  * Model UiEvent
  * Аппын хэрэглээний бүртгэл (эзэн 2026-11-04: «хүмүүс аль товч дээр илүү дарж, ямар ажил
  * хийж байгааг судлах»). Хуудас нээх, товч дарах — нэг мөр. Агуулга (нэр, хариу, оноо,
@@ -710,3 +780,69 @@ export type HomeworkPhoto = Prisma.HomeworkPhotoModel
  * эсвэл lucide дүрсний нэрээр тэмдэглэнэ. User-тэй relation зориуд тавиагүй (AuditLog-той адил).
  */
 export type UiEvent = Prisma.UiEventModel
+/**
+ * Model HomeworkDeadline
+ * Гэрийн даалгаврын хугацааг багш гараар тохируулсан (эзэн 2026-11-05: самбарын «Онлайн гэрийн
+ * даалгавар» мөрийн ард). lessonDate = даалгавар ӨГСӨН хичээлийн өдөр. Мөр байхгүй бол хугацаа =
+ * дараагийн хичээлийн өдрийн 00:00 (УБ), хоцорч илгээж болно (хуучин дүрэм хэвээр).
+ * allowLate = false бол хугацаа өнгөрмөгц онлайн тест эхлэх/хадгалах/илгээх, зураг явуулах хаагдана.
+ */
+export type HomeworkDeadline = Prisma.HomeworkDeadlineModel
+/**
+ * Model HomeworkComment
+ * Гэрийн даалгавар дээрх СУРАГЧИД ХАРАГДАХ сэтгэгдэл (эзэн 2026-11-05). Багшийн дотоод тэмдэглэл
+ * (DailyHomeworkMark.comment)-ээс тусдаа. Нэг сурагч × анги × даалгавар өгсөн хичээлийн өдөр = нэг яриа:
+ * багш алдааг нь бичнэ, сурагч хариулж болно. ХЭЗЭЭ Ч устгахгүй (deletedAt зөвхөн зохиогч өөрөө нуухад).
+ * kind: NOTE — энгийн, RETURN — «Буцаах» дарахад бичсэн шалтгаан.
+ */
+export type HomeworkComment = Prisma.HomeworkCommentModel
+/**
+ * Model HomeworkQuiz
+ * Гэрийн даалгаврыг ангид богино шалгалтаар шалгах (эзэн 2026-11-08): ижил төрлийн, өөр тоотой
+ * бодлого. Нэг анги × нэг өдөр = нэг шалгалт. «Устгах» = deletedAt (оноонууд мөн deletedAt-тай нуугдана);
+ * дахин эхлүүлбэл ижил мөр сэргэж, оноо хоосноос эхэлнэ. Зөвхөн ажилтан харна.
+ */
+export type HomeworkQuiz = Prisma.HomeworkQuizModel
+/**
+ * Model HomeworkQuizScore
+ * Шалгалтын нэг сурагчийн оноо 0..problemCount, бутархай 2 хүртэл орон (7.5 — эзэн 2026-11-08 19:08;
+ * Decimal тул хөвөгч тооны алдаагүй). Цэвэрлэх = deletedAt, дахин бичвэл сэргэнэ.
+ */
+export type HomeworkQuizScore = Prisma.HomeworkQuizScoreModel
+/**
+ * Model MakeupVisit
+ * Нөхөлт (эзэн 2026-11-08): өөрийн ангидаа хийж чадаагүй хичээлээ нөхсөн нэг удаа.
+ * - Өөр ангид суусан: hostClassroomId = зочилсон анги (ж: 12-4-ийн сурагч 12-6-д). Хийсэн
+ * тест = тэр ангийн тэр өдрийн хичээлийнх (ClassTestSession, эс бөгөөс төлөвлөгөө) —
+ * уншихдаа тооцно (makeup-visits/covered.logic.ts), энд хуулахгүй.
+ * - 406 өрөө: hostClassroomId = null. Хийсэн тестийг багш сонгоно → MakeupVisitTest.
+ * Давхардал: нэг сурагч, нэг өдөр, нэг газар (placeKey = hostClassroomId эсвэл "406")
+ * идэвхтэй ганц мөр. Устгах нь зөөлөн (deletedAt). Хэрэглэгч/ангийн FK-гүй (ClassCheck-ийн адил).
+ */
+export type MakeupVisit = Prisma.MakeupVisitModel
+/**
+ * Model MakeupVisitTest
+ * 406 өрөөнд нөхөж хийсэн тест/сэдэв. testId = null бол бодлогын санд байхгүй, багшийн
+ * бичсэн сэдэв (title). Сэдвийг солиход хасагдсан мөр зөөлөн устна (түүх үлдэнэ).
+ */
+export type MakeupVisitTest = Prisma.MakeupVisitTestModel
+/**
+ * Model PaperExam
+ * 
+ */
+export type PaperExam = Prisma.PaperExamModel
+/**
+ * Model PaperExamItem
+ * 
+ */
+export type PaperExamItem = Prisma.PaperExamItemModel
+/**
+ * Model PaperExamSheet
+ * 
+ */
+export type PaperExamSheet = Prisma.PaperExamSheetModel
+/**
+ * Model PaperExamImport
+ * 
+ */
+export type PaperExamImport = Prisma.PaperExamImportModel

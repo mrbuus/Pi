@@ -103,7 +103,7 @@ export async function loadLessonDays(
   const ids = classes.map((c) => c.classroomId);
   const [topicRows, exceptions, sessions, records] = await Promise.all([
     prisma.lessonTopic.findMany({
-      where: { date: range, schedule: { classroomId: { in: ids } } },
+      where: { deletedAt: null, date: range, schedule: { deletedAt: null, classroomId: { in: ids } } },
       // dismissMode-ийг ХЭЗЭЭ Ч сонгохгүй
       select: {
         scheduleId: true,
@@ -115,7 +115,7 @@ export async function loadLessonDays(
     }),
     // Сэдвийн анхны огнооны цуцлалт/зөөлт
     prisma.scheduleException.findMany({
-      where: { date: range, schedule: { classroomId: { in: ids } } },
+      where: { deletedAt: null, date: range, schedule: { deletedAt: null, classroomId: { in: ids } } },
       select: { scheduleId: true, date: true, kind: true, newDate: true },
     }),
     prisma.classTestSession.findMany({
@@ -296,7 +296,8 @@ export async function classDayEvidence(
     }),
     prisma.lessonTopic.findMany({
       where: {
-        schedule: { classroomId },
+        deletedAt: null,
+        schedule: { deletedAt: null, classroomId },
         OR: [
           { date },
           {
@@ -305,7 +306,7 @@ export async function classDayEvidence(
               lte: new Date(date.getTime() + span),
             },
             schedule: {
-              exceptions: { some: { kind: 'MOVED', newDate: date } },
+              exceptions: { some: { kind: 'MOVED', newDate: date, deletedAt: null } },
             },
           },
         ],
@@ -313,7 +314,7 @@ export async function classDayEvidence(
       select: { scheduleId: true, date: true },
     }),
     prisma.scheduleException.findMany({
-      where: { schedule: { classroomId }, OR: [{ date }, { newDate: date }] },
+      where: { deletedAt: null, schedule: { deletedAt: null, classroomId }, OR: [{ date }, { newDate: date }] },
       select: { scheduleId: true, date: true, kind: true, newDate: true },
     }),
   ]);
@@ -349,6 +350,7 @@ export async function loadUpcomingDays(
   const [rows, topics, calendar] = await Promise.all([
     prisma.classSchedule.findMany({
       where: {
+        deletedAt: null,
         classroomId: { in: ids },
         effectiveFrom: { lte: to },
         OR: [{ effectiveTo: null }, { effectiveTo: { gte: from } }],
@@ -364,6 +366,7 @@ export async function loadUpcomingDays(
         effectiveTo: true,
         exceptions: {
           where: {
+            deletedAt: null,
             OR: [
               { date: { gte: from, lte: to } },
               { newDate: { gte: from, lte: to } },
@@ -375,8 +378,9 @@ export async function loadUpcomingDays(
     }),
     prisma.lessonTopic.findMany({
       where: {
+        deletedAt: null,
         date: { gte: from, lte: to },
-        schedule: { classroomId: { in: ids } },
+        schedule: { deletedAt: null, classroomId: { in: ids } },
       },
       select: {
         scheduleId: true,
@@ -385,12 +389,12 @@ export async function loadUpcomingDays(
       },
     }),
     prisma.academicCalendarDay.findMany({
-      where: { date: { gte: from, lte: to } },
+      where: { date: { gte: from, lte: to }, deletedAt: null },
       select: {
         date: true,
         type: true,
         title: true,
-        classrooms: { select: { classroomId: true } },
+        classrooms: { where: { deletedAt: null }, select: { classroomId: true } },
       },
     }),
   ]);

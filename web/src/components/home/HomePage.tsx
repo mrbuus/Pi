@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { homeForRole } from "@/lib/api";
 import HeroStill from "./HeroStill";
+import HomeTuition from "./HomeTuition";
 import { MARKUP } from "./markup";
 import "./home.css";
 
@@ -49,6 +50,7 @@ function showStillTag(root: HTMLElement) {
 export default function HomePage() {
   const rootRef = useRef<HTMLDivElement>(null);
   const [stillHost, setStillHost] = useState<HTMLElement | null>(null);
+  const [tuitionHost, setTuitionHost] = useState<HTMLElement | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -59,6 +61,7 @@ export default function HomePage() {
       showStillTag(root);
       setStillHost(root.querySelector<HTMLElement>("#heroView"));
     };
+    setTuitionHost(root.querySelector<HTMLElement>("#tuitionMount"));
     (async () => {
       const { mountDom } = await import("./dom");
       if (dead) return;
@@ -96,6 +99,7 @@ export default function HomePage() {
     <>
       <div ref={rootRef} className="sie" dangerouslySetInnerHTML={{ __html: MARKUP }} />
       {stillHost && createPortal(<HeroStill />, stillHost)}
+      {tuitionHost && createPortal(<HomeTuition />, tuitionHost)}
     </>
   );
 }

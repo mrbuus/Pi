@@ -1,3 +1,4 @@
+import { activeClasses } from '../common/class-track';
 import {
   BadRequestException,
   ForbiddenException,
@@ -27,6 +28,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { ACADEMIC_YEAR, todayKeyUB } from '../payments/ledger';
 import { ledgersFor } from '../payments/ledger-load';
+import { studentPaymentView } from '../payments/ledger-redact';
 import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
 import {
   BEHAVIOR_FLAGS,
@@ -133,6 +135,7 @@ export class ClassDashboardService {
       }),
       this.prisma.classSchedule.findMany({
         where: {
+          deletedAt: null,
           teacherId: actor.userId,
           OR: [{ effectiveTo: null }, { effectiveTo: { gte: today } }],
         },
@@ -140,7 +143,9 @@ export class ClassDashboardService {
       }),
       this.prisma.lessonStaffing.findMany({
         where: {
+          deletedAt: null,
           date: { gte: daysAgo(STAFFING_DAYS) },
+          schedule: { deletedAt: null },
           OR: [
             { leadTeacherId: actor.userId },
             { assistantTeacherId: actor.userId },
@@ -318,6 +323,7 @@ export class ClassDashboardService {
       }),
       this.prisma.classSchedule.findMany({
         where: {
+          deletedAt: null,
           classroomId: { in: classIds },
           OR: [{ effectiveTo: null }, { effectiveTo: { gte: today } }],
           teacherId: { not: null },
@@ -522,7 +528,7 @@ export class ClassDashboardService {
       : null;
     if (!chapterId) {
       const topic = await this.prisma.lessonTopic.findFirst({
-        where: { schedule: { classroomId }, chapterId: { not: null } },
+        where: { deletedAt: null, schedule: { deletedAt: null, classroomId }, chapterId: { not: null } },
         orderBy: { date: 'desc' },
         select: { chapterId: true },
       });
@@ -614,6 +620,7 @@ export class ClassDashboardService {
           COUNT(*) FILTER (WHERE a."selfState" IS NOT NULL OR a."autoCorrect" IS NOT NULL) AS judged
         FROM "Attempt" a
         WHERE a."studentId" = ANY(${ids}::text[]) AND a."testId" IS NULL
+          AND a."deletedAt" IS NULL
           AND a."occurredOn" >= ${firstDate} AND a."occurredOn" <= ${lastDate}
         GROUP BY 1, 2
         UNION ALL
@@ -623,6 +630,7 @@ export class ClassDashboardService {
           COUNT(*) FILTER (WHERE e.meta->>'correct' IN ('true', 'false'))
         FROM "LearningEvent" e
         WHERE e."userId" = ANY(${ids}::text[]) AND e.type = 'ANSWER_SUBMITTED'
+          AND e."deletedAt" IS NULL
           AND e.id LIKE 'lab-first-%'
           AND e."occurredAt" >= ${w.fromUtc} AND e."occurredAt" < ${w.toUtc}
         GROUP BY 1, 2
@@ -738,6 +746,7 @@ export class ClassDashboardService {
         where: {
           studentId: { in: ids },
           testId: null,
+          deletedAt: null,
           occurredOn: { gte: historyFrom },
         },
         select: {
@@ -792,6 +801,7 @@ export class ClassDashboardService {
       }),
       this.prisma.classSchedule.findMany({
         where: {
+          deletedAt: null,
           classroomId,
           OR: [{ effectiveTo: null }, { effectiveTo: { gte: today } }],
         },
@@ -808,7 +818,7 @@ export class ClassDashboardService {
         },
       }),
       this.prisma.lessonStaffing.findMany({
-        where: { schedule: { classroomId }, date: { gte: daysAgo(STAFFING_DAYS) } },
+        where: { deletedAt: null, schedule: { deletedAt: null, classroomId }, date: { gte: daysAgo(STAFFING_DAYS) } },
         select: { leadTeacherId: true, assistantTeacherId: true },
       }),
       coverageP.then((c) =>
@@ -836,6 +846,7 @@ export class ClassDashboardService {
             JOIN "Chapter" ch ON ch.id = p."chapterId"
             JOIN "Topic" t ON t.id = ch."topicId" AND t."deletedAt" IS NULL
             WHERE a."studentId" = ANY(${ids}::text[])
+              AND a."deletedAt" IS NULL
               AND a."occurredOn" >= ${historyFrom}
             GROUP BY t.id, t.name, t."order"
             ORDER BY t."order", t.name`)
@@ -1016,9 +1027,8 @@ export class ClassDashboardService {
           createdAt: f.createdAt.toISOString(),
           createdByName: markPlus(f.createdByName, f.createdById, flagPlus),
         })),
-        payment: pay
-          ? { state: pay.state, tuitionAmount: pay.tuitionAmount, paidThisMonth: pay.paidThisMonth }
-          : null,
+        // Багш+ зөвхөн төлөв (эзний хатуу дүрэм) — дүн серверээс гарахгүй
+        payment: pay ? studentPaymentView(pay, actor.role) : null,
       };
     });
 
@@ -1226,6 +1236,7 @@ export class ClassDashboardService {
         }),
         this.prisma.classSchedule.findMany({
           where: {
+            deletedAt: null,
             classroomId,
             effectiveFrom: { lte: resolveEnd },
             OR: [{ effectiveTo: null }, { effectiveTo: { gte: firstDate } }],
@@ -1243,12 +1254,12 @@ export class ClassDashboardService {
           },
         }),
         this.prisma.academicCalendarDay.findMany({
-          where: { date: { gte: firstDate, lte: resolveEnd } },
+          where: { date: { gte: firstDate, lte: resolveEnd }, deletedAt: null },
           select: {
             date: true,
             type: true,
             title: true,
-            classrooms: { select: { classroomId: true } },
+            classrooms: { where: { deletedAt: null }, select: { classroomId: true } },
           },
         }),
         this.prisma.lessonRecord.findMany({
@@ -1274,7 +1285,7 @@ export class ClassDashboardService {
       ]);
     const exceptions = schedules.length
       ? await this.prisma.scheduleException.findMany({
-          where: { scheduleId: { in: schedules.map((s) => s.id) } },
+          where: { deletedAt: null, scheduleId: { in: schedules.map((s) => s.id) } },
         })
       : [];
     const testIds = access.map((a) => a.test.id);
@@ -1437,11 +1448,7 @@ export class ClassDashboardService {
 
   async studentCompetency(studentId: string, userId: string) {
     const actor = await this.actor(userId);
-    const enrollment = await this.prisma.enrollment.findFirst({
-      where: { studentId, leftAt: null, classroom: { archived: false } },
-      orderBy: { joinedAt: 'desc' },
-      select: { classroomId: true },
-    });
+    const [enrollment] = await activeClasses(this.prisma, studentId);
     if (!enrollment) return { competency: null, classroomId: null };
     const visible = await this.visibleClassIds(actor);
     if (visible !== 'ALL' && !visible.includes(enrollment.classroomId))
@@ -1464,7 +1471,7 @@ export class ClassDashboardService {
         select: { date: true, status: true },
       }),
       this.prisma.attempt.findMany({
-        where: { studentId, testId: null, occurredOn: { gte: from } },
+        where: { studentId, testId: null, deletedAt: null, occurredOn: { gte: from } },
         select: { occurredOn: true, autoCorrect: true, selfState: true },
       }),
     ]);

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BookOpenCheck, CalendarClock, ChevronDown, ChevronRight, History, CircleCheck, CircleDashed, Clock, Hourglass, MessageSquareText, Play, RotateCcw } from "lucide-react";
+import { BookOpenCheck, CalendarClock, ChevronDown, ChevronRight, History, CircleCheck, CircleDashed, Clock, Hourglass, Lock, MessageSquareText, Play, RotateCcw } from "lucide-react";
 import { HOMEWORK_MARKS, TONE_SELECTED } from "@/components/attendance/marks";
 import { dayLabel } from "@/components/makeup/types";
 import { weekdayShort } from "@/components/student-hub/lib";
@@ -14,6 +14,7 @@ import { cn } from "@/lib/cn";
 import { formatMnDate } from "@/lib/dateMn";
 import HomeworkPhotoPanel from "@/components/student-hub/HomeworkPhotoPanel";
 import { HOMEWORK_WINDOW_DAYS, dayDiff } from "@/components/student-hub/photo-types";
+import HomeworkComments, { type HwComment } from "./HomeworkComments";
 import HomeworkRedo from "./HomeworkRedo";
 import { cleanTitle, solveHref, todayKeyUB } from "./lib";
 import type { HwDay, HwItem, HwMyResponse, HwPhoto } from "./types";
@@ -52,6 +53,17 @@ function StatusChip({ item }: { item: HwItem }) {
 
 function ItemRow({ day, item }: { day: HwDay; item: HwItem }) {
   const title = cleanTitle(item.title, item.variantLabel);
+  // Багш «хугацаа дуусахад хаагдана» гэж тохируулсан, хугацаа өнгөрсөн — илгээгээгүй бол нээхгүй
+  if (day.closed && item.status !== "SUBMITTED")
+    return (
+      <li className="flex min-h-14 items-center gap-3 py-2.5 text-ink-dim">
+        <Lock className="size-5 shrink-0" aria-hidden />
+        <span className="min-w-0 flex-1">
+          <span className="cyrillic-tight block truncate font-semibold">{title}</span>
+          <span className="mt-0.5 block text-xs">Хугацаа дууссан, хаагдсан</span>
+        </span>
+      </li>
+    );
   return (
     <li>
       <Link
@@ -124,20 +136,28 @@ function useNow(): number {
 
 /**
  * Хугацаа энгийнээр (эзэн 2026-11-03): «Мягмар 23:59 хүртэл» + үлдсэн хугацаа («2 өдөр 5 цаг үлдсэн»).
- * Сервер дараагийн хичээлийн өдрийн 00:00-ийг өгдөг — өмнөх өдрийн 23:59 гэж харуулна.
+ * Анхдагч хугацаа нь дараагийн хичээлийн өдрийн 00:00 — өмнөх өдрийн 23:59 гэж харуулна. Багш
+ * гараар тохируулсан бол тэр цагийг 24 цагийн хэлбэрээр («Лх 21:00 хүртэл», эзэн 2026-11-05).
  */
-function DeadlineChip({ iso }: { iso: string }) {
+function DeadlineChip({ iso, allowLate = true }: { iso: string; allowLate?: boolean }) {
   const now = useNow();
   const end = new Date(iso).getTime();
   if (!Number.isFinite(end)) return null;
-  const endKey = formatMnDate(new Date(end - 60_000), { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\./g, "-");
+  const ub = new Date(end + 8 * 3_600_000);
+  const midnight = ub.getUTCHours() === 0 && ub.getUTCMinutes() === 0;
+  const endKey = formatMnDate(new Date(midnight ? end - 60_000 : end), { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\./g, "-");
+  const hhmm = midnight
+    ? "23:59"
+    : `${String(ub.getUTCHours()).padStart(2, "0")}:${String(ub.getUTCMinutes()).padStart(2, "0")}`;
   const left = end - now;
   const mins = Math.floor(left / 60_000);
   const days = Math.floor(mins / 1440);
   const hours = Math.floor((mins % 1440) / 60);
   const remain =
     left <= 0
-      ? "Хугацаа дууссан"
+      ? allowLate
+        ? "Хугацаа дууссан"
+        : "Хаагдсан"
       : days > 0
         ? `${days} өдөр${hours ? ` ${hours} цаг` : ""} үлдсэн`
         : hours > 0
@@ -152,7 +172,7 @@ function DeadlineChip({ iso }: { iso: string }) {
       )}
     >
       <Clock className="size-3" aria-hidden />
-      <Meta items={[`${weekdayShort(endKey)} 23:59 хүртэл`, remain]} />
+      <Meta items={[`${weekdayShort(endKey)} ${hhmm} хүртэл`, remain, left > 0 && !allowLate && "дараа нь хаагдана"]} />
     </span>
   );
 }
@@ -168,7 +188,11 @@ function DayCard({
   canSend: boolean;
   onPhoto: (p: HwPhoto | null) => void;
 }) {
-  const comment = day.markComment?.trim();
+  const [comments, setComments] = useState(day.comments ?? []);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- серверийн шинэ жагсаалтыг дагана
+    setComments(day.comments ?? []);
+  }, [day.comments]);
   return (
     <article
       id={dayId(day)}
@@ -194,14 +218,8 @@ function DayCard({
         {day.topic && <p className="cyrillic-tight font-semibold text-ink">{day.topic}</p>}
         <div className="flex flex-wrap items-center gap-1.5 text-sm text-ink-dim">
           <span>{day.classroomName}</span>
-          {day.deadlineAt && !day.upcoming && <DeadlineChip iso={day.deadlineAt} />}
+          {day.deadlineAt && !day.upcoming && <DeadlineChip iso={day.deadlineAt} allowLate={day.allowLate} />}
         </div>
-        {comment && (
-          <p className="flex items-start gap-1.5 rounded-lg bg-panel px-3 py-2 text-sm text-ink">
-            <MessageSquareText className="mt-0.5 size-4 shrink-0 text-ink-dim" aria-label="Багшийн тайлбар" />
-            <span className="min-w-0 break-words">{comment}</span>
-          </p>
-        )}
       </header>
 
       <HomeworkPhotoPanel
@@ -211,6 +229,27 @@ function DayCard({
         canSend={canSend}
         onChange={onPhoto}
       />
+
+      {/* Багшийн сэтгэгдэл (эзэн 2026-11-05) — тухайн даалгавар дээр, сурагч хариулж болно */}
+      {comments.length > 0 && (
+        <section aria-label="Багшийн сэтгэгдэл" className="rounded-xl border border-brand-bright/40 p-3">
+          <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-ink">
+            <MessageSquareText className="size-4 text-brand-soft" aria-hidden />
+            Багшийн сэтгэгдэл
+          </h3>
+          <HomeworkComments
+            comments={comments}
+            placeholder="Багшид хариулах"
+            onSend={async (body) => {
+              const r = await api<{ comments: HwComment[] }>("/homework/comments", {
+                method: "POST",
+                body: { classroomId: day.classroomId, date: day.date, body },
+              });
+              setComments(r.comments);
+            }}
+          />
+        </section>
+      )}
 
       {day.items.length > 0 && (
         <div>
@@ -335,8 +374,10 @@ export default function HomeworkList() {
     };
   }, [sorted, todayKey]);
 
+  // Багш буцаасан бол хугацаа хаагдсан ч дахин илгээнэ (сервер мөн зөвшөөрнө)
   const canSendDay = (d: HwDay) =>
-    !!d.upcoming || (dayDiff(todayKey, d.date) >= 0 && dayDiff(todayKey, d.date) < HOMEWORK_WINDOW_DAYS);
+    (!d.closed || !!d.photo?.returnedAt) &&
+    (!!d.upcoming || (dayDiff(todayKey, d.date) >= 0 && dayDiff(todayKey, d.date) < HOMEWORK_WINDOW_DAYS));
   // Өмнөх өдрүүдээс зураг нь илгээгдээгүй, одоо ч илгээж болох — товчон дээр сануулна
   const missed = groups.older.filter((d) => !d.photo && canSendDay(d)).length;
 

@@ -4,7 +4,7 @@ import * as bcrypt from 'bcryptjs';
 import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthService } from './auth.service';
-import { LoginAttempts, accountAttempts, loginAttempts } from './login-attempts';
+import { LoginAttempts, accountAttempts, accountSourceAttempts, loginAttempts } from './login-attempts';
 import { PasswordResetService } from './password-reset.service';
 
 /* 3 удаа буруу нууц үг → бүртгэлийн эзэнд НЭГ имэйл (эзэн 2026-10-22) +
@@ -70,6 +70,7 @@ describe('AuthService.login — буруу оролдлогын мэдэгдэл
   afterEach(() => {
     ids.forEach((id) => loginAttempts.success(id));
     accountAttempts.success('synthetic-alert-user');
+    accountSourceAttempts.success('synthetic-alert-user|');
   });
 
   it('гурван ӨӨР нэрээр оролдсон ч нэг бүртгэлд тооцож ЯГ НЭГ имэйл', async () => {

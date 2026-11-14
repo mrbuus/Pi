@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Archive, MoreVertical, Pencil, UsersRound } from 'lucide-react';
+import { Pencil, UsersRound } from 'lucide-react';
 import RequireRole from '@/components/nav/RequireRole';
 import { Meta } from '@/components/ui/Meta';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/StateBlock';
@@ -27,12 +27,6 @@ export default function ClassroomsClient() {
   const [classrooms, setClassrooms] = useState<Classroom[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [disbandTarget, setDisbandTarget] = useState<Classroom | null>(null);
-  const [disbandConfirmText, setDisbandConfirmText] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState('');
-  const [disbandError, setDisbandError] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -51,37 +45,18 @@ export default function ClassroomsClient() {
     return () => window.clearTimeout(timer);
   }, [load]);
 
-  async function disband() {
-    if (!disbandTarget || disbandConfirmText !== disbandTarget.name || busy) return;
-    setBusy(true);
-    setDisbandError('');
-    setMessage('');
-    try {
-      await api(`/classrooms/${encodeURIComponent(disbandTarget.id)}/disband`, { method: 'POST', body: {} });
-      setDisbandTarget(null);
-      setDisbandConfirmText('');
-      setMessage('Ангийн идэвхтэй сурагчдыг гаргалаа. Түүх хадгалагдсан.');
-      await load();
-    } catch (err) {
-      setDisbandError(errorMessage(err));
-    } finally {
-      setBusy(false);
-    }
-  }
-
   return <RequireRole allow={['ADMIN', 'TEACHER_PLUS']}>
     <div className="mx-auto w-full max-w-5xl space-y-5">
       <header>
         <h1 className="text-2xl font-extrabold text-ink">Ангиуд</h1>
         <p className="mt-1 text-sm text-ink-dim">Ангийн мэдээлэл болон сурагчдын бүртгэлийг удирдана.</p>
       </header>
-      {message && <p role="status" className="rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm font-semibold text-success">{message}</p>}
       {error && <ErrorState message={error} onRetry={() => void load()} />}
       {loading && <LoadingState rows={4} label="Ангиуд ачаалж байна" />}
       {!loading && !error && classrooms?.length === 0 && <EmptyState icon={UsersRound} title="Идэвхтэй анги алга" hint="Идэвхтэй сургалтын анги шинээр бүртгэх үед энд харагдана." />}
       {!loading && !error && Boolean(classrooms?.length) && <ul className="grid gap-3 sm:grid-cols-2">
         {classrooms?.map((classroom) => <li key={classroom.id} className="relative rounded-2xl border border-line bg-surface p-4 elev-1">
-          <Link href={`/app/admin/classrooms/${encodeURIComponent(classroom.id)}`} className="block min-h-24 rounded-lg pr-12 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+          <Link href={`/app/admin/classrooms/${encodeURIComponent(classroom.id)}`} className="block min-h-24 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
             <h2 className="break-words text-lg font-bold text-ink">{classroom.name}</h2>
             <div className="mt-2 text-sm text-ink-dim"><Meta items={[
               classroom.type === 'ONLINE' ? 'Онлайн' : 'Танхим',
@@ -92,24 +67,8 @@ export default function ClassroomsClient() {
             ]} /></div>
             <span className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand"><Pencil size={16} aria-hidden /> Дэлгэрэнгүй удирдах</span>
           </Link>
-          <div className="absolute right-3 top-3">
-            <button type="button" onClick={() => setOpenMenu(openMenu === classroom.id ? null : classroom.id)} className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-ink-dim hover:bg-panel focus-visible:outline-2 focus-visible:outline-brand" aria-label={`${classroom.name}-ийн үйлдэл`} aria-expanded={openMenu === classroom.id}>
-              <MoreVertical size={18} aria-hidden />
-            </button>
-            {openMenu === classroom.id && <div className="absolute right-0 top-full z-10 mt-1 w-48 rounded-xl border border-line bg-surface p-1 elev-2">
-              <button type="button" onClick={() => { setDisbandTarget(classroom); setDisbandConfirmText(''); setOpenMenu(null); }} className="flex min-h-11 w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-error hover:bg-error/10 focus-visible:outline-2 focus-visible:outline-brand">
-                <Archive size={16} aria-hidden /> Анги тараах
-              </button>
-            </div>}
-          </div>
         </li>)}
       </ul>}
-              {disbandTarget && <Dialog title={`«${disbandTarget.name}» ангийг тараах уу?`} onClose={() => !busy && setDisbandTarget(null)} busy={busy} confirmLabel="Ангийг тараах" confirmDisabled={disbandConfirmText !== disbandTarget.name} onConfirm={disband} danger>
-        <p className="text-sm text-ink-dim">Идэвхтэй {disbandTarget._count?.enrollments ?? 0} сурагчийг ангиас гаргана. Ирцийн түүх хадгалагдана. Баталгаажуулахын тулд ангийн нэрийг бичнэ үү.</p>
-        <label htmlFor="disband-classroom-name" className="mt-4 block text-sm font-semibold text-ink">Ангийн нэр</label>
-        <input id="disband-classroom-name" value={disbandConfirmText} onChange={(event) => setDisbandConfirmText(event.target.value)} className="mt-1 min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-ink focus-visible:outline-2 focus-visible:outline-brand" autoComplete="off" />
-        {disbandError && <ErrorState message={disbandError} onRetry={() => void disband()} />}
-      </Dialog>}
     </div>
   </RequireRole>;
 }

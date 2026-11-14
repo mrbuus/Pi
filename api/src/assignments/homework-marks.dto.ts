@@ -4,12 +4,15 @@ import {
   ArrayMaxSize,
   ArrayNotEmpty,
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
+  Matches,
+  MaxLength,
   ValidateNested,
 } from 'class-validator';
 import { HomeworkMarkStatus } from '../generated/prisma/enums';
@@ -57,4 +60,28 @@ export class BulkHomeworkMarksDto {
   @ValidateNested({ each: true })
   @Type(() => BulkHomeworkEntryDto)
   entries: BulkHomeworkEntryDto[];
+}
+
+/** PUT classrooms/:id/homework-deadline — самбарын өдөр D-д шалгах даалгаврын хугацаа */
+export class SetHomeworkDeadlineDto {
+  @ApiProperty({ example: '2026-11-05', description: 'Самбарын өдөр (даалгаврыг шалгах хичээл)' })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  date: string;
+
+  @ApiProperty({ example: '2026-11-04', description: 'Хугацааны огноо: өмнөх хичээлээс энэ хичээл хүртэл' })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  dueDate: string;
+
+  @ApiProperty({ example: '21:00', description: '24 цагийн хэлбэр HH:MM (AM/PM үгүй)' })
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, { message: 'Цагийг 24 цагийн хэлбэрээр (00:00–23:59) оруулна уу' })
+  time: string;
+
+  @ApiProperty({ description: 'true = хугацаа өнгөрсөн ч илгээж болно (хоцорсон гэж тэмдэглэнэ)' })
+  @IsBoolean()
+  allowLate: boolean;
+}
+
+/** Сурагчид харагдах сэтгэгдэл / «Буцаах» шалтгаан (эзэн 2026-11-05) */
+export class HomeworkCommentDto {
+  @ApiProperty() @IsString() @IsNotEmpty() @MaxLength(1000) body!: string;
 }

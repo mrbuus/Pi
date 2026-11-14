@@ -27,8 +27,12 @@ export class TeacherGroupsController {
 
   /**
    * POST /api/teacher-groups/register
-   * Гадны багш бүртгүүлнэ (нэвтэрээгүй хэрэглэгч).
+   * Гадны багшийн бүртгэлийг ЗӨВХӨН Админ үүсгэнэ (2026-11-05 аудит): өмнө нь нэвтрээгүй хэн ч
+   * TEACHER эрхтэй, автоматаар баталгаажсан бүртгэл үүсгэж, төвийн сурагчдын ирц/дүнг уншиж
+   * чаддаг байв. Баталгаажуулалт (verifiedAt) нь тусдаа PUT verify/:userId-ээр.
    */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Post('register')
   async registerExternalTeacher(@Body() dto: RegisterExternalTeacherDto) {
     return this.service.registerExternalTeacher(dto);

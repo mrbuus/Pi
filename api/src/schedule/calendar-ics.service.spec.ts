@@ -7,7 +7,7 @@ import { CalendarIcsService } from './calendar-ics.service';
 type AsyncMock = jest.Mock<Promise<unknown>, unknown[]>;
 interface PrismaMock {
   user: { findUnique: AsyncMock; updateMany: AsyncMock };
-  enrollment: { findFirst: AsyncMock };
+  enrollment: { findMany: AsyncMock };
   classSchedule: { findMany: AsyncMock };
   scheduleException: { findMany: AsyncMock };
   academicCalendarDay: { findMany: AsyncMock };
@@ -29,7 +29,7 @@ describe('CalendarIcsService', () => {
         findUnique: asyncMock(),
         updateMany: asyncMock().mockResolvedValue({ count: 1 }),
       },
-      enrollment: { findFirst: asyncMock() },
+      enrollment: { findMany: asyncMock() },
       classSchedule: { findMany: asyncMock() },
       scheduleException: { findMany: asyncMock() },
       academicCalendarDay: { findMany: asyncMock() },
@@ -82,7 +82,7 @@ describe('CalendarIcsService', () => {
       role: Role.STUDENT,
       ...archiveField,
     });
-    prisma.enrollment.findFirst.mockResolvedValue(null);
+    prisma.enrollment.findMany.mockResolvedValue([]);
 
     await expect(
       service.feedByToken(Buffer.alloc(32, 5).toString('base64url')),
@@ -106,7 +106,7 @@ describe('CalendarIcsService', () => {
     await expect(
       service.feedByToken(Buffer.alloc(32, 5).toString('base64url')),
     ).rejects.toBeInstanceOf(NotFoundException);
-    expect(prisma.enrollment.findFirst).not.toHaveBeenCalled();
+    expect(prisma.enrollment.findMany).not.toHaveBeenCalled();
   });
 
   it('limits export to the token owner enrolled class and caps the date range', async () => {
@@ -114,10 +114,10 @@ describe('CalendarIcsService', () => {
       id: 'user-1',
       role: Role.STUDENT,
     });
-    prisma.enrollment.findFirst.mockResolvedValue({
-      classroomId: 'class-owned',
-      classroom: { archived: false },
-    });
+    prisma.enrollment.findMany.mockResolvedValue([
+      { classroomId: 'class-owned' },
+      { classroomId: 'class-social' },
+    ]);
     prisma.classSchedule.findMany.mockResolvedValue([]);
 
     const token = Buffer.alloc(32, 5).toString('base64url');
@@ -128,16 +128,18 @@ describe('CalendarIcsService', () => {
     const scheduleQuery = prisma.classSchedule.findMany.mock.calls[0][0] as {
       where: Record<string, unknown>;
     };
-    const enrollmentQuery = prisma.enrollment.findFirst.mock.calls[0][0] as {
+    const enrollmentQuery = prisma.enrollment.findMany.mock.calls[0][0] as {
       where: Record<string, unknown>;
     };
     expect(scheduleQuery.where).toMatchObject({
-      classroomId: 'class-owned',
+      // хоёр ангид зэрэг суудаг сурагч — хоёр ангийн хуваарь
+      classroomId: { in: ['class-owned', 'class-social'] },
       classroom: { archived: false },
     });
     expect(enrollmentQuery.where).toEqual({
       studentId: 'user-1',
       leftAt: null,
+      classroom: { archived: false },
     });
     await expect(
       service.exportForUser('user-1', Role.STUDENT, '2026-09-01', '2026-12-01'),

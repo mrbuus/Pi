@@ -4,6 +4,7 @@ import { api } from "@/lib/api";
 import { Button } from "@/components/ui/kit/button";
 import { paymentAttempt } from "./payment-attempt";
 import QpayCheckout from "./QpayCheckout";
+import BankTransferInfo from "@/components/payments/BankTransferInfo";
 import type {
   CreatePaymentResponse,
   PaymentDetails,
@@ -36,6 +37,8 @@ export default function StoreCheckout({
     [status, setStatus] = useState(""),
     [confirmed, setConfirmed] = useState(false),
     [granted, setGranted] = useState(false);
+  // Дансаар: эхлээд дансны мэдээлэл (хуулах гүйлгээний утгатай), шилжүүлсний дараа мэдэгдэнэ
+  const [bankOpen, setBankOpen] = useState(false);
   const [requestId, setRequestId] = useState<string | undefined>();
   const lock = useRef(false);
   const description = `Дэлгүүр: ${title}`.slice(0, 200);
@@ -202,7 +205,9 @@ export default function StoreCheckout({
       remember(receipt);
       setMethod(next);
       setStatus(
-        "Төлбөрийн мэдэгдэл хүлээгдэж байна. Төвийн баталгаатай сувгаар данс эсвэл бэлэн төлбөрийн мэдээллээ лавлаарай; ажилтан баталгаажуулсны дараа төлвийг шалгана.",
+        next === "BANK_TRANSFER"
+          ? "Төлбөрийн мэдэгдэл илгээгдлээ. Ажилтан шилжүүлгийг баталгаажуулсны дараа эрх нээгдэнэ."
+          : "Бэлэн төлбөрийн мэдэгдэл илгээгдлээ. Төвд төлсний дараа ажилтан баталгаажуулна.",
       );
     } catch (e) {
       setError(
@@ -233,17 +238,30 @@ export default function StoreCheckout({
           Баримтын дугаар: {receiptId}
         </p>
       )}
-      {!receiptId && !method && (
+      {!receiptId && !method && bankOpen && (
+        <div className="space-y-3">
+          <BankTransferInfo />
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => void create("BANK_TRANSFER")} disabled={busy}>
+              {purchase.price.toLocaleString("en-US")}₮ шилжүүлсэн, мэдэгдэх
+            </Button>
+            <Button variant="outline" onClick={() => setBankOpen(false)} disabled={busy}>
+              Буцах
+            </Button>
+          </div>
+        </div>
+      )}
+      {!receiptId && !method && !bankOpen && (
         <div className="flex flex-wrap gap-2">
           <Button onClick={chooseQpay} disabled={busy}>
             QPay
           </Button>
           <Button
             variant="outline"
-            onClick={() => void create("BANK_TRANSFER")}
+            onClick={() => setBankOpen(true)}
             disabled={busy}
           >
-            Дансаар төлөх мэдэгдэл
+            Дансаар шилжүүлэх
           </Button>
           <Button
             variant="outline"
@@ -254,6 +272,8 @@ export default function StoreCheckout({
           </Button>
         </div>
       )}
+      {/* Мэдэгдэл илгээсний дараа ч дансны мэдээлэл харагдана (дахин хуулах) */}
+      {method === "BANK_TRANSFER" && !granted && <BankTransferInfo />}
       {method === "QPAY" && !granted && (
         <QpayCheckout
           clientRequestId={requestId}

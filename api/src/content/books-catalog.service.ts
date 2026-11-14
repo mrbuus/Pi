@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Subject, TestGradingMode, TestType } from '../generated/prisma/enums';
+import { TtlCache } from '../common/ttl-cache';
 import { PrismaService } from '../prisma/prisma.service';
 import { BOOK_DISPLAY_ORDER, studentBookWhere } from '../common/book-display';
 
@@ -99,8 +100,17 @@ const lite = (ch: ChapterRow): ChapterLite => ({
   tests: ch.tests.map((t) => ({ id: t.id, title: t.title, variantLabel: t.variantLabel, groupKey: t.groupKey, createdAt: t.createdAt, gradingMode: t.gradingMode, type: t.type, problemCount: t._count.problems })),
 });
 
+/**
+ * Нийтийн каталог (/catalog/books) бүх хэрэглэгчид ижил, HTTP-ээр аль хэдийн
+ * `public, max-age=300` — сервер талд 60 секунд санах ойд барина (ном бүрийн
+ * бүлэг/тест/бодлогын тоолол хүнд). docs/BACKEND-PERF.md
+ */
+const CATALOG_CACHE_TTL_MS = 60_000;
+
 @Injectable()
 export class BooksCatalogService {
+  private readonly cache = new TtlCache<unknown>(CATALOG_CACHE_TTL_MS, 100);
+
   constructor(private prisma: PrismaService) {}
 
   /** Нийтэд харагдах номууд: архивлаагүй, туршилтын (LAB, v2-*) биш; V3 хувилбартай бол хуучныг нуух */
@@ -116,7 +126,15 @@ export class BooksCatalogService {
     return rows.filter((b) => !/LAB|legacy/i.test(b.code) && !b.id.startsWith('v2-') && !codes.has(`${b.code}V3`));
   }
 
-  async listBooks() {
+  listBooks() {
+    return this.cache.get('list', () => this.loadBooks()) as ReturnType<BooksCatalogService['loadBooks']>;
+  }
+
+  bookDetail(code: string) {
+    return this.cache.get(`book:${code}`, () => this.loadBookDetail(code)) as ReturnType<BooksCatalogService['loadBookDetail']>;
+  }
+
+  private async loadBooks() {
     const books = await this.publicBooks();
     const chapters = (await this.prisma.chapter.findMany({
       where: { bookId: { in: books.map((b) => b.id) }, deletedAt: null },
@@ -139,7 +157,7 @@ export class BooksCatalogService {
     });
   }
 
-  async bookDetail(code: string) {
+  private async loadBookDetail(code: string) {
     const book = (await this.publicBooks()).find((b) => b.code === code);
     if (!book) throw new NotFoundException('Ном олдсонгүй');
     const chapters = (await this.prisma.chapter.findMany({

@@ -5,7 +5,7 @@ import { useSyncExternalStore, type CSSProperties } from "react";
 import { CalendarClock, CalendarX2, Check, MessageSquareText } from "lucide-react";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { CompactBlocks } from "./MonthBlocks";
-import { dayLabel, mnt, PLAN_LABEL, shortMnt } from "./ledgerFormat";
+import { dayLabel, isComplete, isOwed, mnt, PLAN_LABEL, shortMnt } from "./ledgerFormat";
 import type { LedgerRow } from "./ledgerTypes";
 
 const QUERY = "(min-width: 768px)";
@@ -24,10 +24,10 @@ export const studentHref = (id: string) => `/app/payments/student/${encodeURICom
 /** Баруун талын нэг тоо — өр, илүү, бүтэн эсвэл дараагийн төлөх өдөр. */
 export function RowSummary({ r, align = "right" }: { r: LedgerRow; align?: "right" | "left" }) {
   const box = `flex flex-col ${align === "right" ? "items-end text-right" : "items-start"} leading-tight`;
-  if (r.owedNow > 0)
+  if (isOwed(r))
     return (
       <span className={box}>
-        <span className="font-bold tabular-nums text-error">{mnt(r.owedNow)}</span>
+        <span className="font-bold tabular-nums text-error">{r.owedNow == null ? "Өртэй" : mnt(r.owedNow)}</span>
         <span className="text-xs text-ink-dim">
           {r.overdueDays > 0 ? `${r.overdueDays} хоног хэтэрсэн` : `${r.owedMonths} сарын өр`}
         </span>
@@ -40,7 +40,7 @@ export function RowSummary({ r, align = "right" }: { r: LedgerRow; align?: "righ
         <span className="text-xs text-ink-dim">илүү төлсөн</span>
       </span>
     );
-  if (r.remaining === 0)
+  if (isComplete(r))
     return (
       <span className={box}>
         <span className="inline-flex items-center gap-1 font-semibold text-success">
@@ -51,7 +51,7 @@ export function RowSummary({ r, align = "right" }: { r: LedgerRow; align?: "righ
   if (r.nextDue)
     return (
       <span className={box}>
-        <span className="tabular-nums text-ink">{shortMnt(r.nextDue.amount)}</span>
+        <span className="tabular-nums text-ink">{r.nextDue.amount == null ? "Дараагийн төлөлт" : shortMnt(r.nextDue.amount)}</span>
         <span className="text-xs text-ink-dim">{dayLabel(r.nextDue.dueOn)}-нд</span>
       </span>
     );
@@ -109,6 +109,8 @@ export default function LedgerRowItem({
 }) {
   const desktop = useIsDesktop();
   const href = studentHref(r.id);
+  // Төлбөр нь асуудалтай (хугацаа нь болсон өр) мөр улаанаар ялгарна — шийтийн адил нэг харахад олно
+  const owed = isOwed(r);
   const stripe = r.classroom ? ({ "--cls": getClassroomColor(r.classroom.id) } as CSSProperties) : undefined;
   const name = (
     <>
@@ -129,7 +131,7 @@ export default function LedgerRowItem({
       <Link
         href={href}
         style={stripe}
-        className={`block space-y-2 rounded-xl border border-line bg-surface p-3 row-interactive hover:bg-ink/[0.02] ${showClass ? "class-row" : ""}`}
+        className={`block space-y-2 rounded-xl border p-3 row-interactive ${owed ? "border-error/45 bg-error/10" : "border-line bg-surface hover:bg-ink/[0.02]"} ${showClass ? "class-row" : ""}`}
       >
         <span className="flex items-start justify-between gap-3">
           <span className="min-w-0 space-y-0.5">
@@ -146,7 +148,7 @@ export default function LedgerRowItem({
   return (
     <div
       style={stripe}
-      className={`grid grid-cols-[minmax(11rem,1fr)_auto_7.5rem] items-center gap-x-5 gap-y-1 rounded-xl px-3 py-2 row-interactive hover:bg-ink/[0.025] ${showClass ? "class-row" : ""}`}
+      className={`grid grid-cols-[minmax(11rem,1fr)_auto_7.5rem] items-center gap-x-5 gap-y-1 rounded-xl px-3 py-2 row-interactive ${owed ? "bg-error/10 ring-1 ring-inset ring-error/35" : "hover:bg-ink/[0.025]"} ${showClass ? "class-row" : ""}`}
     >
       <Link href={href} className="min-w-0 space-y-0.5 rounded-lg py-1 hover:underline">
         <span className="block truncate">{name}</span>

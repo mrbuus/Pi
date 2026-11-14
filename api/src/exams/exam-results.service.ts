@@ -17,6 +17,7 @@ import {
 } from '../common/access';
 import { PrismaService } from '../prisma/prisma.service';
 import { ItemStatus } from '../tests/exam-items';
+import { spentSeconds } from '../tests/problem-time';
 import {
   chosenLetter,
   percentOf,
@@ -41,6 +42,19 @@ import {
   youtubeOf,
 } from './exam-data';
 import { EXAM_TYPES } from './exams.service';
+
+/** Бодлого бүрийн дугаар ба зарцуулсан секунд (онлайн сесстэй үед л). */
+export function itemTimesOf(
+  exam: Pick<PreparedExam, 'test'>,
+  data: Pick<StudentExamData, 'session'>,
+): { n: number; timeSpentSec: number }[] {
+  const times = data.session?.times;
+  if (!times) return [];
+  return exam.test.problems.flatMap((row) => {
+    const sec = spentSeconds(times[row.problemId]);
+    return sec === null ? [] : [{ n: row.order, timeSpentSec: sec }];
+  });
+}
 
 const PARENT_WEAK_TOPICS = 3;
 
@@ -212,6 +226,7 @@ export class ExamResultsService {
       return {
         n: row.order,
         part: p.format === 'FILL_NUMBER' ? 2 : 1,
+        timeSpentSec: spentSeconds(data.session?.times?.[problemId]),
         items,
         lost: items.reduce((s, i) => s + i.points, 0),
         problem: policy.problems
@@ -307,6 +322,9 @@ export class ExamResultsService {
           ? this.wrongList(exam, breakdown, data, policy)
           : null,
       practice: weak ? { topic: weak.name, chapterIds } : null,
+      // Нэмэлт (2026-11-04): онлайнаар өгсөн бол бодлого бүрт зарцуулсан секунд («Удаан бодсон»).
+      // Зөвхөн дугаар ба хугацаа — зөв/буруу, хариу задрахгүй.
+      itemTimes: itemTimesOf(exam, data),
     };
   }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { classNames } from "@/lib/classTrack";
 import { useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { Check, History, Pencil, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/kit/button";
@@ -7,6 +8,7 @@ import { Meta } from "@/components/ui/Meta";
 import { formatMnDate } from "@/lib/dateMn";
 import { api } from "@/lib/api";
 import SendPasswordResetButton from "../SendPasswordResetButton";
+import AdminPasswordButton from "../AdminPasswordButton";
 import { SMS_ENABLED } from "@/lib/features";
 import {
   StudentDetailData,
@@ -233,6 +235,7 @@ export default function StudentInfoTab({
               </Button>
               {/* Нууц үгээ мартсан сурагчийг багш газар дээр нь шийднэ — код зөвхөн сурагчийн утас руу */}
               {SMS_ENABLED && <SendPasswordResetButton studentId={studentId} studentName={fullName(detail)} />}
+              <AdminPasswordButton userId={studentId} hasPhone={Boolean(detail.phone)} />
             </div>
           )}
           {editing && (
@@ -299,7 +302,7 @@ export default function StudentInfoTab({
               <Field
                 id="v-classroom"
                 label="Анги"
-                value={detail.currentClassroom?.name ?? (p?.grade ? `${p.grade}-р анги` : null)}
+                value={classNames(detail.currentClassroom, detail.otherClassrooms) ?? (p?.grade ? `${p.grade}-р анги` : null)}
               />
               <Field id="v-grade" label="Анги (жил)" value={p?.grade ? `${p.grade}-р анги` : null} />
               <Field id="v-section" label="Секц" value={p?.section} />

@@ -221,3 +221,19 @@ describe('computePaidUntil — Төлбөр дуусах огноо', () => {
     expect(formatDate(result)).toBe('2026-10-02');
   });
 });
+
+describe('paidUntilFromLedger — ledger-ээс «хэдий хүртэл төлсөн» (2026-11-05)', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { paidUntilFromLedger } = require('./paid-until') as typeof import('./paid-until');
+  const key = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : null);
+
+  it('сар бүр: 9, 10-р сар төлсөн, 11-р сар 11-04-нд → 11-03 хүртэл', () => {
+    expect(key(paidUntilFromLedger({ coveredThrough: '2026-10', nextDue: { dueOn: '2026-11-04' } }))).toBe('2026-11-03');
+  });
+  it('бүх сар төлсөн (бүтэн жил) → сүүлийн сарын эцэс', () => {
+    expect(key(paidUntilFromLedger({ coveredThrough: '2027-05', nextDue: null }))).toBe('2027-05-31');
+  });
+  it('юу ч төлөөгүй → null', () => {
+    expect(paidUntilFromLedger({ coveredThrough: null, nextDue: { dueOn: '2026-09-04' } })).toBeNull();
+  });
+});

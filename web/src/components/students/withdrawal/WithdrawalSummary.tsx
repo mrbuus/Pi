@@ -22,7 +22,7 @@ export default function WithdrawalSummary({ data }: { data: WithdrawalPreview })
         <p className="font-display text-2xl font-extrabold tabular-nums text-ink">{mnt(r.refund)}</p>
         <p className="mt-0.5 text-sm text-ink-dim">
           {r.refund > 0
-            ? `Төлсөн ${mnt(r.paid)} − суусан ${mnt(r.owed)}`
+            ? `Төлсөн ${mnt(r.paid)}${r.refundedBefore ? ` − өмнө буцаасан ${mnt(r.refundedBefore)}` : ""} − суусан ${mnt(r.owed)}`
             : `Суусан хичээлийн төлбөр (${mnt(r.owed)}) төлсөн дүнгээс (${mnt(r.paid)}) их буюу тэнцүү тул буцаах дүн алга`}
         </p>
       </section>
@@ -54,6 +54,7 @@ export default function WithdrawalSummary({ data }: { data: WithdrawalPreview })
                 ) : (
                   <>
                     Гарсан сар: {c.lessons} хичээл
+                    {c.assumed ? ` (${c.assumed} нь вэбээс өмнө, суусанд тооцсон)` : ""}
                     {c.leaveDay ? `, чөлөө 1 (${md(c.leaveDay)}) хассан` : ""}
                     {c.extraDays.length ? `, ${c.extraDays.length} өдөр хассан (${c.extraDays.map(md).join(", ")})` : ""}
                     {` → ${c.counted} × ${mnt(r.perLesson)}`}
@@ -79,6 +80,11 @@ export default function WithdrawalSummary({ data }: { data: WithdrawalPreview })
             <dd className="font-bold tabular-nums text-ink">{mnt(r.refund)}</dd>
           </div>
         </dl>
+        {data.noSchedule && (
+          <p role="alert" className="mt-2 rounded-lg border border-warning/40 bg-warning/10 px-2.5 py-1.5 text-sm text-ink">
+            Ангийн хуваарь алга тул хичээлийн тоо бодогдоогүй — хуваариа оруулаад дахин шалгана уу
+          </p>
+        )}
         {data.payments.length > 0 && (
           <details className="mt-2 text-sm">
             <summary className="cursor-pointer text-xs font-semibold text-ink-dim">Төлбөрүүд ({data.payments.length})</summary>

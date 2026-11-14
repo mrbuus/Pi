@@ -19,6 +19,16 @@ interface AuthedRequest {
   user: { userId: string; role: Role };
 }
 
+/** `?chapterId=a,b` эсвэл давтагдсан `?chapterId=a&chapterId=b` — сонголттой. */
+export function parseChapterIds(raw?: string | string[]): string[] | undefined {
+  if (raw === undefined) return undefined;
+  const list = (Array.isArray(raw) ? raw : [raw])
+    .flatMap((value) => String(value).split(','))
+    .map((value) => value.trim())
+    .filter(Boolean);
+  return list.length ? list : undefined;
+}
+
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('recommend')
 export class RecommendController {
@@ -30,6 +40,7 @@ export class RecommendController {
    * Гүйцэтгэл: 1-2 сек (DB үзүүлэлт 100-200 бодлого таран хайна)
    *
    * @query limit - хэдэн бодлого санал болгох (өгөгдмөл 10)
+   * @query chapterId - сонголттой: зөвхөн эдгээр бүлгээс (сэдвээр дасгал, таслалаар 12 хүртэл)
    * @returns Recommendation[] - { problemId, topicId, score, reason }
    */
   @Roles(Role.STUDENT, Role.BUYER)
@@ -37,6 +48,7 @@ export class RecommendController {
   async next(
     @Req() req: AuthedRequest,
     @Query('limit') limitStr?: string,
+    @Query('chapterId') chapterId?: string | string[],
   ): Promise<EvidenceRecommendation[]> {
     if (!req.user.userId) throw new NotFoundException('Сурагч олдсонгүй');
     const limit =
@@ -49,7 +61,18 @@ export class RecommendController {
       req.user.userId,
       limit,
       req.user.role,
+      parseChapterIds(chapterId),
     );
+  }
+
+  /**
+   * Хичээлийн чөлөөт сэдвийг бүлэгтэй тааруулна (яг/хэвшүүлсэн гарчиг; эргэлзээтэй бол null).
+   * @returns { chapterId: string | null, chapterIds: string[], title: string | null }
+   */
+  @Roles(Role.STUDENT, Role.BUYER)
+  @Get('chapter-match')
+  chapterMatch(@Req() req: AuthedRequest, @Query('topic') topic?: string) {
+    return this.recommend.matchLessonTopic(req.user.userId, topic, req.user.role);
   }
 
   /**

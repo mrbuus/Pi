@@ -1,0 +1,14 @@
+# tool/icon_font/build_icon_font.py үүсгэсэн — апп-д хэрэглэсэн Lucide глифийн subset.
+name: lucide_icons_flutter
+version: 4.0.1+subset
+publish_to: none
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  fonts:
+    - family: Lucide
+      fonts:
+        - asset: assets/lucide.ttf

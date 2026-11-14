@@ -115,6 +115,7 @@ export class CalendarIcsService {
     }
     const range = feedRange(from, to);
     const activeRange = {
+      deletedAt: null,
       effectiveFrom: { lte: range.to },
       AND: [
         { OR: [{ effectiveTo: null }, { effectiveTo: { gte: range.from } }] },
@@ -128,25 +129,25 @@ export class CalendarIcsService {
         ? []
         : await this.prisma.lessonStaffing.findMany({
             where: {
+              deletedAt: null,
               date: { gte: range.from, lte: range.to },
               OR: [{ leadTeacherId: userId }, { assistantTeacherId: userId }],
             },
             select: { scheduleId: true },
           });
     if (role === Role.STUDENT) {
-      const enrollment = await this.prisma.enrollment.findFirst({
-        where: { studentId: userId, leftAt: null },
-        select: {
-          classroomId: true,
-          classroom: { select: { archived: true } },
-        },
-      });
-      if (!enrollment || enrollment.classroom.archived) {
+      const classIds = (
+        await this.prisma.enrollment.findMany({
+          where: { studentId: userId, leftAt: null, classroom: { archived: false } },
+          select: { classroomId: true },
+        })
+      ).map((e) => e.classroomId);
+      if (!classIds.length) {
         return { filename: 'pi.mn-huvaari.ics', ics: buildIcs([]) };
       }
       scheduleWhere = {
         ...activeRange,
-        classroomId: enrollment.classroomId,
+        classroomId: { in: classIds },
         classroom: { archived: false },
       };
     } else {
@@ -181,6 +182,7 @@ export class CalendarIcsService {
     const [exceptions, holidays, topics, staffing] = await Promise.all([
       this.prisma.scheduleException.findMany({
         where: {
+          deletedAt: null,
           scheduleId: { in: scheduleIds },
           OR: [
             { date: { gte: range.from, lte: range.to } },
@@ -189,14 +191,15 @@ export class CalendarIcsService {
         },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { date: { gte: range.from, lte: range.to } },
-        include: { classrooms: { select: { classroomId: true } } },
+        where: { date: { gte: range.from, lte: range.to }, deletedAt: null },
+        include: { classrooms: { where: { deletedAt: null }, select: { classroomId: true } } },
       }),
       this.prisma.lessonTopic.findMany({
-        where: { scheduleId: { in: scheduleIds } },
+        where: { deletedAt: null, scheduleId: { in: scheduleIds } },
       }),
       this.prisma.lessonStaffing.findMany({
         where: {
+          deletedAt: null,
           scheduleId: { in: scheduleIds },
           date: { gte: range.from, lte: range.to },
         },

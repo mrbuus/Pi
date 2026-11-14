@@ -1,5 +1,6 @@
 "use client";
 
+import { classNames } from "@/lib/classTrack";
 import {
   ArrowRightLeft,
   CalendarCheck,
@@ -31,6 +32,7 @@ import {
 } from "../types";
 import StudentCompetencyCards from "@/components/classes/StudentCompetencyCards";
 import { studyDurationLabel } from "./studyDuration";
+import RefundEstimateRow from "../RefundEstimate";
 
 /** GET /exams/classes/:classId/students/:id — зөвхөн хураангуйд хэрэгтэй талбарууд */
 export interface ClassSummary {
@@ -69,7 +71,9 @@ export default function StudentOverview({
   const classroom = detail.currentClassroom;
   const started = p?.joinedOn ?? null;
   const duration = started ? studyDurationLabel(started, p?.leftOn ?? new Date()) : null;
+  // Сурагчийн өөрийн утас эхэнд (эзэн 2026-11-14) — нэвтрэх нэр ч мөн
   const phones = [
+    { label: "Өөрөө", value: detail.phone },
     { label: "Аав", value: p?.fatherPhone },
     { label: "Ээж", value: p?.motherPhone },
   ].filter((x): x is { label: string; value: string } => !!x.value);
@@ -84,7 +88,7 @@ export default function StudentOverview({
           <Meta
             className="mt-1 text-sm text-ink-dim"
             items={[
-              classroom?.name ?? <span key="nc">Ангигүй</span>,
+              classNames(classroom, detail.otherClassrooms) ?? <span key="nc">Ангигүй</span>,
               detail.studentCode && (
                 <span key="code" className="font-mono text-xs">
                   {detail.studentCode}
@@ -182,6 +186,13 @@ export default function StudentOverview({
           </Fact>
         )}
 
+        {/* «Одоо гарвал буцаах дүн» — Багш ч харна (эзэн 2026-11-08); Багшид сервер мөнгөн задаргаа өгөхгүй */}
+        {classroom && !detail.archivedAt && (
+          <div className="col-span-2 min-w-0 rounded-2xl border border-line bg-surface px-3 py-1.5 lg:col-span-1">
+            <RefundEstimateRow studentId={detail.id} />
+          </div>
+        )}
+
         <Fact icon={CalendarCheck} label="Ирц">
           {!classroom ? (
             <p className="font-semibold text-ink-dim">—</p>
@@ -233,8 +244,8 @@ export default function StudentOverview({
         {detail.focus && <FocusFact focus={detail.focus} />}
 
         {phones.length > 0 && (
-          <Fact icon={Phone} label="Эцэг эх" wide>
-            <div className="grid grid-cols-2 gap-2">
+          <Fact icon={Phone} label="Утас" wide>
+            <div className={`grid gap-2 ${phones.length >= 3 ? "grid-cols-3" : "grid-cols-2"}`}>
               {phones.map((ph) => (
                 <a
                   key={ph.label}

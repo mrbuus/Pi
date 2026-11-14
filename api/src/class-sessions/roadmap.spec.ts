@@ -142,7 +142,7 @@ describe('Замын зургийн маршрутын эрх', () => {
       classTestStatus: {
         findMany: jest.fn(async () => []),
         upsert: jest.fn(async () => ({})),
-        deleteMany: jest.fn(async () => ({})),
+        updateMany: jest.fn(async () => ({ count: 2 })),
       },
       auditLog: { create: jest.fn(async () => ({})) },
     };
@@ -151,12 +151,16 @@ describe('Замын зургийн маршрутын эрх', () => {
     expect(prisma.classTestStatus.upsert.mock.calls[0][0]).toMatchObject({
       where: { classroomId_testId: { classroomId: 'c', testId: 'tA' } },
       create: { status: 'REMOVED', updatedById: 'tp' },
+      // өмнө буцаасан мөрийг сэргээнэ
+      update: { status: 'REMOVED', deletedAt: null, deletedById: null },
     });
     await svc.setTestStatus('c', 'tA', null, 'tp', Role.TEACHER_PLUS);
-    expect(prisma.classTestStatus.deleteMany.mock.calls[0][0].where).toEqual({
-      classroomId: 'c',
-      testId: { in: ['tA', 'tB'] },
+    // Буцаах = ЗӨӨЛӨН (deletedAt), хатуу устгалгүй
+    expect(prisma.classTestStatus.updateMany.mock.calls[0][0]).toEqual({
+      where: { classroomId: 'c', testId: { in: ['tA', 'tB'] }, deletedAt: null },
+      data: { deletedAt: expect.any(Date), deletedById: 'tp' },
     });
+    expect(prisma.classTestStatus.deleteMany).toBeUndefined();
     expect(prisma.auditLog.create).toHaveBeenCalledTimes(2);
     prisma.test.findFirst.mockResolvedValueOnce(null);
     await expect(svc.setTestStatus('c', 'x', 'REMOVED', 'tp', Role.TEACHER_PLUS)).rejects.toThrow('Тест');

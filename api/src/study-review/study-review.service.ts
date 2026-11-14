@@ -4,11 +4,13 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { officialProblemIds } from './official-exposure';
 import { randomInt } from 'node:crypto';
 import { parseRational } from '../learning-lab/generator';
 import { PrismaService } from '../prisma/prisma.service';
+import { ProblemReviewService } from '../mistakes/problem-review.service';
 import { Prisma } from '../generated/prisma/client';
 import { Role } from '../generated/prisma/enums';
 import { canAccessChapter, chapterAccessGrant } from '../common/access';
@@ -35,7 +37,10 @@ const json = (value: unknown): Prisma.InputJsonValue =>
   JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 @Injectable()
 export class StudyReviewService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly reviews?: ProblemReviewService,
+  ) {}
   async history(
     userId: string,
     role: Role,
@@ -280,12 +285,13 @@ export class StudyReviewService {
     const ids = rows.map((p) => p.id);
     const [attempts, events, reviews, official] = await Promise.all([
       this.prisma.attempt.findMany({
-        where: { studentId: userId, problemId: { in: ids } },
+        where: { studentId: userId, deletedAt: null, problemId: { in: ids } },
         select: { problemId: true },
       }),
       this.prisma.learningEvent.findMany({
         where: {
           userId,
+          deletedAt: null,
           problemId: { in: ids },
           type: {
             in: [
@@ -551,6 +557,8 @@ export class StudyReviewService {
         flags: input.flags,
       });
     await this.owned(userId, role, id);
+    let wrongProblemId: string | null = null;
+    const answeredAt = new Date();
     await this.prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`study-review:${id}`}))`;
       const run = await tx.studyReviewRun.findFirst({
@@ -585,6 +593,7 @@ export class StudyReviewService {
       const hint = await tx.learningEvent.findFirst({
         where: {
           userId,
+          deletedAt: null,
           problemId: item.problemId,
           type: {
             in: [
@@ -653,6 +662,7 @@ export class StudyReviewService {
           assistance,
         },
       });
+      if (!correct) wrongProblemId = item.problemId;
       if (input.kind === 'FIRST')
         await tx.studyReviewItem.update({
           where: { id: itemId },
@@ -670,6 +680,17 @@ export class StudyReviewService {
           data: { status: 'EXPIRED' },
         });
     });
+    // Хугацаатай давталт: commit болсны дараа, хүсэлтийн замаас гадуур (дүнг өөрчлөхгүй)
+    if (wrongProblemId)
+      this.reviews?.recordWrongInBackground([
+        {
+          studentId: userId,
+          problemId: wrongProblemId,
+          source: 'STUDY_REVIEW',
+          occurredAt: answeredAt,
+          sourceRefId: id,
+        },
+      ]);
     return this.get(userId, role, id);
   }
   async submit(userId: string, role: Role, id: string) {

@@ -1,3 +1,5 @@
+import { activeClasses } from '../common/class-track';
+import { groupTestNames } from '../common/test-names';
 import {
   BadRequestException,
   ConflictException,
@@ -48,6 +50,7 @@ import { assertCanSwap, RoomSwapError, swappedRooms } from './room-swap';
 import { UpsertExceptionDto } from './dto/upsert-exception.dto';
 import { UpsertTopicDto } from './dto/upsert-topic.dto';
 import { SplitOutOfRangeError, SplitPlan, planSplit } from './split-series';
+import { LESSON_TOPIC_BLANK } from '../common/soft-delete';
 import { resolveOccurrence } from './lesson-plan.logic';
 import {
   findRoomConflict,
@@ -72,6 +75,11 @@ const FAR_FUTURE = new Date('9999-12-31');
 // /schedule/days нэг дуудлагаар хэт өргөн хугацаа (жишээ нь бүхэл мэдээллийн
 // сангийн түүх) шаардаж сервер ачаалахаас сэргийлнэ.
 const MAX_DAYS_RANGE = 370;
+
+// Зөөлөн устгал (эзний дүрэм 2026-10-23): deletedAt-тай хуваарь/хуанлийн мөр
+// хуваарийн хөдөлгүүр, жагсаалт, давхцлын шалгалт, тоолол бүрээс хасагдана.
+// Устсан мөрийг уншвал «устгасан» хичээл хуваарь дээр дахин амилна.
+export const LIVE = { deletedAt: null } as const;
 
 // _count: хуваарийн зурагт хуудсанд «танхимд хэдэн хүүхэд орох» (эзэн 2026-10-08)
 const CLASSROOM_SELECT = {
@@ -155,6 +163,7 @@ export class ScheduleService {
   }) {
     const siblings = await this.prisma.classSchedule.findMany({
       where: {
+        ...LIVE,
         classroomId: params.classroomId,
         weekday: params.weekday,
         ...(params.excludeId ? { id: { not: params.excludeId } } : {}),
@@ -188,6 +197,7 @@ export class ScheduleService {
     if (!roomCounts(candidate.room)) return;
     const others = await db.classSchedule.findMany({
       where: {
+        ...LIVE,
         room: candidate.room,
         weekday: candidate.weekday,
         classroomId: { not: candidate.classroomId },
@@ -282,6 +292,7 @@ export class ScheduleService {
   findAll(classroomId?: string, readableClassroomIds?: string[]) {
     return this.prisma.classSchedule.findMany({
       where: {
+        ...LIVE,
         ...(classroomId ? { classroomId } : {}),
         ...(readableClassroomIds
           ? { AND: [{ classroomId: { in: readableClassroomIds } }] }
@@ -294,7 +305,7 @@ export class ScheduleService {
 
   async findOne(id: string) {
     const entry = await this.prisma.classSchedule.findUnique({
-      where: { id },
+      where: { id, ...LIVE },
       include: { classroom: CLASSROOM_SELECT, teacher: TEACHER_SELECT },
     });
     if (!entry) throw new NotFoundException('Хуваарь олдсонгүй');
@@ -303,7 +314,7 @@ export class ScheduleService {
 
   async update(id: string, dto: UpdateScheduleDto) {
     const existing = await this.prisma.classSchedule.findUnique({
-      where: { id },
+      where: { id, ...LIVE },
     });
     if (!existing) throw new NotFoundException('Хуваарь олдсонгүй');
 
@@ -406,7 +417,7 @@ export class ScheduleService {
    */
   async splitSeries(id: string, dto: SplitSeriesDto) {
     const existing = await this.prisma.classSchedule.findUnique({
-      where: { id },
+      where: { id, ...LIVE },
     });
     if (!existing) throw new NotFoundException('Хуваарь олдсонгүй');
 
@@ -456,6 +467,7 @@ export class ScheduleService {
       // алдаа өгнө.
       const siblings = await tx.classSchedule.findMany({
         where: {
+          ...LIVE,
           classroomId: existing.classroomId,
           weekday,
           id: { not: id },
@@ -636,8 +648,10 @@ export class ScheduleService {
    */
   async swapRooms(id: string, dto: SwapRoomDto) {
     const [a, b] = await Promise.all([
-      this.prisma.classSchedule.findUnique({ where: { id } }),
-      this.prisma.classSchedule.findUnique({ where: { id: dto.otherId } }),
+      this.prisma.classSchedule.findUnique({ where: { id, ...LIVE } }),
+      this.prisma.classSchedule.findUnique({
+        where: { id: dto.otherId, ...LIVE },
+      }),
     ]);
     if (!a || !b) throw new NotFoundException('Хуваарь олдсонгүй');
     const weekday = dto.weekday ?? a.weekday;
@@ -675,6 +689,7 @@ export class ScheduleService {
 
     const result = await this.prisma.$transaction(async (tx) => {
       const sameSeries = (row: typeof a) => ({
+        ...LIVE,
         classroomId: row.classroomId,
         weekday: row.weekday,
         startMinute: row.startMinute,
@@ -685,8 +700,8 @@ export class ScheduleService {
       });
       // Хоёр ангийн «дараа нь эхлэх» залгаа хэсгүүдийг (цуврал) өмнө нь авна
       const [aLater, bLater] = await Promise.all([
-        tx.classSchedule.findMany({ where: sameSeries(a) }),
-        tx.classSchedule.findMany({ where: sameSeries(b) }),
+        tx.classSchedule.findMany({ where: { ...sameSeries(a), ...LIVE } }),
+        tx.classSchedule.findMany({ where: { ...sameSeries(b), ...LIVE } }),
       ]);
       const aNew = await this.applyFromDate(tx, a, from, {
         weekday: dto.weekday,
@@ -715,7 +730,12 @@ export class ScheduleService {
 
       // Ижил ангийн өөр хичээлтэй цаг давхцахгүй байх (гараг/цаг солигдсон үед)
       const siblings = await tx.classSchedule.findMany({
-        where: { classroomId: a.classroomId, weekday, id: { not: aNew.id } },
+        where: {
+          ...LIVE,
+          classroomId: a.classroomId,
+          weekday,
+          id: { not: aNew.id },
+        },
       });
       const aEnd = aNew.effectiveTo ?? FAR_FUTURE;
       if (
@@ -735,7 +755,7 @@ export class ScheduleService {
       // Эцсийн төлөвт танхимын давхар захиалга үлдсэн бол бүгдийг буцаана (409)
       for (const row of [aNew, bNew, ...aLater, ...bLater]) {
         const fresh = await tx.classSchedule.findUnique({
-          where: { id: row.id },
+          where: { id: row.id, ...LIVE },
         });
         if (fresh)
           await this.assertRoomFree(
@@ -837,7 +857,7 @@ export class ScheduleService {
     const classroom = await this.assertClassroomExists(classroomId);
     const from = this.parseDate(dto.effectiveFrom);
     const rows = await this.prisma.classSchedule.findMany({
-      where: { classroomId },
+      where: { classroomId, ...LIVE },
     });
     const plan = this.planOrThrow(rows, dto.days, from);
     await this.assertTeachersExist(dto.days.map((d) => d.teacherId));
@@ -871,10 +891,11 @@ export class ScheduleService {
       // Хараахан эхлээгүй мөр: сэдэв/тэмдэглэл/ирцийн холбоосгүй бол л хасна
       for (const row of plan.dropUnstarted) {
         const where = { scheduleId: row.id };
+        // Устсан (deletedAt) сэдэв/онцгой тохиолдол/оноолт хасалтыг хаахгүй
         const deps = await Promise.all([
-          tx.lessonTopic.count({ where }),
-          tx.scheduleException.count({ where }),
-          tx.lessonStaffing.count({ where }),
+          tx.lessonTopic.count({ where: { ...where, deletedAt: null } }),
+          tx.scheduleException.count({ where: { ...where, deletedAt: null } }),
+          tx.lessonStaffing.count({ where: { ...where, deletedAt: null } }),
           tx.lessonNote.count({ where }),
           tx.lessonRecord.count({ where }),
         ]);
@@ -882,7 +903,11 @@ export class ScheduleService {
           throw new ConflictException(
             'Хасах гэж буй өдөрт сэдэв эсвэл тэмдэглэл бүртгэгдсэн байна — тэр өдрийг тор дээрээс засна уу',
           );
-        await tx.classSchedule.delete({ where: { id: row.id } });
+        // Хатуу устгалгүй (эзний дүрэм): мөр DB-д үлдэж, уншилтаас хасагдана
+        await tx.classSchedule.update({
+          where: { id: row.id },
+          data: { deletedAt: new Date(), deletedById: actorId },
+        });
       }
       for (const { row, effectiveTo } of plan.end)
         await tx.classSchedule.update({
@@ -1057,12 +1082,26 @@ export class ScheduleService {
     return { classroom, schedules: rows };
   }
 
-  async remove(id: string) {
+  // ЗӨӨЛӨН устгал: мөр, түүний сэдэв/онцгой тохиолдол/багшийн оноолт DB-д
+  // үлдэнэ; LIVE шүүлтүүрээр хуваарийн хөдөлгүүр бүрээс хасагдана.
+  async remove(id: string, actorId: string, actorRole: Role) {
     const existing = await this.prisma.classSchedule.findUnique({
-      where: { id },
+      where: { id, ...LIVE },
     });
     if (!existing) throw new NotFoundException('Хуваарь олдсонгүй');
-    await this.prisma.classSchedule.delete({ where: { id } });
+    const deleted = await this.prisma.classSchedule.update({
+      where: { id },
+      data: { deletedAt: new Date(), deletedById: actorId },
+    });
+    await this.recordAudit(
+      actorId,
+      actorRole,
+      'DELETE',
+      'ClassSchedule',
+      id,
+      existing,
+      { deletedAt: deleted.deletedAt },
+    );
     await this.notifyScheduleChange(
       [existing.classroomId],
       [existing.teacherId],
@@ -1078,6 +1117,7 @@ export class ScheduleService {
     const today = todayUB();
     return this.prisma.classSchedule.findMany({
       where: {
+        ...LIVE,
         classroomId,
         effectiveFrom: { lte: today },
         OR: [{ effectiveTo: null }, { effectiveTo: { gte: today } }],
@@ -1093,19 +1133,23 @@ export class ScheduleService {
   async forMe(userId: string, role: Role) {
     const today = todayUB();
     if (role === Role.STUDENT) {
-      const enrollment = await this.prisma.enrollment.findFirst({
-        where: { studentId: userId, leftAt: null },
-        select: { classroomId: true },
-      });
-      if (!enrollment) {
+      // Хоёр ангид зэрэг суудаг сурагч (математик + Нийгэм) — хоёр ангийн хуваарь нэг дор;
+      // classroomId = үндсэн (математикийн) анги
+      const classes = await activeClasses(this.prisma, userId);
+      if (!classes.length) {
         return { classroomId: null, entries: [] };
       }
-      const entries = await this.forClassroom(enrollment.classroomId);
-      return { classroomId: enrollment.classroomId, entries };
+      const entries = (
+        await Promise.all(classes.map((c) => this.forClassroom(c.classroomId)))
+      )
+        .flat()
+        .sort((a, b) => a.weekday - b.weekday || a.startMinute - b.startMinute);
+      return { classroomId: classes[0].classroomId, entries };
     }
     if (role === Role.TEACHER || role === Role.TEACHER_PLUS) {
       const entries = await this.prisma.classSchedule.findMany({
         where: {
+          ...LIVE,
           effectiveFrom: { lte: today },
           OR: [{ effectiveTo: null }, { effectiveTo: { gte: today } }],
           AND: [
@@ -1157,6 +1201,7 @@ export class ScheduleService {
     const [schedules, calendarDays] = await Promise.all([
       this.prisma.classSchedule.findMany({
         where: {
+          ...LIVE,
           ...(classroomId ? { classroomId } : {}),
           effectiveFrom: { lte: to },
           AND: [
@@ -1179,8 +1224,8 @@ export class ScheduleService {
         include: { classroom: CLASSROOM_SELECT, teacher: TEACHER_SELECT },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { date: { gte: from, lte: to } },
-        include: { classrooms: { select: { classroomId: true } } },
+        where: { date: { gte: from, lte: to }, ...LIVE },
+        include: { classrooms: { where: { deletedAt: null }, select: { classroomId: true } } },
       }),
     ]);
     // Бүх ангид хамаарах өдөр ба зөвхөн зарим ангид хамаарах өдрийг тусгаарлана
@@ -1267,7 +1312,7 @@ export class ScheduleService {
               endMinute: s.endMinute,
               teacherId: s.teacher?.id ?? null,
               teacherName: s.teacher
-                ? `${s.teacher.firstName} ${s.teacher.lastName}`
+                ? withPlus(`${s.teacher.firstName} ${s.teacher.lastName}`, s.teacher.role)
                 : null,
               teacherRole: s.teacher?.role ?? null,
               room: s.room,
@@ -1296,6 +1341,8 @@ export class ScheduleService {
 
   private static readonly CALENDAR_INCLUDE = {
     classrooms: {
+      // Хасагдсан (deletedAt) ангийн холбоос харагдахгүй
+      where: { deletedAt: null },
       select: { classroom: { select: { id: true, name: true } } },
     },
   } as const;
@@ -1337,8 +1384,12 @@ export class ScheduleService {
     excludeId?: string,
   ) {
     const others = await this.prisma.academicCalendarDay.findMany({
-      where: { date, ...(excludeId ? { id: { not: excludeId } } : {}) },
-      include: { classrooms: { select: { classroomId: true } } },
+      where: {
+        date,
+        ...LIVE,
+        ...(excludeId ? { id: { not: excludeId } } : {}),
+      },
+      include: { classrooms: { where: { deletedAt: null }, select: { classroomId: true } } },
     });
     for (const o of others) {
       const otherIds = o.classrooms.map((c) => c.classroomId);
@@ -1379,15 +1430,17 @@ export class ScheduleService {
     const from = fromStr ? this.parseDate(fromStr) : undefined;
     const to = toStr ? this.parseDate(toStr) : undefined;
     const rows = await this.prisma.academicCalendarDay.findMany({
-      where:
-        from || to
+      where: {
+        ...LIVE,
+        ...(from || to
           ? {
               date: {
                 ...(from ? { gte: from } : {}),
                 ...(to ? { lte: to } : {}),
               },
             }
-          : undefined,
+          : {}),
+      },
       orderBy: { date: 'asc' },
       include: ScheduleService.CALENDAR_INCLUDE,
     });
@@ -1396,14 +1449,14 @@ export class ScheduleService {
 
   async findCalendarDay(id: string) {
     const day = await this.prisma.academicCalendarDay.findUnique({
-      where: { id },
+      where: { id, ...LIVE },
       include: ScheduleService.CALENDAR_INCLUDE,
     });
     if (!day) throw new NotFoundException('Хуанлийн бичлэг олдсонгүй');
     return this.shapeCalendarDay(day);
   }
 
-  async updateCalendarDay(id: string, dto: UpdateCalendarDayDto) {
+  async updateCalendarDay(id: string, dto: UpdateCalendarDayDto, actorId?: string) {
     const existing = await this.findCalendarDay(id);
     const date = dto.date ? this.parseDate(dto.date) : undefined;
     const nextClassroomIds =
@@ -1422,15 +1475,21 @@ export class ScheduleService {
     }
     const updated = await this.prisma.$transaction(async (tx) => {
       if (dto.classroomIds !== undefined) {
-        await tx.academicCalendarDayClassroom.deleteMany({
-          where: { calendarDayId: id },
+        // Хатуу устгалгүй (эзний дүрэм): хасагдсан ангийн холбоос deletedAt-тай
+        // DB-д үлдэнэ; дахин нэмэгдсэн анги нь хуучин холбоосоо сэргээнэ (PK хэвээр).
+        await tx.academicCalendarDayClassroom.updateMany({
+          where: {
+            calendarDayId: id,
+            deletedAt: null,
+            classroomId: { notIn: nextClassroomIds },
+          },
+          data: { deletedAt: new Date(), deletedById: actorId ?? null },
         });
-        if (nextClassroomIds.length > 0) {
-          await tx.academicCalendarDayClassroom.createMany({
-            data: nextClassroomIds.map((classroomId) => ({
-              calendarDayId: id,
-              classroomId,
-            })),
+        for (const classroomId of nextClassroomIds) {
+          await tx.academicCalendarDayClassroom.upsert({
+            where: { calendarDayId_classroomId: { calendarDayId: id, classroomId } },
+            update: { deletedAt: null, deletedById: null },
+            create: { calendarDayId: id, classroomId },
           });
         }
       }
@@ -1448,12 +1507,27 @@ export class ScheduleService {
     return this.shapeCalendarDay(updated);
   }
 
-  async removeCalendarDay(id: string) {
+  // ЗӨӨЛӨН устгал: бичлэг ба ангийн холбоос DB-д үлдэнэ; LIVE шүүлтүүрээр
+  // хуваарь, ирц, төлбөр, хуанлийн уншилт бүрээс хасагдана.
+  async removeCalendarDay(id: string, actorId: string, actorRole: Role) {
     const existing = await this.prisma.academicCalendarDay.findUnique({
-      where: { id },
+      where: { id, ...LIVE },
+      include: { classrooms: { where: { deletedAt: null }, select: { classroomId: true } } },
     });
     if (!existing) throw new NotFoundException('Хуанлийн бичлэг олдсонгүй');
-    await this.prisma.academicCalendarDay.delete({ where: { id } });
+    const deleted = await this.prisma.academicCalendarDay.update({
+      where: { id },
+      data: { deletedAt: new Date(), deletedById: actorId },
+    });
+    await this.recordAudit(
+      actorId,
+      actorRole,
+      'DELETE',
+      'AcademicCalendarDay',
+      id,
+      existing,
+      { deletedAt: deleted.deletedAt },
+    );
     return { removed: true };
   }
 
@@ -1522,7 +1596,7 @@ export class ScheduleService {
         // мөрүүдтэй давхцлыг харахгүй — тул mini-check-ийг мөн tx-ээр давхар
         // хийнэ.
         const siblings = await tx.classSchedule.findMany({
-          where: { classroomId: dto.classroomId, weekday },
+          where: { classroomId: dto.classroomId, weekday, ...LIVE },
         });
         const FAR_FUTURE = new Date('9999-12-31');
         const newEnd = effectiveTo ?? FAR_FUTURE;
@@ -1591,6 +1665,7 @@ export class ScheduleService {
     ] = await Promise.all([
       this.prisma.classSchedule.findMany({
         where: {
+          ...LIVE,
           ...(readableClassroomIds
             ? { classroomId: { in: readableClassroomIds } }
             : {}),
@@ -1603,13 +1678,19 @@ export class ScheduleService {
         // MOVED тохиолдол цонхны гадна эх огнооноос энэ 7 хоног руу орж
         // ирж болох тул date талбараар шүүхгүй — холбогдох schedule бүрийн
         // бүх exception-ийг л дараа нь week-resolver-т шүүлгэнэ.
-        where: readableClassroomIds
-          ? { schedule: { classroomId: { in: readableClassroomIds } } }
-          : {},
+        where: {
+          deletedAt: null,
+          schedule: {
+            ...LIVE,
+            ...(readableClassroomIds
+              ? { classroomId: { in: readableClassroomIds } }
+              : {}),
+          },
+        },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { date: { gte: start, lte: end } },
-        include: { classrooms: { select: { classroomId: true } } },
+        where: { date: { gte: start, lte: end }, ...LIVE },
+        include: { classrooms: { where: { deletedAt: null }, select: { classroomId: true } } },
       }),
       readableClassroomIds
         ? Promise.resolve<
@@ -1648,7 +1729,7 @@ export class ScheduleService {
     );
 
     const topics = await this.prisma.lessonTopic.findMany({
-      where: { scheduleId: { in: [...scheduleIds] } },
+      where: { deletedAt: null, scheduleId: { in: [...scheduleIds] } },
     });
 
     const resolverSchedules: ResolverSchedule[] = schedules.map((s) => ({
@@ -1660,7 +1741,7 @@ export class ScheduleService {
       endMinute: s.endMinute,
       teacherId: s.teacher?.id ?? null,
       teacherName: s.teacher
-        ? `${s.teacher.firstName} ${s.teacher.lastName}`
+        ? withPlus(`${s.teacher.firstName} ${s.teacher.lastName}`, s.teacher.role)
         : null,
       teacherRole: s.teacher?.role ?? null,
       room: s.room,
@@ -1688,7 +1769,7 @@ export class ScheduleService {
 
     // Өдрийн ахлах/туслах багш — нэрийг нэг дуудлагаар нийлүүлнэ
     const staffRows = await this.prisma.lessonStaffing.findMany({
-      where: { scheduleId: { in: [...scheduleIds] } },
+      where: { deletedAt: null, scheduleId: { in: [...scheduleIds] } },
     });
     const staffIds = [
       ...new Set(
@@ -1776,7 +1857,7 @@ export class ScheduleService {
 
   private async assertScheduleExists(scheduleId: string) {
     const schedule = await this.prisma.classSchedule.findUnique({
-      where: { id: scheduleId },
+      where: { id: scheduleId, ...LIVE },
     });
     if (!schedule) throw new NotFoundException('Хуваарь олдсонгүй');
     return schedule;
@@ -1791,7 +1872,7 @@ export class ScheduleService {
    */
   async occurrenceKey(scheduleId: string, key: string, strict: boolean) {
     const schedule = await this.prisma.classSchedule.findUnique({
-      where: { id: scheduleId },
+      where: { id: scheduleId, ...LIVE },
       select: {
         id: true,
         classroomId: true,
@@ -1799,7 +1880,7 @@ export class ScheduleService {
         weekday: true,
         effectiveFrom: true,
         effectiveTo: true,
-        exceptions: { select: { date: true, kind: true, newDate: true } },
+        exceptions: { where: { deletedAt: null }, select: { date: true, kind: true, newDate: true } },
       },
     });
     if (!schedule) throw new NotFoundException('Хуваарь олдсонгүй');
@@ -1862,9 +1943,12 @@ export class ScheduleService {
     }
 
     const newDate = dto.newDate ? this.parseDate(dto.newDate) : null;
-    const existing = await this.prisma.scheduleException.findUnique({
+    // Устсан (deletedAt) мөр ч (scheduleId, date) түлхүүрийг эзэлдэг — тэр мөрийг
+    // СЭРГЭЭНЭ (шинэ утгаар), харин утгын хувьд «шинээр үүсгэсэн» гэж үзнэ.
+    const stored = await this.prisma.scheduleException.findUnique({
       where: { scheduleId_date: { scheduleId, date } },
     });
+    const existing = stored && !stored.deletedAt ? stored : null;
 
     const data = {
       scheduleId,
@@ -1884,10 +1968,10 @@ export class ScheduleService {
       note: dto.note ?? null,
     };
 
-    const result = existing
+    const result = stored
       ? await this.prisma.scheduleException.update({
-          where: { id: existing.id },
-          data,
+          where: { id: stored.id },
+          data: { ...data, deletedAt: null, deletedById: null },
         })
       : await this.prisma.scheduleException.create({ data });
 
@@ -1928,13 +2012,18 @@ export class ScheduleService {
     actorRole: Role,
   ) {
     const existing = await this.prisma.scheduleException.findUnique({
-      where: { id: exceptionId },
+      where: { id: exceptionId, deletedAt: null },
       include: { schedule: { select: { classroomId: true, teacherId: true } } },
     });
     if (!existing || existing.scheduleId !== scheduleId) {
       throw new NotFoundException('Өөрчлөлт олдсонгүй');
     }
-    await this.prisma.scheduleException.delete({ where: { id: exceptionId } });
+    await this.assertScheduleExists(scheduleId);
+    // Хатуу устгалгүй (эзний дүрэм): мөр DB-д үлдэж, хуваарийн хөдөлгүүрээс хасагдана
+    await this.prisma.scheduleException.update({
+      where: { id: exceptionId },
+      data: { deletedAt: new Date(), deletedById: actorId },
+    });
     await this.notifyScheduleChange(
       [existing.schedule.classroomId],
       [existing.schedule.teacherId],
@@ -2075,13 +2164,18 @@ export class ScheduleService {
     }
     const key = { scheduleId_date: { scheduleId, date } };
     if (!lead && !assistant) {
-      await this.prisma.lessonStaffing.deleteMany({ where: { scheduleId, date } });
+      // Хатуу устгалгүй (эзний дүрэм): оноолт deletedAt-тай DB-д үлдэнэ
+      await this.prisma.lessonStaffing.updateMany({
+        where: { scheduleId, date, deletedAt: null },
+        data: { deletedAt: new Date(), deletedById: actorId },
+      });
       await this.recordAudit(actorId, actorRole, 'DELETE', 'LessonStaffing', scheduleId, { date: dto.date }, null);
       return { scheduleId, date: occurrence, leadTeacherId: null, assistantTeacherId: null };
     }
     const row = await this.prisma.lessonStaffing.upsert({
       where: key,
-      update: { leadTeacherId: lead, assistantTeacherId: assistant, updatedById: actorId },
+      // Устсан оноолт байвал сэргээнэ (deletedAt = null)
+      update: { leadTeacherId: lead, assistantTeacherId: assistant, updatedById: actorId, deletedAt: null, deletedById: null },
       create: { scheduleId, date, leadTeacherId: lead, assistantTeacherId: assistant, updatedById: actorId },
     });
     await this.recordAudit(actorId, actorRole, 'UPDATE', 'LessonStaffing', row.id, null, {
@@ -2105,13 +2199,22 @@ export class ScheduleService {
       (await this.occurrenceKey(scheduleId, dto.date.slice(0, 10), false)).key,
     );
 
-    const existing = await this.prisma.lessonTopic.findUnique({
+    const stored = await this.prisma.lessonTopic.findUnique({
       where: { scheduleId_date: { scheduleId, date } },
     });
-    const result = existing
+    // Устсан сэдэв байвал хоосон төлөвөөс СЭРГЭЭНЭ (хуучин төлөв нь AuditLog-д)
+    const existing = stored && !stored.deletedAt ? stored : null;
+    const result = stored
       ? await this.prisma.lessonTopic.update({
-          where: { id: existing.id },
-          data: { title: dto.title, chapterId: dto.chapterId ?? null },
+          where: { id: stored.id },
+          data: existing
+            ? { title: dto.title, chapterId: dto.chapterId ?? null }
+            : {
+                ...LESSON_TOPIC_BLANK(),
+                title: dto.title,
+                chapterId: dto.chapterId ?? null,
+                createdById: actorId,
+              },
         })
       : await this.prisma.lessonTopic.create({
           data: {
@@ -2148,7 +2251,7 @@ export class ScheduleService {
       (await this.occurrenceKey(scheduleId, dto.date.slice(0, 10), false)).key,
     );
     const existing = await this.prisma.lessonTopic.findUnique({
-      where: { scheduleId_date: { scheduleId, date } },
+      where: { scheduleId_date: { scheduleId, date }, deletedAt: null },
     });
     if (!existing) return { removed: false };
     // Төлөвлөгөөтэй (тест, тарах/үлдэх, зураг) бол зөвхөн гараар бичсэн гарчгийг
@@ -2161,7 +2264,7 @@ export class ScheduleService {
           })
         : [];
       const byId = new Map(tests.map((t) => [t.id, t.title.replace(/\s+/g, ' ').trim()]));
-      const title = existing.testIds.map((id) => byId.get(id) ?? '').filter(Boolean).join(', ');
+      const title = groupTestNames(existing.testIds.map((id) => byId.get(id) ?? ''));
       const updated = await this.prisma.lessonTopic.update({
         where: { id: existing.id },
         data: { title },
@@ -2169,7 +2272,11 @@ export class ScheduleService {
       await this.recordAudit(actorId, actorRole, 'UPDATE', 'LessonTopic', existing.id, existing, updated);
       return { removed: true };
     }
-    await this.prisma.lessonTopic.delete({ where: { id: existing.id } });
+    // Хатуу устгалгүй (эзний дүрэм): мөр DB-д үлдэж, уншилтаас хасагдана
+    await this.prisma.lessonTopic.update({
+      where: { id: existing.id },
+      data: { deletedAt: new Date(), deletedById: actorId },
+    });
     await this.recordAudit(
       actorId,
       actorRole,

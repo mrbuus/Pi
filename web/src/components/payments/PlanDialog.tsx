@@ -20,14 +20,18 @@ export default function PlanDialog({
   onSaved: () => void;
 }) {
   const { row, tier } = data;
+  // Багш+ мөнгөн дүн хардаггүй (сервер үнэ, дүнг null болгодог) — тэр үед зөвхөн багц, эхэлсэн өдрийг засна.
+  // Дүн, тохирсон (хөнгөлөлттэй) дүнг ИЛГЭЭХГҮЙ: өмнө нь null илгээж Админы хөнгөлөлтийг арилгадаг байв.
+  const hidden = !!data.amountsHidden;
   const priceOf = (k: PlanKind) =>
-    k === "MONTHLY" ? tier.monthly : k === "FULL_YEAR" ? tier.fullYear : (tier.installment ?? tier.fullYear);
+    (k === "MONTHLY" ? tier.monthly : k === "FULL_YEAR" ? tier.fullYear : (tier.installment ?? tier.fullYear)) ?? 0;
   const [kind, setKind] = useState<PlanKind>(row.plan.kind);
   const [amount, setAmount] = useState(String(kind === "MONTHLY" ? row.plan.fee : row.plan.total || priceOf(kind)));
   const [start, setStart] = useState(row.startDate ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const value = Number(amount.replace(/\D/g, "")) || 0;
+  const discount = kind === "FULL_YEAR" && value >= 800_000 && value < priceOf("FULL_YEAR");
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,7 +40,17 @@ export default function PlanDialog({
     try {
       await api(`/users/${encodeURIComponent(row.id)}/profile`, {
         method: "PATCH",
-        body: { tuitionPlan: kind, tuitionAmount: value || priceOf(kind), ...(start ? { joinedOn: start } : {}) },
+        body: {
+          tuitionPlan: kind,
+          ...(hidden
+            ? {}
+            : {
+                tuitionAmount: value || priceOf(kind),
+                // Бүтэн жилд үнийн жагсаалтаас БАГА дүн = тохирсон (хөнгөлөлттэй) гэрээ; эс бөгөөс стандарт үнэ
+                tuitionAgreed: discount ? value : null,
+              }),
+          ...(start ? { joinedOn: start } : {}),
+        },
       });
       toast.success("Багц хадгалагдлаа");
       onSaved();
@@ -64,23 +78,27 @@ export default function PlanDialog({
             ...(tier.installment ? [{ value: "INSTALLMENT" as PlanKind, label: "Хагас жил" }] : []),
           ]}
         />
-        <Field
-          label={kind === "MONTHLY" ? "Сарын төлбөр" : "Жилийн нийт дүн"}
-          htmlFor="plan-amount"
-          hint={
-            kind === "INSTALLMENT" && tier.installmentFirst
-              ? `Эхний төлбөр ${mnt(tier.installmentFirst)} 12-р сар хүртэл, үлдэгдэл 12/20-нд`
-              : `Үнийн жагсаалт: ${mnt(priceOf(kind))}`
-          }
-        >
-          <input
-            id="plan-amount"
-            inputMode="numeric"
-            value={value ? value.toLocaleString("en-US") : amount}
-            onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
-            className={`${inputCls} font-semibold tabular-nums`}
-          />
-        </Field>
+        {!hidden && (
+          <Field
+            label={kind === "MONTHLY" ? "Сарын төлбөр" : "Жилийн нийт дүн"}
+            htmlFor="plan-amount"
+            hint={
+              kind === "INSTALLMENT" && tier.installmentFirst
+                ? `Эхний төлбөр ${mnt(tier.installmentFirst)} 12-р сар хүртэл, үлдэгдэл 12/20-нд`
+                : discount
+                  ? `Хөнгөлөлттэй гэрээ: ${mnt(value)} төлөгдвөл жилийн төлбөр бүрэн гэж тооцно (үнийн жагсаалт ${mnt(priceOf(kind))})`
+                  : `Үнийн жагсаалт: ${mnt(priceOf(kind))}`
+            }
+          >
+            <input
+              id="plan-amount"
+              inputMode="numeric"
+              value={value ? value.toLocaleString("en-US") : amount}
+              onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
+              className={`${inputCls} font-semibold tabular-nums`}
+            />
+          </Field>
+        )}
         <Field label="Сууж эхэлсэн өдөр" htmlFor="plan-start">
           <input id="plan-start" type="date" value={start} onChange={(e) => setStart(e.target.value)} className={inputCls} />
         </Field>

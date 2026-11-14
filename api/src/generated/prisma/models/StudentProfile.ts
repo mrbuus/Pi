@@ -29,11 +29,13 @@ export type AggregateStudentProfile = {
 export type StudentProfileAvgAggregateOutputType = {
   grade: number | null
   tuitionAmount: number | null
+  tuitionAgreed: number | null
 }
 
 export type StudentProfileSumAggregateOutputType = {
   grade: number | null
   tuitionAmount: number | null
+  tuitionAgreed: number | null
 }
 
 export type StudentProfileMinAggregateOutputType = {
@@ -49,6 +51,7 @@ export type StudentProfileMinAggregateOutputType = {
   branch: string | null
   section: string | null
   tuitionAmount: number | null
+  tuitionAgreed: number | null
   tuitionPlan: $Enums.TuitionPlan | null
   tuitionNote: string | null
   joinedOn: Date | null
@@ -71,6 +74,7 @@ export type StudentProfileMaxAggregateOutputType = {
   branch: string | null
   section: string | null
   tuitionAmount: number | null
+  tuitionAgreed: number | null
   tuitionPlan: $Enums.TuitionPlan | null
   tuitionNote: string | null
   joinedOn: Date | null
@@ -93,6 +97,7 @@ export type StudentProfileCountAggregateOutputType = {
   branch: number
   section: number
   tuitionAmount: number
+  tuitionAgreed: number
   tuitionPlan: number
   tuitionNote: number
   joinedOn: number
@@ -107,11 +112,13 @@ export type StudentProfileCountAggregateOutputType = {
 export type StudentProfileAvgAggregateInputType = {
   grade?: true
   tuitionAmount?: true
+  tuitionAgreed?: true
 }
 
 export type StudentProfileSumAggregateInputType = {
   grade?: true
   tuitionAmount?: true
+  tuitionAgreed?: true
 }
 
 export type StudentProfileMinAggregateInputType = {
@@ -127,6 +134,7 @@ export type StudentProfileMinAggregateInputType = {
   branch?: true
   section?: true
   tuitionAmount?: true
+  tuitionAgreed?: true
   tuitionPlan?: true
   tuitionNote?: true
   joinedOn?: true
@@ -149,6 +157,7 @@ export type StudentProfileMaxAggregateInputType = {
   branch?: true
   section?: true
   tuitionAmount?: true
+  tuitionAgreed?: true
   tuitionPlan?: true
   tuitionNote?: true
   joinedOn?: true
@@ -171,6 +180,7 @@ export type StudentProfileCountAggregateInputType = {
   branch?: true
   section?: true
   tuitionAmount?: true
+  tuitionAgreed?: true
   tuitionPlan?: true
   tuitionNote?: true
   joinedOn?: true
@@ -280,6 +290,7 @@ export type StudentProfileGroupByOutputType = {
   branch: string | null
   section: string | null
   tuitionAmount: number | null
+  tuitionAgreed: number | null
   tuitionPlan: $Enums.TuitionPlan | null
   tuitionNote: string | null
   joinedOn: Date | null
@@ -325,6 +336,7 @@ export type StudentProfileWhereInput = {
   branch?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   section?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   tuitionAmount?: Prisma.IntNullableFilter<"StudentProfile"> | number | null
+  tuitionAgreed?: Prisma.IntNullableFilter<"StudentProfile"> | number | null
   tuitionPlan?: Prisma.EnumTuitionPlanNullableFilter<"StudentProfile"> | $Enums.TuitionPlan | null
   tuitionNote?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   joinedOn?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
@@ -348,6 +360,7 @@ export type StudentProfileOrderByWithRelationInput = {
   branch?: Prisma.SortOrderInput | Prisma.SortOrder
   section?: Prisma.SortOrderInput | Prisma.SortOrder
   tuitionAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  tuitionAgreed?: Prisma.SortOrderInput | Prisma.SortOrder
   tuitionPlan?: Prisma.SortOrderInput | Prisma.SortOrder
   tuitionNote?: Prisma.SortOrderInput | Prisma.SortOrder
   joinedOn?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -374,6 +387,7 @@ export type StudentProfileWhereUniqueInput = Prisma.AtLeast<{
   branch?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   section?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   tuitionAmount?: Prisma.IntNullableFilter<"StudentProfile"> | number | null
+  tuitionAgreed?: Prisma.IntNullableFilter<"StudentProfile"> | number | null
   tuitionPlan?: Prisma.EnumTuitionPlanNullableFilter<"StudentProfile"> | $Enums.TuitionPlan | null
   tuitionNote?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   joinedOn?: Prisma.DateTimeNullableFilter<"StudentProfile"> | Date | string | null
@@ -397,6 +411,7 @@ export type StudentProfileOrderByWithAggregationInput = {
   branch?: Prisma.SortOrderInput | Prisma.SortOrder
   section?: Prisma.SortOrderInput | Prisma.SortOrder
   tuitionAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  tuitionAgreed?: Prisma.SortOrderInput | Prisma.SortOrder
   tuitionPlan?: Prisma.SortOrderInput | Prisma.SortOrder
   tuitionNote?: Prisma.SortOrderInput | Prisma.SortOrder
   joinedOn?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -427,6 +442,7 @@ export type StudentProfileScalarWhereWithAggregatesInput = {
   branch?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
   section?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
   tuitionAmount?: Prisma.IntNullableWithAggregatesFilter<"StudentProfile"> | number | null
+  tuitionAgreed?: Prisma.IntNullableWithAggregatesFilter<"StudentProfile"> | number | null
   tuitionPlan?: Prisma.EnumTuitionPlanNullableWithAggregatesFilter<"StudentProfile"> | $Enums.TuitionPlan | null
   tuitionNote?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
   joinedOn?: Prisma.DateTimeNullableWithAggregatesFilter<"StudentProfile"> | Date | string | null
@@ -448,6 +464,7 @@ export type StudentProfileCreateInput = {
   branch?: string | null
   section?: string | null
   tuitionAmount?: number | null
+  tuitionAgreed?: number | null
   tuitionPlan?: $Enums.TuitionPlan | null
   tuitionNote?: string | null
   joinedOn?: Date | string | null
@@ -471,6 +488,7 @@ export type StudentProfileUncheckedCreateInput = {
   branch?: string | null
   section?: string | null
   tuitionAmount?: number | null
+  tuitionAgreed?: number | null
   tuitionPlan?: $Enums.TuitionPlan | null
   tuitionNote?: string | null
   joinedOn?: Date | string | null
@@ -492,6 +510,7 @@ export type StudentProfileUpdateInput = {
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tuitionAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tuitionAgreed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tuitionPlan?: Prisma.NullableEnumTuitionPlanFieldUpdateOperationsInput | $Enums.TuitionPlan | null
   tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -515,6 +534,7 @@ export type StudentProfileUncheckedUpdateInput = {
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tuitionAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tuitionAgreed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tuitionPlan?: Prisma.NullableEnumTuitionPlanFieldUpdateOperationsInput | $Enums.TuitionPlan | null
   tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -537,6 +557,7 @@ export type StudentProfileCreateManyInput = {
   branch?: string | null
   section?: string | null
   tuitionAmount?: number | null
+  tuitionAgreed?: number | null
   tuitionPlan?: $Enums.TuitionPlan | null
   tuitionNote?: string | null
   joinedOn?: Date | string | null
@@ -558,6 +579,7 @@ export type StudentProfileUpdateManyMutationInput = {
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tuitionAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tuitionAgreed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tuitionPlan?: Prisma.NullableEnumTuitionPlanFieldUpdateOperationsInput | $Enums.TuitionPlan | null
   tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -580,6 +602,7 @@ export type StudentProfileUncheckedUpdateManyInput = {
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tuitionAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tuitionAgreed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tuitionPlan?: Prisma.NullableEnumTuitionPlanFieldUpdateOperationsInput | $Enums.TuitionPlan | null
   tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -607,6 +630,7 @@ export type StudentProfileCountOrderByAggregateInput = {
   branch?: Prisma.SortOrder
   section?: Prisma.SortOrder
   tuitionAmount?: Prisma.SortOrder
+  tuitionAgreed?: Prisma.SortOrder
   tuitionPlan?: Prisma.SortOrder
   tuitionNote?: Prisma.SortOrder
   joinedOn?: Prisma.SortOrder
@@ -619,6 +643,7 @@ export type StudentProfileCountOrderByAggregateInput = {
 export type StudentProfileAvgOrderByAggregateInput = {
   grade?: Prisma.SortOrder
   tuitionAmount?: Prisma.SortOrder
+  tuitionAgreed?: Prisma.SortOrder
 }
 
 export type StudentProfileMaxOrderByAggregateInput = {
@@ -634,6 +659,7 @@ export type StudentProfileMaxOrderByAggregateInput = {
   branch?: Prisma.SortOrder
   section?: Prisma.SortOrder
   tuitionAmount?: Prisma.SortOrder
+  tuitionAgreed?: Prisma.SortOrder
   tuitionPlan?: Prisma.SortOrder
   tuitionNote?: Prisma.SortOrder
   joinedOn?: Prisma.SortOrder
@@ -656,6 +682,7 @@ export type StudentProfileMinOrderByAggregateInput = {
   branch?: Prisma.SortOrder
   section?: Prisma.SortOrder
   tuitionAmount?: Prisma.SortOrder
+  tuitionAgreed?: Prisma.SortOrder
   tuitionPlan?: Prisma.SortOrder
   tuitionNote?: Prisma.SortOrder
   joinedOn?: Prisma.SortOrder
@@ -668,6 +695,7 @@ export type StudentProfileMinOrderByAggregateInput = {
 export type StudentProfileSumOrderByAggregateInput = {
   grade?: Prisma.SortOrder
   tuitionAmount?: Prisma.SortOrder
+  tuitionAgreed?: Prisma.SortOrder
 }
 
 export type StudentProfileCreateNestedOneWithoutUserInput = {
@@ -722,6 +750,7 @@ export type StudentProfileCreateWithoutUserInput = {
   branch?: string | null
   section?: string | null
   tuitionAmount?: number | null
+  tuitionAgreed?: number | null
   tuitionPlan?: $Enums.TuitionPlan | null
   tuitionNote?: string | null
   joinedOn?: Date | string | null
@@ -743,6 +772,7 @@ export type StudentProfileUncheckedCreateWithoutUserInput = {
   branch?: string | null
   section?: string | null
   tuitionAmount?: number | null
+  tuitionAgreed?: number | null
   tuitionPlan?: $Enums.TuitionPlan | null
   tuitionNote?: string | null
   joinedOn?: Date | string | null
@@ -780,6 +810,7 @@ export type StudentProfileUpdateWithoutUserInput = {
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tuitionAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tuitionAgreed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tuitionPlan?: Prisma.NullableEnumTuitionPlanFieldUpdateOperationsInput | $Enums.TuitionPlan | null
   tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -801,6 +832,7 @@ export type StudentProfileUncheckedUpdateWithoutUserInput = {
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tuitionAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tuitionAgreed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tuitionPlan?: Prisma.NullableEnumTuitionPlanFieldUpdateOperationsInput | $Enums.TuitionPlan | null
   tuitionNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedOn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -825,6 +857,7 @@ export type StudentProfileSelect<ExtArgs extends runtime.Types.Extensions.Intern
   branch?: boolean
   section?: boolean
   tuitionAmount?: boolean
+  tuitionAgreed?: boolean
   tuitionPlan?: boolean
   tuitionNote?: boolean
   joinedOn?: boolean
@@ -848,6 +881,7 @@ export type StudentProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   branch?: boolean
   section?: boolean
   tuitionAmount?: boolean
+  tuitionAgreed?: boolean
   tuitionPlan?: boolean
   tuitionNote?: boolean
   joinedOn?: boolean
@@ -871,6 +905,7 @@ export type StudentProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   branch?: boolean
   section?: boolean
   tuitionAmount?: boolean
+  tuitionAgreed?: boolean
   tuitionPlan?: boolean
   tuitionNote?: boolean
   joinedOn?: boolean
@@ -894,6 +929,7 @@ export type StudentProfileSelectScalar = {
   branch?: boolean
   section?: boolean
   tuitionAmount?: boolean
+  tuitionAgreed?: boolean
   tuitionPlan?: boolean
   tuitionNote?: boolean
   joinedOn?: boolean
@@ -903,7 +939,7 @@ export type StudentProfileSelectScalar = {
   approvedById?: boolean
 }
 
-export type StudentProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "type" | "grade" | "school" | "activatedAt" | "activationCode" | "fatherPhone" | "motherPhone" | "guardianNote" | "branch" | "section" | "tuitionAmount" | "tuitionPlan" | "tuitionNote" | "joinedOn" | "leftOn" | "approvalPending" | "approvedAt" | "approvedById", ExtArgs["result"]["studentProfile"]>
+export type StudentProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "type" | "grade" | "school" | "activatedAt" | "activationCode" | "fatherPhone" | "motherPhone" | "guardianNote" | "branch" | "section" | "tuitionAmount" | "tuitionAgreed" | "tuitionPlan" | "tuitionNote" | "joinedOn" | "leftOn" | "approvalPending" | "approvedAt" | "approvedById", ExtArgs["result"]["studentProfile"]>
 export type StudentProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -932,6 +968,7 @@ export type $StudentProfilePayload<ExtArgs extends runtime.Types.Extensions.Inte
     branch: string | null
     section: string | null
     tuitionAmount: number | null
+    tuitionAgreed: number | null
     tuitionPlan: $Enums.TuitionPlan | null
     tuitionNote: string | null
     joinedOn: Date | null
@@ -1375,6 +1412,7 @@ export interface StudentProfileFieldRefs {
   readonly branch: Prisma.FieldRef<"StudentProfile", 'String'>
   readonly section: Prisma.FieldRef<"StudentProfile", 'String'>
   readonly tuitionAmount: Prisma.FieldRef<"StudentProfile", 'Int'>
+  readonly tuitionAgreed: Prisma.FieldRef<"StudentProfile", 'Int'>
   readonly tuitionPlan: Prisma.FieldRef<"StudentProfile", 'TuitionPlan'>
   readonly tuitionNote: Prisma.FieldRef<"StudentProfile", 'String'>
   readonly joinedOn: Prisma.FieldRef<"StudentProfile", 'DateTime'>

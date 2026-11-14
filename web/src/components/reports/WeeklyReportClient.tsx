@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, PageHeader } from "@/components/ui/Surface";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { formatMnDateTime } from "@/lib/dateMn";
+import QuizScoreChip from "@/components/homework-quiz/QuizScoreChip";
 
 type ChildLink = { verified: boolean; student: { id: string; firstName: string; lastName: string } };
 type WeeklyReport = {
@@ -18,7 +19,7 @@ type WeeklyReport = {
   testResultLimit: number | null;
   tests: Array<{ title: string; score: number | null; maxScore: number | null; createdAt: string }>;
   practiceCount: number;
-  homework: { assignments: { done: number; notDone: number; items: Array<{ title: string; done: boolean }> }; dailyMarks: { done: number; partial: number; notDone: number; unmarked: number } };
+  homework: { assignments: { done: number; notDone: number; items: Array<{ title: string; done: boolean }> }; dailyMarks: { done: number; partial: number; notDone: number; unmarked: number }; quizzes?: Array<{ date: string; classroom: string; score: number; problemCount: number }> };
   topics: { best: { topic: string; rate: number } | null; weakest: { topic: string; rate: number } | null; complete: boolean; sampleLimit: number | null };
   nextWeekSchedule: Array<{ date: string; startMinute: number; endMinute: number; room: string | null; classroom: string }>;
 };
@@ -102,7 +103,7 @@ export default function WeeklyReportClient({ initialStudentId, initialWeek }: { 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card><p className="text-sm text-ink-dim">Ирц</p><p className="mt-2 text-xl font-extrabold">{report.attendance.present} ирсэн</p><p className="text-sm text-ink-dim">{report.attendance.absent} тасалсан · {report.attendance.excused} чөлөөтэй</p></Card>
           <Card><p className="text-sm text-ink-dim">Тест ба дасгал</p><p className="mt-2 text-xl font-extrabold">{report.tests.length} тест</p><p className="text-sm text-ink-dim">{report.practiceCount} дасгал</p></Card>
-          <Card><p className="text-sm text-ink-dim">Даалгаврын явц</p><p className="mt-2 font-extrabold">Даалгавар: {report.homework.assignments.done} хийсэн</p><p className="text-sm text-ink-dim">{report.homework.assignments.notDone} хийгээгүй</p><p className="mt-2 font-bold">Ангийн тэмдэглэгээ: {report.homework.dailyMarks.done} хийсэн</p><p className="text-sm text-ink-dim">{report.homework.dailyMarks.partial} дутуу · {report.homework.dailyMarks.notDone} хийгээгүй</p></Card>
+          <Card><p className="text-sm text-ink-dim">Даалгаврын явц</p><p className="mt-2 font-extrabold">Даалгавар: {report.homework.assignments.done} хийсэн</p><p className="text-sm text-ink-dim">{report.homework.assignments.notDone} хийгээгүй</p><p className="mt-2 font-bold">Ангийн тэмдэглэгээ: {report.homework.dailyMarks.done} хийсэн</p><p className="text-sm text-ink-dim">{report.homework.dailyMarks.partial} дутуу · {report.homework.dailyMarks.notDone} хийгээгүй</p>{(report.homework.quizzes ?? []).length > 0 && <ul className="mt-2 space-y-1" aria-label="Шалгалтаар шалгасан даалгавар">{(report.homework.quizzes ?? []).map((q) => <li key={`${q.date}-${q.classroom}`} className="flex flex-wrap items-center gap-x-1.5 text-sm"><span className="tabular-nums text-ink-dim">{q.date.slice(5)}</span><QuizScoreChip score={q.score} problemCount={q.problemCount} /></li>)}</ul>}</Card>
           <Card><p className="text-sm text-ink-dim">Сэдвийн ахиц</p><p className="mt-2 font-bold">Сайн: {report.topics.best?.topic ?? "мэдээлэл алга"}</p><p className="text-sm text-ink-dim">Давтах: {report.topics.weakest?.topic ?? "мэдээлэл алга"}</p>{!report.topics.complete && <p className="mt-2 text-xs text-ink-dim">Эхний {report.topics.sampleLimit?.toLocaleString("mn-MN")} оролдлогод тулгуурлав.</p>}</Card>
         </div>
         <div className="grid gap-4 lg:grid-cols-2">

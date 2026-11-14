@@ -60,7 +60,7 @@ export class EventsService {
 
     const grouped = await this.prisma.learningEvent.groupBy({
       by: ['type'],
-      where: { userId, occurredAt: { gte: since } },
+      where: { userId, deletedAt: null, occurredAt: { gte: since } },
       _count: { _all: true },
       _sum: { durationMs: true },
     });
@@ -89,6 +89,7 @@ export class EventsService {
         COUNT(DISTINCT "userId") FILTER (WHERE "occurredAt" >= ${UTC_NOW} - interval '7 days') AS wau,
         COUNT(DISTINCT "userId") FILTER (WHERE "occurredAt" >= ${UTC_NOW} - interval '30 days') AS mau
       FROM "LearningEvent"
+      WHERE "deletedAt" IS NULL
     `;
 
     const [session] = await this.prisma.$queryRaw<
@@ -99,7 +100,7 @@ export class EventsService {
         SELECT
           EXTRACT(EPOCH FROM (MAX("occurredAt") - MIN("occurredAt"))) * 1000 AS duration_ms
         FROM "LearningEvent"
-        WHERE "sessionId" IS NOT NULL AND "occurredAt" >= ${UTC_NOW} - interval '30 days'
+        WHERE "sessionId" IS NOT NULL AND "deletedAt" IS NULL AND "occurredAt" >= ${UTC_NOW} - interval '30 days'
         GROUP BY "sessionId"
       ) sessions
     `;

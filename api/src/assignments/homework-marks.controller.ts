@@ -1,21 +1,26 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Throttle } from '@nestjs/throttler';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import {
   BulkHomeworkMarksDto,
+  HomeworkCommentDto,
   PatchHomeworkMarkDto,
+  SetHomeworkDeadlineDto,
 } from './homework-marks.dto';
 import { HomeworkMarksService } from './homework-marks.service';
 
@@ -27,6 +32,28 @@ interface AuthedRequest {
 @Controller()
 export class HomeworkMarksController {
   constructor(private homeworkMarks: HomeworkMarksService) {}
+
+  // Самбарын өдөр D-д шалгах гэрийн даалгаврын хугацаа (эзэн 2026-11-05): өмнөх хичээлээс D хүртэл
+  // огноо, 24 цагийн цаг, «хоцорч илгээж болно» эсвэл «хугацаа дуусахад хаагдана»
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Get('classrooms/:id/homework-deadline')
+  getDeadline(
+    @Param('id') classroomId: string,
+    @Query('date') date: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.homeworkMarks.getDeadline(classroomId, date, req.user.userId, req.user.role);
+  }
+
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Put('classrooms/:id/homework-deadline')
+  setDeadline(
+    @Param('id') classroomId: string,
+    @Body() dto: SetHomeworkDeadlineDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.homeworkMarks.setDeadline(classroomId, dto, req.user.userId, req.user.role);
+  }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get('classrooms/:id/homework-marks')
@@ -136,5 +163,39 @@ export class HomeworkMarksController {
       req.user.userId,
       req.user.role,
     );
+  }
+
+  // Сурагчид харагдах сэтгэгдэл (багшийн дотоод тэмдэглэлээс тусдаа, эзэн 2026-11-05)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @Post('classrooms/:id/homework-marks/online/:studentId/comments')
+  addComment(
+    @Param('id') classroomId: string,
+    @Param('studentId') studentId: string,
+    @Query('date') date: string,
+    @Body() dto: HomeworkCommentDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.homeworkMarks.addComment(classroomId, date, studentId, dto.body, req.user.userId, req.user.role);
+  }
+
+  // «Буцаах»: даалгавар хангалтгүй — шалтгаан сурагчид харагдана, сурагч дахин илгээнэ
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @Post('classrooms/:id/homework-marks/online/:studentId/return')
+  returnPhoto(
+    @Param('id') classroomId: string,
+    @Param('studentId') studentId: string,
+    @Query('date') date: string,
+    @Body() dto: HomeworkCommentDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.homeworkMarks.returnPhoto(classroomId, date, studentId, dto.body, req.user.userId, req.user.role);
+  }
+
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
+  @Delete('homework-comments/:commentId')
+  hideComment(@Param('commentId') id: string, @Req() req: AuthedRequest) {
+    return this.homeworkMarks.hideComment(id, req.user.userId);
   }
 }

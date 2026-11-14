@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsInt } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsInt, IsOptional } from 'class-validator';
 
 /** Асуудалтай сурагчийн шалгуур — мужийг сервис шалгана (board-logic CRITERIA_LIMITS) */
 export class RiskCriteriaDto {
@@ -26,4 +26,10 @@ export class RiskCriteriaDto {
   @ApiProperty({ minimum: 1, maximum: 6 })
   @IsInt()
   missingStreak: number;
+
+  /** Сүүлийн шалгалтын хувь үүнээс бага бол (0 = тооцохгүй); ирүүлээгүй бол анхдагч 50 */
+  @ApiPropertyOptional({ minimum: 0, maximum: 100, default: 50 })
+  @IsOptional()
+  @IsInt()
+  minQuiz?: number;
 }

@@ -1,3 +1,4 @@
+import { mainFirst } from '../common/class-track';
 import type { Prisma } from '../generated/prisma/client';
 import { PaymentMethod, PaymentStatus } from '../generated/prisma/enums';
 
@@ -65,7 +66,7 @@ export interface ExportPaymentRow {
     lastName: string;
     phone: string | null;
     studentCode: string | null;
-    enrollments?: { classroom: { name: string } }[];
+    enrollments?: { classroom: { name: string; subject?: string | null } }[];
   };
 }
 
@@ -130,7 +131,8 @@ export function paymentsToCsv(rows: ExportPaymentRow[]): string {
       p.user.lastName,
       p.user.firstName,
       p.user.phone,
-      p.user.enrollments?.[0]?.classroom.name,
+      // хоёр ангитай бол үндсэн (математикийн) анги
+      mainFirst(p.user.enrollments ?? [])[0]?.classroom.name,
       p.forMonth,
       p.amount,
       METHOD_MN[p.method] ?? p.method,

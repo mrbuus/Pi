@@ -37,6 +37,7 @@ import { DayRow } from "./LessonDays";
 import { HomeworkMark } from "./Marks";
 import { currentMonth, dayHref, dayShort, loadMonth, timeRange, todayKey, useApi, useMonthDays } from "./lib";
 import type { HubOverview } from "./types";
+import { regroupTopicText } from "@/lib/testNames";
 
 /* ============================================================================
  * Сурагчийн «Миний самбар» (SURAGCH-V2-GEREE, 2026-10-31) — нэг харцаар:
@@ -95,7 +96,7 @@ export default function StudentDashboard() {
 
       {ov && inClass && (
         <>
-          <TodayCard today={ov.today} />
+          <TodayCard today={ov.today} others={ov.todayOther} />
           <div className="grid grid-cols-2 gap-3">
             <RateTile
               title="Ирц"
@@ -156,7 +157,7 @@ function DashboardSkeleton() {
 }
 
 /* ── Өнөөдрийн хичээл + түргэн үйлдэл ── */
-function TodayCard({ today }: { today: HubOverview["today"] }) {
+function TodayCard({ today, others = [] }: { today: HubOverview["today"]; others?: NonNullable<HubOverview["today"]>[] }) {
   const date = todayKey();
   return (
     <section className={CARD} aria-labelledby="today-title">
@@ -169,19 +170,24 @@ function TodayCard({ today }: { today: HubOverview["today"] }) {
       </div>
 
       {today ? (
-        <Link
-          href={dayHref({ date, classroomId: today.classroomId })}
-          className="row-interactive -mx-2 flex items-center gap-3 rounded-lg px-2 py-2"
-        >
-          <RoomBadge room={today.room} size="md" />
-          <span className="min-w-0 flex-1">
-            <span className="block font-bold tabular-nums text-ink">{timeRange(today.startMinute, today.endMinute)}</span>
-            <span className="cyrillic-tight block truncate text-sm text-ink-dim">
-              <Meta items={[today.topic, today.classroomName]} />
-            </span>
-          </span>
-          <ArrowRight className="size-4 shrink-0 text-ink-dim" aria-hidden />
-        </Link>
+        [today, ...others]
+          .sort((a, b) => a.startMinute - b.startMinute)
+          .map((t) => (
+            <Link
+              key={t.classroomId}
+              href={dayHref({ date, classroomId: t.classroomId })}
+              className="row-interactive -mx-2 flex items-center gap-3 rounded-lg px-2 py-2"
+            >
+              <RoomBadge room={t.room} size="md" />
+              <span className="min-w-0 flex-1">
+                <span className="block font-bold tabular-nums text-ink">{timeRange(t.startMinute, t.endMinute)}</span>
+                <span className="cyrillic-tight block truncate text-sm text-ink-dim">
+                  <Meta items={[t.topic && regroupTopicText(t.topic), t.classroomName]} />
+                </span>
+              </span>
+              <ArrowRight className="size-4 shrink-0 text-ink-dim" aria-hidden />
+            </Link>
+          ))
       ) : (
         <p className="rounded-lg border border-dashed border-line px-4 py-3 text-sm text-ink-dim">Өнөөдөр хичээлгүй</p>
       )}

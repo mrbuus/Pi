@@ -19,7 +19,7 @@ const noScope = { all: false, testIds: [], chapterIds: [], bookIds: [] };
 
 const test1000 = {
   id: 'test-1',
-  title: 'Тест 10-A',
+  title: 'Тест 10-B',
   type: 'THOUSAND',
   deletedAt: null,
   chapterId: 'ch-1',
@@ -290,4 +290,16 @@ describe('1000 бодлого — сурагчийн хариунд бодлог
     const res = await service.studentReview('test-1', 'student-1', NOW);
     expect(JSON.stringify(res)).not.toMatch(/"token"|1000-S10A-\d/);
   });
+});
+
+describe('lockVariantA', () => {
+  const { lockVariantA } = jest.requireActual('./thousand.service');
+  const open = { level: 'FULL', opensAt: null, covered: true };
+  const later = { level: 'NONE', opensAt: new Date('2026-11-17'), covered: true };
+  it('А сорил: бүрэн нээлттэй байсан ч хаагдана', () =>
+    expect(lockVariantA(open, { title: '1000 бодлого · Сорил 15-A', variantLabel: null })).toEqual({ ...open, level: 'NONE' }));
+  it('А сорил: «7 хоногийн дараа нээгдэнэ» огноо харагдахгүй', () =>
+    expect(lockVariantA(later, { title: 'Сорил 3', variantLabel: 'А' }).opensAt).toBeNull());
+  it('B хувилбар хэвээр', () =>
+    expect(lockVariantA(open, { title: 'Сорил 15-B', variantLabel: 'B' })).toBe(open));
 });

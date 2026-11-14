@@ -1,14 +1,17 @@
+import { mainFirst } from '../common/class-track';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
   ForbiddenException,
+  Optional,
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleService } from '../schedule/schedule.service';
 import { type DateKey } from './proration';
-import { computePaidUntil } from './paid-until';
+import { computePaidUntil, paidUntilFromLedger } from './paid-until';
+import { PaymentsLedgerService } from '../payments/ledger.service';
 import {
   ACADEMIC_YEAR,
   computeLedger,
@@ -25,6 +28,7 @@ export class TuitionService {
     private prisma: PrismaService,
     private scheduleService: ScheduleService,
     private withdrawal: WithdrawalService,
+    @Optional() private ledger?: PaymentsLedgerService,
   ) {}
 
   /**
@@ -380,7 +384,12 @@ export class TuitionService {
     // Сурагч байгаа эсэх
     const student = await this.prisma.user.findUnique({
       where: { id: studentId },
-      include: { enrollments: { where: { leftAt: null } } },
+      include: {
+        enrollments: {
+          where: { leftAt: null },
+          include: { classroom: { select: { name: true, subject: true } } },
+        },
+      },
     });
     if (!student) {
       throw new NotFoundException('Сурагч олдсонгүй');
@@ -395,8 +404,16 @@ export class TuitionService {
       if (!classroom) throw new NotFoundException('Анги олдсонгүй');
     } else if (student.enrollments.length > 0) {
       // ТАНХИМЫН сурагч → сүүлийн идэвхтэй ангийг авна
-      const enrollment = student.enrollments[0];
+      const enrollment = mainFirst(student.enrollments)[0];
       classroom = { id: enrollment.classroomId };
+    }
+
+    // Танхимын сурагч: төлбөрийн ledger-ээс (ажилтны хуудастай ижил — сар бүр, хуваан, бүтэн
+    // жил бүгдийг зөв тооцно). Өмнө нь доорх хуучин гинж Улаанбаатарын (+08) цагтай серверт сарыг
+    // ахиулж чаддаггүй байсан тул 2+ сар төлсөн ч эхний сараар зогсдог байв (2026-11-05).
+    if (this.ledger) {
+      const [row] = await this.ledger.rows({ id: studentId });
+      if (row) return paidUntilFromLedger(row);
     }
 
     // Төлбөр нь САРЫН дүнтэй төлбөр, forMonth = "2026-09" гэх мэт
@@ -425,7 +442,8 @@ export class TuitionService {
         monthsPaid++;
         // Дараагийн сар авна
         const [y, m] = expectedMonth.split('-').map(Number);
-        const next = new Date(y, m, 1);
+        // UTC-ээр — new Date(y, m, 1) нь +08 серверт өмнөх сарын 16:00 UTC болж сар ахидаггүй байв
+        const next = new Date(Date.UTC(y, m, 1));
         expectedMonth = `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, '0')}`;
       } else {
         // Гинж эвдэрсэн → эхний дараалсан хэсгийг авна
@@ -436,9 +454,10 @@ export class TuitionService {
     // Schedule модулаас амралтын өдрүүдийг авна
     const calendars = await this.prisma.academicCalendarDay.findMany({
       where: {
+        deletedAt: null,
         type: 'HOLIDAY',
         // Зөвхөн БҮХ ангид хамаарах амралт (зарим ангийн онцгой өдөр биш)
-        classrooms: { none: {} },
+        classrooms: { none: { deletedAt: null } },
         // Төлбөр хугацаанд
         date: { gte: fromDate },
       },

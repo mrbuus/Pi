@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { Button } from "@/components/ui/kit/button";
 import { Meta } from "@/components/ui/Meta";
 import LedgerDialog, { Field, inputCls } from "./LedgerDialog";
-import { stampLabel } from "./ledgerFormat";
+import { isComplete, stampLabel } from "./ledgerFormat";
 import { errMsg } from "./paymentHelpers";
 import type { LedgerRow, StudentLedger } from "./ledgerTypes";
 
@@ -30,7 +30,7 @@ export default function SettleSwitch({
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  if (!settled && row.remaining === 0) return null;
+  if (!settled && isComplete(row)) return null;
 
   async function save(full: boolean) {
     setSaving(true);

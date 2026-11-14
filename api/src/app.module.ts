@@ -3,11 +3,15 @@ import { HealthController } from './health.controller';
 import { StudyReviewModule } from './study-review/study-review.module';
 import { LessonFlowModule } from './lesson-flow/lesson-flow.module';
 import { LessonDayModule } from './lesson-day/lesson-day.module';
+import { MakeupVisitsModule } from './makeup-visits/makeup-visits.module';
+import { StudentCalendarModule } from './student-calendar/student-calendar.module';
 import { LessonRecordsModule } from './lesson-records/lesson-records.module';
 import { CentreHelpModule } from './centre-help/centre-help.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { DocumentImportModule } from './document-import/document-import.module';
 import { LearningLabModule } from './learning-lab/learning-lab.module';
+import { AccountDeletionModule } from './account-deletion/account-deletion.module';
+import { DevicesModule } from './devices/devices.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
@@ -21,6 +25,7 @@ import { AnnouncementsModule } from './announcements/announcements.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AssignmentsModule } from './assignments/assignments.module';
+import { HomeworkQuizModule } from './homework-quiz/homework-quiz.module';
 import { TeacherGroupsModule } from './teacher-groups/teacher-groups.module';
 import { AuditModule } from './audit/audit.module';
 import { ClassSessionsModule } from './class-sessions/class-sessions.module';
@@ -43,6 +48,7 @@ import { InsightsModule } from './insights/insights.module';
 import { LeadsModule } from './leads/leads.module';
 import { PlacementModule } from './placement/placement.module';
 import { MockExamsModule } from './mock-exams/mock-exams.module';
+import { PaperExamsModule } from './paper-exams/paper-exams.module';
 import { LessonsModule } from './lessons/lessons.module';
 import { GatewaysModule } from './gateways/gateways.module';
 import { NotesModule } from './notes/notes.module';
@@ -54,12 +60,14 @@ import { PaymentsModule } from './payments/payments.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { StoreModule } from './store/store.module';
 import { ScheduleModule as ClassScheduleModule } from './schedule/schedule.module';
+import { TeacherHoursModule } from './teacher-hours/teacher-hours.module';
 import { StorageModule } from './storage/storage.module';
 import { TasksModule } from './tasks/tasks.module';
 import { TestsModule } from './tests/tests.module';
 import { ThousandModule } from './thousand/thousand.module';
 import { HomeworkPracticeModule } from './homework-practice/homework-practice.module';
 import { StudentHubModule } from './student-hub/student-hub.module';
+import { ScanModule } from './scan/scan.module';
 import { UsersModule } from './users/users.module';
 import { VideosModule } from './videos/videos.module';
 import { TuitionModule } from './tuition/tuition.module';
@@ -73,6 +81,7 @@ import { RevisionsModule } from './revisions/revisions.module';
 import { PresenceModule } from './presence/presence.module';
 import { ClassDashboardModule } from './class-dashboard/class-dashboard.module';
 import { ClassChecksModule } from './class-checks/class-checks.module';
+import { BookPaymentsModule } from './book-payments/book-payments.module';
 import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
 
 @Module({
@@ -133,11 +142,13 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     ClassroomsModule,
     AttendanceModule,
     AssignmentsModule,
+    HomeworkQuizModule,
     ContentModule,
     TestsModule,
     ThousandModule,
     HomeworkPracticeModule,
     StudentHubModule,
+    ScanModule,
     AttemptsModule,
     StorageModule,
     PassesModule,
@@ -157,11 +168,14 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     LeadsModule,
     PlacementModule,
     MockExamsModule,
+    PaperExamsModule,
     LessonsModule,
     GatewaysModule,
     ProgressModule,
     TasksModule,
     ClassScheduleModule,
+    // Багшийн ажилласан цагийн хүснэгт, данс, хөлс (эзэн 2026-11-08)
+    TeacherHoursModule,
     AuditModule,
     NotesModule,
     GoalsModule,
@@ -186,6 +200,9 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     CentreHelpModule,
     LessonFlowModule,
     LessonDayModule,
+    MakeupVisitsModule,
+    // Сурагчийн хичээлийн хуанли + сэдэв хөтөлбөр (эзэн 2026-11-08)
+    StudentCalendarModule,
     LessonRecordsModule,
     // Буцаах ба өөрчлөлтийн түүх (docs/v2/BUTSAAH-TUUKH-TOLOVLOGOO.md)
     RevisionsModule,
@@ -193,8 +210,12 @@ import { InternalDraftsModule } from './internal-drafts/internal-drafts.module';
     // «Анги» самбар (эзэн 2026-10-13)
     ClassDashboardModule,
     ClassChecksModule,
+    BookPaymentsModule,
     // «Дотоод» — нийтлэхээс өмнөх бодлого/тестийн ноорог (эзэн 2026-10-13)
     InternalDraftsModule,
+    // Piemath гар утасны апп: push токен, бүртгэл устгах хүсэлт
+    DevicesModule,
+    AccountDeletionModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

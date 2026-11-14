@@ -1,3 +1,4 @@
+import { activeClasses } from '../common/class-track';
 import {
   BadRequestException,
   ForbiddenException,
@@ -19,6 +20,7 @@ import {
   todayUB,
 } from '../common/date';
 import { EVENING_MARKING_WINDOW_DAYS } from '../common/marking';
+import { softDeleteData } from '../common/soft-delete';
 import { PrismaService } from '../prisma/prisma.service';
 import { EveningReportDto } from './dto/evening-report.dto';
 import { MistakeCollector } from '../mistakes/mistake-collector.service';
@@ -96,9 +98,8 @@ export class AttemptsService {
 
   // Оройн тэмдэглэгээ — утас хураадаг танхимын горимын гол урсгал (SPEC §9.1.1)
   async eveningReport(dto: EveningReportDto, studentId: string) {
-    const enrollment = await this.prisma.enrollment.findFirst({
-      where: { studentId, leftAt: null },
-    });
+    // Хоёр ангитай сурагч: үндсэн (математикийн) анги
+    const [enrollment] = await activeClasses(this.prisma, studentId);
     if (!enrollment) {
       throw new ForbiddenException('Та идэвхтэй ангид бүртгэлгүй байна');
     }
@@ -142,25 +143,30 @@ export class AttemptsService {
     ];
 
     const createdAttempts = await this.prisma.$transaction(async (tx) => {
-      await tx.attempt.deleteMany({
+      // Өмнөх тэмдэглэгээг ЗӨӨЛӨН сольно (эзний дүрэм 2026-10-23): хуучин мөр
+      // deletedAt-тай DB-д үлдэж, уншилт бүрээс хасагдана
+      await tx.attempt.updateMany({
         where: {
           studentId,
           classroomId: enrollment.classroomId,
           occurredOn,
           source: AttemptSource.EVENING_SELF_REPORT,
           problemId: { in: rows.map((r) => r.problemId) },
+          deletedAt: null,
         },
+        data: softDeleteData(studentId),
       });
       return tx.attempt.createManyAndReturn({
         data: rows,
         select: { id: true, mistakeCollectedAt: true },
       });
     });
-    for (const attempt of createdAttempts) {
-      if (attempt.mistakeCollectedAt === null) {
-        await this.mistakes.collectAttempt(attempt.id);
-      }
-    }
+    // Хүсэлтийн дараа цуглуулна (docs/BACKEND-PERF.md) — алдаа гарвал pending үлдэнэ
+    this.mistakes.collectAttemptsInBackground(
+      createdAttempts
+        .filter((attempt) => attempt.mistakeCollectedAt === null)
+        .map((attempt) => attempt.id),
+    );
     return { recorded: rows.length, date: occurredOn };
   }
 
@@ -168,6 +174,7 @@ export class AttemptsService {
     return this.prisma.attempt.findMany({
       where: {
         studentId,
+        deletedAt: null,
         ...(from || to
           ? {
               occurredOn: {
@@ -195,9 +202,9 @@ export class AttemptsService {
     // Нийт оролдлогын тоо (take-д ор орилцуулсан мөрүүдийн үнэн тоог авах)
     // + сүүлийн 5000 оролдлого (санах ойн ачаалал сөргүүлэх, хэрэглэгчид харагдах үзүүлэлт чанар сайхан)
     const [totalAttemptCount, attempts] = await Promise.all([
-      this.prisma.attempt.count({ where: { studentId } }),
+      this.prisma.attempt.count({ where: { studentId, deletedAt: null } }),
       this.prisma.attempt.findMany({
-        where: { studentId },
+        where: { studentId, deletedAt: null },
         include: {
           problem: {
             select: {
@@ -275,6 +282,7 @@ export class AttemptsService {
       where: {
         classroomId: { in: classroomIds },
         occurredOn: date,
+        deletedAt: null,
       },
       include: {
         problem: { select: { chapter: { select: { title: true } } } },
@@ -459,6 +467,7 @@ export class AttemptsService {
             where: {
               classroomId,
               studentId: { in: studentIds },
+              deletedAt: null,
               source: AttemptSource.EVENING_SELF_REPORT,
               occurredOn: { in: sessionTasks.map((s) => s.date) },
               problemId: {

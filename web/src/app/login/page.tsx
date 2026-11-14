@@ -10,6 +10,7 @@ import LoginNotice from "@/components/auth/LoginNotice";
 import { rememberPreference, saveRememberPreference } from "@/components/auth/remember";
 import InfoHint from "@/components/ui/InfoHint";
 import { api, homeForRole, nextFromLocation, setAuth } from "@/lib/api";
+import { saveSecurityNudge, type SecurityNudge } from "@/lib/securityNudge";
 
 /**
  * Нэвтрэх хуудас.
@@ -68,6 +69,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [authError, setAuthError] = useState("");
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [failCount, setFailCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [remember, setRemember] = useState(true);
@@ -80,9 +82,11 @@ export default function LoginPage() {
     const saved = typeof window !== "undefined" ? localStorage.getItem("login_identifier") : null;
     const keep = rememberPreference();
     // Хөтчөөс уншсан утгыг дараагийн микро-даалгаварт (effect дотор synchronous setState биш)
+    const expired = new URLSearchParams(window.location.search).get("expired") === "1";
     queueMicrotask(() => {
       if (saved) setIdentifier(saved);
       setRemember(keep);
+      setSessionExpired(expired);
     });
   }, []);
 
@@ -108,7 +112,7 @@ export default function LoginPage() {
     if (!validate()) return;
     setLoading(true);
     try {
-      const res = await api<{ accessToken: string; role: string }>(
+      const res = await api<{ accessToken: string; role: string; securityNudge?: SecurityNudge }>(
         "/auth/login",
         { method: "POST", body: { identifier, password, remember }, auth: false },
       );
@@ -117,6 +121,8 @@ export default function LoginPage() {
         localStorage.setItem("login_identifier", identifier);
       }
       setAuth(res.accessToken, res.role, remember);
+      // Нууц үг = утасны дугаар хэвээр бол апп дотор зөөлөн сануулна (SecurityNudge)
+      saveSecurityNudge(res.securityNudge, password);
       router.push(nextFromLocation() ?? homeForRole(res.role));
     } catch (err) {
       // Backend нь аль талбар буруу болохыг ЗОРИУДААР хэлдэггүй (хэрэглэгч
@@ -152,6 +158,13 @@ export default function LoginPage() {
 
         {/* Админы бичсэн тайлбар/зарлал — хоосон бол харагдахгүй */}
         <LoginNotice />
+
+        {/* Хугацаа дууссан / нууц үг өөр газар солигдсон токеноос автоматаар ирэв */}
+        {sessionExpired && (
+          <p role="status" className="mb-4 rounded-xl border border-info/40 bg-info/10 px-3 py-2.5 text-sm text-ink">
+            Нэвтрэлтийн хугацаа дууссан эсвэл нууц үг солигдсон тул дахин нэвтэрнэ үү
+          </p>
+        )}
 
         <form onSubmit={submit} noValidate className="space-y-4">
           {/* ---------- Хэн бэ ---------- */}

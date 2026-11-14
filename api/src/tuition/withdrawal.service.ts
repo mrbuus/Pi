@@ -21,12 +21,19 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleService } from '../schedule/schedule.service';
 import {
+  WEB_ATTENDANCE_FROM,
   computeWithdrawal,
+  dayBefore,
+  firstPattern,
   heldLessonDays,
+  leaveCandidates,
   lessonsPerMonthFor,
+  projectLessonDays,
+  webMarkingStart,
   type DateKey,
   type WithdrawalResult,
 } from './withdrawal';
+import { toEstimate, type RefundEstimate } from './refund-estimate';
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const dk = (d: Date | null | undefined): DateKey | null =>
@@ -77,6 +84,31 @@ export class WithdrawalService {
     return this.compute(studentId, o.leftOn, null, [], false);
   }
 
+  /**
+   * «Одоо гарвал буцаах дүн» (эзэн 2026-11-08) — өнөөдрөөр, анхдагч эхлэх өдрөөр, хасалтгүй тооцоо.
+   * Хадгалахгүй. Багшид зөвхөн буцаах дүн + хичээлийн тоо (refund-estimate.ts).
+   */
+  async estimate(studentId: string, role: Role): Promise<RefundEstimate> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: studentId },
+      select: {
+        role: true,
+        archivedAt: true,
+        // Танхимын анги л — онлайн сургалтад энэ гэрээний тооцоо хамаарахгүй
+        enrollments: {
+          where: { leftAt: null, classroom: { type: 'IN_PERSON' } },
+          select: { id: true },
+        },
+      },
+    });
+    if (!user || user.role !== Role.STUDENT)
+      throw new NotFoundException('Сурагч олдсонгүй');
+    if (user.archivedAt) return { applicable: false, reason: 'ARCHIVED' };
+    if (!user.enrollments.length) return { applicable: false, reason: 'NO_CLASS' };
+    const calc = await this.compute(studentId, todayKeyUB(), null, [], true);
+    return toEstimate(calc, role);
+  }
+
   private async compute(
     studentId: string,
     leftOn: DateKey,
@@ -97,6 +129,7 @@ export class WithdrawalService {
             grade: true,
             tuitionPlan: true,
             tuitionAmount: true,
+            tuitionAgreed: true,
             joinedOn: true,
           },
         },
@@ -150,6 +183,7 @@ export class WithdrawalService {
     const ledger = computeLedger({
       plan: profile?.tuitionPlan ?? null,
       tuitionAmount: profile?.tuitionAmount ?? null,
+      agreed: profile?.tuitionAgreed ?? null,
       tier,
       startDate,
       leftOn: null,
@@ -173,6 +207,16 @@ export class WithdrawalService {
 
     // Ангид БОЛСОН хичээл: анги бүрийн суусан хугацаагаар (анги сольсон байж болно)
     const lessonDays: DateKey[] = [];
+    // Вэбд ирц бүртгэхээс өмнөх хичээл — суусан гэж үзнэ, хасахгүй (эзэн 2026-11-08)
+    const assumedDays: DateKey[] = [];
+    const segments: {
+      classroomId: string;
+      name: string;
+      from: DateKey;
+      to: DateKey;
+      webStart: DateKey | null;
+      noSchedule: boolean;
+    }[] = [];
     // Анхны ангийн Enrollment.joinedAt нь импортын өдөр байж болно (бодит эхлэл = joinedOn) — анхны
     // ангид тооцоо эхлэх өдрөөс, дараагийн (анги сольсон) ангид шилжсэн өдрөөс тоолно
     // Нийгмийн анги тусдаа төлбөртэй — үндсэн анги нийгэм биш бол тоолохгүй
@@ -187,31 +231,55 @@ export class WithdrawalService {
       const segFrom = joined > countFrom ? joined : countFrom;
       const segTo = [leftOn, e.leftAt ? ubDateKey(e.leftAt) : leftOn].sort()[0];
       if (segFrom > segTo) continue;
-      lessonDays.push(
-        ...(await this.classLessonDays(e.classroomId, segFrom, segTo)),
-      );
+      const seg = await this.classLessonDays(e.classroomId, segFrom, segTo);
+      const webStart = await this.webStart(e.classroomId);
+      lessonDays.push(...seg.days);
+      assumedDays.push(...seg.days.filter((d) => !webStart || d < webStart));
+      segments.push({
+        classroomId: e.classroomId,
+        name: e.classroom.name,
+        from: segFrom,
+        to: segTo,
+        webStart,
+        noSchedule: seg.noSchedule,
+      });
     }
+    const assumedSet = new Set(assumedDays);
+    // Ирц: зөвхөн вэбд бодитоор бүртгэсэн (2026-10-23-ноос) — өмнөх нь туршилтын бичлэг
+    const attFrom = countFrom > WEB_ATTENDANCE_FROM ? countFrom : WEB_ATTENDANCE_FROM;
     const attendance = await this.prisma.attendance.findMany({
       where: {
         studentId,
         date: {
-          gte: new Date(`${countFrom}T00:00:00Z`),
+          gte: new Date(`${attFrom}T00:00:00Z`),
           lte: new Date(`${leftOn}T00:00:00Z`),
         },
       },
       select: { date: true, status: true, note: true, classroomId: true },
       orderBy: { date: 'asc' },
     });
-    const excused = attendance.filter((a) => a.status === 'EXCUSED');
+    // Өмнө нь гаргасан, цуцлаагүй буцаалт (энэ жилийн) — сэргээгээд дахин хасахад давхар буцаахгүй
+    const prior = await this.prisma.tuitionRefund.aggregate({
+      where: {
+        studentId,
+        status: { not: 'CANCELLED' },
+        leftOn: { gte: new Date(`${ACADEMIC_YEAR.paymentsFrom}T00:00:00Z`) },
+      },
+      _sum: { refundAmount: true },
+    });
     const result = computeWithdrawal({
       monthlyFee: tier.monthly,
       lessonsPerMonth: lessonsPerMonthFor(daysPerWeek, tier.monthly),
       countFrom,
       leftOn,
       lessonDays,
-      excusedDays: excused.map((a) => dk(a.date)!),
+      excusedDays: leaveCandidates(
+        attendance.map((a) => ({ date: dk(a.date)!, status: a.status })),
+      ),
       extraExcluded: exclude,
+      assumedDays,
       paid: ledger.paidTotal,
+      refundedBefore: prior._sum.refundAmount ?? 0,
     });
     const last = result.cycles.at(-1);
     // Гарсан мөчлөгийн хичээлүүд — ажилтан «суугаагүй» (эмнэлгийн чөлөө) гэж сонгоно
@@ -227,6 +295,8 @@ export class WithdrawalService {
               note: attByDay.get(d)?.note ?? null,
               leave: last.leaveDay === d,
               excluded: last.extraDays.includes(d),
+              // Вэбд ирц бүртгэхээс өмнөх — суусан гэж үзнэ, хасах боломжгүй
+              assumed: assumedSet.has(d),
             }))
         : [];
     const counts = { PRESENT: 0, LATE: 0, ABSENT: 0, EXCUSED: 0 } as Record<
@@ -270,6 +340,11 @@ export class WithdrawalService {
       startDate,
       countFrom,
       leftOn,
+      /** Сүүлийн (одоогийн) ангид вэбд ирц бүртгэж эхэлсэн өдөр */
+      webStart: segments.at(-1)?.webStart ?? null,
+      segments,
+      /** Хуваарьгүй анги — хичээлийн тоог мэдэх боломжгүй (тооцоо дутуу) */
+      noSchedule: segments.some((x) => x.noSchedule),
       payments: payments.map((p) => ({
         amount: p.amount,
         paidOn: dk(p.paidAt),
@@ -285,8 +360,75 @@ export class WithdrawalService {
     };
   }
 
-  /** Нэг ангийн [from, to] хооронд болсон хичээлийн өдрүүд (амралт, цуцлалт, зөөлт тооцсон) */
+  /** Ангийн вэбд ирц бүртгэж эхэлсэн өдөр (2026-10-23-ноос хойших анхны ирц), бичлэггүй бол null */
+  private async webStart(classroomId: string): Promise<DateKey | null> {
+    const first = await this.prisma.attendance.findFirst({
+      where: {
+        classroomId,
+        date: { gte: new Date(`${WEB_ATTENDANCE_FROM}T00:00:00Z`) },
+      },
+      orderBy: { date: 'asc' },
+      select: { date: true },
+    });
+    return webMarkingStart(dk(first?.date));
+  }
+
+  /**
+   * Нэг ангийн [from, to] хооронд болсон хичээлийн өдрүүд (амралт, цуцлалт, зөөлт тооцсон). Хуваарь вэбд
+   * хожуу үүссэн бол (анхны мөрийн effectiveFrom > from) түүнээс өмнөх өдрүүдийг анхны хуваарийн
+   * гарагаар тооцно — тэр үед ч анги хичээллэж байсан (эзэн 2026-11-08, 13-3 анги).
+   */
   private async classLessonDays(
+    classroomId: string,
+    from: DateKey,
+    to: DateKey,
+  ): Promise<{ days: DateKey[]; noSchedule: boolean }> {
+    const rows = await this.prisma.classSchedule.findMany({
+      where: { classroomId, deletedAt: null },
+      select: { weekday: true, effectiveFrom: true, effectiveTo: true },
+    });
+    const pattern = firstPattern(
+      rows.map((r) => ({
+        weekday: r.weekday,
+        effectiveFrom: dk(r.effectiveFrom)!,
+        effectiveTo: dk(r.effectiveTo),
+      })),
+    );
+    if (!pattern) return { days: [], noSchedule: true };
+    const out: DateKey[] = [];
+    if (from < pattern.from) {
+      const projTo = [to, dayBefore(pattern.from)].sort()[0];
+      const off = await this.prisma.academicCalendarDay.findMany({
+        where: {
+          deletedAt: null,
+          date: {
+            gte: new Date(`${from}T00:00:00Z`),
+            lte: new Date(`${projTo}T00:00:00Z`),
+          },
+          OR: [
+            { classrooms: { none: {} } },
+            { classrooms: { some: { classroomId } } },
+          ],
+        },
+        select: { date: true },
+      });
+      out.push(
+        ...projectLessonDays(
+          from,
+          projTo,
+          pattern.weekdays,
+          new Set(off.map((h) => dk(h.date)!)),
+        ),
+      );
+      if (to < pattern.from) return { days: out, noSchedule: false };
+      from = pattern.from;
+    }
+    out.push(...(await this.scheduledLessonDays(classroomId, from, to)));
+    return { days: out, noSchedule: false };
+  }
+
+  /** Хуваарийн хөдөлгүүрээр [from, to] хооронд болсон хичээлийн өдрүүд (амралт, цуцлалт, зөөлт) */
+  private async scheduledLessonDays(
     classroomId: string,
     from: DateKey,
     to: DateKey,
@@ -312,6 +454,7 @@ export class WithdrawalService {
       const exceptions = ids.length
         ? await this.prisma.scheduleException.findMany({
             where: {
+              deletedAt: null,
               scheduleId: { in: ids },
               OR: [
                 {

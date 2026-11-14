@@ -1,5 +1,6 @@
 "use client";
 
+import { classNames } from "@/lib/classTrack";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -31,6 +32,12 @@ interface OutstandingRow {
 }
 
 const PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
+
+/** Утасны зөвхөн цифрүүд; урд талын +976 / 976-г хасна */
+function phoneDigits(v: string): string {
+  const d = v.replace(/\D/g, "");
+  return d.length > 8 && d.startsWith("976") ? d.slice(3) : d;
+}
 
 /** Сурагчийн төлбөрийн төлөв — outstandingMap-д байвал дутуу, эс бөгөөс
  * төлбөрийн багц (tuitionPlan) байгаа эсэхээс шалгаж ойролцоогоор тооцно
@@ -137,6 +144,7 @@ export default function StudentsDirectory() {
     const branches = new Set<string>();
     for (const s of students ?? []) {
       if (s.currentClassroom) classrooms.set(s.currentClassroom.id, s.currentClassroom.name);
+      for (const c of s.otherClassrooms ?? []) classrooms.set(c.id, c.name);
       if (s.studentProfile?.grade) grades.add(s.studentProfile.grade);
       if (s.studentProfile?.branch) branches.add(s.studentProfile.branch);
     }
@@ -149,21 +157,31 @@ export default function StudentsDirectory() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
+    const qDigits = phoneDigits(q);
     return (students ?? []).filter((s) => {
       if (attention === "unassigned" && !unassignedIds.has(s.id)) return false;
       if (attention === "absent" && !absentIds.has(s.id)) return false;
-      if (classroomFilter !== "ALL" && s.currentClassroom?.id !== classroomFilter) return false;
+      if (
+        classroomFilter !== "ALL" &&
+        s.currentClassroom?.id !== classroomFilter &&
+        !(s.otherClassrooms ?? []).some((c) => c.id === classroomFilter)
+      )
+        return false;
       if (gradeFilter !== "ALL" && String(s.studentProfile?.grade ?? "") !== gradeFilter)
         return false;
       if (branchFilter !== "ALL" && s.studentProfile?.branch !== branchFilter) return false;
       if (subjectFilter !== "ALL" && subjectFromCode(s.studentCode) !== subjectFilter)
         return false;
       if (!q) return true;
-      const haystack = [s.studentCode, s.firstName, s.lastName, s.phone]
+      const p = s.studentProfile;
+      const phones = [s.phone, p?.fatherPhone, p?.motherPhone, ...(s.parentPhones ?? [])];
+      const haystack = [s.studentCode, s.firstName, s.lastName, s.username, ...phones]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
-      return haystack.includes(q);
+      if (haystack.includes(q)) return true;
+      // Утсыг зай, зураас, +976-тай бичсэн ч олно (3+ орон бичсэн үед)
+      return qDigits.length >= 3 && phones.some((ph) => ph && phoneDigits(ph).includes(qDigits));
     });
   }, [
     students,
@@ -337,14 +355,14 @@ export default function StudentsDirectory() {
           />
         )}
         <label className="sr-only" htmlFor="student-search">
-          Код, нэр, утасны дугаараар хайх
+          Код, нэр, сурагч эсвэл эцэг эхийн утсаар хайх
         </label>
         <input
           id="student-search"
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Код, нэр, утасны дугаараар хайх…"
+          placeholder="Код, нэр, сурагч эсвэл эцэг эхийн утсаар хайх…"
           className={`w-full sm:max-w-xs ${inputCls}`}
         />
         <div className="flex flex-wrap gap-2">
@@ -535,7 +553,7 @@ export default function StudentsDirectory() {
                             )}
                           </td>
                           <td className="px-3 py-2 text-ink-dim">
-                            {cls?.name ?? (s.studentProfile?.grade ? `${s.studentProfile.grade}-р анги` : "—")}
+                            {(showArchived ? cls?.name : classNames(cls, s.otherClassrooms)) ?? (s.studentProfile?.grade ? `${s.studentProfile.grade}-р анги` : "—")}
                           </td>
                           <td className="px-3 py-2 text-ink-dim">{s.studentProfile?.section ?? "—"}</td>
                           <td className="px-3 py-2 text-ink-dim">{s.studentProfile?.branch ?? "—"}</td>
@@ -565,6 +583,7 @@ export default function StudentsDirectory() {
                                 student={{ id: s.id, name: fullName(s) }}
                                 archived={!!s.archivedAt}
                                 currentClassId={s.currentClassroom?.id ?? null}
+                                otherClassIds={(s.otherClassrooms ?? []).map((c) => c.id)}
                                 lastClassId={s.lastClassroom?.id ?? null}
                                 onChanged={reloadAll}
                               />
@@ -593,7 +612,7 @@ export default function StudentsDirectory() {
                           className="text-xs text-ink-dim"
                           items={[
                             s.studentCode && <span key="c" className="font-mono">{s.studentCode}</span>,
-                            cls?.name ?? (isUnassigned ? "Хуваарилаагүй" : null),
+                            (showArchived ? cls?.name : classNames(cls, s.otherClassrooms)) ?? (isUnassigned ? "Хуваарилаагүй" : null),
                             !showArchived && absentIds.has(s.id) ? "Ирэхгүй" : null,
                             showArchived ? s.archiveReason : null,
                           ]}
@@ -609,6 +628,7 @@ export default function StudentsDirectory() {
                           student={{ id: s.id, name: fullName(s) }}
                           archived={!!s.archivedAt}
                           currentClassId={s.currentClassroom?.id ?? null}
+                          otherClassIds={(s.otherClassrooms ?? []).map((c) => c.id)}
                           lastClassId={s.lastClassroom?.id ?? null}
                           onChanged={reloadAll}
                         />

@@ -7,9 +7,17 @@ import type { TheoryDay } from "@/components/makeup/types";
 /** Гэрийн даалгаврын зураг илгээх хугацаа: өнөөдөр ба сүүлийн 13 хоног (нийт 14) */
 export const HOMEWORK_WINDOW_DAYS = 14;
 /** Гэрийн даалгаврын дээд хуудас (эзэн) */
-export const HOMEWORK_MAX_PAGES = 6;
+export const HOMEWORK_MAX_PAGES = 15;
 /** Онолын зургийн дээд хуудас (эзэн) */
-export const THEORY_MAX_PAGES = 10;
+export const THEORY_MAX_PAGES = 20;
+/** Илгээсэн зургаа сурагч өөрөө устгах / солих хугацаа (эзэн 2026-11-12) — сервер дахин шалгана */
+export const PHOTO_EDIT_MS = 5 * 60_000;
+
+/** Илгээсэн цагаас 5 минутын дараах агшин (ms); цаг буруу бол null */
+export function editDeadline(sentAt: string | null | undefined): number | null {
+  const t = sentAt ? Date.parse(sentAt) : NaN;
+  return Number.isFinite(t) ? t + PHOTO_EDIT_MS : null;
+}
 
 /** GET /lesson-day/:classroomId/:date/photos — V2 нэмэлт талбартай */
 export interface TheoryDayV2 extends TheoryDay {
@@ -40,6 +48,10 @@ export interface HomeworkPhoto {
   uploadedAt: string;
   /** Дараагийн хичээлээс хойш илгээсэн */
   late?: boolean;
+  /** Сурагчийн бичсэн тайлбар (эзэн 2026-11-05) */
+  caption?: string | null;
+  /** Багш «Буцаах» дарсан — засаад дахин илгээнэ */
+  returnedAt?: string | null;
 }
 
 /** «YYYY-MM-DD»-ээс n хоногийн зөрүү (цагийн бүсгүй өдөр) */

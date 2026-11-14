@@ -12,6 +12,7 @@ import ClassHubTabs, { hubFor } from "@/components/nav/ClassHubTabs";
 import UserMenu from "@/components/nav/UserMenu";
 import ThemeToggle from "@/components/ThemeToggle";
 import UsageTracker from "@/components/usage/UsageTracker";
+import SecurityNudge from "@/components/auth/SecurityNudge";
 import { TopBarSlotProvider } from "@/components/nav/TopBarSlot";
 import { getPageTitle } from "@/components/nav/nav-data";
 import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
@@ -58,6 +59,20 @@ function useVerifiedChildName(role: string | undefined): string {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  // Дотоод ажилчид (Админ, Багш+, Багш) текстийг чөлөөтэй сонгож хуулна (эзэн 2026-11-10).
+  // Сурагч, эцэг эхэд хэвээр хаалттай (globals.css `html[data-staff]`).
+  useEffect(() => {
+    const sync = () => {
+      if (["ADMIN", "TEACHER_PLUS", "TEACHER"].includes(getRole() ?? "")) document.documentElement.dataset.staff = "1";
+      else delete document.documentElement.dataset.staff;
+    };
+    sync();
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      delete document.documentElement.dataset.staff;
+    };
+  }, [pathname]);
   const role = useSyncExternalStore(
     () => () => {},
     getRole,
@@ -236,6 +251,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <UsageTracker />
+      {!examFullscreen && <SecurityNudge />}
       {!examFullscreen && (
         <BottomTabs
           role={displayRole ?? role}

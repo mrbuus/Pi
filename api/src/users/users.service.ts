@@ -1,3 +1,4 @@
+import { mainFirst } from '../common/class-track';
 import {
   BadRequestException,
   ConflictException,
@@ -20,7 +21,9 @@ import { CreateClassroomStudentDto } from './dto/create-classroom-student.dto';
 import { parseDateOnly, todayUB } from '../common/date';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { toNationalMn } from '../notifications/phone';
+import { validatePasswordStrength } from '../auth/password-policy';
 import { buildRegistrationWorkbook, type RegistrationRow } from './registration-standard';
+import { guardTuitionFields } from './tuition-guard';
 import {
   nextSevenDigitStudentCode,
   parseClassroomLabel,
@@ -866,19 +869,31 @@ export class UsersService {
         enrollments: {
           where: includeArchived ? {} : { leftAt: null },
           orderBy: { joinedAt: 'desc' },
-          take: 1,
-          select: { classroom: { select: { id: true, name: true, grade: true } } },
+          // идэвхтэй жагсаалтад бүх анги (математик + Нийгэм); архивт сүүлийнх л хэрэгтэй
+          ...(includeArchived ? { take: 1 } : {}),
+          select: {
+            classroom: { select: { id: true, name: true, grade: true, subject: true } },
+          },
         },
+        // Аппад бүртгүүлсэн эцэг эхийн утас — сурагчийн хайлтад (эзэн 2026-11-10)
+        childLinks: { select: { parent: { select: { phone: true } } } },
       },
       orderBy: [{ role: 'asc' }, { firstName: 'asc' }],
       take: 5000,
     });
-    return users.map(({ enrollments, ...u }) => {
-      const latest = enrollments[0]?.classroom ?? null;
+    return users.map(({ enrollments, childLinks, ...u }) => {
+      // Хоёр ангитай бол үндсэн (математикийн) анги; бусад нь otherClassrooms-д
+      const pick = ({ id, name, grade }: { id: string; name: string; grade: number | null }) => ({ id, name, grade });
+      const ordered = mainFirst(enrollments);
+      const latest = ordered[0] ? pick(ordered[0].classroom) : null;
+      const otherClassrooms = ordered.slice(1).map((e) => pick(e.classroom));
+      const parentPhones = childLinks
+        .map((l) => l.parent.phone)
+        .filter((p): p is string => !!p);
       // Архивын жагсаалтад: сүүлийн анги (сэргээхэд урьдчилан сонгоно)
       if (includeArchived)
-        return { ...u, currentClassroom: null, lastClassroom: latest };
-      return { ...u, currentClassroom: latest };
+        return { ...u, parentPhones, currentClassroom: null, lastClassroom: latest };
+      return { ...u, parentPhones, currentClassroom: latest, otherClassrooms };
     });
   }
 
@@ -1128,6 +1143,9 @@ export class UsersService {
     if (target.role === Role.ADMIN && targetId !== actorId)
       throw new ForbiddenException('Өөр админы мэдээллийг засах боломжгүй');
 
+    // Тохирсон (хөнгөлөлттэй) дүнг зөвхөн Админ тавьж/арилгана — Багш+ багц засахад дарагдахгүй
+    dto = guardTuitionFields(dto, actorRole);
+
     const studentFields: (keyof UpdateUserProfileDto)[] = [
       'grade',
       'school',
@@ -1137,6 +1155,7 @@ export class UsersService {
       'branch',
       'section',
       'tuitionAmount',
+      'tuitionAgreed',
       'tuitionPlan',
       'tuitionNote',
       'joinedOn',
@@ -1235,6 +1254,7 @@ export class UsersService {
             branch: dto.branch,
             section: dto.section,
             tuitionAmount: dto.tuitionAmount,
+            tuitionAgreed: dto.tuitionAgreed,
             tuitionPlan: dto.tuitionPlan,
             tuitionNote: dto.tuitionNote,
             joinedOn: dto.joinedOn ? new Date(dto.joinedOn) : undefined,
@@ -1256,6 +1276,9 @@ export class UsersService {
             ...(dto.section !== undefined ? { section: dto.section } : {}),
             ...(dto.tuitionAmount !== undefined
               ? { tuitionAmount: dto.tuitionAmount }
+              : {}),
+            ...(dto.tuitionAgreed !== undefined
+              ? { tuitionAgreed: dto.tuitionAgreed }
               : {}),
             ...(dto.tuitionPlan !== undefined
               ? { tuitionPlan: dto.tuitionPlan }
@@ -1301,6 +1324,55 @@ export class UsersService {
     return { ...result, passwordFollowedPhone };
   }
 
+  // Админ: хэрэглэгчийн нэвтрэх нууц үгийг шинээр тохируулна. Хадгалсан нууц үг
+  // bcrypt hash тул ХАРАХ боломжгүй — оронд нь шинийг тавина. Нууц үг өгөөгүй бол
+  // одоогийн утасны дугаар руу буцаана (анхны дүрэм). Хуучин сесс бүгд тасарна.
+  async setPasswordByAdmin(
+    targetId: string,
+    password: string | undefined,
+    actorId: string,
+    actorRole: Role,
+  ) {
+    const target = await this.prisma.user.findUnique({
+      where: { id: targetId },
+      select: { id: true, phone: true },
+    });
+    if (!target) throw new NotFoundException('Хэрэглэгч олдсонгүй');
+
+    let next = password;
+    if (next === undefined) {
+      if (!target.phone) {
+        throw new BadRequestException(
+          'Утасны дугаар байхгүй тул нууц үгийг утас руу буцаах боломжгүй. Нууц үгээ бичнэ үү',
+        );
+      }
+      next = target.phone;
+    } else {
+      const weak = validatePasswordStrength(next);
+      if (weak) throw new BadRequestException(weak);
+    }
+
+    await this.prisma.user.update({
+      where: { id: targetId },
+      data: {
+        passwordHash: await bcrypt.hash(next, 10),
+        passwordChangedAt: new Date(),
+      },
+    });
+    // Нууц үгийн утгыг аудитад бичихгүй
+    const resetTo = password === undefined ? 'phone' : 'custom';
+    await this.audit.record({
+      actorId,
+      actorRole,
+      action: 'UPDATE',
+      entity: 'User',
+      entityId: targetId,
+      before: {},
+      after: { passwordReset: true, resetTo },
+    });
+    return { changed: true, resetTo };
+  }
+
   // Ажилтанд зориулсан дэлгэрэнгүй харагдац: профайл + идэвхтэй анги + код +
   // тоолуур. 🚨 Утасны дугаар зөвхөн Админ/Багш+-д харагдана; энгийн Багш
   // зөвхөн ӨӨРИЙН ангийн сурагчийг л харна, эцэг эхийн утасгүйгээр (SPEC).
@@ -1332,20 +1404,26 @@ export class UsersService {
     });
     if (!user) throw new NotFoundException('Хэрэглэгч олдсонгүй');
 
-    const activeEnrollment = await this.prisma.enrollment.findFirst({
-      where: { studentId: targetId, leftAt: null },
-      include: {
-        classroom: {
-          select: {
-            id: true,
-            name: true,
-            grade: true,
-            teacherId: true,
-            assistantTeacherId: true,
+    // Хоёр ангид зэрэг суудаг сурагч (математик + Нийгэм): үндсэн анги эхэнд
+    const activeEnrollments = mainFirst(
+      await this.prisma.enrollment.findMany({
+        where: { studentId: targetId, leftAt: null },
+        orderBy: { joinedAt: 'desc' },
+        include: {
+          classroom: {
+            select: {
+              id: true,
+              name: true,
+              grade: true,
+              subject: true,
+              teacherId: true,
+              assistantTeacherId: true,
+            },
           },
         },
-      },
-    });
+      }),
+    );
+    const activeEnrollment = activeEnrollments[0] ?? null;
 
     // Багш (TEACHER) бүх идэвхтэй сурагчийг УНШИХ эрхтэй (эзэн 2026-10-22) —
     // өөрийн ангийн шалгалтыг тайлсан. Зөвхөн унших: засах/архивлах маршрутууд
@@ -1378,7 +1456,7 @@ export class UsersService {
       }),
       this.prisma.testResult.count({ where: { studentId: targetId } }),
       this.prisma.attendance.count({ where: { studentId: targetId } }),
-      this.prisma.attempt.count({ where: { studentId: targetId } }),
+      this.prisma.attempt.count({ where: { studentId: targetId, deletedAt: null } }),
       user.role === Role.STUDENT
         ? this.studentFocus(targetId)
         : Promise.resolve(null),
@@ -1409,6 +1487,7 @@ export class UsersService {
     if (requesterRole === Role.TEACHER && strippedStudentProfile) {
       strippedStudentProfile.tuitionPlan = null;
       strippedStudentProfile.tuitionAmount = null;
+      strippedStudentProfile.tuitionAgreed = null;
       strippedStudentProfile.tuitionNote = null;
     }
 
@@ -1422,6 +1501,12 @@ export class UsersService {
             grade: activeEnrollment.classroom.grade,
           }
         : null,
+      // Зэрэг сууж буй бусад анги (ж: Нийгэм)
+      otherClassrooms: activeEnrollments.slice(1).map((e) => ({
+        id: e.classroom.id,
+        name: e.classroom.name,
+        grade: e.classroom.grade,
+      })),
       lastClassroom: lastEnrollment?.classroom ?? null,
       classHistory,
       counts: {
@@ -1493,6 +1578,7 @@ export class UsersService {
                SUM(COALESCE(NULLIF(meta->'timing'->>'leaves', '')::int, 0)) AS leaves
         FROM "LearningEvent"
         WHERE "userId" = ${studentId}
+          AND "deletedAt" IS NULL
           AND "occurredAt" >= ${since}
           AND meta->>'lab' = 'v1'`,
     ]);

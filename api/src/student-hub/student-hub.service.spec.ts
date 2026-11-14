@@ -335,6 +335,7 @@ function makeDb() {
         attendance.filter((a) => inRange(a.date, where.date)),
       ),
     },
+    homeworkQuizScore: { findMany: jest.fn().mockResolvedValue([]) },
     dailyHomeworkMark: {
       groupBy: jest.fn(async () => []),
       findFirst: jest.fn(async () => null),
@@ -462,7 +463,7 @@ describe('StudentHubService', () => {
         attendance: null,
         homework: {
           status: 'PARTIAL',
-          comment: 'Дутуу',
+          comment: null, // багшийн дотоод тэмдэглэл сурагчид очихгүй (2026-11-05)
           checkedOn: '2026-10-27',
         },
         theory: { count: 3, mine: true, canUpload: true, assignedToMe: true },
@@ -510,7 +511,7 @@ describe('StudentHubService', () => {
       ]);
       expect(k1.homework).toEqual({
         status: 'DONE',
-        comment: 'Сайн',
+        comment: null,
         checkedOn: '2026-10-25',
       });
     });
@@ -732,10 +733,11 @@ describe('StudentHubService', () => {
         latestMark: {
           date: '2026-10-30',
           status: 'PARTIAL',
-          comment: 'Дутуу',
+          comment: null,
           classroomId: 'c1',
           lessonDate: '2026-10-27',
         },
+        todayOther: [],
       });
       expect(env.db.attendance.groupBy.mock.calls[0][0].where).toEqual({
         studentId: 's1',
@@ -932,7 +934,7 @@ describe('StudentHubService', () => {
   });
 
   describe('GET /student-hub/tests/:testId', () => {
-    it('нээгдсэн тест: бодлого, сонголт, зөв хариу; YouTube холбоосгүй', async () => {
+    it('нээгдсэн А тест: бодлого, сонголт, хариу ХААЛТТАЙ; YouTube холбоосгүй', async () => {
       env.db.testProblem.findMany.mockResolvedValue([
         {
           problemId: 'p1',
@@ -955,6 +957,7 @@ describe('StudentHubService', () => {
         title: 'Тест 18',
         variant: 'A',
         date: '2026-10-27',
+        answersHidden: true,
         problems: [
           {
             id: 'p1',
@@ -965,7 +968,7 @@ describe('StudentHubService', () => {
               { label: 'A', text: '3', imageKey: null },
               { label: 'B', text: '4', imageKey: null },
             ],
-            correctAnswer: 'B',
+            correctAnswer: null,
             hasVideo: true,
           },
         ],

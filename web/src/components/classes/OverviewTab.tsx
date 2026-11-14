@@ -35,11 +35,14 @@ export default function OverviewTab({
   onOpenStudents,
   onOpenTab,
   onOpenMonth,
+  onOpenPayments,
 }: {
   data: ClassDashboard;
   onOpenStudents: (v: QuickView) => void;
   onOpenTab: (t: string) => void;
   onOpenMonth: (m: MonthMetric) => void;
+  /** Ангийн төлбөрийн самбар (Админ, Багш+) */
+  onOpenPayments?: () => void;
 }) {
   const s = data.summary;
   const nameBy = new Map(data.students.map((x) => [x.id, `${x.lastName} ${x.firstName}`]));
@@ -244,8 +247,13 @@ export default function OverviewTab({
         </Panel>
 
         {data.payment && (
-          <Panel icon={Wallet} title="Энэ сарын төлбөр" hint="Баталгаажсан төлбөрөөр. Бүртгэлгүй = энэ сард төлбөр бүртгэгдээгүй (импорт хийгдээгүй байж болно)">
-            <PaymentBlock p={data.payment} onOpen={() => onOpenStudents("unpaid")} />
+          <Panel
+            icon={Wallet}
+            title="Энэ сарын төлбөр"
+            hint="Баталгаажсан төлбөрөөр. Бүртгэлгүй = энэ сард төлбөр бүртгэгдээгүй (импорт хийгдээгүй байж болно)"
+            action={onOpenPayments && <LinkButton onClick={onOpenPayments}>Сар бүрээр</LinkButton>}
+          >
+            <PaymentBlock p={data.payment} onOpen={onOpenPayments ?? (() => onOpenStudents("unpaid"))} />
           </Panel>
         )}
       </div>

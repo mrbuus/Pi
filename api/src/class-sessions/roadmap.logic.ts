@@ -52,6 +52,11 @@ export interface RoadmapTestOut {
   plannedOn?: string;
   /** «Өмнө үзсэн» гэж огноогүй тэмдэглэсэн (ClassCoveredTest, эзэн 2026-10-27) */
   past?: true;
+  /**
+   * `asOf`-оос ХОЙШ хийсэн хамгийн сүүлийн өдөр (өнгөрсөн өдрийг засаж байхад дараа нь хийсэн
+   * тест) — төлөвт нөлөөлөхгүй, зөвхөн «Хийчихсэн · 11.03» шошгонд.
+   */
+  laterOn?: string;
 }
 export interface RoadmapResult {
   books: {
@@ -118,6 +123,12 @@ export function buildRoadmap(input: {
   /** Өмнөх хичээлүүдийн төлөвлөгөө (зорилтот өдрөөс ӨМНӨХ) — next-ийг урагшлуулна */
   plans?: RoadmapPlanIn[];
   nextLimit?: number;
+  /**
+   * Зорилтот өдөр (YYYY-MM-DD). Өгвөл ЗӨВХӨН түүнээс ӨМНӨХ бүртгэл «хийсэн» болно —
+   * өнгөрсөн өдрийг засахад дараагийн өдрүүдэд хийсэн тест санал, төлөвийг гуйвуулахгүй
+   * (эзэн 2026-11-08). Тэр өдрийн өөрийнх нь бүртгэл тооцогдохгүй (батлах цонх өөрөө харуулна).
+   */
+  asOf?: string;
 }): RoadmapResult {
   const rank = (code: string) => {
     const i = (ROADMAP_BOOK_CODES as readonly string[]).indexOf(code);
@@ -134,7 +145,12 @@ export function buildRoadmap(input: {
   }
   // Тест бүрийн хамгийн сүүлийн хийсэн өдөр (+ тэр өдрийн хассан бодлого)
   const lastSession = new Map<string, RoadmapSessionIn>();
+  const laterOn = new Map<string, string>();
   for (const s of input.sessions) {
+    if (input.asOf && s.date >= input.asOf) {
+      if (s.date > input.asOf && (laterOn.get(s.testId) ?? '') < s.date) laterOn.set(s.testId, s.date);
+      continue;
+    }
     const prev = lastSession.get(s.testId);
     if (!prev || prev.date < s.date) lastSession.set(s.testId, s);
   }
@@ -207,6 +223,8 @@ export function buildRoadmap(input: {
   units.forEach((u, i) => {
     if (i <= furthest || next.length >= limit) return;
     if (statusOf(u, i) !== 'TODO' || u.planned) return;
+    // Дараагийн өдрүүдэд аль хэдийн хийсэн тестийг санал болгохгүй
+    if (u.tests.some((t) => laterOn.has(t.id))) return;
     const pick = classVariantOf(u.tests);
     if (pick) next.push(pick.id);
   });
@@ -246,6 +264,8 @@ export function buildRoadmap(input: {
         }
         if (!u.done && u.planned) out.plannedOn = u.planned;
         if (past.has(t.id)) out.past = true;
+        const later = laterOn.get(t.id);
+        if (later) out.laterOn = later;
         return out;
       }),
     });

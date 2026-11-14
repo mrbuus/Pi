@@ -142,6 +142,8 @@ export interface LedgerPayment {
 export interface LedgerInput {
   plan: PlanKind | null;
   tuitionAmount: number | null;
+  /** Тохирсон (хөнгөлөлттэй) бүтэн жилийн дүн — гараар тавьсан (StudentProfile.tuitionAgreed) */
+  agreed?: number | null;
   tier: PriceTier;
   /** Сурагч суж эхэлсэн өдөр (StudentProfile.joinedOn) */
   startDate: DateKey | null;
@@ -153,6 +155,15 @@ export interface LedgerInput {
   year?: AcademicYear;
   /** Багш+ гараар «бүтэн жил» гэж тооцсон (TuitionSettlement) */
   settled?: boolean;
+  /** Шийтийн «Хугацаа» нүд (сар бүрийн багц): ажилтны бичсэн «08/04-09/14» — үүнийг үнэн гэж үзнэ */
+  periods?: Record<MonthKey, MonthPeriod>;
+  /** Сайтаас сунгасан төлөх хугацаа (сар бүрийн багц): тэр сар ба түүнээс хойших бүх сар шилжинэ */
+  extensions?: { month: MonthKey; days: number }[];
+}
+
+export interface MonthPeriod {
+  from: DateKey;
+  to: DateKey;
 }
 
 export interface MonthBlock {
@@ -168,6 +179,10 @@ export interface MonthBlock {
   paidOn: DateKey | null;
   /** Төлөгдөх өдрөөс хэдэн хоног хоцорч бүрэн төлөгдсөн (цагтаа бол 0) */
   lateDays: number;
+  /** Сар бүрийн багц: энэ төлбөрийн хамрах хугацаа «09/14 – 10/14» (бусад багцад байхгүй) */
+  period?: MonthPeriod;
+  /** Энэ сард сайтаас сунгасан хоног (шалтгааныг ledger.service өгнө) */
+  extDays?: number;
 }
 
 export interface ResolvedPlan {
@@ -187,6 +202,8 @@ export interface ResolvedPlan {
    * хугацаандаа, эсвэл нэг дор бүтэн жилийн дүн
    */
   autoFull?: boolean;
+  /** Тохирсон (хөнгөлөлттэй) бүтэн жилийн дүнгээр тооцсон */
+  discounted?: boolean;
   /** Бүтэн жилийн дүн төлсөн ч хугацаа хэтэрсэн — Багш+ шалгаж гараар «Бүрэн» болгоно */
   fullYearLate?: boolean;
 }
@@ -220,6 +237,52 @@ const inRange = (n: number | null, lo: number, hi: number): n is number =>
   n != null && Number.isFinite(n) && n >= lo && n <= hi;
 
 const monthOf = (d: DateKey): MonthKey => d.slice(0, 7);
+
+/** Өдөр нэмэх */
+const plusDays = (d: DateKey, n: number): DateKey =>
+  new Date(Date.parse(`${d}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
+
+/** Нэг сарын дараах ижил өдөр (сарын сүүлээр хязгаарлана: 01/31 → 02/28) */
+export function plusMonth(d: DateKey): DateKey {
+  const [y, m, day] = d.split('-').map(Number);
+  const ny = m === 12 ? y + 1 : y;
+  const nm = m === 12 ? 1 : m + 1;
+  const last = new Date(Date.UTC(ny, nm, 0)).getUTCDate();
+  return `${ny}-${pad2(nm)}-${pad2(Math.min(day, last))}`;
+}
+
+/**
+ * Сар бүрийн багцын хугацаа (эзэн 2026-11-12): шийтийн «Хугацаа»-тай адил гинжин —
+ * сар бүр өмнөх сарын дууссан өдрөөс эхэлнэ. Эх сурвалж (давуу эрэмбээр):
+ *  1) Сайтаас сунгасан хоног — тэр сарын эхлэх (төлөх) өдрийг шилжүүлж, ДАРААГИЙН бүх сар
+ *     дагаж шилжинэ; сунгалтаас хойш шийтийн хуучин хугацааг үл тооно.
+ *  2) Шийтийн хугацаа (ажилтны бичсэн, сунгалт орсон байж болно: «08/04-09/14»).
+ *  3) Өмнөх сарын дууссан өдөр; эхний сард — сууж эхэлсэн өдрийн тоогоор.
+ */
+export function monthlyPeriods(
+  months: MonthKey[],
+  firstDue: (m: MonthKey) => DateKey,
+  sheet: Record<MonthKey, MonthPeriod> = {},
+  extensions: { month: MonthKey; days: number }[] = [],
+): Map<MonthKey, MonthPeriod & { extDays: number }> {
+  const ext = new Map<MonthKey, number>();
+  for (const e of extensions) if (e.days > 0) ext.set(e.month, (ext.get(e.month) ?? 0) + e.days);
+  const out = new Map<MonthKey, MonthPeriod & { extDays: number }>();
+  let prevEnd: DateKey | null = null;
+  let shifted = false;
+  for (const m of months) {
+    const extDays = ext.get(m) ?? 0;
+    // Өмнөх сард сунгалт орсон бол шийтийн (хуучин) хугацааг авахгүй — гинжээр үргэлжилнэ
+    const s = shifted ? undefined : sheet[m];
+    if (extDays) shifted = true;
+    const base = s?.from ?? prevEnd ?? firstDue(m);
+    const from = extDays ? plusDays(base, extDays) : base;
+    const to = s && !extDays && s.to > s.from ? s.to : plusMonth(from);
+    out.set(m, { from, to, extDays });
+    prevEnd = to;
+  }
+  return out;
+}
 
 /** Хоёр өдрийн зөрүү (хоногоор) */
 const daysBetween = (from: DateKey, to: DateKey): number =>
@@ -390,11 +453,17 @@ export function computeLedger(input: LedgerInput): LedgerResult {
   // Гараар бүтэн жил: гэрээ = бодит төлсөн дүн → идэвхтэй сар бүр «төлсөн»
   // (0₮ ч байж болно), илүү төлөлт ч, өр ч үгүй. Буцаалтад мөн энэ гэрээ.
   if (plan.settled) plan = { ...plan, total: paidTotal, first: paidTotal };
+  // Тохирсон (хөнгөлөлттэй) бүтэн жил (эзэн 2026-11-12): гэрээ = гараар тавьсан дүн — төлчихвөл
+  // өргүй, «Бүтэн». Зөвхөн шатлалын үнээс БАГА, бүтэн жилийн багцад (tuitionAmount биш — түүнийг синк бичдэг).
+  else if (plan.kind === 'FULL_YEAR' && inRange(input.agreed ?? null, 800_000, plan.total - 1))
+    plan = { ...plan, total: input.agreed!, first: Math.min(plan.first, input.agreed!), discounted: true };
 
   // 1) Сар бүрийн ногдох дүн ба төлөгдөх өдөр
   const dues = new Map<MonthKey, { due: number; dueOn: DateKey }>();
+  const periods = new Map<MonthKey, MonthPeriod & { extDays: number }>();
   if (plan.kind === 'MONTHLY') {
-    for (const m of active) dues.set(m, { due: plan.fee, dueOn: `${m}-${day}` });
+    for (const [m, p] of monthlyPeriods(active, (x) => `${x}-${day}`, input.periods, input.extensions)) periods.set(m, p);
+    for (const m of active) dues.set(m, { due: plan.fee, dueOn: periods.get(m)!.from });
   } else if (plan.kind === 'FULL_YEAR') {
     split(plan.total, active.length).forEach((d, i) =>
       dues.set(active[i], { due: d, dueOn: startDue! }),
@@ -460,7 +529,17 @@ export function computeLedger(input: LedgerInput): LedgerResult {
             : 'FUTURE';
     const paidOn = state === 'PAID' && d.due > 0 ? coveredOn(need) : null;
     const lateDays = paidOn && paidOn > d.dueOn ? daysBetween(d.dueOn, paidOn) : 0;
-    return { month, state, due: d.due, paid, dueOn: d.dueOn, paidOn, lateDays };
+    const pr = periods.get(month);
+    return {
+      month,
+      state,
+      due: d.due,
+      paid,
+      dueOn: d.dueOn,
+      paidOn,
+      lateDays,
+      ...(pr ? { period: { from: pr.from, to: pr.to }, ...(pr.extDays ? { extDays: pr.extDays } : {}) } : {}),
+    };
   });
 
   // 3) Хураангуй
@@ -513,6 +592,41 @@ export function amountThrough(blocks: MonthBlock[], month: MonthKey): number {
     if (b.month === month) break;
   }
   return sum;
+}
+
+/**
+ * Сар бүрийг аль төлбөр дүүргэснийг (computeLedger-ийн waterfall-тай ижил: энэ жилд
+ * тооцогдох төлбөрийг огноогоор нь хуучнаас, сарыг дарааллаар) тодорхойлно. Сар дээр
+ * дарахад «хэзээ, ямар төлбөрөөр» гэдгийг харуулна. Нэг төлбөр хэд хэдэн сарыг (бүтэн
+ * жил), нэг сарыг хэд хэдэн төлбөр (дутуу + нэмэлт) дүүргэж болно.
+ */
+export function blockSources(
+  blocks: MonthBlock[],
+  payments: (LedgerPayment & { id: string })[],
+  kind: ResolvedPlan['kind'],
+  startDate: DateKey | null,
+  year: AcademicYear = ACADEMIC_YEAR,
+): Record<MonthKey, { paymentId: string; amount: number }[]> {
+  const queue = payments
+    .filter((p) => countsForYear(p, kind, startDate, year))
+    .map((p) => ({ id: p.id, left: Math.max(0, Math.round(p.amount)), on: p.paidOn ?? (p.forMonth ? `${p.forMonth}-01` : null) }))
+    .sort((a, b) => (a.on ?? '9999').localeCompare(b.on ?? '9999'));
+  const out: Record<MonthKey, { paymentId: string; amount: number }[]> = {};
+  let i = 0;
+  for (const b of blocks) {
+    if (b.state === 'OFF' || b.paid <= 0) continue;
+    let need = b.paid;
+    const parts: { paymentId: string; amount: number }[] = [];
+    while (need > 0 && i < queue.length) {
+      const take = Math.min(need, queue[i].left);
+      if (take > 0) parts.push({ paymentId: queue[i].id, amount: take });
+      need -= take;
+      queue[i].left -= take;
+      if (queue[i].left <= 0) i++;
+    }
+    out[b.month] = parts;
+  }
+  return out;
 }
 
 export type PromiseState = 'UPCOMING' | 'BROKEN' | 'KEPT';

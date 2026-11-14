@@ -34,6 +34,7 @@ export type StudentGoalMinAggregateOutputType = {
   subject: $Enums.Subject | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
 }
 
 export type StudentGoalMaxAggregateOutputType = {
@@ -46,6 +47,7 @@ export type StudentGoalMaxAggregateOutputType = {
   subject: $Enums.Subject | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
 }
 
 export type StudentGoalCountAggregateOutputType = {
@@ -58,6 +60,7 @@ export type StudentGoalCountAggregateOutputType = {
   subject: number
   createdAt: number
   updatedAt: number
+  deletedAt: number
   _all: number
 }
 
@@ -72,6 +75,7 @@ export type StudentGoalMinAggregateInputType = {
   subject?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
 }
 
 export type StudentGoalMaxAggregateInputType = {
@@ -84,6 +88,7 @@ export type StudentGoalMaxAggregateInputType = {
   subject?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
 }
 
 export type StudentGoalCountAggregateInputType = {
@@ -96,6 +101,7 @@ export type StudentGoalCountAggregateInputType = {
   subject?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -181,6 +187,7 @@ export type StudentGoalGroupByOutputType = {
   subject: $Enums.Subject | null
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
   _count: StudentGoalCountAggregateOutputType | null
   _min: StudentGoalMinAggregateOutputType | null
   _max: StudentGoalMaxAggregateOutputType | null
@@ -214,6 +221,7 @@ export type StudentGoalWhereInput = {
   subject?: Prisma.EnumSubjectNullableFilter<"StudentGoal"> | $Enums.Subject | null
   createdAt?: Prisma.DateTimeFilter<"StudentGoal"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"StudentGoal"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"StudentGoal"> | Date | string | null
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -227,6 +235,7 @@ export type StudentGoalOrderByWithRelationInput = {
   subject?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   student?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -243,6 +252,7 @@ export type StudentGoalWhereUniqueInput = Prisma.AtLeast<{
   subject?: Prisma.EnumSubjectNullableFilter<"StudentGoal"> | $Enums.Subject | null
   createdAt?: Prisma.DateTimeFilter<"StudentGoal"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"StudentGoal"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"StudentGoal"> | Date | string | null
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
@@ -256,6 +266,7 @@ export type StudentGoalOrderByWithAggregationInput = {
   subject?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.StudentGoalCountOrderByAggregateInput
   _max?: Prisma.StudentGoalMaxOrderByAggregateInput
   _min?: Prisma.StudentGoalMinOrderByAggregateInput
@@ -274,6 +285,7 @@ export type StudentGoalScalarWhereWithAggregatesInput = {
   subject?: Prisma.EnumSubjectNullableWithAggregatesFilter<"StudentGoal"> | $Enums.Subject | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"StudentGoal"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"StudentGoal"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"StudentGoal"> | Date | string | null
 }
 
 export type StudentGoalCreateInput = {
@@ -285,6 +297,7 @@ export type StudentGoalCreateInput = {
   subject?: $Enums.Subject | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   student: Prisma.UserCreateNestedOneWithoutStudentGoalsInput
 }
 
@@ -298,6 +311,7 @@ export type StudentGoalUncheckedCreateInput = {
   subject?: $Enums.Subject | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type StudentGoalUpdateInput = {
@@ -309,6 +323,7 @@ export type StudentGoalUpdateInput = {
   subject?: Prisma.NullableEnumSubjectFieldUpdateOperationsInput | $Enums.Subject | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutStudentGoalsNestedInput
 }
 
@@ -322,6 +337,7 @@ export type StudentGoalUncheckedUpdateInput = {
   subject?: Prisma.NullableEnumSubjectFieldUpdateOperationsInput | $Enums.Subject | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type StudentGoalCreateManyInput = {
@@ -334,6 +350,7 @@ export type StudentGoalCreateManyInput = {
   subject?: $Enums.Subject | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type StudentGoalUpdateManyMutationInput = {
@@ -345,6 +362,7 @@ export type StudentGoalUpdateManyMutationInput = {
   subject?: Prisma.NullableEnumSubjectFieldUpdateOperationsInput | $Enums.Subject | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type StudentGoalUncheckedUpdateManyInput = {
@@ -357,6 +375,7 @@ export type StudentGoalUncheckedUpdateManyInput = {
   subject?: Prisma.NullableEnumSubjectFieldUpdateOperationsInput | $Enums.Subject | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type StudentGoalListRelationFilter = {
@@ -379,6 +398,7 @@ export type StudentGoalCountOrderByAggregateInput = {
   subject?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type StudentGoalMaxOrderByAggregateInput = {
@@ -391,6 +411,7 @@ export type StudentGoalMaxOrderByAggregateInput = {
   subject?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type StudentGoalMinOrderByAggregateInput = {
@@ -403,6 +424,7 @@ export type StudentGoalMinOrderByAggregateInput = {
   subject?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type StudentGoalCreateNestedManyWithoutStudentInput = {
@@ -456,6 +478,7 @@ export type StudentGoalCreateWithoutStudentInput = {
   subject?: $Enums.Subject | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type StudentGoalUncheckedCreateWithoutStudentInput = {
@@ -467,6 +490,7 @@ export type StudentGoalUncheckedCreateWithoutStudentInput = {
   subject?: $Enums.Subject | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type StudentGoalCreateOrConnectWithoutStudentInput = {
@@ -508,6 +532,7 @@ export type StudentGoalScalarWhereInput = {
   subject?: Prisma.EnumSubjectNullableFilter<"StudentGoal"> | $Enums.Subject | null
   createdAt?: Prisma.DateTimeFilter<"StudentGoal"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"StudentGoal"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"StudentGoal"> | Date | string | null
 }
 
 export type StudentGoalCreateManyStudentInput = {
@@ -519,6 +544,7 @@ export type StudentGoalCreateManyStudentInput = {
   subject?: $Enums.Subject | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type StudentGoalUpdateWithoutStudentInput = {
@@ -530,6 +556,7 @@ export type StudentGoalUpdateWithoutStudentInput = {
   subject?: Prisma.NullableEnumSubjectFieldUpdateOperationsInput | $Enums.Subject | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type StudentGoalUncheckedUpdateWithoutStudentInput = {
@@ -541,6 +568,7 @@ export type StudentGoalUncheckedUpdateWithoutStudentInput = {
   subject?: Prisma.NullableEnumSubjectFieldUpdateOperationsInput | $Enums.Subject | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type StudentGoalUncheckedUpdateManyWithoutStudentInput = {
@@ -552,6 +580,7 @@ export type StudentGoalUncheckedUpdateManyWithoutStudentInput = {
   subject?: Prisma.NullableEnumSubjectFieldUpdateOperationsInput | $Enums.Subject | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -566,6 +595,7 @@ export type StudentGoalSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   subject?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentGoal"]>
 
@@ -579,6 +609,7 @@ export type StudentGoalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   subject?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentGoal"]>
 
@@ -592,6 +623,7 @@ export type StudentGoalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   subject?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentGoal"]>
 
@@ -605,9 +637,10 @@ export type StudentGoalSelectScalar = {
   subject?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
 }
 
-export type StudentGoalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "title" | "description" | "targetDate" | "status" | "subject" | "createdAt" | "updatedAt", ExtArgs["result"]["studentGoal"]>
+export type StudentGoalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "title" | "description" | "targetDate" | "status" | "subject" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["studentGoal"]>
 export type StudentGoalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -633,6 +666,7 @@ export type $StudentGoalPayload<ExtArgs extends runtime.Types.Extensions.Interna
     subject: $Enums.Subject | null
     createdAt: Date
     updatedAt: Date
+    deletedAt: Date | null
   }, ExtArgs["result"]["studentGoal"]>
   composites: {}
 }
@@ -1066,6 +1100,7 @@ export interface StudentGoalFieldRefs {
   readonly subject: Prisma.FieldRef<"StudentGoal", 'Subject'>
   readonly createdAt: Prisma.FieldRef<"StudentGoal", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"StudentGoal", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"StudentGoal", 'DateTime'>
 }
     
 

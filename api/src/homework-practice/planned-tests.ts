@@ -89,9 +89,10 @@ export async function loadPlanned(
   };
   const rows = await prisma.lessonTopic.findMany({
     where: {
+      deletedAt: null,
       date: range,
       testIds: { isEmpty: false },
-      schedule: { classroomId: { in: classroomIds } },
+      schedule: { deletedAt: null, classroomId: { in: classroomIds } },
     },
     select: {
       scheduleId: true,
@@ -103,6 +104,7 @@ export async function loadPlanned(
   if (!rows.length) return [] as PlannedSession[];
   const exceptions = await prisma.scheduleException.findMany({
     where: {
+      deletedAt: null,
       date: range,
       scheduleId: { in: [...new Set(rows.map((r) => r.scheduleId))] },
     },

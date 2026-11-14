@@ -1,22 +1,20 @@
 "use client";
 
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, BookOpen, CalendarDays, ClipboardCheck, Hash, LayoutDashboard, ListChecks, MoreHorizontal, Pencil, Settings2, Trash2, UserPlus, Users } from "lucide-react";
+import { ArrowLeft, BookOpen, CalendarDays, ClipboardCheck, Hash, LayoutDashboard, ListChecks, Pencil, Settings2, UserPlus, Users, Wallet } from "lucide-react";
 import MakeupPanel from "@/components/makeup/MakeupPanel";
+import ClassBoard from "@/components/payments/ClassBoard";
 import RequireRole from "@/components/nav/RequireRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/kit/tabs";
 import { Meta } from "@/components/ui/Meta";
 import { SkeletonCard, SkeletonRows } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/StateBlock";
-import { api } from "@/lib/api";
+import { api, getRole } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { cn } from "@/lib/cn";
 import ClassChecksPanel from "./ClassChecksPanel";
 import CodesTab from "./CodesTab";
-import DisbandClassDialog from "./DisbandClassDialog";
 import MonthView, { METRICS } from "./MonthView";
 import OverviewTab from "./OverviewTab";
 import StudentsTab, { type QuickView } from "./StudentsTab";
@@ -24,13 +22,14 @@ import TeacherPicker from "./TeacherPicker";
 import TopicsTab from "./TopicsTab";
 import type { ClassDashboard, MonthMetric, PersonRef } from "./types";
 
-type TabKey = "overview" | "month" | "students" | "codes" | "makeup" | "topics";
+type TabKey = "overview" | "month" | "students" | "payments" | "codes" | "makeup" | "topics";
 /** «Чек» нь табын жагсаалтад БИШ — толгойн товчоор нээгдэх тусдаа горим (#checks) */
 type ViewKey = TabKey | "checks";
 const TABS: { key: TabKey; label: string; icon: typeof Users }[] = [
   { key: "overview", label: "Тойм", icon: LayoutDashboard },
   { key: "month", label: "Сарын явц", icon: CalendarDays },
   { key: "students", label: "Сурагчид", icon: Users },
+  { key: "payments", label: "Төлбөр", icon: Wallet },
   { key: "codes", label: "Код", icon: Hash },
   { key: "makeup", label: "Нөхөх", icon: ListChecks },
   { key: "topics", label: "Сэдэв, хөтөлбөр", icon: BookOpen },
@@ -70,13 +69,14 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
   const [data, setData] = useState<ClassDashboard | null>(null);
   const [error, setError] = useState("");
   const [tab, setTab] = useState<ViewKey>("overview");
+  // Ангийн төлбөрийн самбар — зөвхөн Админ, Багш+ (Багш төлбөрийн дүн харахгүй)
+  const [canPayments, setCanPayments] = useState(false);
+  useEffect(() => setCanPayments(["ADMIN", "TEACHER_PLUS"].includes(getRole() ?? "")), []);
   const [lastTab, setLastTab] = useState<TabKey>("overview");
   const [checkCount, setCheckCount] = useState<number | null>(null);
   const [metric, setMetric] = useState<MonthMetric>("attendance");
   const [view, setView] = useState<QuickView | null>(null);
   const [picking, setPicking] = useState(false);
-  const [disbanding, setDisbanding] = useState(false);
-  const router = useRouter();
 
   const load = useCallback(async () => {
     setError("");
@@ -161,7 +161,7 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
                   onEdit={() => setPicking(true)}
                 />
               </div>
-              {/* Утсан дээр: [бүртгэл][⋯] дээр, «Чек» доор — гарчиг шахагдахгүй. sm-ээс нэг мөрөнд «Чек» эхэнд */}
+              {/* Утсан дээр: [бүртгэл] дээр, «Чек» доор — гарчиг шахагдахгүй. sm-ээс нэг мөрөнд «Чек» эхэнд */}
               <div className="flex shrink-0 flex-col items-end gap-1.5 sm:flex-row-reverse sm:items-center sm:gap-1">
                 {data.permissions.manageClass && (
                   <div className="flex items-center gap-1">
@@ -173,28 +173,6 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
                     >
                       <Settings2 className="h-5 w-5" aria-hidden />
                     </Link>
-                    {/* Анги тараах — зориуд нууцалсан (аюулын бүс) */}
-                    <DropdownMenu.Root>
-                      <DropdownMenu.Trigger asChild>
-                        <button
-                          type="button"
-                          aria-label="Ангийн нэмэлт үйлдэл"
-                          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-ink-dim hover:bg-panel hover:text-ink focus-visible:outline-2 focus-visible:outline-brand"
-                        >
-                          <MoreHorizontal className="h-5 w-5" aria-hidden />
-                        </button>
-                      </DropdownMenu.Trigger>
-                      <DropdownMenu.Portal>
-                        <DropdownMenu.Content align="end" sideOffset={4} className="elev-2 z-[65] w-52 rounded-xl border border-line bg-surface p-1">
-                          <DropdownMenu.Item
-                            onSelect={() => setDisbanding(true)}
-                            className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm font-semibold text-error outline-none data-[highlighted]:bg-error/10"
-                          >
-                            <Trash2 className="h-4 w-4" aria-hidden /> Анги тараах
-                          </DropdownMenu.Item>
-                        </DropdownMenu.Content>
-                      </DropdownMenu.Portal>
-                    </DropdownMenu.Root>
                   </div>
                 )}
                 <button
@@ -236,7 +214,7 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
             ) : (
               <Tabs value={tab} onValueChange={changeTab}>
                 <TabsList aria-label="Ангийн самбарын хэсгүүд">
-                  {TABS.map(({ key, label, icon: Icon }) => (
+                  {TABS.filter((t) => t.key !== "payments" || canPayments).map(({ key, label, icon: Icon }) => (
                     <TabsTrigger key={key} value={key}>
                       <Icon aria-hidden />
                       {label}
@@ -247,7 +225,7 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
                   ))}
                 </TabsList>
                 <TabsContent value="overview" className="mt-4">
-                  <OverviewTab data={data} onOpenStudents={openStudents} onOpenTab={changeTab} onOpenMonth={changeMetric} />
+                  <OverviewTab data={data} onOpenStudents={openStudents} onOpenTab={changeTab} onOpenMonth={changeMetric} onOpenPayments={canPayments ? () => changeTab("payments") : undefined} />
                 </TabsContent>
                 <TabsContent value="month" className="mt-4">
                   <MonthView classroomId={data.classroom.id} metric={metric} onMetric={changeMetric} />
@@ -255,6 +233,12 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
                 <TabsContent value="students" className="mt-4">
                   <StudentsTab data={data} view={view} onViewChange={setView} onChanged={() => void load()} />
                 </TabsContent>
+                {canPayments && (
+                  <TabsContent value="payments" className="mt-4">
+                    {/* Хүүхэд бүр нэг мөр, сар бүрийн блок (шийтийн сарын бүлэгтэй ижил); өртэй мөр улаан */}
+                    <ClassBoard id={data.classroom.id} embedded />
+                  </TabsContent>
+                )}
                 <TabsContent value="codes" className="mt-4">
                   <CodesTab students={data.students} />
                 </TabsContent>
@@ -267,14 +251,6 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
               </Tabs>
             )}
 
-            {disbanding && (
-              <DisbandClassDialog
-                classroom={data.classroom}
-                students={data.summary.students}
-                onClose={() => setDisbanding(false)}
-                onDone={() => router.push("/app/classes")}
-              />
-            )}
             {picking && (
               <TeacherPicker
                 classroom={data.classroom}

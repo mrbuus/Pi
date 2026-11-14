@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import DatePickerButton from "@/components/ui/DatePickerButton";
 import { CalendarDays, Camera, ChevronRight, Images, Search, SearchX, X } from "lucide-react";
 import { dayLabel } from "@/components/makeup/types";
 import { todayKeyUB } from "@/components/homework-practice/lib";
@@ -15,6 +16,7 @@ import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import TheoryDayPanel from "./TheoryDayPanel";
 import { addDays, isDateKey, type TheoryListDay } from "./photo-types";
+import { regroupTopicText } from "@/lib/testNames";
 
 const WEEKDAY_SHORT = ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"];
 const rowKey = (d: { classroomId: string; date: string }) => `${d.classroomId}:${d.date}`;
@@ -95,7 +97,7 @@ function DayRow({ day, onOpen }: { day: TheoryListDay; onOpen: () => void }) {
         </span>
         <span className="min-w-0 flex-1">
           <span className={cn("cyrillic-tight block truncate font-semibold", day.topic ? "text-ink" : "text-ink-dim")}>
-            {day.topic ?? (day.tests[0] || "Сэдэв тодорхойгүй")}
+            {(day.topic && regroupTopicText(day.topic)) || day.tests[0] || "Сэдэв тодорхойгүй"}
           </span>
           <Meta className="mt-0.5 text-xs text-ink-dim" items={[day.classroomName, names || null]} />
         </span>
@@ -291,18 +293,16 @@ export default function TheoryBrowser() {
           >
             Өчигдөр
           </button>
-          <label className={cn(chip(customDate), "relative cursor-pointer")}>
+          <DatePickerButton
+            value={dateFilter}
+            max={today}
+            onChange={(v) => setDateFilter(isDateKey(v) ? v : "")}
+            ariaLabel="Огноо сонгох"
+            className={chip(customDate)}
+          >
             <CalendarDays className="size-4" aria-hidden />
             <span>{customDate ? dayLabel(dateFilter, false) : "Огноо"}</span>
-            <input
-              type="date"
-              value={dateFilter}
-              max={today}
-              onChange={(e) => setDateFilter(isDateKey(e.target.value) ? e.target.value : "")}
-              aria-label="Огноо сонгох"
-              className="absolute inset-0 cursor-pointer opacity-0"
-            />
-          </label>
+          </DatePickerButton>
         </div>
       </div>
 

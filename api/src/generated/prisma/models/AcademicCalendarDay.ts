@@ -32,6 +32,8 @@ export type AcademicCalendarDayMinAggregateOutputType = {
   note: string | null
   createdById: string | null
   createdAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type AcademicCalendarDayMaxAggregateOutputType = {
@@ -42,6 +44,8 @@ export type AcademicCalendarDayMaxAggregateOutputType = {
   note: string | null
   createdById: string | null
   createdAt: Date | null
+  deletedAt: Date | null
+  deletedById: string | null
 }
 
 export type AcademicCalendarDayCountAggregateOutputType = {
@@ -52,6 +56,8 @@ export type AcademicCalendarDayCountAggregateOutputType = {
   note: number
   createdById: number
   createdAt: number
+  deletedAt: number
+  deletedById: number
   _all: number
 }
 
@@ -64,6 +70,8 @@ export type AcademicCalendarDayMinAggregateInputType = {
   note?: true
   createdById?: true
   createdAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type AcademicCalendarDayMaxAggregateInputType = {
@@ -74,6 +82,8 @@ export type AcademicCalendarDayMaxAggregateInputType = {
   note?: true
   createdById?: true
   createdAt?: true
+  deletedAt?: true
+  deletedById?: true
 }
 
 export type AcademicCalendarDayCountAggregateInputType = {
@@ -84,6 +94,8 @@ export type AcademicCalendarDayCountAggregateInputType = {
   note?: true
   createdById?: true
   createdAt?: true
+  deletedAt?: true
+  deletedById?: true
   _all?: true
 }
 
@@ -167,6 +179,8 @@ export type AcademicCalendarDayGroupByOutputType = {
   note: string | null
   createdById: string
   createdAt: Date
+  deletedAt: Date | null
+  deletedById: string | null
   _count: AcademicCalendarDayCountAggregateOutputType | null
   _min: AcademicCalendarDayMinAggregateOutputType | null
   _max: AcademicCalendarDayMaxAggregateOutputType | null
@@ -198,6 +212,8 @@ export type AcademicCalendarDayWhereInput = {
   note?: Prisma.StringNullableFilter<"AcademicCalendarDay"> | string | null
   createdById?: Prisma.StringFilter<"AcademicCalendarDay"> | string
   createdAt?: Prisma.DateTimeFilter<"AcademicCalendarDay"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"AcademicCalendarDay"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"AcademicCalendarDay"> | string | null
   classrooms?: Prisma.AcademicCalendarDayClassroomListRelationFilter
 }
 
@@ -209,6 +225,8 @@ export type AcademicCalendarDayOrderByWithRelationInput = {
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   classrooms?: Prisma.AcademicCalendarDayClassroomOrderByRelationAggregateInput
 }
 
@@ -223,6 +241,8 @@ export type AcademicCalendarDayWhereUniqueInput = Prisma.AtLeast<{
   note?: Prisma.StringNullableFilter<"AcademicCalendarDay"> | string | null
   createdById?: Prisma.StringFilter<"AcademicCalendarDay"> | string
   createdAt?: Prisma.DateTimeFilter<"AcademicCalendarDay"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"AcademicCalendarDay"> | Date | string | null
+  deletedById?: Prisma.StringNullableFilter<"AcademicCalendarDay"> | string | null
   classrooms?: Prisma.AcademicCalendarDayClassroomListRelationFilter
 }, "id">
 
@@ -234,6 +254,8 @@ export type AcademicCalendarDayOrderByWithAggregationInput = {
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.AcademicCalendarDayCountOrderByAggregateInput
   _max?: Prisma.AcademicCalendarDayMaxOrderByAggregateInput
   _min?: Prisma.AcademicCalendarDayMinOrderByAggregateInput
@@ -250,6 +272,8 @@ export type AcademicCalendarDayScalarWhereWithAggregatesInput = {
   note?: Prisma.StringNullableWithAggregatesFilter<"AcademicCalendarDay"> | string | null
   createdById?: Prisma.StringWithAggregatesFilter<"AcademicCalendarDay"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AcademicCalendarDay"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AcademicCalendarDay"> | Date | string | null
+  deletedById?: Prisma.StringNullableWithAggregatesFilter<"AcademicCalendarDay"> | string | null
 }
 
 export type AcademicCalendarDayCreateInput = {
@@ -260,6 +284,8 @@ export type AcademicCalendarDayCreateInput = {
   note?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   classrooms?: Prisma.AcademicCalendarDayClassroomCreateNestedManyWithoutCalendarDayInput
 }
 
@@ -271,6 +297,8 @@ export type AcademicCalendarDayUncheckedCreateInput = {
   note?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
   classrooms?: Prisma.AcademicCalendarDayClassroomUncheckedCreateNestedManyWithoutCalendarDayInput
 }
 
@@ -282,6 +310,8 @@ export type AcademicCalendarDayUpdateInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classrooms?: Prisma.AcademicCalendarDayClassroomUpdateManyWithoutCalendarDayNestedInput
 }
 
@@ -293,6 +323,8 @@ export type AcademicCalendarDayUncheckedUpdateInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classrooms?: Prisma.AcademicCalendarDayClassroomUncheckedUpdateManyWithoutCalendarDayNestedInput
 }
 
@@ -304,6 +336,8 @@ export type AcademicCalendarDayCreateManyInput = {
   note?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type AcademicCalendarDayUpdateManyMutationInput = {
@@ -314,6 +348,8 @@ export type AcademicCalendarDayUpdateManyMutationInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AcademicCalendarDayUncheckedUpdateManyInput = {
@@ -324,6 +360,8 @@ export type AcademicCalendarDayUncheckedUpdateManyInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AcademicCalendarDayCountOrderByAggregateInput = {
@@ -334,6 +372,8 @@ export type AcademicCalendarDayCountOrderByAggregateInput = {
   note?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type AcademicCalendarDayMaxOrderByAggregateInput = {
@@ -344,6 +384,8 @@ export type AcademicCalendarDayMaxOrderByAggregateInput = {
   note?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type AcademicCalendarDayMinOrderByAggregateInput = {
@@ -354,6 +396,8 @@ export type AcademicCalendarDayMinOrderByAggregateInput = {
   note?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  deletedById?: Prisma.SortOrder
 }
 
 export type AcademicCalendarDayScalarRelationFilter = {
@@ -387,6 +431,8 @@ export type AcademicCalendarDayCreateWithoutClassroomsInput = {
   note?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type AcademicCalendarDayUncheckedCreateWithoutClassroomsInput = {
@@ -397,6 +443,8 @@ export type AcademicCalendarDayUncheckedCreateWithoutClassroomsInput = {
   note?: string | null
   createdById: string
   createdAt?: Date | string
+  deletedAt?: Date | string | null
+  deletedById?: string | null
 }
 
 export type AcademicCalendarDayCreateOrConnectWithoutClassroomsInput = {
@@ -423,6 +471,8 @@ export type AcademicCalendarDayUpdateWithoutClassroomsInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AcademicCalendarDayUncheckedUpdateWithoutClassroomsInput = {
@@ -433,6 +483,8 @@ export type AcademicCalendarDayUncheckedUpdateWithoutClassroomsInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -474,6 +526,8 @@ export type AcademicCalendarDaySelect<ExtArgs extends runtime.Types.Extensions.I
   note?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
   classrooms?: boolean | Prisma.AcademicCalendarDay$classroomsArgs<ExtArgs>
   _count?: boolean | Prisma.AcademicCalendarDayCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["academicCalendarDay"]>
@@ -486,6 +540,8 @@ export type AcademicCalendarDaySelectCreateManyAndReturn<ExtArgs extends runtime
   note?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }, ExtArgs["result"]["academicCalendarDay"]>
 
 export type AcademicCalendarDaySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -496,6 +552,8 @@ export type AcademicCalendarDaySelectUpdateManyAndReturn<ExtArgs extends runtime
   note?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }, ExtArgs["result"]["academicCalendarDay"]>
 
 export type AcademicCalendarDaySelectScalar = {
@@ -506,9 +564,11 @@ export type AcademicCalendarDaySelectScalar = {
   note?: boolean
   createdById?: boolean
   createdAt?: boolean
+  deletedAt?: boolean
+  deletedById?: boolean
 }
 
-export type AcademicCalendarDayOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "date" | "type" | "title" | "note" | "createdById" | "createdAt", ExtArgs["result"]["academicCalendarDay"]>
+export type AcademicCalendarDayOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "date" | "type" | "title" | "note" | "createdById" | "createdAt" | "deletedAt" | "deletedById", ExtArgs["result"]["academicCalendarDay"]>
 export type AcademicCalendarDayInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   classrooms?: boolean | Prisma.AcademicCalendarDay$classroomsArgs<ExtArgs>
   _count?: boolean | Prisma.AcademicCalendarDayCountOutputTypeDefaultArgs<ExtArgs>
@@ -529,6 +589,8 @@ export type $AcademicCalendarDayPayload<ExtArgs extends runtime.Types.Extensions
     note: string | null
     createdById: string
     createdAt: Date
+    deletedAt: Date | null
+    deletedById: string | null
   }, ExtArgs["result"]["academicCalendarDay"]>
   composites: {}
 }
@@ -960,6 +1022,8 @@ export interface AcademicCalendarDayFieldRefs {
   readonly note: Prisma.FieldRef<"AcademicCalendarDay", 'String'>
   readonly createdById: Prisma.FieldRef<"AcademicCalendarDay", 'String'>
   readonly createdAt: Prisma.FieldRef<"AcademicCalendarDay", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"AcademicCalendarDay", 'DateTime'>
+  readonly deletedById: Prisma.FieldRef<"AcademicCalendarDay", 'String'>
 }
     
 

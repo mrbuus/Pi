@@ -237,6 +237,8 @@ export interface StudentExamData {
     submittedAt: Date | null;
     answers: Record<string, unknown>;
     choiceOrder: Record<string, number[]>;
+    /** Бодлого бүрт зарцуулсан секунд (сессийн problemTimes) */
+    times?: Record<string, unknown>;
   } | null;
   /** Онлайн дүнтэй бол сонгох бодлого бүрийн үсэг ('' = хоосон) */
   choices: Map<string, string> | null;
@@ -281,6 +283,7 @@ export async function loadStudentData(
         submittedAt: true,
         draftAnswers: true,
         choiceOrder: true,
+        problemTimes: true,
       },
     }),
   ]);
@@ -306,6 +309,7 @@ export async function loadStudentData(
           submittedAt: raw.submittedAt,
           answers: asRecord(raw.draftAnswers),
           choiceOrder: asRecord(raw.choiceOrder) as Record<string, number[]>,
+          times: asRecord(raw.problemTimes),
         }
       : null;
     const online = !!session && result?.source === AttemptSource.ONLINE_TEST;

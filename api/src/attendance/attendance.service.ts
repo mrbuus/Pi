@@ -2,13 +2,16 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service';
 import { addDateDays, dateKey, parseDateOnly, todayUB } from '../common/date';
 import { Prisma } from '../generated/prisma/client';
 import { AttendanceStatus, Role } from '../generated/prisma/enums';
 import { classTeacherWhere, isClassTeacher } from '../common/class-teachers';
+import { NotificationCenterService } from '../notification-center/notification-center.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { shortName } from '../revisions/revision-snapshot';
 import { ScheduleService } from '../schedule/schedule.service';
@@ -38,10 +41,13 @@ const CLASS_DAY_LOOKBACK_MAX = 189;
 
 @Injectable()
 export class AttendanceService {
+  private readonly logger = new Logger(AttendanceService.name);
+
   constructor(
     private prisma: PrismaService,
     private schedule: ScheduleService,
     private audit: AuditService,
+    @Optional() private notifications?: NotificationCenterService,
   ) {}
 
   // parseDateOnly plain Error шидвэл HTTP 500 болчихно — энд эргүүлж 400
@@ -207,19 +213,29 @@ export class AttendanceService {
     });
 
     // Аудит (AuditService алдааг өөрөө залгина)
-    await Promise.all(
-      result.changes.map((c) =>
-        this.audit.record({
-          actorId: userId,
-          actorRole: role,
-          action: c.action,
-          entity: 'Attendance',
-          entityId: (c.after ?? c.before)!.id,
-          before: c.before,
-          after: c.after,
-        }),
-      ),
+    await this.audit.recordMany(
+      result.changes.map((c) => ({
+        actorId: userId,
+        actorRole: role,
+        action: c.action,
+        entity: 'Attendance',
+        entityId: (c.after ?? c.before)!.id,
+        before: c.before,
+        after: c.after,
+      })),
     );
+
+    // Өнөөдөр ИРЭЭГҮЙ болсон сурагчийн баталгаажсан асран хамгаалагчид мэдэгдэнэ (fire-and-forget).
+    if (dateKey(date) === dateKey(todayUB())) {
+      const newlyAbsent = result.changes
+        .filter(
+          (c) =>
+            c.after?.status === AttendanceStatus.ABSENT &&
+            c.before?.status !== AttendanceStatus.ABSENT,
+        )
+        .map((c) => c.after!.studentId);
+      if (newlyAbsent.length > 0) void this.notifyParentsOfAbsence(newlyAbsent);
+    }
 
     const rows = await this.attendanceRows(classroomId, date, ids);
     return {
@@ -229,6 +245,39 @@ export class AttendanceService {
       skipped: result.skipped,
       rows,
     };
+  }
+
+  /** Алдаа шидэхгүй — ирц бүртгэх үндсэн хүсэлтийг хэзээ ч унагахгүй. */
+  private async notifyParentsOfAbsence(studentIds: string[]) {
+    if (!this.notifications) return;
+    try {
+      const links = await this.prisma.parentLink.findMany({
+        where: { studentId: { in: studentIds }, verifiedAt: { not: null } },
+        select: {
+          parentId: true,
+          student: { select: { firstName: true, lastName: true } },
+        },
+      });
+      // Нэг асран хамгаалагч хэд хэдэн хүүхэдтэй байж болно — хүүхэд тус бүрд тусдаа мэдэгдэл
+      const byName = new Map<string, string[]>();
+      for (const l of links) {
+        const name = shortName(l.student);
+        byName.set(name, [...(byName.get(name) ?? []), l.parentId]);
+      }
+      for (const [name, parentIds] of byName) {
+        await this.notifications.notify(parentIds, {
+          kind: 'SYSTEM',
+          title: 'Хүүхэд хичээлд ирээгүй',
+          body: `${name} өнөөдрийн хичээлд ирээгүй гэж тэмдэглэгдлээ`,
+          link: '/app/notifications',
+          push: { body: 'Таны хүүхэд өнөөдрийн хичээлд ирээгүй гэж тэмдэглэгдлээ' },
+        });
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Ирцийн мэдэгдэл үүсгэж чадсангүй: ${error instanceof Error ? error.message : 'unknown error'}`,
+      );
+    }
   }
 
   /* ───────── Самбар (эзэн 2026-10-18) ───────── */
@@ -356,7 +405,7 @@ export class AttendanceService {
     const upTo = key < today ? key : today;
     const from = addDaysKey(upTo, -criteria.windowDays);
     const range = { gte: this.parseDate(from), lte: this.parseDate(upTo) };
-    const [att, hw] = await Promise.all([
+    const [att, hw, quiz] = await Promise.all([
       this.prisma.attendance.findMany({
         where: { classroomId, date: range, studentId: { in: studentIds } },
         select: { studentId: true, date: true, status: true },
@@ -370,12 +419,31 @@ export class AttendanceService {
         },
         select: { studentId: true, date: true, status: true },
       }),
+      // Шалгалтаар даалгавар шалгасан оноо (homework-quiz, эзэн 2026-11-08 19:08) — шалгуурын minQuiz
+      this.prisma.homeworkQuizScore.findMany({
+        where: {
+          studentId: { in: studentIds },
+          deletedAt: null,
+          quiz: { classroomId, deletedAt: null, date: range },
+        },
+        select: {
+          studentId: true,
+          score: true,
+          quiz: { select: { date: true, problemCount: true } },
+        },
+      }),
     ]);
     const flags = computeRisk(
       studentIds,
       att.map((r) => ({ ...r, date: dateKey(r.date) })),
       hw.map((r) => ({ ...r, date: dateKey(r.date) })),
       criteria,
+      quiz.map((r) => ({
+        studentId: r.studentId,
+        date: dateKey(r.quiz.date),
+        score: Number(r.score),
+        problemCount: r.quiz.problemCount,
+      })),
     );
     return { criteria, flags };
   }
@@ -530,7 +598,7 @@ export class AttendanceService {
       : new Set(
           (
             await this.prisma.classSchedule.findMany({
-              where: { teacherId: userId },
+              where: { teacherId: userId, deletedAt: null },
               select: { classroomId: true },
             })
           ).map((s) => s.classroomId),
@@ -986,7 +1054,9 @@ export class AttendanceService {
     beforeDate: Date,
   ): Promise<{ dates: string[]; source: 'schedule' | 'attendance-fallback' }> {
     const hasSchedule =
-      (await this.prisma.classSchedule.count({ where: { classroomId } })) > 0;
+      (await this.prisma.classSchedule.count({
+        where: { classroomId, deletedAt: null },
+      })) > 0;
 
     if (hasSchedule) {
       const to = addDateDays(beforeDate, -1);

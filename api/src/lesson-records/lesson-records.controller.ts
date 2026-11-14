@@ -77,6 +77,8 @@ export class LessonRecordsController {
   ) {
     return this.records.confirm(req.user, scheduleId, dto.date, dto.tests, {
       topic: dto.topic,
+      customTopics: dto.customTopics,
+      expectedConfirmedAt: dto.expectedConfirmedAt,
       description: dto.description,
       problemNumbers: dto.problemNumbers,
     });

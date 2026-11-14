@@ -14,6 +14,19 @@ export interface MonthBlock {
   paidOn: string | null;
   /** Хугацаанаас хэдэн хоног хоцорч бүрэн төлөгдсөн (цагтаа бол 0) */
   lateDays: number;
+  /** Сар бүрийн багц: энэ төлбөрийн хамрах хугацаа (шийтийн «Хугацаа»-тай ижил) */
+  period?: { from: string; to: string };
+  /** Энэ сард сунгасан хоног */
+  extDays?: number;
+}
+
+export interface LedgerExtension {
+  id: string;
+  month: string;
+  days: number;
+  reason: string;
+  at: string;
+  authorName: string | null;
 }
 
 export interface YearView {
@@ -41,6 +54,8 @@ export interface LedgerRow {
     raw: string | null;
     /** Төлбөрөөр автоматаар бүтэн жил (суудал баталгаажуулах + үлдэгдэл хугацаандаа, эсвэл нэг дор) */
     autoFull?: boolean;
+    /** Тохирсон (хөнгөлөлттэй) бүтэн жилийн дүнгээр тооцсон */
+    discounted?: boolean;
     /** Бүтэн жилийн дүн төлсөн ч хугацаа хэтэрсэн — Багш+ шалгана */
     fullYearLate?: boolean;
   };
@@ -69,6 +84,10 @@ export interface ClassStat {
   expected: number;
   covered: number;
   late: number;
+  /** Энэ сард төлөх ёстой / бүрэн төлсөн / хугацаа хэтэрсэн сурагчдын тоо */
+  activeStudents?: number;
+  paidStudents?: number;
+  lateStudents?: number;
   owedStudents: number;
   owedNow: number;
   brokenPromises: number;
@@ -86,6 +105,8 @@ export interface LedgerOverview {
     pending: { count: number; amount: number };
   };
   classes: ClassStat[];
+  /** Багш+ — сервер мөнгөн дүнг null болгосон (зөвхөн төлөв) */
+  amountsHidden?: boolean;
 }
 
 export interface LedgerBoard {
@@ -96,6 +117,7 @@ export interface LedgerBoard {
   total: number;
   owedNow?: number;
   rows: LedgerRow[];
+  amountsHidden?: boolean;
 }
 
 export interface LedgerPayment {
@@ -159,4 +181,9 @@ export interface StudentLedger {
   payments: LedgerPayment[];
   notes: LedgerNote[];
   refunds: LedgerRefund[];
+  /** Сар бүрийг дүүргэсэн төлбөр (огноогоор хуучнаас) — Багш+-д дүн null */
+  sources?: Record<string, { paymentId: string; amount: number | null }[]>;
+  /** Сар бүрийн төлбөрийн хугацааны сунгалт */
+  extensions?: LedgerExtension[];
+  amountsHidden?: boolean;
 }

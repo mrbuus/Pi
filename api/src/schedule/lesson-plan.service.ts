@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
@@ -17,11 +18,19 @@ import { PrismaService } from '../prisma/prisma.service';
 import {
   cleanCustomTopics,
   compareBookOrder,
+  isAutoTitle,
   planTitle,
   storedCustomTopics,
   suggestPhotoStudent,
   type DismissMode,
 } from './lesson-plan.logic';
+import {
+  actualDateOf,
+  isStale,
+  recordTestIds,
+  sameSet,
+  sessionVisibleFor,
+} from './lesson-coherence.logic';
 import { ScheduleService, teacherDisplayNames } from './schedule.service';
 import { chaptersWithSourcePdf, sourcePdfKey } from '../tests/source-pdf';
 import {
@@ -167,14 +176,14 @@ export class LessonPlanService {
     meta: Map<string, TestMeta> = new Map(),
   ) {
     if (!topic) return null;
-    const auto = planTitle(topic.testIds.map((id) => meta.get(id)?.short ?? ''));
+    const names = topic.testIds.map((id) => meta.get(id)?.short ?? '');
     return {
       testIds: topic.testIds,
       customTopics: this.customTopicsOf(topic, meta),
       dismissMode: (topic.dismissMode as DismissMode | null) ?? null,
       photoStudentId: topic.photoStudentId,
       title: topic.title || null,
-      customTitle: topic.title && topic.title !== auto ? topic.title : null,
+      customTitle: topic.title && !isAutoTitle(topic.title, names) ? topic.title : null,
       updatedAt: topic.updatedAt,
     };
   }
@@ -187,7 +196,7 @@ export class LessonPlanService {
     if (!topic) return [];
     return storedCustomTopics({
       ...topic,
-      autoTitle: planTitle(topic.testIds.map((id) => meta.get(id)?.short ?? '')),
+      testNames: topic.testIds.map((id) => meta.get(id)?.short ?? ''),
     });
   }
 
@@ -200,10 +209,16 @@ export class LessonPlanService {
       },
     });
     const seen = new Set<string>();
+    // Багшийн самбартай ижил: НЭРЭЭР, дараа нь овгоор. «А. Амгаланбат» бүтэн бичвэрээр
+    // эрэмбэлбэл овгийн эхний үсгээр эрэмбэлэгдэж байсан (эзэн 2026-11-05).
     return rows
       .filter((r) => !seen.has(r.studentId) && !!seen.add(r.studentId))
-      .map((r) => ({ id: r.studentId, name: studentName(r.student) }))
-      .sort((a, b) => a.name.localeCompare(b.name, 'mn'));
+      .sort(
+        (a, b) =>
+          a.student.firstName.localeCompare(b.student.firstName, 'mn') ||
+          a.student.lastName.localeCompare(b.student.lastName, 'mn'),
+      )
+      .map((r) => ({ id: r.studentId, name: studentName(r.student) }));
   }
 
   /** GET /schedule/:scheduleId/plan?date= — засварын цонхонд: төлөвлөгөө + ангийн жагсаалт + зургийн ээлж. */
@@ -217,12 +232,14 @@ export class LessonPlanService {
       this.prisma.lessonTopic.findUnique({
         where: {
           scheduleId_date: { scheduleId, date: parseDateOnly(occurrenceDate) },
+          deletedAt: null,
         },
       }),
       this.roster(schedule.classroomId),
       this.prisma.lessonTopic.findMany({
         where: {
-          schedule: { classroomId: schedule.classroomId },
+          deletedAt: null,
+          schedule: { deletedAt: null, classroomId: schedule.classroomId },
           photoStudentId: { not: null },
           date: { lt: parseDateOnly(occurrenceDate) },
         },
@@ -260,6 +277,8 @@ export class LessonPlanService {
       photoStudentId?: string | null;
       title?: string | null;
       customTopics?: string[];
+      /** Цонх нээх үеийн төлөвлөгөөний updatedAt (null = төлөвлөгөөгүй байсан); өөр хүн хооронд нь засвал 409 */
+      expectedUpdatedAt?: string | null;
     },
   ) {
     if (!PLANNERS.includes(actor.role))
@@ -269,12 +288,22 @@ export class LessonPlanService {
       await this.schedule.occurrenceKey(scheduleId, key, true);
     const date = parseDateOnly(occurrenceDate);
     const where = { scheduleId_date: { scheduleId, date } };
-    const existing = await this.prisma.lessonTopic.findUnique({ where });
+    // Устсан (deletedAt) мөр ч түлхүүрийг эзэлдэг — дахин тавибал тэр мөрийг шинэ
+    // утгаар СЭРГЭЭНЭ; утгын хувьд «байхгүй» гэж үзнэ (хуучин төлөв AuditLog-д).
+    const stored = await this.prisma.lessonTopic.findUnique({ where });
+    const existing = stored && !stored.deletedAt ? stored : null;
+    if (isStale(dto.expectedUpdatedAt, existing?.updatedAt))
+      throw new ConflictException(
+        'Энэ хичээлийн төлөвлөгөөг өөр хүн дөнгөж өөрчилсөн байна. Цонхоо хаагаад дахин нээнэ үү',
+      );
 
     const ids = [...new Set((dto.testIds ?? []).filter(Boolean))];
     const meta = await this.testsMeta([...ids, ...(existing?.testIds ?? [])]);
     const tests = ids.map((id) => meta.get(id));
-    if (tests.some((t) => !t || !t.available))
+    // Аль хэдийн төлөвлөсөн тест хожим ноорог/устгагдсан ч бусад талбарыг (тарах, зураг)
+    // хадгалж болно — зөвхөн ШИНЭЭР нэмж буй тест бэлэн байх ёстой
+    const kept = new Set(existing?.testIds ?? []);
+    if (tests.some((t, i) => !t || (!t.available && !kept.has(ids[i]))))
       throw new BadRequestException('Сонгосон тест олдсонгүй');
     const sorted = (tests as TestMeta[]).sort((a, b) =>
       compareBookOrder(
@@ -311,10 +340,42 @@ export class LessonPlanService {
     const title = planTitle([...sorted.map((t) => t.short), ...customTopics]);
     const testIds = sorted.map((t) => t.testId);
 
+    // Батлагдсан хичээлийн тест, сэдвийг энд солихгүй — «хийсэн тест» (ClassTestSession) ба
+    // батламжийн snapshot-той зөрчилдөнө. Тэдгээрийг батлах цонх нэг дор засна (эзэн 2026-11-08).
+    const actual = actualDateOf(
+      schedule.exceptions.map((e) => ({
+        scheduleId,
+        date: dateKey(e.date),
+        kind: e.kind,
+        newDate: e.newDate ? dateKey(e.newDate) : null,
+      })),
+      scheduleId,
+      occurrenceDate,
+    );
+    const confirmed = actual
+      ? await this.prisma.lessonRecord.findFirst({
+          where: { scheduleId, date: parseDateOnly(actual), cancelledAt: null },
+          select: { id: true },
+        })
+      : null;
+    if (
+      confirmed &&
+      (!sameSet(testIds, existing?.testIds ?? []) ||
+        !sameSet(customTopics, this.customTopicsOf(existing, meta)))
+    )
+      throw new ConflictException(
+        'Хичээл батлагдсан тул тест, сэдвийг «Батлагдсан» цонхноос засна',
+      );
+
     if (!testIds.length && !dismissMode && !photoStudentId && !customTopics.length) {
+      // ЗӨӨЛӨН (эзэн 2026-10-23): мөрийг устгахгүй, утгыг нь хоосолно — «Одоогийн бүлэг»
+      // (chapterId) ба түүх AuditLog-д үлдэнэ
       if (existing) {
-        await this.prisma.lessonTopic.delete({ where: { id: existing.id } });
-        await this.audit(actor, 'DELETE', existing.id, existing, null);
+        const row = await this.prisma.lessonTopic.update({
+          where: { id: existing.id },
+          data: { title: '', testIds: [], customTopics: [], dismissMode: null, photoStudentId: null },
+        });
+        await this.audit(actor, 'UPDATE', existing.id, existing, row);
       }
       return { scheduleId, date: key, occurrenceDate, plan: null };
     }
@@ -330,8 +391,13 @@ export class LessonPlanService {
         ? (sorted[sorted.length - 1].chapterId ?? null)
         : (existing?.chapterId ?? null),
     };
-    const row = existing
-      ? await this.prisma.lessonTopic.update({ where: { id: existing.id }, data })
+    const row = stored
+      ? await this.prisma.lessonTopic.update({
+          where: { id: stored.id },
+          data: existing
+            ? data
+            : { ...data, deletedAt: null, deletedById: null, createdById: actor.userId },
+        })
       : await this.prisma.lessonTopic.create({
           data: { ...data, scheduleId, date, createdById: actor.userId },
         });
@@ -400,6 +466,7 @@ export class LessonPlanService {
       entries.length
         ? this.prisma.lessonTopic.findMany({
             where: {
+              deletedAt: null,
               OR: entries.map((e) => ({
                 scheduleId: e.scheduleId,
                 date: parseDateOnly(occurrenceOf(e)),
@@ -495,6 +562,19 @@ export class LessonPlanService {
       countByClass.set(e.classroomId, set);
     }
     const classById = new Map(classrooms.map((c) => [c.id, c]));
+    // Нэг анги нэг өдөр хоёр хичээлтэй бол: өөр хичээлийн батламжид орсон тест тэр хичээлийнх
+    const recordTestsBySchedule = new Map(
+      records.map((r) => [r.scheduleId, new Set(recordTestIds(r.tests))]),
+    );
+    const scheduleClass = new Map(entries.map((e) => [e.scheduleId, e.classroomId]));
+    const otherLessonsTests = (scheduleId: string, classroomId: string) => {
+      const out = new Set<string>();
+      for (const [sid, ids] of recordTestsBySchedule)
+        if (sid !== scheduleId && scheduleClass.get(sid) === classroomId)
+          for (const id of ids) out.add(id);
+      return out;
+    };
+    const work = await this.studentWork(date, todaySessions, meta, countByClass);
     const withRole = (p: { id: string; name: string } | null | undefined) =>
       p ? { ...p, role: personById.get(p.id)?.role ?? null } : null;
 
@@ -567,13 +647,23 @@ export class LessonPlanService {
               }
             : null,
           done: todaySessions
-            .filter((s) => s.classroomId === e.classroomId)
+            .filter(
+              (s) =>
+                s.classroomId === e.classroomId &&
+                sessionVisibleFor(
+                  s.testId,
+                  recordTestsBySchedule.get(e.scheduleId) ?? new Set(),
+                  otherLessonsTests(e.scheduleId, e.classroomId),
+                ),
+            )
             .map((s) => ({
               sessionId: s.id,
               testId: s.testId,
               manualTitle: s.manualTitle,
               excludedNumbers: nums(s.testId, s.excludedProblemIds),
               excludedProblemIds: s.excludedProblemIds,
+              // Энэ тестээр сурагч тэмдэглэгээ/гэрийн даалгавар хийсэн бол хасахад анхааруулна
+              studentWork: s.testId ? (work.get(`${s.classroomId}|${s.testId}`) ?? 0) : 0,
             })),
           note: note
             ? {
@@ -621,6 +711,77 @@ export class LessonPlanService {
       ),
       meal: await this.mealOf(date, key),
     };
+  }
+
+  /**
+   * Тухайн өдрийн ангийн тест бүрээр АЖИЛ хийсэн сурагчийн тоо: оройн тэмдэглэгээ
+   * (Attempt, тэр өдрийн) эсвэл гэрийн даалгавар (HomeworkAttempt, тэр хичээлийн, бүлгийн
+   * аль ч хувилбар). Түлхүүр `${classroomId}|${testId}`. Батлах цонхонд тест хасахад
+   * «N сурагчийн тэмдэглэгээ хадгалагдана» гэж анхааруулахад л — өгөгдөл устгахгүй.
+   */
+  private async studentWork(
+    date: Date,
+    sessions: { classroomId: string; testId: string | null }[],
+    meta: Map<string, TestMeta>,
+    rosterByClass: Map<string, Set<string>>,
+  ): Promise<Map<string, number>> {
+    const out = new Map<string, number>();
+    const library = sessions.filter((s): s is { classroomId: string; testId: string } => !!s.testId);
+    if (!library.length || date > todayUB()) return out;
+    const problemToTests = new Map<string, Set<string>>();
+    for (const s of library)
+      for (const pid of meta.get(s.testId)?.problemIds ?? []) {
+        const set = problemToTests.get(pid) ?? new Set<string>();
+        set.add(s.testId);
+        problemToTests.set(pid, set);
+      }
+    const chapterIds = [
+      ...new Set(library.flatMap((s) => (meta.get(s.testId)?.chapterId ? [meta.get(s.testId)!.chapterId!] : []))),
+    ];
+    const [attempts, siblings, homework] = await Promise.all([
+      problemToTests.size
+        ? this.prisma.attempt.findMany({
+            where: { occurredOn: date, problemId: { in: [...problemToTests.keys()] }, deletedAt: null },
+            select: { studentId: true, problemId: true },
+            distinct: ['studentId', 'problemId'],
+          })
+        : Promise.resolve([] as { studentId: string; problemId: string }[]),
+      chapterIds.length
+        ? this.prisma.test.findMany({
+            where: { chapterId: { in: chapterIds } },
+            select: { id: true, chapterId: true },
+          })
+        : Promise.resolve([] as { id: string; chapterId: string | null }[]),
+      this.prisma.homeworkAttempt.findMany({
+        where: {
+          lessonDate: date,
+          classroomId: { in: [...new Set(library.map((s) => s.classroomId))] },
+        },
+        select: { studentId: true, classroomId: true, testId: true },
+      }),
+    ]);
+    const chapterOfTest = new Map(siblings.map((t) => [t.id, t.chapterId]));
+    const who = new Map<string, Set<string>>();
+    const add = (k: string, studentId: string) => {
+      const set = who.get(k) ?? new Set<string>();
+      set.add(studentId);
+      who.set(k, set);
+    };
+    for (const s of library) {
+      const roster = rosterByClass.get(s.classroomId) ?? new Set<string>();
+      const k = `${s.classroomId}|${s.testId}`;
+      const chapter = meta.get(s.testId)?.chapterId ?? null;
+      for (const a of attempts)
+        if (roster.has(a.studentId) && problemToTests.get(a.problemId)?.has(s.testId)) add(k, a.studentId);
+      for (const h of homework)
+        if (
+          h.classroomId === s.classroomId &&
+          (h.testId === s.testId || (chapter && chapterOfTest.get(h.testId) === chapter))
+        )
+          add(k, h.studentId);
+      out.set(k, who.get(k)?.size ?? 0);
+    }
+    return out;
   }
 
   /** Бямба, Ням л хоолтой (эзэн 2026-10-31); бусад өдөр null. */
@@ -703,7 +864,10 @@ export class LessonPlanService {
     if (test.type === TestType.EESH_MOCK || test.type === TestType.THOUSAND)
       throw new ForbiddenException('Энэ шалгалтын хариуг харах эрхгүй');
     const [planned, done, assigned] = await Promise.all([
-      this.prisma.lessonTopic.findFirst({ where: { testIds: { has: testId } }, select: { id: true } }),
+      this.prisma.lessonTopic.findFirst({
+        where: { testIds: { has: testId }, deletedAt: null, schedule: { deletedAt: null } },
+        select: { id: true },
+      }),
       this.prisma.classTestSession.findFirst({ where: { testId }, select: { id: true } }),
       this.prisma.testAccess.findFirst({
         where: {

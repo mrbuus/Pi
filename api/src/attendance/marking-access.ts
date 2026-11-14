@@ -41,7 +41,7 @@ export async function assertMarkAccess(
   if (isClassTeacher(classroom, userId)) return classroom;
 
   const ownsSchedule = await prisma.classSchedule.count({
-    where: { classroomId, teacherId: userId },
+    where: { classroomId, teacherId: userId, deletedAt: null },
   });
   if (ownsSchedule > 0) return classroom;
 
@@ -53,8 +53,9 @@ export async function assertMarkAccess(
   if (dateWhere) {
     const staffed = await prisma.lessonStaffing.count({
       where: {
+        deletedAt: null,
         ...dateWhere,
-        schedule: { classroomId },
+        schedule: { deletedAt: null, classroomId },
         OR: [{ leadTeacherId: userId }, { assistantTeacherId: userId }],
       },
     });

@@ -249,10 +249,33 @@ describe('LessonDayService — нөхөх хичээл, онолын зураг'
       db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
       db.classTestSession.findFirst.mockResolvedValue({ id: 'cts' });
       db.lessonTopic.findMany.mockResolvedValue([]);
-      db.lessonPhoto.findFirst.mockResolvedValue({ id: 'lp1', imageKeys: ['old.jpg'] });
+      db.lessonPhoto.findFirst.mockResolvedValue({ id: 'lp1', imageKeys: ['old.jpg'], createdAt: new Date() });
       db.storedFile.findMany.mockResolvedValue([]);
       await expect(service.uploadDayPhotos(staff('s2', Role.STUDENT), 'c1', '2026-10-20', [])).rejects.toMatchObject({ status: 400 });
       expect(db.lessonPhoto.delete).not.toHaveBeenCalled();
+    });
+
+    it('5 минутын дүрэм (эзэн 2026-11-12): хугацаа өнгөрвөл солих, устгахгүй; дотор нь зөөлөн устгана', async () => {
+      db.enrollment.findFirst.mockResolvedValue({ id: 'e' });
+      db.classTestSession.findFirst.mockResolvedValue({ id: 'cts' });
+      db.lessonTopic.findMany.mockResolvedValue([]);
+      db.storedFile.findMany.mockResolvedValue([{ key: 'x.jpg', mime: 'image/jpeg' }]);
+      const me = staff('s2', Role.STUDENT);
+      db.lessonPhoto.findFirst.mockResolvedValue({ id: 'lp1', imageKeys: ['old.jpg'], createdAt: new Date(Date.now() - 6 * 60_000) });
+      await expect(service.uploadDayPhotos(me, 'c1', '2026-10-20', ['x.jpg'])).rejects.toMatchObject({ status: 403 });
+      await expect(service.removeDayPhotos(me, 'c1', '2026-10-20')).rejects.toMatchObject({ status: 403 });
+      expect(db.lessonPhoto.update).not.toHaveBeenCalled();
+
+      db.lessonPhoto.findFirst.mockResolvedValue({ id: 'lp1', imageKeys: ['old.jpg'], createdAt: new Date(Date.now() - 60_000) });
+      await service.removeDayPhotos(me, 'c1', '2026-10-20');
+      expect(db.lessonPhoto.update).toHaveBeenCalledWith({ where: { id: 'lp1' }, data: { imageKeys: [] } });
+      expect(db.lessonPhoto.delete).not.toHaveBeenCalled();
+
+      // Устгасны дараа (хоосон мөр) дахин илгээхэд хугацаа шинээр эхэлнэ
+      db.lessonPhoto.update.mockClear();
+      db.lessonPhoto.findFirst.mockResolvedValue({ id: 'lp1', imageKeys: [], createdAt: new Date(Date.now() - 60 * 60_000) });
+      await service.uploadDayPhotos(me, 'c1', '2026-10-20', ['x.jpg']);
+      expect(db.lessonPhoto.update.mock.calls[0][0].data).toMatchObject({ imageKeys: ['x.jpg'], createdAt: expect.any(Date) });
     });
 
     it('томилогдоогүй ч ангийн гишүүн сурагч илгээнэ; томилолт зөвхөн тэмдэг', async () => {

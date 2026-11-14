@@ -1,3 +1,4 @@
+import { mainFirst } from '../common/class-track';
 import {
   BadRequestException,
   ForbiddenException,
@@ -5,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { addDaysKey, normalizeVariant } from '../attendance/board-logic';
+import { isVariantA } from './student-hub.logic';
 import { isActivatedClassroomStudent } from '../common/access';
 import { dateKey, parseDateOnly, todayUB } from '../common/date';
 import { markPlus } from '../common/teacher-plus';
@@ -46,6 +48,7 @@ import {
   type HubProblemRow,
   type LessonDayEvidence,
   type MarkRow,
+  type QuizMark,
   type TestClosedReason,
 } from './student-hub.logic';
 import type {
@@ -72,6 +75,8 @@ interface DayBundle {
     { status: AttendanceStatus; lateRange: LateRangeValue | null }
   >;
   marks: Map<string, MarkRow>;
+  /** «анги|өдөр» → шалгалтын оноо (homework-quiz) */
+  quizzes: Map<string, QuizMark>;
   topics: Map<
     string,
     { title: string; chapterId: string | null; photoStudentId: string | null }[]
@@ -256,7 +261,7 @@ export class StudentHubService {
       gte: parseDateOnly(fromKey),
       lte: parseDateOnly(toKey),
     };
-    const [enrollments, attendance, marks] = await Promise.all([
+    const [enrollments, attendance, marks, quizRows] = await Promise.all([
       this.enrollmentRows(studentId),
       // note-ийг ХЭЗЭЭ Ч сонгохгүй
       this.prisma.attendance.findMany({
@@ -275,16 +280,31 @@ export class StudentHubService {
               classroomId: true,
               date: true,
               status: true,
-              comment: true,
             },
           })
         : Promise.resolve([]),
+      // Шалгалтаар даалгавар шалгасан өөрийн оноо (эзэн 2026-11-08 19:08), устгаагүй
+      opts.days
+        ? this.prisma.homeworkQuizScore.findMany({
+            where: { studentId, deletedAt: null, quiz: { deletedAt: null, date: range } },
+            select: { quizId: true, score: true },
+          })
+        : Promise.resolve([]),
     ]);
+    // Шалгалтын өдөр, бодлогын тоо — relation select-гүй хавтгай (оноо байвал л нэг асуулга)
+    const quizMeta = quizRows.length
+      ? await this.prisma.homeworkQuiz.findMany({
+          where: { id: { in: quizRows.map((r) => r.quizId) } },
+          select: { id: true, classroomId: true, date: true, problemCount: true },
+        })
+      : [];
+    const quizById = new Map(quizMeta.map((q) => [q.id, q]));
     const bundle: DayBundle = {
       classes: [],
       byClass: new Map(),
       attendance: new Map(),
       marks: new Map(),
+      quizzes: new Map(),
       topics: new Map(),
       staffing: new Map(),
       slots: new Map(),
@@ -295,7 +315,7 @@ export class StudentHubService {
     const ids = [...new Set(enrollments.map((e) => e.classroomId))];
     if (!ids.length) return bundle;
     const inIds = { in: ids };
-    const ofClasses = { schedule: { classroomId: inIds } };
+    const ofClasses = { schedule: { deletedAt: null, classroomId: inIds } };
     const [
       names,
       scheduleRows,
@@ -309,7 +329,7 @@ export class StudentHubService {
       this.classNames(ids),
       // dismissMode-ийг ХЭЗЭЭ Ч сонгохгүй
       this.prisma.classSchedule.findMany({
-        where: { classroomId: inIds },
+        where: { classroomId: inIds, deletedAt: null },
         select: {
           id: true,
           classroomId: true,
@@ -323,7 +343,7 @@ export class StudentHubService {
         },
       }),
       this.prisma.lessonTopic.findMany({
-        where: { date: range, ...ofClasses },
+        where: { deletedAt: null, date: range, ...ofClasses },
         select: {
           scheduleId: true,
           date: true,
@@ -334,7 +354,7 @@ export class StudentHubService {
       }),
       opts.days
         ? this.prisma.lessonStaffing.findMany({
-            where: { date: range, ...ofClasses },
+            where: { deletedAt: null, date: range, ...ofClasses },
             select: {
               scheduleId: true,
               date: true,
@@ -344,7 +364,7 @@ export class StudentHubService {
           })
         : Promise.resolve([]),
       this.prisma.scheduleException.findMany({
-        where: { ...ofClasses, OR: [{ date: range }, { newDate: range }] },
+        where: { deletedAt: null, ...ofClasses, OR: [{ date: range }, { newDate: range }] },
         select: {
           scheduleId: true,
           date: true,
@@ -443,11 +463,20 @@ export class StudentHubService {
         lateRange: a.lateRange,
       });
     }
+    for (const r of quizRows) {
+      const q = quizById.get(r.quizId);
+      if (q && current.has(q.classroomId))
+        bundle.quizzes.set(dayKey(q.classroomId, dateKey(q.date)), {
+          score: Number(r.score),
+          problemCount: q.problemCount,
+        });
+    }
     for (const m of marks)
       if (current.has(m.classroomId))
         bundle.marks.set(dayKey(m.classroomId, dateKey(m.date)), {
           status: m.status,
-          comment: m.comment,
+          // Багшийн дотоод тэмдэглэл сурагчид харагдахгүй (эзэн 2026-11-05)
+          comment: null,
         });
     for (const t of topics) {
       const at = lessonKey(t.scheduleId, t.date);
@@ -596,21 +625,20 @@ export class StudentHubService {
           classroomId: true,
           date: true,
           status: true,
-          comment: true,
         },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { date: todayDate },
+        where: { date: todayDate, deletedAt: null },
         select: { id: true, type: true, title: true },
       }),
       this.prisma.academicCalendarDayClassroom.findMany({
-        where: { calendarDay: { date: todayDate } },
+        where: { deletedAt: null, calendarDay: { date: todayDate, deletedAt: null } },
         select: { calendarDayId: true, classroomId: true },
       }),
     ]);
     const ids = [...new Set(enrollments.map((e) => e.classroomId))];
     const inIds = { in: ids };
-    const ofClasses = { schedule: { classroomId: inIds } };
+    const ofClasses = { schedule: { deletedAt: null, classroomId: inIds } };
     const markKey = latest?.status ? dateKey(latest.date) : null;
     // 2-р давалгаа: classroomId IN (…) — хуваарь, exception, сэдэв, өнөөдрийн бүртгэл,
     // сүүлийн тэмдэглэгээний D (нэг жижиг асуулга)
@@ -620,6 +648,7 @@ export class StudentHubService {
             this.classNames(ids),
             this.prisma.classSchedule.findMany({
               where: {
+                deletedAt: null,
                 classroomId: inIds,
                 effectiveFrom: { lte: todayDate },
                 OR: [
@@ -641,6 +670,7 @@ export class StudentHubService {
             }),
             this.prisma.scheduleException.findMany({
               where: {
+                deletedAt: null,
                 ...ofClasses,
                 OR: [{ date: todayDate }, { newDate: todayDate }],
               },
@@ -656,7 +686,7 @@ export class StudentHubService {
             }),
             // Зөөгдөж ирсэн хичээлийн сэдэв анхны огноогоороо байдаг тул ойрын хугацааг уншина
             this.prisma.lessonTopic.findMany({
-              where: { ...ofClasses, date: { gte: topicFrom, lte: todayDate } },
+              where: { deletedAt: null, ...ofClasses, date: { gte: topicFrom, lte: todayDate } },
               select: { scheduleId: true, date: true, title: true },
             }),
             // Багш баталсан бүртгэл байвал түүний сэдэв/цаг давамгайлна (description-гүй)
@@ -721,26 +751,38 @@ export class StudentHubService {
     });
     const entry =
       day && !day.isHoliday ? pickToday(day.entries, ubMinuteOfDay()) : null;
-    const record = entry
-      ? records.find(
-          (r) =>
-            r.classroomId === entry.classroomId &&
-            r.scheduleId === entry.scheduleId,
-        )
-      : undefined;
-    const todayView: HubOverview['today'] = entry
-      ? {
-          classroomId: entry.classroomId,
-          classroomName: entry.classroomName,
-          date: today,
-          startMinute: record?.startMinute ?? entry.startMinute,
-          endMinute: record?.endMinute ?? entry.endMinute,
-          room: record?.room ?? entry.room,
-          topic: topicOf(record?.topic, entry.topic),
-        }
-      : null;
+    type Entry = NonNullable<typeof entry>;
+    const viewOf = (e: Entry): NonNullable<HubOverview['today']> => {
+      const record = records.find(
+        (r) => r.classroomId === e.classroomId && r.scheduleId === e.scheduleId,
+      );
+      return {
+        classroomId: e.classroomId,
+        classroomName: e.classroomName,
+        date: today,
+        startMinute: record?.startMinute ?? e.startMinute,
+        endMinute: record?.endMinute ?? e.endMinute,
+        room: record?.room ?? e.room,
+        topic: topicOf(record?.topic, e.topic),
+      };
+    };
+    const todayView: HubOverview['today'] = entry ? viewOf(entry) : null;
+    // Хоёр ангид зэрэг суудаг сурагч (математик + Нийгэм): өнөөдрийн НӨГӨӨ ангийн хичээл
+    const otherToday: Entry[] = [];
+    if (entry && day)
+      for (const id of new Set(day.entries.map((e) => e.classroomId))) {
+        if (id === entry.classroomId) continue;
+        const e = pickToday(
+          day.entries.filter((x) => x.classroomId === id),
+          ubMinuteOfDay(),
+        );
+        if (e) otherToday.push(e);
+      }
     return {
-      classrooms: classes.map((c) => ({
+      // Хоёр ангитай бол үндсэн (математикийн) анги эхэнд
+      classrooms: mainFirst(
+        classes.map((c) => ({ c, classroom: { name: c.classroomName } })),
+      ).map(({ c }) => ({
         id: c.classroomId,
         name: c.classroomName,
       })),
@@ -751,12 +793,15 @@ export class StudentHubService {
         homework.map((h) => ({ status: h.status, count: h._count._all })),
       ),
       today: todayView,
+      todayOther: otherToday
+        .map(viewOf)
+        .sort((a, b) => a.startMinute - b.startMinute),
       latestMark:
         latest && latest.status
           ? {
               date: dateKey(latest.date),
               status: latest.status,
-              comment: latest.comment,
+              comment: null, // багшийн дотоод тэмдэглэл — сурагчид илгээхгүй
               classroomId: latest.classroomId,
               lessonDate,
             }
@@ -794,7 +839,10 @@ export class StudentHubService {
           JOIN "ClassSchedule" cs ON cs."id" = t."scheduleId"
           LEFT JOIN "ScheduleException" x
             ON x."scheduleId" = t."scheduleId" AND x."date" = t."date"
+              AND x."deletedAt" IS NULL
           WHERE cs."classroomId" = ${classroomId}
+            AND cs."deletedAt" IS NULL
+            AND t."deletedAt" IS NULL
             AND t."date" BETWEEN ${from}::date AND ${to}::date
             AND (x."kind" IS NULL OR x."kind" <> 'CANCELLED')
       ) u WHERE u.d BETWEEN ${from}::date AND ${to}::date`;
@@ -917,6 +965,7 @@ export class StudentHubService {
           date,
           b.byClass.get(cls.classroomId) ?? [],
           b.marks,
+          b.quizzes,
         ),
         theory: {
           count: photos.reduce((n, p) => n + p.imageKeys.length, 0),
@@ -1164,12 +1213,18 @@ export class StudentHubService {
         },
       },
     });
+    const variant = normalizeVariant(test.variantLabel);
+    // Ангийн А хувилбарын хариу ямар ч ангийн сурагчид харагдахгүй (эзэн 2026-11-10)
+    const answersHidden = isVariantA(variant, test.title);
     return {
       testId: test.id,
       title: test.title,
-      variant: normalizeVariant(test.variantLabel),
+      variant,
       date: open[open.length - 1],
-      problems: (rows as HubProblemRow[]).map(hubProblem),
+      answersHidden,
+      problems: (rows as HubProblemRow[])
+        .map(hubProblem)
+        .map((p) => (answersHidden ? { ...p, correctAnswer: null } : p)),
     };
   }
 

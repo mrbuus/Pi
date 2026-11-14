@@ -1,3 +1,4 @@
+import { classTrack } from '../common/class-track';
 import {
   BadRequestException,
   ConflictException,
@@ -181,6 +182,9 @@ export class ClassroomsService {
         teacher: classroom.teacher,
         assistantTeacherId: classroom.assistantTeacherId,
         assistantTeacher: classroom.assistantTeacher,
+        // Засах маягт бодит хичээлийг харуулна (эс бөгөөс «Математик» гэж
+        // анхдагчаар орж, Нийгмийн ухааны ангийг хадгалахад чимээгүй солигдоно)
+        subject: classroom.subject,
       },
       students: classroom.enrollments.map((enrollment) => ({
         ...enrollment.student,
@@ -188,6 +192,40 @@ export class ClassroomsService {
       })),
       permissions: { canManageStudents },
     };
+  }
+
+  /**
+   * GET /classrooms/registry — «Бүртгэл» хуудас (web/components/registry):
+   * архивлаагүй сурагч бүрийн БҮХ элсэлт (идэвхтэй = leftAt null, түүх = leftAt-тэй).
+   * Вэб идэвхтэй ростер, ангийн тоо, сурагчийн ангийн түүхийг эндээс бодно;
+   * ангигүй сурагчдыг /classrooms/unassigned-students өгнө. Зөвхөн байгаа
+   * өгөгдлийг уншина — утас зэрэг хувийн талбаргүй.
+   */
+  async registry() {
+    return this.prisma.enrollment.findMany({
+      where: { student: { role: Role.STUDENT, archivedAt: null } },
+      orderBy: [{ joinedAt: 'desc' }, { id: 'asc' }],
+      select: {
+        id: true,
+        joinedAt: true,
+        leftAt: true,
+        movedById: true,
+        student: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            studentCode: true,
+            studentProfile: {
+              select: { grade: true, branch: true, school: true },
+            },
+          },
+        },
+        classroom: {
+          select: { id: true, name: true, grade: true, type: true },
+        },
+      },
+    });
   }
 
   // Идэвхжсэн ч ангид ороогүй танхимын сурагчид (SPEC §6.3)
@@ -375,19 +413,36 @@ export class ClassroomsService {
       throw new NotFoundException('Сурагч олдсонгүй');
     }
 
-    // Өмнөх ангийн бичилт хаагдаж шинэ бичилт үүснэ — түүх хадгалагдана,
-    // сурагчид зөвхөн орсон өдрөөс хойшхи мэдээлэл харагдана (SPEC §6.3)
+    // Ижил ЧИГЛЭЛИЙН (математик / Нийгэм) өмнөх ангийн бичилт хаагдаж шинэ бичилт үүснэ —
+    // түүх хадгалагдана, сурагчид зөвхөн орсон өдрөөс хойшхи мэдээлэл харагдана (SPEC §6.3).
+    // Өөр чиглэлийн анги хөндөгдөхгүй: математикийн ангийн сурагчийг Нийгэмд нэмэхэд хоёр
+    // ангид зэрэг сууна (эзэн 2026-11-12, common/class-track.ts).
+    const include = {
+      classroom: { select: { id: true, name: true } },
+      student: { select: { id: true, firstName: true, lastName: true } },
+    } as const;
+    const track = classTrack(classroom);
     return this.prisma.$transaction(async (tx) => {
-      await tx.enrollment.updateMany({
+      const open = await tx.enrollment.findMany({
         where: { studentId, leftAt: null },
-        data: { leftAt: new Date(), movedById: byUserId },
+        select: {
+          id: true,
+          classroomId: true,
+          classroom: { select: { name: true, subject: true } },
+        },
       });
+      // Аль хэдийн энэ ангид байгаа — орсон өдрийг нь шинэчлэхгүй
+      const same = open.find((e) => e.classroomId === classroomId);
+      if (same) return tx.enrollment.findUniqueOrThrow({ where: { id: same.id }, include });
+      const closing = open.filter((e) => classTrack(e.classroom) === track).map((e) => e.id);
+      if (closing.length)
+        await tx.enrollment.updateMany({
+          where: { id: { in: closing } },
+          data: { leftAt: new Date(), movedById: byUserId },
+        });
       return tx.enrollment.create({
         data: { studentId, classroomId, movedById: byUserId },
-        include: {
-          classroom: { select: { id: true, name: true } },
-          student: { select: { id: true, firstName: true, lastName: true } },
-        },
+        include,
       });
     });
   }

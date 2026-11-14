@@ -11,12 +11,18 @@ import ClassPicker from "./ClassPicker";
 import CriteriaButton from "./CriteriaButton";
 import DateStrip, { type YearMonth } from "./DateStrip";
 import LessonNoteBox from "./LessonNoteBox";
-import MarkView, { type BulkState } from "./MarkView";
+import MarkView, { type BulkState, type QuizCardProps } from "./MarkView";
+import QuizBar from "./QuizBar";
+import { useHomeworkQuiz } from "./useHomeworkQuiz";
 import { BoardFilters, LessonInfo, matchesFilter, type FilterKey } from "./BoardFilters";
 import OtherInfo from "./OtherInfo";
 import RecordedByLine from "./RecordedBy";
 import TheoryPhotosStaff from "@/components/TheoryPhotosStaff";
 import OnlineDetail from "./OnlineDetail";
+import GuestSection from "@/components/makeup-visits/GuestSection";
+import Room406View from "@/components/makeup-visits/Room406View";
+import { ROOM406_ID, type HomeBadge } from "@/components/makeup-visits/types";
+import type { VisitNote } from "@/components/makeup-visits/VisitNoteChip";
 import StudentDrawer from "./StudentDrawer";
 import type { OnlineCell } from "./StudentCard";
 import SummaryBar from "./SummaryBar";
@@ -102,7 +108,8 @@ function BoardRoot({ link }: { link: BoardLink }) {
   const [dayFail, setDayFail] = useState<{ key: string; msg: string } | null>(null);
   const [dayRetry, setDayRetry] = useState(0);
   // Сонгосон анги тэр өдөр хичээлгүй байсан ч нэр, тоог нь серверээс (эрхтэй бол)
-  const wanted = picked ?? readStore(CLASS_KEY);
+  const stored = picked ?? readStore(CLASS_KEY);
+  const wanted = stored === ROOM406_ID ? null : stored;
 
   useEffect(() => {
     let alive = true;
@@ -159,7 +166,7 @@ function BoardRoot({ link }: { link: BoardLink }) {
   const [lessonDays, setLessonDays] = useState<{ key: string; days: Set<string> } | null>(null);
   const rangeKey = classId ? `${classId}|${view.y}-${view.m}` : null;
   useEffect(() => {
-    if (!classId) return;
+    if (!classId || classId === ROOM406_ID) return;
     let alive = true;
     const from = toKey(new Date(view.y, view.m - 1, 1));
     const to = toKey(new Date(view.y, view.m + 2, 0));
@@ -191,9 +198,18 @@ function BoardRoot({ link }: { link: BoardLink }) {
   };
 
   const sel = dayReady && day!.selected?.id === classId ? day!.selected : null;
-  const current = cls ? { name: cls.name, studentCount: cls.studentCount } : sel ? { name: sel.name, studentCount: sel.studentCount } : null;
+  const room406 = classId === ROOM406_ID;
+  const current = room406
+    ? { name: "406 нөхөх өрөө", studentCount: null }
+    : cls
+      ? { name: cls.name, studentCount: cls.studentCount }
+      : sel
+        ? { name: sel.name, studentCount: sel.studentCount }
+        : null;
 
-  const footer = cls ? (
+  const footer = room406 ? (
+    <span>Хуваарьгүй, өдөр бүр</span>
+  ) : cls ? (
     <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
       {cls.lessons.map((l) => (
         <span key={l.scheduleId} className="inline-flex items-center gap-1.5 font-semibold tabular-nums text-ink">
@@ -241,6 +257,8 @@ function BoardRoot({ link }: { link: BoardLink }) {
         <ErrorState message={dayError} onRetry={() => setDayRetry((r) => r + 1)} />
       ) : !dayReady ? (
         <BoardSkeletonBody />
+      ) : room406 ? (
+        <Room406View key={date} date={date} today={today} />
       ) : cls ? (
         <ClassView key={`${cls.id}|${date}`} cls={cls} date={date} today={today} canManage={canManage} />
       ) : (
@@ -317,6 +335,20 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
   const board = useBoard(cls.id, date);
   const { data, recs } = board;
   const homework = cls.type !== "ONLINE";
+  // Шалгалтаар даалгавар шалгах (эзэн 2026-11-08) — QuizBar.tsx, useHomeworkQuiz.ts
+  const quiz = useHomeworkQuiz(cls.id, date, homework, board.poll);
+  const quizScored = useMemo(() => new Set(quiz.scores.keys()), [quiz.scores]);
+  const quizCard = useMemo<QuizCardProps>(
+    () => ({
+      max: quiz.quiz && !quiz.hidden ? quiz.quiz.problemCount : null,
+      scores: quiz.scores,
+      cells: quiz.cells,
+      onScore: quiz.setScore,
+      onFlush: quiz.flush,
+      onInvalid: quiz.markInvalid,
+    }),
+    [quiz.quiz, quiz.hidden, quiz.scores, quiz.cells, quiz.setScore, quiz.flush, quiz.markInvalid],
+  );
   const [ui, setUi] = useState<Ui>(EMPTY_UI);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [filter, setFilter] = useState<FilterKey | null>(null);
@@ -368,6 +400,30 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
     return m;
   }, [makeupRows, recs]);
 
+  // Нөхөлт: тэр өдөр өөр ангид/406-д нөхсөн энэ ангийн сурагч — нэрийн доор шошго (makeup-visits)
+  const [visitNotes, setVisitNotes] = useState<Map<string, VisitNote>>(() => new Map());
+  useEffect(() => {
+    let alive = true;
+    api<HomeBadge[]>(`/makeup-visits/home?classroomId=${encodeURIComponent(cls.id)}&date=${date}`)
+      .then((rows) => {
+        if (!alive) return;
+        // Нэг өдөр хоёр газарт нөхсөн бол хоёуланг нь
+        const m = new Map<string, VisitNote>();
+        for (const r of rows) {
+          const prev = m.get(r.studentId);
+          m.set(r.studentId, {
+            short: prev ? `${prev.short}, ${r.hostName}-д` : `${r.hostName}-д нөхсөн`,
+            full: prev ? `${prev.full}, ${r.label}` : r.label,
+          });
+        }
+        setVisitNotes(m);
+      })
+      .catch(() => alive && setVisitNotes(new Map()));
+    return () => {
+      alive = false;
+    };
+  }, [cls.id, date]);
+
   // Нэрээр (овгоор биш) эрэмбэлж «Б. Нэр»; ижил нэр, ижил овгийн үсэгтэй бол овог бүтнээр (эзэн 2026-10-18)
   const students = useMemo(() => [...(data?.students ?? [])].sort(byFirstName), [data]);
   const names = useMemo(() => rosterNames(students), [students]);
@@ -388,10 +444,11 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
               flags: flags.get(s.id) ?? [],
               online: online[s.id] ?? null,
               sent: sentSet.has(s.id),
+              quiz: quizScored.has(s.id),
             }),
           )
         : students,
-    [filter, students, recs, flags, online, sentSet],
+    [filter, students, recs, flags, online, sentSet, quizScored],
   );
   const flaggedCount = useMemo(() => [...flags.values()].filter((f) => f.length > 0).length, [flags]);
 
@@ -434,12 +491,13 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
   const doneIds = students
     .filter((s) => {
       const r = recs.get(s.id);
-      return r && r.hw === null && (r.att === "PRESENT" || r.att === "LATE");
+      // Шалгалтын оноотой сурагчийг «үлдсэн»-д тооцохгүй (даалгаврыг нь шалгасан)
+      return r && r.hw === null && !quizScored.has(s.id) && (r.att === "PRESENT" || r.att === "LATE");
     })
     .map((s) => s.id);
   const hwSkipped = students.filter((s) => {
     const r = recs.get(s.id);
-    return r && r.hw === null && r.att !== "PRESENT" && r.att !== "LATE";
+    return r && r.hw === null && !quizScored.has(s.id) && r.att !== "PRESENT" && r.att !== "LATE";
   }).length;
 
   const bulk = async (fn: () => Promise<void>) => {
@@ -480,6 +538,8 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
     students.map((s) => s.id),
     recs,
   );
+  // Тэмдэглээгүй ч шалгалтын оноотой бол «Тэмдэглээгүй»-д тоолохгүй (эзэн 2026-11-08)
+  counts.homework.unmarked -= students.filter((s) => recs.get(s.id)?.hw == null && quizScored.has(s.id)).length;
   const hasOnline = homework && !!onlineData && onlineData.tests.length > 0;
   const firstStart = Math.min(...cls.lessons.map((l) => l.startMinute));
   const upcoming = date > today || (date === today && ubNowMinute() < firstStart);
@@ -521,6 +581,8 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
         ) : (
           <>
             <LessonInfo
+              classId={cls.id}
+              date={date}
               students={students}
               homework={homework}
               topic={cls.lessons.map((l) => l.topic).find(Boolean) ?? null}
@@ -539,7 +601,9 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
               filter={filter}
               onFilter={setFilter}
               shown={shownStudents.length}
+              quizScored={quizScored}
             />
+            {homework && <QuizBar q={quiz} studentIds={students.map((s) => s.id)} />}
             {shownStudents.length > 0 ? (
               <MarkView
                 students={shownStudents}
@@ -570,6 +634,9 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
                 onHwNote={board.onHwNote}
                 onDrawer={openDrawer}
                 onOnline={openOnline}
+                quiz={homework ? quizCard : undefined}
+                visitNotes={visitNotes}
+                after={<GuestSection hostId={cls.id} hostName={cls.name} date={date} today={today} homework={homework} />}
               />
             ) : (
               <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-line px-4 py-8 text-center text-sm text-ink-dim">
@@ -597,6 +664,8 @@ function ClassView({ cls, date, today, canManage }: { cls: DayClass; date: strin
           date={date}
           hw={recs.get(onlineStudent.id)?.hw ?? null}
           hwNote={recs.get(onlineStudent.id)?.hwNote ?? ""}
+          onHw={onHw}
+          onHwNote={board.onHwNote}
           onClose={() => setOnlineId(null)}
         />
       )}

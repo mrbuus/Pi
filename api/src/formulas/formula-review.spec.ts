@@ -279,6 +279,19 @@ describe('formula review service', () => {
     }
     expect(prisma.formulaReview.count.mock.calls[0][0].where.userId).toBe('u1');
   });
+  it('never puts limit (\\lim) formulas into review decks or counts', async () => {
+    const { prisma, service } = fixture();
+    await service.due('u1', 10, now);
+    const limitFree = { AND: [{ NOT: { latex: { contains: '\\lim' } } }] };
+    const wheres = [
+      ...prisma.formula.findMany.mock.calls.map((c: any) => c[0].where),
+      ...prisma.formula.count.mock.calls.map((c: any) => c[0].where),
+    ];
+    expect(wheres.length).toBeGreaterThan(0);
+    for (const where of wheres) expect(where).toMatchObject(limitFree);
+    for (const c of [...prisma.formulaReview.findMany.mock.calls, ...prisma.formulaReview.count.mock.calls])
+      expect(c[0].where.formula).toMatchObject(limitFree);
+  });
   it('records a graded answer once and returns the same receipt for retry', async () => {
     const { prisma, service } = fixture();
     const { exercise } = exercises.create('u1', formula(), 'blank', now, 0);

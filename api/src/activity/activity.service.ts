@@ -7,6 +7,7 @@ import { addDateDays, dateKey, todayUB } from '../common/date';
 import { Role } from '../generated/prisma/enums';
 import { classTeacherWhere, isClassTeacher } from '../common/class-teachers';
 import { PrismaService } from '../prisma/prisma.service';
+import { computeFlexStreak } from './flex-streak';
 import {
   computeActivityLevel,
   computeClassActivityLevel,
@@ -106,11 +107,11 @@ export class ActivityService {
     const [grouped, calendarDays] = await Promise.all([
       this.prisma.attempt.groupBy({
         by: ['occurredOn'],
-        where: { studentId, occurredOn: { gte: start, lte: end } },
+        where: { studentId, occurredOn: { gte: start, lte: end }, deletedAt: null },
         _count: { _all: true },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} } },
+        where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: { deletedAt: null } }, deletedAt: null },
         select: { date: true },
       }),
     ]);
@@ -158,10 +159,10 @@ export class ActivityService {
   // өдөр гэж үзнэ — төвийн хуваарийн буруугаас болж сурагчийг шийтгэхгүй.
   // Энэ хамгаалалтыг хасвал стрийк "урамшуулагч" биш "шийтгэгч" механизм болж хувирна.
   async streak(studentId: string) {
-    const [grouped, freezes, calendarDays] = await Promise.all([
+    const [grouped, freezes, calendarDays, goal] = await Promise.all([
       this.prisma.attempt.groupBy({
         by: ['occurredOn'],
-        where: { studentId },
+        where: { studentId, deletedAt: null },
         _count: { _all: true },
       }),
       this.prisma.streakFreeze.findMany({
@@ -169,14 +170,28 @@ export class ActivityService {
         select: { date: true },
       }),
       this.prisma.academicCalendarDay.findMany({
-        where: { type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} } },
+        where: { type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: { deletedAt: null } }, deletedAt: null },
         select: { date: true },
       }),
+      this.prisma.studyWeeklyGoal.findFirst({
+        where: { studentId, deletedAt: null },
+        select: { daysPerWeek: true },
+      }),
     ]);
+    // Нэмэлт, сонголттой талбарууд (апп): уян цуврал, энэ 7 хоногийн амралтын өдөр, зорилго
+    const weeklyGoal = goal?.daysPerWeek ?? null;
 
     const totalActiveDays = grouped.length;
     if (totalActiveDays === 0) {
-      return { currentStreak: 0, longestStreak: 0, totalActiveDays: 0 };
+      return {
+        currentStreak: 0,
+        longestStreak: 0,
+        totalActiveDays: 0,
+        flexStreak: 0,
+        restDayUsedThisWeek: false,
+        activeDaysThisWeek: 0,
+        weeklyGoal,
+      };
     }
 
     const activeDates = new Set(grouped.map((g) => dateKey(g.occurredOn)));
@@ -215,7 +230,13 @@ export class ActivityService {
       : runThroughYesterday;
     longest = Math.max(longest, currentStreak);
 
-    return { currentStreak, longestStreak: longest, totalActiveDays };
+    return {
+      currentStreak,
+      longestStreak: longest,
+      totalActiveDays,
+      ...computeFlexStreak(activeDates, protectedDates, todayKey),
+      weeklyGoal,
+    };
   }
 
   // Ангийн бүлэг идэвх — сурагч хоорондын жагсаалт/харьцуулалт БИШ, зөвхөн
@@ -243,6 +264,7 @@ export class ActivityService {
         where: {
           studentId: { in: studentIds },
           occurredOn: { gte: start, lte: end },
+          deletedAt: null,
         },
         _count: { _all: true },
       });
@@ -256,7 +278,7 @@ export class ActivityService {
     }
 
     const calendarDays = await this.prisma.academicCalendarDay.findMany({
-      where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: {} } },
+      where: { date: { gte: start, lte: end }, type: { in: NON_CLASS_DAY_TYPES }, classrooms: { none: { deletedAt: null } }, deletedAt: null },
       select: { date: true },
     });
     const nonClassDates = new Set(calendarDays.map((c) => dateKey(c.date)));
