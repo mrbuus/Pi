@@ -25,7 +25,7 @@ import { byFirstName, staffNames, withPlus } from "@/lib/personName";
  * ========================================================================== */
 
 type StaffRole = "ADMIN" | "TEACHER_PLUS" | "TEACHER";
-type CapabilityId = "schedule.manage" | "finance.manage" | "time.review" | "payroll.view" | "teacher-hours.edit";
+type CapabilityId = "schedule.manage" | "finance.manage" | "time.review" | "payroll.view" | "teacher-hours.edit" | "student-password.set";
 
 interface StaffUser {
   id: string;
@@ -85,6 +85,13 @@ const CAPS: { id: CapabilityId; label: string; full: string; hint: string }[] = 
     label: "Цаг бөглөх",
     full: "Ажилласан цаг бөглөх",
     hint: "«Ажилласан цаг» хүснэгтэд бүх багшийн цагийг бөглөж, багшийн дансыг засна",
+  },
+  {
+    // Эзэн 2026-11-16: сурагчийн нууц үгийг шууд солих — матрицаас олгоно
+    id: "student-password.set",
+    label: "Нууц үг солих",
+    full: "Сурагчийн нууц үг солих",
+    hint: "Сурагчийн нууц үгийг шинээр тавих эсвэл утасны дугаар руу буцаана (ажилтных биш)",
   },
 ];
 

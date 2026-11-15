@@ -1335,9 +1335,17 @@ export class UsersService {
   ) {
     const target = await this.prisma.user.findUnique({
       where: { id: targetId },
-      select: { id: true, phone: true },
+      select: { id: true, phone: true, role: true },
     });
     if (!target) throw new NotFoundException('Хэрэглэгч олдсонгүй');
+    // Админ биш бол: матрицаас олгосон эрхтэй, зөвхөн сурагчийн нууц үг
+    if (actorRole !== Role.ADMIN) {
+      if (
+        target.role !== Role.STUDENT ||
+        !(await this.capabilities.has(actorId, 'student-password.set'))
+      )
+        throw new ForbiddenException('Нууц үг солих эрх олгогдоогүй байна');
+    }
 
     let next = password;
     if (next === undefined) {

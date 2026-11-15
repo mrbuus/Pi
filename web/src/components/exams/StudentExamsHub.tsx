@@ -28,24 +28,26 @@ import { cleanTitle } from "@/lib/studentTitle";
  * ========================================================================== */
 
 const TABS = [
+  // Сурагч «Шалгалт» дээр дарахад шууд Нэгдсэн шалгалт нээгдэнэ (эзэн 2026-11-16)
+  { value: "paper", label: "Нэгдсэн шалгалт", icon: ScanLine },
   { value: "give", label: "Өгөх", icon: PencilLine },
   { value: "done", label: "Өгсөн, дүн", icon: ClipboardCheck },
-  { value: "paper", label: "Нэгдсэн шалгалт", icon: ScanLine },
   { value: "rank", label: "Эрэмбэ", icon: Trophy },
   { value: "soril", label: "Жишиг сорил", icon: Sparkles },
 ] as const;
 type HubTab = (typeof TABS)[number]["value"];
 const isHubTab = (v: string | null): v is HubTab => TABS.some((t) => t.value === v);
 
+const DEFAULT_TAB: HubTab = "paper";
 const PAGE_SIZE = 20;
 
 export default function StudentExamsHub() {
-  const [tab, setTab] = useState<HubTab>("give");
+  const [tab, setTab] = useState<HubTab>(DEFAULT_TAB);
   const [studentId, setStudentId] = useState<string | null>(null);
 
   useEffect(() => {
     const fromUrl = new URLSearchParams(window.location.search).get("tab");
-    if (isHubTab(fromUrl) && fromUrl !== "give") {
+    if (isHubTab(fromUrl) && fromUrl !== DEFAULT_TAB) {
       const t = window.setTimeout(() => setTab(fromUrl), 0);
       return () => window.clearTimeout(t);
     }
@@ -61,7 +63,7 @@ export default function StudentExamsHub() {
     if (!isHubTab(v)) return;
     setTab(v);
     const url = new URL(window.location.href);
-    if (v === "give") url.searchParams.delete("tab");
+    if (v === DEFAULT_TAB) url.searchParams.delete("tab");
     else url.searchParams.set("tab", v);
     window.history.replaceState(window.history.state, "", url);
   };

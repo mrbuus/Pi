@@ -254,9 +254,10 @@ export class UsersController {
   }
 
   // Админ нууц үгийг шинээр тохируулна (хадгалсан hash-ийг харах боломжгүй).
-  // Нууц үг өгөөгүй бол утасны дугаар руу буцаана. Багш+ энэ эрхгүй.
+  // Нууц үг өгөөгүй бол утасны дугаар руу буцаана. Багш+ — зөвхөн эрхийн матрицаас
+  // «student-password.set» олгогдсон бол, зөвхөн СУРАГЧИЙН нууц үгийг (сервис шалгана).
   @Post(':id/password')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   setPassword(
     @Param('id') id: string,
     @Body() dto: SetUserPasswordDto,

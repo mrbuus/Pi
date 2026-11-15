@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CircleAlert, CircleCheck, KeyRound } from "lucide-react";
 import { api, getRole } from "@/lib/api";
 
@@ -22,7 +22,16 @@ export default function AdminPasswordButton({
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ kind: "success" | "error"; text: string } | null>(null);
 
-  if (getRole() !== "ADMIN") return null;
+  // Админ үргэлж; Багш+ — эрхийн матрицаас «Нууц үг солих» олгогдсон бол
+  const role = getRole();
+  const [granted, setGranted] = useState(false);
+  useEffect(() => {
+    if (role !== "TEACHER_PLUS") return;
+    api<{ grants: { capability: string }[] }>("/staff-capabilities/me")
+      .then((r) => setGranted(r.grants.some((g) => g.capability === "student-password.set")))
+      .catch(() => {});
+  }, [role]);
+  if (role !== "ADMIN" && !granted) return null;
 
   async function submit(toPhone: boolean) {
     setBusy(true);

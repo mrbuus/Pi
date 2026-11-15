@@ -4,12 +4,11 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { ChevronRight, ScanLine } from "lucide-react";
 import { api } from "@/lib/api";
-import { Badge } from "@/components/ui/kit/badge";
 import { Meta } from "@/components/ui/Meta";
 import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import { SkeletonRows } from "@/components/ui/Skeleton";
 import { errorText } from "@/components/exams/types";
-import { dayText, scoreText, toneOf, type MyPaperExam } from "./types";
+import { dayText, scoreText, type MyPaperExam } from "./types";
 
 /** Сурагчийн «Шалгалт» → «Нэгдсэн шалгалт» таб: өгсөн шалгалт бүрийн оноо, байр. */
 export default function StudentPaperExams() {
@@ -50,7 +49,6 @@ export default function StudentPaperExams() {
                 {scoreText(r.totalScore)}
                 <span className="text-sm font-normal text-ink-dim">/{scoreText(r.maxScore)}</span>
               </div>
-              {r.pct !== null && <Badge tone={toneOf(r.pct)}>{r.pct}%</Badge>}
             </div>
             <ChevronRight className="size-4 shrink-0 text-ink-dim" aria-hidden />
           </Link>
