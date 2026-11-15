@@ -22,6 +22,12 @@ export default function OverviewPanel({ board }: { board: Board }) {
   const overallBy = by === "topic" ? o.topics : o.areas;
   const short = by === "topic" ? topicShort : areaShort;
   const areaNames = overallBy.map((a) => a.area);
+  // Ангиуд дундаж оноогоор (эзэн 2026-11-15); ижил дундажтай бол ижил байр
+  const sorted = [...board.groups].sort((x, y) => (y.avgScore ?? -1) - (x.avgScore ?? -1) || x.label.localeCompare(y.label, "mn", { numeric: true }));
+  const ranked = sorted.map((g, i) => ({
+    g,
+    rank: sorted.findIndex((h) => h.avgScore === g.avgScore) + 1 || i + 1,
+  }));
   const formulaBy = new Map(board.formulas.map((f) => [f.slug, f]));
   const hardest = [...o.items]
     .filter((s) => s.pct !== null)
@@ -54,6 +60,7 @@ export default function OverviewPanel({ board }: { board: Board }) {
           <table className="w-full min-w-[36rem] border-separate border-spacing-0 text-sm">
             <thead>
               <tr className="text-left text-xs text-ink-dim">
+                <th className="w-10 px-2 py-2 text-right font-bold">Байр</th>
                 <th className="px-2 py-2 font-bold">Анги</th>
                 <th className="px-2 py-2 text-right font-bold">Сурагч</th>
                 <th className="px-2 py-2 text-right font-bold">Дундаж</th>
@@ -67,10 +74,11 @@ export default function OverviewPanel({ board }: { board: Board }) {
               </tr>
             </thead>
             <tbody>
-              {board.groups.map((g) => {
+              {ranked.map(({ g, rank }) => {
                 const pctBy = new Map((by === "topic" ? g.topics : g.areas).map((a) => [a.area, a.pct]));
                 return (
                   <tr key={g.label}>
+                    <td className="border-t border-line px-2 py-1.5 text-right font-bold tabular-nums text-ink">{rank}</td>
                     <td className="border-t border-line px-2 py-1.5">
                       <span className="font-semibold text-ink">{g.label}</span>
                       {g.teacher && <span className="block text-xs text-ink-dim">{g.teacher}</span>}
@@ -92,6 +100,7 @@ export default function OverviewPanel({ board }: { board: Board }) {
                 );
               })}
               <tr className="font-bold">
+                <td className="border-t-2 border-line" />
                 <td className="border-t-2 border-line px-2 py-1.5 text-ink">Нийт</td>
                 <td className="border-t-2 border-line px-2 py-1.5 text-right tabular-nums">{o.count}</td>
                 <td className="border-t-2 border-line px-2 py-1.5 text-right tabular-nums">{scoreText(o.avgScore)}</td>
