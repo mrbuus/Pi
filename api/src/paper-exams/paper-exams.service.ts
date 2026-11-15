@@ -246,37 +246,14 @@ export class PaperExamsService {
     if (dto.heldOn !== undefined) data.heldOn = toDate(dto.heldOn);
     if (dto.published !== undefined) data.published = dto.published;
     if (dto.published === true && !exam.published) {
-      const [linked, unlinked] = await Promise.all([
-        this.prisma.paperExamSheet.count({
-          where: { examId: id, supersededAt: null, studentId: { not: null } },
-        }),
-        this.prisma.paperExamSheet.count({
-          where: { examId: id, supersededAt: null, studentId: null },
-        }),
-      ]);
+      const linked = await this.prisma.paperExamSheet.count({
+        where: { examId: id, supersededAt: null, studentId: { not: null } },
+      });
       if (linked === 0)
         throw new BadRequestException(
           'Дүн оруулаагүй шалгалтыг сурагчдад нээхгүй',
         );
-      // Холбогдсон сурагчийн кодтой ижил кодтой холбогдоогүй хуудас = нэг сурагчид өөр
-      // өөр дүн (хоёр файлд давхар). Аль нь зөв болохыг шийдэхээс өмнө нээхгүй.
-      if (unlinked > 0) {
-        const loose = await this.prisma.paperExamSheet.findMany({
-          where: { examId: id, supersededAt: null, studentId: null },
-          select: { rawCode: true },
-        });
-        const twins = await this.prisma.paperExamSheet.count({
-          where: {
-            examId: id,
-            supersededAt: null,
-            student: { studentCode: { in: loose.map((l) => l.rawCode) } },
-          },
-        });
-        if (twins > 0)
-          throw new BadRequestException(
-            `${twins} сурагч хоёр өөр дүнтэй (давхар хуудас). «Дүн оруулах» табд аль нь зөвийг холбож шийдээд нээнэ үү`,
-          );
-      }
+      // Холбогдоогүй (давхар) хуудас сурагчид харагдахгүй тул нээхэд саад болохгүй (эзэн 2026-11-15)
     }
     const resize =
       dto.itemCount !== undefined && dto.itemCount !== exam.itemCount;

@@ -36,6 +36,8 @@ function save(blob: Blob, name: string) {
  * хүснэгтэд (зэрэгцээ) хувааж зурна: гарчиг дээр, хүснэгт бүрт Дүн | Сурагчийн код | Байр.
  */
 async function downloadPng(r: Ranking) {
+  const bands = new Map<string, number>();
+  for (const x of r.rows) if (!bands.has(x.rank)) bands.set(x.rank, bands.size);
   await document.fonts?.ready;
   const PER_BLOCK = 50;
   const blocks = Math.max(1, Math.ceil(r.rows.length / PER_BLOCK));
@@ -88,8 +90,9 @@ async function downloadPng(r: Ranking) {
     // Мөрүүд
     slice.forEach((row, i) => {
       const y = y0 + HEAD + i * ROW;
-      if (i % 2 === 1) {
-        ctx.fillStyle = "#F4F6FA";
+      // Ижил байртай бүлгүүд ээлжлэн өнгөтэй
+      if ((bands.get(row.rank) ?? 0) % 2 === 1) {
+        ctx.fillStyle = "#E3EBFB";
         ctx.fillRect(x0, y, blockW, ROW);
       }
       let x = x0;
@@ -159,6 +162,12 @@ export default function PaperRanking() {
   }, [examId]);
   useEffect(load, [load]);
 
+  // Ижил байртай бүлгүүдийг ээлжлэн өнгөөр ялгана (эзэн 2026-11-15)
+  const bandOf = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of data?.rows ?? []) if (!m.has(r.rank)) m.set(r.rank, m.size);
+    return m;
+  }, [data]);
   const rows = useMemo(() => {
     const q = query.trim().toUpperCase();
     return (data?.rows ?? []).filter((r) => !q || r.code.toUpperCase().includes(q));
@@ -250,7 +259,7 @@ export default function PaperRanking() {
             </thead>
             <tbody>
               {rows.map((r, i) => (
-                <tr key={`${r.code}-${i}`} className={cn(i % 2 === 1 && "bg-ink/[0.03]")}>
+                <tr key={`${r.code}-${i}`} className={cn((bandOf.get(r.rank) ?? 0) % 2 === 1 && "bg-brand-bright/10")}>
                   <td className={cn(cell, "border-b font-bold text-ink")}>{scoreText(r.score)}</td>
                   <td className={cn(cell, "border-x border-b text-ink")}>{r.code}</td>
                   <td className={cn(cell, "border-b text-ink-dim")}>{r.rank}</td>

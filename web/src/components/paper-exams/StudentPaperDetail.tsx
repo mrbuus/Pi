@@ -29,12 +29,21 @@ import {
 
 type Filter = "wrong" | "all";
 type Tab = "result" | "guide" | "material" | "ranking";
-const TABS: [Tab, string][] = [
-  ["result", "Задаргаа"],
-  ["guide", "Тайлбар"],
-  ["material", "Материал"],
-  ["ranking", "Жагсаалт"],
-];
+// Одоохондоо сурагч өөрийн задаргаа, материал, дүнгийн жагсаалтыг харна (эзэн 2026-11-15).
+// Алдсан бодлогын тайлбарыг дараагийн ээлжид нээхдээ SHOW_GUIDE-ийг true болгоно.
+const SHOW_GUIDE = false;
+const TABS: [Tab, string][] = SHOW_GUIDE
+  ? [
+      ["result", "Задаргаа"],
+      ["guide", "Тайлбар"],
+      ["material", "Материал"],
+      ["ranking", "Жагсаалт"],
+    ]
+  : [
+      ["result", "Задаргаа"],
+      ["material", "Материал"],
+      ["ranking", "Жагсаалт"],
+    ];
 
 /** URL-ийн ?tab=&p= — хөтчийн «буцах» өмнөх таб/бодлого руу очно (эзэн 2026-11-15) */
 function readNav(): { tab: Tab; p: string | null } {
@@ -122,6 +131,9 @@ export default function StudentPaperDetail({ id }: { id: string }) {
     );
   }
   const me = data.me;
+  // Ижил оноотой (ижил байртай) бүлэг бүрийг ээлжлэн өнгөөр ялгана
+  const bandOf = new Map<string, number>();
+  for (const r of data.ranking) if (!bandOf.has(r.rankLabel)) bandOf.set(r.rankLabel, bandOf.size);
   const label = CLASSIFY_LABEL[view.by];
   const mineBy = view.by === "topic" ? me.topics : me.areas;
   const centerBy = new Map((view.by === "topic" ? data.center.topics : data.center.areas).map((a) => [a.area, a.pct]));
@@ -155,7 +167,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
         </Card>
       </div>
 
-      <div className="grid grid-cols-4 gap-1 rounded-2xl border border-line bg-panel p-1" role="tablist" aria-label="Хэсэг">
+      <div className={cn("grid gap-1 rounded-2xl border border-line bg-panel p-1", SHOW_GUIDE ? "grid-cols-4" : "grid-cols-3")} role="tablist" aria-label="Хэсэг">
         {TABS.map(([t, text]) => (
           <button
             key={t}
@@ -172,7 +184,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
         ))}
       </div>
 
-      {nav.tab === "guide" && <StudentGuide examId={id} open={nav.p} onOpen={(p) => go("guide", p)} />}
+      {SHOW_GUIDE && nav.tab === "guide" && <StudentGuide examId={id} open={nav.p} onOpen={(p) => go("guide", p)} />}
       {nav.tab === "material" && <MaterialViewer examId={id} />}
 
       {nav.tab === "result" && (
@@ -269,7 +281,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
           </ol>
         )}
       </Card>
-      {view.wrong.length > 0 && (
+      {SHOW_GUIDE && view.wrong.length > 0 && (
         <button onClick={() => go("guide")} className="min-h-12 w-full rounded-xl bg-brand px-4 font-semibold text-on-brand">
           Алдсан бодлогын тайлбар үзэх
         </button>
@@ -297,9 +309,10 @@ export default function StudentPaperDetail({ id }: { id: string }) {
               <tbody>
                 {data.ranking.map((r, i) => (
                   <tr
+                    data-band={bandOf.get(r.rankLabel)! % 2}
                     key={i}
                     ref={r.isMe ? scrollMe : undefined}
-                    className={cn("border-t border-line", r.isMe && "bg-brand-bright/15 font-bold")}
+                    className={cn("border-t border-line", r.isMe ? "bg-brand-bright/25 font-bold" : bandOf.get(r.rankLabel)! % 2 === 1 && "bg-brand-bright/8")}
                     aria-current={r.isMe ? "true" : undefined}
                   >
                     <td className="border-r border-line px-3 py-1.5 tabular-nums text-ink">{scoreText(r.totalScore)}</td>
