@@ -249,7 +249,7 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
 function Legend({ topics }: { topics: string[] | null }) {
   const items = [
     { st: "CORRECT", text: "D", label: "зөв (бичсэн хариу)" },
-    { st: "WRONG", text: "B", label: "буруу (бичсэн хариу)" },
+    { st: "WRONG", text: "B", label: "алдсан (бичсэн хариу)" },
     { st: "BLANK", text: "", label: "хариулаагүй" },
     { st: "MULTI", text: "*", label: "давхар будсан" },
   ] as const;

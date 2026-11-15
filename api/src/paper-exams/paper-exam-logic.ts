@@ -64,7 +64,7 @@ export type ClassifyBy = 'area' | 'topic';
  * slug нь томьёоны сангийн topicSlugs-тэй таарна → сэдвээр томьёо шүүнэ.
  */
 export const PAPER_TOPICS: { slug: string; name: string }[] = [
-  { slug: 'TOO', name: 'Тоо' },
+  { slug: 'TOO', name: 'Тоо тоолол' },
   { slug: 'ALG', name: 'Алгебрийн хувиргалт' },
   { slug: 'RATEQ', name: 'Рационал тэгшитгэл' },
   { slug: 'RATINEQ', name: 'Рационал тэнцэтгэл биш' },

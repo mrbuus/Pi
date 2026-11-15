@@ -289,12 +289,12 @@ export function cellText(status: ItemStatus, answer: string | undefined): string
 /** Бодлогын нэр: «7» эсвэл 2-р хэсгийн багц «2.1 a-d» */
 export function itemName(it: { number: number; label?: string | null }): string {
   const m = it.label?.match(/^(\d+\.\d+)\.([a-h](?:-[a-h])?)$/i);
-  return m ? `${m[1]} ${m[2]}` : String(it.number);
+  return m ? `${m[1].replace(".", "-")} ${m[2]}` : String(it.number);
 }
 
 export const STATUS_LABEL: Record<ItemStatus, string> = {
   CORRECT: "Зөв",
-  WRONG: "Буруу",
+  WRONG: "Алдсан",
   BLANK: "Хариулаагүй",
   MULTI: "Давхар будсан",
   UNGRADED: "Тооцохгүй",

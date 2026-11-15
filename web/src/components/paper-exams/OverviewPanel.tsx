@@ -6,7 +6,7 @@ import { BarChart3 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import AreaBars from "./AreaBars";
 import FormulaLine from "./FormulaLine";
-import { areaShort, CLASSIFY_LABEL, scoreText, TONE_CELL, toneOf, topicShort, type Board } from "./types";
+import { areaShort, CLASSIFY_LABEL, itemName, scoreText, TONE_CELL, toneOf, topicShort, type Board } from "./types";
 
 /**
  * Харагдац 2 — бүх багийн тойм: нийт үзүүлэлт, баг × агуулгын хүснэгт,
@@ -129,7 +129,7 @@ export default function OverviewPanel({ board }: { board: Board }) {
                     {s.pct}%
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="font-semibold text-ink">{s.number}-р бодлого</span>
+                    <span className="font-semibold text-ink">{it ? itemName(it) : s.number}-р бодлого</span>
                     {(it?.topic ?? it?.area) && <span className="ml-2 text-xs text-ink-dim">{it?.topic ?? it?.area}</span>}
                   </span>
                   {s.topWrong && (
@@ -162,7 +162,7 @@ export default function OverviewPanel({ board }: { board: Board }) {
                 const s = o.items[i];
                 return (
                   <tr key={it.number} className={cn("align-top", it.voided && "opacity-60")}>
-                    <td className="border-t border-line px-2 py-2 font-bold tabular-nums text-ink">{it.number}</td>
+                    <td className="whitespace-nowrap border-t border-line px-2 py-2 font-bold tabular-nums text-ink">{itemName(it)}</td>
                     <td className="border-t border-line px-2 py-2">
                       <span className="block text-ink">{it.topic ?? ""}</span>
                       {it.area && <span className="block text-xs text-ink-dim">{it.area}</span>}

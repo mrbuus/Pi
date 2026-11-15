@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, Check, Lightbulb, ListChecks, LockOpen, Sigma } from "lucide-react";
 import MathText from "@/components/MathText";
 import { api } from "@/lib/api";
@@ -22,6 +22,8 @@ interface Progress {
   fixed: boolean;
   retry?: Record<string, string>;
 }
+/** «II.2» → «2-2» (эзэн 2026-11-15: 2-р хэсэг 2-1…2-4) */
+const shownLabel = (label: string) => label.replace(/^II\.(\d+)$/, "2-$1");
 const EMPTY: Progress = { stage: 0, step: 0, tries: 0, wrong: [], fixed: false };
 const LETTERS = ["A", "B", "C", "D", "E"];
 const HINTS = ["Ашиглагдах чанар", "Энгийнээр хэлбэл", "100x100 номын төстэй бодлого"];
@@ -112,6 +114,7 @@ export default function PaperGuide({
   items,
   open,
   onOpen,
+  editor,
 }: {
   examId: string;
   variants: string[];
@@ -119,6 +122,8 @@ export default function PaperGuide({
   /** Нээлттэй бодлогын дугаар (label); null бол жагсаалт */
   open: string | null;
   onOpen: (label: string | null) => void;
+  /** Багш+/Админ: бодлого дээр нь ангилал засах хэсэг */
+  editor?: (entry: GuideEntry) => ReactNode;
 }) {
   const [variant, setVariant] = useState(() => {
     const saved = readStore<string | null>(`paper-guide-variant:${examId}`, null);
@@ -175,7 +180,7 @@ export default function PaperGuide({
       ) : !entries ? (
         <SkeletonRows rows={5} />
       ) : (
-        <GuideBody key={variant} storeKey={`paper-guide:${examId}:${variant}`} entries={entries} items={items} open={open} onOpen={onOpen} />
+        <GuideBody key={variant} storeKey={`paper-guide:${examId}:${variant}`} entries={entries} items={items} open={open} onOpen={onOpen} editor={editor} />
       )}
     </div>
   );
@@ -187,12 +192,14 @@ function GuideBody({
   items,
   open,
   onOpen,
+  editor,
 }: {
   storeKey: string;
   entries: GuideEntry[];
   items: MyItem[];
   open: string | null;
   onOpen: (label: string | null) => void;
+  editor?: (entry: GuideEntry) => ReactNode;
 }) {
   const [progress, setProgress] = useState<Record<string, Progress>>(() => readStore(storeKey, {}));
   useEffect(() => writeStore(storeKey, progress), [storeKey, progress]);
@@ -231,12 +238,12 @@ function GuideBody({
               {groups.length > 1 && <h3 className="mb-2 text-sm font-bold text-ink">{g.title}</h3>}
               <ol className="grid grid-cols-[repeat(auto-fill,minmax(3.25rem,1fr))] gap-2">
                 {g.list.map((e) => (
-                  <li key={e.label}>
+                  <li key={shownLabel(e.label)}>
                     <button
                       onClick={() => onOpen(e.label)}
                       className={cn("h-12 w-full rounded-xl border-2 text-sm font-bold tabular-nums", cellClass(e))}
                     >
-                      {e.label}
+                      {shownLabel(e.label)}
                     </button>
                   </li>
                 ))}
@@ -260,6 +267,7 @@ function GuideBody({
       onBack={() => onOpen(null)}
       onPrev={current > 0 ? () => onOpen(entries[current - 1].label) : undefined}
       onNext={current < entries.length - 1 ? () => onOpen(entries[current + 1].label) : undefined}
+      editor={editor?.(entry)}
     />
   );
 }
@@ -273,7 +281,9 @@ function GuideProblem({
   onBack,
   onPrev,
   onNext,
+  editor,
 }: {
+  editor?: ReactNode;
   entry: GuideEntry;
   item: MyItem | undefined;
   progress: Progress;
@@ -321,7 +331,7 @@ function GuideProblem({
 
       <Card>
         <div className="mb-2 flex items-baseline gap-2">
-          <span className="font-display text-2xl font-bold tabular-nums text-ink">{entry.label}</span>
+          <span className="font-display text-2xl font-bold tabular-nums text-ink">{shownLabel(entry.label)}</span>
           <span className="text-sm text-ink-dim">{c.points} оноо</span>
         </div>
         {c.image && (
@@ -498,6 +508,8 @@ function GuideProblem({
           </button>
         </div>
       )}
+
+      {editor}
 
       {/* Апп-ын доод цэстэй давхцуулахгүйн тулд хөвөгч биш, агуулгын төгсгөлд */}
       <div className="flex items-center gap-3 pt-2">
