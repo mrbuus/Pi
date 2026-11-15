@@ -132,6 +132,23 @@ export default function PaperBoard({ id }: { id: string }) {
   }
   const e = board.exam;
   const itemsKey = JSON.stringify(board.items);
+  /** Тайлбарын бодлого бүрийн төвийн зөв %: сонгох → бодлогын %, нөхөх → багцуудын оноогоор жигнэсэн % */
+  const guideStats: Record<string, number | null> = {};
+  for (const [i, it] of board.items.entries()) {
+    const pct = board.overall.items[i]?.pct ?? null;
+    if (!it.label) guideStats[String(it.number)] = pct;
+  }
+  const byProblem = new Map<string, { w: number; sum: number }>();
+  for (const [i, it] of board.items.entries()) {
+    const m = it.label?.match(/^2\.(\d+)\./);
+    const pct = board.overall.items[i]?.pct;
+    if (!m || pct === null || pct === undefined) continue;
+    const acc = byProblem.get(`II.${m[1]}`) ?? { w: 0, sum: 0 };
+    acc.w += it.points;
+    acc.sum += pct * it.points;
+    byProblem.set(`II.${m[1]}`, acc);
+  }
+  for (const [k, v] of byProblem) guideStats[k] = v.w ? Math.round(v.sum / v.w) : null;
   /** Тайлбарын бодлого → шалгалтын бодлого(ууд): «12» → 12; «II.2» → 2.2.* багцууд */
   const itemsOf = (label: string, number: number | null) => {
     if (number !== null) return board.items.filter((i) => i.number === number);
@@ -197,6 +214,7 @@ export default function PaperBoard({ id }: { id: string }) {
                 examId={id}
                 variants={board.guideVariants}
                 items={[]}
+                stats={guideStats}
                 editor={
                   canManage
                     ? (entry) => (
