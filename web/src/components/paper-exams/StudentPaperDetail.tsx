@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Medal, Sigma, Target, Trophy } from "lucide-react";
+import MaterialViewer from "./MaterialViewer";
+import StudentGuide from "./StudentGuide";
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
 import { Card } from "@/components/ui/Surface";
@@ -26,6 +28,21 @@ import {
 } from "./types";
 
 type Filter = "wrong" | "all";
+type Tab = "result" | "guide" | "material" | "ranking";
+const TABS: [Tab, string][] = [
+  ["result", "Задаргаа"],
+  ["guide", "Тайлбар"],
+  ["material", "Материал"],
+  ["ranking", "Жагсаалт"],
+];
+
+/** URL-ийн ?tab=&p= — хөтчийн «буцах» өмнөх таб/бодлого руу очно (эзэн 2026-11-15) */
+function readNav(): { tab: Tab; p: string | null } {
+  if (typeof window === "undefined") return { tab: "result", p: null };
+  const q = new URLSearchParams(window.location.search);
+  const tab = q.get("tab") as Tab | null;
+  return { tab: tab && TABS.some(([t]) => t === tab) ? tab : "result", p: q.get("p") };
+}
 type MyItem = MyPaperDetail["me"]["items"][number];
 const missed = (i: MyItem) => i.status === "WRONG" || i.status === "BLANK" || i.status === "MULTI";
 
@@ -38,6 +55,21 @@ export default function StudentPaperDetail({ id }: { id: string }) {
   const [data, setData] = useState<MyPaperDetail | null>(null);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState<Filter>("wrong");
+  const [nav, setNav] = useState(readNav);
+  useEffect(() => {
+    const onPop = () => setNav(readNav());
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  const go = (tab: Tab, p: string | null = null) => {
+    const q = new URLSearchParams(window.location.search);
+    q.set("tab", tab);
+    if (p === null) q.delete("p");
+    else q.set("p", p);
+    window.history.pushState(null, "", `${window.location.pathname}?${q}`);
+    setNav({ tab, p });
+    window.scrollTo({ top: 0 });
+  };
 
   const load = useCallback(() => {
     api<MyPaperDetail>(`/paper-exams/my/${encodeURIComponent(id)}`)
@@ -123,6 +155,28 @@ export default function StudentPaperDetail({ id }: { id: string }) {
         </Card>
       </div>
 
+      <div className="grid grid-cols-4 gap-1 rounded-2xl border border-line bg-panel p-1" role="tablist" aria-label="Хэсэг">
+        {TABS.map(([t, text]) => (
+          <button
+            key={t}
+            role="tab"
+            aria-selected={nav.tab === t}
+            onClick={() => nav.tab !== t && go(t)}
+            className={cn(
+              "min-h-11 rounded-xl px-1 text-sm font-semibold",
+              nav.tab === t ? "bg-brand text-on-brand" : "text-ink-dim hover:text-ink",
+            )}
+          >
+            {text}
+          </button>
+        ))}
+      </div>
+
+      {nav.tab === "guide" && <StudentGuide examId={id} open={nav.p} onOpen={(p) => go("guide", p)} />}
+      {nav.tab === "material" && <MaterialViewer examId={id} />}
+
+      {nav.tab === "result" && (
+      <>
       <Card>
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-bold text-brand-soft">{label.by}</h2>
@@ -215,40 +269,56 @@ export default function StudentPaperDetail({ id }: { id: string }) {
           </ol>
         )}
       </Card>
+      {view.wrong.length > 0 && (
+        <button onClick={() => go("guide")} className="min-h-12 w-full rounded-xl bg-brand px-4 font-semibold text-on-brand">
+          Алдсан бодлогын тайлбар үзэх
+        </button>
+      )}
+      </>
+      )}
 
-      <Card padding="none" className="overflow-hidden">
-        <h2 className="px-5 pb-2 pt-4 font-bold text-brand-soft">Дүнгийн жагсаалт</h2>
-        <div className="max-h-[60vh] overflow-auto">
-          <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-panel text-left text-xs text-ink-dim">
-              <tr>
-                <th className="w-14 px-4 py-2 text-right">Байр</th>
-                <th className="px-2 py-2">Сурагчийн код</th>
-                <th className="px-4 py-2 text-right">Оноо</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.ranking.map((r, i) => (
-                <tr key={i} className={cn("border-t border-line", r.isMe && "bg-brand-bright/12 font-bold")} aria-current={r.isMe ? "true" : undefined}>
-                  <td className="px-4 py-1.5 text-right tabular-nums">{r.rankLabel}</td>
-                  <td className="px-2 py-1.5 text-ink">
-                    {r.name}
-                    {r.isMe && (
-                      <Badge tone="brand" className="ml-2">
-                        Та
-                      </Badge>
-                    )}
-                  </td>
-                  <td className="px-4 py-1.5 text-right tabular-nums">
-                    <span className="text-ink">{scoreText(r.totalScore)}</span>
-                    <span className="text-xs text-ink-dim">/{scoreText(r.maxScore)}</span>
-                  </td>
+      {nav.tab === "ranking" && (
+        <Card padding="none" className="mx-auto max-w-xl overflow-hidden">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 px-5 pb-2 pt-4">
+            <h2 className="font-bold text-brand-soft">Дүнгийн жагсаалт</h2>
+            <span className="text-sm text-ink-dim">
+              Таны байр: <span className="font-bold text-ink">{data.ranking.find((r) => r.isMe)?.rankLabel ?? me.rank}</span>
+            </span>
+          </div>
+          <div className="max-h-[70vh] overflow-auto">
+            <table className="w-full border-collapse text-center text-sm">
+              <thead className="sticky top-0 bg-panel text-xs text-ink-dim">
+                <tr>
+                  <th className="border-r border-line px-3 py-2">Дүн</th>
+                  <th className="border-r border-line px-3 py-2">Сурагчийн код</th>
+                  <th className="px-3 py-2">Байр</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+              </thead>
+              <tbody>
+                {data.ranking.map((r, i) => (
+                  <tr
+                    key={i}
+                    ref={r.isMe ? scrollMe : undefined}
+                    className={cn("border-t border-line", r.isMe && "bg-brand-bright/15 font-bold")}
+                    aria-current={r.isMe ? "true" : undefined}
+                  >
+                    <td className="border-r border-line px-3 py-1.5 tabular-nums text-ink">{scoreText(r.totalScore)}</td>
+                    <td className="border-r border-line px-3 py-1.5 tabular-nums text-ink">
+                      {r.name}
+                      {r.isMe && (
+                        <Badge tone="brand" className="ml-2">
+                          Та
+                        </Badge>
+                      )}
+                    </td>
+                    <td className="px-3 py-1.5 tabular-nums text-ink">{r.rankLabel}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
@@ -339,4 +409,9 @@ function CellCompare({ written, keyText }: { written: string; keyText: string })
       {wrong > 0 && <span className="text-ink-dim">{wrong} нүд буруу тул багцын оноо бүхэлдээ алдагдсан</span>}
     </span>
   );
+}
+
+/** Өөрийн мөр рүү нэг удаа гүйлгэнэ (тогтвортой функц — дахин зурахад дахин гүйлгэхгүй) */
+function scrollMe(el: HTMLTableRowElement | null) {
+  el?.scrollIntoView({ block: "center" });
 }

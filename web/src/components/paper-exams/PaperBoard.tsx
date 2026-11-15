@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as Tabs from "@radix-ui/react-tabs";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, BarChart3, BookOpen, Eye, EyeOff, KeyRound, Table2, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, BarChart3, BookOpen, Eye, EyeOff, FileText, KeyRound, Table2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { api, getRole } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
@@ -18,6 +18,7 @@ import GroupTable from "./GroupTable";
 import ImportPanel from "./ImportPanel";
 import ItemEdit from "./ItemEdit";
 import KeyEditor from "./KeyEditor";
+import MaterialViewer from "./MaterialViewer";
 import OverviewPanel from "./OverviewPanel";
 import PaperGuide from "./PaperGuide";
 import { dayText, type Board } from "./types";
@@ -27,6 +28,8 @@ const ALL_TABS = [
   { value: "overview", label: "Тойм", icon: BarChart3, manage: false },
   // Бодлого бүр: тайлбар + (Багш+/Админ) сэдэв, агуулга, томьёо — тусдаа «Түлхүүр» табгүй (эзэн 2026-11-15)
   { value: "guide", label: "Бодлого", icon: BookOpen, manage: false },
+  // Шалгалтын материал (лого усан тэмдэгтэй, зөвхөн харах) — багш эрхтэй бүх хүн хувилбар бүрийг
+  { value: "material", label: "Материал", icon: FileText, manage: false },
   { value: "import", label: "Дүн оруулах", icon: Upload, manage: true },
 ] as const;
 type BoardTab = (typeof ALL_TABS)[number]["value"];
@@ -240,6 +243,9 @@ export default function PaperBoard({ id }: { id: string }) {
               />
             </Tabs.Content>
           )}
+          <Tabs.Content value="material">
+            <StaffMaterial examId={id} variants={board.guideVariants.length > 0 ? board.guideVariants : ["A", "B"]} />
+          </Tabs.Content>
           {canManage && (
             <>
               {/* forceMount: таб солиход хадгалаагүй ноорог алдагдахгүй. key = бодлогын
@@ -277,6 +283,34 @@ export default function PaperBoard({ id }: { id: string }) {
       >
         <span />
       </ExamDialog>
+    </div>
+  );
+}
+
+/** Ажилтанд материалын хувилбар сонгогч + харагч */
+function StaffMaterial({ examId, variants }: { examId: string; variants: string[] }) {
+  const [variant, setVariant] = useState(variants[0]);
+  return (
+    <div className="mx-auto max-w-3xl space-y-3">
+      {variants.length > 1 && (
+        <div className="flex gap-2" role="group" aria-label="Хувилбар">
+          {variants.map((v) => (
+            <button
+              key={v}
+              aria-pressed={variant === v}
+              onClick={() => setVariant(v)}
+              className={
+                variant === v
+                  ? "min-h-11 min-w-14 rounded-xl border-2 border-brand-bright bg-brand-bright/15 px-4 font-bold text-brand-soft"
+                  : "min-h-11 min-w-14 rounded-xl border-2 border-line px-4 font-bold text-ink-dim"
+              }
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+      )}
+      <MaterialViewer key={variant} examId={examId} variant={variant} staff />
     </div>
   );
 }

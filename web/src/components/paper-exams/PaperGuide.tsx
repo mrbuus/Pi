@@ -23,13 +23,13 @@ interface Progress {
   retry?: Record<string, string>;
 }
 /** «II.2» → «2-2» (эзэн 2026-11-15: 2-р хэсэг 2-1…2-4) */
-const shownLabel = (label: string) => label.replace(/^II\.(\d+)$/, "2-$1");
+export const shownLabel = (label: string) => label.replace(/^II\.(\d+)$/, "2-$1");
 const EMPTY: Progress = { stage: 0, step: 0, tries: 0, wrong: [], fixed: false };
 const LETTERS = ["A", "B", "C", "D", "E"];
 const HINTS = ["Ашиглагдах чанар", "Энгийнээр хэлбэл", "100x100 номын төстэй бодлого"];
 
 /** Хөтөчийн санах ой — зөвхөн тав тухын төлөө (аль санамжийг нээснээ санах); байхгүй ч ажиллана. */
-function readStore<T>(key: string, fallback: T): T {
+export function readStore<T>(key: string, fallback: T): T {
   try {
     const raw = window.localStorage.getItem(key);
     return raw ? (JSON.parse(raw) as T) : fallback;
@@ -37,7 +37,7 @@ function readStore<T>(key: string, fallback: T): T {
     return fallback;
   }
 }
-function writeStore(key: string, value: unknown) {
+export function writeStore(key: string, value: unknown) {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
@@ -57,7 +57,7 @@ function splitMath(tex: string): string[] {
 }
 
 /** Мөрүүд: `$$…$$` бол тусдаа мөрийн томьёо (урт бол хуваана), «Жишээ:» өнгөт картаар, бусад нь өгүүлбэр. */
-function Lines({ lines, mathClass }: { lines: string[]; mathClass?: string }) {
+export function Lines({ lines, mathClass }: { lines: string[]; mathClass?: string }) {
   return (
     <>
       {lines.map((line, i) =>
@@ -88,7 +88,7 @@ function Lines({ lines, mathClass }: { lines: string[]; mathClass?: string }) {
  * Хариултын байрлал (эзэн: хугарахгүй, мөрөө тэгш дүүргэнэ): богино бол 5 нэг мөрөнд,
  * дунд бол 3+2, урт бол мөр бүрт нэг. Томьёо нүдэн дотроо хэзээ ч хугарахгүй.
  */
-function choiceLayout(choices: string[]): "row" | "split" | "stack" {
+export function choiceLayout(choices: string[]): "row" | "split" | "stack" {
   const visible = (c: string) =>
     c.replace(/\\(dfrac|frac|cdot|left|right|lbrack|rbrack|infty)/g, "x").replace(/\\text\{([^}]*)\}/g, "$1").replace(/[{}\s\\]/g, "").length;
   const len = Math.max(0, ...choices.map(visible));

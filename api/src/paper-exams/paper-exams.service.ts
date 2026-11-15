@@ -27,6 +27,14 @@ import {
   type SheetAnswer,
 } from './paper-exam-logic';
 import { parsePaperWorkbook, type ParsedPaperRow } from './paper-exam-sheet';
+import {
+  checkGuide,
+  guideStage,
+  isMissed,
+  publicGuide,
+  type GuideRow,
+} from './paper-exam-student';
+import { readStoredBytes } from '../storage/file-store';
 import type {
   CreatePaperExamDto,
   SavePaperItemsDto,
@@ -250,10 +258,25 @@ export class PaperExamsService {
         throw new BadRequestException(
           'Дүн оруулаагүй шалгалтыг сурагчдад нээхгүй',
         );
-      if (unlinked > 0)
-        throw new BadRequestException(
-          `Сурагчтай холбогдоогүй ${unlinked} хуудас байна. «Дүн оруулах» табд холбож эсвэл шалгаж дуусгаад нээнэ үү`,
-        );
+      // Холбогдсон сурагчийн кодтой ижил кодтой холбогдоогүй хуудас = нэг сурагчид өөр
+      // өөр дүн (хоёр файлд давхар). Аль нь зөв болохыг шийдэхээс өмнө нээхгүй.
+      if (unlinked > 0) {
+        const loose = await this.prisma.paperExamSheet.findMany({
+          where: { examId: id, supersededAt: null, studentId: null },
+          select: { rawCode: true },
+        });
+        const twins = await this.prisma.paperExamSheet.count({
+          where: {
+            examId: id,
+            supersededAt: null,
+            student: { studentCode: { in: loose.map((l) => l.rawCode) } },
+          },
+        });
+        if (twins > 0)
+          throw new BadRequestException(
+            `${twins} сурагч хоёр өөр дүнтэй (давхар хуудас). «Дүн оруулах» табд аль нь зөвийг холбож шийдээд нээнэ үү`,
+          );
+      }
     }
     const resize =
       dto.itemCount !== undefined && dto.itemCount !== exam.itemCount;
@@ -1440,6 +1463,109 @@ export class PaperExamsService {
     });
     if (entries.length === 0) throw new NotFoundException('Тайлбар олдсонгүй');
     return { variant, entries };
+  }
+
+  // ======================= Сурагчийн тайлбар, материал =======================
+
+  /** Сурагчийн нийтэлсэн шалгалтын хуудас (хувилбар, хариу) — байхгүй бол 404 */
+  private async mySheet(examId: string, studentId: string) {
+    const sheet = await this.prisma.paperExamSheet.findFirst({
+      where: {
+        examId,
+        studentId,
+        supersededAt: null,
+        exam: { published: true, deletedAt: null },
+      },
+      select: { variant: true, answers: true },
+    });
+    if (!sheet) throw new NotFoundException('Энэ шалгалтад таны дүн алга');
+    return sheet;
+  }
+
+  /** Сурагчийн АЛДСАН бодлогын тайлбарын мөрүүд — өөрийн хувилбараас л */
+  private async myMissedGuides(examId: string, studentId: string) {
+    const sheet = await this.mySheet(examId, studentId);
+    const variant = sheet.variant ?? '';
+    const [exam, rows] = await Promise.all([
+      this.activeExam(examId),
+      this.prisma.paperExamGuide.findMany({
+        where: { examId, variant },
+        select: { label: true, number: true, content: true },
+        orderBy: { order: 'asc' },
+      }),
+    ]);
+    const items: PaperItem[] = exam.items;
+    const { statuses } = gradeSheet(answersOf(sheet.answers), items, sheet.variant);
+    const guides = (rows as unknown as GuideRow[]).filter((r) =>
+      isMissed(r, items, statuses),
+    );
+    return { variant, guides };
+  }
+
+  /** Алдсан бодлогууд: нөхцөл, сонголт л (бодолт, хариугүй) */
+  async myGuide(examId: string, studentId: string) {
+    const { variant, guides } = await this.myMissedGuides(examId, studentId);
+    return { variant, entries: guides.map(publicGuide) };
+  }
+
+  /** Нэг бодлогын санамжийн шат (1 чанар … 3+k бодолтын алхам, сүүлд хариу) */
+  async myGuideStage(
+    examId: string,
+    studentId: string,
+    label: string,
+    stage: number,
+  ) {
+    const { guides } = await this.myMissedGuides(examId, studentId);
+    const row = guides.find((g) => g.label === label);
+    if (!row) throw new NotFoundException('Бодлого олдсонгүй');
+    return guideStage(row, stage);
+  }
+
+  /** Дахин оролдлого — зөв хариуг клиент рүү илгээхгүйгээр шалгана */
+  async myGuideCheck(
+    examId: string,
+    studentId: string,
+    label: string,
+    answer: unknown,
+  ) {
+    const { guides } = await this.myMissedGuides(examId, studentId);
+    const row = guides.find((g) => g.label === label);
+    if (!row) throw new NotFoundException('Бодлого олдсонгүй');
+    return checkGuide(row, answer);
+  }
+
+  /**
+   * Шалгалтын материалын хуудсууд (лого усан тэмдэгтэй JPEG) — StoredFile
+   * `paperexam-<examId>-<хувилбар>-<n>.jpg`. Харах л зориулалттай (татах товчгүй).
+   */
+  private async materialPages(examId: string, variant: string) {
+    const prefix = `paperexam-${examId}-${variant}-`;
+    const files = await this.prisma.storedFile.findMany({
+      where: { key: { startsWith: prefix } },
+      select: { key: true },
+    });
+    const keys = files
+      .map((f) => ({ key: f.key, n: Number(f.key.slice(prefix.length).split('.')[0]) }))
+      .filter((f) => Number.isInteger(f.n))
+      .sort((a, b) => a.n - b.n);
+    const pages: string[] = [];
+    for (const { key } of keys) {
+      const file = await readStoredBytes(this.prisma, key);
+      if (file) pages.push(`data:${file.mime};base64,${file.bytes.toString('base64')}`);
+    }
+    return { variant, pages };
+  }
+
+  /** Сурагч — зөвхөн өөрийн хувилбарын материал */
+  async myMaterial(examId: string, studentId: string) {
+    const sheet = await this.mySheet(examId, studentId);
+    return this.materialPages(examId, sheet.variant ?? '');
+  }
+
+  /** Ажилтан — дурын хувилбар */
+  async material(examId: string, variant: string) {
+    await this.activeExam(examId);
+    return this.materialPages(examId, variant);
   }
 
   /**
