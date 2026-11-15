@@ -286,10 +286,23 @@ export function cellText(status: ItemStatus, answer: string | undefined): string
   return "";
 }
 
-/** Бодлогын нэр: «7» эсвэл 2-р хэсгийн багц «2.1 a-d» */
-export function itemName(it: { number: number; label?: string | null }): string {
+type Named = { number: number; label?: string | null };
+
+/**
+ * Бодлогын нэр (эзэн 2026-11-15): 1–36 → «7»; 2-р хэсгийн багц → «2.3 · 1-р багц».
+ * `all` өгвөл тухайн бодлогын хэд дэх багц болохыг тоолно, үгүй бол «2.3 · a-b».
+ */
+export function itemName(it: Named, all?: Named[]): string {
   const m = it.label?.match(/^(\d+\.\d+)\.([a-h](?:-[a-h])?)$/i);
-  return m ? `${m[1].replace(".", "-")} ${m[2]}` : String(it.number);
+  if (!m) return String(it.number);
+  if (!all) return `${m[1]} · ${m[2]}`;
+  const same = all.filter((x) => x.label?.startsWith(`${m[1]}.`)).sort((a, b) => a.number - b.number);
+  return `${m[1]} · ${same.findIndex((x) => x.number === it.number) + 1}-р багц`;
+}
+
+/** «7-р бодлого» эсвэл «2.3 · 1-р багц» */
+export function itemTitle(it: Named, all?: Named[]): string {
+  return it.label ? itemName(it, all) : `${it.number}-р бодлого`;
 }
 
 export const STATUS_LABEL: Record<ItemStatus, string> = {

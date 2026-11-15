@@ -10,7 +10,8 @@ export default function AreaBars({
   compare,
   compareLabel,
 }: {
-  areas: { area: string; pct: number | null }[];
+  /** earned/possible өгвөл «12/20 оноо» гэж хувийн өмнө харуулна */
+  areas: { area: string; pct: number | null; earned?: number; possible?: number }[];
   /** Харьцуулах хувь (жиш: төвийн дундаж) — мөрийн ард жижиг тоогоор */
   compare?: Map<string, number | null>;
   compareLabel?: string;
@@ -32,6 +33,11 @@ export default function AreaBars({
               aria-label={`${a.area} ${a.pct ?? 0}%`}
             />
             <span className="text-right text-sm tabular-nums">
+              {a.earned !== undefined && a.possible !== undefined && (
+                <span className="mr-2 text-ink">
+                  <b>{a.earned}</b>/{a.possible} оноо
+                </span>
+              )}
               <span className="font-bold text-ink">{a.pct === null ? "" : `${a.pct}%`}</span>
               {other !== undefined && other !== null && (
                 <span className="ml-1.5 text-xs text-ink-dim" title={compareLabel}>

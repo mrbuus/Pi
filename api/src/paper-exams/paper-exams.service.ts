@@ -481,6 +481,23 @@ export class PaperExamsService {
     });
 
     const matched = await this.matchRows(parsed.rows);
+    // Файлд анги бичигдээгүй мөр — сурагчийн одоогийн ангиар (эзэн 2026-11-15: анги бүрээр эрэмбэлнэ)
+    const noClass = matched.filter(
+      (m) => m.student && m.classroomId && m.row.groupLabel === 'Ангигүй',
+    );
+    if (noClass.length) {
+      const rooms = await this.prisma.classroom.findMany({
+        where: { id: { in: [...new Set(noClass.map((m) => m.classroomId!))] } },
+        select: { id: true, name: true },
+      });
+      const nameBy = new Map(
+        rooms.map((c) => [c.id, c.name.replace(/\s*\(.*\)\s*$/, '').trim()]),
+      );
+      for (const m of noClass) {
+        const name = nameBy.get(m.classroomId!);
+        if (name) m.row = { ...m.row, groupLabel: name };
+      }
+    }
 
     // Файлд нэг сурагч давхар таарвал эхнийх нь тухайн сурагчийнх, бусад нь
     // холбогдоогүй хуудас болж хадгалагдана (хариу нь алдагдахгүй, гараар холбоно).
@@ -1125,8 +1142,18 @@ export class PaperExamsService {
         pct: pct(x.g.totalScore, x.g.maxScore),
         rank: rankBy.get(x.s.id) ?? null,
         weak: weakAreas(by === 'topic' ? topics : areas),
-        areas: areas.map((a) => ({ area: a.area, pct: a.pct })),
-        topics: topics.map((a) => ({ area: a.area, pct: a.pct })),
+        areas: areas.map((a) => ({
+          area: a.area,
+          pct: a.pct,
+          earned: a.earned,
+          possible: a.possible,
+        })),
+        topics: topics.map((a) => ({
+          area: a.area,
+          pct: a.pct,
+          earned: a.earned,
+          possible: a.possible,
+        })),
         statuses: x.g.statuses.map((st) => STATUS_CHAR[st]).join(''),
         answers: x.answers,
       };

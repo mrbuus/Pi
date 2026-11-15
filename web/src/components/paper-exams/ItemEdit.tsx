@@ -67,7 +67,7 @@ export default function ItemEdit({
   return (
     <section className="rounded-2xl border border-line bg-panel px-4 py-3">
       <h3 className="mb-2 text-xs font-bold tracking-wide text-ink-dim">
-        АНГИЛАЛ · {items.map((i) => `${itemName(i)} (${i.points} оноо)`).join(", ")}
+        АНГИЛАЛ · {items.map((i) => `${itemName(i, items)} (${i.points} оноо)`).join(", ")}
       </h3>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="grid gap-1 text-sm font-semibold text-ink">
@@ -115,7 +115,7 @@ export default function ItemEdit({
       </div>
       <FormulaPicker
         open={pick}
-        title={`${itemName(first)} — томьёо`}
+        title={`${itemName(first, items)} — томьёо`}
         topics={topics}
         initialTopic={topic || null}
         selected={slugs.flatMap((s) => (refs.get(s) ? [refs.get(s)!] : []))}

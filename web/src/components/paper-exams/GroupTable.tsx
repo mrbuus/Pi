@@ -166,10 +166,10 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
                   <th
                     key={it.number}
                     scope="col"
-                    title={[`${itemName(it)} · ${it.points} оноо`, it.topic, it.area, it.voided ? "хүчингүй" : null].filter(Boolean).join(" — ")}
+                    title={[`${itemName(it, items)} · ${it.points} оноо`, it.topic, it.area, it.voided ? "хүчингүй" : null].filter(Boolean).join(" — ")}
                     className={cn(head, "px-1 text-center tabular-nums", (it.cells ?? 1) > 1 ? "min-w-12" : "w-8 px-0", it.voided && "line-through opacity-60")}
                   >
-                    <span className="block whitespace-nowrap">{itemName(it)}</span>
+                    <span className="block whitespace-nowrap">{itemName(it, items)}</span>
                     <span className="block text-[10px] font-semibold opacity-70">{it.points} оноо</span>
                     <span className="block text-[10px] font-semibold opacity-70">{by === "topic" ? topicShort(it.topic) : areaShort(it.area)}</span>
                   </th>
@@ -200,7 +200,7 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
                     return (
                       <td
                         key={it.number}
-                        title={`${itemName(it)}: ${STATUS_LABEL[st]} · ${st === "CORRECT" ? it.points : 0}/${it.points} оноо${cellText(st, r.answers[j]) ? ` · бичсэн: ${cellText(st, r.answers[j])}` : ""}`}
+                        title={`${itemName(it, items)}: ${STATUS_LABEL[st]} · ${st === "CORRECT" ? it.points : 0}/${it.points} оноо${cellText(st, r.answers[j]) ? ` · бичсэн: ${cellText(st, r.answers[j])}` : ""}`}
                         className={cn("h-8 whitespace-nowrap border-l border-t border-line/60 px-1 text-center text-xs font-bold tabular-nums", (it.cells ?? 1) > 1 ? "min-w-12" : "w-8", STATUS_CELL[st])}
                       >
                         {cellText(st, r.answers[j])}

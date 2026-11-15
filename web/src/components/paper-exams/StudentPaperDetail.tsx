@@ -190,7 +190,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
                   </h3>
                   <ul className="space-y-2">
                     {g.items.map((i) => (
-                      <WrongItem key={i.number} item={i} formulaBy={view.formulaBy} showTopic={view.by !== "topic"} />
+                      <WrongItem key={i.number} item={i} all={me.items} formulaBy={view.formulaBy} showTopic={view.by !== "topic"} />
                     ))}
                   </ul>
                 </section>
@@ -254,7 +254,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
 }
 
 /** Алдсан нэг бодлого: дугаар, өөрийн/зөв хариу, төвийн гүйцэтгэл, ашиглах томьёо. */
-function WrongItem({ item, formulaBy, showTopic }: { item: MyItem; formulaBy: Map<string, FormulaRef>; showTopic: boolean }) {
+function WrongItem({ item, all, formulaBy, showTopic }: { item: MyItem; all: MyItem[]; formulaBy: Map<string, FormulaRef>; showTopic: boolean }) {
   const formulas = item.formulaSlugs.flatMap((s) => {
     const f = formulaBy.get(s);
     return f ? [f] : [];
@@ -263,7 +263,7 @@ function WrongItem({ item, formulaBy, showTopic }: { item: MyItem; formulaBy: Ma
     <li className="rounded-xl border border-line p-3">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <span className={cn("inline-flex h-8 min-w-8 items-center justify-center whitespace-nowrap rounded-lg px-2 text-sm font-bold tabular-nums", STATUS_CELL[item.status])}>
-          {itemName(item)}
+          {itemName(item, all)}
         </span>
         {(item.cells ?? 1) > 1 && item.key ? (
           <CellCompare written={item.answer ?? ""} keyText={item.key} />
