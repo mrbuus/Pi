@@ -66,16 +66,24 @@ type StaffView = "paper" | "scores" | "hidden";
 function StaffExamHome({ role }: { role: string | null }) {
   const isAdmin = role === "ADMIN";
   const canManage = role === "ADMIN" || role === "TEACHER_PLUS";
-  const [view, setView] = useState<StaffView>(() => {
+  const fromUrl = useCallback((): StaffView => {
     const v = new URLSearchParams(window.location.search).get("view");
     return v === "scores" ? "scores" : v === "hidden" && isAdmin ? "hidden" : "paper";
-  });
+  }, [isAdmin]);
+  const [view, setView] = useState<StaffView>(fromUrl);
+  // Таб бүр түүхэнд нэмэгдэнэ — буцах товч өмнөх таб руу (эзэн 2026-11-15)
+  useEffect(() => {
+    const onPop = () => setView(fromUrl());
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [fromUrl]);
   const change = (v: StaffView) => {
+    if (v === view) return;
     setView(v);
     const url = new URL(window.location.href);
     if (v === "paper") url.searchParams.delete("view");
     else url.searchParams.set("view", v);
-    window.history.replaceState(window.history.state, "", url);
+    window.history.pushState(window.history.state, "", url);
     window.scrollTo({ top: 0 });
   };
 

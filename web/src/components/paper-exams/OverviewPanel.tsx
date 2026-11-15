@@ -49,12 +49,12 @@ export default function OverviewPanel({ board }: { board: Board }) {
       </div>
 
       <Card padding="none" className="overflow-hidden">
-        <h3 className="px-5 pt-4 font-bold text-brand-soft">Багаар — {label.one.toLocaleLowerCase("mn-MN")} бүрийн гүйцэтгэл %</h3>
+        <h3 className="px-5 pt-4 font-bold text-brand-soft">Ангиар — {label.one.toLocaleLowerCase("mn-MN")} бүрийн гүйцэтгэл %</h3>
         <div className="overflow-x-auto p-3">
           <table className="w-full min-w-[36rem] border-separate border-spacing-0 text-sm">
             <thead>
               <tr className="text-left text-xs text-ink-dim">
-                <th className="px-2 py-2 font-bold">Баг</th>
+                <th className="px-2 py-2 font-bold">Анги</th>
                 <th className="px-2 py-2 text-right font-bold">Сурагч</th>
                 <th className="px-2 py-2 text-right font-bold">Дундаж</th>
                 <th className="px-2 py-2 text-right font-bold">%</th>

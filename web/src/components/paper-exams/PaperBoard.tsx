@@ -22,7 +22,7 @@ import PaperGuide from "./PaperGuide";
 import { dayText, type Board } from "./types";
 
 const ALL_TABS = [
-  { value: "groups", label: "Багаар", icon: Table2, manage: false },
+  { value: "groups", label: "Ангиар", icon: Table2, manage: false },
   { value: "overview", label: "Тойм", icon: BarChart3, manage: false },
   { value: "guide", label: "Бодлогын тайлбар", icon: BookOpen, manage: false },
   { value: "key", label: "Түлхүүр, агуулга", icon: KeyRound, manage: true },
@@ -37,7 +37,7 @@ export default function PaperBoard({ id }: { id: string }) {
   const canManage = role === "ADMIN" || role === "TEACHER_PLUS";
   const tabs = ALL_TABS.filter((t) => canManage || !t.manage);
   // Тайлбартай шалгалтад л «Бодлогын тайлбар» таб
-  const [guideOpen, setGuideOpen] = useState<string | null>(null);
+  const [guideOpen, setGuideOpen] = useState<string | null>(() => new URLSearchParams(window.location.search).get("p"));
   const [tab, setTab] = useState<BoardTab>("groups");
   const [board, setBoard] = useState<Board | null>(null);
   const [error, setError] = useState("");
@@ -64,14 +64,35 @@ export default function PaperBoard({ id }: { id: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Таб, тайлбарын бодлого бүр түүхэнд нэмэгдэнэ — буцах товч өмнөх таб/жагсаалт руу (эзэн 2026-11-15)
+  useEffect(() => {
+    const onPop = () => {
+      const params = new URLSearchParams(window.location.search);
+      const t = ALL_TABS.find((x) => x.value === params.get("tab"));
+      setTab(t ? t.value : "groups");
+      setGuideOpen(params.get("p"));
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const push = (next: { tab?: BoardTab; p?: string | null }) => {
+    const url = new URL(window.location.href);
+    if (next.tab !== undefined) {
+      if (next.tab === "groups") url.searchParams.delete("tab");
+      else url.searchParams.set("tab", next.tab);
+    }
+    if (next.p) url.searchParams.set("p", next.p);
+    else url.searchParams.delete("p");
+    window.history.pushState(window.history.state, "", url);
+  };
+
   const changeTab = (v: string) => {
     const t = tabs.find((x) => x.value === v);
-    if (!t) return;
+    if (!t || t.value === tab) return;
     setTab(t.value);
-    const url = new URL(window.location.href);
-    if (t.value === "groups") url.searchParams.delete("tab");
-    else url.searchParams.set("tab", t.value);
-    window.history.replaceState(window.history.state, "", url);
+    setGuideOpen(null);
+    push({ tab: t.value, p: null });
   };
 
   async function togglePublish() {
@@ -171,7 +192,9 @@ export default function PaperBoard({ id }: { id: string }) {
                 items={[]}
                 open={guideOpen}
                 onOpen={(label) => {
+                  if (label === guideOpen) return;
                   setGuideOpen(label);
+                  push({ p: label });
                   window.scrollTo({ top: 0 });
                 }}
               />

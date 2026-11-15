@@ -47,6 +47,12 @@ export interface PaperItem {
   /** Томьёоны сангийн slug-ууд */
   formulaSlugs: string[];
   voided: boolean;
+  /** Хувилбар бүрийн түлхүүр {"A":"D","B":"B"} */
+  answerKeys?: Record<string, string> | null;
+  /** «2.1.a-d» — 2-р хэсгийн багц */
+  label?: string | null;
+  /** Багцын нүдний тоо */
+  cells?: number | null;
 }
 
 /** Бодлогод оноосон томьёо (Томьёоны сангаас) */
@@ -193,6 +199,11 @@ export interface MyPaperDetail {
     topics: AreaScore[];
     items: {
       number: number;
+      /** «2.1.a-d» — 2-р хэсгийн багц */
+      label: string | null;
+      cells: number | null;
+      /** Энэ бодлогоос авсан оноо */
+      earned: number;
       area: string | null;
       topic: string | null;
       formulaSlugs: string[];
@@ -261,13 +272,24 @@ export function scoreText(n: number | null | undefined): string {
   return Number.isInteger(n) ? String(n) : n.toFixed(1);
 }
 
-/** Нүдэнд харуулах бичвэр: эзний Excel-ийн дагуу зөв = 1; буруу бол сурагчийн үсэг эсвэл 0 */
+/**
+ * Нүдэнд харуулах бичвэр — сурагчийн БИЧСЭН хариу (эзэн 2026-11-15): үсэг A–E, 2-р хэсгийн
+ * багцад цифрүүд («_» хоосон нүд → «·»). Зөвхөн зөв/буруугаар ирсэн дүнд 1 / 0.
+ */
 export function cellText(status: ItemStatus, answer: string | undefined): string {
-  if (status === "CORRECT") return "1";
+  const a = (answer ?? "").trim();
   if (status === "MULTI") return "*";
-  if (status === "BLANK") return "";
-  if (status === "WRONG") return answer && /^[A-E]$/.test(answer) ? answer : "0";
+  if (/^[A-E]$/.test(a)) return a;
+  if (/^[0-9_*-]{2,}$/.test(a)) return /^_+$/.test(a) ? "" : a.replaceAll("_", "·");
+  if (status === "CORRECT") return "1";
+  if (status === "WRONG") return "0";
   return "";
+}
+
+/** Бодлогын нэр: «7» эсвэл 2-р хэсгийн багц «2.1 a-d» */
+export function itemName(it: { number: number; label?: string | null }): string {
+  const m = it.label?.match(/^(\d+\.\d+)\.([a-h](?:-[a-h])?)$/i);
+  return m ? `${m[1]} ${m[2]}` : String(it.number);
 }
 
 export const STATUS_LABEL: Record<ItemStatus, string> = {

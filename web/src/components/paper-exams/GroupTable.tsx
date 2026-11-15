@@ -14,6 +14,7 @@ import {
   CLASSIFY_LABEL,
   topicShort,
   cellText,
+  itemName,
   scoreText,
   STATUS_CELL,
   STATUS_LABEL,
@@ -64,7 +65,7 @@ export default function GroupTable({ board }: { board: Board }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto pb-1" role="tablist" aria-label="Баг">
+        <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto pb-1" role="tablist" aria-label="Анги">
           {board.groups.map((g) => (
             <button
               key={g.label}
@@ -165,10 +166,11 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
                   <th
                     key={it.number}
                     scope="col"
-                    title={[`${it.number}-р бодлого`, it.topic, it.area, it.voided ? "хүчингүй" : null].filter(Boolean).join(" — ")}
-                    className={cn(head, "w-8 px-0 text-center tabular-nums", it.voided && "line-through opacity-60")}
+                    title={[`${itemName(it)} · ${it.points} оноо`, it.topic, it.area, it.voided ? "хүчингүй" : null].filter(Boolean).join(" — ")}
+                    className={cn(head, "px-1 text-center tabular-nums", (it.cells ?? 1) > 1 ? "min-w-12" : "w-8 px-0", it.voided && "line-through opacity-60")}
                   >
-                    <span className="block">{it.number}</span>
+                    <span className="block whitespace-nowrap">{itemName(it)}</span>
+                    <span className="block text-[10px] font-semibold opacity-70">{it.points} оноо</span>
                     <span className="block text-[10px] font-semibold opacity-70">{by === "topic" ? topicShort(it.topic) : areaShort(it.area)}</span>
                   </th>
                 ))}
@@ -198,8 +200,8 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
                     return (
                       <td
                         key={it.number}
-                        title={`${it.number}: ${STATUS_LABEL[st]}${r.answers[j] && /^[A-E]$/.test(r.answers[j]) ? ` (${r.answers[j]})` : ""}`}
-                        className={cn("h-8 w-8 border-l border-t border-line/60 text-center text-xs font-bold tabular-nums", STATUS_CELL[st])}
+                        title={`${itemName(it)}: ${STATUS_LABEL[st]} · ${st === "CORRECT" ? it.points : 0}/${it.points} оноо${cellText(st, r.answers[j]) ? ` · бичсэн: ${cellText(st, r.answers[j])}` : ""}`}
+                        className={cn("h-8 whitespace-nowrap border-l border-t border-line/60 px-1 text-center text-xs font-bold tabular-nums", (it.cells ?? 1) > 1 ? "min-w-12" : "w-8", STATUS_CELL[st])}
                       >
                         {cellText(st, r.answers[j])}
                       </td>
@@ -246,8 +248,8 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
 
 function Legend({ topics }: { topics: string[] | null }) {
   const items = [
-    { st: "CORRECT", text: "1", label: "зөв" },
-    { st: "WRONG", text: "B", label: "буруу (сонгосон хариу)" },
+    { st: "CORRECT", text: "D", label: "зөв (бичсэн хариу)" },
+    { st: "WRONG", text: "B", label: "буруу (бичсэн хариу)" },
     { st: "BLANK", text: "", label: "хариулаагүй" },
     { st: "MULTI", text: "*", label: "давхар будсан" },
   ] as const;

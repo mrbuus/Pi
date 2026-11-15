@@ -223,3 +223,39 @@ describe('rankLabels — ижил оноотой хуваана', () => {
     expect(rankLabels([7])).toEqual(['1']);
   });
 });
+
+describe('хувилбар бүрийн түлхүүр, 2-р хэсгийн багц', () => {
+  const choice = {
+    number: 1,
+    answerKey: 'D',
+    answerKeys: { A: 'D', B: 'A' },
+    points: 2,
+    area: null,
+    voided: false,
+  };
+  const group = {
+    number: 2,
+    answerKey: '21',
+    answerKeys: { A: '21', B: '34' },
+    points: 3,
+    area: null,
+    voided: false,
+    cells: 2,
+  };
+
+  it('сурагчийн хувилбарын түлхүүрээр дүгнэнэ', () => {
+    expect(gradeSheet(['A', '34'], [choice, group], 'B').totalScore).toBe(5);
+    expect(gradeSheet(['A', '34'], [choice, group], 'A').totalScore).toBe(0);
+  });
+
+  it('багцын нэг нүд буруу бол багц бүхэлдээ 0, хоосон бол хариулаагүй', () => {
+    expect(gradeSheet(['D', '31'], [choice, group], 'A').statuses).toEqual([
+      'CORRECT',
+      'WRONG',
+    ]);
+    expect(gradeSheet(['', '__'], [choice, group], 'A').statuses).toEqual([
+      'BLANK',
+      'BLANK',
+    ]);
+  });
+});

@@ -20,6 +20,7 @@ import {
   itemStats,
   pct,
   rankLabels,
+  keyFor,
   weakAreas,
   type ItemStatus,
   type PaperItem,
@@ -108,6 +109,9 @@ const ITEM_SELECT = {
   topic: true,
   formulaSlugs: true,
   voided: true,
+  answerKeys: true,
+  label: true,
+  cells: true,
 } as const;
 
 @Injectable()
@@ -377,13 +381,19 @@ export class PaperExamsService {
     });
     const sheets = await tx.paperExamSheet.findMany({
       where: { examId },
-      select: { id: true, answers: true, totalScore: true, maxScore: true },
+      select: {
+        id: true,
+        answers: true,
+        variant: true,
+        totalScore: true,
+        maxScore: true,
+      },
     });
     const changed = sheets
       .map((s) => ({
         id: s.id,
         old: s,
-        g: gradeSheet(answersOf(s.answers), items),
+        g: gradeSheet(answersOf(s.answers), items, s.variant),
       }))
       .filter(
         (x) =>
@@ -425,18 +435,36 @@ export class PaperExamsService {
         `Файлаас сурагчийн мөр олдсонгүй.${why ? ` ${why}` : ''}`,
       );
     }
-    // V2 файлд бодлого бүрийн оноо «Түлхүүр» шийтэд бий — тэрээр дүгнэж, хадгалахдаа шалгалтад тавина
-    const filePoints = parsed.itemPoints ?? null;
-    const gradeItems: PaperItem[] = filePoints
-      ? exam.items.map((i, idx) => ({
-          ...i,
-          points: filePoints[idx] ?? i.points,
-        }))
+    // V2 файлд бодлого бүрийн нэр, оноо, хувилбар бүрийн түлхүүр «Түлхүүр» шийтэд бий —
+    // тэрээр дүгнэж, хадгалахдаа шалгалтын бодлогуудад тавина (машины key.ini = эх сурвалж)
+    const v2 = parsed.v2Items ?? null;
+    const fileItem = (idx: number) => {
+      const it = v2?.[idx];
+      if (!it) return null;
+      const keys = it.keys;
+      return {
+        points: it.points,
+        answerKeys: keys,
+        answerKey: keys[Object.keys(keys).sort()[0]] ?? null,
+        label: it.label.includes('.') ? it.label : null,
+        cells: it.cols.length > 1 ? it.cols.length : null,
+      };
+    };
+    const gradeItems: PaperItem[] = v2
+      ? exam.items.map((i, idx) => ({ ...i, ...(fileItem(idx) ?? {}) }))
       : exam.items;
     const pointsChange =
-      !!filePoints &&
-      filePoints.length === exam.items.length &&
-      exam.items.some((i, idx) => i.points !== filePoints[idx]);
+      !!v2 &&
+      v2.length === exam.items.length &&
+      exam.items.some((i, idx) => {
+        const f = fileItem(idx)!;
+        return (
+          i.points !== f.points ||
+          (i.label ?? null) !== f.label ||
+          (i.cells ?? null) !== f.cells ||
+          JSON.stringify(i.answerKeys ?? null) !== JSON.stringify(f.answerKeys)
+        );
+      });
     const wrongSize = parsed.sheets.filter(
       (s) => s.itemCount !== exam.itemCount,
     );
@@ -474,7 +502,7 @@ export class PaperExamsService {
 
     const existing = await this.activeSheetsFor(this.prisma, id);
     const rows = resolved.map((m, index) => {
-      const g = gradeSheet(m.row.answers, gradeItems);
+      const g = gradeSheet(m.row.answers, gradeItems, m.row.variant ?? null);
       const target = sheetTarget(m.student?.id ?? null, m.row);
       const replaces = existing.has(target);
       const allBinary = m.row.answers.every((a) => a === '+' || a === '-');
@@ -585,13 +613,19 @@ export class PaperExamsService {
         const write = rows.filter(
           (r) => !r.rejected && (opts.replace || !current.has(r.target)),
         );
-        // V2 файлын оноог шалгалтын бодлогуудад тавина (машины түлхүүр = эх сурвалж)
-        if (pointsChange && filePoints) {
+        // V2 файлын бодлогын нэр, оноо, хувилбар бүрийн түлхүүрийг шалгалтад тавина
+        if (pointsChange && v2) {
           for (const [idx, item] of exam.items.entries()) {
-            if (item.points === filePoints[idx]) continue;
+            const f = fileItem(idx)!;
             await tx.paperExamItem.update({
               where: { examId_number: { examId: id, number: item.number } },
-              data: { points: filePoints[idx] },
+              data: {
+                points: f.points,
+                answerKeys: json(f.answerKeys),
+                answerKey: f.answerKey,
+                label: f.label,
+                cells: f.cells,
+              },
             });
           }
         }
@@ -627,6 +661,7 @@ export class PaperExamsService {
             groupTeacher: r.parsed.groupTeacher,
             classroomId: r.classroomId,
             answers: r.parsed.answers,
+            variant: r.parsed.variant ?? null,
             totalScore: r.totalScore,
             maxScore: r.maxScore,
           })),
@@ -635,7 +670,7 @@ export class PaperExamsService {
         if (pointsChange) await this.regrade(tx, id);
         await this.audit(tx, actor, 'IMPORT', id, null, {
           importId: imp.id,
-          pointsFromFile: pointsChange ? filePoints : undefined,
+          keysFromFile: pointsChange ? v2?.map((it) => it.label) : undefined,
           fileName,
           sha,
           ...summary.totals,
@@ -1056,6 +1091,7 @@ export class PaperExamsService {
         groupTeacher: true,
         classroomId: true,
         answers: true,
+        variant: true,
         student: {
           select: { firstName: true, lastName: true, studentCode: true },
         },
@@ -1064,7 +1100,7 @@ export class PaperExamsService {
     const items: PaperItem[] = exam.items;
     const graded = sheets.map((s) => {
       const answers = answersOf(s.answers);
-      return { s, answers, g: gradeSheet(answers, items) };
+      return { s, answers, g: gradeSheet(answers, items, s.variant) };
     });
     // Төвийн эрэмбэ — холбогдсон бүх сурагчаар (багшийн шүүлтээс өмнө)
     const ranked = graded.filter((x) => x.s.studentId);
@@ -1244,6 +1280,7 @@ export class PaperExamsService {
         studentId: true,
         groupLabel: true,
         answers: true,
+        variant: true,
         student: { select: { studentCode: true } },
       },
     });
@@ -1253,7 +1290,7 @@ export class PaperExamsService {
     const graded = sheets.map((s) => ({
       s,
       answers: answersOf(s.answers),
-      g: gradeSheet(answersOf(s.answers), items),
+      g: gradeSheet(answersOf(s.answers), items, s.variant),
     }));
     const ranks = competitionRanks(graded.map((x) => x.g.totalScore));
     const me = graded.find((x) => x.s.id === mine.id)!;
@@ -1301,9 +1338,18 @@ export class PaperExamsService {
         topics: myTopics,
         items: items.map((item, i) => {
           const answer = me.answers[i] ?? '';
-          const letter = /^[A-E]$/.test(answer) ? answer : null;
+          // Үсэг (A–E) эсвэл 2-р хэсгийн цифрүүд «2122» («_» хоосон) — сурагчийн бичсэн яг хариу
+          const written =
+            /^[A-E]$/.test(answer) ||
+            ((item.cells ?? 1) > 1 && /[0-9*-]/.test(answer))
+              ? answer
+              : null;
+          const status = me.g.statuses[i];
           return {
             number: item.number,
+            label: item.label ?? null,
+            cells: item.cells ?? null,
+            earned: status === 'CORRECT' ? item.points : 0,
             area: item.area,
             topic: item.topic ?? null,
             formulaSlugs: item.formulaSlugs ?? [],
@@ -1311,11 +1357,14 @@ export class PaperExamsService {
             centerPct: centerItems[i]?.pct ?? null,
             points: item.points,
             status: me.g.statuses[i],
-            answer: letter,
-            // Үсгээр ирсэн хариуд л зөв хариуг харуулна
+            answer: written,
+            // Өөрийн хувилбарын зөв хариу (зөв/буруугаар л ирсэн дүнд харуулахгүй)
             key:
-              letter !== null || answer === '' || answer === '*'
-                ? item.answerKey
+              written !== null ||
+              answer === '' ||
+              answer === '*' ||
+              /^_+$/.test(answer)
+                ? keyFor(item, mine.variant)
                 : null,
           };
         }),

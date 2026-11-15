@@ -19,6 +19,7 @@ export const ANSWER_LETTERS = ['A', 'B', 'C', 'D', 'E'] as const;
  *   «»      — хоосон (хариулаагүй)
  *   «*»     — давхар будсан
  *   «+»/«-» — зөвхөн зөв/буруугаар ирсэн дүн (эзний Excel: 1 = зөв)
+ *   «2122» — 2-р хэсгийн багцын нүднүүд («_» хоосон, «-» хасах тэмдэг, «*» давхар будсан)
  */
 export type SheetAnswer = string;
 
@@ -34,6 +35,25 @@ export interface PaperItem {
   /** Томьёоны сангийн slug-ууд */
   formulaSlugs?: string[];
   voided: boolean;
+  /** Хувилбар бүрийн түлхүүр {"A":"D","B":"B"} — байвал answerKey-ээс давамгайлна */
+  answerKeys?: unknown;
+  /** «2.1.a-d» — 2-р хэсгийн багц */
+  label?: string | null;
+  /** Багцын нүдний тоо (>1 бол цифрүүдийг бүгдийг нь тулгана) */
+  cells?: number | null;
+}
+
+/** Тухайн хувилбарын зөв хариу: answerKeys[variant] → answerKey. */
+export function keyFor(
+  item: PaperItem,
+  variant?: string | null,
+): string | null {
+  const keys = item.answerKeys;
+  if (variant && keys && typeof keys === 'object' && !Array.isArray(keys)) {
+    const k = (keys as Record<string, unknown>)[variant];
+    if (typeof k === 'string' && k) return k;
+  }
+  return item.answerKey;
 }
 
 /** Ангиллын хэмжээс: БҮТ-ийн агуулга эсвэл сэдэв */
@@ -90,15 +110,22 @@ export function isContentArea(v: unknown): v is ContentArea {
 export function statusOf(
   answer: SheetAnswer | undefined,
   item: PaperItem,
+  variant?: string | null,
 ): ItemStatus {
   if (item.voided) return 'UNGRADED';
   const a = (answer ?? '').trim();
   if (a === '+') return 'CORRECT';
   if (a === '-') return 'WRONG';
-  if (!item.answerKey) return 'UNGRADED';
+  const key = keyFor(item, variant);
+  if (!key) return 'UNGRADED';
+  if ((item.cells ?? 1) > 1) {
+    // 2-р хэсгийн багц: бүх нүд зөв бол л оноо; нэг нүд буруу бол багц бүхэлдээ 0
+    if (a === '' || /^_+$/.test(a)) return 'BLANK';
+    return a === key ? 'CORRECT' : 'WRONG';
+  }
   if (a === '') return 'BLANK';
   if (a === '*') return 'MULTI';
-  return a === item.answerKey ? 'CORRECT' : 'WRONG';
+  return a === key ? 'CORRECT' : 'WRONG';
 }
 
 export interface GradedSheet {
@@ -111,11 +138,12 @@ export interface GradedSheet {
 export function gradeSheet(
   answers: SheetAnswer[],
   items: PaperItem[],
+  variant?: string | null,
 ): GradedSheet {
   let total = 0;
   let max = 0;
   const statuses = items.map((item, i) => {
-    const st = statusOf(answers[i], item);
+    const st = statusOf(answers[i], item, variant);
     if (st !== 'UNGRADED') {
       max += item.points;
       if (st === 'CORRECT') total += item.points;

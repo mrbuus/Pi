@@ -14342,7 +14342,10 @@ export const PaperExamItemScalarFieldEnum = {
   area: 'area',
   topic: 'topic',
   formulaSlugs: 'formulaSlugs',
-  voided: 'voided'
+  voided: 'voided',
+  answerKeys: 'answerKeys',
+  label: 'label',
+  cells: 'cells'
 } as const
 
 export type PaperExamItemScalarFieldEnum = (typeof PaperExamItemScalarFieldEnum)[keyof typeof PaperExamItemScalarFieldEnum]
@@ -14374,6 +14377,7 @@ export const PaperExamSheetScalarFieldEnum = {
   groupTeacher: 'groupTeacher',
   classroomId: 'classroomId',
   answers: 'answers',
+  variant: 'variant',
   totalScore: 'totalScore',
   maxScore: 'maxScore',
   supersededAt: 'supersededAt',

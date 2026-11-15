@@ -24,7 +24,7 @@ interface Progress {
 }
 const EMPTY: Progress = { stage: 0, step: 0, tries: 0, wrong: [], fixed: false };
 const LETTERS = ["A", "B", "C", "D", "E"];
-const HINTS = ["Мэдэж байх ёстой чанар", "Энгийнээр хэлбэл", "100x100 номын төстэй бодлого"];
+const HINTS = ["Ашиглагдах чанар", "Энгийнээр хэлбэл", "100x100 номын төстэй бодлого"];
 
 /** Хөтөчийн санах ой — зөвхөн тав тухын төлөө (аль санамжийг нээснээ санах); байхгүй ч ажиллана. */
 function readStore<T>(key: string, fallback: T): T {
@@ -43,14 +43,34 @@ function writeStore(key: string, value: unknown) {
   }
 }
 
-/** Мөрүүд: `$$…$$` бол тусдаа мөрийн томьёо, бусад нь өгүүлбэр. */
+/**
+ * Урт томьёог «⇒»-оор хуваана: «A ⇒ B ⇒ C» → [«A», «⇒ B», «⇒ C»]. Утсанд нэг мөрөнд
+ * багтахгүй томьёо гүйлгэх биш, мөр мөрөөрөө доош буухын тулд (эзэн 2026-11-15).
+ */
+function splitMath(tex: string): string[] {
+  const body = tex.replace(/^\$\$|\$\$$/g, "");
+  const parts = body.split(/\\quad\s*\\Rightarrow\s*\\quad/);
+  if (parts.length < 2) return [tex];
+  return parts.map((p, i) => `$$${i ? "\\Rightarrow\\ " : ""}${p.trim()}$$`);
+}
+
+/** Мөрүүд: `$$…$$` бол тусдаа мөрийн томьёо (урт бол хуваана), «Жишээ:» өнгөт картаар, бусад нь өгүүлбэр. */
 function Lines({ lines, mathClass }: { lines: string[]; mathClass?: string }) {
   return (
     <>
       {lines.map((line, i) =>
         line.startsWith("$$") ? (
-          <div key={i} className={cn("overflow-x-auto overflow-y-hidden py-1 text-center", mathClass)}>
-            <MathText>{line}</MathText>
+          <div key={i} className={cn("py-1 text-center", mathClass)}>
+            {splitMath(line).map((part, j) => (
+              <div key={j} className="overflow-x-auto overflow-y-hidden">
+                <MathText>{part}</MathText>
+              </div>
+            ))}
+          </div>
+        ) : /^Жишээ[:：]/.test(line) ? (
+          <div key={i} className="my-2 rounded-xl border-l-4 border-l-brand-bright bg-brand-bright/10 px-3 py-2">
+            <span className="mb-0.5 block text-xs font-bold tracking-wide text-brand-soft">ЖИШЭЭ</span>
+            <MathText>{line.replace(/^Жишээ[:：]\s*/, "")}</MathText>
           </div>
         ) : (
           <p key={i} className="my-1.5">
@@ -60,6 +80,19 @@ function Lines({ lines, mathClass }: { lines: string[]; mathClass?: string }) {
       )}
     </>
   );
+}
+
+/**
+ * Хариултын байрлал (эзэн: хугарахгүй, мөрөө тэгш дүүргэнэ): богино бол 5 нэг мөрөнд,
+ * дунд бол 3+2, урт бол мөр бүрт нэг. Томьёо нүдэн дотроо хэзээ ч хугарахгүй.
+ */
+function choiceLayout(choices: string[]): "row" | "split" | "stack" {
+  const visible = (c: string) =>
+    c.replace(/\\(dfrac|frac|cdot|left|right|lbrack|rbrack|infty)/g, "x").replace(/\\text\{([^}]*)\}/g, "$1").replace(/[{}\s\\]/g, "").length;
+  const len = Math.max(0, ...choices.map(visible));
+  if (len <= 6) return "row";
+  if (len <= 16) return "split";
+  return "stack";
 }
 
 function fillParts(c: GuideContent, values: Record<string, string> | undefined): boolean[] {
@@ -274,8 +307,8 @@ function GuideProblem({
   };
   const values = revealed ? Object.fromEntries((c.fields ?? []).map((f) => [f.key, f.value])) : (r.retry ?? {});
   const partsOk = fillParts(c, values);
+  const layout = choiceLayout(c.choices ?? []);
   const five = c.choices?.length === 5;
-  const long = (c.choices ?? []).some((x) => x.length > 22);
 
   return (
     <div className="space-y-4">
@@ -300,7 +333,12 @@ function GuideProblem({
         </div>
 
         {c.kind === "choice" && c.choices && (
-          <div className={cn("mt-4 grid gap-2", long ? "grid-cols-1" : five ? "grid-cols-6 sm:grid-cols-5" : "grid-cols-2 sm:grid-cols-4")}>
+          <div
+            className={cn(
+              "mt-4 grid gap-2",
+              layout === "stack" ? "grid-cols-1" : layout === "split" || !five ? "grid-cols-6" : "grid-cols-6 sm:grid-cols-5",
+            )}
+          >
             {c.choices.map((choice, i) => {
               const letter = LETTERS[i];
               const good = revealed && letter === c.answer;
@@ -311,15 +349,18 @@ function GuideProblem({
                   onClick={() => choose(letter)}
                   aria-disabled={revealed || bad}
                   className={cn(
-                    "flex min-h-14 min-w-0 items-center gap-2 rounded-xl border-2 px-3 py-1.5 text-ink",
-                    long ? "justify-start" : "justify-center",
-                    !long && five && (i < 3 ? "col-span-2 sm:col-span-1" : "col-span-3 sm:col-span-1"),
+                    "flex min-h-14 min-w-0 items-center justify-center gap-2 rounded-xl border-2 px-3 py-1.5 text-ink",
+                    layout === "split" && (i < 3 ? "col-span-2" : "col-span-3"),
+                    layout === "row" && five && (i < 3 ? "col-span-2 sm:col-span-1" : "col-span-3 sm:col-span-1"),
+                    layout === "row" && !five && "col-span-3",
                     good ? "border-success bg-success/15" : bad ? "border-error bg-error/12" : "border-line bg-panel",
                     !revealed && !bad && "hover:border-brand",
                   )}
                 >
                   <span className="font-bold text-ink-dim">{letter}</span>
-                  <MathText>{`$${choice}$`}</MathText>
+                  <span className="whitespace-nowrap">
+                    <MathText>{`$${choice}$`}</MathText>
+                  </span>
                   {good && <Check className="size-4 shrink-0 text-success" aria-label="зөв хариу" />}
                 </button>
               );
@@ -383,7 +424,7 @@ function GuideProblem({
       {stage >= 1 && (
         <section className="rounded-2xl border border-line border-l-4 border-l-error bg-panel px-4 py-3">
           <h3 className="mb-1 flex items-center gap-1.5 text-xs font-bold tracking-wide text-error">
-            <Sigma className="size-4" aria-hidden /> МЭДЭЖ БАЙХ ЁСТОЙ ЧАНАР
+            <Sigma className="size-4" aria-hidden /> АШИГЛАГДАХ ЧАНАР
           </h3>
           <div className="overflow-x-auto overflow-y-hidden font-semibold text-ink">
             <Lines lines={c.rule} />

@@ -29,11 +29,13 @@ export type AggregatePaperExamItem = {
 export type PaperExamItemAvgAggregateOutputType = {
   number: number | null
   points: number | null
+  cells: number | null
 }
 
 export type PaperExamItemSumAggregateOutputType = {
   number: number | null
   points: number | null
+  cells: number | null
 }
 
 export type PaperExamItemMinAggregateOutputType = {
@@ -45,6 +47,8 @@ export type PaperExamItemMinAggregateOutputType = {
   area: string | null
   topic: string | null
   voided: boolean | null
+  label: string | null
+  cells: number | null
 }
 
 export type PaperExamItemMaxAggregateOutputType = {
@@ -56,6 +60,8 @@ export type PaperExamItemMaxAggregateOutputType = {
   area: string | null
   topic: string | null
   voided: boolean | null
+  label: string | null
+  cells: number | null
 }
 
 export type PaperExamItemCountAggregateOutputType = {
@@ -68,6 +74,9 @@ export type PaperExamItemCountAggregateOutputType = {
   topic: number
   formulaSlugs: number
   voided: number
+  answerKeys: number
+  label: number
+  cells: number
   _all: number
 }
 
@@ -75,11 +84,13 @@ export type PaperExamItemCountAggregateOutputType = {
 export type PaperExamItemAvgAggregateInputType = {
   number?: true
   points?: true
+  cells?: true
 }
 
 export type PaperExamItemSumAggregateInputType = {
   number?: true
   points?: true
+  cells?: true
 }
 
 export type PaperExamItemMinAggregateInputType = {
@@ -91,6 +102,8 @@ export type PaperExamItemMinAggregateInputType = {
   area?: true
   topic?: true
   voided?: true
+  label?: true
+  cells?: true
 }
 
 export type PaperExamItemMaxAggregateInputType = {
@@ -102,6 +115,8 @@ export type PaperExamItemMaxAggregateInputType = {
   area?: true
   topic?: true
   voided?: true
+  label?: true
+  cells?: true
 }
 
 export type PaperExamItemCountAggregateInputType = {
@@ -114,6 +129,9 @@ export type PaperExamItemCountAggregateInputType = {
   topic?: true
   formulaSlugs?: true
   voided?: true
+  answerKeys?: true
+  label?: true
+  cells?: true
   _all?: true
 }
 
@@ -213,6 +231,9 @@ export type PaperExamItemGroupByOutputType = {
   topic: string | null
   formulaSlugs: string[]
   voided: boolean
+  answerKeys: runtime.JsonValue | null
+  label: string | null
+  cells: number | null
   _count: PaperExamItemCountAggregateOutputType | null
   _avg: PaperExamItemAvgAggregateOutputType | null
   _sum: PaperExamItemSumAggregateOutputType | null
@@ -248,6 +269,9 @@ export type PaperExamItemWhereInput = {
   topic?: Prisma.StringNullableFilter<"PaperExamItem"> | string | null
   formulaSlugs?: Prisma.StringNullableListFilter<"PaperExamItem">
   voided?: Prisma.BoolFilter<"PaperExamItem"> | boolean
+  answerKeys?: Prisma.JsonNullableFilter<"PaperExamItem">
+  label?: Prisma.StringNullableFilter<"PaperExamItem"> | string | null
+  cells?: Prisma.IntNullableFilter<"PaperExamItem"> | number | null
   exam?: Prisma.XOR<Prisma.PaperExamScalarRelationFilter, Prisma.PaperExamWhereInput>
 }
 
@@ -261,6 +285,9 @@ export type PaperExamItemOrderByWithRelationInput = {
   topic?: Prisma.SortOrderInput | Prisma.SortOrder
   formulaSlugs?: Prisma.SortOrder
   voided?: Prisma.SortOrder
+  answerKeys?: Prisma.SortOrderInput | Prisma.SortOrder
+  label?: Prisma.SortOrderInput | Prisma.SortOrder
+  cells?: Prisma.SortOrderInput | Prisma.SortOrder
   exam?: Prisma.PaperExamOrderByWithRelationInput
 }
 
@@ -278,6 +305,9 @@ export type PaperExamItemWhereUniqueInput = Prisma.AtLeast<{
   topic?: Prisma.StringNullableFilter<"PaperExamItem"> | string | null
   formulaSlugs?: Prisma.StringNullableListFilter<"PaperExamItem">
   voided?: Prisma.BoolFilter<"PaperExamItem"> | boolean
+  answerKeys?: Prisma.JsonNullableFilter<"PaperExamItem">
+  label?: Prisma.StringNullableFilter<"PaperExamItem"> | string | null
+  cells?: Prisma.IntNullableFilter<"PaperExamItem"> | number | null
   exam?: Prisma.XOR<Prisma.PaperExamScalarRelationFilter, Prisma.PaperExamWhereInput>
 }, "id" | "examId_number">
 
@@ -291,6 +321,9 @@ export type PaperExamItemOrderByWithAggregationInput = {
   topic?: Prisma.SortOrderInput | Prisma.SortOrder
   formulaSlugs?: Prisma.SortOrder
   voided?: Prisma.SortOrder
+  answerKeys?: Prisma.SortOrderInput | Prisma.SortOrder
+  label?: Prisma.SortOrderInput | Prisma.SortOrder
+  cells?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PaperExamItemCountOrderByAggregateInput
   _avg?: Prisma.PaperExamItemAvgOrderByAggregateInput
   _max?: Prisma.PaperExamItemMaxOrderByAggregateInput
@@ -311,6 +344,9 @@ export type PaperExamItemScalarWhereWithAggregatesInput = {
   topic?: Prisma.StringNullableWithAggregatesFilter<"PaperExamItem"> | string | null
   formulaSlugs?: Prisma.StringNullableListFilter<"PaperExamItem">
   voided?: Prisma.BoolWithAggregatesFilter<"PaperExamItem"> | boolean
+  answerKeys?: Prisma.JsonNullableWithAggregatesFilter<"PaperExamItem">
+  label?: Prisma.StringNullableWithAggregatesFilter<"PaperExamItem"> | string | null
+  cells?: Prisma.IntNullableWithAggregatesFilter<"PaperExamItem"> | number | null
 }
 
 export type PaperExamItemCreateInput = {
@@ -322,6 +358,9 @@ export type PaperExamItemCreateInput = {
   topic?: string | null
   formulaSlugs?: Prisma.PaperExamItemCreateformulaSlugsInput | string[]
   voided?: boolean
+  answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  label?: string | null
+  cells?: number | null
   exam: Prisma.PaperExamCreateNestedOneWithoutItemsInput
 }
 
@@ -335,6 +374,9 @@ export type PaperExamItemUncheckedCreateInput = {
   topic?: string | null
   formulaSlugs?: Prisma.PaperExamItemCreateformulaSlugsInput | string[]
   voided?: boolean
+  answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  label?: string | null
+  cells?: number | null
 }
 
 export type PaperExamItemUpdateInput = {
@@ -346,6 +388,9 @@ export type PaperExamItemUpdateInput = {
   topic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaSlugs?: Prisma.PaperExamItemUpdateformulaSlugsInput | string[]
   voided?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   exam?: Prisma.PaperExamUpdateOneRequiredWithoutItemsNestedInput
 }
 
@@ -359,6 +404,9 @@ export type PaperExamItemUncheckedUpdateInput = {
   topic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaSlugs?: Prisma.PaperExamItemUpdateformulaSlugsInput | string[]
   voided?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type PaperExamItemCreateManyInput = {
@@ -371,6 +419,9 @@ export type PaperExamItemCreateManyInput = {
   topic?: string | null
   formulaSlugs?: Prisma.PaperExamItemCreateformulaSlugsInput | string[]
   voided?: boolean
+  answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  label?: string | null
+  cells?: number | null
 }
 
 export type PaperExamItemUpdateManyMutationInput = {
@@ -382,6 +433,9 @@ export type PaperExamItemUpdateManyMutationInput = {
   topic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaSlugs?: Prisma.PaperExamItemUpdateformulaSlugsInput | string[]
   voided?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type PaperExamItemUncheckedUpdateManyInput = {
@@ -394,6 +448,9 @@ export type PaperExamItemUncheckedUpdateManyInput = {
   topic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaSlugs?: Prisma.PaperExamItemUpdateformulaSlugsInput | string[]
   voided?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type PaperExamItemListRelationFilter = {
@@ -421,11 +478,15 @@ export type PaperExamItemCountOrderByAggregateInput = {
   topic?: Prisma.SortOrder
   formulaSlugs?: Prisma.SortOrder
   voided?: Prisma.SortOrder
+  answerKeys?: Prisma.SortOrder
+  label?: Prisma.SortOrder
+  cells?: Prisma.SortOrder
 }
 
 export type PaperExamItemAvgOrderByAggregateInput = {
   number?: Prisma.SortOrder
   points?: Prisma.SortOrder
+  cells?: Prisma.SortOrder
 }
 
 export type PaperExamItemMaxOrderByAggregateInput = {
@@ -437,6 +498,8 @@ export type PaperExamItemMaxOrderByAggregateInput = {
   area?: Prisma.SortOrder
   topic?: Prisma.SortOrder
   voided?: Prisma.SortOrder
+  label?: Prisma.SortOrder
+  cells?: Prisma.SortOrder
 }
 
 export type PaperExamItemMinOrderByAggregateInput = {
@@ -448,11 +511,14 @@ export type PaperExamItemMinOrderByAggregateInput = {
   area?: Prisma.SortOrder
   topic?: Prisma.SortOrder
   voided?: Prisma.SortOrder
+  label?: Prisma.SortOrder
+  cells?: Prisma.SortOrder
 }
 
 export type PaperExamItemSumOrderByAggregateInput = {
   number?: Prisma.SortOrder
   points?: Prisma.SortOrder
+  cells?: Prisma.SortOrder
 }
 
 export type PaperExamItemCreateNestedManyWithoutExamInput = {
@@ -515,6 +581,9 @@ export type PaperExamItemCreateWithoutExamInput = {
   topic?: string | null
   formulaSlugs?: Prisma.PaperExamItemCreateformulaSlugsInput | string[]
   voided?: boolean
+  answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  label?: string | null
+  cells?: number | null
 }
 
 export type PaperExamItemUncheckedCreateWithoutExamInput = {
@@ -526,6 +595,9 @@ export type PaperExamItemUncheckedCreateWithoutExamInput = {
   topic?: string | null
   formulaSlugs?: Prisma.PaperExamItemCreateformulaSlugsInput | string[]
   voided?: boolean
+  answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  label?: string | null
+  cells?: number | null
 }
 
 export type PaperExamItemCreateOrConnectWithoutExamInput = {
@@ -567,6 +639,9 @@ export type PaperExamItemScalarWhereInput = {
   topic?: Prisma.StringNullableFilter<"PaperExamItem"> | string | null
   formulaSlugs?: Prisma.StringNullableListFilter<"PaperExamItem">
   voided?: Prisma.BoolFilter<"PaperExamItem"> | boolean
+  answerKeys?: Prisma.JsonNullableFilter<"PaperExamItem">
+  label?: Prisma.StringNullableFilter<"PaperExamItem"> | string | null
+  cells?: Prisma.IntNullableFilter<"PaperExamItem"> | number | null
 }
 
 export type PaperExamItemCreateManyExamInput = {
@@ -578,6 +653,9 @@ export type PaperExamItemCreateManyExamInput = {
   topic?: string | null
   formulaSlugs?: Prisma.PaperExamItemCreateformulaSlugsInput | string[]
   voided?: boolean
+  answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  label?: string | null
+  cells?: number | null
 }
 
 export type PaperExamItemUpdateWithoutExamInput = {
@@ -589,6 +667,9 @@ export type PaperExamItemUpdateWithoutExamInput = {
   topic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaSlugs?: Prisma.PaperExamItemUpdateformulaSlugsInput | string[]
   voided?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type PaperExamItemUncheckedUpdateWithoutExamInput = {
@@ -600,6 +681,9 @@ export type PaperExamItemUncheckedUpdateWithoutExamInput = {
   topic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaSlugs?: Prisma.PaperExamItemUpdateformulaSlugsInput | string[]
   voided?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type PaperExamItemUncheckedUpdateManyWithoutExamInput = {
@@ -611,6 +695,9 @@ export type PaperExamItemUncheckedUpdateManyWithoutExamInput = {
   topic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   formulaSlugs?: Prisma.PaperExamItemUpdateformulaSlugsInput | string[]
   voided?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 
@@ -625,6 +712,9 @@ export type PaperExamItemSelect<ExtArgs extends runtime.Types.Extensions.Interna
   topic?: boolean
   formulaSlugs?: boolean
   voided?: boolean
+  answerKeys?: boolean
+  label?: boolean
+  cells?: boolean
   exam?: boolean | Prisma.PaperExamDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paperExamItem"]>
 
@@ -638,6 +728,9 @@ export type PaperExamItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   topic?: boolean
   formulaSlugs?: boolean
   voided?: boolean
+  answerKeys?: boolean
+  label?: boolean
+  cells?: boolean
   exam?: boolean | Prisma.PaperExamDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paperExamItem"]>
 
@@ -651,6 +744,9 @@ export type PaperExamItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   topic?: boolean
   formulaSlugs?: boolean
   voided?: boolean
+  answerKeys?: boolean
+  label?: boolean
+  cells?: boolean
   exam?: boolean | Prisma.PaperExamDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paperExamItem"]>
 
@@ -664,9 +760,12 @@ export type PaperExamItemSelectScalar = {
   topic?: boolean
   formulaSlugs?: boolean
   voided?: boolean
+  answerKeys?: boolean
+  label?: boolean
+  cells?: boolean
 }
 
-export type PaperExamItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "examId" | "number" | "answerKey" | "points" | "area" | "topic" | "formulaSlugs" | "voided", ExtArgs["result"]["paperExamItem"]>
+export type PaperExamItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "examId" | "number" | "answerKey" | "points" | "area" | "topic" | "formulaSlugs" | "voided" | "answerKeys" | "label" | "cells", ExtArgs["result"]["paperExamItem"]>
 export type PaperExamItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   exam?: boolean | Prisma.PaperExamDefaultArgs<ExtArgs>
 }
@@ -707,6 +806,19 @@ export type $PaperExamItemPayload<ExtArgs extends runtime.Types.Extensions.Inter
      * Хүчингүй болгосон бодлого — оноо, хувьд тооцогдохгүй
      */
     voided: boolean
+    /**
+     * Хувилбар бүрийн зөв хариу {"A":"D","B":"B"}; 2-р хэсгийн багцад цифрүүд {"A":"2122"}.
+     * Байвал answerKey-ээс давамгайлна (хуудасны variant-аар сонгоно)
+     */
+    answerKeys: runtime.JsonValue | null
+    /**
+     * Дэлгэцийн нэр: «2.1.a-d» (2-р хэсгийн багц); null бол дугаар
+     */
+    label: string | null
+    /**
+     * Багцын нүдний тоо (a–h-ийн хэд нь); null/1 бол сонгох бодлого
+     */
+    cells: number | null
   }, ExtArgs["result"]["paperExamItem"]>
   composites: {}
 }
@@ -1140,6 +1252,9 @@ export interface PaperExamItemFieldRefs {
   readonly topic: Prisma.FieldRef<"PaperExamItem", 'String'>
   readonly formulaSlugs: Prisma.FieldRef<"PaperExamItem", 'String[]'>
   readonly voided: Prisma.FieldRef<"PaperExamItem", 'Boolean'>
+  readonly answerKeys: Prisma.FieldRef<"PaperExamItem", 'Json'>
+  readonly label: Prisma.FieldRef<"PaperExamItem", 'String'>
+  readonly cells: Prisma.FieldRef<"PaperExamItem", 'Int'>
 }
     
 

@@ -16,6 +16,7 @@ import FormulaLine from "./FormulaLine";
 import {
   CLASSIFY_LABEL,
   dayText,
+  itemName,
   orderedAreas,
   scoreText,
   STATUS_CELL,
@@ -261,22 +262,29 @@ function WrongItem({ item, formulaBy, showTopic }: { item: MyItem; formulaBy: Ma
   return (
     <li className="rounded-xl border border-line p-3">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className={cn("inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm font-bold tabular-nums", STATUS_CELL[item.status])}>
-          {item.number}
+        <span className={cn("inline-flex h-8 min-w-8 items-center justify-center whitespace-nowrap rounded-lg px-2 text-sm font-bold tabular-nums", STATUS_CELL[item.status])}>
+          {itemName(item)}
         </span>
-        <span className="text-sm text-ink">
-          {item.answer ? (
-            <>
-              Таны хариу <b>{item.answer}</b>
-            </>
-          ) : (
-            STATUS_LABEL[item.status]
-          )}
-          {item.key && (
-            <>
-              , зөв хариу <b>{item.key}</b>
-            </>
-          )}
+        {(item.cells ?? 1) > 1 && item.key ? (
+          <CellCompare written={item.answer ?? ""} keyText={item.key} />
+        ) : (
+          <span className="text-sm text-ink">
+            {item.answer ? (
+              <>
+                Таны хариу <b>{item.answer}</b>
+              </>
+            ) : (
+              STATUS_LABEL[item.status]
+            )}
+            {item.key && (
+              <>
+                , зөв хариу <b>{item.key}</b>
+              </>
+            )}
+          </span>
+        )}
+        <span className="text-sm font-semibold tabular-nums text-ink-dim">
+          {item.earned}/{item.points} оноо
         </span>
         <Meta
           className="ml-auto text-xs text-ink-dim"
@@ -299,5 +307,36 @@ function BackLink() {
     <Link href="/app/tests?tab=paper" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink-dim hover:text-ink">
       <ArrowLeft className="size-4" aria-hidden /> Шалгалт
     </Link>
+  );
+}
+
+/**
+ * 2-р хэсгийн багц: нүд бүрийн бичсэн ба зөв цифрийг харуулна. Нэг нүд буруу бол
+ * багцын оноо бүхэлдээ алдагдана — аль нүд буруу байсныг улаанаар тодруулна.
+ */
+function CellCompare({ written, keyText }: { written: string; keyText: string }) {
+  const cells = keyText.split("").map((k, i) => ({ k, w: written[i] ?? "_" }));
+  const wrong = cells.filter((c) => c.w !== c.k).length;
+  return (
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink">
+      <span className="inline-flex gap-1" aria-label="Таны бичсэн нүднүүд">
+        {cells.map((c, i) => (
+          <span
+            key={i}
+            className={cn(
+              "inline-flex size-7 items-center justify-center rounded-md font-bold tabular-nums",
+              c.w === c.k ? "bg-success/15 text-success" : "bg-error/12 text-error",
+            )}
+            title={c.w === c.k ? "зөв" : `зөв нь ${c.k}`}
+          >
+            {c.w === "_" ? "" : c.w}
+          </span>
+        ))}
+      </span>
+      <span>
+        зөв: <b className="tabular-nums">{keyText}</b>
+      </span>
+      {wrong > 0 && <span className="text-ink-dim">{wrong} нүд буруу тул багцын оноо бүхэлдээ алдагдсан</span>}
+    </span>
   );
 }

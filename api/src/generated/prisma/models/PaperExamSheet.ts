@@ -47,6 +47,7 @@ export type PaperExamSheetMinAggregateOutputType = {
   groupLabel: string | null
   groupTeacher: string | null
   classroomId: string | null
+  variant: string | null
   totalScore: number | null
   maxScore: number | null
   supersededAt: Date | null
@@ -65,6 +66,7 @@ export type PaperExamSheetMaxAggregateOutputType = {
   groupLabel: string | null
   groupTeacher: string | null
   classroomId: string | null
+  variant: string | null
   totalScore: number | null
   maxScore: number | null
   supersededAt: Date | null
@@ -84,6 +86,7 @@ export type PaperExamSheetCountAggregateOutputType = {
   groupTeacher: number
   classroomId: number
   answers: number
+  variant: number
   totalScore: number
   maxScore: number
   supersededAt: number
@@ -114,6 +117,7 @@ export type PaperExamSheetMinAggregateInputType = {
   groupLabel?: true
   groupTeacher?: true
   classroomId?: true
+  variant?: true
   totalScore?: true
   maxScore?: true
   supersededAt?: true
@@ -132,6 +136,7 @@ export type PaperExamSheetMaxAggregateInputType = {
   groupLabel?: true
   groupTeacher?: true
   classroomId?: true
+  variant?: true
   totalScore?: true
   maxScore?: true
   supersededAt?: true
@@ -151,6 +156,7 @@ export type PaperExamSheetCountAggregateInputType = {
   groupTeacher?: true
   classroomId?: true
   answers?: true
+  variant?: true
   totalScore?: true
   maxScore?: true
   supersededAt?: true
@@ -257,6 +263,7 @@ export type PaperExamSheetGroupByOutputType = {
   groupTeacher: string | null
   classroomId: string | null
   answers: runtime.JsonValue
+  variant: string | null
   totalScore: number
   maxScore: number
   supersededAt: Date | null
@@ -299,6 +306,7 @@ export type PaperExamSheetWhereInput = {
   groupTeacher?: Prisma.StringNullableFilter<"PaperExamSheet"> | string | null
   classroomId?: Prisma.StringNullableFilter<"PaperExamSheet"> | string | null
   answers?: Prisma.JsonFilter<"PaperExamSheet">
+  variant?: Prisma.StringNullableFilter<"PaperExamSheet"> | string | null
   totalScore?: Prisma.FloatFilter<"PaperExamSheet"> | number
   maxScore?: Prisma.FloatFilter<"PaperExamSheet"> | number
   supersededAt?: Prisma.DateTimeNullableFilter<"PaperExamSheet"> | Date | string | null
@@ -321,6 +329,7 @@ export type PaperExamSheetOrderByWithRelationInput = {
   groupTeacher?: Prisma.SortOrderInput | Prisma.SortOrder
   classroomId?: Prisma.SortOrderInput | Prisma.SortOrder
   answers?: Prisma.SortOrder
+  variant?: Prisma.SortOrderInput | Prisma.SortOrder
   totalScore?: Prisma.SortOrder
   maxScore?: Prisma.SortOrder
   supersededAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -347,6 +356,7 @@ export type PaperExamSheetWhereUniqueInput = Prisma.AtLeast<{
   groupTeacher?: Prisma.StringNullableFilter<"PaperExamSheet"> | string | null
   classroomId?: Prisma.StringNullableFilter<"PaperExamSheet"> | string | null
   answers?: Prisma.JsonFilter<"PaperExamSheet">
+  variant?: Prisma.StringNullableFilter<"PaperExamSheet"> | string | null
   totalScore?: Prisma.FloatFilter<"PaperExamSheet"> | number
   maxScore?: Prisma.FloatFilter<"PaperExamSheet"> | number
   supersededAt?: Prisma.DateTimeNullableFilter<"PaperExamSheet"> | Date | string | null
@@ -369,6 +379,7 @@ export type PaperExamSheetOrderByWithAggregationInput = {
   groupTeacher?: Prisma.SortOrderInput | Prisma.SortOrder
   classroomId?: Prisma.SortOrderInput | Prisma.SortOrder
   answers?: Prisma.SortOrder
+  variant?: Prisma.SortOrderInput | Prisma.SortOrder
   totalScore?: Prisma.SortOrder
   maxScore?: Prisma.SortOrder
   supersededAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -396,6 +407,7 @@ export type PaperExamSheetScalarWhereWithAggregatesInput = {
   groupTeacher?: Prisma.StringNullableWithAggregatesFilter<"PaperExamSheet"> | string | null
   classroomId?: Prisma.StringNullableWithAggregatesFilter<"PaperExamSheet"> | string | null
   answers?: Prisma.JsonWithAggregatesFilter<"PaperExamSheet">
+  variant?: Prisma.StringNullableWithAggregatesFilter<"PaperExamSheet"> | string | null
   totalScore?: Prisma.FloatWithAggregatesFilter<"PaperExamSheet"> | number
   maxScore?: Prisma.FloatWithAggregatesFilter<"PaperExamSheet"> | number
   supersededAt?: Prisma.DateTimeNullableWithAggregatesFilter<"PaperExamSheet"> | Date | string | null
@@ -412,6 +424,7 @@ export type PaperExamSheetCreateInput = {
   groupTeacher?: string | null
   classroomId?: string | null
   answers: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: string | null
   totalScore: number
   maxScore: number
   supersededAt?: Date | string | null
@@ -434,6 +447,7 @@ export type PaperExamSheetUncheckedCreateInput = {
   groupTeacher?: string | null
   classroomId?: string | null
   answers: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: string | null
   totalScore: number
   maxScore: number
   supersededAt?: Date | string | null
@@ -450,6 +464,7 @@ export type PaperExamSheetUpdateInput = {
   groupTeacher?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
   maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -472,6 +487,7 @@ export type PaperExamSheetUncheckedUpdateInput = {
   groupTeacher?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
   maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -491,6 +507,7 @@ export type PaperExamSheetCreateManyInput = {
   groupTeacher?: string | null
   classroomId?: string | null
   answers: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: string | null
   totalScore: number
   maxScore: number
   supersededAt?: Date | string | null
@@ -507,6 +524,7 @@ export type PaperExamSheetUpdateManyMutationInput = {
   groupTeacher?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
   maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -526,6 +544,7 @@ export type PaperExamSheetUncheckedUpdateManyInput = {
   groupTeacher?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
   maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -560,6 +579,7 @@ export type PaperExamSheetCountOrderByAggregateInput = {
   groupTeacher?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
   answers?: Prisma.SortOrder
+  variant?: Prisma.SortOrder
   totalScore?: Prisma.SortOrder
   maxScore?: Prisma.SortOrder
   supersededAt?: Prisma.SortOrder
@@ -583,6 +603,7 @@ export type PaperExamSheetMaxOrderByAggregateInput = {
   groupLabel?: Prisma.SortOrder
   groupTeacher?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
+  variant?: Prisma.SortOrder
   totalScore?: Prisma.SortOrder
   maxScore?: Prisma.SortOrder
   supersededAt?: Prisma.SortOrder
@@ -601,6 +622,7 @@ export type PaperExamSheetMinOrderByAggregateInput = {
   groupLabel?: Prisma.SortOrder
   groupTeacher?: Prisma.SortOrder
   classroomId?: Prisma.SortOrder
+  variant?: Prisma.SortOrder
   totalScore?: Prisma.SortOrder
   maxScore?: Prisma.SortOrder
   supersededAt?: Prisma.SortOrder
@@ -748,6 +770,7 @@ export type PaperExamSheetCreateWithoutStudentInput = {
   groupTeacher?: string | null
   classroomId?: string | null
   answers: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: string | null
   totalScore: number
   maxScore: number
   supersededAt?: Date | string | null
@@ -768,6 +791,7 @@ export type PaperExamSheetUncheckedCreateWithoutStudentInput = {
   groupTeacher?: string | null
   classroomId?: string | null
   answers: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: string | null
   totalScore: number
   maxScore: number
   supersededAt?: Date | string | null
@@ -816,6 +840,7 @@ export type PaperExamSheetScalarWhereInput = {
   groupTeacher?: Prisma.StringNullableFilter<"PaperExamSheet"> | string | null
   classroomId?: Prisma.StringNullableFilter<"PaperExamSheet"> | string | null
   answers?: Prisma.JsonFilter<"PaperExamSheet">
+  variant?: Prisma.StringNullableFilter<"PaperExamSheet"> | string | null
   totalScore?: Prisma.FloatFilter<"PaperExamSheet"> | number
   maxScore?: Prisma.FloatFilter<"PaperExamSheet"> | number
   supersededAt?: Prisma.DateTimeNullableFilter<"PaperExamSheet"> | Date | string | null
@@ -832,6 +857,7 @@ export type PaperExamSheetCreateWithoutExamInput = {
   groupTeacher?: string | null
   classroomId?: string | null
   answers: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: string | null
   totalScore: number
   maxScore: number
   supersededAt?: Date | string | null
@@ -852,6 +878,7 @@ export type PaperExamSheetUncheckedCreateWithoutExamInput = {
   groupTeacher?: string | null
   classroomId?: string | null
   answers: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: string | null
   totalScore: number
   maxScore: number
   supersededAt?: Date | string | null
@@ -894,6 +921,7 @@ export type PaperExamSheetCreateWithoutImportInput = {
   groupTeacher?: string | null
   classroomId?: string | null
   answers: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: string | null
   totalScore: number
   maxScore: number
   supersededAt?: Date | string | null
@@ -914,6 +942,7 @@ export type PaperExamSheetUncheckedCreateWithoutImportInput = {
   groupTeacher?: string | null
   classroomId?: string | null
   answers: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: string | null
   totalScore: number
   maxScore: number
   supersededAt?: Date | string | null
@@ -958,6 +987,7 @@ export type PaperExamSheetCreateManyStudentInput = {
   groupTeacher?: string | null
   classroomId?: string | null
   answers: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: string | null
   totalScore: number
   maxScore: number
   supersededAt?: Date | string | null
@@ -974,6 +1004,7 @@ export type PaperExamSheetUpdateWithoutStudentInput = {
   groupTeacher?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
   maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -994,6 +1025,7 @@ export type PaperExamSheetUncheckedUpdateWithoutStudentInput = {
   groupTeacher?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
   maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1012,6 +1044,7 @@ export type PaperExamSheetUncheckedUpdateManyWithoutStudentInput = {
   groupTeacher?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
   maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1030,6 +1063,7 @@ export type PaperExamSheetCreateManyExamInput = {
   groupTeacher?: string | null
   classroomId?: string | null
   answers: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: string | null
   totalScore: number
   maxScore: number
   supersededAt?: Date | string | null
@@ -1046,6 +1080,7 @@ export type PaperExamSheetUpdateWithoutExamInput = {
   groupTeacher?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
   maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1066,6 +1101,7 @@ export type PaperExamSheetUncheckedUpdateWithoutExamInput = {
   groupTeacher?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
   maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1084,6 +1120,7 @@ export type PaperExamSheetUncheckedUpdateManyWithoutExamInput = {
   groupTeacher?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
   maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1102,6 +1139,7 @@ export type PaperExamSheetCreateManyImportInput = {
   groupTeacher?: string | null
   classroomId?: string | null
   answers: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: string | null
   totalScore: number
   maxScore: number
   supersededAt?: Date | string | null
@@ -1118,6 +1156,7 @@ export type PaperExamSheetUpdateWithoutImportInput = {
   groupTeacher?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
   maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1138,6 +1177,7 @@ export type PaperExamSheetUncheckedUpdateWithoutImportInput = {
   groupTeacher?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
   maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1156,6 +1196,7 @@ export type PaperExamSheetUncheckedUpdateManyWithoutImportInput = {
   groupTeacher?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classroomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   answers?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  variant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalScore?: Prisma.FloatFieldUpdateOperationsInput | number
   maxScore?: Prisma.FloatFieldUpdateOperationsInput | number
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1177,6 +1218,7 @@ export type PaperExamSheetSelect<ExtArgs extends runtime.Types.Extensions.Intern
   groupTeacher?: boolean
   classroomId?: boolean
   answers?: boolean
+  variant?: boolean
   totalScore?: boolean
   maxScore?: boolean
   supersededAt?: boolean
@@ -1199,6 +1241,7 @@ export type PaperExamSheetSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   groupTeacher?: boolean
   classroomId?: boolean
   answers?: boolean
+  variant?: boolean
   totalScore?: boolean
   maxScore?: boolean
   supersededAt?: boolean
@@ -1221,6 +1264,7 @@ export type PaperExamSheetSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   groupTeacher?: boolean
   classroomId?: boolean
   answers?: boolean
+  variant?: boolean
   totalScore?: boolean
   maxScore?: boolean
   supersededAt?: boolean
@@ -1243,6 +1287,7 @@ export type PaperExamSheetSelectScalar = {
   groupTeacher?: boolean
   classroomId?: boolean
   answers?: boolean
+  variant?: boolean
   totalScore?: boolean
   maxScore?: boolean
   supersededAt?: boolean
@@ -1250,7 +1295,7 @@ export type PaperExamSheetSelectScalar = {
   createdAt?: boolean
 }
 
-export type PaperExamSheetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "examId" | "importId" | "studentId" | "rawCode" | "rawLastName" | "rawFirstName" | "groupLabel" | "groupTeacher" | "classroomId" | "answers" | "totalScore" | "maxScore" | "supersededAt" | "supersededByImportId" | "createdAt", ExtArgs["result"]["paperExamSheet"]>
+export type PaperExamSheetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "examId" | "importId" | "studentId" | "rawCode" | "rawLastName" | "rawFirstName" | "groupLabel" | "groupTeacher" | "classroomId" | "answers" | "variant" | "totalScore" | "maxScore" | "supersededAt" | "supersededByImportId" | "createdAt", ExtArgs["result"]["paperExamSheet"]>
 export type PaperExamSheetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   exam?: boolean | Prisma.PaperExamDefaultArgs<ExtArgs>
   import?: boolean | Prisma.PaperExamImportDefaultArgs<ExtArgs>
@@ -1295,9 +1340,14 @@ export type $PaperExamSheetPayload<ExtArgs extends runtime.Types.Extensions.Inte
      */
     classroomId: string | null
     /**
-     * Бодлого бүрийн хариу: «A»…«E», «» хоосон, «*» давхар будсан, «+» зөв, «-» буруу
+     * Бодлого бүрийн хариу: «A»…«E», «» хоосон, «*» давхар будсан, «+» зөв, «-» буруу;
+     * 2-р хэсгийн багц: нүд бүрийн цифр «2122» («_» хоосон, «*» давхар будсан)
      */
     answers: runtime.JsonValue
+    /**
+     * Шалгалтын хувилбар «A», «B» — PaperExamItem.answerKeys-ээс түлхүүр сонгоно
+     */
+    variant: string | null
     totalScore: number
     maxScore: number
     /**
@@ -1746,6 +1796,7 @@ export interface PaperExamSheetFieldRefs {
   readonly groupTeacher: Prisma.FieldRef<"PaperExamSheet", 'String'>
   readonly classroomId: Prisma.FieldRef<"PaperExamSheet", 'String'>
   readonly answers: Prisma.FieldRef<"PaperExamSheet", 'Json'>
+  readonly variant: Prisma.FieldRef<"PaperExamSheet", 'String'>
   readonly totalScore: Prisma.FieldRef<"PaperExamSheet", 'Float'>
   readonly maxScore: Prisma.FieldRef<"PaperExamSheet", 'Float'>
   readonly supersededAt: Prisma.FieldRef<"PaperExamSheet", 'DateTime'>

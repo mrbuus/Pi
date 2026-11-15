@@ -58,6 +58,8 @@ export interface ParsedPaperFile {
   format?: 'V2';
   /** V2: бодлого бүрийн оноо «Түлхүүр» шийтээс (1-ээс эхэлсэн дарааллаар) */
   itemPoints?: number[];
+  /** V2: бодлого бүрийн нэр, оноо, хувилбар бүрийн түлхүүр */
+  v2Items?: V2Item[];
   /** V2: файл доторх ижил сурагчийн ижил мөр (давхар файлаас) — нэг л удаа авна */
   droppedDuplicates?: number;
 }
@@ -234,49 +236,88 @@ function splitFull(text: string): { lastName: string; firstName: string } {
 // ---------------------------------------------------------------------------
 // V2 боловсруулалтын файл (эзний машин → «… V2.xlsx», 2026-11-14):
 //   Дүн | Хариулт | Оноо | Зөв-Буруу | Түлхүүр | Анализ | Шалгах | Тайлбар
-// «Зөв-Буруу»: № | ID | Овог | Нэр | Анги | Хувилбар | Оноо | Гүйцэтгэл % | 1 … N
-//   (1 = зөв, хоосон = буруу; 1–36 нь 1-р хэсэг, 37-оос хойш 2-р хэсгийн багц).
-// «Түлхүүр»: Хувилбар | № | Хэсэг | Бодлого / багц | Зөв хариу | Оноо — бодлогын тоо, оноо.
-// Анги бүр нэг баг. Хувилбар бүрийн түлхүүр өөр ч оноо нь ижил тул зөв/буруугаар дүгнэнэ.
-// Бодсон оноо файлын «Оноо»-оос зөрвөл тэр мөрийг алдаатай гэж үзээд хадгалахгүй.
+// «Хариулт»: № | ID | Овог | Нэр | Анги | Хувилбар | Нийт | 1 … 36 | 2.1.a … 2.4.h
+//   — сурагчийн БИЧСЭН хариу: 1–36-д үсэг (A–E, «*» давхар будсан, хоосон), 2-р хэсэгт нүд бүрийн цифр.
+// «Түлхүүр»: Хувилбар | № | Хэсэг | Бодлого / багц | Зөв хариу | Оноо | Багцын оронгийн тоо
+//   — хувилбар бүрийн түлхүүр; 2-р хэсгийн багц «2.1.a-d» нь 4 нүд, бүгд зөв бол л оноо.
+// Сурагч бүрийг өөрийн хувилбарын түлхүүрээр дүгнэнэ. Бодсон нийт оноо «Нийт»-ээс зөрвөл
+// тэр мөрийг алдаатай гэж үзээд ХАДГАЛАХГҮЙ (эзэн: алдаатай дүн хэзээ ч нийтлэгдэхгүй).
 // ---------------------------------------------------------------------------
-const V2_SHEETS = { binary: 'зөв-буруу', key: 'түлхүүр', check: 'шалгах' };
+const V2_SHEETS = { answers: 'хариулт', key: 'түлхүүр', check: 'шалгах' };
 
 function sheetByName(workbook: ExcelJS.Workbook, name: string) {
   return workbook.worksheets.find((w) => norm(w.name) === name);
 }
 
+export interface V2Item {
+  /** «7» эсвэл «2.1.a-d» */
+  label: string;
+  points: number;
+  /** Багцын нүднүүдийн толгой: ["2.1.a","2.1.b",…]; сонгох бодлогод [«7»] */
+  cols: string[];
+  /** Хувилбар → зөв хариу */
+  keys: Record<string, string>;
+}
+
+/** «2.1.a-d» → ["2.1.a","2.1.b","2.1.c","2.1.d"]; «2.2.e» → ["2.2.e"]; «7» → ["7"] */
+export function expandLabel(label: string): string[] {
+  const m = label.trim().match(/^(\d+\.\d+)\.([a-h])(?:-([a-h]))?$/i);
+  if (!m) return [label.trim()];
+  const from = m[2].toLowerCase().charCodeAt(0);
+  const to = (m[3] ?? m[2]).toLowerCase().charCodeAt(0);
+  const out: string[] = [];
+  for (let c = from; c <= to; c++)
+    out.push(`${m[1]}.${String.fromCharCode(c)}`);
+  return out;
+}
+
 /**
- * «Түлхүүр» шийтээс бодлого бүрийн оноо. Машины key.ini-д ашиглаагүй хувилбар (ж: C)
- * байж болох тул зөвхөн сурагчдын бөглөсөн хувилбаруудыг (`used`) харьцуулна.
+ * «Түлхүүр» шийтээс бодлогууд. Машины key.ini-д ашиглаагүй хувилбар (ж: C) байж болох тул
+ * зөвхөн сурагчдын бөглөсөн хувилбаруудыг (`used`) авна; тэдгээрийн бүтэц (багц, оноо) ижил байх ёстой.
  */
-function v2ItemPoints(
-  ws: ExcelJS.Worksheet,
-  used: Set<string>,
-): number[] | string {
-  const byVariant = new Map<string, Map<number, number>>();
+function v2Items(ws: ExcelJS.Worksheet, used: Set<string>): V2Item[] | string {
+  const byVariant = new Map<
+    string,
+    Map<number, { label: string; key: string; points: number }>
+  >();
   ws.eachRow((row, r) => {
     if (r === 1) return;
     const variant = cellText(row.getCell(1).value).trim();
     const n = plainValue(row.getCell(2).value);
+    const label = cellText(row.getCell(4).value).trim();
+    const key = cellText(row.getCell(5).value).trim().toUpperCase();
     const pts = plainValue(row.getCell(6).value);
-    if (!variant || typeof n !== 'number' || typeof pts !== 'number') return;
+    if (!variant || typeof n !== 'number' || typeof pts !== 'number' || !label)
+      return;
     if (used.size > 0 && !used.has(variant)) return;
     if (!byVariant.has(variant)) byVariant.set(variant, new Map());
-    byVariant.get(variant)!.set(n, pts);
+    byVariant.get(variant)!.set(n, { label, key, points: pts });
   });
-  const lists = [...byVariant.values()].map((m) => {
-    const out: number[] = [];
-    for (let n = 1; m.has(n); n++) out.push(m.get(n)!);
-    return out;
-  });
-  if (lists.length === 0 || lists[0].length === 0)
-    return '«Түлхүүр» шийтээс бодлогын оноо уншигдсангүй';
-  if (lists.some((l) => l.join(',') !== lists[0].join(',')))
-    return 'Хувилбаруудын бодлогын тоо эсвэл оноо зөрж байна';
-  if (lists[0].some((p) => !Number.isInteger(p) || p < 0 || p > 100))
-    return '«Түлхүүр» шийтэд буруу оноо байна';
-  return lists[0];
+  if (byVariant.size === 0) return '«Түлхүүр» шийтээс бодлого уншигдсангүй';
+  const variants = [...byVariant.keys()].sort();
+  const first = byVariant.get(variants[0])!;
+  const items: V2Item[] = [];
+  for (let n = 1; first.has(n); n++) {
+    const base = first.get(n)!;
+    const keys: Record<string, string> = {};
+    for (const v of variants) {
+      const it = byVariant.get(v)!.get(n);
+      if (!it || it.label !== base.label || it.points !== base.points)
+        return `Хувилбаруудын ${n}-р бодлогын бүтэц (багц, оноо) зөрж байна`;
+      keys[v] = it.key;
+    }
+    if (!Number.isInteger(base.points) || base.points < 0 || base.points > 100)
+      return `«Түлхүүр»: ${n}-р бодлогын оноо буруу`;
+    const cols = expandLabel(base.label);
+    if (
+      cols.length > 1 &&
+      Object.values(keys).some((k) => k.length !== cols.length)
+    )
+      return `«Түлхүүр»: ${base.label} багцын цифрийн тоо нүдний тоотой таарахгүй`;
+    items.push({ label: base.label, points: base.points, cols, keys });
+  }
+  if (items.length === 0) return '«Түлхүүр» шийтэд 1-р бодлого алга';
+  return items;
 }
 
 /** «Шалгах» шийт: ID → тэмдэглэлүүд. */
@@ -299,101 +340,130 @@ function v2Notes(ws: ExcelJS.Worksheet | undefined): Map<string, string[]> {
   return out;
 }
 
+/** Сонгох бодлогын нүд: «A»…«E», «*», «» */
+function choiceCell(raw: string): { v: string; odd: boolean } {
+  const t = raw.normalize('NFKC').trim();
+  if (t === '') return { v: '', odd: false };
+  if (t === '*') return { v: '*', odd: false };
+  const one = normalizeLetter(t);
+  if (one) return { v: one, odd: false };
+  const parts = t.replace(/[\s,;/]+/g, '').split('');
+  if (parts.length >= 2 && parts.every((x) => normalizeLetter(x)))
+    return { v: '*', odd: false };
+  return { v: '', odd: true };
+}
+
+/** Багцын нэг нүд: цифр, «-» хасах тэмдэг (хуудсан дээр бий), «*» давхар будсан, «_» хоосон */
+function digitCell(raw: string): { v: string; odd: boolean } {
+  const t = raw.normalize('NFKC').trim();
+  if (t === '') return { v: '_', odd: false };
+  if (t === '*') return { v: '*', odd: false };
+  if (/^\d$/.test(t) || t === '-') return { v: t, odd: false };
+  return { v: '_', odd: true };
+}
+
 function parseV2(workbook: ExcelJS.Workbook): ParsedPaperFile | null {
-  const binary = sheetByName(workbook, V2_SHEETS.binary);
-  const key = sheetByName(workbook, V2_SHEETS.key);
-  if (!binary || !key) return null;
-  // Сурагчдын бөглөсөн хувилбарууд — «Хувилбар» баганаас
-  const used = new Set<string>();
-  const head = findHeader(binary);
-  if (head) {
-    let col: number | null = null;
-    binary.getRow(head.row).eachCell((c, i) => {
-      if (norm(cellText(c.value)) === 'хувилбар') col ??= i;
-    });
-    if (col !== null) {
-      for (let r = head.row + 1; r <= binary.rowCount; r++) {
-        const v = cellText(binary.getRow(r).getCell(col).value).trim();
-        if (v) used.add(v);
-      }
-    }
-  }
-  const points = v2ItemPoints(key, used);
-  const skipped: { name: string; reason: string }[] = [];
-  if (typeof points === 'string') {
-    return {
-      itemCount: 0,
-      sheets: [],
-      skipped: [{ name: key.name, reason: points }],
-      rows: [],
-      format: 'V2',
-    };
-  }
-  const layout = findHeader(binary);
-  if (!layout || layout.items.length < points.length) {
-    return {
-      itemCount: 0,
-      sheets: [],
-      skipped: [
-        {
-          name: binary.name,
-          reason: `1…${points.length} дугаартай толгой мөр олдсонгүй`,
-        },
-      ],
-      rows: [],
-      format: 'V2',
-    };
-  }
-  const items = layout.items.slice(0, points.length);
-  let classCol: number | null = null;
-  let variantCol: number | null = null;
-  binary.getRow(layout.row).eachCell((c, col) => {
-    const t = norm(cellText(c.value));
-    if (t === 'анги') classCol ??= col;
-    if (t === 'хувилбар') variantCol ??= col;
+  const answersWs = sheetByName(workbook, V2_SHEETS.answers);
+  const keyWs = sheetByName(workbook, V2_SHEETS.key);
+  if (!answersWs || !keyWs) return null;
+  const fail = (name: string, reason: string): ParsedPaperFile => ({
+    itemCount: 0,
+    sheets: [],
+    skipped: [{ name, reason }],
+    rows: [],
+    format: 'V2',
   });
+
+  // Толгой мөр: нэр → багана
+  const header = new Map<string, number>();
+  answersWs.getRow(1).eachCell((c, col) => {
+    const t = cellText(c.value).normalize('NFKC').trim();
+    if (t && !header.has(t.toLowerCase())) header.set(t.toLowerCase(), col);
+  });
+  const col = (name: string) => header.get(name) ?? null;
+  const idCol = col('id') ?? col('шифр');
+  const lastCol = col('овог');
+  const firstCol = col('нэр');
+  const classCol = col('анги');
+  const variantCol = col('хувилбар');
+  const totalCol = col('нийт') ?? col('оноо');
+  if (idCol === null || variantCol === null)
+    return fail(
+      answersWs.name,
+      '«ID», «Хувилбар» баганатай толгой мөр олдсонгүй',
+    );
+
+  const used = new Set<string>();
+  for (let r = 2; r <= answersWs.rowCount; r++) {
+    const v = cellText(answersWs.getRow(r).getCell(variantCol).value).trim();
+    if (v) used.add(v);
+  }
+  const items = v2Items(keyWs, used);
+  if (typeof items === 'string') return fail(keyWs.name, items);
+  const missing = items
+    .flatMap((it) => it.cols)
+    .filter((c) => !header.has(c.toLowerCase()));
+  if (missing.length)
+    return fail(
+      answersWs.name,
+      `Хариултын багана олдсонгүй: ${missing.slice(0, 6).join(', ')}`,
+    );
   const notes = v2Notes(sheetByName(workbook, V2_SHEETS.check));
 
   const rows: ParsedPaperRow[] = [];
-  const seen = new Map<string, ParsedPaperRow>();
+  const seen = new Set<string>();
   let droppedDuplicates = 0;
-  const end = Math.min(binary.rowCount, layout.row + MAX_ROWS_PER_SHEET * 5);
-  for (let r = layout.row + 1; r <= end; r++) {
-    const row = binary.getRow(r);
-    const text = (col: number | null) =>
-      col === null ? '' : cellText(row.getCell(col).value).trim();
-    const code =
-      layout.code === null ? '' : normalizeCode(row.getCell(layout.code).value);
-    const lastName = text(layout.last);
-    const firstName = text(layout.first);
+  for (let r = 2; r <= answersWs.rowCount; r++) {
+    const row = answersWs.getRow(r);
+    const text = (c: number | null) =>
+      c === null ? '' : cellText(row.getCell(c).value).trim();
+    const code = normalizeCode(row.getCell(idCol).value);
+    const lastName = text(lastCol);
+    const firstName = text(firstCol);
     if (!code && !firstName && !lastName) continue;
+    const variant = text(variantCol) || null;
     let odd = 0;
-    const answers = items.map((col) => {
-      const p = parseAnswerCell(row.getCell(col).value);
-      if (p.odd) odd += 1;
-      if (p.answer === '+') return '+';
-      if (p.answer !== null && p.answer !== '-') odd += 1;
-      return '-';
+    const answers = items.map((it) => {
+      if (it.cols.length === 1 && !/\./.test(it.cols[0])) {
+        const c = choiceCell(text(header.get(it.cols[0].toLowerCase())!));
+        if (c.odd) odd += 1;
+        return c.v;
+      }
+      return it.cols
+        .map((h) => {
+          const c = digitCell(text(header.get(h.toLowerCase())!));
+          if (c.odd) odd += 1;
+          return c.v;
+        })
+        .join('');
     });
-    const scoreValue =
-      layout.score === null
-        ? null
-        : plainValue(row.getCell(layout.score).value);
+    const totalValue =
+      totalCol === null ? null : plainValue(row.getCell(totalCol).value);
     const fileScore =
-      typeof scoreValue === 'number' && Number.isFinite(scoreValue)
-        ? scoreValue
+      typeof totalValue === 'number' && Number.isFinite(totalValue)
+        ? totalValue
         : null;
-    const total = answers.reduce(
-      (t, a, i) => t + (a === '+' ? points[i] : 0),
-      0,
-    );
+    let total = 0;
+    let unknownVariant = false;
+    items.forEach((it, i) => {
+      const key = variant ? it.keys[variant] : undefined;
+      if (key === undefined) unknownVariant = true;
+      else if (answers[i] === key) total += it.points;
+    });
     let error: string | null = null;
-    if (fileScore === null) error = 'Файлд «Оноо» байхгүй';
+    if (unknownVariant) error = `«${variant ?? ''}» хувилбарын түлхүүр алга`;
+    else if (fileScore === null) error = 'Файлд «Нийт» оноо байхгүй';
     else if (fileScore !== total)
-      error = `Машины оноо ${fileScore}, зөв хариунаас бодсон ${total} — зөрж байна`;
+      error = `Машины оноо ${fileScore}, хариунаас бодсон ${total} — зөрж байна`;
     if (odd) error ??= `${odd} нүдний утга танигдсангүй`;
-    const parsed: ParsedPaperRow = {
-      sheetName: binary.name,
+    const sig = `${code}|${lastName}|${firstName}|${variant}|${answers.join(',')}`;
+    if (code && seen.has(sig)) {
+      droppedDuplicates += 1;
+      continue;
+    }
+    seen.add(sig);
+    rows.push({
+      sheetName: answersWs.name,
       rowNumber: r,
       code,
       lastName,
@@ -403,34 +473,27 @@ function parseV2(workbook: ExcelJS.Workbook): ParsedPaperFile | null {
       answers,
       fileScore,
       oddCells: odd,
-      variant: text(variantCol) || null,
+      variant,
       notes: code ? (notes.get(code) ?? []) : [],
       error,
-    };
-    // Ижил сурагч ижил хариутай давхар орсон (хоёр файлд) — нэгийг л авна
-    const sig = `${code}|${lastName}|${firstName}|${answers.join('')}`;
-    if (code && seen.has(sig)) {
-      droppedDuplicates += 1;
-      continue;
-    }
-    seen.set(sig, parsed);
-    rows.push(parsed);
+    });
   }
   const groups = [...new Set(rows.map((r) => r.groupLabel))];
   return {
-    itemCount: points.length,
+    itemCount: items.length,
     sheets: groups.map((g) => ({
       name: g,
       groupLabel: g,
       groupTeacher: null,
-      itemCount: points.length,
+      itemCount: items.length,
       rowCount: rows.filter((r) => r.groupLabel === g).length,
-      mode: 'BINARY' as const,
+      mode: 'LETTERS' as const,
     })),
-    skipped,
+    skipped: [],
     rows,
     format: 'V2',
-    itemPoints: points,
+    itemPoints: items.map((it) => it.points),
+    v2Items: items,
     droppedDuplicates,
   };
 }

@@ -91,7 +91,7 @@ export default function ImportPanel({
         <h3 className="mb-3 flex items-center gap-2 font-bold text-brand-soft">
           <Upload className="size-5" aria-hidden /> Файл оруулах
           <InfoHint label="Файлын хэлбэр">
-            Шийт бүр нэг баг. Шифр, Овог, Нэр баганууд ба 1…{itemCount} дугаартай бодлогын баганууд. Нүдэнд 1 (зөв), хоосон (буруу),
+            Машины V2 файл (Хариулт, Түлхүүр шийттэй) эсвэл шийт бүр нэг анги: Шифр, Овог, Нэр баганууд ба 1…{itemCount} дугаартай бодлогын баганууд. Нүдэнд 1 (зөв), хоосон (буруу),
             эсвэл уншигчийн гаргасан үсэг (A–E).
           </InfoHint>
         </h3>
