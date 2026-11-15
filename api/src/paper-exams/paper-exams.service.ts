@@ -1711,7 +1711,18 @@ export class PaperExamsService {
         totalScore: true,
         maxScore: true,
         rawCode: true,
-        student: { select: { studentCode: true } },
+        groupLabel: true,
+        student: {
+          select: {
+            studentCode: true,
+            enrollments: {
+              where: { leftAt: null, classroom: { archived: false } },
+              orderBy: { joinedAt: 'desc' },
+              take: 1,
+              select: { classroom: { select: { name: true } } },
+            },
+          },
+        },
       },
     });
     const labels = rankLabels(sheets.map((s) => s.totalScore));
@@ -1721,6 +1732,16 @@ export class PaperExamsService {
         maxScore: s.maxScore,
         code: s.student?.studentCode ?? s.rawCode,
         rank: labels[i],
+        // Анги — ЗӨВХӨН ажилтанд (сурагчид код, оноо, байр л харна); одоогийн ангиар
+        ...(isStudent
+          ? {}
+          : {
+              group: (
+                s.student?.enrollments[0]?.classroom.name ?? s.groupLabel
+              )
+                .replace(/\s*\(.*\)\s*$/, '')
+                .trim(),
+            }),
       }))
       .sort((a, b) => b.score - a.score || a.code.localeCompare(b.code));
     return {

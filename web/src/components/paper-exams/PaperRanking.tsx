@@ -16,7 +16,7 @@ import { dayText, scoreText, type PaperExamRow, type PaperRanking as Ranking } f
 /** Excel (UTF-8 BOM) — зөвхөн Админ, Багш+ (эзэн 2026-11-15: Excel олон нийтэд нээлттэй биш). */
 function downloadCsv(r: Ranking) {
   const esc = (v: string) => (/[",\n;]/.test(v) ? `"${v.replaceAll('"', '""')}"` : v);
-  const lines = [esc(r.exam.title), ["Дүн", "Сурагчийн код", "Байр"].join(","), ...r.rows.map((x) => [scoreText(x.score), esc(x.code), esc(x.rank)].join(","))];
+  const lines = [esc(r.exam.title), ["Дүн", "Сурагчийн код", "Анги", "Байр"].join(","), ...r.rows.map((x) => [scoreText(x.score), esc(x.code), esc(x.group ?? ""), esc(x.rank)].join(","))];
   save(new Blob(["﻿" + lines.join("\r\n") + "\r\n"], { type: "text/csv;charset=utf-8" }), `${r.exam.title} — дүн.csv`);
 }
 
@@ -170,8 +170,10 @@ export default function PaperRanking() {
   }, [data]);
   const rows = useMemo(() => {
     const q = query.trim().toUpperCase();
-    return (data?.rows ?? []).filter((r) => !q || r.code.toUpperCase().includes(q));
+    return (data?.rows ?? []).filter((r) => !q || r.code.toUpperCase().includes(q) || (r.group ?? "").toUpperCase() === q);
   }, [data, query]);
+  // Анги зөвхөн ажилтанд ирнэ (сурагч код, оноо, байр л харна)
+  const hasGroup = (data?.rows ?? []).some((r) => r.group);
 
   if (!exams) return error ? <ErrorState message={error} onRetry={loadExams} /> : <SkeletonRows rows={8} />;
   if (withScores.length === 0) return <EmptyState title="Дүн оруулсан нэгдсэн шалгалт алга" />;
@@ -204,7 +206,7 @@ export default function PaperRanking() {
             inputMode="numeric"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Сурагчийн код"
+            placeholder="Сурагчийн код эсвэл анги"
             className="h-11 w-full rounded-xl border border-line bg-bg py-2 pl-9 pr-3 text-sm text-ink outline-none focus:border-brand"
           />
         </div>
@@ -246,14 +248,16 @@ export default function PaperRanking() {
           </div>
           <table className="w-full table-fixed border-collapse text-sm tabular-nums">
             <colgroup>
-              <col className="w-[28%]" />
-              <col className="w-[44%]" />
-              <col className="w-[28%]" />
+              <col className={hasGroup ? "w-[20%]" : "w-[28%]"} />
+              <col className={hasGroup ? "w-[32%]" : "w-[44%]"} />
+              {hasGroup && <col className="w-[26%]" />}
+              <col className={hasGroup ? "w-[22%]" : "w-[28%]"} />
             </colgroup>
             <thead className="bg-brand-bright/12 text-xs font-bold text-brand-soft">
               <tr>
                 <th className={cn(cell, "border-y")}>Дүн</th>
                 <th className={cn(cell, "border-x border-y")}>Сурагчийн код</th>
+                {hasGroup && <th className={cn(cell, "border-y border-r")}>Анги</th>}
                 <th className={cn(cell, "border-y")}>Байр</th>
               </tr>
             </thead>
@@ -262,6 +266,7 @@ export default function PaperRanking() {
                 <tr key={`${r.code}-${i}`} className={cn((bandOf.get(r.rank) ?? 0) % 2 === 1 && "bg-brand-bright/10")}>
                   <td className={cn(cell, "border-b font-bold text-ink")}>{scoreText(r.score)}</td>
                   <td className={cn(cell, "border-x border-b text-ink")}>{r.code}</td>
+                  {hasGroup && <td className={cn(cell, "border-b border-r text-ink")}>{r.group}</td>}
                   <td className={cn(cell, "border-b text-ink-dim")}>{r.rank}</td>
                 </tr>
               ))}

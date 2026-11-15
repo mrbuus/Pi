@@ -229,7 +229,8 @@ export interface MyPaperDetail {
 /** Дүнгийн жагсаалт: Дүн | Сурагчийн код | Байр («1-2» — ижил оноотой) */
 export interface PaperRanking {
   exam: { id: string; title: string; heldOn: string; published: boolean };
-  rows: { score: number; maxScore: number; code: string; rank: string }[];
+  /** group — анги, зөвхөн ажилтанд ирнэ */
+  rows: { score: number; maxScore: number; code: string; rank: string; group?: string }[];
 }
 
 /** Бодлогын тайлбар (API: paper-exams/paper-exam-guide.ts GuideContent). Томьёо `$…$`, `$$…$$`. */
