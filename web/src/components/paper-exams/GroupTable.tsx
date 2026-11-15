@@ -34,6 +34,8 @@ import {
  * № | Шифр | Овог | Нэр | Оноо | Сул агуулга | 1..N, доор нь «Гүйцэтгэл %»,
  * хүснэгтийн доор «Агуулгын төрлөөр — гүйцэтгэл %».
  */
+const ALL = "Бүгд";
+
 export default function GroupTable({ board, onChanged }: { board: Board; onChanged: () => void }) {
   const [active, setActive] = useState(board.groups[0]?.label ?? "");
   const [query, setQuery] = useState("");
@@ -66,13 +68,26 @@ export default function GroupTable({ board, onChanged }: { board: Board; onChang
       />
     );
   }
-  const group = board.groups.find((g) => g.label === active) ?? board.groups[0];
+  // «Бүгд» — бүх ангийн сурагч нэг хүснэгтэд, оноогоор (эзэн 2026-11-15)
+  const all: BoardGroup = {
+    label: ALL,
+    teacher: null,
+    count: board.overall.count,
+    avgScore: board.overall.avgScore,
+    avgPct: board.overall.avgPct,
+    items: board.overall.items,
+    areas: board.overall.areas,
+    topics: board.overall.topics,
+    rows: board.groups.flatMap((g) => g.rows).sort((x, y) => y.totalScore - x.totalScore || x.code.localeCompare(y.code)),
+  };
+  const tabs = [all, ...board.groups];
+  const group = tabs.find((g) => g.label === active) ?? board.groups[0];
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto pb-1" role="tablist" aria-label="Анги">
-          {board.groups.map((g) => (
+          {tabs.map((g) => (
             <button
               key={g.label}
               role="tab"
