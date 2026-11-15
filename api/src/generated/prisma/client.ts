@@ -859,6 +859,13 @@ export type PaperExam = Prisma.PaperExamModel
  */
 export type PaperExamItem = Prisma.PaperExamItemModel
 /**
+ * Model PaperExamGuide
+ * Бодлого бүрийн тайлбар: нөхцөл, мэдэж байх ёстой чанар, энгийн тайлбар, 100x100-ын төстэй
+ * бодлого, алхамчилсан бодолт. Урьдчилан бэлдэж ачаална (api/prisma/paper-exam-guide.cjs) —
+ * вэб ажиллах үедээ AI дуудахгүй. Дүнд нөлөөлөхгүй, зөвхөн сурагчийн дүнгийн дэлгэцэд харагдана.
+ */
+export type PaperExamGuide = Prisma.PaperExamGuideModel
+/**
  * Model PaperExamSheet
  * 
  */

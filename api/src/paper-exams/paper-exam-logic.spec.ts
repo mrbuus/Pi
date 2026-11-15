@@ -7,6 +7,7 @@ import {
   normalizeLetter,
   orderAreas,
   publicName,
+  rankLabels,
   statusOf,
   weakAreas,
   type PaperItem,
@@ -206,5 +207,19 @@ describe('publicName, normalizeLetter', () => {
     expect(normalizeLetter('Г')).toBeNull();
     expect(normalizeLetter('AB')).toBeNull();
     expect(normalizeLetter('F')).toBeNull();
+  });
+});
+
+describe('rankLabels — ижил оноотой хуваана', () => {
+  it('«1-2», «3», «4-6» хэлбэрээр', () => {
+    expect(rankLabels([100, 90, 100, 50, 50, 50])).toEqual([
+      '1-2',
+      '3',
+      '1-2',
+      '4-6',
+      '4-6',
+      '4-6',
+    ]);
+    expect(rankLabels([7])).toEqual(['1']);
   });
 });

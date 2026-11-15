@@ -105,6 +105,8 @@ export interface BoardGroup {
 export interface Board {
   exam: { id: string; title: string; heldOn: string; itemCount: number; published: boolean };
   scope: "ALL" | "OWN_CLASSES";
+  /** Бодлогын тайлбар ачаалсан хувилбарууд («A», «B») — ажилтанд */
+  guideVariants: string[];
   topicsList: { slug: string; name: string }[];
   classifyBy: ClassifyBy;
   formulas: FormulaRef[];
@@ -208,7 +210,44 @@ export interface MyPaperDetail {
   };
   classifyBy: ClassifyBy;
   formulas: FormulaRef[];
-  ranking: { rank: number; name: string; group: string; totalScore: number; maxScore: number; isMe: boolean }[];
+  /** name = сурагчийн код (нэр харуулахгүй) */
+  ranking: { rank: number; rankLabel: string; name: string; group: string; totalScore: number; maxScore: number; isMe: boolean }[];
+}
+
+/** Дүнгийн жагсаалт: Дүн | Сурагчийн код | Байр («1-2» — ижил оноотой) */
+export interface PaperRanking {
+  exam: { id: string; title: string; heldOn: string; published: boolean };
+  rows: { score: number; maxScore: number; code: string; rank: string }[];
+}
+
+/** Бодлогын тайлбар (API: paper-exams/paper-exam-guide.ts GuideContent). Томьёо `$…$`, `$$…$$`. */
+export interface GuideContent {
+  kind: "choice" | "fill";
+  points: number;
+  statement: string[];
+  image?: string;
+  choices?: string[];
+  answer?: string;
+  fields?: { key: string; value: string; part: number }[];
+  parts?: { points: number }[];
+  rule: string[];
+  easy: string[];
+  refs: { chapter: string; test: number; number: string; text: string }[];
+  steps: string[];
+  topic: string;
+}
+
+export interface GuideEntry {
+  /** Дэлгэцийн дугаар: «12», «II.3» */
+  label: string;
+  /** Дүнтэй холбогдох бодлогын дугаар; дүнд ороогүй (нөхөх даалгавар) бол null */
+  number: number | null;
+  content: GuideContent;
+}
+
+export interface MyPaperGuide {
+  variant: string;
+  entries: GuideEntry[];
 }
 
 /** «2026-11-10» → «2026.11.10» (цагийн бүсгүй өдөр) */

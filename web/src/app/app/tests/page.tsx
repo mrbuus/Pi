@@ -1,6 +1,6 @@
 "use client";
 
-import { ScanLine, Search } from "lucide-react";
+import { ArrowLeft, EyeOff, ScanLine, Search, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { LoadingState } from "@/components/ui/StateBlock";
@@ -11,6 +11,8 @@ import ExamsBoard from "@/components/exams/ExamsBoard";
 import StudentExamLists from "@/components/exams/StudentExamLists";
 import StudentExamsHub from "@/components/exams/StudentExamsHub";
 import TopicGroup from "@/components/test-list/TopicGroup";
+import PaperExamsList from "@/components/paper-exams/PaperExamsList";
+import PaperRanking from "@/components/paper-exams/PaperRanking";
 import {
   collapseVariants,
   isExamType,
@@ -52,7 +54,81 @@ export default function TestsPage() {
   const role = getRole();
   // Сурагч, худалдан авагч — нэг «Шалгалт» хэсэг (Өгөх, Өгсөн, Эрэмбэ, Жишиг сорил)
   if (role === "STUDENT" || role === "BUYER") return <StudentExamsHub />;
-  return <StaffTestsView role={role} />;
+  return <StaffExamHome role={role} />;
+}
+
+type StaffView = "paper" | "scores" | "hidden";
+
+/**
+ * Ажилтны «Шалгалт» (эзэн 2026-11-15): одоохондоо зөвхөн Нэгдсэн шалгалт ба түүний «Дүн».
+ * Бусад тест, шалгалт устаагүй — «Нуусан шалгалт» дотор, зөвхөн Админд харагдана.
+ */
+function StaffExamHome({ role }: { role: string | null }) {
+  const isAdmin = role === "ADMIN";
+  const canManage = role === "ADMIN" || role === "TEACHER_PLUS";
+  const [view, setView] = useState<StaffView>(() => {
+    const v = new URLSearchParams(window.location.search).get("view");
+    return v === "scores" ? "scores" : v === "hidden" && isAdmin ? "hidden" : "paper";
+  });
+  const change = (v: StaffView) => {
+    setView(v);
+    const url = new URL(window.location.href);
+    if (v === "paper") url.searchParams.delete("view");
+    else url.searchParams.set("view", v);
+    window.history.replaceState(window.history.state, "", url);
+    window.scrollTo({ top: 0 });
+  };
+
+  if (view === "hidden" && isAdmin) {
+    return (
+      <div className="space-y-4">
+        <button
+          onClick={() => change("paper")}
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink-dim hover:text-ink"
+        >
+          <ArrowLeft className="size-4" aria-hidden /> Шалгалт
+        </button>
+        <StaffTestsView role={role} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <h1 className="cyrillic-heading font-display text-2xl font-bold text-ink">Шалгалт</h1>
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Шалгалт">
+        {(
+          [
+            { key: "paper", label: "Нэгдсэн шалгалт", icon: ScanLine },
+            { key: "scores", label: "Дүн", icon: Trophy },
+          ] as const
+        ).map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            role="tab"
+            aria-selected={view === key}
+            onClick={() => change(key)}
+            className={`inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 text-sm font-bold transition ${
+              view === key ? "border-brand-bright bg-brand-bright/15 text-brand-soft" : "border-line text-ink-dim hover:border-brand"
+            }`}
+          >
+            <Icon className="size-4" aria-hidden /> {label}
+          </button>
+        ))}
+      </div>
+      {view === "paper" ? <PaperExamsList canManage={canManage} /> : <PaperRanking />}
+      {isAdmin && (
+        <div className="flex justify-end pt-6">
+          <button
+            onClick={() => change("hidden")}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-ink-dim hover:text-ink"
+          >
+            <EyeOff className="size-4" aria-hidden /> Нуусан шалгалт
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function StaffTestsView({ role }: { role: string | null }) {

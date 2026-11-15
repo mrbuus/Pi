@@ -251,6 +251,19 @@ export function competitionRanks(scores: number[]): number[] {
   return scores.map((s) => 1 + scores.filter((o) => o > s + 1e-9).length);
 }
 
+/**
+ * Байрны шошго: ижил оноотой сурагчид нэг байрыг хуваана — «1-2», «3», «4-6».
+ * Элсэлтийн шалгалтын жагсаалтын хэв маяг (эзэн 2026-11-15).
+ */
+export function rankLabels(scores: number[]): string[] {
+  const sorted = [...scores].sort((a, b) => b - a);
+  return scores.map((s) => {
+    const first = 1 + sorted.filter((o) => o > s + 1e-9).length;
+    const last = sorted.filter((o) => o > s - 1e-9).length;
+    return first === last ? String(first) : `${first}-${last}`;
+  });
+}
+
 /** Олон нийтэд харуулах нэр: «Болор-Эрдэнэ Б.» (овгийн эхний үсэг). */
 export function publicName(firstName: string, lastName: string): string {
   const initial = lastName.trim().charAt(0);

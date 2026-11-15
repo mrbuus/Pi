@@ -548,6 +548,7 @@ export const ModelName = {
   MakeupVisitTest: 'MakeupVisitTest',
   PaperExam: 'PaperExam',
   PaperExamItem: 'PaperExamItem',
+  PaperExamGuide: 'PaperExamGuide',
   PaperExamSheet: 'PaperExamSheet',
   PaperExamImport: 'PaperExamImport'
 } as const
@@ -565,7 +566,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "bankAllocation" | "bankPayerHint" | "bankCursor" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionExtension" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "teacherWorkHours" | "teacherBankAccount" | "teacherPayRate" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "bookPayment" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment" | "homeworkQuiz" | "homeworkQuizScore" | "makeupVisit" | "makeupVisitTest" | "paperExam" | "paperExamItem" | "paperExamSheet" | "paperExamImport"
+    modelProps: "user" | "passwordResetToken" | "smsMessage" | "smsBatch" | "smsTemplate" | "studentProfile" | "teacherProfile" | "externalTeacherProfile" | "parentLink" | "classroom" | "teacherGroup" | "teacherGroupMember" | "enrollment" | "attendance" | "assignment" | "submission" | "submissionRevision" | "dailyHomeworkMark" | "book" | "chapter" | "topic" | "theoryBlock" | "video" | "problemChoice" | "problem" | "tag" | "problemTag" | "formula" | "formulaSection" | "problemFormula" | "problemAnalysis" | "test" | "testDraft" | "testProblem" | "testAccess" | "studentTestAccess" | "testAttemptSession" | "testResult" | "testItemMark" | "testAbsence" | "resultAcknowledgement" | "emailOtp" | "attempt" | "mistakeEntry" | "dailyClassSummary" | "prediction" | "studentColorTag" | "studentNote" | "auditLog" | "contentRevision" | "pass" | "userPass" | "bankTransaction" | "bankAllocation" | "bankPayerHint" | "bankCursor" | "studentCodeLegacy" | "payment" | "productItem" | "purchase" | "expenseRecord" | "tuitionExtension" | "tuitionSettlement" | "tuitionRefund" | "studentWithdrawal" | "announcement" | "announcementClassroomTarget" | "notification" | "notificationPreference" | "notificationDelivery" | "jobRun" | "classTestSession" | "learningEvent" | "enrollmentWindow" | "lead" | "staffTask" | "staffTaskAssignee" | "classSchedule" | "scheduleException" | "lessonTopic" | "dayMeal" | "schedulePublication" | "lessonStaffing" | "teacherWorkDay" | "teacherRosterConfig" | "teacherWorkException" | "academicCalendarDay" | "academicCalendarDayClassroom" | "studentGoal" | "streakFreeze" | "googleIdentity" | "googleOAuthState" | "googleLoginExchange" | "storedFile" | "formulaReview" | "problemReview" | "studyWeeklyGoal" | "formulaReviewDay" | "formulaReviewAttempt" | "feedback" | "classDismissal" | "lessonPacket" | "lessonReceipt" | "lessonPhotoTurn" | "lessonRotation" | "staffCapabilityGrant" | "teacherWorkHours" | "teacherBankAccount" | "teacherPayRate" | "studyReviewRun" | "studyReviewItem" | "studyReviewResponse" | "lessonRecord" | "lessonRecordStudent" | "lessonNote" | "studentBehaviorFlag" | "draftSet" | "draftBlock" | "draftEvent" | "placementAttempt" | "placementTestConfig" | "mockExamEvent" | "mockExamRegistration" | "classTestStatus" | "classCoveredTest" | "lessonPhoto" | "lessonMakeup" | "classCheck" | "classCheckMark" | "bookPayment" | "loginText" | "sheetSyncRun" | "sheetRow" | "sheetRowVersion" | "sheetIssue" | "sheetPayment" | "homeworkAttempt" | "homeworkCheck" | "homeworkPhoto" | "deviceToken" | "appleIdentity" | "accountDeletionRequest" | "uiEvent" | "homeworkDeadline" | "homeworkComment" | "homeworkQuiz" | "homeworkQuizScore" | "makeupVisit" | "makeupVisitTest" | "paperExam" | "paperExamItem" | "paperExamGuide" | "paperExamSheet" | "paperExamImport"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -11743,6 +11744,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PaperExamGuide: {
+      payload: Prisma.$PaperExamGuidePayload<ExtArgs>
+      fields: Prisma.PaperExamGuideFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaperExamGuideFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamGuidePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaperExamGuideFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamGuidePayload>
+        }
+        findFirst: {
+          args: Prisma.PaperExamGuideFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamGuidePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaperExamGuideFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamGuidePayload>
+        }
+        findMany: {
+          args: Prisma.PaperExamGuideFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamGuidePayload>[]
+        }
+        create: {
+          args: Prisma.PaperExamGuideCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamGuidePayload>
+        }
+        createMany: {
+          args: Prisma.PaperExamGuideCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaperExamGuideCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamGuidePayload>[]
+        }
+        delete: {
+          args: Prisma.PaperExamGuideDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamGuidePayload>
+        }
+        update: {
+          args: Prisma.PaperExamGuideUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamGuidePayload>
+        }
+        deleteMany: {
+          args: Prisma.PaperExamGuideDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaperExamGuideUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaperExamGuideUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamGuidePayload>[]
+        }
+        upsert: {
+          args: Prisma.PaperExamGuideUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperExamGuidePayload>
+        }
+        aggregate: {
+          args: Prisma.PaperExamGuideAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePaperExamGuide>
+        }
+        groupBy: {
+          args: Prisma.PaperExamGuideGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperExamGuideGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaperExamGuideCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperExamGuideCountAggregateOutputType> | number
+        }
+      }
+    }
     PaperExamSheet: {
       payload: Prisma.$PaperExamSheetPayload<ExtArgs>
       fields: Prisma.PaperExamSheetFieldRefs
@@ -14273,6 +14348,20 @@ export const PaperExamItemScalarFieldEnum = {
 export type PaperExamItemScalarFieldEnum = (typeof PaperExamItemScalarFieldEnum)[keyof typeof PaperExamItemScalarFieldEnum]
 
 
+export const PaperExamGuideScalarFieldEnum = {
+  id: 'id',
+  examId: 'examId',
+  variant: 'variant',
+  label: 'label',
+  number: 'number',
+  order: 'order',
+  content: 'content',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaperExamGuideScalarFieldEnum = (typeof PaperExamGuideScalarFieldEnum)[keyof typeof PaperExamGuideScalarFieldEnum]
+
+
 export const PaperExamSheetScalarFieldEnum = {
   id: 'id',
   examId: 'examId',
@@ -15542,6 +15631,7 @@ export type GlobalOmitConfig = {
   makeupVisitTest?: Prisma.MakeupVisitTestOmit
   paperExam?: Prisma.PaperExamOmit
   paperExamItem?: Prisma.PaperExamItemOmit
+  paperExamGuide?: Prisma.PaperExamGuideOmit
   paperExamSheet?: Prisma.PaperExamSheetOmit
   paperExamImport?: Prisma.PaperExamImportOmit
 }

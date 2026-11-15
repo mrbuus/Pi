@@ -251,6 +251,7 @@ export type PaperExamWhereInput = {
   items?: Prisma.PaperExamItemListRelationFilter
   sheets?: Prisma.PaperExamSheetListRelationFilter
   imports?: Prisma.PaperExamImportListRelationFilter
+  guides?: Prisma.PaperExamGuideListRelationFilter
 }
 
 export type PaperExamOrderByWithRelationInput = {
@@ -266,6 +267,7 @@ export type PaperExamOrderByWithRelationInput = {
   items?: Prisma.PaperExamItemOrderByRelationAggregateInput
   sheets?: Prisma.PaperExamSheetOrderByRelationAggregateInput
   imports?: Prisma.PaperExamImportOrderByRelationAggregateInput
+  guides?: Prisma.PaperExamGuideOrderByRelationAggregateInput
 }
 
 export type PaperExamWhereUniqueInput = Prisma.AtLeast<{
@@ -284,6 +286,7 @@ export type PaperExamWhereUniqueInput = Prisma.AtLeast<{
   items?: Prisma.PaperExamItemListRelationFilter
   sheets?: Prisma.PaperExamSheetListRelationFilter
   imports?: Prisma.PaperExamImportListRelationFilter
+  guides?: Prisma.PaperExamGuideListRelationFilter
 }, "id">
 
 export type PaperExamOrderByWithAggregationInput = {
@@ -331,6 +334,7 @@ export type PaperExamCreateInput = {
   items?: Prisma.PaperExamItemCreateNestedManyWithoutExamInput
   sheets?: Prisma.PaperExamSheetCreateNestedManyWithoutExamInput
   imports?: Prisma.PaperExamImportCreateNestedManyWithoutExamInput
+  guides?: Prisma.PaperExamGuideCreateNestedManyWithoutExamInput
 }
 
 export type PaperExamUncheckedCreateInput = {
@@ -346,6 +350,7 @@ export type PaperExamUncheckedCreateInput = {
   items?: Prisma.PaperExamItemUncheckedCreateNestedManyWithoutExamInput
   sheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutExamInput
   imports?: Prisma.PaperExamImportUncheckedCreateNestedManyWithoutExamInput
+  guides?: Prisma.PaperExamGuideUncheckedCreateNestedManyWithoutExamInput
 }
 
 export type PaperExamUpdateInput = {
@@ -361,6 +366,7 @@ export type PaperExamUpdateInput = {
   items?: Prisma.PaperExamItemUpdateManyWithoutExamNestedInput
   sheets?: Prisma.PaperExamSheetUpdateManyWithoutExamNestedInput
   imports?: Prisma.PaperExamImportUpdateManyWithoutExamNestedInput
+  guides?: Prisma.PaperExamGuideUpdateManyWithoutExamNestedInput
 }
 
 export type PaperExamUncheckedUpdateInput = {
@@ -376,6 +382,7 @@ export type PaperExamUncheckedUpdateInput = {
   items?: Prisma.PaperExamItemUncheckedUpdateManyWithoutExamNestedInput
   sheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutExamNestedInput
   imports?: Prisma.PaperExamImportUncheckedUpdateManyWithoutExamNestedInput
+  guides?: Prisma.PaperExamGuideUncheckedUpdateManyWithoutExamNestedInput
 }
 
 export type PaperExamCreateManyInput = {
@@ -477,6 +484,20 @@ export type PaperExamUpdateOneRequiredWithoutItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PaperExamUpdateToOneWithWhereWithoutItemsInput, Prisma.PaperExamUpdateWithoutItemsInput>, Prisma.PaperExamUncheckedUpdateWithoutItemsInput>
 }
 
+export type PaperExamCreateNestedOneWithoutGuidesInput = {
+  create?: Prisma.XOR<Prisma.PaperExamCreateWithoutGuidesInput, Prisma.PaperExamUncheckedCreateWithoutGuidesInput>
+  connectOrCreate?: Prisma.PaperExamCreateOrConnectWithoutGuidesInput
+  connect?: Prisma.PaperExamWhereUniqueInput
+}
+
+export type PaperExamUpdateOneRequiredWithoutGuidesNestedInput = {
+  create?: Prisma.XOR<Prisma.PaperExamCreateWithoutGuidesInput, Prisma.PaperExamUncheckedCreateWithoutGuidesInput>
+  connectOrCreate?: Prisma.PaperExamCreateOrConnectWithoutGuidesInput
+  upsert?: Prisma.PaperExamUpsertWithoutGuidesInput
+  connect?: Prisma.PaperExamWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PaperExamUpdateToOneWithWhereWithoutGuidesInput, Prisma.PaperExamUpdateWithoutGuidesInput>, Prisma.PaperExamUncheckedUpdateWithoutGuidesInput>
+}
+
 export type PaperExamCreateNestedOneWithoutSheetsInput = {
   create?: Prisma.XOR<Prisma.PaperExamCreateWithoutSheetsInput, Prisma.PaperExamUncheckedCreateWithoutSheetsInput>
   connectOrCreate?: Prisma.PaperExamCreateOrConnectWithoutSheetsInput
@@ -517,6 +538,7 @@ export type PaperExamCreateWithoutItemsInput = {
   deletedAt?: Date | string | null
   sheets?: Prisma.PaperExamSheetCreateNestedManyWithoutExamInput
   imports?: Prisma.PaperExamImportCreateNestedManyWithoutExamInput
+  guides?: Prisma.PaperExamGuideCreateNestedManyWithoutExamInput
 }
 
 export type PaperExamUncheckedCreateWithoutItemsInput = {
@@ -531,6 +553,7 @@ export type PaperExamUncheckedCreateWithoutItemsInput = {
   deletedAt?: Date | string | null
   sheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutExamInput
   imports?: Prisma.PaperExamImportUncheckedCreateNestedManyWithoutExamInput
+  guides?: Prisma.PaperExamGuideUncheckedCreateNestedManyWithoutExamInput
 }
 
 export type PaperExamCreateOrConnectWithoutItemsInput = {
@@ -561,6 +584,7 @@ export type PaperExamUpdateWithoutItemsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sheets?: Prisma.PaperExamSheetUpdateManyWithoutExamNestedInput
   imports?: Prisma.PaperExamImportUpdateManyWithoutExamNestedInput
+  guides?: Prisma.PaperExamGuideUpdateManyWithoutExamNestedInput
 }
 
 export type PaperExamUncheckedUpdateWithoutItemsInput = {
@@ -573,6 +597,83 @@ export type PaperExamUncheckedUpdateWithoutItemsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutExamNestedInput
+  imports?: Prisma.PaperExamImportUncheckedUpdateManyWithoutExamNestedInput
+  guides?: Prisma.PaperExamGuideUncheckedUpdateManyWithoutExamNestedInput
+}
+
+export type PaperExamCreateWithoutGuidesInput = {
+  id?: string
+  title: string
+  heldOn: Date | string
+  itemCount: number
+  published?: boolean
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  items?: Prisma.PaperExamItemCreateNestedManyWithoutExamInput
+  sheets?: Prisma.PaperExamSheetCreateNestedManyWithoutExamInput
+  imports?: Prisma.PaperExamImportCreateNestedManyWithoutExamInput
+}
+
+export type PaperExamUncheckedCreateWithoutGuidesInput = {
+  id?: string
+  title: string
+  heldOn: Date | string
+  itemCount: number
+  published?: boolean
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  items?: Prisma.PaperExamItemUncheckedCreateNestedManyWithoutExamInput
+  sheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutExamInput
+  imports?: Prisma.PaperExamImportUncheckedCreateNestedManyWithoutExamInput
+}
+
+export type PaperExamCreateOrConnectWithoutGuidesInput = {
+  where: Prisma.PaperExamWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaperExamCreateWithoutGuidesInput, Prisma.PaperExamUncheckedCreateWithoutGuidesInput>
+}
+
+export type PaperExamUpsertWithoutGuidesInput = {
+  update: Prisma.XOR<Prisma.PaperExamUpdateWithoutGuidesInput, Prisma.PaperExamUncheckedUpdateWithoutGuidesInput>
+  create: Prisma.XOR<Prisma.PaperExamCreateWithoutGuidesInput, Prisma.PaperExamUncheckedCreateWithoutGuidesInput>
+  where?: Prisma.PaperExamWhereInput
+}
+
+export type PaperExamUpdateToOneWithWhereWithoutGuidesInput = {
+  where?: Prisma.PaperExamWhereInput
+  data: Prisma.XOR<Prisma.PaperExamUpdateWithoutGuidesInput, Prisma.PaperExamUncheckedUpdateWithoutGuidesInput>
+}
+
+export type PaperExamUpdateWithoutGuidesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  itemCount?: Prisma.IntFieldUpdateOperationsInput | number
+  published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  items?: Prisma.PaperExamItemUpdateManyWithoutExamNestedInput
+  sheets?: Prisma.PaperExamSheetUpdateManyWithoutExamNestedInput
+  imports?: Prisma.PaperExamImportUpdateManyWithoutExamNestedInput
+}
+
+export type PaperExamUncheckedUpdateWithoutGuidesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  itemCount?: Prisma.IntFieldUpdateOperationsInput | number
+  published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  items?: Prisma.PaperExamItemUncheckedUpdateManyWithoutExamNestedInput
   sheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutExamNestedInput
   imports?: Prisma.PaperExamImportUncheckedUpdateManyWithoutExamNestedInput
 }
@@ -589,6 +690,7 @@ export type PaperExamCreateWithoutSheetsInput = {
   deletedAt?: Date | string | null
   items?: Prisma.PaperExamItemCreateNestedManyWithoutExamInput
   imports?: Prisma.PaperExamImportCreateNestedManyWithoutExamInput
+  guides?: Prisma.PaperExamGuideCreateNestedManyWithoutExamInput
 }
 
 export type PaperExamUncheckedCreateWithoutSheetsInput = {
@@ -603,6 +705,7 @@ export type PaperExamUncheckedCreateWithoutSheetsInput = {
   deletedAt?: Date | string | null
   items?: Prisma.PaperExamItemUncheckedCreateNestedManyWithoutExamInput
   imports?: Prisma.PaperExamImportUncheckedCreateNestedManyWithoutExamInput
+  guides?: Prisma.PaperExamGuideUncheckedCreateNestedManyWithoutExamInput
 }
 
 export type PaperExamCreateOrConnectWithoutSheetsInput = {
@@ -633,6 +736,7 @@ export type PaperExamUpdateWithoutSheetsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   items?: Prisma.PaperExamItemUpdateManyWithoutExamNestedInput
   imports?: Prisma.PaperExamImportUpdateManyWithoutExamNestedInput
+  guides?: Prisma.PaperExamGuideUpdateManyWithoutExamNestedInput
 }
 
 export type PaperExamUncheckedUpdateWithoutSheetsInput = {
@@ -647,6 +751,7 @@ export type PaperExamUncheckedUpdateWithoutSheetsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   items?: Prisma.PaperExamItemUncheckedUpdateManyWithoutExamNestedInput
   imports?: Prisma.PaperExamImportUncheckedUpdateManyWithoutExamNestedInput
+  guides?: Prisma.PaperExamGuideUncheckedUpdateManyWithoutExamNestedInput
 }
 
 export type PaperExamCreateWithoutImportsInput = {
@@ -661,6 +766,7 @@ export type PaperExamCreateWithoutImportsInput = {
   deletedAt?: Date | string | null
   items?: Prisma.PaperExamItemCreateNestedManyWithoutExamInput
   sheets?: Prisma.PaperExamSheetCreateNestedManyWithoutExamInput
+  guides?: Prisma.PaperExamGuideCreateNestedManyWithoutExamInput
 }
 
 export type PaperExamUncheckedCreateWithoutImportsInput = {
@@ -675,6 +781,7 @@ export type PaperExamUncheckedCreateWithoutImportsInput = {
   deletedAt?: Date | string | null
   items?: Prisma.PaperExamItemUncheckedCreateNestedManyWithoutExamInput
   sheets?: Prisma.PaperExamSheetUncheckedCreateNestedManyWithoutExamInput
+  guides?: Prisma.PaperExamGuideUncheckedCreateNestedManyWithoutExamInput
 }
 
 export type PaperExamCreateOrConnectWithoutImportsInput = {
@@ -705,6 +812,7 @@ export type PaperExamUpdateWithoutImportsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   items?: Prisma.PaperExamItemUpdateManyWithoutExamNestedInput
   sheets?: Prisma.PaperExamSheetUpdateManyWithoutExamNestedInput
+  guides?: Prisma.PaperExamGuideUpdateManyWithoutExamNestedInput
 }
 
 export type PaperExamUncheckedUpdateWithoutImportsInput = {
@@ -719,6 +827,7 @@ export type PaperExamUncheckedUpdateWithoutImportsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   items?: Prisma.PaperExamItemUncheckedUpdateManyWithoutExamNestedInput
   sheets?: Prisma.PaperExamSheetUncheckedUpdateManyWithoutExamNestedInput
+  guides?: Prisma.PaperExamGuideUncheckedUpdateManyWithoutExamNestedInput
 }
 
 
@@ -730,12 +839,14 @@ export type PaperExamCountOutputType = {
   items: number
   sheets: number
   imports: number
+  guides: number
 }
 
 export type PaperExamCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | PaperExamCountOutputTypeCountItemsArgs
   sheets?: boolean | PaperExamCountOutputTypeCountSheetsArgs
   imports?: boolean | PaperExamCountOutputTypeCountImportsArgs
+  guides?: boolean | PaperExamCountOutputTypeCountGuidesArgs
 }
 
 /**
@@ -769,6 +880,13 @@ export type PaperExamCountOutputTypeCountImportsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.PaperExamImportWhereInput
 }
 
+/**
+ * PaperExamCountOutputType without action
+ */
+export type PaperExamCountOutputTypeCountGuidesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaperExamGuideWhereInput
+}
+
 
 export type PaperExamSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -783,6 +901,7 @@ export type PaperExamSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   items?: boolean | Prisma.PaperExam$itemsArgs<ExtArgs>
   sheets?: boolean | Prisma.PaperExam$sheetsArgs<ExtArgs>
   imports?: boolean | Prisma.PaperExam$importsArgs<ExtArgs>
+  guides?: boolean | Prisma.PaperExam$guidesArgs<ExtArgs>
   _count?: boolean | Prisma.PaperExamCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paperExam"]>
 
@@ -827,6 +946,7 @@ export type PaperExamInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   items?: boolean | Prisma.PaperExam$itemsArgs<ExtArgs>
   sheets?: boolean | Prisma.PaperExam$sheetsArgs<ExtArgs>
   imports?: boolean | Prisma.PaperExam$importsArgs<ExtArgs>
+  guides?: boolean | Prisma.PaperExam$guidesArgs<ExtArgs>
   _count?: boolean | Prisma.PaperExamCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PaperExamIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -838,6 +958,7 @@ export type $PaperExamPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     items: Prisma.$PaperExamItemPayload<ExtArgs>[]
     sheets: Prisma.$PaperExamSheetPayload<ExtArgs>[]
     imports: Prisma.$PaperExamImportPayload<ExtArgs>[]
+    guides: Prisma.$PaperExamGuidePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1249,6 +1370,7 @@ export interface Prisma__PaperExamClient<T, Null = never, ExtArgs extends runtim
   items<T extends Prisma.PaperExam$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaperExam$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaperExamItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sheets<T extends Prisma.PaperExam$sheetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaperExam$sheetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaperExamSheetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   imports<T extends Prisma.PaperExam$importsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaperExam$importsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaperExamImportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  guides<T extends Prisma.PaperExam$guidesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaperExam$guidesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaperExamGuidePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1749,6 +1871,30 @@ export type PaperExam$importsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.PaperExamImportScalarFieldEnum | Prisma.PaperExamImportScalarFieldEnum[]
+}
+
+/**
+ * PaperExam.guides
+ */
+export type PaperExam$guidesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaperExamGuide
+   */
+  select?: Prisma.PaperExamGuideSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaperExamGuide
+   */
+  omit?: Prisma.PaperExamGuideOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaperExamGuideInclude<ExtArgs> | null
+  where?: Prisma.PaperExamGuideWhereInput
+  orderBy?: Prisma.PaperExamGuideOrderByWithRelationInput | Prisma.PaperExamGuideOrderByWithRelationInput[]
+  cursor?: Prisma.PaperExamGuideWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaperExamGuideScalarFieldEnum | Prisma.PaperExamGuideScalarFieldEnum[]
 }
 
 /**

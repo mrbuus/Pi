@@ -190,3 +190,149 @@ describe('туслах функцүүд', () => {
     });
   });
 });
+
+describe('parsePaperWorkbook — V2 боловсруулалтын файл', () => {
+  /** Зөв-Буруу + Түлхүүр (+ Шалгах) шийттэй жижиг V2 ном: 3 бодлого, оноо 1, 2, 3. */
+  function v2Book(
+    rows: (string | number | null)[][],
+    keyPoints: Record<string, number[]> = { A: [1, 2, 3], B: [1, 2, 3] },
+  ) {
+    const wb = new ExcelJS.Workbook();
+    wb.addWorksheet('Дүн').addRow([
+      '№',
+      'ID',
+      'Овог',
+      'Нэр',
+      'Анги',
+      'Хувилбар',
+      '1-р хэсэг',
+      'Нийт',
+    ]);
+    wb.addWorksheet('Хариулт').addRow([
+      '№',
+      'ID',
+      'Овог',
+      'Нэр',
+      'Анги',
+      'Хувилбар',
+      'Нийт',
+      1,
+      2,
+      3,
+    ]);
+    const zb = wb.addWorksheet('Зөв-Буруу');
+    zb.addRow([
+      '№',
+      'ID',
+      'Овог',
+      'Нэр',
+      'Анги',
+      'Хувилбар',
+      'Оноо',
+      'Гүйцэтгэл %',
+      1,
+      2,
+      3,
+      4,
+      5,
+    ]);
+    for (const r of rows) zb.addRow(r);
+    const key = wb.addWorksheet('Түлхүүр');
+    key.addRow([
+      'Хувилбар',
+      '№',
+      'Хэсэг',
+      'Бодлого / багц',
+      'Зөв хариу',
+      'Оноо',
+      'Багц',
+    ]);
+    for (const [v, pts] of Object.entries(keyPoints))
+      pts.forEach((p, i) =>
+        key.addRow([v, i + 1, 1, String(i + 1), 'A', p, 1]),
+      );
+    const check = wb.addWorksheet('Шалгах');
+    check.addRow([
+      'ID',
+      'Овог',
+      'Нэр',
+      'Хувилбар',
+      'Нийт',
+      'Тулгалт',
+      'Тэмдэглэл',
+    ]);
+    check.addRow([
+      '2027002',
+      'Бат',
+      'Сараа',
+      'B',
+      3,
+      'OK',
+      'Давхар будсан (*) хариутай',
+    ]);
+    return wb;
+  }
+
+  it('Зөв-Буруу шийтийг Түлхүүрийн оноогоор уншиж, анги бүрийг баг болгоно', () => {
+    const parsed = parsePaperWorkbook(
+      v2Book([
+        [1, '2027001', 'Дорж', 'Анар', '12-1', 'A', 6, 100, 1, 1, 1],
+        [2, '2027002', 'Бат', 'Сараа', '12-2', 'B', 3, 50, null, null, 1],
+      ]),
+    );
+    expect(parsed.format).toBe('V2');
+    expect(parsed.itemCount).toBe(3);
+    expect(parsed.itemPoints).toEqual([1, 2, 3]);
+    expect(parsed.sheets.map((s) => s.groupLabel)).toEqual(['12-1', '12-2']);
+    expect(parsed.rows[0].answers).toEqual(['+', '+', '+']);
+    expect(parsed.rows[1].answers).toEqual(['-', '-', '+']);
+    expect(parsed.rows[1].variant).toBe('B');
+    expect(parsed.rows[1].notes).toEqual(['Давхар будсан (*) хариутай']);
+    expect(parsed.rows.every((r) => !r.error)).toBe(true);
+  });
+
+  it('машины онооноос зөрсөн мөрийг алдаатай гэж тэмдэглэнэ', () => {
+    const parsed = parsePaperWorkbook(
+      v2Book([[1, '2027001', 'Дорж', 'Анар', '12-1', 'A', 5, 0, 1, 1, 1]]),
+    );
+    expect(parsed.rows[0].error).toMatch(/Машины оноо 5, .* 6/);
+  });
+
+  it('хоёр файлаас давхар орсон ижил мөрийг нэг л удаа авна', () => {
+    const row = [
+      1,
+      '2027001',
+      'Дорж',
+      'Анар',
+      '12-1',
+      'A',
+      1,
+      0,
+      1,
+      null,
+      null,
+    ];
+    const parsed = parsePaperWorkbook(v2Book([row, row]));
+    expect(parsed.rows).toHaveLength(1);
+    expect(parsed.droppedDuplicates).toBe(1);
+  });
+
+  it('сурагчийн бөглөөгүй хувилбарын (C) түлхүүрийг үл тооно', () => {
+    const parsed = parsePaperWorkbook(
+      v2Book([[1, '2027001', 'Дорж', 'Анар', '12-1', 'A', 6, 100, 1, 1, 1]], {
+        A: [1, 2, 3],
+        C: [1, 1, 1, 1],
+      }),
+    );
+    expect(parsed.itemPoints).toEqual([1, 2, 3]);
+    expect(parsed.rows).toHaveLength(1);
+  });
+
+  it('хувилбаруудын оноо зөрвөл уншихгүй', () => {
+    const parsed = parsePaperWorkbook(
+      v2Book([], { A: [1, 2, 3], B: [1, 2, 2] }),
+    );
+    expect(parsed.rows).toHaveLength(0);
+    expect(parsed.skipped[0].reason).toMatch(/зөрж/);
+  });
+});

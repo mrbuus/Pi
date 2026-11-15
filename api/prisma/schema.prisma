@@ -3696,6 +3696,7 @@ model PaperExam {
   items   PaperExamItem[]
   sheets  PaperExamSheet[]
   imports PaperExamImport[]
+  guides  PaperExamGuide[]
 
   @@index([deletedAt, heldOn])
 }
@@ -3718,6 +3719,28 @@ model PaperExamItem {
   voided    Boolean   @default(false)
 
   @@unique([examId, number])
+}
+
+/// Бодлого бүрийн тайлбар: нөхцөл, мэдэж байх ёстой чанар, энгийн тайлбар, 100x100-ын төстэй
+/// бодлого, алхамчилсан бодолт. Урьдчилан бэлдэж ачаална (api/prisma/paper-exam-guide.cjs) —
+/// вэб ажиллах үедээ AI дуудахгүй. Дүнд нөлөөлөхгүй, зөвхөн сурагчийн дүнгийн дэлгэцэд харагдана.
+model PaperExamGuide {
+  id        String    @id @default(cuid())
+  examId    String
+  exam      PaperExam @relation(fields: [examId], references: [id], onDelete: Cascade)
+  /// Хувилбар «A», «B»; хувилбаргүй шалгалтад «»
+  variant   String    @default("")
+  /// Дэлгэцийн дугаар: «12», «II.3»
+  label     String
+  /// PaperExamItem.number — дүнтэй холбогдох бодлого; дүнд ороогүй (нөхөх даалгавар) бол null
+  number    Int?
+  order     Int
+  /// paper-exams/paper-exam-guide.ts GuideContent
+  content   Json
+  updatedAt DateTime  @updatedAt
+
+  @@unique([examId, variant, label])
+  @@index([examId, variant, order])
 }
 
 model PaperExamSheet {

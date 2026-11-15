@@ -1,0 +1,473 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, Lightbulb, ListChecks, LockOpen, Sigma } from "lucide-react";
+import MathText from "@/components/MathText";
+import { api } from "@/lib/api";
+import { Badge } from "@/components/ui/kit/badge";
+import { Card } from "@/components/ui/Surface";
+import { ErrorState } from "@/components/ui/StateBlock";
+import { SkeletonRows } from "@/components/ui/Skeleton";
+import { errorText } from "@/components/exams/types";
+import { cn } from "@/lib/cn";
+import { STATUS_LABEL, type GuideContent, type GuideEntry, type MyPaperDetail, type MyPaperGuide } from "./types";
+
+type MyItem = MyPaperDetail["me"]["items"][number];
+/** Нэг бодлогын нээсэн шат: stage = нээсэн санамж (0–3), step = нээсэн бодолтын алхам */
+interface Progress {
+  stage: number;
+  step: number;
+  tries: number;
+  wrong: string[];
+  fixed: boolean;
+  retry?: Record<string, string>;
+}
+const EMPTY: Progress = { stage: 0, step: 0, tries: 0, wrong: [], fixed: false };
+const LETTERS = ["A", "B", "C", "D", "E"];
+const HINTS = ["Мэдэж байх ёстой чанар", "Энгийнээр хэлбэл", "100x100 номын төстэй бодлого"];
+
+/** Хөтөчийн санах ой — зөвхөн тав тухын төлөө (аль санамжийг нээснээ санах); байхгүй ч ажиллана. */
+function readStore<T>(key: string, fallback: T): T {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+function writeStore(key: string, value: unknown) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* хувийн горим г.м. — хадгалахгүй */
+  }
+}
+
+/** Мөрүүд: `$$…$$` бол тусдаа мөрийн томьёо, бусад нь өгүүлбэр. */
+function Lines({ lines, mathClass }: { lines: string[]; mathClass?: string }) {
+  return (
+    <>
+      {lines.map((line, i) =>
+        line.startsWith("$$") ? (
+          <div key={i} className={cn("overflow-x-auto overflow-y-hidden py-1 text-center", mathClass)}>
+            <MathText>{line}</MathText>
+          </div>
+        ) : (
+          <p key={i} className="my-1.5">
+            <MathText>{line}</MathText>
+          </p>
+        ),
+      )}
+    </>
+  );
+}
+
+function fillParts(c: GuideContent, values: Record<string, string> | undefined): boolean[] {
+  return (c.parts ?? []).map((_, part) =>
+    (c.fields ?? []).filter((f) => f.part === part).every((f) => (values?.[f.key] ?? "").trim() === f.value),
+  );
+}
+
+/**
+ * Нэгдсэн шалгалтын «Бодлогын тайлбар»: бодлого бүрийн чанар → энгийн тайлбар → 100x100-ын
+ * төстэй бодлого → бодолт. Одоохондоо зөвхөн ажилтанд (эзэн 2026-11-14) — бүх шат шууд нээлттэй.
+ * `items` (сурагчийн дүн) өгвөл шаттай санамжийн горим — сурагчдад нээх үед ашиглана.
+ */
+export default function PaperGuide({
+  examId,
+  variants,
+  items,
+  open,
+  onOpen,
+}: {
+  examId: string;
+  variants: string[];
+  items: MyItem[];
+  /** Нээлттэй бодлогын дугаар (label); null бол жагсаалт */
+  open: string | null;
+  onOpen: (label: string | null) => void;
+}) {
+  const [variant, setVariant] = useState(() => {
+    const saved = readStore<string | null>(`paper-guide-variant:${examId}`, null);
+    return saved !== null && variants.includes(saved) ? saved : variants[0];
+  });
+  const [guides, setGuides] = useState<Record<string, GuideEntry[]>>({});
+  const [error, setError] = useState("");
+
+  const load = useCallback(() => {
+    api<MyPaperGuide>(`/paper-exams/${encodeURIComponent(examId)}/guide?variant=${encodeURIComponent(variant)}`)
+      .then((g) => {
+        setError("");
+        setGuides((prev) => ({ ...prev, [g.variant]: g.entries }));
+      })
+      .catch((e) => setError(errorText(e, "Тайлбарыг ачаалж чадсангүй")));
+  }, [examId, variant]);
+  useEffect(() => {
+    if (!guides[variant]) load();
+  }, [guides, variant, load]);
+
+  const entries = guides[variant];
+  return (
+    <div className="space-y-4">
+      {variants.length > 1 && open === null && (
+        <Card padding="tight">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="font-bold text-ink">Хувилбар</div>
+              <div className="text-sm text-ink-dim">Шалгалтын материал дээрх хувилбараа сонгоно</div>
+            </div>
+            <div className="flex gap-2" role="group" aria-label="Хувилбар">
+              {variants.map((v) => (
+                <button
+                  key={v}
+                  aria-pressed={variant === v}
+                  onClick={() => {
+                    setVariant(v);
+                    writeStore(`paper-guide-variant:${examId}`, v);
+                  }}
+                  className={cn(
+                    "min-h-12 min-w-14 rounded-xl border-2 px-4 text-lg font-bold",
+                    variant === v ? "border-brand-bright bg-brand-bright/15 text-brand-soft" : "border-line text-ink-dim",
+                  )}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+          </div>
+        </Card>
+      )}
+      {error ? (
+        <ErrorState message={error} onRetry={load} />
+      ) : !entries ? (
+        <SkeletonRows rows={5} />
+      ) : (
+        <GuideBody key={variant} storeKey={`paper-guide:${examId}:${variant}`} entries={entries} items={items} open={open} onOpen={onOpen} />
+      )}
+    </div>
+  );
+}
+
+function GuideBody({
+  storeKey,
+  entries,
+  items,
+  open,
+  onOpen,
+}: {
+  storeKey: string;
+  entries: GuideEntry[];
+  items: MyItem[];
+  open: string | null;
+  onOpen: (label: string | null) => void;
+}) {
+  const [progress, setProgress] = useState<Record<string, Progress>>(() => readStore(storeKey, {}));
+  useEffect(() => writeStore(storeKey, progress), [storeKey, progress]);
+  const itemBy = useMemo(() => new Map(items.map((i) => [i.number, i])), [items]);
+
+  const current = open === null ? -1 : entries.findIndex((e) => e.label === open);
+  const patch = (label: string, next: Partial<Progress>) =>
+    setProgress((prev) => ({ ...prev, [label]: { ...(prev[label] ?? EMPTY), ...next } }));
+
+  /** Жагсаалтын нүдний өнгө: зөв, буруу, санамж аваад зассан, дүнд ороогүй */
+  const cellClass = (e: GuideEntry) => {
+    const item = e.number === null ? undefined : itemBy.get(e.number);
+    const fixed = progress[e.label]?.fixed;
+    if (item?.status === "CORRECT") return "border-success bg-success/15 text-success";
+    if (fixed) return "border-success bg-panel text-success";
+    if (item && item.status !== "UNGRADED") return "border-error bg-error/12 text-error";
+    return "border-line bg-panel text-ink";
+  };
+
+  if (current < 0) {
+    const groups = [
+      { title: "Сонгох даалгавар", list: entries.filter((e) => e.content.kind === "choice") },
+      { title: "Нөхөх даалгавар", list: entries.filter((e) => e.content.kind === "fill") },
+    ].filter((g) => g.list.length > 0);
+    return (
+      <Card>
+        <h2 className="mb-1 flex items-center gap-2 font-bold text-brand-soft">
+          <ListChecks className="size-5" aria-hidden /> Бодлого бүрээр
+        </h2>
+        <p className="mb-4 text-sm text-ink-dim">
+          Бодлогоо дарж санамж, томьёо, бодолтыг шат шатаар нээнэ. Ногоон хүрээтэй цагаан нь санамж аваад зассан бодлого
+        </p>
+        <div className="space-y-5">
+          {groups.map((g) => (
+            <section key={g.title}>
+              {groups.length > 1 && <h3 className="mb-2 text-sm font-bold text-ink">{g.title}</h3>}
+              <ol className="grid grid-cols-[repeat(auto-fill,minmax(3.25rem,1fr))] gap-2">
+                {g.list.map((e) => (
+                  <li key={e.label}>
+                    <button
+                      onClick={() => onOpen(e.label)}
+                      className={cn("h-12 w-full rounded-xl border-2 text-sm font-bold tabular-nums", cellClass(e))}
+                    >
+                      {e.label}
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ))}
+        </div>
+      </Card>
+    );
+  }
+
+  const entry = entries[current];
+  return (
+    <GuideProblem
+      key={entry.label}
+      entry={entry}
+      item={entry.number === null ? undefined : itemBy.get(entry.number)}
+      progress={progress[entry.label] ?? EMPTY}
+      onPatch={(next) => patch(entry.label, next)}
+      position={`${current + 1} / ${entries.length}`}
+      onBack={() => onOpen(null)}
+      onPrev={current > 0 ? () => onOpen(entries[current - 1].label) : undefined}
+      onNext={current < entries.length - 1 ? () => onOpen(entries[current + 1].label) : undefined}
+    />
+  );
+}
+
+function GuideProblem({
+  entry,
+  item,
+  progress: r,
+  onPatch,
+  position,
+  onBack,
+  onPrev,
+  onNext,
+}: {
+  entry: GuideEntry;
+  item: MyItem | undefined;
+  progress: Progress;
+  onPatch: (next: Partial<Progress>) => void;
+  position: string;
+  onBack: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+}) {
+  const c = entry.content;
+  // Анхнаасаа зөв бодсон (эсвэл тооцохгүй болсон) бодлогод бүх тайлбар шууд нээлттэй
+  const free = !item || item.status === "CORRECT" || item.status === "UNGRADED";
+  const solved = free || r.fixed;
+  const stage = free ? 3 : r.stage;
+  const step = solved ? c.steps.length : r.step;
+  // Зөв хариу ил болох мөч: зөв бодсон, санамж аваад зассан, эсвэл бодолтыг дуустал нээсэн
+  const revealed = solved || r.step >= c.steps.length;
+  const used = r.stage + (r.step > 0 ? 1 : 0);
+
+  const badge = !item ? null : free ? (
+    <Badge tone="success">{item.status === "CORRECT" ? `Зөв · ${c.points} оноо` : STATUS_LABEL.UNGRADED}</Badge>
+  ) : r.fixed ? (
+    <Badge tone="success">Санамж аваад зөв болголоо</Badge>
+  ) : item ? (
+    <Badge tone="danger">{STATUS_LABEL[item.status]}</Badge>
+  ) : null;
+
+  const choose = (letter: string) => {
+    if (revealed || letter === item?.answer || r.wrong.includes(letter)) return;
+    onPatch(letter === c.answer ? { tries: r.tries + 1, fixed: true } : { tries: r.tries + 1, wrong: [...r.wrong, letter] });
+  };
+  const values = revealed ? Object.fromEntries((c.fields ?? []).map((f) => [f.key, f.value])) : (r.retry ?? {});
+  const partsOk = fillParts(c, values);
+  const five = c.choices?.length === 5;
+  const long = (c.choices ?? []).some((x) => x.length > 22);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <button onClick={onBack} className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink-dim hover:text-ink">
+          <ArrowLeft className="size-4" aria-hidden /> Бүх бодлого
+        </button>
+        {badge}
+      </div>
+
+      <Card>
+        <div className="mb-2 flex items-baseline gap-2">
+          <span className="font-display text-2xl font-bold tabular-nums text-ink">{entry.label}</span>
+          <span className="text-sm text-ink-dim">{c.points} оноо</span>
+        </div>
+        {c.image && (
+          // eslint-disable-next-line @next/next/no-img-element -- санд хадгалсан жижиг data URI зураг
+          <img src={c.image} alt="Бодлогын зураг" className="mx-auto mb-3 block max-w-full rounded-lg bg-white sm:max-w-sm" />
+        )}
+        <div className="overflow-x-auto overflow-y-hidden text-ink">
+          <Lines lines={c.statement} />
+        </div>
+
+        {c.kind === "choice" && c.choices && (
+          <div className={cn("mt-4 grid gap-2", long ? "grid-cols-1" : five ? "grid-cols-6 sm:grid-cols-5" : "grid-cols-2 sm:grid-cols-4")}>
+            {c.choices.map((choice, i) => {
+              const letter = LETTERS[i];
+              const good = revealed && letter === c.answer;
+              const bad = !free && (letter === item?.answer || r.wrong.includes(letter));
+              return (
+                <button
+                  key={letter}
+                  onClick={() => choose(letter)}
+                  aria-disabled={revealed || bad}
+                  className={cn(
+                    "flex min-h-14 min-w-0 items-center gap-2 rounded-xl border-2 px-3 py-1.5 text-ink",
+                    long ? "justify-start" : "justify-center",
+                    !long && five && (i < 3 ? "col-span-2 sm:col-span-1" : "col-span-3 sm:col-span-1"),
+                    good ? "border-success bg-success/15" : bad ? "border-error bg-error/12" : "border-line bg-panel",
+                    !revealed && !bad && "hover:border-brand",
+                  )}
+                >
+                  <span className="font-bold text-ink-dim">{letter}</span>
+                  <MathText>{`$${choice}$`}</MathText>
+                  {good && <Check className="size-4 shrink-0 text-success" aria-label="зөв хариу" />}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {c.kind === "fill" && c.fields && (
+          <>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {c.fields.map((f) => {
+                const marked = revealed || r.tries > 0;
+                return (
+                  <label key={f.key} className="flex flex-col items-center gap-1 text-sm font-bold text-ink-dim">
+                    {f.key}
+                    <input
+                      inputMode="numeric"
+                      maxLength={f.key.length}
+                      readOnly={revealed}
+                      value={values[f.key] ?? ""}
+                      onChange={(e) => onPatch({ retry: { ...(r.retry ?? {}), [f.key]: e.target.value.replace(/[^0-9]/g, "") } })}
+                      className={cn(
+                        "h-13 rounded-xl border-2 bg-panel text-center text-xl font-bold text-ink outline-none focus:border-brand",
+                        f.key.length > 1 ? "w-19" : "w-14",
+                        marked ? (partsOk[f.part] ? "border-success bg-success/15" : "border-error bg-error/12") : "border-line",
+                      )}
+                    />
+                  </label>
+                );
+              })}
+            </div>
+            {!revealed && (
+              <button
+                onClick={() => onPatch(partsOk.every(Boolean) ? { tries: r.tries + 1, fixed: true } : { tries: r.tries + 1 })}
+                className="mt-4 min-h-12 rounded-xl bg-brand px-5 font-semibold text-on-brand"
+              >
+                Шалгах
+              </button>
+            )}
+          </>
+        )}
+
+        {!revealed && (
+          <p className={cn("mt-3 text-sm font-semibold", r.tries ? "text-error" : "text-ink-dim")}>
+            {r.tries === 0
+              ? "Санамж аваад дахин оролдоорой. Зөв хариу хамгийн сүүлд нээгдэнэ"
+              : c.kind === "fill"
+                ? "Ногоон нүд зөв, улаан нүдийг засаарай. Хэрэгтэй бол дараагийн санамжийг аваарай"
+                : "Буруу байна. Дараагийн санамжийг аваад дахин оролдоорой"}
+          </p>
+        )}
+        {r.fixed && !free && <p className="mt-3 text-sm font-semibold text-success">Зөв! {used} санамж ашиглалаа</p>}
+      </Card>
+
+      <div className="flex gap-1.5" aria-hidden>
+        {[0, 1, 2, 3].map((i) => (
+          <span key={i} className={cn("h-1.5 flex-1 rounded-full", i < (free ? 4 : r.stage + (r.step >= c.steps.length ? 1 : 0)) ? "bg-brand" : "bg-line")} />
+        ))}
+      </div>
+
+      {stage >= 1 && (
+        <section className="rounded-2xl border border-line border-l-4 border-l-error bg-panel px-4 py-3">
+          <h3 className="mb-1 flex items-center gap-1.5 text-xs font-bold tracking-wide text-error">
+            <Sigma className="size-4" aria-hidden /> МЭДЭЖ БАЙХ ЁСТОЙ ЧАНАР
+          </h3>
+          <div className="overflow-x-auto overflow-y-hidden font-semibold text-ink">
+            <Lines lines={c.rule} />
+          </div>
+        </section>
+      )}
+      {stage >= 2 && (
+        <section className="rounded-2xl border border-line bg-panel px-4 py-3">
+          <h3 className="mb-1 flex items-center gap-1.5 text-xs font-bold tracking-wide text-ink-dim">
+            <Lightbulb className="size-4" aria-hidden /> ЭНГИЙНЭЭР ХЭЛБЭЛ
+          </h3>
+          <div className="overflow-x-auto overflow-y-hidden text-ink">
+            <Lines lines={c.easy} />
+          </div>
+        </section>
+      )}
+      {stage >= 3 && c.refs.length > 0 && (
+        <section className="rounded-2xl bg-brand-bright/10 px-4 py-3">
+          <h3 className="mb-1 flex items-center gap-1.5 text-xs font-bold tracking-wide text-brand-soft">
+            <BookOpen className="size-4" aria-hidden /> 100x100 НОМД ТӨСТЭЙ БОДЛОГО
+          </h3>
+          <ul className="text-sm text-ink">
+            {c.refs.map((ref, i) => (
+              <li key={i} className="my-1.5 overflow-x-auto overflow-y-hidden">
+                <span className="font-semibold">
+                  {ref.chapter}, Тест {ref.test}, №{ref.number}
+                </span>
+                <span className="text-ink-dim"> — </span>
+                <MathText>{ref.text}</MathText>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {step > 0 && (
+        <section className="rounded-2xl border border-line bg-panel px-4 py-3">
+          <h3 className="mb-1 text-xs font-bold tracking-wide text-ink-dim">
+            БОДОЛТ{step < c.steps.length ? ` · ${step} / ${c.steps.length} алхам` : ""}
+          </h3>
+          <div className="text-ink">
+            <Lines lines={c.steps.slice(0, step)} mathClass="text-brand-soft" />
+          </div>
+        </section>
+      )}
+      {revealed && (
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-success bg-success/15 px-4 py-3 font-bold text-ink">
+          Зөв хариу:
+          {c.kind === "choice" && c.choices && c.answer ? (
+            <>
+              {c.answer} <MathText>{`$${c.choices[LETTERS.indexOf(c.answer)]}$`}</MathText>
+            </>
+          ) : (
+            <span>{(c.fields ?? []).map((f) => `${f.key} = ${f.value}`).join(", ")}</span>
+          )}
+        </div>
+      )}
+      {!free && !r.fixed && (r.stage < 3 || r.step < c.steps.length) && (
+        <div className="flex items-center gap-3 rounded-2xl border-2 border-dashed border-line px-4 py-3">
+          <span className="flex-1 font-semibold text-ink-dim">
+            {r.stage < 3
+              ? `${r.stage + 1}-р санамж: ${HINTS[r.stage]}`
+              : r.step === 0
+                ? "4-р санамж: Бодолтыг алхам алхмаар"
+                : "Бодолтын дараагийн алхам"}
+          </span>
+          <button
+            onClick={() => onPatch(r.stage < 3 ? { stage: r.stage + 1 } : { step: r.step + 1 })}
+            className="inline-flex min-h-12 items-center gap-1.5 rounded-xl bg-brand px-4 font-semibold text-on-brand"
+          >
+            <LockOpen className="size-4" aria-hidden /> Нээх
+          </button>
+        </div>
+      )}
+
+      {/* Апп-ын доод цэстэй давхцуулахгүйн тулд хөвөгч биш, агуулгын төгсгөлд */}
+      <div className="flex items-center gap-3 pt-2">
+        <button onClick={onPrev} disabled={!onPrev} className="inline-flex min-h-12 items-center gap-1.5 rounded-xl border border-line bg-panel px-4 font-semibold text-ink disabled:opacity-40">
+          <ArrowLeft className="size-4" aria-hidden /> Өмнөх
+        </button>
+        <span className="flex-1 text-center font-semibold tabular-nums text-ink">{position}</span>
+        <button onClick={onNext} disabled={!onNext} className="inline-flex min-h-12 items-center gap-1.5 rounded-xl bg-brand px-4 font-semibold text-on-brand disabled:opacity-40">
+          Дараах <ArrowRight className="size-4" aria-hidden />
+        </button>
+      </div>
+    </div>
+  );
+}

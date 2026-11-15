@@ -71,6 +71,23 @@ export class PaperExamsController {
   }
 
   // ---- Ажилтан ----
+  /** Дүнгийн жагсаалт (код, оноо, байр) — сурагчид нийтэлсэн үед л */
+  @Roles(...STAFF, Role.STUDENT)
+  @Get(':id/ranking')
+  ranking(@Param('id') id: string, @Req() req: RequestWithUser) {
+    return this.paper.ranking(id, actorOf(req));
+  }
+
+  /** Бодлогын тайлбар — одоохондоо зөвхөн ажилтан */
+  @Roles(...STAFF)
+  @Get(':id/guide')
+  guide(
+    @Param('id') id: string,
+    @Query('variant') variant: string | undefined,
+  ) {
+    return this.paper.guide(id, variant ?? '');
+  }
+
   @Roles(...STAFF)
   @Get()
   list(@Req() req: RequestWithUser) {

@@ -8,7 +8,6 @@ import {
 import { Prisma } from '../generated/prisma/client';
 import { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
-import { classTeacherWhere } from '../common/class-teachers';
 import { managesAllClasses } from '../exams/exam-access';
 import { loadWorkbook, normalizeName } from '../exams/gradebook-sheet';
 import {
@@ -20,7 +19,7 @@ import {
   gradeSheet,
   itemStats,
   pct,
-  publicName,
+  rankLabels,
   weakAreas,
   type ItemStatus,
   type PaperItem,
@@ -234,6 +233,24 @@ export class PaperExamsService {
     if (dto.title !== undefined) data.title = dto.title;
     if (dto.heldOn !== undefined) data.heldOn = toDate(dto.heldOn);
     if (dto.published !== undefined) data.published = dto.published;
+    if (dto.published === true && !exam.published) {
+      const [linked, unlinked] = await Promise.all([
+        this.prisma.paperExamSheet.count({
+          where: { examId: id, supersededAt: null, studentId: { not: null } },
+        }),
+        this.prisma.paperExamSheet.count({
+          where: { examId: id, supersededAt: null, studentId: null },
+        }),
+      ]);
+      if (linked === 0)
+        throw new BadRequestException(
+          'Дүн оруулаагүй шалгалтыг сурагчдад нээхгүй',
+        );
+      if (unlinked > 0)
+        throw new BadRequestException(
+          `Сурагчтай холбогдоогүй ${unlinked} хуудас байна. «Дүн оруулах» табд холбож эсвэл шалгаж дуусгаад нээнэ үү`,
+        );
+    }
     const resize =
       dto.itemCount !== undefined && dto.itemCount !== exam.itemCount;
     if (resize) {
@@ -408,6 +425,18 @@ export class PaperExamsService {
         `Файлаас сурагчийн мөр олдсонгүй.${why ? ` ${why}` : ''}`,
       );
     }
+    // V2 файлд бодлого бүрийн оноо «Түлхүүр» шийтэд бий — тэрээр дүгнэж, хадгалахдаа шалгалтад тавина
+    const filePoints = parsed.itemPoints ?? null;
+    const gradeItems: PaperItem[] = filePoints
+      ? exam.items.map((i, idx) => ({
+          ...i,
+          points: filePoints[idx] ?? i.points,
+        }))
+      : exam.items;
+    const pointsChange =
+      !!filePoints &&
+      filePoints.length === exam.items.length &&
+      exam.items.some((i, idx) => i.points !== filePoints[idx]);
     const wrongSize = parsed.sheets.filter(
       (s) => s.itemCount !== exam.itemCount,
     );
@@ -445,16 +474,21 @@ export class PaperExamsService {
 
     const existing = await this.activeSheetsFor(this.prisma, id);
     const rows = resolved.map((m, index) => {
-      const g = gradeSheet(m.row.answers, exam.items);
+      const g = gradeSheet(m.row.answers, gradeItems);
       const target = sheetTarget(m.student?.id ?? null, m.row);
       const replaces = existing.has(target);
       const allBinary = m.row.answers.every((a) => a === '+' || a === '-');
       const scoreMismatch =
+        !parsed.format &&
         m.row.fileScore !== null &&
         allBinary &&
         exam.items.every((i) => i.points === 1 && !i.voided) &&
         m.row.fileScore !== g.totalScore;
+      // Алдаатай дүн (машины онооноос зөрсөн г.м.) хэзээ ч хадгалагдахгүй
+      const rejected = m.row.error ?? null;
       const warnings: string[] = [];
+      if (rejected) warnings.push(`ХАДГАЛАХГҮЙ: ${rejected}`);
+      for (const note of m.row.notes ?? []) warnings.push(note);
       if ('duplicateOf' in m && m.duplicateOf)
         warnings.push(
           `«${m.duplicateOf.lastName} ${m.duplicateOf.firstName}» файлд давхар таарсан — энэ мөрийг холбогдоогүй хуудас болгож хадгална`,
@@ -489,13 +523,16 @@ export class PaperExamsService {
         duplicate: m.duplicate,
         replaces,
         warnings,
+        rejected,
         target,
         classroomId: m.student ? m.classroomId : null,
         parsed: m.row,
       };
     });
 
-    const planned = rows.filter((r) => !(r.replaces && !opts.replace));
+    const planned = rows.filter(
+      (r) => !r.rejected && !(r.replaces && !opts.replace),
+    );
     const summary = {
       fileName,
       examItemCount: exam.itemCount,
@@ -510,8 +547,12 @@ export class PaperExamsService {
         duplicates: rows.filter((r) => r.duplicate).length,
         replaces: rows.filter((r) => r.replaces).length,
         warnings: rows.filter((r) => r.warnings.length > 0).length,
+        rejected: rows.filter((r) => r.rejected).length,
+        droppedDuplicates: parsed.droppedDuplicates ?? 0,
         willWrite: planned.length,
       },
+      format: parsed.format ?? null,
+      pointsChange,
       noKeyLetters:
         parsed.sheets.some((s) => s.mode === 'LETTERS') &&
         exam.items.every((i) => !i.answerKey),
@@ -542,8 +583,18 @@ export class PaperExamsService {
         // Түгжээний дараа дахин уншина — зэрэг хоёр импорт давхар бичихгүй
         const current = await this.activeSheetsFor(tx, id);
         const write = rows.filter(
-          (r) => opts.replace || !current.has(r.target),
+          (r) => !r.rejected && (opts.replace || !current.has(r.target)),
         );
+        // V2 файлын оноог шалгалтын бодлогуудад тавина (машины түлхүүр = эх сурвалж)
+        if (pointsChange && filePoints) {
+          for (const [idx, item] of exam.items.entries()) {
+            if (item.points === filePoints[idx]) continue;
+            await tx.paperExamItem.update({
+              where: { examId_number: { examId: id, number: item.number } },
+              data: { points: filePoints[idx] },
+            });
+          }
+        }
         const imp = await tx.paperExamImport.create({
           data: {
             examId: id,
@@ -580,8 +631,11 @@ export class PaperExamsService {
             maxScore: r.maxScore,
           })),
         });
+        // Оноо өөрчлөгдсөн бол өмнөх хуудсуудыг шинэ оноогоор дахин дүгнэнэ
+        if (pointsChange) await this.regrade(tx, id);
         await this.audit(tx, actor, 'IMPORT', id, null, {
           importId: imp.id,
+          pointsFromFile: pointsChange ? filePoints : undefined,
           fileName,
           sha,
           ...summary.totals,
@@ -1017,28 +1071,8 @@ export class PaperExamsService {
     const ranks = competitionRanks(ranked.map((x) => x.g.totalScore));
     const rankBy = new Map(ranked.map((x, i) => [x.s.id, ranks[i]]));
 
-    let visible = graded;
-    if (!all) {
-      const classes = await this.prisma.classroom.findMany({
-        where: { archived: false, ...classTeacherWhere(actor.userId) },
-        select: { id: true },
-      });
-      const mine = new Set(classes.map((c) => c.id));
-      // Одоогийн ангиар (анги сольсон, хоёр ангитай сурагч ч зөв харагдана) + импортын үеийн анги
-      const enrolled = mine.size
-        ? await this.prisma.enrollment.findMany({
-            where: { classroomId: { in: [...mine] }, leftAt: null },
-            select: { studentId: true },
-          })
-        : [];
-      const myStudents = new Set(enrolled.map((e) => e.studentId));
-      visible = graded.filter(
-        (x) =>
-          !!x.s.studentId &&
-          (myStudents.has(x.s.studentId) ||
-            (!!x.s.classroomId && mine.has(x.s.classroomId))),
-      );
-    }
+    // Багш ч бүх сурагчийн задаргааг харна (эзэн 2026-11-15) — ангиар нь «Багаар» табд эрэмбэлнэ
+    const visible = graded;
 
     const by = classifyBy(items);
     const row = (x: (typeof graded)[number]) => {
@@ -1113,7 +1147,8 @@ export class PaperExamsService {
         itemCount: exam.itemCount,
         published: exam.published,
       },
-      scope: all ? ('ALL' as const) : ('OWN_CLASSES' as const),
+      scope: 'ALL' as const,
+      guideVariants: await this.guideVariants(id),
       areasList: CONTENT_AREAS,
       topicsList: PAPER_TOPICS,
       classifyBy: by,
@@ -1209,7 +1244,7 @@ export class PaperExamsService {
         studentId: true,
         groupLabel: true,
         answers: true,
-        student: { select: { firstName: true, lastName: true } },
+        student: { select: { studentCode: true } },
       },
     });
     const mine = sheets.find((s) => s.studentId === studentId);
@@ -1232,12 +1267,14 @@ export class PaperExamsService {
       items,
     );
 
+    const rankText = rankLabels(graded.map((x) => x.g.totalScore));
     const ranking = graded
       .map((x, i) => ({
         rank: ranks[i],
-        name: x.s.student
-          ? publicName(x.s.student.firstName, x.s.student.lastName)
-          : '',
+        // «1-2» — ижил оноотой сурагчид байр хуваана
+        rankLabel: rankText[i],
+        // Жагсаалтад зөвхөн сурагчийн код (нэр харуулахгүй — эзэн 2026-11-15)
+        name: x.s.student?.studentCode ?? '',
         group: x.s.groupLabel,
         totalScore: x.g.totalScore,
         maxScore: x.g.maxScore,
@@ -1300,6 +1337,77 @@ export class PaperExamsService {
       classifyBy: by,
       formulas: await this.formulasFor(items),
       ranking,
+    };
+  }
+
+  /** Ачаалсан тайлбарын хувилбарууд («A», «B»); хоосон бол тайлбаргүй. */
+  private async guideVariants(examId: string): Promise<string[]> {
+    const rows = await this.prisma.paperExamGuide.findMany({
+      where: { examId },
+      distinct: ['variant'],
+      select: { variant: true },
+      orderBy: { variant: 'asc' },
+    });
+    return rows.map((g) => g.variant);
+  }
+
+  /**
+   * Бодлого бүрийн тайлбар (чанар, санамж, бодолт) — одоохондоо зөвхөн ажилтан
+   * (эзэн 2026-11-14: сурагчдад нээхгүй, багш нар үзнэ).
+   */
+  async guide(examId: string, variant: string) {
+    await this.activeExam(examId);
+    const entries = await this.prisma.paperExamGuide.findMany({
+      where: { examId, variant },
+      select: { label: true, number: true, content: true },
+      orderBy: { order: 'asc' },
+    });
+    if (entries.length === 0) throw new NotFoundException('Тайлбар олдсонгүй');
+    return { variant, entries };
+  }
+
+  /**
+   * Дүнгийн жагсаалт: Дүн | Сурагчийн код | Байр («1-2» — ижил оноотой хуваана).
+   * Нэр, хариу буцаахгүй. Сурагч зөвхөн нийтэлсэн шалгалтынхыг харна; ажилтан үргэлж.
+   * Сурагчтай холбогдоогүй хуудас жагсаалтад орохгүй.
+   */
+  async ranking(examId: string, actor: Actor) {
+    const isStudent = actor.role === Role.STUDENT;
+    const exam = await this.prisma.paperExam.findFirst({
+      where: {
+        id: examId,
+        deletedAt: null,
+        ...(isStudent ? { published: true } : {}),
+      },
+      select: { id: true, title: true, heldOn: true, published: true },
+    });
+    if (!exam) throw new NotFoundException('Шалгалт олдсонгүй');
+    const sheets = await this.prisma.paperExamSheet.findMany({
+      where: { examId, supersededAt: null, studentId: { not: null } },
+      select: {
+        totalScore: true,
+        maxScore: true,
+        rawCode: true,
+        student: { select: { studentCode: true } },
+      },
+    });
+    const labels = rankLabels(sheets.map((s) => s.totalScore));
+    const rows = sheets
+      .map((s, i) => ({
+        score: s.totalScore,
+        maxScore: s.maxScore,
+        code: s.student?.studentCode ?? s.rawCode,
+        rank: labels[i],
+      }))
+      .sort((a, b) => b.score - a.score || a.code.localeCompare(b.code));
+    return {
+      exam: {
+        id: exam.id,
+        title: exam.title,
+        heldOn: dayOf(exam.heldOn),
+        published: exam.published,
+      },
+      rows,
     };
   }
 }

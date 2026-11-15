@@ -91,7 +91,15 @@ describe('Цаасан шалгалт (OMR) — эрх', () => {
       expect(rolesOf(proto[name])).toEqual(['STUDENT']);
     },
   );
-  it.each(['list', 'board'] as const)('%s — ажилтан', (name) => {
+  it('ranking — ажилтан ба сурагч (сурагч нийтэлсэн үед л — сервис шалгана)', () => {
+    expect(rolesOf(proto.ranking)).toEqual([
+      'ADMIN',
+      'TEACHER_PLUS',
+      'TEACHER',
+      'STUDENT',
+    ]);
+  });
+  it.each(['list', 'board', 'guide'] as const)('%s — ажилтан', (name) => {
     expect(rolesOf(proto[name])).toEqual(['ADMIN', 'TEACHER_PLUS', 'TEACHER']);
   });
   it.each([

@@ -216,21 +216,20 @@ export default function StudentPaperDetail({ id }: { id: string }) {
       </Card>
 
       <Card padding="none" className="overflow-hidden">
-        <h2 className="px-5 pb-2 pt-4 font-bold text-brand-soft">Төвийн жагсаалт</h2>
+        <h2 className="px-5 pb-2 pt-4 font-bold text-brand-soft">Дүнгийн жагсаалт</h2>
         <div className="max-h-[60vh] overflow-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-panel text-left text-xs text-ink-dim">
               <tr>
                 <th className="w-14 px-4 py-2 text-right">Байр</th>
-                <th className="px-2 py-2">Нэр</th>
-                <th className="px-2 py-2">Баг</th>
+                <th className="px-2 py-2">Сурагчийн код</th>
                 <th className="px-4 py-2 text-right">Оноо</th>
               </tr>
             </thead>
             <tbody>
               {data.ranking.map((r, i) => (
                 <tr key={i} className={cn("border-t border-line", r.isMe && "bg-brand-bright/12 font-bold")} aria-current={r.isMe ? "true" : undefined}>
-                  <td className="px-4 py-1.5 text-right tabular-nums">{r.rank}</td>
+                  <td className="px-4 py-1.5 text-right tabular-nums">{r.rankLabel}</td>
                   <td className="px-2 py-1.5 text-ink">
                     {r.name}
                     {r.isMe && (
@@ -239,7 +238,6 @@ export default function StudentPaperDetail({ id }: { id: string }) {
                       </Badge>
                     )}
                   </td>
-                  <td className="px-2 py-1.5 text-ink-dim">{r.group}</td>
                   <td className="px-4 py-1.5 text-right tabular-nums">
                     <span className="text-ink">{scoreText(r.totalScore)}</span>
                     <span className="text-xs text-ink-dim">/{scoreText(r.maxScore)}</span>

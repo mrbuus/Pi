@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as Tabs from "@radix-ui/react-tabs";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, BarChart3, Eye, EyeOff, KeyRound, Table2, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, BarChart3, BookOpen, Eye, EyeOff, KeyRound, Table2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { api, getRole } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
@@ -18,11 +18,13 @@ import GroupTable from "./GroupTable";
 import ImportPanel from "./ImportPanel";
 import KeyEditor from "./KeyEditor";
 import OverviewPanel from "./OverviewPanel";
+import PaperGuide from "./PaperGuide";
 import { dayText, type Board } from "./types";
 
 const ALL_TABS = [
   { value: "groups", label: "Багаар", icon: Table2, manage: false },
   { value: "overview", label: "Тойм", icon: BarChart3, manage: false },
+  { value: "guide", label: "Бодлогын тайлбар", icon: BookOpen, manage: false },
   { value: "key", label: "Түлхүүр, агуулга", icon: KeyRound, manage: true },
   { value: "import", label: "Дүн оруулах", icon: Upload, manage: true },
 ] as const;
@@ -34,6 +36,8 @@ export default function PaperBoard({ id }: { id: string }) {
   const role = getRole();
   const canManage = role === "ADMIN" || role === "TEACHER_PLUS";
   const tabs = ALL_TABS.filter((t) => canManage || !t.manage);
+  // Тайлбартай шалгалтад л «Бодлогын тайлбар» таб
+  const [guideOpen, setGuideOpen] = useState<string | null>(null);
   const [tab, setTab] = useState<BoardTab>("groups");
   const [board, setBoard] = useState<Board | null>(null);
   const [error, setError] = useState("");
@@ -136,7 +140,7 @@ export default function PaperBoard({ id }: { id: string }) {
 
       <Tabs.Root value={tab} onValueChange={changeTab}>
         <Tabs.List aria-label="Шалгалтын хэсэг" className="flex gap-1 overflow-x-auto border-b border-line">
-          {tabs.map(({ value, label, icon: Icon }) => (
+          {tabs.filter((t) => t.value !== "guide" || board.guideVariants.length > 0).map(({ value, label, icon: Icon }) => (
             <Tabs.Trigger
               key={value}
               value={value}
@@ -159,6 +163,20 @@ export default function PaperBoard({ id }: { id: string }) {
           <Tabs.Content value="overview">
             <OverviewPanel board={board} />
           </Tabs.Content>
+          {board.guideVariants.length > 0 && (
+            <Tabs.Content value="guide">
+              <PaperGuide
+                examId={id}
+                variants={board.guideVariants}
+                items={[]}
+                open={guideOpen}
+                onOpen={(label) => {
+                  setGuideOpen(label);
+                  window.scrollTo({ top: 0 });
+                }}
+              />
+            </Tabs.Content>
+          )}
           {canManage && (
             <>
               {/* forceMount: таб солиход хадгалаагүй ноорог алдагдахгүй. key = бодлогын

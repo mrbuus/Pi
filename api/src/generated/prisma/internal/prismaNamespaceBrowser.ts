@@ -202,6 +202,7 @@ export const ModelName = {
   MakeupVisitTest: 'MakeupVisitTest',
   PaperExam: 'PaperExam',
   PaperExamItem: 'PaperExamItem',
+  PaperExamGuide: 'PaperExamGuide',
   PaperExamSheet: 'PaperExamSheet',
   PaperExamImport: 'PaperExamImport'
 } as const
@@ -2563,6 +2564,20 @@ export const PaperExamItemScalarFieldEnum = {
 } as const
 
 export type PaperExamItemScalarFieldEnum = (typeof PaperExamItemScalarFieldEnum)[keyof typeof PaperExamItemScalarFieldEnum]
+
+
+export const PaperExamGuideScalarFieldEnum = {
+  id: 'id',
+  examId: 'examId',
+  variant: 'variant',
+  label: 'label',
+  number: 'number',
+  order: 'order',
+  content: 'content',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaperExamGuideScalarFieldEnum = (typeof PaperExamGuideScalarFieldEnum)[keyof typeof PaperExamGuideScalarFieldEnum]
 
 
 export const PaperExamSheetScalarFieldEnum = {
