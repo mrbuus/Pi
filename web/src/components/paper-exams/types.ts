@@ -81,6 +81,7 @@ export interface ItemStat {
 
 export interface BoardRow {
   sheetId: string;
+  variant: string | null;
   studentId: string | null;
   code: string;
   lastName: string;

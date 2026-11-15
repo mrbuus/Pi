@@ -99,7 +99,7 @@ describe('Цаасан шалгалт (OMR) — эрх', () => {
       'STUDENT',
     ]);
   });
-  it.each(['list', 'board', 'guide', 'material'] as const)('%s — ажилтан', (name) => {
+  it.each(['list', 'board', 'guide', 'material', 'editSheet', 'searchStudents'] as const)('%s — ажилтан', (name) => {
     expect(rolesOf(proto[name])).toEqual(['ADMIN', 'TEACHER_PLUS', 'TEACHER']);
   });
   it.each([
@@ -111,7 +111,6 @@ describe('Цаасан шалгалт (OMR) — эрх', () => {
     'imports',
     'revert',
     'link',
-    'searchStudents',
   ] as const)('%s — зөвхөн ADMIN/TEACHER_PLUS', (name) => {
     expect(rolesOf(proto[name])).toEqual(['ADMIN', 'TEACHER_PLUS']);
   });

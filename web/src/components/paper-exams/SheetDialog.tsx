@@ -1,6 +1,7 @@
 "use client";
 
 import { Meta } from "@/components/ui/Meta";
+import { Button } from "@/components/ui/kit/button";
 import ExamDialog from "@/components/exams/ExamDialog";
 import { cn } from "@/lib/cn";
 import AreaBars from "./AreaBars";
@@ -24,18 +25,22 @@ export default function SheetDialog({
   formulas,
   classifyBy,
   onOpenChange,
+  onEdit,
 }: {
   row: BoardRow | null;
   items: PaperItem[];
   formulas: FormulaRef[];
   classifyBy: ClassifyBy;
   onOpenChange: (open: boolean) => void;
+  /** Гараар засах (багш эрхтэй бүх ажилтан) */
+  onEdit?: (row: BoardRow) => void;
 }) {
   return (
     <ExamDialog
       open={!!row}
       onOpenChange={onOpenChange}
       wide
+      footer={row && onEdit ? <Button onClick={() => onEdit(row)}>Дүн засах</Button> : undefined}
       title={row ? `${row.lastName} ${row.firstName}` : ""}
       description={
         row ? (

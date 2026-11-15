@@ -206,7 +206,7 @@ export default function PaperBoard({ id }: { id: string }) {
         </Tabs.List>
         <div className="mt-4">
           <Tabs.Content value="groups">
-            <GroupTable board={board} />
+            <GroupTable board={board} onChanged={load} />
           </Tabs.Content>
           <Tabs.Content value="overview">
             <OverviewPanel board={board} />

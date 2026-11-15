@@ -142,3 +142,26 @@ export class ImportQueryDto {
   @IsIn(['0', '1'])
   replace?: string;
 }
+
+/** Багшийн гараар засвар: хариу (A–E, цифр) эсвэл зөв/буруу («+»/«-») */
+export class EditSheetDto {
+  /** Засах хуудас; байхгүй бол studentId-д шинэ хуудас (машин уншаагүй сурагч) */
+  @IsOptional()
+  @IsString()
+  @Length(1, 60)
+  sheetId?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 60)
+  studentId?: string;
+
+  @IsString()
+  @Length(1, 2)
+  variant!: string;
+
+  @IsArray()
+  @ArrayMaxSize(200)
+  @IsString({ each: true })
+  answers!: string[];
+}

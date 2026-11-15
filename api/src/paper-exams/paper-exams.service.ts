@@ -1066,6 +1066,121 @@ export class PaperExamsService {
     return { ok: true };
   }
 
+  /**
+   * Багшийн гараар засвар (эзэн 2026-11-15): машин уншиж чадаагүй сурагчийн дүнг оруулах,
+   * эсвэл буруу уншсаныг засах. Хуучин мөрийг ДАРЖ БИЧИХГҮЙ — хүчингүй болгоод шинэ мөр
+   * (тусдаа «Гараар засвар» импорт) үүсгэнэ, тэр импортыг буцаавал хуучин нь сэргэнэ.
+   */
+  async editSheet(
+    examId: string,
+    dto: { sheetId?: string; studentId?: string; variant: string; answers: string[] },
+    actor: Actor,
+  ) {
+    const exam = await this.activeExam(examId);
+    const items: PaperItem[] = exam.items;
+    if (dto.answers.length !== items.length)
+      throw new BadRequestException(`${items.length} бодлогын хариу өгнө үү`);
+    const variant = dto.variant.trim().toUpperCase();
+    const answers = dto.answers.map((raw, i) => {
+      const a = raw.trim().toUpperCase();
+      const cells = items[i].cells ?? 1;
+      const ok =
+        a === '' || a === '+' || a === '-' ||
+        (cells > 1 ? new RegExp(`^[0-9_*-]{${cells}}$`).test(a) : /^[A-E*]$/.test(a));
+      if (!ok)
+        throw new BadRequestException(
+          `${items[i].label ?? items[i].number}: «${raw}» хариу буруу хэлбэртэй`,
+        );
+      return a;
+    });
+    const g = gradeSheet(answers, items, variant);
+
+    const old = dto.sheetId
+      ? await this.prisma.paperExamSheet.findFirst({
+          where: { id: dto.sheetId, examId, supersededAt: null },
+        })
+      : null;
+    if (dto.sheetId && !old) throw new NotFoundException('Хуудас олдсонгүй');
+    const studentId = old ? old.studentId : (dto.studentId ?? null);
+    if (!old && !studentId) throw new BadRequestException('Сурагчаа сонгоно уу');
+    const student = studentId
+      ? await this.prisma.user.findFirst({
+          where: { id: studentId, role: Role.STUDENT },
+          select: {
+            id: true,
+            studentCode: true,
+            lastName: true,
+            firstName: true,
+            enrollments: {
+              where: { leftAt: null, classroom: { archived: false } },
+              orderBy: { joinedAt: 'desc' },
+              take: 1,
+              select: { classroomId: true, classroom: { select: { name: true } } },
+            },
+          },
+        })
+      : null;
+    if (studentId && !student) throw new NotFoundException('Сурагч олдсонгүй');
+    const enr = student?.enrollments[0];
+
+    return this.prisma.$transaction(async (tx) => {
+      await lockExam(tx, examId);
+      if (!old && studentId) {
+        const other = await tx.paperExamSheet.findFirst({
+          where: { examId, studentId, supersededAt: null },
+          select: { id: true },
+        });
+        if (other)
+          throw new ConflictException('Энэ сурагчид дүн байна — тэр мөрийг засна уу');
+      }
+      const imp = await tx.paperExamImport.create({
+        data: {
+          examId,
+          fileName: 'Гараар засвар',
+          fileSha256: 'manual',
+          sheetCount: 1,
+          matchedCount: studentId ? 1 : 0,
+          createdById: actor.userId,
+        },
+        select: { id: true },
+      });
+      if (old)
+        await tx.paperExamSheet.update({
+          where: { id: old.id },
+          data: { supersededAt: new Date(), supersededByImportId: imp.id },
+        });
+      const sheet = await tx.paperExamSheet.create({
+        data: {
+          examId,
+          importId: imp.id,
+          studentId,
+          rawCode: old?.rawCode ?? student?.studentCode ?? '',
+          rawLastName: old?.rawLastName ?? student?.lastName ?? '',
+          rawFirstName: old?.rawFirstName ?? student?.firstName ?? '',
+          groupLabel:
+            old?.groupLabel ??
+            (enr?.classroom.name.replace(/\s*\(.*\)\s*$/, '').trim() || 'Ангигүй'),
+          groupTeacher: old?.groupTeacher ?? null,
+          classroomId: old?.classroomId ?? enr?.classroomId ?? null,
+          answers,
+          variant,
+          totalScore: g.totalScore,
+          maxScore: g.maxScore,
+        },
+        select: { id: true, totalScore: true, maxScore: true },
+      });
+      await this.audit(
+        tx,
+        actor,
+        'EDIT_SHEET',
+        examId,
+        old ? { sheetId: old.id, answers: old.answers, variant: old.variant, totalScore: old.totalScore } : null,
+        { sheetId: sheet.id, answers, variant, totalScore: g.totalScore },
+      );
+      return sheet;
+    });
+  }
+
   async searchStudents(q: string) {
     const users = await this.prisma.user.findMany({
       where: {
@@ -1157,6 +1272,7 @@ export class PaperExamsService {
       return {
         sheetId: x.s.id,
         studentId: x.s.studentId,
+        variant: x.s.variant ?? null,
         code: x.s.student?.studentCode ?? x.s.rawCode,
         lastName: x.s.student?.lastName ?? x.s.rawLastName,
         firstName: x.s.student?.firstName ?? x.s.rawFirstName,

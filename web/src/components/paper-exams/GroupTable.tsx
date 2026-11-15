@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ChevronDown, Search, Users } from "lucide-react";
+import { Plus } from "lucide-react";
 import InfoHint from "@/components/ui/InfoHint";
 import { Card } from "@/components/ui/Surface";
 import { Meta } from "@/components/ui/Meta";
@@ -9,6 +10,8 @@ import { EmptyState } from "@/components/ui/StateBlock";
 import { cn } from "@/lib/cn";
 import AreaBars from "./AreaBars";
 import SheetDialog from "./SheetDialog";
+import SheetEditor from "./SheetEditor";
+import { Button } from "@/components/ui/kit/button";
 import {
   areaShort,
   CLASSIFY_LABEL,
@@ -31,10 +34,13 @@ import {
  * № | Шифр | Овог | Нэр | Оноо | Сул агуулга | 1..N, доор нь «Гүйцэтгэл %»,
  * хүснэгтийн доор «Агуулгын төрлөөр — гүйцэтгэл %».
  */
-export default function GroupTable({ board }: { board: Board }) {
+export default function GroupTable({ board, onChanged }: { board: Board; onChanged: () => void }) {
   const [active, setActive] = useState(board.groups[0]?.label ?? "");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<BoardRow | null>(null);
+  // Гараар засвар: row = засах мөр, "new" = шинэ сурагч нэмэх
+  const [edit, setEdit] = useState<BoardRow | "new" | null>(null);
+  const variants = board.guideVariants.length ? board.guideVariants : ["A", "B"];
 
   const q = query.trim().toLocaleLowerCase("mn-MN");
   const found = useMemo(() => {
@@ -125,7 +131,35 @@ export default function GroupTable({ board }: { board: Board }) {
         <GroupSheet board={board} group={group} onOpen={setOpen} />
       )}
 
-      <SheetDialog row={open} items={board.items} formulas={board.formulas} classifyBy={board.classifyBy} onOpenChange={(v) => !v && setOpen(null)} />
+      <div className="flex justify-end">
+        <Button variant="secondary" onClick={() => setEdit("new")}>
+          <Plus aria-hidden /> Дүн гараар нэмэх
+        </Button>
+      </div>
+
+      <SheetDialog
+        row={open}
+        items={board.items}
+        formulas={board.formulas}
+        classifyBy={board.classifyBy}
+        onOpenChange={(v) => !v && setOpen(null)}
+        onEdit={(r) => {
+          setOpen(null);
+          setEdit(r);
+        }}
+      />
+      {edit && (
+        <SheetEditor
+          key={edit === "new" ? "new" : edit.sheetId}
+          examId={board.exam.id}
+          items={board.items}
+          variants={variants}
+          row={edit === "new" ? null : edit}
+          open
+          onOpenChange={(v) => !v && setEdit(null)}
+          onSaved={onChanged}
+        />
+      )}
     </div>
   );
 }
@@ -161,7 +195,6 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
                 <th className={cn(head, "hidden md:table-cell")}>Шифр</th>
                 <th className={cn(head, "sticky left-8 z-20 min-w-36 border-r border-line")}>Овог, нэр</th>
                 <th className={cn(head, "text-right")}>Оноо</th>
-                <th className={cn(head, "min-w-32")}>{label.weak}</th>
                 {items.map((it) => (
                   <th
                     key={it.number}
@@ -194,7 +227,6 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
                   <td className="border-t border-line px-2 py-1 text-right font-bold tabular-nums text-ink">
                     {scoreText(r.totalScore)}
                   </td>
-                  <td className="border-t border-line px-2 py-1 text-xs text-ink">{r.weak.join(", ")}</td>
                   {items.map((it, j) => {
                     const st = STATUS_OF_CHAR[r.statuses[j]] ?? "UNGRADED";
                     return (
@@ -215,7 +247,6 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
                 <td className="sticky left-0 z-10 border-t-2 border-line bg-panel" />
                 <td className="hidden border-t-2 border-line bg-panel md:table-cell" />
                 <td className="sticky left-8 z-10 border-r border-t-2 border-line bg-panel px-2 py-2 text-xs font-bold text-ink">Гүйцэтгэл %</td>
-                <td className="border-t-2 border-line bg-panel" />
                 <td className="border-t-2 border-line bg-panel" />
                 {group.items.map((s) => (
                   <td

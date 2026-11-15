@@ -23,6 +23,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import type { RequestWithUser } from '../auth/request.interface';
 import { Role } from '../generated/prisma/enums';
 import {
+  EditSheetDto,
   CreatePaperExamDto,
   ImportQueryDto,
   LinkSheetDto,
@@ -137,7 +138,7 @@ export class PaperExamsController {
     return this.paper.list(actorOf(req));
   }
 
-  @Roles(...MANAGE)
+  @Roles(...STAFF)
   @Get('students/search')
   searchStudents(@Query() query: StudentSearchDto) {
     return this.paper.searchStudents(query.q);
@@ -227,6 +228,17 @@ export class PaperExamsController {
   @HttpCode(200)
   revert(@Param('importId') importId: string, @Req() req: RequestWithUser) {
     return this.paper.revertImport(importId, actorOf(req));
+  }
+
+  /** Гараар засвар/нэмэлт — багш эрхтэй бүх ажилтан (эзэн 2026-11-15) */
+  @Roles(...STAFF)
+  @Put(':id/sheet')
+  editSheet(
+    @Param('id') id: string,
+    @Body() dto: EditSheetDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.paper.editSheet(id, dto, actorOf(req));
   }
 
   @Roles(...MANAGE)
