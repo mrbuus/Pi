@@ -8,7 +8,8 @@
  *   node prisma/paper-exam-import.cjs <файл.xlsx> --title="Нэгдсэн шалгалт 1" --held=2026-11-14 --create   # шалгалт байхгүй бол үүсгэнэ
  *   node prisma/paper-exam-import.cjs <файл.xlsx> --title="Нэгдсэн шалгалт 1" --commit                     # хадгална
  *
- * --topics=<guide.json>: бодлого бүрийн сэдвийг тайлбарын файлаас оноох (paper-exam-guide.cjs-ийн JSON).
+ * --topics=<file.json>: {items:[{number, topic, area}]} — бодлого бүрийн сэдэв, БҮТ-ийн агуулга
+ *   (prisma/data/paper-exam-guides/negdsen-shalgalt-1-topics.json).
  * Урьдчилан `npm run build` хийсэн байх ёстой (dist).
  */
 const fs = require('fs');
@@ -23,16 +24,6 @@ const arg = (name) => (process.argv.find((a) => a.startsWith(`--${name}=`)) || '
 const has = (name) => process.argv.includes(`--${name}`);
 const file = process.argv.slice(2).find((a) => !a.startsWith('--'));
 
-/** Тайлбарын сэдэв → «Сэдэв» жагсаалтын нэр (PAPER_TOPICS) */
-const TOPIC = {
-  'Тоо тоолол': 'Тоо',
-  'Рациональ тэгшитгэл': 'Рационал тэгшитгэл',
-  'Рациональ тэнцэтгэл биш': 'Рационал тэнцэтгэл биш',
-  'Модультай тэгшитгэл': 'Модультай тэгшитгэл',
-  'Модультай тэнцэтгэл биш': 'Модультай тэнцэтгэл биш',
-};
-/** Нөхөх даалгаврын багц (37…48) → сэдэв: II.1 Тоо, II.2 модуль, II.3–II.4 рационал тэнцэтгэл биш */
-const FILL_TOPICS = ['Тоо', 'Модультай тэнцэтгэл биш', 'Рационал тэнцэтгэл биш', 'Рационал тэнцэтгэл биш'];
 
 async function main() {
   if (!file) throw new Error('Excel файлын зам өгнө үү');
@@ -68,19 +59,24 @@ async function main() {
     const topicsFile = arg('topics');
     if (topicsFile && has('commit')) {
       const guide = JSON.parse(fs.readFileSync(topicsFile, 'utf8'));
-      const choice = (guide.variants.A || []).filter((e) => e.number !== null);
       const current = await prisma.paperExamItem.findMany({ where: { examId: exam.id }, orderBy: { number: 'asc' } });
-      const items = current.map((it) => {
-        const g = choice.find((e) => e.number === it.number);
-        const fillIndex = Math.floor((it.number - choice.length - 1) / 3);
-        const topic = g ? TOPIC[g.content.topic] ?? g.content.topic : FILL_TOPICS[fillIndex] ?? it.topic;
-        return { number: it.number, answerKey: it.answerKey, points: it.points, area: it.area, topic, formulaSlugs: it.formulaSlugs, voided: it.voided };
-      });
-      await svc.saveItems(exam.id, { items }, actor);
-      console.log('Сэдэв онооллоо:', [...new Set(items.map((i) => i.topic))].join(', '));
+      // {items:[{number, topic, area}]} — бодлого бүрийн сэдэв, БҮТ-ийн агуулга (шууд)
+      if (Array.isArray(guide.items)) {
+        const by = new Map(guide.items.map((i) => [i.number, i]));
+        const items = current.map((it) => {
+          const g = by.get(it.number);
+          return { number: it.number, answerKey: it.answerKey, points: it.points, area: g?.area ?? it.area, topic: g?.topic ?? it.topic, formulaSlugs: it.formulaSlugs, voided: it.voided };
+        });
+        await svc.saveItems(exam.id, { items }, actor);
+        console.log('Сэдэв, агуулга онооллоо:', guide.items.length, 'бодлого');
+      }
     }
 
-    const res = await svc.importFile(exam.id, buffer, path.basename(file), { confirm: has('commit'), replace: has('replace') }, actor);
+    // Бичих мөр байхгүй бол хоосон импорт үүсгэхгүй
+    const preview = await svc.importFile(exam.id, buffer, path.basename(file), { confirm: false, replace: has('replace') }, actor);
+    const write = has('commit') && preview.totals.willWrite > 0;
+    if (has('commit') && !write) console.log('Бичих шинэ мөр алга — импорт хийсэнгүй');
+    const res = write ? await svc.importFile(exam.id, buffer, path.basename(file), { confirm: true, replace: has('replace') }, actor) : preview;
     console.log(JSON.stringify({ format: res.format, pointsChange: res.pointsChange, blocking: res.blocking, ...res.totals }, null, 1));
     const show = (label, list) => list.length && console.log(`${label} (${list.length}):\n` + list.slice(0, 40).map((r) => `  ${r.groupLabel} · ${r.code} · ${r.lastName} ${r.firstName} · ${r.totalScore} · ${r.warnings.join('; ')}`).join('\n'));
     show('ХАДГАЛАХГҮЙ', res.rows.filter((r) => r.warnings.some((w) => w.startsWith('ХАДГАЛАХГҮЙ'))));
