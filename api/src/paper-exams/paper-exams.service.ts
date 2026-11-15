@@ -1125,9 +1125,9 @@ export class PaperExamsService {
 
     return this.prisma.$transaction(async (tx) => {
       await lockExam(tx, examId);
-      if (!old && studentId) {
+      if (studentId) {
         const other = await tx.paperExamSheet.findFirst({
-          where: { examId, studentId, supersededAt: null },
+          where: { examId, studentId, supersededAt: null, ...(old ? { NOT: { id: old.id } } : {}) },
           select: { id: true },
         });
         if (other)
@@ -1144,11 +1144,15 @@ export class PaperExamsService {
         },
         select: { id: true },
       });
-      if (old)
-        await tx.paperExamSheet.update({
-          where: { id: old.id },
+      if (old) {
+        // Түгжээний дараа дахин шалгана — зэрэг засвар нэг мөрийг хоёр удаа орлохгүй
+        const done = await tx.paperExamSheet.updateMany({
+          where: { id: old.id, supersededAt: null },
           data: { supersededAt: new Date(), supersededByImportId: imp.id },
         });
+        if (done.count !== 1)
+          throw new ConflictException('Энэ хуудсыг өөр хүн дөнгөж засчээ — дахин ачаална уу');
+      }
       const sheet = await tx.paperExamSheet.create({
         data: {
           examId,
@@ -1305,7 +1309,8 @@ export class PaperExamsService {
     const groups = [...byGroup.entries()]
       .sort(
         (a, b) =>
-          groupOrder(a[0]) - groupOrder(b[0]) || a[0].localeCompare(b[0], 'mn'),
+          groupOrder(a[0]) - groupOrder(b[0]) ||
+          a[0].localeCompare(b[0], 'mn', { numeric: true }),
       )
       .map(([label, list]) => {
         list.sort(

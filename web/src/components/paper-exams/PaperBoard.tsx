@@ -258,7 +258,7 @@ export default function PaperBoard({ id }: { id: string }) {
               </Tabs.Content>
               )}
               <Tabs.Content value="import">
-                <ImportPanel examId={id} itemCount={e.itemCount} unmatched={board.unmatched} onChanged={load} />
+                <ImportPanel examId={id} itemCount={e.itemCount} unmatched={board.unmatched} onChanged={load} items={board.items} variants={board.guideVariants.length ? board.guideVariants : ["A", "B"]} />
               </Tabs.Content>
             </>
           )}

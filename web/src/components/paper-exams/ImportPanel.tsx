@@ -1,5 +1,8 @@
 "use client";
 
+import SheetEditor from "./SheetEditor";
+import type { PaperItem } from "./types";
+
 import { useCallback, useEffect, useState } from "react";
 import { FileSpreadsheet, Link2, RotateCcw, Search, TriangleAlert, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -30,7 +33,11 @@ export default function ImportPanel({
   itemCount,
   unmatched,
   onChanged,
+  items,
+  variants,
 }: {
+  items: PaperItem[];
+  variants: string[];
   examId: string;
   itemCount: number;
   unmatched: BoardRow[];
@@ -45,6 +52,7 @@ export default function ImportPanel({
   const [history, setHistory] = useState<ImportHistoryRow[] | null>(null);
   const [linking, setLinking] = useState<BoardRow | null>(null);
   const [reverting, setReverting] = useState<ImportHistoryRow | null>(null);
+  const [manual, setManual] = useState(false);
 
   const loadHistory = useCallback(() => {
     api<ImportHistoryRow[]>(`/paper-exams/${encodeURIComponent(examId)}/imports`)
@@ -87,6 +95,18 @@ export default function ImportPanel({
 
   return (
     <div className="space-y-4">
+      <Card>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-bold text-brand-soft">Гараар оруулах</h3>
+            <p className="text-sm text-ink-dim">Машин уншиж чадаагүй сурагч: сурагчаа сонгоод бодлого бүрт зөв/алдсан тэмдэглэх эсвэл хариуг нь шивнэ — оноог систем бодно</p>
+          </div>
+          <Button onClick={() => setManual(true)}>Гараар оруулах</Button>
+        </div>
+      </Card>
+      {manual && (
+        <SheetEditor examId={examId} items={items} variants={variants} row={null} open onOpenChange={(v) => !v && setManual(false)} onSaved={onChanged} />
+      )}
       <Card>
         <h3 className="mb-3 flex items-center gap-2 font-bold text-brand-soft">
           <Upload className="size-5" aria-hidden /> Файл оруулах
