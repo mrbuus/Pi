@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, Users } from "lucide-react";
+import { ChevronDown, Search, Users } from "lucide-react";
 import InfoHint from "@/components/ui/InfoHint";
 import { Card } from "@/components/ui/Surface";
 import { Meta } from "@/components/ui/Meta";
@@ -232,16 +232,25 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
       </Card>
       <Legend topics={by === "topic" ? [...new Set(items.flatMap((i) => (i.topic ? [i.topic] : [])))] : null} />
 
-      <Card>
-        <h3 className="mb-3 font-bold text-brand-soft">{label.by} — гүйцэтгэл %</h3>
-        <AreaBars areas={groupBy} compare={new Map(overallBy.map((a) => [a.area, a.pct]))} compareLabel="төв" />
-      </Card>
-      {by === "topic" && group.areas.length > 1 && (
-        <Card>
-          <h3 className="mb-3 font-bold text-brand-soft">{CLASSIFY_LABEL.area.by} — гүйцэтгэл %</h3>
-          <AreaBars areas={group.areas} compare={new Map(board.overall.areas.map((a) => [a.area, a.pct]))} compareLabel="төв" />
-        </Card>
-      )}
+      {/* Сэдэв, агуулгаар гүйцэтгэл — анхдагчаар хураалттай, хүсвэл нээнэ (эзэн 2026-11-15) */}
+      <details className="group/perf chunky overflow-hidden">
+        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-5 py-3 font-bold text-brand-soft [&::-webkit-details-marker]:hidden">
+          {label.by}, агуулгаар — гүйцэтгэл %
+          <ChevronDown className="size-5 shrink-0 text-ink-dim transition-transform group-open/perf:rotate-180" aria-hidden />
+        </summary>
+        <div className="space-y-6 border-t border-line px-5 py-4">
+          <div>
+            <h3 className="mb-3 font-bold text-brand-soft">{label.by} — гүйцэтгэл %</h3>
+            <AreaBars areas={groupBy} compare={new Map(overallBy.map((a) => [a.area, a.pct]))} compareLabel="төв" />
+          </div>
+          {by === "topic" && group.areas.length > 1 && (
+            <div>
+              <h3 className="mb-3 font-bold text-brand-soft">{CLASSIFY_LABEL.area.by} — гүйцэтгэл %</h3>
+              <AreaBars areas={group.areas} compare={new Map(board.overall.areas.map((a) => [a.area, a.pct]))} compareLabel="төв" />
+            </div>
+          )}
+        </div>
+      </details>
     </div>
   );
 }
