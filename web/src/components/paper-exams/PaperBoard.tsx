@@ -206,6 +206,7 @@ export default function PaperBoard({ id }: { id: string }) {
                           items={itemsOf(entry.label, entry.number)}
                           formulas={board.formulas}
                           topics={board.topicsList}
+                          examTopics={[...new Set(board.items.flatMap((i) => (i.topic ? [i.topic] : [])))]}
                           onSaved={load}
                         />
                       )

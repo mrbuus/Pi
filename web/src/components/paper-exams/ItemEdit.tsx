@@ -21,12 +21,15 @@ export default function ItemEdit({
   items,
   formulas,
   topics,
+  examTopics,
   onSaved,
 }: {
   examId: string;
   items: PaperItem[];
   formulas: FormulaRef[];
   topics: { slug: string; name: string }[];
+  /** Энэ шалгалтын бодлогуудад оноосон сэдвүүд — сонгох боломжтой цорын ганц сэдвүүд */
+  examTopics: string[];
   onSaved: () => void;
 }) {
   const first = items[0];
@@ -72,12 +75,15 @@ export default function ItemEdit({
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="grid gap-1 text-sm font-semibold text-ink">
           Сэдэв
-          <input list="paper-topics" value={topic} onChange={(e) => setTopic(e.target.value)} className={field} />
-          <datalist id="paper-topics">
-            {topics.map((t) => (
-              <option key={t.slug} value={t.name} />
+          {/* Зөвхөн энэ шалгалтад орсон сэдвүүдээс (эзэн: тестийн хамрахаас гадуурх сэдэв оруулахгүй) */}
+          <select value={topic} onChange={(e) => setTopic(e.target.value)} className={field}>
+            <option value="">Оноогоогүй</option>
+            {[...new Set([...examTopics, topic].filter(Boolean))].map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
-          </datalist>
+          </select>
         </label>
         <label className="grid gap-1 text-sm font-semibold text-ink">
           Агуулга (БҮТ)
