@@ -464,7 +464,15 @@ export class PaperExamsService {
     const fileItem = (idx: number) => {
       const it = v2?.[idx];
       if (!it) return null;
-      const keys = it.keys;
+      // Файлд байхгүй хувилбарын түлхүүрийг ХАДГАЛНА: нэг ангийн (зөвхөн A) файл оруулахад
+      // B-гийн түлхүүр алга болж B сурагчид A түлхүүрээр дүгнэгдсэн алдаа (2026-11-15)
+      const prev = exam.items[idx]?.answerKeys;
+      const keys: Record<string, string> = {
+        ...(prev && typeof prev === 'object' && !Array.isArray(prev)
+          ? (prev as Record<string, string>)
+          : {}),
+        ...it.keys,
+      };
       return {
         points: it.points,
         answerKeys: keys,
