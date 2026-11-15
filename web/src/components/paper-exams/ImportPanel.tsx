@@ -1,7 +1,7 @@
 "use client";
 
 import SheetEditor from "./SheetEditor";
-import type { PaperItem } from "./types";
+import { shortName, type PaperItem } from "./types";
 
 import { useCallback, useEffect, useState } from "react";
 import { FileSpreadsheet, Link2, RotateCcw, Search, TriangleAlert, Upload } from "lucide-react";
@@ -215,7 +215,7 @@ export default function ImportPanel({
                     <tr key={r.key} className="border-t border-line align-top">
                       <td className="px-2 py-1.5">
                         <span className="text-ink">
-                          {r.lastName} {r.firstName}
+                          {shortName(r.lastName, r.firstName)}
                         </span>
                         <div className="text-xs text-ink-dim">
 <Meta items={[r.code || "шифргүй", r.groupLabel, `${r.rowNumber}-р мөр`]} />
@@ -274,7 +274,7 @@ export default function ImportPanel({
               <li key={r.sheetId} className="flex min-h-11 flex-wrap items-center gap-3 py-2">
                 <span className="min-w-0 flex-1 text-sm">
                   <span className="font-semibold text-ink">
-                    {r.lastName} {r.firstName}
+                    {shortName(r.lastName, r.firstName)}
                   </span>
                   <Meta className="ml-2 text-xs text-ink-dim" items={[r.code || "шифргүй", `${scoreText(r.totalScore)} оноо`]} />
                 </span>
@@ -425,7 +425,7 @@ function LinkDialog({ row, onClose, onLinked }: { row: BoardRow | null; onClose:
         }
       }}
       title="Сурагч холбох"
-      description={row ? `Файлд: ${row.lastName} ${row.firstName}${row.code ? `, шифр ${row.code}` : ""}` : undefined}
+      description={row ? `Файлд: ${shortName(row.lastName, row.firstName)}${row.code ? `, шифр ${row.code}` : ""}` : undefined}
     >
       <label className="relative block">
         <span className="sr-only">Нэр эсвэл код</span>

@@ -403,3 +403,22 @@ export interface PaperMaterial {
   variant: string;
   pages: string[];
 }
+
+/**
+ * Нэр «Э. Мандахнаран» — овгийн эхний үсэг (эзэн 2026-11-15). Овгийн эхний үсэг, нэр нь
+ * давхцсан өөр хүн байвал л овгийг бүтнээр. `rows` — жагсаалтын бүх хүн.
+ */
+export function makeNamer(rows: { lastName: string; firstName: string }[]) {
+  const key = (l: string, f: string) => `${l.trim().charAt(0)}|${f.trim()}`;
+  const lastsBy = new Map<string, Set<string>>();
+  for (const r of rows) {
+    const k = key(r.lastName, r.firstName);
+    lastsBy.set(k, (lastsBy.get(k) ?? new Set()).add(r.lastName.trim()));
+  }
+  return (lastName: string, firstName: string) => {
+    const l = lastName.trim();
+    if (!l) return firstName;
+    return (lastsBy.get(key(l, firstName))?.size ?? 0) > 1 ? `${l} ${firstName}` : `${l.charAt(0)}. ${firstName}`;
+  };
+}
+export const shortName = (lastName: string, firstName: string) => makeNamer([])(lastName, firstName);

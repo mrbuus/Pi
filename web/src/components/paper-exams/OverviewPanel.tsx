@@ -2,7 +2,8 @@
 
 import { Card } from "@/components/ui/Surface";
 import { EmptyState } from "@/components/ui/StateBlock";
-import { BarChart3 } from "lucide-react";
+import { useState } from "react";
+import { ArrowDown, ArrowUp, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import AreaBars from "./AreaBars";
 import FormulaLine from "./FormulaLine";
@@ -13,6 +14,8 @@ import { areaShort, CLASSIFY_LABEL, itemName, itemTitle, scoreText, TONE_CELL, t
  * хамгийн их алдсан бодлогууд, агуулгын гүйцэтгэл. (Эзний жишээ ирэхэд тааруулна.)
  */
 export default function OverviewPanel({ board }: { board: Board }) {
+  // Excel шиг: толгой дээр дарж эрэмбэлнэ; анхдагч — дунджаар ихээс бага (эзэн 2026-11-15)
+  const [sort, setSort] = useState<{ key: string; desc: boolean }>({ key: "avg", desc: true });
   const o = board.overall;
   if (o.count === 0) {
     return <EmptyState icon={BarChart3} title="Дүн алга" hint="Дүн оруулсны дараа тойм энд харагдана." />;
@@ -23,11 +26,34 @@ export default function OverviewPanel({ board }: { board: Board }) {
   const short = by === "topic" ? topicShort : areaShort;
   const areaNames = overallBy.map((a) => a.area);
   // Ангиуд дундаж оноогоор (эзэн 2026-11-15); ижил дундажтай бол ижил байр
-  const sorted = [...board.groups].sort((x, y) => (y.avgScore ?? -1) - (x.avgScore ?? -1) || x.label.localeCompare(y.label, "mn", { numeric: true }));
-  const ranked = sorted.map((g, i) => ({
-    g,
-    rank: sorted.findIndex((h) => h.avgScore === g.avgScore) + 1 || i + 1,
-  }));
+  const byAvg = [...board.groups].sort((x, y) => (y.avgScore ?? -1) - (x.avgScore ?? -1));
+  const rankOf = new Map(board.groups.map((g) => [g.label, byAvg.findIndex((h) => h.avgScore === g.avgScore) + 1]));
+  const valueOf = (g: (typeof board.groups)[number]): number | string => {
+    if (sort.key === "label") return g.label;
+    if (sort.key === "count") return g.count;
+    if (sort.key === "avg" || sort.key === "rank") return g.avgScore ?? -1;
+    if (sort.key === "pct") return g.avgPct ?? -1;
+    return ((by === "topic" ? g.topics : g.areas).find((a) => a.area === sort.key)?.pct ?? -1) as number;
+  };
+  const ranked = [...board.groups]
+    .sort((x, y) => {
+      const a = valueOf(x);
+      const b = valueOf(y);
+      const c = typeof a === "string" ? a.localeCompare(String(b), "mn", { numeric: true }) : a - (b as number);
+      return (sort.desc ? -c : c) || x.label.localeCompare(y.label, "mn", { numeric: true });
+    })
+    .map((g) => ({ g, rank: rankOf.get(g.label) ?? 0 }));
+  const sortHead = (key: string, text: React.ReactNode, cls: string, title?: string) => (
+    <th key={key} className={cn(cls, "py-2 font-bold")} title={title} aria-sort={sort.key === key ? (sort.desc ? "descending" : "ascending") : "none"}>
+      <button
+        onClick={() => setSort((s) => ({ key, desc: s.key === key ? !s.desc : key !== "label" }))}
+        className={cn("inline-flex items-center gap-0.5 hover:text-ink", sort.key === key && "text-brand-soft")}
+      >
+        {text}
+        {sort.key === key && (sort.desc ? <ArrowDown className="size-3" aria-hidden /> : <ArrowUp className="size-3" aria-hidden />)}
+      </button>
+    </th>
+  );
   const formulaBy = new Map(board.formulas.map((f) => [f.slug, f]));
   const hardest = [...o.items]
     .filter((s) => s.pct !== null)
@@ -37,7 +63,6 @@ export default function OverviewPanel({ board }: { board: Board }) {
   const stats = [
     { label: "Сурагч", value: String(o.count) },
     { label: "Дундаж оноо", value: scoreText(o.avgScore) },
-    { label: "Дундаж", value: o.avgPct !== null ? `${o.avgPct}%` : "" },
     { label: "Медиан", value: scoreText(o.medianScore) },
     { label: "Хамгийн их", value: scoreText(o.maxScore) },
     { label: "Хамгийн бага", value: scoreText(o.minScore) },
@@ -45,7 +70,7 @@ export default function OverviewPanel({ board }: { board: Board }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
         {stats.map((s) => (
           <Card key={s.label} padding="tight" className="text-center">
             <div className="font-display text-xl font-bold tabular-nums text-ink">{s.value}</div>
@@ -60,17 +85,21 @@ export default function OverviewPanel({ board }: { board: Board }) {
           <table className="w-full min-w-[36rem] border-separate border-spacing-0 text-sm">
             <thead>
               <tr className="text-left text-xs text-ink-dim">
-                <th className="w-10 px-2 py-2 text-right font-bold">Байр</th>
-                <th className="px-2 py-2 font-bold">Анги</th>
-                <th className="px-2 py-2 text-right font-bold">Сурагч</th>
-                <th className="px-2 py-2 text-right font-bold">Дундаж</th>
-                <th className="px-2 py-2 text-right font-bold">%</th>
-                {areaNames.map((a) => (
-                  <th key={a} className="px-1 py-2 text-center font-bold" title={a}>
-                    <span className="hidden lg:inline">{a}</span>
-                    <span className="lg:hidden">{short(a)}</span>
-                  </th>
-                ))}
+                {sortHead("rank", "Байр", "w-12 px-2 text-right")}
+                {sortHead("label", "Анги", "px-2")}
+                {sortHead("count", "Сурагч", "px-2 text-right")}
+                {sortHead("avg", "Дундаж", "px-2 text-right")}
+                {areaNames.map((a) =>
+                  sortHead(
+                    a,
+                    <>
+                      <span className="hidden lg:inline">{a}</span>
+                      <span className="lg:hidden">{short(a)}</span>
+                    </>,
+                    "px-1 text-center",
+                    a,
+                  ),
+                )}
               </tr>
             </thead>
             <tbody>
@@ -85,7 +114,6 @@ export default function OverviewPanel({ board }: { board: Board }) {
                     </td>
                     <td className="border-t border-line px-2 py-1.5 text-right tabular-nums">{g.count}</td>
                     <td className="border-t border-line px-2 py-1.5 text-right tabular-nums">{scoreText(g.avgScore)}</td>
-                    <td className="border-t border-line px-2 py-1.5 text-right font-bold tabular-nums">{g.avgPct ?? ""}</td>
                     {areaNames.map((a) => {
                       const p = pctBy.get(a) ?? null;
                       return (
@@ -104,7 +132,6 @@ export default function OverviewPanel({ board }: { board: Board }) {
                 <td className="border-t-2 border-line px-2 py-1.5 text-ink">Нийт</td>
                 <td className="border-t-2 border-line px-2 py-1.5 text-right tabular-nums">{o.count}</td>
                 <td className="border-t-2 border-line px-2 py-1.5 text-right tabular-nums">{scoreText(o.avgScore)}</td>
-                <td className="border-t-2 border-line px-2 py-1.5 text-right tabular-nums">{o.avgPct ?? ""}</td>
                 {overallBy.map((a) => (
                   <td key={a.area} className="border-t-2 border-line p-1">
                     <span className={cn("block rounded-md py-1 text-center text-xs tabular-nums", TONE_CELL[toneOf(a.pct)])}>{a.pct ?? ""}</span>

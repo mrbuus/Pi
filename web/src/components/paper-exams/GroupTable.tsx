@@ -26,8 +26,7 @@ import {
   toneOf,
   type Board,
   type BoardGroup,
-  type BoardRow,
-} from "./types";
+  type BoardRow, makeNamer } from "./types";
 
 /**
  * Харагдац 1 — багийн хүснэгт (эзний «Баг 27 Болор-Эрдэнэ» Excel-ийн хэлбэр):
@@ -130,9 +129,7 @@ export default function GroupTable({ board, onChanged }: { board: Board; onChang
                 <li key={r.sheetId}>
                   <button className="row-interactive flex min-h-11 w-full items-center gap-3 px-4 py-2 text-left" onClick={() => setOpen(r)}>
                     <span className="min-w-0 flex-1 text-sm">
-                      <span className="font-semibold text-ink">
-                        {r.lastName} {r.firstName}
-                      </span>
+                      <span className="font-semibold text-ink">{makeNamer(board.groups.flatMap((g) => g.rows))(r.lastName, r.firstName)}</span>
                       <Meta className="ml-2 text-xs text-ink-dim" items={[r.group, r.code]} />
                     </span>
                     <span className="text-sm font-bold tabular-nums text-ink">{scoreText(r.totalScore)}</span>
@@ -180,6 +177,7 @@ export default function GroupTable({ board, onChanged }: { board: Board; onChang
 }
 
 function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup; onOpen: (r: BoardRow) => void }) {
+  const nameOf = makeNamer(board.groups.flatMap((g) => g.rows));
   const items = board.items;
   const by = board.classifyBy;
   const label = CLASSIFY_LABEL[by];
@@ -196,7 +194,7 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
           </h3>
           <Meta
             className="text-sm text-ink-dim"
-            items={[`${group.count} сурагч`, group.avgScore !== null ? `дундаж ${scoreText(group.avgScore)} оноо` : null, group.avgPct !== null ? `${group.avgPct}%` : null]}
+            items={[`${group.count} сурагч`, group.avgScore !== null ? `дундаж ${scoreText(group.avgScore)} оноо` : null]}
           />
         </div>
       </Card>
@@ -236,7 +234,7 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
                       className="min-h-11 text-left font-semibold text-ink underline-offset-2 hover:underline"
                       onClick={() => onOpen(r)}
                     >
-                      <span className="text-ink-dim">{r.lastName}</span> {r.firstName}
+                      {nameOf(r.lastName, r.firstName)}
                     </button>
                   </td>
                   <td className="border-t border-line px-2 py-1 text-right font-bold tabular-nums text-ink">

@@ -1252,10 +1252,25 @@ export class PaperExamsService {
         answers: true,
         variant: true,
         student: {
-          select: { firstName: true, lastName: true, studentCode: true },
+          select: {
+            firstName: true,
+            lastName: true,
+            studentCode: true,
+            enrollments: {
+              where: { leftAt: null, classroom: { archived: false } },
+              orderBy: { joinedAt: 'desc' },
+              take: 1,
+              select: { classroom: { select: { name: true } } },
+            },
+          },
         },
       },
     });
+    // Анги = сурагчийн санд хамгийн сүүлд бүртгэгдсэн анги (файлд бичсэн биш, эзэн 2026-11-15)
+    for (const s of sheets) {
+      const cur = s.student?.enrollments[0]?.classroom.name;
+      if (cur) s.groupLabel = cur.replace(/\s*\(.*\)\s*$/, '').trim();
+    }
     const items: PaperItem[] = exam.items;
     const graded = sheets.map((s) => {
       const answers = answersOf(s.answers);

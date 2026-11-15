@@ -15,8 +15,7 @@ import {
   type BoardRow,
   type ClassifyBy,
   type FormulaRef,
-  type PaperItem,
-} from "./types";
+  type PaperItem, shortName } from "./types";
 
 /** Нэг сурагчийн хуудас: бодлого бүрийн хариу, зөв хариу, агуулгын хувь. */
 export default function SheetDialog({
@@ -41,7 +40,7 @@ export default function SheetDialog({
       onOpenChange={onOpenChange}
       wide
       footer={row && onEdit ? <Button onClick={() => onEdit(row)}>Дүн засах</Button> : undefined}
-      title={row ? `${row.lastName} ${row.firstName}` : ""}
+      title={row ? shortName(row.lastName, row.firstName) : ""}
       description={
         row ? (
           <Meta

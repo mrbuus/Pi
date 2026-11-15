@@ -181,7 +181,7 @@ describe('itemStats', () => {
     expect(stats[1]).toMatchObject({
       correct: 2,
       graded: 3,
-      pct: 67,
+      pct: 66.7,
       topWrong: null,
     });
   });

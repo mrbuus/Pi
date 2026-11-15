@@ -154,7 +154,8 @@ export function gradeSheet(
 }
 
 export function pct(part: number, whole: number): number | null {
-  return whole > 0 ? Math.round((part / whole) * 100) : null;
+  // Нэг оронтой бутархай — бүхэлчлэхгүй (эзэн 2026-11-15)
+  return whole > 0 ? Math.round((part / whole) * 1000) / 10 : null;
 }
 
 export interface AreaScore {

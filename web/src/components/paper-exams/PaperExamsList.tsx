@@ -96,11 +96,6 @@ export default function PaperExamsList({ canManage }: { canManage: boolean }) {
                     ]}
                   />
                 </div>
-                {r.avgPct !== null && (
-                  <Badge tone={correctTone(r.avgPct)} className="shrink-0 text-sm">
-                    дундаж {r.avgPct}%
-                  </Badge>
-                )}
                 <ChevronRight className="size-4 shrink-0 text-ink-dim" aria-hidden />
               </Link>
             </li>

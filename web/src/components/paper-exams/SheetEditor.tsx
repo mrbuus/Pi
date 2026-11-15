@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/kit/button";
 import ExamDialog from "@/components/exams/ExamDialog";
 import { errorText } from "@/components/exams/types";
 import { cn } from "@/lib/cn";
-import { itemName, type BoardRow, type PaperItem } from "./types";
+import { itemName, type BoardRow, type PaperItem, shortName } from "./types";
 
 type Mode = "answer" | "mark";
 interface FoundStudent {
@@ -87,7 +87,7 @@ export default function SheetEditor({
       open={open}
       onOpenChange={onOpenChange}
       wide
-      title={row ? `Дүн засах · ${row.lastName} ${row.firstName}` : "Дүн нэмэх"}
+      title={row ? `Дүн засах · ${shortName(row.lastName, row.firstName)}` : "Дүн нэмэх"}
       description="Машин уншиж чадаагүй эсвэл буруу уншсан хуудсыг гараар оруулна. Хуучин дүн устахгүй"
       footer={
         <>
