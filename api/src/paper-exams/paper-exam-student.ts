@@ -85,3 +85,48 @@ export interface VariantGuideRow extends GuideRow {
 export function studentEntries(rows: VariantGuideRow[], variant: string, solution = true): GuideRow[] {
   return rows.filter((r) => r.variant === variant).map((r) => studentGuide(r, { solution }));
 }
+
+/** Сурагчийн өөрийн хариу нэг бодлогод — «юу дугуйлж/бичиж алдсан» (эзэн 2026-11-16) */
+export interface MyAnswer {
+  /** Сонгох: дугуйлсан үсэг «A»…«E»; «» хоосон; «*» хоёр хариу дугуйлсан */
+  answer?: string;
+  /** Нөхөх: нүдний нэр → бичсэн цифр («a» → «2», «ef» → «18»; бичээгүй орон «_») */
+  fields?: Record<string, string>;
+}
+
+/**
+ * Хуудсан дээрх яг хариу. Багш зөв/алдсанаар (+/−) гараар оруулсан бол хариу мэдэгдэхгүй —
+ * undefined (дэлгэц зөвхөн Зөв/Алдсан тэмдгээр үлдэнэ).
+ */
+export function myAnswerOf(
+  row: GuideRow,
+  items: PaperItem[],
+  answers: string[],
+): MyAnswer | undefined {
+  const own = itemsOfGuide(row, items);
+  if (own.length === 0) return undefined;
+  const raw = (it: PaperItem) => answers[items.indexOf(it)] ?? '';
+  if (row.content.kind === 'choice') {
+    const a = raw(own[0]);
+    return /^[A-E]$/.test(a) || a === '' || a === '*' ? { answer: a } : undefined;
+  }
+  // «2.1.a-d» → a,b,c,d нүд; «2.1.e» → e. Хариу «2122» — нүд бүрд нэг тэмдэгт
+  const digit = new Map<string, string>();
+  for (const it of own) {
+    const a = raw(it);
+    if (a === '+' || a === '-') return undefined;
+    const m = it.label?.match(/\.([a-z])(?:-([a-z]))?$/);
+    if (!m) return undefined;
+    const from = m[1].charCodeAt(0);
+    const to = (m[2] ?? m[1]).charCodeAt(0);
+    for (let c = from; c <= to; c++) {
+      const ch = a[c - from];
+      digit.set(String.fromCharCode(c), ch && /[0-9-]/.test(ch) ? ch : '_');
+    }
+  }
+  const fields: Record<string, string> = {};
+  for (const f of row.content.fields ?? []) {
+    fields[f.key] = [...f.key].map((k) => digit.get(k) ?? '_').join('');
+  }
+  return { fields };
+}

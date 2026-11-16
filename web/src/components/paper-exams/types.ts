@@ -267,6 +267,14 @@ export interface MyPaperGuide {
   entries: GuideEntry[];
   /** Зөвхөн сурагчид: бодлого (label) бүрт өөрийнх нь зөв/алдсан */
   marks?: Record<string, GuideMark>;
+  /** Зөвхөн сурагчид: бодлого бүрт өөрийн дугуйлсан үсэг / нөхөх нүдэнд бичсэн цифр */
+  mine?: Record<string, MyAnswer>;
+}
+export interface MyAnswer {
+  /** «A»…«E»; «» хоосон; «*» хоёр хариу дугуйлсан */
+  answer?: string;
+  /** нүдний нэр → бичсэн цифр («_» бичээгүй орон) */
+  fields?: Record<string, string>;
 }
 
 /** «2026-11-10» → «2026.11.10» (цагийн бүсгүй өдөр) */

@@ -11,7 +11,7 @@ import { SkeletonRows } from "@/components/ui/Skeleton";
 import { errorText } from "@/components/exams/types";
 import MistakeNotes, { type MistakeNoteItem } from "@/components/exam/MistakeNotes";
 import { cn } from "@/lib/cn";
-import { STATUS_LABEL, TONE_CELL, toneOf, type GuideContent, type GuideEntry, type GuideMark, type MyPaperDetail, type MyPaperGuide } from "./types";
+import { STATUS_LABEL, TONE_CELL, toneOf, type GuideContent, type GuideEntry, type GuideMark, type MyAnswer, type MyPaperDetail, type MyPaperGuide } from "./types";
 
 type MyItem = MyPaperDetail["me"]["items"][number];
 /** Нэг бодлогын нээсэн шат: stage = нээсэн санамж (0–3), step = нээсэн бодолтын алхам */
@@ -132,10 +132,7 @@ export default function PaperGuide({
   editor,
   stats,
   path,
-  picks,
 }: {
-  /** Сурагч: бодлогын дугаар → өөрийн бичсэн хариу (A–E) — «Түгээмэл алдаа»-нд өөрийнхийг эхэнд */
-  picks?: Record<number, string>;
   /** Сурагч: өөрийн хувилбарын бодлогууд + өөрийн зөв/алдсан тэмдэг ирэх зам (хувилбар сонгохгүй) */
   path?: string;
   examId: string;
@@ -156,12 +153,14 @@ export default function PaperGuide({
   const [guides, setGuides] = useState<Record<string, GuideEntry[]>>({});
   const [error, setError] = useState("");
   const [marks, setMarks] = useState<MyPaperGuide["marks"]>(undefined);
+  const [mine, setMine] = useState<MyPaperGuide["mine"]>(undefined);
 
   const load = useCallback(() => {
     api<MyPaperGuide>(path ?? `/paper-exams/${encodeURIComponent(examId)}/guide?variant=${encodeURIComponent(variant)}`)
       .then((g) => {
         setError("");
         setMarks(g.marks);
+        setMine(g.mine);
         setGuides((prev) => ({ ...prev, [path ? variant : g.variant]: g.entries }));
       })
       .catch((e) => setError(errorText(e, "Тайлбарыг ачаалж чадсангүй")));
@@ -206,7 +205,7 @@ export default function PaperGuide({
       ) : !entries ? (
         <SkeletonRows rows={5} />
       ) : (
-        <GuideBody key={variant} storeKey={`paper-guide:${examId}:${variant}`} entries={entries} items={items} open={open} onOpen={onOpen} editor={editor} stats={stats} marks={marks} picks={picks} />
+        <GuideBody key={variant} storeKey={`paper-guide:${examId}:${variant}`} entries={entries} items={items} open={open} onOpen={onOpen} editor={editor} stats={stats} marks={marks} mine={mine} />
       )}
     </div>
   );
@@ -221,9 +220,9 @@ function GuideBody({
   editor,
   stats,
   marks,
-  picks,
+  mine,
 }: {
-  picks?: Record<number, string>;
+  mine?: MyPaperGuide["mine"];
   marks?: MyPaperGuide["marks"];
   stats?: Record<string, number | null>;
   storeKey: string;
@@ -321,7 +320,8 @@ function GuideBody({
       onPrev={current > 0 ? () => onOpen(entries[current - 1].label) : undefined}
       onNext={current < entries.length - 1 ? () => onOpen(entries[current + 1].label) : undefined}
       editor={editor?.(entry)}
-      mine={entry.number === null ? undefined : picks?.[entry.number]}
+      mark={marks?.[entry.label]}
+      mine={mine?.[entry.label]}
     />
   );
 }
@@ -336,10 +336,12 @@ function GuideProblem({
   onPrev,
   onNext,
   editor,
+  mark,
   mine,
 }: {
-  /** Сурагчийн бичсэн хариу (A–E) */
-  mine?: string;
+  /** Сурагчид: энэ бодлогод өөрийнх нь зөв/алдсан ба яг хариу (эзэн 2026-11-16) */
+  mark?: GuideMark;
+  mine?: MyAnswer;
   editor?: ReactNode;
   entry: GuideEntry;
   item: MyItem | undefined;
@@ -360,7 +362,12 @@ function GuideProblem({
   const revealed = solved || r.step >= c.steps.length;
   const used = r.stage + (r.step > 0 ? 1 : 0);
 
-  const badge = !item ? null : free ? (
+  const picked = mine?.answer;
+  const badge = mark ? (
+    <Badge tone={mark === "CORRECT" ? "success" : mark === "MISSED" ? "danger" : "neutral"}>
+      {mark === "CORRECT" ? `Зөв · ${c.points} оноо` : MARK[mark][0]}
+    </Badge>
+  ) : !item ? null : free ? (
     <Badge tone="success">{item.status === "CORRECT" ? `Зөв · ${c.points} оноо` : STATUS_LABEL.UNGRADED}</Badge>
   ) : r.fixed ? (
     <Badge tone="success">Санамж аваад зөв болголоо</Badge>
@@ -409,7 +416,7 @@ function GuideProblem({
             {c.choices.map((choice, i) => {
               const letter = LETTERS[i];
               const good = revealed && letter === c.answer;
-              const bad = !free && (letter === item?.answer || r.wrong.includes(letter));
+              const bad = (!free && (letter === item?.answer || r.wrong.includes(letter))) || (letter === picked && letter !== c.answer);
               return (
                 <button
                   key={letter}
@@ -434,9 +441,25 @@ function GuideProblem({
             })}
           </div>
         )}
+        {c.kind === "choice" && picked !== undefined && (
+          <p className={cn("mt-3 text-sm font-semibold", picked === c.answer ? "text-success" : "text-error")}>
+            {picked === c.answer ? (
+              <>Та {picked} гэж зөв хариулсан</>
+            ) : picked === "" ? (
+              <>Та хариу дугуйлаагүй, зөв хариу {c.answer}</>
+            ) : picked === "*" ? (
+              <>Та хоёр хариу дугуйлсан тул тооцоогүй, зөв хариу {c.answer}</>
+            ) : (
+              <>
+                Та {picked} гэж дугуйлсан, зөв хариу {c.answer}
+              </>
+            )}
+          </p>
+        )}
 
         {c.kind === "fill" && c.fields && (
           <>
+            {mine?.fields && <div className="-mb-3 mt-4 text-sm font-semibold text-ink-dim">Зөв хариу</div>}
             <div className="mt-4 flex flex-wrap gap-3">
               {c.fields.map((f) => {
                 const marked = revealed || r.tries > 0;
@@ -459,6 +482,33 @@ function GuideProblem({
                 );
               })}
             </div>
+            {mine?.fields && (
+              <div className="mt-4">
+                <div className="mb-1 text-sm font-semibold text-ink-dim">Таны бичсэн</div>
+                <div className="flex flex-wrap gap-3">
+                  {c.fields.map((f) => {
+                    const mineValue = mine.fields?.[f.key] ?? "";
+                    const ok = mineValue === f.value;
+                    return (
+                      <span key={f.key} className="flex flex-col items-center gap-1 text-sm font-bold text-ink-dim">
+                        {f.key}
+                        <span
+                          className={cn(
+                            "flex h-13 items-center justify-center rounded-xl border-2 text-xl font-bold tabular-nums",
+                            f.key.length > 1 ? "w-19" : "w-14",
+                            ok ? "border-success bg-success/15 text-success" : "border-error bg-error/12 text-error",
+                          )}
+                          title={ok ? "зөв" : `зөв нь ${f.value}`}
+                        >
+                          {mineValue.replace(/_/g, "")}
+                        </span>
+                      </span>
+                    );
+                  })}
+                </div>
+                <p className="mt-2 text-sm text-ink-dim">Улаан нүдэнд алдсан</p>
+              </div>
+            )}
             {!revealed && (
               <button
                 onClick={() => onPatch(partsOk.every(Boolean) ? { tries: r.tries + 1, fixed: true } : { tries: r.tries + 1 })}
@@ -537,7 +587,7 @@ function GuideProblem({
         </section>
       )}
       {/* Түгээмэл алдаа — бодолт бүрэн харагдсаны дараа л (бодолттой ижил нөхцөл) */}
-      {step >= c.steps.length && <MistakeNotes notes={guideMistakeNotes(c, mine)} />}
+      {step >= c.steps.length && <MistakeNotes notes={guideMistakeNotes(c, mine?.answer)} />}
       {revealed && (
         <div className="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-success bg-success/15 px-4 py-3 font-bold text-ink">
           Зөв хариу:
