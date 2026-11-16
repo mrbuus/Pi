@@ -7,16 +7,12 @@ import { ubDateKey } from '../attendance/board-logic';
 import { AuditService } from '../audit/audit.service';
 import { Prisma } from '../generated/prisma/client';
 import { PaymentStatus, Role } from '../generated/prisma/enums';
-import {
-  ACADEMIC_YEAR,
-  computeLedger,
-  tierFor,
-  todayKeyUB,
-} from '../payments/ledger';
+import { ACADEMIC_YEAR, tierFor, todayKeyUB } from '../payments/ledger';
 import {
   classDays,
+  cycleStartsFor,
+  ledgersFor,
   primaryEnrollment,
-  settlements,
 } from '../payments/ledger-load';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleService } from '../schedule/schedule.service';
@@ -24,6 +20,7 @@ import {
   WEB_ATTENDANCE_FROM,
   computeWithdrawal,
   dayBefore,
+  defaultCountFrom,
   firstPattern,
   heldLessonDays,
   leaveCandidates,
@@ -131,6 +128,7 @@ export class WithdrawalService {
             tuitionAmount: true,
             tuitionAgreed: true,
             joinedOn: true,
+            cycleStartOn: true,
           },
         },
         enrollments: {
@@ -160,47 +158,43 @@ export class WithdrawalService {
       : null;
     const startDate = dk(profile?.joinedOn) ?? firstEnroll;
 
-    const [payments, days, settled] = await Promise.all([
+    // Төлбөр хэсгийн ledger-ийг ЯГ тэр оролтоор (сунгалт, шийтийн хугацаа, мөчлөгийн эхлэл, зуны
+    // төлбөрийн ангилал — Шийдвэр 4) — буцаалтын «төлсөн» дүн Төлбөр хэсэгтэй зөрөхгүй (эзэн 2026-11-16)
+    const [payments, days, ledgers, cycles] = await Promise.all([
       this.prisma.payment.findMany({
         where: {
           userId: studentId,
           status: PaymentStatus.CONFIRMED,
           storePurchaseId: null,
         },
-        select: { amount: true, forMonth: true, paidAt: true },
+        select: { id: true, amount: true, forMonth: true, paidAt: true },
         orderBy: { paidAt: 'asc' },
       }),
       classDays(this.prisma, [primary.id]),
-      settlements(this.prisma, [studentId]),
+      ledgersFor(this.prisma, [studentId], todayKeyUB()),
+      cycleStartsFor(this.prisma, [
+        {
+          id: studentId,
+          cycleStartOn: profile?.cycleStartOn,
+          joinedOn: profile?.joinedOn,
+        },
+      ]),
     ]);
     const daysPerWeek = days.get(primary.id) ?? null;
     const tier = tierFor(profile?.grade, primary.name, daysPerWeek).tier;
-    const ledgerPayments = payments.map((p) => ({
-      amount: p.amount,
-      forMonth: p.forMonth,
-      paidOn: dk(p.paidAt),
-    }));
-    const ledger = computeLedger({
-      plan: profile?.tuitionPlan ?? null,
-      tuitionAmount: profile?.tuitionAmount ?? null,
-      agreed: profile?.tuitionAgreed ?? null,
-      tier,
-      startDate,
-      leftOn: null,
-      payments: ledgerPayments,
-      today: todayKeyUB(),
-      settled: settled.has(studentId),
-    });
+    const ledger = ledgers.get(studentId)!;
+    const summerIds = new Set(ledger.summerPaymentIds ?? []);
+    const cycle = cycles.get(studentId) ?? { on: null, source: 'DEFAULT' as const };
 
-    // Тооцоо эхлэх өдөр: сар бүр төлөгч жил эхлэхээс өмнө орсон бол зуны төлбөр тооцогддоггүй тул
-    // 9-р сарын 1; энэ жилийн гэрээнд (3-р сараас хойш) орсон бол эхэлсэн өдөр; хуучин сурагч 9/1.
-    const yearStart = `${ACADEMIC_YEAR.months[0]}-01`;
-    const defaultFrom =
-      !startDate || startDate < ACADEMIC_YEAR.paymentsFrom
-        ? yearStart
-        : ledger.plan.kind === 'MONTHLY' && startDate < yearStart
-          ? yearStart
-          : startDate;
+    // Тооцоо эхлэх өдөр = ledger-ийн энэ жилийн мөчлөгийн эхлэл (сар бүр төлөгч: гараар > ирц >
+    // joinedOn; зун/өмнөх жилээс суусан бол 9/1). Бүтэн жил: энэ жилийн гэрээнд орсон өдөр эсвэл 9/1.
+    const defaultFrom = defaultCountFrom({
+      kind: ledger.plan.kind,
+      startDate,
+      cycleStart: cycle.on,
+      yearStart: `${ACADEMIC_YEAR.months[0]}-01`,
+      paymentsFrom: ACADEMIC_YEAR.paymentsFrom,
+    });
     const countFrom = countFromIn ?? defaultFrom;
     if (countFrom > leftOn && countFromIn)
       throw new BadRequestException('Эхлэх огноо гарсан огнооноос хойш байна');
@@ -339,6 +333,10 @@ export class WithdrawalService {
       daysPerWeek,
       startDate,
       countFrom,
+      /** Мөчлөгийн эхлэлийн эх сурвалж (MANUAL / ATTENDANCE / JOINED / DEFAULT) */
+      cycleStartSource: cycle.source,
+      /** Зуны хичээлийн төлбөр — энэ жилийн гэрээнд ороогүй тул буцаалтад тооцохгүй */
+      summerPaid: ledger.summerPaid,
       leftOn,
       /** Сүүлийн (одоогийн) ангид вэбд ирц бүртгэж эхэлсэн өдөр */
       webStart: segments.at(-1)?.webStart ?? null,
@@ -349,6 +347,7 @@ export class WithdrawalService {
         amount: p.amount,
         paidOn: dk(p.paidAt),
         forMonth: p.forMonth,
+        summer: summerIds.has(p.id),
       })),
       result,
       lastCycleDays,

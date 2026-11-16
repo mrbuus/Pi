@@ -49,7 +49,9 @@ export interface WithdrawalPreview {
   webStart?: string | null;
   /** Хуваарьгүй анги — хичээлийн тоо мэдэгдэхгүй */
   noSchedule?: boolean;
-  payments: { amount: number; paidOn: string | null; forMonth: string | null }[];
+  /** Зуны хичээлийн төлбөр — энэ жилийн гэрээнд ороогүй (буцаалтад тооцохгүй) */
+  summerPaid?: number;
+  payments: { amount: number; paidOn: string | null; forMonth: string | null; summer?: boolean }[];
   result: WithdrawalResult;
   lastCycleDays: WithdrawalLessonDay[];
   history: {

@@ -82,6 +82,9 @@ export class TuitionService {
         : []),
       `Суусан: ${mnt(r.owed)}`,
       `Төлсөн: ${mnt(r.paid)}`,
+      ...(w.summerPaid > 0
+        ? [`Зуны хичээлийн төлбөр ${mnt(w.summerPaid)} энэ жилийн гэрээнд тооцогдоогүй`]
+        : []),
       r.refund > 0 ? `Буцаах: ${mnt(r.refund)}` : 'Буцаах дүн алга',
     ];
     return {

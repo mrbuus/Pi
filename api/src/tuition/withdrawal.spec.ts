@@ -1,12 +1,15 @@
 import {
+  ACADEMIC_YEAR,
   PRICE_TIERS,
   computeLedger,
+  resolveCycleStart,
   fullYearByPayments,
   type LedgerPayment,
 } from '../payments/ledger';
 import {
   addMonths,
   computeWithdrawal,
+  defaultCountFrom,
   firstPattern,
   leaveCandidates,
   lessonsPerMonthFor,
@@ -527,5 +530,94 @@ describe('Т (бодит тохиолдол): 2 сар суусан хүүхдэ
     });
     expect(r.cycles[1]).toMatchObject({ lessons: 12, charge: 262_500 });
     expect(r.refund).toBe(87_500);
+  });
+});
+
+describe('Мөчлөгийн эхлэл ledger-тэй ижил + зуны төлбөр буцаахгүй (эзэн 2026-11-16)', () => {
+  const year = {
+    yearStart: `${ACADEMIC_YEAR.months[0]}-01`,
+    paymentsFrom: ACADEMIC_YEAR.paymentsFrom,
+  };
+
+  it('defaultCountFrom: сар бүр төлөгч мөчлөгийн эхлэлээр, мэдэгдэхгүй бол 9/1; бүтэн жил joinedOn', () => {
+    // гараар 9/15 (joinedOn 9/1-ийг дарна)
+    const manual = resolveCycleStart('2026-09-15', null, '2026-09-01');
+    expect(defaultCountFrom({ kind: 'MONTHLY', startDate: '2026-09-01', cycleStart: manual.on, ...year })).toBe('2026-09-15');
+    // зунаас суусан, эхлэл мэдэгдэхгүй → 9/1 (зун хэзээ ч орохгүй)
+    const def = resolveCycleStart(null, null, '2026-06-17');
+    expect(def.source).toBe('DEFAULT');
+    expect(defaultCountFrom({ kind: 'MONTHLY', startDate: '2026-06-17', cycleStart: def.on, ...year })).toBe('2026-09-01');
+    // энэ жилд орсон (JOINED) → joinedOn
+    const joined = resolveCycleStart(null, null, '2026-10-05');
+    expect(defaultCountFrom({ kind: 'MONTHLY', startDate: '2026-10-05', cycleStart: joined.on, ...year })).toBe('2026-10-05');
+    // бүтэн жил: мөчлөгийн эхлэлийг хэрэглэхгүй
+    expect(defaultCountFrom({ kind: 'FULL_YEAR', startDate: '2026-06-17', cycleStart: '2026-09-07', ...year })).toBe('2026-06-17');
+    expect(defaultCountFrom({ kind: 'FULL_YEAR', startDate: '2025-10-01', cycleStart: null, ...year })).toBe('2026-09-01');
+  });
+
+  it('зунаас суусан, cycleStartOn 9/7, 11/15-нд гарвал: 9/7–10/6, 10/7–11/6 бүтэн + 11/7-оос хичээлээр; зуны төлбөр тооцохгүй', () => {
+    const cs = resolveCycleStart('2026-09-07', null, '2026-06-17');
+    const ledger = computeLedger({
+      plan: 'MONTHLY',
+      tuitionAmount: null,
+      tier: PRICE_TIERS.g12,
+      startDate: '2026-06-17',
+      cycleStart: { on: cs.on!, source: 'MANUAL' },
+      leftOn: null,
+      today: '2026-11-15',
+      payments: [
+        { id: 'summer', amount: 350_000, forMonth: '2026-08', paidOn: '2026-08-10' },
+        { id: 's', amount: 350_000, forMonth: '2026-09', paidOn: '2026-09-07' },
+        { id: 'o', amount: 350_000, forMonth: '2026-10', paidOn: '2026-10-07' },
+        { id: 'n', amount: 350_000, forMonth: '2026-11', paidOn: '2026-11-07' },
+      ],
+    });
+    expect(ledger.summerPaid).toBe(350_000);
+    expect(ledger.summerPaymentIds).toEqual(['summer']);
+    expect(ledger.paidTotal).toBe(1_050_000);
+    const countFrom = defaultCountFrom({ kind: ledger.plan.kind, startDate: '2026-06-17', cycleStart: cs.on, ...year });
+    expect(countFrom).toBe('2026-09-07');
+    const r = computeWithdrawal({
+      ...base,
+      countFrom,
+      leftOn: '2026-11-15',
+      lessonDays: days4('2026-09-07', '2026-11-15'),
+      paid: ledger.paidTotal,
+    });
+    expect(r.cycles.map((c) => [c.start, c.end, c.full])).toEqual([
+      ['2026-09-07', '2026-10-06', true],
+      ['2026-10-07', '2026-11-06', true],
+      ['2026-11-07', '2026-12-06', false],
+    ]);
+    // 11/7–11/15: Ба 7, Да 9, Мя 10, Пү 12, Ба 14 = 5 хичээл
+    expect(r.cycles[2].counted).toBe(5);
+    expect(r.owed).toBe(700_000 + 5 * 21_875);
+    expect(r.refund).toBe(1_050_000 - 700_000 - 5 * 21_875);
+  });
+
+  it('хуучин дүрэм (9/1-ээс) байсан бол 11/1–11/15 мөчлөгөөр өөр дүн гарах байсан', () => {
+    const old = computeWithdrawal({
+      ...base,
+      countFrom: '2026-09-01',
+      leftOn: '2026-11-15',
+      lessonDays: days4('2026-09-01', '2026-11-15'),
+      paid: 1_050_000,
+    });
+    expect(old.cycles.at(-1)!.start).toBe('2026-11-01');
+    expect(old.refund).not.toBe(1_050_000 - 700_000 - 5 * 21_875);
+  });
+
+  it('сар бүр төлөгч, энэ жил 9/15-нд гараар эхэлсэн: 10/15-нд гарвал 1 бүтэн сар + 10/15-ны хичээл', () => {
+    const countFrom = defaultCountFrom({ kind: 'MONTHLY', startDate: '2026-09-01', cycleStart: '2026-09-15', ...year });
+    const r = computeWithdrawal({
+      ...base,
+      countFrom,
+      leftOn: '2026-10-15',
+      lessonDays: days4('2026-09-15', '2026-10-15'),
+      paid: 700_000,
+    });
+    expect(r.cycles[0]).toMatchObject({ start: '2026-09-15', end: '2026-10-14', full: true });
+    expect(r.cycles[1]).toMatchObject({ start: '2026-10-15', full: false, counted: 1 });
+    expect(r.refund).toBe(700_000 - 350_000 - 21_875);
   });
 });
