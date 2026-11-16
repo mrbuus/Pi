@@ -6,6 +6,11 @@
  *   node prisma/paper-exam-guide.cjs prisma/data/paper-exam-guides/negdsen-shalgalt-1.json            # dry-run
  *   node prisma/paper-exam-guide.cjs prisma/data/paper-exam-guides/negdsen-shalgalt-1.json --commit
  *   node prisma/paper-exam-guide.cjs <файл> --exam=<шалгалтын id>     # нэрээр биш id-аар
+ *   node prisma/paper-exam-guide.cjs <файл> --mistakes=<тайлбарын файл> [--commit]
+ *
+ * `--mistakes`: буруу сонголт бүрийн «Түгээмэл алдаа» — { variants: { A: { "<label>": { "<үсэг>": "…" } } } }.
+ * Санах ойд л `content.mistakes`-д нэгтгэнэ — эх JSON файлыг дискэн дээр ӨӨРЧЛӨХГҮЙ. Тайлбарын файлд
+ * байгаа ч guide-д байхгүй label, нөхөх бодлого, зөв үсэгт бичсэн тайлбар байвал юу ч бичихгүй.
  *
  * Шалгалтыг файлын `examTitle`-аар (устгаагүй, яг ижил нэртэй ганц шалгалт) эсвэл `--exam`-аар олно.
  * Мөр бүрийг (шалгалт, хувилбар, дугаар)-аар шинээр үүсгэнэ эсвэл агуулгыг шинэчилнэ.
@@ -30,6 +35,42 @@ async function main() {
   const doc = JSON.parse(fs.readFileSync(file, 'utf8'));
   const rows = Object.entries(doc.variants || {}).flatMap(([variant, entries]) => entries.map((e) => ({ variant, ...e })));
   if (rows.length === 0) throw new Error('Файлд тайлбар алга');
+
+  // 0) Түгээмэл алдааг санах ойд нэгтгэнэ (эх файлд хүрэхгүй)
+  const mistakesFile = arg('mistakes');
+  if (mistakesFile) {
+    const notes = JSON.parse(fs.readFileSync(mistakesFile, 'utf8'));
+    if (notes.examTitle && notes.examTitle !== doc.examTitle) {
+      throw new Error(`Тайлбарын файлын шалгалт «${notes.examTitle}» нь «${doc.examTitle}» биш`);
+    }
+    const rowBy = new Map(rows.map((r) => [`${r.variant}/${r.label}`, r]));
+    const bad = [];
+    let problemsWith = 0;
+    let noteCount = 0;
+    const perVariant = {};
+    for (const [variant, byLabel] of Object.entries(notes.variants || {})) {
+      for (const [label, byLetter] of Object.entries(byLabel || {})) {
+        const id = `${variant}/${label}`;
+        const r = rowBy.get(id);
+        if (!r) { bad.push(`${id}: guide-д ийм бодлого алга`); continue; }
+        if (r.content.kind !== 'choice') { bad.push(`${id}: нөхөх бодлогод түгээмэл алдаа бичихгүй`); continue; }
+        const entries = Object.entries(byLetter || {});
+        for (const [letter] of entries) {
+          if (letter === r.content.answer) bad.push(`${id}: ${letter} нь зөв хариу — тайлбар бичихгүй`);
+        }
+        if (entries.length === 0) continue;
+        r.content = { ...r.content, mistakes: Object.fromEntries(entries) };
+        problemsWith += 1;
+        noteCount += entries.length;
+        perVariant[variant] = (perVariant[variant] || 0) + entries.length;
+      }
+    }
+    if (bad.length) {
+      bad.slice(0, 40).forEach((p) => console.error('  ✗', p));
+      throw new Error(`Түгээмэл алдааны ${bad.length} алдаа — зогслоо`);
+    }
+    console.log(`Түгээмэл алдаа: ${problemsWith} бодлогод ${noteCount} тайлбар нэмэгдэнэ (${Object.entries(perVariant).map(([v, n]) => `${v}: ${n}`).join(', ')})`);
+  }
 
   // 1) Агуулгын шалгалт — нэг ч алдаатай бол юу ч бичихгүй
   const problems = [];

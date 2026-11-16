@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/Surface";
 import { ErrorState } from "@/components/ui/StateBlock";
 import { SkeletonRows } from "@/components/ui/Skeleton";
 import { errorText } from "@/components/exams/types";
+import MistakeNotes, { type MistakeNoteItem } from "@/components/exam/MistakeNotes";
 import { cn } from "@/lib/cn";
 import { STATUS_LABEL, TONE_CELL, toneOf, type GuideContent, type GuideEntry, type GuideMark, type MyPaperDetail, type MyPaperGuide } from "./types";
 
@@ -27,6 +28,20 @@ export const shownLabel = (label: string) => label.replace(/^II\.(\d+)$/, "2-$1"
 const EMPTY: Progress = { stage: 0, step: 0, tries: 0, wrong: [], fixed: false };
 const LETTERS = ["A", "B", "C", "D", "E"];
 const HINTS = ["Ашиглагдах чанар", "Энгийнээр хэлбэл", "100x100 номын төстэй бодлого"];
+
+/** «Түгээмэл алдаа»: буруу сонголт бүрийн тайлбар (үсэг + утга) — сурагчийн сонгосон нь эхэнд */
+export function guideMistakeNotes(c: GuideContent, mine: string | null | undefined): MistakeNoteItem[] {
+  if (c.kind !== "choice" || !c.mistakes) return [];
+  const out: MistakeNoteItem[] = [];
+  LETTERS.forEach((letter, i) => {
+    const note = c.mistakes?.[letter]?.trim();
+    const choice = c.choices?.[i];
+    if (note && choice !== undefined && letter !== c.answer) {
+      out.push({ label: letter, text: `$${choice}$`, note, mine: letter === mine });
+    }
+  });
+  return out.sort((a, b) => Number(b.mine) - Number(a.mine));
+}
 
 /** Хөтөчийн санах ой — зөвхөн тав тухын төлөө (аль санамжийг нээснээ санах); байхгүй ч ажиллана. */
 export function readStore<T>(key: string, fallback: T): T {
@@ -117,7 +132,10 @@ export default function PaperGuide({
   editor,
   stats,
   path,
+  picks,
 }: {
+  /** Сурагч: бодлогын дугаар → өөрийн бичсэн хариу (A–E) — «Түгээмэл алдаа»-нд өөрийнхийг эхэнд */
+  picks?: Record<number, string>;
   /** Сурагч: өөрийн хувилбарын бодлогууд + өөрийн зөв/алдсан тэмдэг ирэх зам (хувилбар сонгохгүй) */
   path?: string;
   examId: string;
@@ -188,7 +206,7 @@ export default function PaperGuide({
       ) : !entries ? (
         <SkeletonRows rows={5} />
       ) : (
-        <GuideBody key={variant} storeKey={`paper-guide:${examId}:${variant}`} entries={entries} items={items} open={open} onOpen={onOpen} editor={editor} stats={stats} marks={marks} />
+        <GuideBody key={variant} storeKey={`paper-guide:${examId}:${variant}`} entries={entries} items={items} open={open} onOpen={onOpen} editor={editor} stats={stats} marks={marks} picks={picks} />
       )}
     </div>
   );
@@ -203,7 +221,9 @@ function GuideBody({
   editor,
   stats,
   marks,
+  picks,
 }: {
+  picks?: Record<number, string>;
   marks?: MyPaperGuide["marks"];
   stats?: Record<string, number | null>;
   storeKey: string;
@@ -301,6 +321,7 @@ function GuideBody({
       onPrev={current > 0 ? () => onOpen(entries[current - 1].label) : undefined}
       onNext={current < entries.length - 1 ? () => onOpen(entries[current + 1].label) : undefined}
       editor={editor?.(entry)}
+      mine={entry.number === null ? undefined : picks?.[entry.number]}
     />
   );
 }
@@ -315,7 +336,10 @@ function GuideProblem({
   onPrev,
   onNext,
   editor,
+  mine,
 }: {
+  /** Сурагчийн бичсэн хариу (A–E) */
+  mine?: string;
   editor?: ReactNode;
   entry: GuideEntry;
   item: MyItem | undefined;
@@ -512,6 +536,8 @@ function GuideProblem({
           </div>
         </section>
       )}
+      {/* Түгээмэл алдаа — бодолт бүрэн харагдсаны дараа л (бодолттой ижил нөхцөл) */}
+      {step >= c.steps.length && <MistakeNotes notes={guideMistakeNotes(c, mine)} />}
       {revealed && (
         <div className="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-success bg-success/15 px-4 py-3 font-bold text-ink">
           Зөв хариу:

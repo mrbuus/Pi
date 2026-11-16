@@ -30,10 +30,27 @@ export function isMissed(row: GuideRow, items: PaperItem[], statuses: ItemStatus
 }
 
 /**
+ * Түгээмэл алдаа: зөвхөн сонгох бодлогын БУРУУ сонголтын үсэгт бичсэн хоосон биш тайлбар
+ * (ачаалагч шалгадаг ч сурагчид очихын өмнө дахин шүүнэ). Тайлбаргүй бол undefined.
+ */
+function studentMistakes(c: GuideContent): Record<string, string> | undefined {
+  if (c.kind !== 'choice' || !c.mistakes || typeof c.mistakes !== 'object') return undefined;
+  const letters = ['A', 'B', 'C', 'D', 'E'].slice(0, c.choices?.length ?? 0);
+  const out: Record<string, string> = {};
+  for (const l of letters) {
+    const v = c.mistakes[l];
+    if (l !== c.answer && typeof v === 'string' && v.trim()) out[l] = v;
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
+/**
  * Сурагчид очих бодлого (эзэн 2026-11-16: өөрийн хувилбарын тайлбар, бодолт, зөв хариу
  * шууд нээлттэй). Талбаруудыг ил жагсаана — санд нэмэгдсэн өөр талбар дагаж гарахгүй.
+ * `solution` — бодолт харагдах эсэх; түгээмэл алдаа (`mistakes`) бодолттой ЯГ ижил
+ * нөхцөлөөр очно (хаалттай бол аль аль нь очихгүй).
  */
-export function studentGuide(row: GuideRow): GuideRow {
+export function studentGuide(row: GuideRow, { solution = true }: { solution?: boolean } = {}): GuideRow {
   const c = row.content;
   return {
     label: row.label,
@@ -50,8 +67,21 @@ export function studentGuide(row: GuideRow): GuideRow {
       rule: c.rule,
       easy: c.easy,
       refs: c.refs.map((r) => ({ chapter: r.chapter, test: r.test, number: r.number, text: r.text })),
-      steps: c.steps,
+      steps: solution ? c.steps : [],
       topic: c.topic,
+      mistakes: solution ? studentMistakes(c) : undefined,
     },
   };
+}
+
+export interface VariantGuideRow extends GuideRow {
+  variant: string;
+}
+
+/**
+ * Сурагчийн «Бодлого» таб: зөвхөн ӨӨРИЙН хувилбарын мөр — нөгөө хувилбарын бодолт,
+ * түгээмэл алдаа хэзээ ч очихгүй (санд шүүсэн ч энд дахин шүүнэ).
+ */
+export function studentEntries(rows: VariantGuideRow[], variant: string, solution = true): GuideRow[] {
+  return rows.filter((r) => r.variant === variant).map((r) => studentGuide(r, { solution }));
 }

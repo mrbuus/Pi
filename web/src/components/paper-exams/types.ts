@@ -242,6 +242,8 @@ export interface GuideContent {
   image?: string;
   choices?: string[];
   answer?: string;
+  /** Түгээмэл алдаа: БУРУУ сонголтын үсэг → тайлбар (бодолттой ижил нөхцөлөөр ирнэ) */
+  mistakes?: Record<string, string>;
   fields?: { key: string; value: string; part: number }[];
   parts?: { points: number }[];
   rule: string[];

@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../core/time/ub_time.dart';
+import '../../../shared/mistake_notes/mistake_notes.dart';
 import '../domain/answer.dart';
+
+export '../../../shared/mistake_notes/mistake_notes.dart' show MistakeNote;
 
 /// Шалгалтын API-ийн Dart загварууд — `docs/api-contract/exam.md`.
 ///
@@ -374,29 +377,6 @@ class ReviewChoice {
 
   /// Буруу сонголтын багшийн тайлбар — сервер бодолт нээгдсэн үед л илгээнэ (хуучин серверт байхгүй).
   final String? mistakeNote;
-}
-
-/// «Түгээмэл алдаа» — нэг буруу сонголтын тайлбар (`/tests/:id/review` → `items[].mistakeNotes[]`).
-@immutable
-class MistakeNote {
-  const MistakeNote({required this.label, this.text = '', required this.note, this.mine = false});
-
-  static MistakeNote? fromJson(Object? raw) {
-    final j = _map(raw);
-    final note = _str(j['note'])?.trim();
-    if (note == null || note.isEmpty) return null;
-    return MistakeNote(label: _str(j['label']) ?? '', text: _str(j['text']) ?? '', note: note, mine: _bool(j['mine']));
-  }
-
-  /// Канон үсэг (A, B, …)
-  final String label;
-
-  /// Сонголтын текст — үсэггүй дэлгэцэд аль сонголт болохыг харуулна.
-  final String text;
-  final String note;
-
-  /// Сурагчийн өөрийн сонгосон хариу эсэх.
-  final bool mine;
 }
 
 /// Жагсаалтыг задлах — хоосон тайлбарыг алгасна; талбаргүй бол хоосон.

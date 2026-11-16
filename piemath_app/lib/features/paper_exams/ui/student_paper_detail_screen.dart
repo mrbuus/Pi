@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/ui/ui.dart';
+import '../../../shared/mistake_notes/mistake_notes.dart';
 import '../../../shared/native/native.dart';
 import '../data/paper_exam_models.dart';
 import '../data/paper_exams_repository.dart';
@@ -51,6 +52,12 @@ class _StudentPaperDetailScreenState extends ConsumerState<StudentPaperDetailScr
       for (final i in d.items) (number: i.number, slugs: i.formulaSlugs, missed: i.status.missed),
     ], d.formulas);
     final dim = context.text.bodySmall?.copyWith(color: c.inkDim);
+    // «Түгээмэл алдаа» — бодлогын тайлбар ирээгүй (алдаа, хуучин сервер) бол хэсэг зурагдахгүй
+    final problems = ref.watch(myPaperProblemsProvider(widget.id)).value ?? const <PaperProblem>[];
+    final problemBy = {
+      for (final p in problems)
+        if (p.number != null) p.number!: p,
+    };
     return ListView(
       padding: const EdgeInsets.all(AppSpace.gutter),
       children: [
@@ -150,6 +157,7 @@ class _StudentPaperDetailScreenState extends ConsumerState<StudentPaperDetailScr
                                     padding: const EdgeInsets.only(bottom: AppSpace.sm),
                                     child: _MissedItem(
                                       item: i,
+                                      notes: problemBy[i.number]?.notes(i.answer) ?? const [],
                                       showTopic: by != ClassifyBy.topic,
                                       formulas: [
                                         for (final s in i.formulaSlugs)
@@ -208,9 +216,12 @@ class _StudentPaperDetailScreenState extends ConsumerState<StudentPaperDetailScr
 }
 
 class _MissedItem extends StatelessWidget {
-  const _MissedItem({required this.item, required this.showTopic, required this.formulas});
+  const _MissedItem({required this.item, required this.showTopic, required this.formulas, this.notes = const []});
 
   final MyPaperItem item;
+
+  /// «Түгээмэл алдаа» (өөрийн сонголт эхэнд); хоосон бол зурагдахгүй.
+  final List<MistakeNote> notes;
   final bool showTopic;
   final List<FormulaRef> formulas;
 
@@ -274,6 +285,10 @@ class _MissedItem extends StatelessWidget {
             for (final f in formulas) ...[
               const SizedBox(height: AppSpace.sm),
               FormulaLine(formula: f, compact: true, link: true),
+            ],
+            if (notes.isNotEmpty) ...[
+              const SizedBox(height: AppSpace.sm),
+              MistakeNotesView(notes: notes, showChoiceText: true),
             ],
           ],
         ),

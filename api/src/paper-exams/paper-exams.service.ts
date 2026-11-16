@@ -30,8 +30,8 @@ import { parsePaperWorkbook, type ParsedPaperRow } from './paper-exam-sheet';
 import {
   isMissed,
   itemsOfGuide,
-  studentGuide,
-  type GuideRow,
+  studentEntries,
+  type VariantGuideRow,
 } from './paper-exam-student';
 import { readStoredBytes } from '../storage/file-store';
 import type {
@@ -1615,14 +1615,15 @@ export class PaperExamsService {
       this.activeExam(examId),
       this.prisma.paperExamGuide.findMany({
         where: { examId, variant },
-        select: { label: true, number: true, content: true },
+        select: { variant: true, label: true, number: true, content: true },
         orderBy: { order: 'asc' },
       }),
     ]);
     const items: PaperItem[] = exam.items;
     const { statuses } = gradeSheet(answersOf(sheet.answers), items, sheet.variant);
-    // Сурагчид очих талбаруудыг тодорхой жагсаана (санд нэмэгдсэн өөр талбар алдагдахгүй)
-    const entries = (rows as unknown as GuideRow[]).map(studentGuide);
+    // Сурагчид очих талбаруудыг тодорхой жагсаана (санд нэмэгдсэн өөр талбар алдагдахгүй);
+    // өөрийн хувилбарын бодолт, түгээмэл алдаа шууд нээлттэй (эзэн 2026-11-16)
+    const entries = studentEntries(rows as unknown as VariantGuideRow[], variant);
     const marks: Record<string, 'CORRECT' | 'MISSED' | 'UNGRADED'> = {};
     for (const row of entries) {
       const own = itemsOfGuide(row, items);

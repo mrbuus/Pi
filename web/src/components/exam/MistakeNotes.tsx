@@ -13,7 +13,7 @@ import { cn } from "@/lib/cn";
 export interface MistakeNoteItem {
   /** Канон үсэг (A, B, …) */
   label: string;
-  /** Сонголтын текст — үсэггүй UI-д аль сонголт болохыг харуулна */
+  /** Сонголтын текст — үсэггүй UI-д аль сонголт болохыг, үсэгтэйд үсгийн ард утгыг харуулна */
   text?: string;
   note: string;
   mine: boolean;
@@ -66,7 +66,7 @@ export default function MistakeNotes({
                 : showLabels
                   ? `${n.label} хариу`
                   : "Өөр буруу хариу"}
-              {!showLabels && n.text && (
+              {n.text && (
                 <>
                   {" "}
                   <MathText>{n.text}</MathText>

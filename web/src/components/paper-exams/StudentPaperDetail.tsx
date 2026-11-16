@@ -124,6 +124,12 @@ export default function StudentPaperDetail({ id }: { id: string }) {
     );
   }
   const me = data.me;
+  // Бодлого бүрт өөрийн бичсэн үсэг (A–E) — «Түгээмэл алдаа»-нд өөрийн сонголт эхэнд
+  const picks: Record<number, string> = {};
+  for (const it of me.items) {
+    const a = (it.answer ?? "").trim();
+    if (/^[A-E]$/.test(a)) picks[it.number] = a;
+  }
   // Ижил оноотой (ижил байртай) бүлэг бүрийг ээлжлэн өнгөөр ялгана
   const bandOf = new Map<string, number>();
   for (const r of data.ranking) if (!bandOf.has(r.rankLabel)) bandOf.set(r.rankLabel, bandOf.size);
@@ -183,6 +189,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
           path={`/paper-exams/my/${encodeURIComponent(id)}/problems`}
           variants={[me.variant]}
           items={[]}
+          picks={picks}
           open={nav.p}
           onOpen={(p) => go("guide", p)}
         />

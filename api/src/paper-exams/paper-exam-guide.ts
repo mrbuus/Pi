@@ -34,6 +34,11 @@ export interface GuideContent {
   choices?: string[];
   /** Зөв хариу «A»…«E» */
   answer?: string;
+  /**
+   * Түгээмэл алдаа — БУРУУ сонголтын үсэг → тайлбар (зөвхөн сонгох бодлогод).
+   * Сурагчид бодолттой (`steps`) яг ижил нөхцөлөөр очно.
+   */
+  mistakes?: Record<string, string>;
   fields?: GuideField[];
   parts?: { points: number }[];
   /** Мэдэж байх ёстой чанар, томьёо */
@@ -90,6 +95,7 @@ export function guideContentErrors(raw: unknown): string[] {
     else if (!LETTERS.slice(0, c.choices.length).includes(c.answer ?? ''))
       errors.push('answer сонголтод алга');
   }
+  if (c.mistakes !== undefined) errors.push(...mistakesErrors(c));
   if (c.kind === 'fill') {
     const parts = c.parts ?? [];
     if (!Array.isArray(c.fields) || c.fields.length === 0)
@@ -108,6 +114,23 @@ export function guideContentErrors(raw: unknown): string[] {
       errors.push('fields буруу (нүдний нэр, утгын урт, хэсэг)');
     if (parts.reduce((t, p) => t + (p?.points ?? 0), 0) !== c.points)
       errors.push('parts-ийн онооны нийлбэр points-тэй тэнцэхгүй');
+  }
+  return errors;
+}
+
+/** `mistakes`-ийн шалгалт: зөвхөн сонгох бодлогод, сонголтын үсэгт, зөв хариунд биш, хоосон биш. */
+function mistakesErrors(c: Partial<GuideContent>): string[] {
+  const m = c.mistakes;
+  if (c.kind !== 'choice') return ['mistakes зөвхөн сонгох бодлогод'];
+  if (!m || typeof m !== 'object' || Array.isArray(m))
+    return ['mistakes объект биш'];
+  const errors: string[] = [];
+  const letters = LETTERS.slice(0, c.choices?.length ?? 0);
+  for (const [k, v] of Object.entries(m)) {
+    if (!letters.includes(k)) errors.push(`mistakes.${k}: сонголтод алга`);
+    else if (k === c.answer) errors.push(`mistakes.${k}: зөв хариунд тайлбар бичихгүй`);
+    if (typeof v !== 'string' || !v.trim()) errors.push(`mistakes.${k}: хоосон`);
+    else if (!balanced(v)) errors.push(`mistakes.${k}: $ тэмдэг хаагдаагүй`);
   }
   return errors;
 }
