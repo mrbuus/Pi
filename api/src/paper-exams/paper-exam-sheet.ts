@@ -242,8 +242,47 @@ function splitFull(text: string): { lastName: string; firstName: string } {
 //   — хувилбар бүрийн түлхүүр; 2-р хэсгийн багц «2.1.a-d» нь 4 нүд, бүгд зөв бол л оноо.
 // Сурагч бүрийг өөрийн хувилбарын түлхүүрээр дүгнэнэ. Бодсон нийт оноо «Нийт»-ээс зөрвөл
 // тэр мөрийг алдаатай гэж үзээд ХАДГАЛАХГҮЙ (эзэн: алдаатай дүн хэзээ ч нийтлэгдэхгүй).
+//
+// Машины шинэ гаралт («13-4.xlsx», 2026-11-15) — мөн адил уншина, хөрвүүлэх шаардлагагүй:
+//   «Хариулт»: 1-р мөр өнгөний тайлбар, 2-р мөр толгой — Код | Овог | Нэр | Анги | Хувилбар | Нийт |
+//     1 … 36 | 2.1a … 2.4h (цэггүй). Толгой мөрийг эхний хэдэн мөрөөс хайна.
+//   «Түлхүүр» өргөн хэлбэр: Асуулт | A хариу | A оноо | B хариу | B оноо | …; багц «2.1 a-d».
+//     Мөр нь тухайн хувилбарт хариутай бол л тэр хувилбарын бодлого (хувилбарууд өөр багцтай байж болно).
+//   «Шалгах»: № | Код | Асуудал | Хувилбар | Нийт — код нь уншигдаагүй хуудас «Хариулт»-д ордоггүй.
 // ---------------------------------------------------------------------------
 const V2_SHEETS = { answers: 'хариулт', key: 'түлхүүр', check: 'шалгах' };
+const V2_HEADER_SCAN_ROWS = 6;
+
+/** Хариултын баганын нэр: «2.1a» / «2.1 a» → «2.1.a» (хуучин, шинэ хэлбэрийг нэг болгоно) */
+function v2ColName(raw: string): string {
+  return raw
+    .normalize('NFKC')
+    .trim()
+    .toLowerCase()
+    .replace(/^(\d+\.\d+)[\s.]*([a-h])$/, '$1.$2');
+}
+
+/** Түлхүүрийн бодлого/багцын нэр: «2.1 a-d» → «2.1.a-d», «7» → «7» */
+function v2Label(raw: string): string {
+  return raw
+    .normalize('NFKC')
+    .trim()
+    .replace(/^(\d+\.\d+)[\s.]*([a-h](?:-[a-h])?)$/i, (_m, a: string, b: string) => `${a}.${b.toLowerCase()}`);
+}
+
+/** «Хариулт» шийтийн толгой мөр: «Хувилбар» ба код (ID/Код/Шифр) баганатай эхний мөр */
+function v2HeaderRow(ws: ExcelJS.Worksheet): number | null {
+  for (let r = 1; r <= Math.min(V2_HEADER_SCAN_ROWS, ws.rowCount); r++) {
+    const names = new Set<string>();
+    ws.getRow(r).eachCell((c) => names.add(v2ColName(cellText(c.value))));
+    if (
+      names.has('хувилбар') &&
+      (names.has('id') || names.has('код') || names.has('шифр'))
+    )
+      return r;
+  }
+  return null;
+}
 
 function sheetByName(workbook: ExcelJS.Workbook, name: string) {
   return workbook.worksheets.find((w) => norm(w.name) === name);
@@ -280,8 +319,35 @@ function v2Items(ws: ExcelJS.Worksheet, used: Set<string>): V2Item[] | string {
     string,
     Map<number, { label: string; key: string; points: number }>
   >();
+  // Өргөн хэлбэр: «A хариу» | «A оноо» | «B хариу» | … — хувилбар бүр хоёр баганатай
+  const wide: { variant: string; keyCol: number; ptsCol: number }[] = [];
+  ws.getRow(1).eachCell((c, col) => {
+    const m = norm(cellText(c.value)).match(/^([a-z])\s*хариу$/);
+    if (m) wide.push({ variant: m[1].toUpperCase(), keyCol: col, ptsCol: col + 1 });
+  });
+  let ended = false;
+  if (wide.length > 0)
+    ws.eachRow((row, r) => {
+      if (r === 1 || ended) return;
+      const raw = cellText(row.getCell(1).value).trim();
+      if (!raw) return;
+      if (norm(raw) === 'нийт') {
+        ended = true;
+        return;
+      }
+      const label = v2Label(raw);
+      for (const w of wide) {
+        if (used.size > 0 && !used.has(w.variant)) continue;
+        const key = cellText(row.getCell(w.keyCol).value).trim().toUpperCase();
+        const pts = plainValue(row.getCell(w.ptsCol).value);
+        if (!key || typeof pts !== 'number') continue;
+        if (!byVariant.has(w.variant)) byVariant.set(w.variant, new Map());
+        const own = byVariant.get(w.variant)!;
+        own.set(own.size + 1, { label, key, points: pts });
+      }
+    });
   ws.eachRow((row, r) => {
-    if (r === 1) return;
+    if (r === 1 || wide.length > 0) return;
     const variant = cellText(row.getCell(1).value).trim();
     const n = plainValue(row.getCell(2).value);
     const label = cellText(row.getCell(4).value).trim();
@@ -328,14 +394,54 @@ function v2Notes(ws: ExcelJS.Worksheet | undefined): Map<string, string[]> {
   let noteCol = 7;
   ws.getRow(1).eachCell((c, col) => {
     const t = norm(cellText(c.value));
-    if (t === 'id') idCol = col;
-    if (t === 'тэмдэглэл') noteCol = col;
+    if (t === 'id' || t === 'код') idCol = col;
+    if (t === 'тэмдэглэл' || t === 'асуудал') noteCol = col;
   });
   ws.eachRow((row, r) => {
     if (r === 1) return;
     const id = normalizeCode(row.getCell(idCol).value);
     const note = cellText(row.getCell(noteCol).value).trim();
     if (id && note) out.set(id, [...(out.get(id) ?? []), note]);
+  });
+  return out;
+}
+
+/**
+ * «Шалгах» шийтэд байгаа боловч «Хариулт»-д ороогүй хуудсууд (код нь уншигдаагүй г.м.) —
+ * хариу нь файлд байхгүй тул оруулах боломжгүй; ажилтанд гараар оруулахыг сануулна.
+ */
+function v2Unread(
+  ws: ExcelJS.Worksheet | undefined,
+  known: Set<string>,
+): { name: string; reason: string }[] {
+  if (!ws) return [];
+  let idCol = 0;
+  let noteCol = 0;
+  let totalCol = 0;
+  ws.getRow(1).eachCell((c, col) => {
+    const t = norm(cellText(c.value));
+    if (t === 'id' || t === 'код') idCol = col;
+    if (t === 'тэмдэглэл' || t === 'асуудал') noteCol = col;
+    if (t === 'нийт') totalCol = col;
+  });
+  if (!idCol) return [];
+  const out: { name: string; reason: string }[] = [];
+  ws.eachRow((row, r) => {
+    if (r === 1) return;
+    const shown = cellText(row.getCell(idCol).value).trim();
+    if (!shown || known.has(normalizeCode(row.getCell(idCol).value))) return;
+    const note = noteCol ? cellText(row.getCell(noteCol).value).trim() : '';
+    const total = totalCol ? plainValue(row.getCell(totalCol).value) : null;
+    out.push({
+      name: `Код ${shown}`,
+      reason: [
+        note || 'уншигдаагүй хуудас',
+        typeof total === 'number' ? `машины оноо ${total}` : null,
+        'хариу нь файлд алга, гараар оруулна',
+      ]
+        .filter(Boolean)
+        .join(', '),
+    });
   });
   return out;
 }
@@ -375,13 +481,19 @@ function parseV2(workbook: ExcelJS.Workbook): ParsedPaperFile | null {
   });
 
   // Толгой мөр: нэр → багана
+  const headerRow = v2HeaderRow(answersWs);
+  if (headerRow === null)
+    return fail(
+      answersWs.name,
+      '«ID» эсвэл «Код», «Хувилбар» баганатай толгой мөр олдсонгүй',
+    );
   const header = new Map<string, number>();
-  answersWs.getRow(1).eachCell((c, col) => {
-    const t = cellText(c.value).normalize('NFKC').trim();
-    if (t && !header.has(t.toLowerCase())) header.set(t.toLowerCase(), col);
+  answersWs.getRow(headerRow).eachCell((c, col) => {
+    const t = v2ColName(cellText(c.value));
+    if (t && !header.has(t)) header.set(t, col);
   });
   const col = (name: string) => header.get(name) ?? null;
-  const idCol = col('id') ?? col('шифр');
+  const idCol = col('id') ?? col('код') ?? col('шифр');
   const lastCol = col('овог');
   const firstCol = col('нэр');
   const classCol = col('анги');
@@ -394,7 +506,7 @@ function parseV2(workbook: ExcelJS.Workbook): ParsedPaperFile | null {
     );
 
   const used = new Set<string>();
-  for (let r = 2; r <= answersWs.rowCount; r++) {
+  for (let r = headerRow + 1; r <= answersWs.rowCount; r++) {
     const v = cellText(answersWs.getRow(r).getCell(variantCol).value).trim();
     if (v) used.add(v);
   }
@@ -413,7 +525,7 @@ function parseV2(workbook: ExcelJS.Workbook): ParsedPaperFile | null {
   const rows: ParsedPaperRow[] = [];
   const seen = new Set<string>();
   let droppedDuplicates = 0;
-  for (let r = 2; r <= answersWs.rowCount; r++) {
+  for (let r = headerRow + 1; r <= answersWs.rowCount; r++) {
     const row = answersWs.getRow(r);
     const text = (c: number | null) =>
       c === null ? '' : cellText(row.getCell(c).value).trim();
@@ -489,7 +601,10 @@ function parseV2(workbook: ExcelJS.Workbook): ParsedPaperFile | null {
       rowCount: rows.filter((r) => r.groupLabel === g).length,
       mode: 'LETTERS' as const,
     })),
-    skipped: [],
+    skipped: v2Unread(
+      sheetByName(workbook, V2_SHEETS.check),
+      new Set(rows.map((r) => r.code).filter(Boolean)),
+    ),
     rows,
     format: 'V2',
     itemPoints: items.map((it) => it.points),

@@ -179,7 +179,7 @@ export default function ImportPanel({
             ))}
             {preview.skipped.map((s) => (
               <li key={s.name} className="text-ink-dim">
-                «{s.name}» шийтийг алгассан: {s.reason}
+                «{s.name}» ороогүй: {s.reason}
               </li>
             ))}
           </ul>

@@ -335,6 +335,61 @@ describe('parsePaperWorkbook — V2 боловсруулалтын файл (Х�
     expect(parsed.skipped[0].reason).toMatch(/зөрж/);
   });
 
+  /** Машины шинэ гаралт («13-4.xlsx»): тайлбар мөр, «Код», «2.1a», өргөн «Түлхүүр», «Шалгах»-д уншигдаагүй хуудас */
+  function machineBook(rows: (string | number | null)[][]) {
+    const wb = new ExcelJS.Workbook();
+    const ans = wb.addWorksheet('Хариулт');
+    ans.addRow(['Зөв', 'Буруу', 'Хоосон']);
+    ans.addRow(['Код', 'Овог', 'Нэр', 'Анги', 'Хувилбар', 'Нийт', 1, 2, '2.1a', '2.1b']);
+    for (const r of rows) ans.addRow(r);
+    const key = wb.addWorksheet('Түлхүүр');
+    key.addRow(['Асуулт', 'A хариу', 'A оноо', 'B хариу', 'B оноо', 'C хариу', 'C оноо']);
+    key.addRow([1, 'D', 1, 'A', 1, 'E', 5]);
+    key.addRow([2, 'B', 2, 'C', 2, 'A', 1]);
+    key.addRow(['2.1 a', null, null, null, null, '7', 1]);
+    key.addRow(['2.1 a-b', '21', 3, '34', 3]);
+    key.addRow(['Нийт', null, 6, null, 6, null, 7]);
+    key.addRow(['Шалгалт: Туршилт']);
+    const check = wb.addWorksheet('Шалгах');
+    check.addRow(['№', 'Код', 'Асуудал', 'Хувилбар', 'Нийт']);
+    check.addRow([1, '202□7471', 'Код дутуу будсан', 'A', 4]);
+    return wb;
+  }
+
+  it('машины шинэ хэлбэрийг хөрвүүлэлгүй уншина — хуучин хэлбэртэй яг ижил үр дүн', () => {
+    const fresh = parsePaperWorkbook(
+      machineBook([
+        ['2027001', 'Бат', 'Анар', '13-4', 'A', 6, 'D', 'B', '2', '1'],
+        ['2027002', 'Бат', 'Сараа', '13-4', 'B', 4, 'A', null, '3', '4'],
+      ]),
+    );
+    const old = parsePaperWorkbook(
+      v2Book([
+        [1, '2027001', 'Бат', 'Анар', '13-4', 'A', 6, 'D', 'B', '2', '1'],
+        [2, '2027002', 'Бат', 'Сараа', '13-4', 'B', 4, 'A', null, '3', '4'],
+      ]),
+    );
+    expect(fresh.format).toBe('V2');
+    expect(fresh.v2Items).toEqual(old.v2Items);
+    expect(fresh.rows.map((r) => [r.code, r.variant, r.answers, r.fileScore, r.error])).toEqual(
+      old.rows.map((r) => [r.code, r.variant, r.answers, r.fileScore, r.error]),
+    );
+    expect(fresh.rows.every((r) => r.error === null)).toBe(true);
+  });
+
+  it('машины шинэ хэлбэр: код нь уншигдаагүй хуудсыг ороогүй гэж мэдэгдэнэ', () => {
+    const p = parsePaperWorkbook(
+      machineBook([['2027001', 'Бат', 'Анар', '13-4', 'A', 6, 'D', 'B', '2', '1']]),
+    );
+    expect(p.rows).toHaveLength(1);
+    expect(p.skipped).toEqual([
+      {
+        name: 'Код 202□7471',
+        reason: 'Код дутуу будсан, машины оноо 4, хариу нь файлд алга, гараар оруулна',
+      },
+    ]);
+  });
+
   it('expandLabel — багцын нүднүүд', () => {
     expect(expandLabel('2.1.a-d')).toEqual([
       '2.1.a',
