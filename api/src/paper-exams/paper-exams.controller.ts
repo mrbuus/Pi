@@ -74,35 +74,6 @@ export class PaperExamsController {
   // ---- Ажилтан ----
   // ---- Сурагчийн тайлбар, материал (өөрийн хувилбар, алдсан бодлого л) ----
   @Roles(Role.STUDENT)
-  @Get('my/:id/guide')
-  myGuide(@Param('id') id: string, @Req() req: RequestWithUser) {
-    return this.paper.myGuide(id, req.user.userId);
-  }
-
-  @Roles(Role.STUDENT)
-  @Get('my/:id/guide/:label')
-  myGuideStage(
-    @Param('id') id: string,
-    @Param('label') label: string,
-    @Query('stage') stage: string | undefined,
-    @Req() req: RequestWithUser,
-  ) {
-    return this.paper.myGuideStage(id, req.user.userId, label, Number(stage ?? 0) || 0);
-  }
-
-  @Roles(Role.STUDENT)
-  @Post('my/:id/guide/:label/check')
-  @HttpCode(200)
-  myGuideCheck(
-    @Param('id') id: string,
-    @Param('label') label: string,
-    @Body() body: { answer?: unknown },
-    @Req() req: RequestWithUser,
-  ) {
-    return this.paper.myGuideCheck(id, req.user.userId, label, body?.answer);
-  }
-
-  @Roles(Role.STUDENT)
   @Get('my/:id/material')
   myMaterial(
     @Param('id') id: string,

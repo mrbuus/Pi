@@ -371,39 +371,6 @@ export const CLASSIFY_LABEL: Record<ClassifyBy, { one: string; weak: string; by:
   topic: { one: "Сэдэв", weak: "Сул сэдэв", by: "Сэдвээр" },
 };
 
-/** Сурагчийн алдсан бодлого — нөхцөл, сонголт л (зөв хариу, бодолт серверээс шат шатаар) */
-export interface StudentGuideEntry {
-  label: string;
-  number: number | null;
-  content: {
-    kind: "choice" | "fill";
-    points: number;
-    statement: string[];
-    image?: string;
-    choices?: string[];
-    fields?: { key: string; part: number }[];
-    parts?: { points: number }[];
-    topic: string;
-    stepCount: number;
-  };
-}
-
-export interface StudentGuide {
-  variant: string;
-  entries: StudentGuideEntry[];
-}
-
-/** Нэг шатанд нээгдсэн хэсгүүд (paper-exam-student.ts guideStage) */
-export interface GuideStageData {
-  stage: number;
-  rule?: string[];
-  easy?: string[];
-  refs?: GuideContent["refs"];
-  steps?: string[];
-  answer?: string;
-  fields?: { key: string; value: string; part: number }[];
-}
-
 export interface PaperMaterial {
   variant: string;
   pages: string[];
