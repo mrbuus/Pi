@@ -54,10 +54,10 @@ function moneyLeaks(v: unknown, path = ''): string[] {
   return [];
 }
 
-describe('Багш+ — төлбөрийн дүнг серверээс хасна', () => {
-  it('зөвшөөрлийн жагсаалт: дүнг зөвхөн Админ харна, бусад бүх role-д нуугдана', () => {
+describe('Төлбөрийн дүн — Админ, Багш+ харна, бусдад серверээс хасна', () => {
+  it('зөвшөөрлийн жагсаалт: дүнг Админ, Багш+ харна, бусад бүх role-д нуугдана', () => {
     expect(amountsHiddenFor(Role.ADMIN)).toBe(false);
-    expect(amountsHiddenFor(Role.TEACHER_PLUS)).toBe(true);
+    expect(amountsHiddenFor(Role.TEACHER_PLUS)).toBe(false);
     expect(amountsHiddenFor(Role.TEACHER)).toBe(true);
     expect(amountsHiddenFor('SOME_NEW_ROLE')).toBe(true);
     expect(amountsHiddenFor(undefined)).toBe(true);
@@ -119,7 +119,8 @@ describe('Багш+ — төлбөрийн дүнг серверээс хасн�
 
   it('ангийн самбар: Багш+-д төлөв л, Админд дүнтэй', () => {
     const pay = { state: 'PARTIAL' as const, tuitionAmount: 350_000, paidThisMonth: 100_000 };
-    expect(studentPaymentView(pay, Role.TEACHER_PLUS)).toEqual({ state: 'PARTIAL', tuitionAmount: null, paidThisMonth: null });
+    expect(studentPaymentView(pay, Role.TEACHER)).toEqual({ state: 'PARTIAL', tuitionAmount: null, paidThisMonth: null });
+    expect(studentPaymentView(pay, Role.TEACHER_PLUS)).toEqual(pay);
     expect(studentPaymentView(pay, Role.ADMIN)).toEqual(pay);
   });
 
@@ -134,14 +135,14 @@ describe('Багш+ — төлбөрийн дүнг серверээс хасн�
     const ctrl = new PaymentsLedgerController(ledger as never);
     const req = (role: Role) => ({ user: { userId: 'u1', role } });
 
-    it('Багш+ — board/pay/settle хариунд дүн алга', async () => {
-      expect(moneyLeaks(await ctrl.board({} as never, req(Role.TEACHER_PLUS)))).toEqual([]);
-      expect(moneyLeaks(await ctrl.pay('s1', {} as never, req(Role.TEACHER_PLUS)))).toEqual([]);
-      expect(moneyLeaks(await ctrl.settle('s1', {} as never, req(Role.TEACHER_PLUS)))).toEqual([]);
+    it('Багш — board/pay/settle хариунд дүн алга', async () => {
+      expect(moneyLeaks(await ctrl.board({} as never, req(Role.TEACHER)))).toEqual([]);
+      expect(moneyLeaks(await ctrl.pay('s1', {} as never, req(Role.TEACHER)))).toEqual([]);
+      expect(moneyLeaks(await ctrl.settle('s1', {} as never, req(Role.TEACHER)))).toEqual([]);
     });
 
-    it('Админ — өөрчлөгдөхгүй', async () => {
-      const b = await ctrl.board({} as never, req(Role.ADMIN));
+    it.each([Role.ADMIN, Role.TEACHER_PLUS])('%s — дүн бүрэн, өөрчлөгдөхгүй', async (role) => {
+      const b = await ctrl.board({} as never, req(role));
       expect(b).toEqual({ total: 1, owedNow: 250_000, rows: [row()] });
     });
   });

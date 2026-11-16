@@ -32,7 +32,7 @@ interface AuthedRequest {
  * «Төлбөр» хэсгийн сарын блок (2026-10-13). Бүх зам 2+ сегменттэй тул
  * PaymentsController-ийн `payments/:id`-тэй давхцахгүй.
  * Багш+ төлбөрийг байнга удирдана (finance.manage — эзний шийдвэр 2026-10-08),
- * гэхдээ ЗӨВХӨН ТӨЛӨВ харна — мөнгөн дүнг серверээс хасна (ledger-redact.ts).
+ * мөнгөн дүнг Админтай адил харна, засна (эзэн 2026-11-16, ledger-redact.ts).
  */
 @Controller('payments/ledger')
 @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
