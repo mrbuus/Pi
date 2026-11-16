@@ -120,6 +120,13 @@ export class PaperExamsController {
     return this.paper.list(actorOf(req));
   }
 
+  /** Нэг сурагчийн бүх нэгдсэн шалгалтын дүн — сурагчийн профайлд (багш эрхтэй бүгд) */
+  @Roles(...STAFF)
+  @Get('students/:studentId/results')
+  studentResults(@Param('studentId') studentId: string) {
+    return this.paper.studentResults(studentId);
+  }
+
   @Roles(...STAFF)
   @Get('students/search')
   searchStudents(@Query() query: StudentSearchDto) {

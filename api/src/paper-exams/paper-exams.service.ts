@@ -1399,17 +1399,30 @@ export class PaperExamsService {
   // ======================= Сурагч =======================
 
   async my(studentId: string) {
+    return this.resultsOf(studentId, true);
+  }
+
+  /**
+   * Ажилтан — нэг сурагчийн бүх нэгдсэн шалгалтын дүн (сурагчийн профайлын «Шалгалт» таб,
+   * эзэн 2026-11-16). Сурагчид хараахан нээгээгүй шалгалт ч орно (`published` талбараар ялгана).
+   */
+  async studentResults(studentId: string) {
+    return this.resultsOf(studentId, false);
+  }
+
+  private async resultsOf(studentId: string, publishedOnly: boolean) {
     const own = await this.prisma.paperExamSheet.findMany({
       where: {
         studentId,
         supersededAt: null,
-        exam: { published: true, deletedAt: null },
+        exam: { deletedAt: null, ...(publishedOnly ? { published: true } : {}) },
       },
       select: {
         examId: true,
         totalScore: true,
         maxScore: true,
-        exam: { select: { title: true, heldOn: true } },
+        variant: true,
+        exam: { select: { title: true, heldOn: true, published: true } },
       },
       orderBy: { exam: { heldOn: 'desc' } },
     });
@@ -1433,6 +1446,7 @@ export class PaperExamsService {
         totalScore: o.totalScore,
         maxScore: o.maxScore,
         pct: pct(o.totalScore, o.maxScore),
+        ...(publishedOnly ? {} : { variant: o.variant, published: o.exam.published }),
         rank: 1 + scores.filter((s) => s > o.totalScore + 1e-9).length,
         participants: scores.length,
       };
