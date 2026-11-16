@@ -169,6 +169,11 @@ export default function SheetEditor({
           </div>
         </div>
 
+        {row && variant !== (row.variant ?? "") && (
+          <p className="rounded-xl bg-brand-bright/10 px-3 py-2 text-sm font-semibold text-ink">
+            Хувилбарыг {row.variant || "тодорхойгүй"} → {variant} болгож байна. Хадгалахад хариуг {variant} хувилбарын түлхүүрээр дахин дүгнэнэ
+          </p>
+        )}
         <ol className="grid grid-cols-[repeat(auto-fill,minmax(7.5rem,1fr))] gap-2">
           {items.map((it, i) => {
             const cells = it.cells ?? 1;

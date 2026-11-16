@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ChevronDown, Search, Users } from "lucide-react";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import InfoHint from "@/components/ui/InfoHint";
 import { Card } from "@/components/ui/Surface";
 import { Meta } from "@/components/ui/Meta";
@@ -140,7 +140,7 @@ export default function GroupTable({ board, onChanged }: { board: Board; onChang
           )}
         </Card>
       ) : (
-        <GroupSheet board={board} group={group} onOpen={setOpen} />
+        <GroupSheet board={board} group={group} onOpen={setOpen} onEdit={setEdit} />
       )}
 
       <div className="flex justify-end">
@@ -176,7 +176,18 @@ export default function GroupTable({ board, onChanged }: { board: Board; onChang
   );
 }
 
-function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup; onOpen: (r: BoardRow) => void }) {
+function GroupSheet({
+  board,
+  group,
+  onOpen,
+  onEdit,
+}: {
+  board: Board;
+  group: BoardGroup;
+  onOpen: (r: BoardRow) => void;
+  /** Багш эрхтэй бүгд: мөрийн «Засах» — хувилбар, хариуг шууд засна (эзэн 2026-11-16) */
+  onEdit: (r: BoardRow) => void;
+}) {
   const nameOf = makeNamer(board.groups.flatMap((g) => g.rows));
   const items = board.items;
   const by = board.classifyBy;
@@ -208,6 +219,8 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
                 <th className={cn(head, "hidden md:table-cell")}>Шифр</th>
                 <th className={cn(head, "sticky left-8 z-20 min-w-36 border-r border-line")}>Овог, нэр</th>
                 <th className={cn(head, "text-right")}>Оноо</th>
+                <th className={cn(head, "text-center")}>Хувилбар</th>
+                <th className={cn(head, "text-center")}>Засах</th>
                 {items.map((it) => (
                   <th
                     key={it.number}
@@ -240,6 +253,17 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
                   <td className="border-t border-line px-2 py-1 text-right font-bold tabular-nums text-ink">
                     {scoreText(r.totalScore)}
                   </td>
+                  <td className="border-t border-line px-2 py-1 text-center font-bold text-ink">{r.variant ?? ""}</td>
+                  <td className="border-t border-line px-1 py-1 text-center">
+                    <button
+                      onClick={() => onEdit(r)}
+                      aria-label={`${nameOf(r.lastName, r.firstName)} — дүн, хувилбар засах`}
+                      title="Дүн, хувилбар засах"
+                      className="inline-flex size-9 items-center justify-center rounded-lg text-ink-dim hover:bg-panel hover:text-brand-soft"
+                    >
+                      <Pencil className="size-4" aria-hidden />
+                    </button>
+                  </td>
                   {items.map((it, j) => {
                     const st = STATUS_OF_CHAR[r.statuses[j]] ?? "UNGRADED";
                     return (
@@ -260,6 +284,8 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
                 <td className="sticky left-0 z-10 border-t-2 border-line bg-panel" />
                 <td className="hidden border-t-2 border-line bg-panel md:table-cell" />
                 <td className="sticky left-8 z-10 border-r border-t-2 border-line bg-panel px-2 py-2 text-xs font-bold text-ink">Гүйцэтгэл %</td>
+                <td className="border-t-2 border-line bg-panel" />
+                <td className="border-t-2 border-line bg-panel" />
                 <td className="border-t-2 border-line bg-panel" />
                 {group.items.map((s) => (
                   <td
