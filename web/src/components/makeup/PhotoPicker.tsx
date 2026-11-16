@@ -76,7 +76,7 @@ export default function PhotoPicker({
   highlight?: boolean;
   /** Хадгалах хугацаа: `theory` байнга, `homework` 7 хоног */
   purpose?: UploadPurpose;
-  /** Дээд хуудасны тоо (анхдагч 10; гэрийн даалгавар 15, онол 20) */
+  /** Дээд хуудасны тоо (анхдагч 10; гэрийн даалгавар 15, онол 10) */
   maxPages?: number;
   /** Зураг сонгосны дараа тайрах алхам (алгасаж болно) */
   crop?: boolean;
