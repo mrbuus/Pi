@@ -1,9 +1,9 @@
 "use client";
 
+import { BackLink } from "@/components/layout/ContextNavigation";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ArrowLeft,
   CalendarClock,
   CalendarX2,
   Check,
@@ -124,9 +124,7 @@ export default function StudentLedger({ id }: { id: string }) {
 
   return (
     <div className="space-y-5">
-      <Link href={back.href} className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand">
-        <ArrowLeft className="h-4 w-4" aria-hidden /> {back.label}
-      </Link>
+      <BackLink href={back.href} label={back.label} />
 
       <section className="chunky space-y-4 p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">

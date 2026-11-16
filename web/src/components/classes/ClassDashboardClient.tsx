@@ -1,8 +1,9 @@
 "use client";
 
+import { BackLink } from "@/components/layout/ContextNavigation";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, BookOpen, CalendarDays, ClipboardCheck, Hash, LayoutDashboard, ListChecks, Pencil, Settings2, UserPlus, Users, Wallet } from "lucide-react";
+import { BookOpen, CalendarDays, ClipboardCheck, Hash, LayoutDashboard, ListChecks, Pencil, Settings2, UserPlus, Users, Wallet } from "lucide-react";
 import MakeupPanel from "@/components/makeup/MakeupPanel";
 import ClassBoard from "@/components/payments/ClassBoard";
 import RequireRole from "@/components/nav/RequireRole";
@@ -132,12 +133,7 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
   return (
     <RequireRole allow={["ADMIN", "TEACHER_PLUS", "TEACHER"]}>
       <div className="min-w-0 space-y-5">
-        <Link
-          href="/app/classes"
-          className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden /> Ангиуд
-        </Link>
+        <BackLink href="/app/classes" label="Ангиуд" />
 
         {error && !data && <ErrorState message={error} onRetry={() => void load()} />}
         {!data && !error && <DashboardSkeleton />}

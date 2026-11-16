@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { BackLink } from "@/components/layout/ContextNavigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Download, Users } from "lucide-react";
+import { Download, Users } from "lucide-react";
 import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { Button } from "@/components/ui/kit/button";
@@ -92,9 +92,7 @@ export default function ClassBoard({ id, embedded = false }: { id: string; embed
   return (
     <div className="space-y-4">
       {!embedded && (
-        <Link href="/app/payments" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand">
-          <ArrowLeft className="h-4 w-4" aria-hidden /> Төлбөр
-        </Link>
+        <BackLink href="/app/payments" label="Төлбөр" />
       )}
       <header className={`flex flex-wrap items-end justify-between gap-4 ${embedded ? "rounded-2xl border border-line bg-surface px-4 py-3" : "chunky p-4 sm:p-5"}`}>
         <div className={embedded ? "hidden" : undefined}>
