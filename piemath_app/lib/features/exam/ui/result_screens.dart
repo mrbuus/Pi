@@ -450,6 +450,7 @@ class _PracticeReviewBody extends ConsumerWidget {
               imageKey: it.imageKey,
               myAnswer: it.myAnswer,
               solution: it.solution,
+              extraMistakeNotes: it.mistakeNotes,
             ),
           ),
         );

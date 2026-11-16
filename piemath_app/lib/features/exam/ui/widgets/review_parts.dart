@@ -91,6 +91,11 @@ class ReviewProblemCard extends StatelessWidget {
                 children: [SolutionView(source: p.solution, showTitle: false)],
               ),
             ),
+          if (p.mistakeNotes.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpace.sm),
+              child: MistakeNotesView(notes: p.mistakeNotes, showLabels: choices != null && choices.isNotEmpty),
+            ),
           if (p.youtube != null)
             Align(
               alignment: AlignmentDirectional.centerStart,
@@ -109,6 +114,85 @@ class ReviewProblemCard extends StatelessWidget {
   static int? _indexOf(List<ReviewChoice> choices, String letter) {
     final i = choices.indexWhere((c) => c.letter == letter);
     return i < 0 ? null : i;
+  }
+}
+
+/// «Түгээмэл алдаа» — буруу сонголтын багшийн тайлбар. Сурагчийн сонгосон нь эхэнд, онцолсон.
+/// Сервер бодолт нээгдсэн үед л илгээнэ; хоосон бол дуудагч зурахгүй.
+class MistakeNotesView extends StatelessWidget {
+  const MistakeNotesView({super.key, required this.notes, this.showLabels = true});
+
+  final List<MistakeNote> notes;
+
+  /// Сонголт үсэгтэй харагдсан эсэх; үгүй бол сонголтын текстийг харуулна.
+  final bool showLabels;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Semantics(
+      container: true,
+      label: 'Түгээмэл алдаа',
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpace.md),
+        decoration: BoxDecoration(
+          color: c.surface,
+          border: Border.all(color: c.line),
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(AppIcons.error, size: 16, color: c.error),
+                const SizedBox(width: AppSpace.xs),
+                Text('Түгээмэл алдаа', style: context.text.titleSmall),
+              ],
+            ),
+            for (final n in notes) ...[
+              const SizedBox(height: AppSpace.sm),
+              _MistakeNoteTile(note: n, showLabel: showLabels),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MistakeNoteTile extends StatelessWidget {
+  const _MistakeNoteTile({required this.note, required this.showLabel});
+
+  final MistakeNote note;
+  final bool showLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final title = note.mine
+        ? (showLabel ? 'Таны сонгосон ${note.label}' : 'Таны сонгосон хариу')
+        : (showLabel ? '${note.label} хариу' : 'Өөр буруу хариу');
+    final labelStyle = context.text.labelMedium?.copyWith(color: note.mine ? c.error : c.inkDim);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpace.sm),
+      decoration: BoxDecoration(
+        color: note.mine ? c.errorTint : null,
+        border: Border.all(color: note.mine ? c.error : c.line),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: labelStyle),
+          if (!showLabel && note.text.isNotEmpty) MathText(note.text, style: context.text.bodySmall),
+          const SizedBox(height: AppSpace.xs),
+          MathText(note.note, style: context.text.bodyMedium),
+        ],
+      ),
+    );
   }
 }
 

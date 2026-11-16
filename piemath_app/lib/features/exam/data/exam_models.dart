@@ -352,19 +352,70 @@ class SaveResponse {
   final ScorePair? result;
 }
 
-/// Эргэн харалтын сонголт (`{letter, text, image}` — канон дараалал).
+/// Эргэн харалтын сонголт (`{letter, text, image, mistakeNote?}` — канон дараалал).
 @immutable
 class ReviewChoice {
-  const ReviewChoice({required this.letter, this.text = '', this.image});
+  const ReviewChoice({required this.letter, this.text = '', this.image, this.mistakeNote});
 
   factory ReviewChoice.fromJson(Object? raw) {
     final j = _map(raw);
-    return ReviewChoice(letter: _str(j['letter']) ?? '', text: _str(j['text']) ?? '', image: _str(j['image']));
+    final note = _str(j['mistakeNote'])?.trim();
+    return ReviewChoice(
+      letter: _str(j['letter']) ?? '',
+      text: _str(j['text']) ?? '',
+      image: _str(j['image']),
+      mistakeNote: note == null || note.isEmpty ? null : note,
+    );
   }
 
   final String letter;
   final String text;
   final String? image;
+
+  /// Буруу сонголтын багшийн тайлбар — сервер бодолт нээгдсэн үед л илгээнэ (хуучин серверт байхгүй).
+  final String? mistakeNote;
+}
+
+/// «Түгээмэл алдаа» — нэг буруу сонголтын тайлбар (`/tests/:id/review` → `items[].mistakeNotes[]`).
+@immutable
+class MistakeNote {
+  const MistakeNote({required this.label, this.text = '', required this.note, this.mine = false});
+
+  static MistakeNote? fromJson(Object? raw) {
+    final j = _map(raw);
+    final note = _str(j['note'])?.trim();
+    if (note == null || note.isEmpty) return null;
+    return MistakeNote(label: _str(j['label']) ?? '', text: _str(j['text']) ?? '', note: note, mine: _bool(j['mine']));
+  }
+
+  /// Канон үсэг (A, B, …)
+  final String label;
+
+  /// Сонголтын текст — үсэггүй дэлгэцэд аль сонголт болохыг харуулна.
+  final String text;
+  final String note;
+
+  /// Сурагчийн өөрийн сонгосон хариу эсэх.
+  final bool mine;
+}
+
+/// Жагсаалтыг задлах — хоосон тайлбарыг алгасна; талбаргүй бол хоосон.
+List<MistakeNote> parseMistakeNotes(Object? raw) => [for (final m in _list(raw)) ?MistakeNote.fromJson(m)];
+
+/// Үсэгтэй сонголтоос «Түгээмэл алдаа» — сурагчийнх эхэнд.
+List<MistakeNote> mistakeNotesFromChoices(List<ReviewChoice>? choices, Object? myAnswer) {
+  final out = [
+    for (final c in choices ?? const <ReviewChoice>[])
+      if (c.mistakeNote != null)
+        MistakeNote(
+          label: c.letter,
+          text: c.text,
+          note: c.mistakeNote!,
+          mine: myAnswer is String && myAnswer == c.letter,
+        ),
+  ];
+  out.sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0));
+  return out;
 }
 
 @immutable
@@ -416,6 +467,7 @@ class ReviewProblem {
     this.solution,
     this.answerNeedsCheck = false,
     this.youtube,
+    this.extraMistakeNotes = const [],
   });
 
   factory ReviewProblem.fromJson(Object? raw) {
@@ -442,6 +494,15 @@ class ReviewProblem {
   final String? solution;
   final bool answerNeedsCheck;
   final YoutubeLink? youtube;
+
+  /// Сонголтын жагсаалтгүй дэлгэцийн тайлбар (`/tests/:id/review`).
+  final List<MistakeNote> extraMistakeNotes;
+
+  /// «Түгээмэл алдаа»: сонголтын `mistakeNote`-оос, эсвэл [extraMistakeNotes]. Байхгүй бол хоосон.
+  List<MistakeNote> get mistakeNotes {
+    final fromChoices = mistakeNotesFromChoices(choices, myAnswer);
+    return fromChoices.isNotEmpty ? fromChoices : extraMistakeNotes;
+  }
 }
 
 /// Эргэн харалтын түвшин (THOUSAND; бусад нь үргэлж FULL).
@@ -625,6 +686,7 @@ class PracticeReviewItem {
     this.myAnswer,
     this.solution,
     this.timeSpentSec,
+    this.mistakeNotes = const [],
   });
 
   factory PracticeReviewItem.fromJson(Object? raw) {
@@ -641,6 +703,7 @@ class PracticeReviewItem {
       myAnswer: _str(j['myAnswer']) ?? answerDisplay(normalizeAnswer(j['myAnswer'])),
       solution: _str(j['solution']),
       timeSpentSec: _int(j['timeSpentSec']),
+      mistakeNotes: parseMistakeNotes(j['mistakeNotes']),
     );
   }
 
@@ -657,6 +720,9 @@ class PracticeReviewItem {
 
   /// Бодлогод зарцуулсан секунд (байхгүй бол null).
   final int? timeSpentSec;
+
+  /// Буруу сонголтын тайлбар — бодолт нээгдсэн үед л (хуучин серверт хоосон).
+  final List<MistakeNote> mistakeNotes;
 }
 
 @immutable

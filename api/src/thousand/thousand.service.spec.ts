@@ -42,6 +42,7 @@ const test1000 = {
           order,
           text,
           isCorrect: order === 4,
+          mistakeNote: order === 0 ? 'НУУЦ_ТАЙЛБАР_A' : order === 4 ? 'зөвийн тайлбар' : null,
         })),
         analysis: { answerKeyStatus: 'VERIFIED', solutionOutline: '**Хариу: E**' },
       },
@@ -138,6 +139,7 @@ describe('ThousandService.studentReview — сервер талын хаалт',
       answered: true,
     });
     expect(res.items[1]).toMatchObject({ myAnswer: '39' });
+    expect(JSON.stringify(res)).not.toMatch(/НУУЦ_ТАЙЛБАР|mistakeNote/);
     for (const item of res.items) {
       for (const key of ['correct', 'correctAnswer', 'solution', 'youtube', 'answerKnown']) {
         expect(item).not.toHaveProperty(key);
@@ -158,6 +160,15 @@ describe('ThousandService.studentReview — сервер талын хаалт',
       answerNeedsCheck: false,
       youtube: { embedUrl: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ' },
     });
+    // «Түгээмэл алдаа»: буруу сонголтод л тайлбар; зөв сонголтын тайлбар гарахгүй
+    const choices = res.items[0].choices as { letter: string; mistakeNote: string | null }[];
+    expect(choices.map((c) => [c.letter, c.mistakeNote])).toEqual([
+      ['A', 'НУУЦ_ТАЙЛБАР_A'],
+      ['B', null],
+      ['C', null],
+      ['D', null],
+      ['E', null],
+    ]);
     expect(res.items[1]).toMatchObject({
       correct: false,
       correctAnswer: '32',

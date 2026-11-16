@@ -91,6 +91,8 @@ interface ReviewItem {
   myAnswer: string | null;
   // Багш баталгаажуулсан бодолт (VERIFIED үед л ирнэ — Шийдвэр Д)
   solution?: string | null;
+  // Буруу сонголтын тайлбар — бодолттой ижил нөхцөлөөр (хуучин API-д байхгүй)
+  mistakeNotes?: { label: string; text: string; note: string; mine: boolean }[];
 }
 interface ReviewResp {
   result: { totalScore: number; maxScore: number } | null;

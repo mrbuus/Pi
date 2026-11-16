@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import MathText from "@/components/MathText";
+import MistakeNotes, { type MistakeNoteItem } from "@/components/exam/MistakeNotes";
 
 /* ============================================================================
  * ExamResult — дүн + сэдвээр задалсан задаргаа + бодлого бүрийн review +
@@ -19,6 +20,8 @@ export interface ExamReviewItem {
   answerUnknown?: boolean;
   myAnswer: string | null;
   solution?: string | null;
+  /** Буруу сонголтын тайлбар — бодолт нээгдсэн үед л ирнэ (хуучин API-д байхгүй) */
+  mistakeNotes?: MistakeNoteItem[];
 }
 
 export default function ExamResult({
@@ -251,6 +254,8 @@ export default function ExamResult({
                       <MathText>{it.solution}</MathText>
                     </div>
                   )}
+                  {/* Сонголт шалгалтад үсэггүй, холилдсон тул үсгийн оронд текстийг харуулна */}
+                  <MistakeNotes notes={it.mistakeNotes} showLabels={false} className="mt-2" />
                 </div>
                 <span className="shrink-0 text-xs text-ink-dim">{it.points} оноо</span>
               </div>
