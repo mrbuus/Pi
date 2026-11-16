@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import DatePickerButton from "@/components/ui/DatePickerButton";
 import { Building2, CalendarDays, CalendarOff, ChevronLeft, ChevronRight, Palmtree } from "lucide-react";
+import { useUbToday } from "@/hooks/useUbToday";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { useSection } from "@/components/students/progress/useSection";
@@ -47,7 +48,8 @@ function defaultDay(): string {
 const BRANCHES = ["Баруун 4", "Зүүн 4", "Бусад"] as const;
 
 export default function WeekBuilder() {
-  const [today] = useState(todayUBKey);
+  // «Өнөөдөр/Маргааш» шошго, өнгөрсөн өдөр — шөнө дунд таб нээлттэй үлдсэн ч зөв
+  const today = useUbToday();
   const [day, setDay] = useState(defaultDay);
   // 7 өдрийн мөрийн эхний өдөр. Сонгосон өдөр мөрнөөс гарвал мөр дагаж шилжинэ (эзэн 2026-11-08:
   // сум дарахад гарчиг солигдоод доорх өдрүүд хөдөлдөггүй байсан)
