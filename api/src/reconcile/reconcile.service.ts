@@ -79,6 +79,8 @@ type Part = { kind: AllocKind; amount: number; studentId: string | null; payment
  * зөрүүтэй нь өөр сарын төлбөр байв. Иймээс ±3 хоног.
  */
 const LINK_WINDOW_MS = 3 * 86_400_000;
+/** Шийтэд юу ч бичээгүй, дахин оролдож болох шалтгаан (writeSheet, demo-sheet) */
+const RETRY_REASON = 'тэмдэглээгүй|холбогдож чадсангүй';
 type ExistingPayment = { id: string; userId: string; amount: number; at: number };
 
 const STUDENT_PART: AllocKind[] = ['TUITION', 'SOCIAL', 'BOOK', 'ANSWER_SHEET'];
@@ -110,7 +112,7 @@ export class ReconcileService {
     }
     const { info, rows } = parsed;
     if (!rows.length) throw new BadRequestException('Хуулгад гүйлгээ алга');
-    const accountNo = info.accountNo ?? 'KHAN';
+    const accountNo = await this.statementAccount(info.accountNo);
 
     // «Бүрэн шийдсэн өдөр» хүртэлх мөрийг огт оруулахгүй; үлдсэнийг түлхүүрээр (ӨС-ийн @unique)
     const cursor = await this.prisma.bankCursor.findUnique({ where: { accountNo } });
@@ -166,6 +168,24 @@ export class ReconcileService {
       after: summary,
     });
     return summary;
+  }
+
+  /**
+   * Хуулгын дансыг өмнөх курсортой тааруулна. Данс танигдаагүй, эсвэл 10 оронтой хэлбэрээр
+   * бичигдсэн бол мэдэгдэж буй ганц данс руу — шинэ курсор үүсвэл «шийтэд хөтлөгдсөн өдөр»
+   * алга болж шийтэд бичихгүй (2026-11-16: 15 гүйлгээ шийтэд ороогүй).
+   */
+  private async statementAccount(read: string | null): Promise<string> {
+    const known = (await this.prisma.bankCursor.findMany({ select: { accountNo: true } })).map((c) => c.accountNo);
+    if (read && known.includes(read)) return read;
+    const digits = read?.replace(/\D/g, '') ?? '';
+    const bySuffix = digits.length >= 8 ? known.filter((k) => k.replace(/\D/g, '').endsWith(digits) || digits.endsWith(k.replace(/\D/g, ''))) : [];
+    if (bySuffix.length === 1) return bySuffix[0];
+    if (read) return read;
+    const real = known.filter((k) => k !== 'KHAN');
+    if (real.length === 1) return real[0];
+    if (!known.length) return 'KHAN';
+    throw new BadRequestException('Хуулгын дансны дугаар танигдсангүй. Хаан банкнаас «Дансны хуулга»-г IBAN-тай нь татна уу');
   }
 
   // ── Тулгалт ───────────────────────────────────────────────────────────────
@@ -257,7 +277,10 @@ export class ReconcileService {
       orderBy: { bookedAt: 'asc' },
       select: { id: true, bankRef: true, accountNo: true, bookedAt: true, amount: true, direction: true, description: true, counterparty: true, suggestion: true },
     });
-    if (!open.length) return { resolved: 0, open: 0 };
+    if (!open.length) {
+      await this.retrySheetWrites();
+      return { resolved: 0, open: 0 };
+    }
     // «Шийтэд хөтлөгдсөн өдөр»-өөс хойш ажилтан шийтэд бичихээ больсон — итгэлтэй таньсныг систем өөрөө шинэ
     // төлбөр болгож, шийтэд бичнэ (эзэн 2026-11-10: «ухаалаг, бодит шийдвэр»)
     const throughBy = new Map((await this.prisma.bankCursor.findMany({ select: { accountNo: true, sheetThrough: true } })).map((c) => [c.accountNo, c.sheetThrough]));
@@ -317,6 +340,7 @@ export class ReconcileService {
       );
       for (const { row, parts } of toSheet.filter((x) => done.has(x.row.id))) await this.writeSheet(row, parts);
     }
+    await this.retrySheetWrites();
     return { resolved, open: toSuggest.length };
   }
 
@@ -331,10 +355,15 @@ export class ReconcileService {
     const primarySocial = await this.socialPrimary(money.map((p) => p.studentId));
     const kids = money.map((p) => ({ studentId: p.studentId!, amount: p.amount, social: p.kind === 'SOCIAL' || primarySocial.has(p.studentId!) }));
     // Атомар эзэмшинэ: зэрэг ажиллалт эсвэл буцаасны дараах дахин хуваарилалт шийтэд ДАВХАР бичихгүй.
-    // Нэг гүйлгээ шийтэд нэг л удаа бичигдэнэ (буцаасан бол тэр нүдийг ажилтан гараар засна).
+    // Нэг гүйлгээ шийтэд нэг л удаа бичигдэнэ (буцаасан бол тэр нүдийг ажилтан гараар засна). Өмнөх
+    // оролдлого юу ч бичээгүй, түр шалтгаанаар (өдөр тэмдэглээгүй, шийттэй холбогдоогүй) бол дахин оролдоно.
     const claimed = await this.prisma.$executeRaw`
       UPDATE "BankTransaction" SET "suggestion" = COALESCE("suggestion", '{}'::jsonb) || '{"sheetWrites": "pending"}'::jsonb
-      WHERE id = ${row.id} AND NOT (COALESCE("suggestion", '{}'::jsonb) ? 'sheetWrites')`;
+      WHERE id = ${row.id} AND (
+        NOT (COALESCE("suggestion", '{}'::jsonb) ? 'sheetWrites')
+        OR (jsonb_typeof("suggestion"->'sheetWrites') = 'array' AND NOT EXISTS (
+          SELECT 1 FROM jsonb_array_elements(CASE WHEN jsonb_typeof("suggestion"->'sheetWrites') = 'array' THEN "suggestion"->'sheetWrites' ELSE '[]'::jsonb END) w
+          WHERE COALESCE((w->>'ok')::boolean, false) OR COALESCE(w->>'reason', '') !~ ${RETRY_REASON})))`;
     if (!claimed)
       return kids.map((k) => ({ studentId: k.studentId, ok: false, reason: 'Энэ гүйлгээг шийтэд өмнө нь бичсэн — шаардлагатай бол тэр нүдийг гараар засна уу' }));
     const through = row.accountNo ? (await this.prisma.bankCursor.findUnique({ where: { accountNo: row.accountNo }, select: { sheetThrough: true } }))?.sheetThrough : null;
@@ -345,10 +374,7 @@ export class ReconcileService {
             ok: false,
             reason: through ? `${through.slice(5).replace('-', '/')} хүртэл ажилтан шийтэд хөтөлсөн тул бичсэнгүй` : '«Шийтэд хөтлөгдсөн өдөр» тэмдэглээгүй тул бичсэнгүй',
           }))
-        : [
-            ...(await this.demoSheet.writeTuition(kids.filter((k) => !k.social), row.bookedAt)),
-            ...(await this.demoSheet.writeTuition(kids.filter((k) => k.social), row.bookedAt, 'SOCIAL')),
-          ];
+        : await this.writeKids(row, kids);
     // Хуулгаас үүссэн төлбөрийн сарыг шийтэд бичсэн сараар (өмнөх өртэй сард орсон бол тэр сар)
     const months = new Map(writes.filter((w) => w.ok && w.month).map((w) => [w.studentId, w.month!]));
     if (months.size)
@@ -361,6 +387,79 @@ export class ReconcileService {
       UPDATE "BankTransaction" SET "suggestion" = COALESCE("suggestion", '{}'::jsonb) || jsonb_build_object('sheetWrites', ${JSON.stringify(writes)}::jsonb)
       WHERE id = ${row.id}`;
     return writes;
+  }
+
+  /**
+   * Шийтэд бичихээс өмнө: ажилтан тэр хүүхдийн төлбөрийг шийтэд гараар бичсэн бол ДАВХАР бичихгүй.
+   *  - энэ гүйлгээний төлбөрийг синк шийтийн нүдтэй холбосон → ажилтан ижил дүнгээр бичжээ
+   *  - ±3 хоногт өөр дүнгээр бичсэн, хуулгатай холбогдоогүй шийтийн төлбөр байна → хүн шалгана
+   */
+  private async writeKids(row: { id: string; bookedAt: Date }, kids: { studentId: string; amount: number; social: boolean }[]): Promise<DemoSheetWrite[]> {
+    const ids = kids.map((k) => k.studentId);
+    const [mine, staff] = await Promise.all([
+      this.prisma.bankAllocation.findMany({
+        where: { bankTxId: row.id, revokedAt: null, studentId: { in: ids }, paymentId: { not: null } },
+        select: { studentId: true, paymentId: true },
+      }),
+      this.prisma.payment.findMany({
+        where: {
+          userId: { in: ids },
+          status: PaymentStatus.CONFIRMED,
+          NOT: { id: { startsWith: 'bank_' } },
+          paidAt: { gte: new Date(row.bookedAt.getTime() - LINK_WINDOW_MS), lte: new Date(row.bookedAt.getTime() + LINK_WINDOW_MS) },
+        },
+        select: { id: true, userId: true, amount: true },
+      }),
+    ]);
+    const linkedToSheet = new Set(
+      (await this.prisma.sheetPayment.findMany({ where: { paymentId: { in: mine.map((m) => m.paymentId!) } }, select: { paymentId: true } })).map((x) => x.paymentId),
+    );
+    const bankLinked = new Set(
+      (await this.prisma.bankAllocation.findMany({ where: { paymentId: { in: staff.map((p) => p.id) }, revokedAt: null }, select: { paymentId: true } })).map((a) => a.paymentId),
+    );
+    const out: DemoSheetWrite[] = [];
+    const go: typeof kids = [];
+    for (const k of kids) {
+      const own = mine.find((m) => m.studentId === k.studentId);
+      if (own && linkedToSheet.has(own.paymentId!)) out.push({ studentId: k.studentId, ok: false, reason: 'Ажилтан шийтэд гараар бичсэн — давхар бичсэнгүй' });
+      else if (!k.social && staff.some((p) => p.userId === k.studentId && !bankLinked.has(p.id)))
+        out.push({ studentId: k.studentId, ok: false, reason: 'Ажилтан энэ хүүхдэд шийтэд өөр дүн бичсэн байна — шийтийг шалгаж гараар засна уу' });
+      else go.push(k);
+    }
+    return [
+      ...out,
+      ...(await this.demoSheet.writeTuition(go.filter((k) => !k.social), row.bookedAt)),
+      ...(await this.demoSheet.writeTuition(go.filter((k) => k.social), row.bookedAt, 'SOCIAL')),
+    ];
+  }
+
+  /**
+   * Шийтэд бичигдээгүй үлдсэн (өдөр тэмдэглээгүй, шийттэй холбогдоогүй) шийдсэн гүйлгээг дахин бичнэ.
+   * Зөвхөн хуулгаас ШИНЭЭР үүссэн мөнгө (шийтийн төлбөртэй холбосон нь шийтэд аль хэдийн бий).
+   */
+  private async retrySheetWrites(): Promise<number> {
+    if (!this.demoSheet.enabled) return 0;
+    let n = 0;
+    for (const c of await this.prisma.bankCursor.findMany({ where: { sheetThrough: { not: null } } })) {
+      const rows = await this.prisma.$queryRaw<{ id: string; accountNo: string | null; bookedAt: Date }[]>`
+        SELECT t.id, t."accountNo", t."bookedAt" FROM "BankTransaction" t
+        WHERE t."accountNo" = ${c.accountNo} AND t."resolvedAt" IS NOT NULL
+          AND t."bookedAt" >= ${new Date(`${shiftDay(c.sheetThrough!, 1)}T00:00:00+08:00`)}
+          AND jsonb_typeof(t."suggestion"->'sheetWrites') = 'array'
+          AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(CASE WHEN jsonb_typeof(t."suggestion"->'sheetWrites') = 'array' THEN t."suggestion"->'sheetWrites' ELSE '[]'::jsonb END) w
+                          WHERE COALESCE((w->>'ok')::boolean, false) OR COALESCE(w->>'reason', '') !~ ${RETRY_REASON})
+        ORDER BY t."bookedAt" LIMIT 100`;
+      for (const r of rows) {
+        const allocs = await this.prisma.bankAllocation.findMany({ where: { bankTxId: r.id, revokedAt: null, kind: { in: ['TUITION', 'SOCIAL'] } } });
+        const parts: Part[] = allocs
+          .filter((a) => a.paymentId == null ? a.kind === 'SOCIAL' : a.paymentId.startsWith('bank_'))
+          .map((a) => ({ kind: a.kind as AllocKind, amount: a.amount, studentId: a.studentId }));
+        if (!parts.length) continue;
+        const w = await this.writeSheet(r, parts);
+        if (w.some((x) => x.ok)) n++;
+      }
+    }
+    return n;
   }
 
   /**
@@ -653,7 +752,8 @@ export class ReconcileService {
       data: { inSheet: false, resolvedAt: null, resolvedById: null, matchStatus: BankMatchStatus.UNMATCHED },
     });
     await this.prisma.bankCursor.updateMany({ data: { sheetThrough: through } });
-    if (reopened.count) await this.resolveOpen(actor);
+    // Шийдэгдээгүй мөрийн санал, шийтэд бичигдээгүй үлдсэн гүйлгээг дахин тооцно
+    await this.resolveOpen(actor);
     const marked = await this.applySheetThrough(actor);
     for (const c of cursors) await this.recomputeCursor(c.accountNo);
     await this.audit.record({ actorId: actor.id, actorRole: actor.role, action: 'SHEET_THROUGH', entity: 'BankCursor', entityId: through, after: { through, marked, reopened: reopened.count } });
@@ -725,11 +825,12 @@ export class ReconcileService {
   // ── Унших ─────────────────────────────────────────────────────────────────
 
   async overview() {
-    const [cursors, all, manual, tuition, other, expense, sheet, sheetCheck, last] = await Promise.all([
+    const [cursors, all, manual, tuition, social, other, expense, sheet, sheetCheck, last] = await Promise.all([
       this.prisma.bankCursor.findMany({ orderBy: { accountNo: 'asc' } }),
       this.prisma.bankTransaction.count(),
       this.prisma.bankTransaction.count({ where: this.laneWhere('manual') }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('tuition') }),
+      this.prisma.bankTransaction.count({ where: this.laneWhere('social') }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('other') }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('expense') }),
       this.prisma.bankTransaction.count({ where: this.laneWhere('sheet') }),
@@ -738,7 +839,7 @@ export class ReconcileService {
     ]);
     return {
       cursors: cursors.map((c) => ({ accountNo: c.accountNo, settledThrough: c.settledThrough, coveredThrough: c.coveredThrough, sheetThrough: c.sheetThrough })),
-      counts: { all, manual, tuition, other, expense, sheet },
+      counts: { all, manual, tuition, social, other, expense, sheet },
       /** Шийтэд хөтлөгдсөн гэж нуусан ч шийтэд байгааг баталж чадаагүй — шалгах */
       sheetCheck,
       lastImportAt: last?.importedAt ?? null,
@@ -756,6 +857,17 @@ export class ReconcileService {
         return { resolvedAt: null };
       case 'tuition':
         return { resolvedAt: { not: null }, allocations: tuitionAlloc };
+      case 'social':
+        // Нийгмийн хичээлийн төлбөр: «Нийгэм сургалт» гэж оноосон, эсвэл утгаараа нийгэм гэж танигдсан
+        return {
+          direction: 'CREDIT',
+          OR: [
+            { allocations: { some: { kind: 'SOCIAL', revokedAt: null } } },
+            { suggestion: { path: ['kind'], equals: 'SOCIAL' } },
+            // 11-12-оос өмнө «Сургалтын төлбөр» гэж оноосон нийгмийн гүйлгээ ч харагдана
+            ...['нийгэм', 'нийгм', 'niigem', 'niigm', 'niigim'].map((w) => ({ description: { contains: w, mode: 'insensitive' as const } })),
+          ],
+        };
       case 'other':
         return { resolvedAt: { not: null }, inSheet: false, direction: 'CREDIT', allocations: { none: { kind: { in: ['TUITION', 'SOCIAL'] }, revokedAt: null } } };
       case 'expense':
