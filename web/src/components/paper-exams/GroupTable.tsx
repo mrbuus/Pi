@@ -285,12 +285,12 @@ function GroupSheet({ board, group, onOpen }: { board: Board; group: BoardGroup;
         <div className="space-y-6 border-t border-line px-5 py-4">
           <div>
             <h3 className="mb-3 font-bold text-brand-soft">{label.by} — гүйцэтгэл %</h3>
-            <AreaBars areas={groupBy} compare={new Map(overallBy.map((a) => [a.area, a.pct]))} compareLabel="төв" />
+            <AreaBars areas={groupBy} compare={new Map(overallBy.map((a) => [a.area, a.pct]))} compareLabel="бүх сурагчийн дундаж" />
           </div>
           {by === "topic" && group.areas.length > 1 && (
             <div>
               <h3 className="mb-3 font-bold text-brand-soft">{CLASSIFY_LABEL.area.by} — гүйцэтгэл %</h3>
-              <AreaBars areas={group.areas} compare={new Map(board.overall.areas.map((a) => [a.area, a.pct]))} compareLabel="төв" />
+              <AreaBars areas={group.areas} compare={new Map(board.overall.areas.map((a) => [a.area, a.pct]))} compareLabel="бүх сурагчийн дундаж" />
             </div>
           )}
         </div>

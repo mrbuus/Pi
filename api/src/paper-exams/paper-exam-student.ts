@@ -1,9 +1,7 @@
 /**
- * Сурагчийн нэгдсэн шалгалтын тайлбар — ЦЭВЭР (ӨС-гүй) хэсэг (эзэн 2026-11-15):
- *   - зөвхөн өөрийн хувилбар, зөвхөн АЛДСАН бодлого;
- *   - бодлогын нөхцөл, сонголт л эхэндээ; чанар, тайлбар, бодолт, зөв хариу нь
- *     шат шатаар (stage) серверээс ирнэ — хуудаснаас бүх бодолтыг шууд хуулж авахгүй;
- *   - дахин оролдоход хариуг сервер шалгана (зөв хариу клиент рүү очихгүй).
+ * Сурагчийн нэгдсэн шалгалтын «Бодлого» — ЦЭВЭР (ӨС-гүй) хэсэг (эзэн 2026-11-16):
+ *   - зөвхөн ӨӨРИЙН өгсөн хувилбарын бодлого, тайлбар, бодолт (нөгөө хувилбарынх очихгүй);
+ *   - бодлого бүрт өөрийнх нь зөв/алдсан — бусад сурагчийн гүйцэтгэлийн хувь очихгүй.
  */
 import type { GuideContent } from './paper-exam-guide';
 import type { ItemStatus, PaperItem } from './paper-exam-logic';
@@ -31,8 +29,11 @@ export function isMissed(row: GuideRow, items: PaperItem[], statuses: ItemStatus
   });
 }
 
-/** Эхний харагдац: нөхцөл, сонголт, нүднүүдийн нэр — зөв хариу, бодолтгүй */
-export function publicGuide(row: GuideRow) {
+/**
+ * Сурагчид очих бодлого (эзэн 2026-11-16: өөрийн хувилбарын тайлбар, бодолт, зөв хариу
+ * шууд нээлттэй). Талбаруудыг ил жагсаана — санд нэмэгдсэн өөр талбар дагаж гарахгүй.
+ */
+export function studentGuide(row: GuideRow): GuideRow {
   const c = row.content;
   return {
     label: row.label,
@@ -43,48 +44,14 @@ export function publicGuide(row: GuideRow) {
       statement: c.statement,
       image: c.image,
       choices: c.choices,
-      fields: c.fields?.map((f) => ({ key: f.key, part: f.part })),
-      parts: c.parts,
+      answer: c.answer,
+      fields: c.fields?.map((f) => ({ key: f.key, value: f.value, part: f.part })),
+      parts: c.parts?.map((p) => ({ points: p.points })),
+      rule: c.rule,
+      easy: c.easy,
+      refs: c.refs.map((r) => ({ chapter: r.chapter, test: r.test, number: r.number, text: r.text })),
+      steps: c.steps,
       topic: c.topic,
-      stepCount: c.steps.length,
     },
   };
-}
-
-/**
- * Шат: 1 — ашиглагдах чанар, 2 — энгийнээр, 3 — 100x100-ын төстэй бодлого,
- * 3+k — бодолтын эхний k алхам; бүх алхам нээгдсэн үед зөв хариу.
- */
-export function guideStage(row: GuideRow, stage: number) {
-  const c = row.content;
-  const s = Math.max(0, Math.min(Math.floor(stage), 3 + c.steps.length));
-  const steps = Math.max(0, s - 3);
-  const done = steps >= c.steps.length;
-  return {
-    stage: s,
-    rule: s >= 1 ? c.rule : undefined,
-    easy: s >= 2 ? c.easy : undefined,
-    refs: s >= 3 ? c.refs : undefined,
-    steps: steps > 0 ? c.steps.slice(0, steps) : undefined,
-    answer: done && c.kind === 'choice' ? c.answer : undefined,
-    fields: done && c.kind === 'fill' ? c.fields : undefined,
-  };
-}
-
-/** Дахин оролдлого: сонгох бол үсэг, нөхөх бол {нүд: цифр}; нөхөхөд хэсэг бүрийн зөв эсэх */
-export function checkGuide(
-  row: GuideRow,
-  answer: unknown,
-): { correct: boolean; parts?: boolean[] } {
-  const c = row.content;
-  if (c.kind === 'choice') {
-    return { correct: typeof answer === 'string' && answer.trim().toUpperCase() === c.answer };
-  }
-  const given = answer && typeof answer === 'object' ? (answer as Record<string, unknown>) : {};
-  const parts = (c.parts ?? []).map((_, part) =>
-    (c.fields ?? [])
-      .filter((f) => f.part === part)
-      .every((f) => String(given[f.key] ?? '').trim() === f.value),
-  );
-  return { correct: parts.length > 0 && parts.every(Boolean), parts };
 }

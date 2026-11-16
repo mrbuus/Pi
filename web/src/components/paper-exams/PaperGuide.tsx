@@ -10,7 +10,7 @@ import { ErrorState } from "@/components/ui/StateBlock";
 import { SkeletonRows } from "@/components/ui/Skeleton";
 import { errorText } from "@/components/exams/types";
 import { cn } from "@/lib/cn";
-import { STATUS_LABEL, TONE_CELL, toneOf, type GuideContent, type GuideEntry, type MyPaperDetail, type MyPaperGuide } from "./types";
+import { STATUS_LABEL, TONE_CELL, toneOf, type GuideContent, type GuideEntry, type GuideMark, type MyPaperDetail, type MyPaperGuide } from "./types";
 
 type MyItem = MyPaperDetail["me"]["items"][number];
 /** Нэг бодлогын нээсэн шат: stage = нээсэн санамж (0–3), step = нээсэн бодолтын алхам */
@@ -116,7 +116,10 @@ export default function PaperGuide({
   onOpen,
   editor,
   stats,
+  path,
 }: {
+  /** Сурагч: өөрийн хувилбарын бодлогууд + өөрийн зөв/алдсан тэмдэг ирэх зам (хувилбар сонгохгүй) */
+  path?: string;
   examId: string;
   variants: string[];
   items: MyItem[];
@@ -134,15 +137,17 @@ export default function PaperGuide({
   });
   const [guides, setGuides] = useState<Record<string, GuideEntry[]>>({});
   const [error, setError] = useState("");
+  const [marks, setMarks] = useState<MyPaperGuide["marks"]>(undefined);
 
   const load = useCallback(() => {
-    api<MyPaperGuide>(`/paper-exams/${encodeURIComponent(examId)}/guide?variant=${encodeURIComponent(variant)}`)
+    api<MyPaperGuide>(path ?? `/paper-exams/${encodeURIComponent(examId)}/guide?variant=${encodeURIComponent(variant)}`)
       .then((g) => {
         setError("");
-        setGuides((prev) => ({ ...prev, [g.variant]: g.entries }));
+        setMarks(g.marks);
+        setGuides((prev) => ({ ...prev, [path ? variant : g.variant]: g.entries }));
       })
       .catch((e) => setError(errorText(e, "Тайлбарыг ачаалж чадсангүй")));
-  }, [examId, variant]);
+  }, [examId, variant, path]);
   useEffect(() => {
     if (!guides[variant]) load();
   }, [guides, variant, load]);
@@ -183,7 +188,7 @@ export default function PaperGuide({
       ) : !entries ? (
         <SkeletonRows rows={5} />
       ) : (
-        <GuideBody key={variant} storeKey={`paper-guide:${examId}:${variant}`} entries={entries} items={items} open={open} onOpen={onOpen} editor={editor} stats={stats} />
+        <GuideBody key={variant} storeKey={`paper-guide:${examId}:${variant}`} entries={entries} items={items} open={open} onOpen={onOpen} editor={editor} stats={stats} marks={marks} />
       )}
     </div>
   );
@@ -197,7 +202,9 @@ function GuideBody({
   onOpen,
   editor,
   stats,
+  marks,
 }: {
+  marks?: MyPaperGuide["marks"];
   stats?: Record<string, number | null>;
   storeKey: string;
   entries: GuideEntry[];
@@ -225,6 +232,13 @@ function GuideBody({
   };
 
   if (current < 0) {
+    if (entries.length === 0) {
+      return (
+        <Card>
+          <p className="text-sm text-ink-dim">Бодлогын тайлбар хараахан ороогүй байна</p>
+        </Card>
+      );
+    }
     const groups = [
       { title: "Сонгох даалгавар", list: entries.filter((e) => e.content.kind === "choice") },
       { title: "Нөхөх даалгавар", list: entries.filter((e) => e.content.kind === "fill") },
@@ -235,19 +249,21 @@ function GuideBody({
           <ListChecks className="size-5" aria-hidden /> Бодлого бүрээр
         </h2>
         <p className="mb-4 text-sm text-ink-dim">
-          {stats
-            ? "Бодлого бүрийн сэдэв, оноо, төвийн зөв бодсон хувь. Дарж тайлбар, бодолтыг үзнэ"
+          {marks
+            ? "Таны өгсөн хувилбарын бодлогууд. Бодлогоо дарж тайлбар, бодолтыг үзнэ"
+            : stats
+            ? "Бодлого бүрийн сэдэв, оноо, бүх сурагчийн хэдэн хувь нь зөв бодсон. Дарж тайлбар, бодолтыг үзнэ"
             : "Бодлогоо дарж санамж, томьёо, бодолтыг шат шатаар нээнэ. Ногоон хүрээтэй цагаан нь санамж аваад зассан бодлого"}
         </p>
         <div className="space-y-5">
           {groups.map((g) => (
             <section key={g.title}>
               {groups.length > 1 && <h3 className="mb-2 text-sm font-bold text-ink">{g.title}</h3>}
-              {stats ? (
+              {stats || marks ? (
                 <ol className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                   {g.list.map((e) => (
                     <li key={shownLabel(e.label)}>
-                      <ProblemCard entry={e} pct={stats[e.label] ?? null} onOpen={() => onOpen(e.label)} />
+                      <ProblemCard entry={e} pct={stats?.[e.label] ?? null} mark={marks ? (marks[e.label] ?? null) : undefined} onOpen={() => onOpen(e.label)} />
                     </li>
                   ))}
                 </ol>
@@ -546,7 +562,23 @@ function GuideProblem({
  * Ажилтны жагсаалтын карт: дугаар, оноо, төвийн зөв %, сэдэв, нөхцөлийн эхний мөр —
  * дарахаас өмнө бодлогыг ойлгохуйц (эзэн 2026-11-15).
  */
-function ProblemCard({ entry, pct, onOpen }: { entry: GuideEntry; pct: number | null; onOpen: () => void }) {
+const MARK: Record<GuideMark, [string, string]> = {
+  CORRECT: ["Зөв", "bg-success/15 text-success"],
+  MISSED: ["Алдсан", "bg-error/12 text-error"],
+  UNGRADED: [STATUS_LABEL.UNGRADED, "bg-line text-ink-dim"],
+};
+function ProblemCard({
+  entry,
+  pct,
+  mark,
+  onOpen,
+}: {
+  entry: GuideEntry;
+  pct: number | null;
+  /** Сурагчид: хувийн оронд өөрийнх нь зөв/алдсан (undefined = ажилтны харагдац) */
+  mark?: GuideMark | null;
+  onOpen: () => void;
+}) {
   const c = entry.content;
   return (
     <button
@@ -556,12 +588,18 @@ function ProblemCard({ entry, pct, onOpen }: { entry: GuideEntry; pct: number | 
       <span className="flex items-center gap-2">
         <span className="font-display text-lg font-bold tabular-nums text-ink">{shownLabel(entry.label)}</span>
         <span className="text-xs text-ink-dim">{c.points} оноо</span>
-        <span
-          className={cn("ml-auto inline-flex h-7 min-w-12 items-center justify-center rounded-lg px-2 text-xs font-bold tabular-nums", TONE_CELL[toneOf(pct)])}
-          title="Төвийн зөв бодсон хувь"
-        >
-          {pct === null ? "" : `${pct}%`}
-        </span>
+        {mark !== undefined ? (
+          mark && (
+            <span className={cn("ml-auto inline-flex h-7 items-center justify-center rounded-lg px-2 text-xs font-bold", MARK[mark][1])}>{MARK[mark][0]}</span>
+          )
+        ) : (
+          <span
+            className={cn("ml-auto inline-flex h-7 min-w-12 items-center justify-center rounded-lg px-2 text-xs font-bold tabular-nums", TONE_CELL[toneOf(pct)])}
+            title="Бүх сурагчийн хэдэн хувь нь зөв бодсон"
+          >
+            {pct === null ? "" : `${pct}%`}
+          </span>
+        )}
       </span>
       <span className="text-xs font-semibold text-brand-soft">{c.topic}</span>
       <span className="line-clamp-2 overflow-hidden text-sm text-ink">

@@ -195,6 +195,7 @@ export interface MyPaperDetail {
     rank: number;
     participants: number;
     group: string;
+    variant: string;
     weak: string[];
     areas: AreaScore[];
     topics: AreaScore[];
@@ -258,9 +259,12 @@ export interface GuideEntry {
   content: GuideContent;
 }
 
+export type GuideMark = "CORRECT" | "MISSED" | "UNGRADED";
 export interface MyPaperGuide {
   variant: string;
   entries: GuideEntry[];
+  /** Зөвхөн сурагчид: бодлого (label) бүрт өөрийнх нь зөв/алдсан */
+  marks?: Record<string, GuideMark>;
 }
 
 /** «2026-11-10» → «2026.11.10» (цагийн бүсгүй өдөр) */
@@ -367,42 +371,12 @@ export const CLASSIFY_LABEL: Record<ClassifyBy, { one: string; weak: string; by:
   topic: { one: "Сэдэв", weak: "Сул сэдэв", by: "Сэдвээр" },
 };
 
-/** Сурагчийн алдсан бодлого — нөхцөл, сонголт л (зөв хариу, бодолт серверээс шат шатаар) */
-export interface StudentGuideEntry {
-  label: string;
-  number: number | null;
-  content: {
-    kind: "choice" | "fill";
-    points: number;
-    statement: string[];
-    image?: string;
-    choices?: string[];
-    fields?: { key: string; part: number }[];
-    parts?: { points: number }[];
-    topic: string;
-    stepCount: number;
-  };
-}
-
-export interface StudentGuide {
-  variant: string;
-  entries: StudentGuideEntry[];
-}
-
-/** Нэг шатанд нээгдсэн хэсгүүд (paper-exam-student.ts guideStage) */
-export interface GuideStageData {
-  stage: number;
-  rule?: string[];
-  easy?: string[];
-  refs?: GuideContent["refs"];
-  steps?: string[];
-  answer?: string;
-  fields?: { key: string; value: string; part: number }[];
-}
-
 export interface PaperMaterial {
   variant: string;
   pages: string[];
+  /** Зөвхөн сурагчид: өөрийн хувилбар ба материалтай бүх хувилбар */
+  own?: string;
+  variants?: string[];
 }
 
 /**

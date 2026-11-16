@@ -13,7 +13,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
-import { LedgerBoardQueryDto, LedgerExtendDto, LedgerPayDto, LedgerSettleDto } from './dto/ledger.dto';
+import { LedgerBoardQueryDto, LedgerCycleStartDto, LedgerExtendDto, LedgerPayDto, LedgerSettleDto } from './dto/ledger.dto';
 import { FinanceCapabilityGuard } from './finance-capability.guard';
 import { PaymentsLedgerService } from './ledger.service';
 import {
@@ -32,7 +32,7 @@ interface AuthedRequest {
  * «Төлбөр» хэсгийн сарын блок (2026-10-13). Бүх зам 2+ сегменттэй тул
  * PaymentsController-ийн `payments/:id`-тэй давхцахгүй.
  * Багш+ төлбөрийг байнга удирдана (finance.manage — эзний шийдвэр 2026-10-08),
- * гэхдээ ЗӨВХӨН ТӨЛӨВ харна — мөнгөн дүнг серверээс хасна (ledger-redact.ts).
+ * мөнгөн дүнг Админтай адил харна, засна (эзэн 2026-11-16, ledger-redact.ts).
  */
 @Controller('payments/ledger')
 @UseGuards(JwtAuthGuard, RolesGuard, FinanceCapabilityGuard)
@@ -83,6 +83,13 @@ export class PaymentsLedgerController {
   @Post('student/:id/extensions')
   async extend(@Param('id') id: string, @Body() dto: LedgerExtendDto, @Req() req: AuthedRequest) {
     const res = await this.ledger.extend(id, dto, { id: req.user.userId, role: req.user.role });
+    return amountsHiddenFor(req.user.role) ? redactRowResult(res) : res;
+  }
+
+  /** Энэ жил суж эхэлсэн өдөр (сар бүрийн мөчлөг) — гараар тавих / арилгах */
+  @Post('student/:id/cycle-start')
+  async cycleStart(@Param('id') id: string, @Body() dto: LedgerCycleStartDto, @Req() req: AuthedRequest) {
+    const res = await this.ledger.setCycleStart(id, dto, { id: req.user.userId, role: req.user.role });
     return amountsHiddenFor(req.user.role) ? redactRowResult(res) : res;
   }
 

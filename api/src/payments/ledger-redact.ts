@@ -2,13 +2,13 @@ import { Role } from '../generated/prisma/enums';
 import type { LedgerRow, PaymentsLedgerService } from './ledger.service';
 
 /**
- * Багш+ (TEACHER_PLUS) төлбөрөөс ЗӨВХӨН ТӨЛӨВ харна — мөнгөн дүн серверээс
- * гарахгүй (эзний хатуу дүрэм, CLAUDE.md). Админ хэвээр. Төлөв, тоо, огноо,
- * хоцорсон хоног, амлалт, тэмдэглэл үлдэнэ; дүн бүр null болно.
+ * Төлбөрийн мөнгөн дүнг Админ ба Багш+ (TEACHER_PLUS) бүрэн харна, засна
+ * (эзний шийдвэр 2026-11-16 — өмнө нь Багш+ зөвхөн төлөв хардаг байв).
+ * Бусад role-д дүн серверээс гарахгүй: төлөв, тоо, огноо үлдэнэ, дүн бүр null.
  */
-// Зөвшөөрлийн жагсаалт: дүнг ЗӨВХӨН Админ харна, бусад бүх role (шинэ role ч) дүнгүй.
+// Зөвшөөрлийн жагсаалт: дүнг Админ, Багш+ л харна; бусад бүх role (шинэ role ч) дүнгүй.
 export const amountsHiddenFor = (role: Role | string | null | undefined): boolean =>
-  role !== Role.ADMIN;
+  role !== Role.ADMIN && role !== Role.TEACHER_PLUS;
 
 /** Дүнгүй мөр — талбарууд хэвээр, мөнгөн утга null. */
 export function redactRow(r: LedgerRow) {
@@ -23,6 +23,7 @@ export function redactRow(r: LedgerRow) {
     owedNow: null,
     remaining: null,
     credit: null,
+    summerPaid: null,
     nextDue: r.nextDue ? { ...r.nextDue, amount: null } : null,
   };
 }
@@ -83,7 +84,7 @@ export function redactRowResult<T extends { row?: LedgerRow }>(res: T) {
   return { ...res, row: res.row ? redactRow(res.row) : res.row, amountsHidden: true as const };
 }
 
-/** Ангийн самбарын сурагчийн төлбөр: Багш+-д зөвхөн төлөв (дүн null). */
+/** Ангийн самбарын сурагчийн төлбөр: Админ, Багш+ биш бол зөвхөн төлөв (дүн null). */
 export function studentPaymentView<S extends string>(
   pay: { state: S; tuitionAmount: number | null; paidThisMonth: number },
   role: Role | string | null | undefined,

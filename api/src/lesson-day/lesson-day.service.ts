@@ -43,8 +43,8 @@ const MAX_RANGE_DAYS = 186;
 const MAX_KEYS = 12;
 /** D13: нэг PDF ≤10 хуудас (хуучин хэлбэрийн ганц зураг ч зөвшөөрөгдөнө) */
 export const MAX_PAGES = 10;
-/** Онолын зураг: ≤20 хуудас (эзэн 2026-11-12); нөхөх тэмдэглэл MAX_PAGES хэвээр */
-export const THEORY_MAX_PAGES = 20;
+/** Онолын зураг: ≤10 хуудас (эзэн 2026-11-16; өмнө 20); нөхөх тэмдэглэл MAX_PAGES хэвээр */
+export const THEORY_MAX_PAGES = 10;
 const IMAGE_MIME = /^image\/(png|jpe?g|webp|gif|heic|heif)$/;
 const PDF_MIME = 'application/pdf';
 /** key → хуудасны тоо (StoredFile-ийн агуулга key-тэй хамт өөрчлөгддөггүй) */

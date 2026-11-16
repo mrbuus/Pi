@@ -9,7 +9,7 @@ export const HOMEWORK_WINDOW_DAYS = 14;
 /** Гэрийн даалгаврын дээд хуудас (эзэн) */
 export const HOMEWORK_MAX_PAGES = 15;
 /** Онолын зургийн дээд хуудас (эзэн) */
-export const THEORY_MAX_PAGES = 20;
+export const THEORY_MAX_PAGES = 10;
 /** Илгээсэн зургаа сурагч өөрөө устгах / солих хугацаа (эзэн 2026-11-12) — сервер дахин шалгана */
 export const PHOTO_EDIT_MS = 5 * 60_000;
 

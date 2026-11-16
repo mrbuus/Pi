@@ -137,6 +137,8 @@ export interface LedgerPayment {
   amount: number;
   forMonth: MonthKey | null;
   paidOn: DateKey | null;
+  /** Гүйлгээний id (сонголттой) — зуны төлбөрийг жагсаалтад тэмдэглэхэд */
+  id?: string;
 }
 
 export interface LedgerInput {
@@ -159,6 +161,61 @@ export interface LedgerInput {
   periods?: Record<MonthKey, MonthPeriod>;
   /** Сайтаас сунгасан төлөх хугацаа (сар бүрийн багц): тэр сар ба түүнээс хойших бүх сар шилжинэ */
   extensions?: { month: MonthKey; days: number }[];
+  /**
+   * Энэ хичээлийн жилд СУЖ ЭХЭЛСЭН өдөр — сайтын баталгаатай эх сурвалжаас (гараар эсвэл ирцээс;
+   * resolveCycleStart). Зөвхөн сар бүрийн багцын төлөх өдрийн гинжийг эхлүүлнэ; joinedOn (зуны
+   * дүрэм, 45 хоног) хэвээр startDate-д.
+   */
+  cycleStart?: { on: DateKey; source: 'MANUAL' | 'ATTENDANCE' } | null;
+}
+
+/** Энэ жилийн мөчлөг эхлэх өдрийн эх сурвалж (UI-д «гараар / ирцээс» гэж харуулна) */
+export type CycleStartSource = 'MANUAL' | 'ATTENDANCE' | 'JOINED' | 'DEFAULT';
+
+/** Сурагчийн ирцийн анхны бичлэгүүд (ledger-load.attendanceStartsFor) */
+export interface AttendanceStart {
+  /** Энэ жилийн хамгийн эртний ирцийн бичлэг (ямар ч төлөв) */
+  firstAny: DateKey;
+  /** Тэр бичлэгийн ангид ирц бүртгэж эхэлсэн өдөр (бүх сурагчаар) */
+  classFirst: DateKey;
+  /** Анх ирсэн (PRESENT/LATE) өдөр */
+  firstPresent: DateKey | null;
+}
+
+const yearStartOf = (year: AcademicYear): DateKey => `${year.months[0]}-01`;
+const yearEndOf = (year: AcademicYear): DateKey => {
+  const [y, m] = year.months[year.months.length - 1].split('-').map(Number);
+  return `${y}-${String(m).padStart(2, '0')}-${String(new Date(Date.UTC(y, m, 0)).getUTCDate()).padStart(2, '0')}`;
+};
+export const inYear = (d: DateKey | null | undefined, year: AcademicYear = ACADEMIC_YEAR): d is DateKey =>
+  !!d && d >= yearStartOf(year) && d <= yearEndOf(year);
+
+/**
+ * Энэ хичээлийн жилийн мөчлөг эхлэх өдөр (эзэн 2026-11-16: 9/7-нд ирж эхэлсэн хүүхдийн төлөх өдөр
+ * сар бүрийн 7). Давуу эрэмбэ:
+ *  1) MANUAL — Багш+/Админ гараар тавьсан (StudentProfile.cycleStartOn);
+ *  2) ATTENDANCE — жил эхэлснээс хойших анхны ирсэн (PRESENT/LATE) өдөр. Ирц вэбд 2026-10-23-ноос
+ *     л бүртгэгддэг тул зөвхөн хүүхдийн анхны бичлэг ТЭР АНГИД ирц бүртгэж эхэлснээс ХОЙШ байвал
+ *     итгэнэ (анги аль хэдийн бүртгэгдэж байхад шинээр гарч ирсэн). Ангийн эхний бүртгэлийн өдөр
+ *     жагсаалтад байсан хүүхэд түүнээс өмнө сууж байсан — ирц эхлэлийг нь мэдэхгүй;
+ *  3) JOINED — joinedOn энэ жилийн дотор бол;
+ *  4) DEFAULT — зун/өмнөх жилээс суусан: 1-ний өдөр (хуучин дүрэм, шийтийн хугацаа хүчинтэй).
+ */
+export function resolveCycleStart(
+  manual: DateKey | null | undefined,
+  attendance: AttendanceStart | null | undefined,
+  joinedOn: DateKey | null | undefined,
+  year: AcademicYear = ACADEMIC_YEAR,
+): { on: DateKey | null; source: CycleStartSource } {
+  if (inYear(manual, year)) return { on: manual, source: 'MANUAL' };
+  if (
+    attendance &&
+    attendance.firstAny > attendance.classFirst &&
+    inYear(attendance.firstPresent, year)
+  )
+    return { on: attendance.firstPresent, source: 'ATTENDANCE' };
+  if (inYear(joinedOn, year)) return { on: joinedOn, source: 'JOINED' };
+  return { on: null, source: 'DEFAULT' };
 }
 
 export interface MonthPeriod {
@@ -231,6 +288,10 @@ export interface LedgerResult {
   overdueDays: number;
   /** Эхнээсээ дараалан бүрэн төлсөн сүүлийн сар */
   coveredThrough: MonthKey | null;
+  /** Зуны (жил эхлэхээс өмнөх) хичээлийн төлбөр — энэ жилийн гэрээнд ороогүй */
+  summerPaid: number;
+  /** Зуны төлбөр гэж тооцсон гүйлгээний id (оролтод id байсан үед) */
+  summerPaymentIds?: string[];
 }
 
 const inRange = (n: number | null, lo: number, hi: number): n is number =>
@@ -362,6 +423,19 @@ export function activeMonths(
   return year.months.filter((m) => m >= startMonth && m <= endMonth);
 }
 
+/** Зунаас суусан сар бүрийн сурагчийн зуны сарын төлбөр (Шийдвэр 3) */
+function isSummerMonthly(
+  p: LedgerPayment,
+  kind: ResolvedPlan['kind'],
+  startDate: DateKey | null,
+  year: AcademicYear,
+): boolean {
+  const key = p.forMonth ?? (p.paidOn ? monthOf(p.paidOn) : null);
+  if (!key || kind !== 'MONTHLY') return false;
+  const startedBefore = !!startDate && monthOf(startDate) < year.months[0];
+  return startedBefore && key < year.months[0] && key >= monthOf(year.paymentsFrom);
+}
+
 /** Тухайн төлбөр энэ жилийн гэрээнд тооцогдох эсэх. */
 export function countsForYear(
   p: LedgerPayment,
@@ -422,7 +496,41 @@ export function fullYearByPayments(
   return counted.some((p) => p.amount >= tier.fullYear - tier.monthly) ? 'LATE' : null;
 }
 
+/**
+ * ══ ГОЛ ШИЙДВЭР 4: ЗУНЫ ТӨЛБӨР «ИЛҮҮ ТӨЛСӨН» БИШ (эзэн 2026-11-16) ═════════════
+ *
+ * Зунаас (joinedOn < 9/1) суусан хүүхдийн жил эхлэхээс ӨМНӨ (paidOn < 9/1) хийсэн төлбөрийг шийт
+ * «9-р сарын төлбөр» (forMonth=09) гэж бичсэн ч энэ нь зуны хичээлийнх байж болно. Бүтэн жилийн
+ * хүүхдийн зуны 350 мянга нь ихэвчлэн суудал баталгаажуулах урьдчилгаа тул бүгдийг хасвал өр
+ * үүснэ. Тиймээс зөвхөн ИЛҮҮ ТӨЛӨЛТ (credit) үүсгэж буй хэсгийг л зуны төлбөр гэж ангилна:
+ * хамгийн эртний өмнөх төлбөрөөс эхлэн, дүн нь үлдсэн илүү төлөлтөөс хэтрэхгүй бол. Ингэснээр
+ * хэзээ ч шинэ өр үүсгэхгүй, жил эхлэхээс өмнө 9-р сараа урьдчилан төлсөн бусад хүүхдэд хүрэхгүй.
+ */
 export function computeLedger(input: LedgerInput): LedgerResult {
+  const year = input.year ?? ACADEMIC_YEAR;
+  const first = computeCore(input, new Set());
+  const startedBefore = !!input.startDate && input.startDate < yearStartOf(year);
+  if (!startedBefore || first.credit <= 0 || first.plan.settled) return first;
+  const yearStart = yearStartOf(year);
+  const candidates = input.payments
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => p.paidOn && p.paidOn < yearStart && p.amount > 0)
+    .filter(({ p }) => countsForYear(p, first.plan.kind, input.startDate, year))
+    .sort((a, b) => a.p.paidOn!.localeCompare(b.p.paidOn!));
+  const skip = new Set<number>();
+  let room = first.credit;
+  for (const { p, i } of candidates) {
+    if (p.amount > room) continue;
+    skip.add(i);
+    room -= p.amount;
+  }
+  if (!skip.size) return first;
+  const again = computeCore(input, skip);
+  // Хамгаалалт: дахин тооцоход өр нэмэгдсэн бол (ийм байх ёсгүй) анхныхаар
+  return again.owedNow > first.owedNow || again.remaining > first.remaining ? first : again;
+}
+
+function computeCore(input: LedgerInput, skip: Set<number>): LedgerResult {
   const year = input.year ?? ACADEMIC_YEAR;
   let plan = resolvePlan(input.plan, input.tuitionAmount, input.tier);
   if (input.settled)
@@ -441,14 +549,23 @@ export function computeLedger(input: LedgerInput): LedgerResult {
       };
     else if (byPay === 'LATE' && plan.kind !== 'FULL_YEAR') plan = { ...plan, fullYearLate: true };
   }
-  const active = activeMonths(input.startDate, input.leftOn, year);
-  const day = pad2(cycleDay(input.startDate, year));
+  // Сар бүрийн багцад сайтын баталгаатай эхлэл (гараар / ирцээс) байвал гинж түүнээс эхэлнэ
+  const site = plan.kind === 'MONTHLY' && input.cycleStart && inYear(input.cycleStart.on, year) ? input.cycleStart.on : null;
+  const cycleFrom = site ?? input.startDate;
+  const active = activeMonths(cycleFrom, input.leftOn, year);
+  const day = pad2(cycleDay(cycleFrom, year));
   const startDue = active.length ? `${active[0]}-${day}` : null;
 
   // Энэ жилд тооцогдох төлбөр (багцын төрлөөс хамаарна)
-  const counted = input.payments.filter((p) =>
-    countsForYear(p, plan.kind, input.startDate, year),
-  );
+  const summerIdx: number[] = [];
+  const counted = input.payments.filter((p, i) => {
+    if (skip.has(i) || isSummerMonthly(p, plan.kind, input.startDate, year)) {
+      summerIdx.push(i);
+      return false;
+    }
+    return countsForYear(p, plan.kind, input.startDate, year);
+  });
+  const summer = summerIdx.map((i) => input.payments[i]);
   const paidTotal = counted.reduce((s, p) => s + Math.max(0, Math.round(p.amount)), 0);
   // Гараар бүтэн жил: гэрээ = бодит төлсөн дүн → идэвхтэй сар бүр «төлсөн»
   // (0₮ ч байж болно), илүү төлөлт ч, өр ч үгүй. Буцаалтад мөн энэ гэрээ.
@@ -462,7 +579,13 @@ export function computeLedger(input: LedgerInput): LedgerResult {
   const dues = new Map<MonthKey, { due: number; dueOn: DateKey }>();
   const periods = new Map<MonthKey, MonthPeriod & { extDays: number }>();
   if (plan.kind === 'MONTHLY') {
-    for (const [m, p] of monthlyPeriods(active, (x) => `${x}-${day}`, input.periods, input.extensions)) periods.set(m, p);
+    // Шийт ба сайтын эхлэлийн давуу байдал (эзэн 2026-11-16): сайт эхлэлийг мэдэж байгаа (гараар /
+    // ирцээс) бол шийтийн «Хугацаа»-г зөвхөн эхний сарын эхлэх өдөр нь сайтынхтай ТААРВАЛ авна
+    // (ажилтны сунгалт агуулж болно). Зөрвөл шийтийнх хуучин таамаг («09/01» гэх мэт) — бүгдийг
+    // орхиж, гинжийг сайтын эхлэлээс + сайтын сунгалтаар тооцно (сунгалт шийтийг дардагтай адил).
+    const sheet = site && input.periods?.[active[0]]?.from !== site ? {} : input.periods;
+    const firstDue = (x: MonthKey) => (site && x === active[0] ? site : `${x}-${day}`);
+    for (const [m, p] of monthlyPeriods(active, firstDue, sheet, input.extensions)) periods.set(m, p);
     for (const m of active) dues.set(m, { due: plan.fee, dueOn: periods.get(m)!.from });
   } else if (plan.kind === 'FULL_YEAR') {
     split(plan.total, active.length).forEach((d, i) =>
@@ -578,7 +701,25 @@ export function computeLedger(input: LedgerInput): LedgerResult {
     overdueDays:
       nextDue && nextDue.dueOn < input.today ? daysBetween(nextDue.dueOn, input.today) : 0,
     coveredThrough,
+    summerPaid: summer.reduce((s, p) => s + Math.max(0, Math.round(p.amount)), 0),
+    ...(summer.some((p) => p.id) ? { summerPaymentIds: summer.filter((p) => p.id).map((p) => p.id!) } : {}),
   };
+}
+
+/**
+ * «Ирээгүй» хугацаа эхэлсэн өдрийг агуулсан блокийн ДАРААГИЙН идэвхтэй сар — түүний төлөх өдөр
+ * хойшилно. Хугацаа эхний сарын эхлэлээс өмнө бол эхний сар өөрөө.
+ */
+export function gapTarget(
+  blocks: { month: MonthKey; state: string; period?: { from: DateKey; to: DateKey } }[],
+  gapFrom: DateKey,
+): MonthKey | null {
+  const live = blocks.filter((b) => b.state !== 'OFF' && b.period);
+  if (!live.length) return null;
+  if (gapFrom < live[0].period!.from) return live[0].month;
+  const i = live.findIndex((b) => gapFrom >= b.period!.from && gapFrom < b.period!.to);
+  if (i < 0) return null;
+  return live[i + 1]?.month ?? null;
 }
 
 /**
@@ -606,9 +747,12 @@ export function blockSources(
   kind: ResolvedPlan['kind'],
   startDate: DateKey | null,
   year: AcademicYear = ACADEMIC_YEAR,
+  /** computeLedger-ийн summerPaymentIds — зуны төлбөр сарыг дүүргэхгүй */
+  summerIds: string[] = [],
 ): Record<MonthKey, { paymentId: string; amount: number }[]> {
+  const summer = new Set(summerIds);
   const queue = payments
-    .filter((p) => countsForYear(p, kind, startDate, year))
+    .filter((p) => !summer.has(p.id) && countsForYear(p, kind, startDate, year))
     .map((p) => ({ id: p.id, left: Math.max(0, Math.round(p.amount)), on: p.paidOn ?? (p.forMonth ? `${p.forMonth}-01` : null) }))
     .sort((a, b) => (a.on ?? '9999').localeCompare(b.on ?? '9999'));
   const out: Record<MonthKey, { paymentId: string; amount: number }[]> = {};

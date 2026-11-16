@@ -1027,7 +1027,7 @@ export class ClassDashboardService {
           createdAt: f.createdAt.toISOString(),
           createdByName: markPlus(f.createdByName, f.createdById, flagPlus),
         })),
-        // Багш+ зөвхөн төлөв (эзний хатуу дүрэм) — дүн серверээс гарахгүй
+        // Дүнг Админ, Багш+ л харна (эзэн 2026-11-16) — бусдад серверээс гарахгүй
         payment: pay ? studentPaymentView(pay, actor.role) : null,
       };
     });

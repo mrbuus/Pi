@@ -3,14 +3,12 @@ import { Role } from '../generated/prisma/enums';
 type TuitionFields = { tuitionAgreed?: number | null; tuitionAmount?: number | null };
 
 /**
- * Мөнгөн дүнг зөвхөн Админ хардаг (payments/ledger-redact). Тиймээс Админ биш хүний (Багш+) илгээсэн
- * тохирсон (хөнгөлөлттэй) дүн `tuitionAgreed`-ийг хадгалахгүй: вэбийн багцын цонх Багш+-д үнэ
- * харагдахгүй үед `null` илгээж, Админы тавьсан хөнгөлөлтийг арилгадаг байсан (2026-11-14).
- * Мөн дүнгүй (`null`) `tuitionAmount` нь «үнэ мэдэхгүй» гэсэн утгатай тул хадгалсан дүнг хоослохгүй.
- * Багш+ тодорхой дүн (`tuitionAmount` тоо) оруулах эрх хэвээр.
+ * Төлбөрийн дүн, тохирсон (хөнгөлөлттэй) дүнг Админ ба Багш+ өөрчилнө (эзний шийдвэр 2026-11-16;
+ * өмнө нь зөвхөн Админ). Бусад role-ийн илгээсэн `tuitionAgreed`-ийг хадгалахгүй, дүнгүй (`null`)
+ * `tuitionAmount` нь «үнэ мэдэхгүй» гэсэн утгатай тул хадгалсан дүнг хоослохгүй.
  */
 export function guardTuitionFields<T extends TuitionFields>(dto: T, actorRole: Role): T {
-  if (actorRole === Role.ADMIN) return dto;
+  if (actorRole === Role.ADMIN || actorRole === Role.TEACHER_PLUS) return dto;
   const safe = { ...dto };
   delete safe.tuitionAgreed;
   if (safe.tuitionAmount == null) delete safe.tuitionAmount;

@@ -91,12 +91,18 @@ export default function WithdrawalSummary({ data }: { data: WithdrawalPreview })
             <ul className="mt-1 space-y-0.5">
               {data.payments.map((p, i) => (
                 <li key={i} className="flex justify-between tabular-nums text-ink">
-                  <span className="text-ink-dim">{p.paidOn ?? p.forMonth ?? "огноогүй"}</span>
-                  <span>{mnt(p.amount)}</span>
+                  <span className="text-ink-dim">
+                    {p.paidOn ?? p.forMonth ?? "огноогүй"}
+                    {p.summer && " (зуны хичээл)"}
+                  </span>
+                  <span className={p.summer ? "text-ink-dim line-through" : undefined}>{mnt(p.amount)}</span>
                 </li>
               ))}
             </ul>
             <p className="mt-1 text-xs text-ink-dim">Энэ жилийн гэрээнд тооцогдох нийт: {mnt(r.paid)}</p>
+            {!!data.summerPaid && (
+              <p className="mt-0.5 text-xs text-ink-dim">Зуны хичээлийн төлбөр {mnt(data.summerPaid)} энэ жилийн гэрээнд ороогүй тул буцаахгүй</p>
+            )}
           </details>
         )}
         {last && !last.full && last.counted > 0 && (

@@ -83,8 +83,13 @@ function readInfo(head: string[][]): StatementInfo {
   };
   const interval = cells.map((c) => /(\d{4}-\d{2}-\d{2})\s*-\s*(\d{4}-\d{2}-\d{2})/.exec(c)).find(Boolean);
   const printed = after('Printed Date:');
+  // Данс: «IBAN:» шошго, үгүй бол аль нэг нүдэнд «MN…» IBAN, эсвэл «Данс…» шошгын дараах 10 оронтой дугаар
+  // (2026-11-16: шинэ хэлбэрийн хуулгад «IBAN:» алга байж, данс танигдалгүй тусдаа курсор үүссэн)
+  const iban = cells.map((c) => /MN\s*\d{2}(?:\s*\d){16}/i.exec(c)?.[0]).find(Boolean);
+  const label = cells.findIndex((c) => /^(данс|дансны дугаар|account)/i.test(c) && /:?$/.test(c));
+  const plain = label >= 0 && /^\d{10}$/.test(cells[label + 1] ?? '') ? cells[label + 1] : null;
   return {
-    accountNo: after('IBAN:'),
+    accountNo: after('IBAN:') ?? (iban ? iban.replace(/\s+/g, '').toUpperCase() : null) ?? plain,
     from: interval?.[1] ?? null,
     to: interval?.[2] ?? null,
     printedOn: printed && /^\d{4}-\d{2}-\d{2}/.test(printed) ? printed.slice(0, 10) : null,

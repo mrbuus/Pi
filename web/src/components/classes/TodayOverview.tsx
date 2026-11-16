@@ -5,11 +5,12 @@ import { BadgeCheck, CalendarCheck, CalendarOff, ChevronLeft, ChevronRight, Tria
 import type { CSSProperties } from "react";
 import { useState } from "react";
 import RoomBadge from "@/components/schedule/RoomBadge";
-import { addDaysToKey, formatMinutes, todayUBKey, WEEKDAY_LABELS } from "@/components/schedule/types";
+import { addDaysToKey, formatMinutes, WEEKDAY_LABELS } from "@/components/schedule/types";
 import { useSection } from "@/components/students/progress/useSection";
 import { Meta } from "@/components/ui/Meta";
 import { SkeletonRows } from "@/components/ui/Skeleton";
 import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
+import { useUbToday } from "@/hooks/useUbToday";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { cn } from "@/lib/cn";
 
@@ -40,8 +41,14 @@ const weekday = (key: string) => WEEKDAY_LABELS[new Date(`${key}T00:00:00.000Z`)
  * даалгаврын явц — цөөн, ойлгомжтой тоо. Мөр дээр дарахад тэр ангийн самбар.
  */
 export default function TodayOverview() {
-  const [today] = useState(todayUBKey);
+  // Шөнө дунд / таб сэргээхэд шинэчлэгдэнэ; өнөөдрийг харж байсан бол шинэ өнөөдөр рүү шилжинэ
+  const today = useUbToday();
   const [date, setDate] = useState(today);
+  const [seenToday, setSeenToday] = useState(today);
+  if (seenToday !== today) {
+    setSeenToday(today);
+    if (date === seenToday) setDate(today);
+  }
   const { data, status, error, reload } = useSection<DaySummary | null>(`/attendance/day-summary?date=${date}`, null);
   const shown = data?.date === date ? data : null;
   const classes = [...(shown?.classes ?? [])].sort(

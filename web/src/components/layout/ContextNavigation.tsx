@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useSyncExternalStore } from "react";
 import { ArrowLeft, House } from "lucide-react";
 import { getPageTitle } from "@/components/nav/nav-data";
-import { homeForRole } from "@/lib/api";
+import { getRole, homeForRole } from "@/lib/api";
 
 /*
  * Буцах товч = ӨМНӨХ хуудас руу (эзэн 2026-10-18: «Ангиуд → ... → буцах нь шууд
@@ -92,6 +92,33 @@ export default function ContextNavigation({ role, pathname }: { role: string; pa
   return (
     <Link href={parent} aria-label={label} title={label} className={BTN}>
       <ArrowLeft className="h-4 w-4" aria-hidden />
+    </Link>
+  );
+}
+
+/**
+ * Хуудсан доторх «← Ангиуд» маягийн буцах холбоос. Өмнө нь тогтмол эцэг хуудас руу
+ * очдог байсан тул «Номын мөнгө → анги → буцах» нь Ангиуд руу гардаг байв (эзэн 2026-11-16).
+ * Одоо дээд буцах товчтой ижил: өмнөх хуудас байвал тийш нь (нэрийг нь харуулна),
+ * байхгүй бол (шууд линкээр нээсэн) `href` руу.
+ */
+export function BackLink({ href, label, className }: { href: string; label: string; className?: string }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const previous = useSyncExternalStore(subscribe, () => previousOf(pathname), () => null);
+  const cls = className ?? "inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
+  if (previous) {
+    const same = previous.split("?")[0] === href.split(/[?#]/)[0];
+    const text = same ? label : getPageTitle(getRole(), previous) || "Буцах";
+    return (
+      <button type="button" onClick={() => router.back()} className={cls}>
+        <ArrowLeft className="h-4 w-4" aria-hidden /> {text}
+      </button>
+    );
+  }
+  return (
+    <Link href={href} className={cls}>
+      <ArrowLeft className="h-4 w-4" aria-hidden /> {label}
     </Link>
   );
 }

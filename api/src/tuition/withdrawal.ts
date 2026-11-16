@@ -99,6 +99,28 @@ export function addMonths(d: DateKey, n: number): DateKey {
   return `${yy}-${pad2(mm)}-${pad2(Math.min(day, last))}`;
 }
 
+/**
+ * Тооцоо эхлэх анхдагч өдөр (мөчлөгийн эхлэл) — Төлбөр хэсгийн ledger-тэй ИЖИЛ (эзэн 2026-11-16).
+ *  - Сар бүр төлөгч: ledger-ийн энэ жилийн мөчлөг эхлэх өдөр (resolveCycleStart: гараар > ирц >
+ *    joinedOn жилийн дотор) → мөчлөг 9/7–10/6, 10/7–11/6 гэх мэт. Мэдэгдэхгүй (зун/өмнөх жилээс
+ *    суусан) бол 9/1. Зуны төлбөр энэ жилийн гэрээнд тооцогдохгүй тул зуныг хэзээ ч оруулахгүй.
+ *  - Бусад (бүтэн жил г.м.): энэ жилийн гэрээнд (paymentsFrom-оос хойш) орсон бол joinedOn,
+ *    хуучин сурагч эсвэл огноогүй бол 9/1.
+ */
+export function defaultCountFrom(input: {
+  kind: string;
+  startDate: DateKey | null;
+  /** ledger-ийн resolveCycleStart(...).on (сар бүрийн багцад л хэрэглэнэ) */
+  cycleStart: DateKey | null;
+  yearStart: DateKey;
+  paymentsFrom: DateKey;
+}): DateKey {
+  const { kind, startDate, cycleStart, yearStart, paymentsFrom } = input;
+  if (kind === 'MONTHLY') return cycleStart && cycleStart >= yearStart ? cycleStart : yearStart;
+  if (!startDate || startDate < paymentsFrom) return yearStart;
+  return startDate;
+}
+
 export function computeWithdrawal(input: WithdrawalInput): WithdrawalResult {
   const fee = Math.max(0, Math.round(input.monthlyFee));
   const lpm = Math.max(1, Math.round(input.lessonsPerMonth));

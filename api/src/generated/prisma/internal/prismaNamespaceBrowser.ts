@@ -338,6 +338,7 @@ export const StudentProfileScalarFieldEnum = {
   tuitionNote: 'tuitionNote',
   joinedOn: 'joinedOn',
   leftOn: 'leftOn',
+  cycleStartOn: 'cycleStartOn',
   approvalPending: 'approvalPending',
   approvedAt: 'approvedAt',
   approvedById: 'approvedById'
@@ -1178,6 +1179,8 @@ export const TuitionExtensionScalarFieldEnum = {
   month: 'month',
   days: 'days',
   reason: 'reason',
+  gapFrom: 'gapFrom',
+  gapTo: 'gapTo',
   createdById: 'createdById',
   createdAt: 'createdAt',
   deletedAt: 'deletedAt',

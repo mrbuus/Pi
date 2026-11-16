@@ -19,6 +19,9 @@ import {
   promiseState,
   tierFor,
   todayKeyUB,
+  gapTarget,
+  inYear,
+  type CycleStartSource,
   type DateKey,
   type LedgerResult,
   type MonthKey,
@@ -27,9 +30,17 @@ import {
 import { withPlus } from '../revisions/revision-snapshot';
 import { AuditService } from '../audit/audit.service';
 import { PaymentsService, type PaymentActor } from './payments.service';
-import { classDays, extensionsFor, primaryEnrollment, settlements, sheetPeriodsFor } from './ledger-load';
+import {
+  classDays,
+  cycleStartsFor,
+  extensionsFor,
+  primaryEnrollment,
+  settlements,
+  sheetPeriodsFor,
+  siteCycleStart,
+} from './ledger-load';
 import type { CreatePaymentDto } from './dto/payment.dto';
-import type { LedgerExtendDto, LedgerPayDto, LedgerSettleDto } from './dto/ledger.dto';
+import type { LedgerCycleStartDto, LedgerExtendDto, LedgerPayDto, LedgerSettleDto } from './dto/ledger.dto';
 
 /** Төлбөрийн хэсгийн нэг сурагчийн мөр — блок, өр, тэмдэглэл, амлалт. */
 export interface LedgerRow extends Omit<LedgerResult, 'plan'> {
@@ -42,6 +53,8 @@ export interface LedgerRow extends Omit<LedgerResult, 'plan'> {
   plan: LedgerResult['plan'] & { raw: string | null };
   startDate: DateKey | null;
   leftOn: DateKey | null;
+  /** Энэ жилийн мөчлөг эхлэх өдөр ба эх сурвалж (гараар / ирцээс / бүртгэлээс / 1-ний өдөр) */
+  cycleStart: { on: DateKey | null; source: CycleStartSource };
   notes: {
     count: number;
     last: { body: string; authorName: string | null; at: string } | null;
@@ -67,6 +80,7 @@ const STUDENT_SELECT = {
       tuitionAgreed: true,
       joinedOn: true,
       leftOn: true,
+      cycleStartOn: true,
     },
   },
   enrollments: {
@@ -130,6 +144,7 @@ export class PaymentsLedgerService {
           storePurchaseId: null,
         },
         select: {
+          id: true,
           userId: true,
           amount: true,
           forMonth: true,
@@ -155,7 +170,14 @@ export class PaymentsLedgerService {
       ),
       settlements(this.prisma, ids),
     ]);
-    const [extensions, sheetPeriods] = await Promise.all([extensionsFor(this.prisma, ids), sheetPeriodsFor(this.prisma, ids)]);
+    const [extensions, sheetPeriods, cycles] = await Promise.all([
+      extensionsFor(this.prisma, ids),
+      sheetPeriodsFor(this.prisma, ids),
+      cycleStartsFor(
+        this.prisma,
+        users.map((u) => ({ id: u.id, cycleStartOn: u.studentProfile?.cycleStartOn, joinedOn: u.studentProfile?.joinedOn })),
+      ),
+    ]);
     const authors = new Map(
       (
         await this.prisma.user.findMany({
@@ -184,16 +206,19 @@ export class PaymentsLedgerService {
       const mine = payBy.get(u.id) ?? [];
       const startDate = dateKey(profile?.joinedOn);
       const leftOn = dateKey(profile?.leftOn);
+      const cycleStart = cycles.get(u.id) ?? { on: null, source: 'DEFAULT' as const };
       const { plan, ...ledger } = computeLedger({
         plan: profile?.tuitionPlan ?? null,
         tuitionAmount: profile?.tuitionAmount ?? null,
         agreed: profile?.tuitionAgreed ?? null,
         periods: sheetPeriods.get(u.id),
         extensions: extensions.get(u.id),
+        cycleStart: siteCycleStart(cycleStart),
         tier: tierFor(profile?.grade, classroom?.name, classroom ? days.get(classroom.id) : null).tier,
         startDate,
         leftOn,
         payments: mine.map((p) => ({
+          id: p.id,
           amount: p.amount,
           forMonth: p.forMonth,
           paidOn: dateKey(p.paidAt),
@@ -227,6 +252,7 @@ export class PaymentsLedgerService {
         plan: { ...plan, raw: profile?.tuitionPlan ?? null },
         startDate,
         leftOn,
+        cycleStart,
         ...ledger,
         notes: {
           count: myNotes.length,
@@ -533,11 +559,23 @@ export class PaymentsLedgerService {
         .map((p) => ({ id: p.id, amount: p.amount, forMonth: p.forMonth, paidOn: dateKey(p.paidAt) })),
       row.plan.kind,
       row.startDate,
+      ACADEMIC_YEAR,
+      row.summerPaymentIds ?? [],
     );
+    const summer = new Set(row.summerPaymentIds ?? []);
     return {
       sources,
       /** Сунгалт (сар бүрийн багц) — шалтгаан, хэн, хэзээ */
-      extensions: exts.map((e) => ({ id: e.id, month: e.month, days: e.days, reason: e.reason, at: e.createdAt, authorName: people.get(e.createdById) ?? null })),
+      extensions: exts.map((e) => ({
+        id: e.id,
+        month: e.month,
+        days: e.days,
+        reason: e.reason,
+        gapFrom: dateKey(e.gapFrom),
+        gapTo: dateKey(e.gapTo),
+        at: e.createdAt,
+        authorName: people.get(e.createdById) ?? null,
+      })),
       year: this.yearView(),
       today,
       month: this.currentMonth(today),
@@ -554,6 +592,8 @@ export class PaymentsLedgerService {
       profile,
       payments: payments.map(({ confirmedById, ...p }) => ({
         ...p,
+        /** Зуны (жил эхлэхээс өмнөх) хичээлийн төлбөр — энэ жилийн гэрээнд ороогүй */
+        ...(summer.has(p.id) ? { summer: true as const } : {}),
         confirmedBy: confirmedById ? (people.get(confirmedById) ?? null) : null,
       })),
       notes: notes.map((n) => ({
@@ -667,10 +707,33 @@ export class PaymentsLedgerService {
     const [row] = await this.rows({ id: studentId });
     if (!row) throw new NotFoundException('Сурагч олдсонгүй');
     if (row.plan.kind !== 'MONTHLY') throw new BadRequestException('Хугацаа сунгах нь зөвхөн сар бүр төлдөг сурагчид');
-    if (!row.blocks.some((b) => b.month === dto.month && b.state !== 'OFF'))
+    let month = dto.month;
+    let days = dto.days;
+    let gap: { from: DateKey; to: DateKey } | null = null;
+    if (dto.gapFrom || dto.gapTo) {
+      // «Ирээгүй X–Y» (эзэн 2026-11-16): хоног = Y − X + 1; тэр хугацааг агуулсан сарын ДАРААГИЙН
+      // сарын төлөх өдөр (= энэ сарын дуусах өдөр) хойшилно, түүнээс хойших бүх сар дагана.
+      if (!dto.gapFrom || !dto.gapTo || dto.gapTo < dto.gapFrom)
+        throw new BadRequestException('Ирээгүй хугацааны эхлэх, дуусах өдрийг зөв оруулна уу');
+      const target = gapTarget(row.blocks, dto.gapFrom);
+      if (!target) throw new BadRequestException('Энэ хугацааны дараа шилжих сар алга (жилийн сүүлийн сар)');
+      month = target;
+      days = Math.round((Date.parse(`${dto.gapTo}T00:00:00Z`) - Date.parse(`${dto.gapFrom}T00:00:00Z`)) / 86_400_000) + 1;
+      if (days > 365) throw new BadRequestException('Хугацаа хэт урт байна');
+      gap = { from: dto.gapFrom, to: dto.gapTo };
+    }
+    if (!month || !days) throw new BadRequestException('Сар, хоног эсвэл ирээгүй хугацаагаа оруулна уу');
+    if (!row.blocks.some((b) => b.month === month && b.state !== 'OFF'))
       throw new BadRequestException('Энэ сар сурагчийн суусан хугацаанд ороогүй');
     const created = await this.prisma.tuitionExtension.create({
-      data: { studentId, month: dto.month, days: dto.days, reason: dto.reason.trim(), createdById: actor.id },
+      data: {
+        studentId,
+        month,
+        days,
+        reason: dto.reason.trim(),
+        ...(gap ? { gapFrom: new Date(`${gap.from}T00:00:00Z`), gapTo: new Date(`${gap.to}T00:00:00Z`) } : {}),
+        createdById: actor.id,
+      },
     });
     await this.audit.record({
       actorId: actor.id,
@@ -683,6 +746,41 @@ export class PaymentsLedgerService {
     });
     const [after] = await this.rows({ id: studentId });
     return { row: after };
+  }
+
+  /**
+   * Энэ хичээлийн жилд суж эхэлсэн өдөр (эзэн 2026-11-16) — сар бүрийн төлбөрийн мөчлөг үүнээс
+   * (9/7 → сар бүрийн 7-нд). null = гараар тавьсныг арилгаж ирц/бүртгэлийн автомат утга руу буцах.
+   * joinedOn-д хүрэхгүй (зуны дүрэм, 45 хоног түүгээр). Өөрчлөлт бүр AuditLog-д.
+   */
+  async setCycleStart(studentId: string, dto: LedgerCycleStartDto, actor: PaymentActor) {
+    const on = dto.on ?? null;
+    if (on && !inYear(on))
+      throw new BadRequestException('Өдөр энэ хичээлийн жилийн дотор байх ёстой (9-р сарын 1-нээс)');
+    const student = await this.prisma.user.findFirst({
+      where: { AND: [this.baseWhere(), { id: studentId }] },
+      select: { id: true, studentProfile: { select: { userId: true, cycleStartOn: true } } },
+    });
+    if (!student?.studentProfile) throw new NotFoundException('Сурагч олдсонгүй');
+    const before = dateKey(student.studentProfile.cycleStartOn);
+    if (before !== on) {
+      await this.prisma.studentProfile.update({
+        where: { userId: studentId },
+        data: { cycleStartOn: on ? new Date(`${on}T00:00:00Z`) : null },
+      });
+      await this.audit.record({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: 'CYCLE_START',
+        entity: 'StudentProfile',
+        entityId: studentId,
+        before: { studentId, cycleStartOn: before },
+        after: { studentId, cycleStartOn: on },
+        reason: dto.note?.trim() || (on ? 'Энэ жил суж эхэлсэн өдөр (гараар)' : 'Гараар тавьсныг арилгасан'),
+      });
+    }
+    const [row] = await this.rows({ id: studentId });
+    return { row };
   }
 
   async unextend(studentId: string, extId: string, actor: PaymentActor) {
@@ -706,3 +804,4 @@ export class PaymentsLedgerService {
     return { row };
   }
 }
+

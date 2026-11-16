@@ -69,6 +69,12 @@ export function monthDay(d: Date | null): string | null {
   return `${mm}/${dd}`;
 }
 
+/** «12-4 (Баруун 4)» → «12-4» (бүртгэлийн «с.т анги» баганын хэлбэр) */
+export function shortClassName(name: string | null | undefined): string | null {
+  const s = name?.replace(/\s*\(.*\)\s*$/, '').trim();
+  return s || null;
+}
+
 const gradeText = (g: number | null) => (g ? `${g}-р анги` : null);
 
 /** «12-4» < «12-10»: ангийн шошгыг тоогоор эрэмбэлнэ */

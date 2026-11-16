@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 
 import RoomBadge from "@/components/schedule/RoomBadge";
 import { ErrorState } from "@/components/ui/StateBlock";
 import { usePresence } from "@/hooks/usePresence";
+import { useUbToday } from "@/hooks/useUbToday";
 import { api, ApiError, getRole } from "@/lib/api";
 import { byFirstName, rosterNames } from "@/lib/personName";
 import ClassPicker from "./ClassPicker";
@@ -38,7 +39,6 @@ import {
   shortDay,
   toKey,
   ubNowMinute,
-  ubTodayKey,
   writeStore,
   type AttendanceStatus,
   type DayClass,
@@ -61,6 +61,25 @@ interface DayPayload {
 export interface BoardLink {
   classId: string | null;
   date: string | null;
+}
+
+/**
+ * `?date=`-ийг зөвхөн апп доторх холбоосоор (зөөлөн шилжилт, жишээ нь «Ангиуд → Өнөөдөр»)
+ * ирсэн үед дагана. Хуудсыг яг тэр огноотой URL-ээр бүтэн ачаалсан бол (хуучин хавчуурга, нүүр
+ * дэлгэцийн дүрс, хөтчийн түүх, дахин ачаалах, таб сэргээх) — өнөөдөр.
+ */
+function linkDate(date: string | null): string | null {
+  if (!date) return null;
+  try {
+    const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    if (nav) {
+      const loaded = new URL(nav.name);
+      if (loaded.pathname === window.location.pathname && loaded.searchParams.get("date") === date) return null;
+    }
+  } catch {
+    // алгасна
+  }
+  return date;
 }
 
 const noop = () => () => {};
@@ -96,12 +115,24 @@ export default function Board({ link }: { link: BoardLink }) {
 function BoardRoot({ link }: { link: BoardLink }) {
   const role = getRole();
   const canManage = role === "ADMIN" || role === "TEACHER_PLUS";
-  const [today] = useState(ubTodayKey);
-  const [date, setDate] = useState(() => link.date ?? today);
+  // Өнөөдөр нь шөнө дунд / таб сэргээхэд шинэчлэгдэнэ (өмнө нь mount хийсэн өдөрт гацдаг байв)
+  const today = useUbToday();
+  const [date, setDate] = useState(() => linkDate(link.date) ?? today);
   const [view, setView] = useState<YearMonth>(() => {
-    const d = fromKey(link.date ?? today);
+    const d = fromKey(date);
     return { y: d.getFullYear(), m: d.getMonth() };
   });
+  // Өдөр солигдоход (таб шөнөжин нээлттэй, утсан дээр сэргээсэн) өнөөдрийг харж байсан бол
+  // шинэ өнөөдөр рүү шилжинэ; багш өөр өдөр сонгосон бол хэвээр
+  const [seenToday, setSeenToday] = useState(today);
+  if (seenToday !== today) {
+    setSeenToday(today);
+    if (date === seenToday) {
+      const d = fromKey(today);
+      setDate(today);
+      setView({ y: d.getFullYear(), m: d.getMonth() });
+    }
+  }
   /** Багш өөрөө сонгосон анги — өдөр солиход хадгалагдана; эс бөгөөс тэр өдрийн эхний хичээл */
   const [picked, setPicked] = useState<string | null>(() => link.classId);
   const [day, setDay] = useState<DayPayload | null>(null);
@@ -152,15 +183,16 @@ function BoardRoot({ link }: { link: BoardLink }) {
 
   const cls = classes.find((c) => c.id === classId) ?? null;
 
-  // URL-ийг шинэчилнэ (дахин ачаалахад ижил анги, өдөр)
+  // URL-д ЗӨВХӨН анги үлдэнэ (дахин ачаалахад ижил анги). Өдрийг URL-д бичихгүй, ирсэн `?date=`-ийг
+  // ч арилгана: өмнө нь бичдэг байсан тул дахин ачаалах, таб/PWA сэргээх, Буцах, хөтчийн түүх,
+  // хавчуурга, нүүр дэлгэцийн дүрс бүгд хуучин өдрийг «холбоос» гэж нээдэг байв (эзэн 2026-11-16)
   useEffect(() => {
-    if (!classId) return;
-    writeStore(CLASS_KEY, classId);
+    if (classId) writeStore(CLASS_KEY, classId);
     const url = new URL(window.location.href);
-    url.searchParams.set("class", classId);
-    url.searchParams.set("date", date);
-    window.history.replaceState(window.history.state, "", url);
-  }, [classId, date]);
+    if (classId) url.searchParams.set("class", classId);
+    url.searchParams.delete("date");
+    if (url.href !== window.location.href) window.history.replaceState(window.history.state, "", url);
+  }, [classId]);
 
   // Огнооны зурвасын цэг: сонгосон ангийн хичээлтэй өдрүүд (харж буй сар ± 1 сар)
   const [lessonDays, setLessonDays] = useState<{ key: string; days: Set<string> } | null>(null);

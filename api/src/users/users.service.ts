@@ -22,7 +22,11 @@ import { parseDateOnly, todayUB } from '../common/date';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { toNationalMn } from '../notifications/phone';
 import { validatePasswordStrength } from '../auth/password-policy';
-import { buildRegistrationWorkbook, type RegistrationRow } from './registration-standard';
+import {
+  buildRegistrationWorkbook,
+  shortClassName,
+  type RegistrationRow,
+} from './registration-standard';
 import { guardTuitionFields } from './tuition-guard';
 import {
   nextSevenDigitStudentCode,
@@ -775,6 +779,12 @@ export class UsersService {
    * Эрх: сурагч бүртгэх эрхтэй ажилтан (CSV-тэй ижил).
    */
   async exportStudentsXlsx(actorId: string): Promise<Buffer> {
+    const wb = await this.registrationWorkbook(actorId);
+    return Buffer.from(await wb.xlsx.writeBuffer());
+  }
+
+  /** Бүртгэлийн стандарт табууд (эрх шалгана) — дээр нь «Бүх мэдээлэл» таб нэмэгдэнэ */
+  async registrationWorkbook(actorId: string) {
     await this.assertCentreAdmissionsStaff(actorId);
     const users = await this.prisma.user.findMany({
       where: {
@@ -786,6 +796,12 @@ export class UsersService {
         lastName: true,
         phone: true,
         archivedAt: true,
+        // «с.т анги» = сангийн ОДООГИЙН анги (эзэн 2026-11-16); ангигүй бол бүртгэлийн шошго
+        enrollments: {
+          where: { leftAt: null, classroom: { archived: false } },
+          orderBy: { joinedAt: 'desc' },
+          select: { classroom: { select: { name: true, subject: true } } },
+        },
         studentProfile: {
           select: {
             grade: true,
@@ -809,7 +825,10 @@ export class UsersService {
       fatherPhone: u.studentProfile?.fatherPhone ?? null,
       motherPhone: u.studentProfile?.motherPhone ?? null,
       school: u.studentProfile?.school ?? null,
-      section: u.studentProfile?.section ?? null,
+      section:
+        shortClassName(mainFirst(u.enrollments)[0]?.classroom.name) ??
+        u.studentProfile?.section ??
+        null,
       joinedOn: u.studentProfile?.joinedOn ?? null,
       leftOn: u.studentProfile?.leftOn ?? null,
       tuitionAmount: u.studentProfile?.tuitionAmount ?? null,
@@ -817,11 +836,10 @@ export class UsersService {
     });
     const gone = (u: (typeof users)[number]) =>
       !!u.archivedAt || !!u.studentProfile?.leftOn;
-    const wb = buildRegistrationWorkbook(
+    return buildRegistrationWorkbook(
       users.filter((u) => !gone(u)).map(toRow),
       users.filter(gone).map(toRow),
     );
-    return Buffer.from(await wb.xlsx.writeBuffer());
   }
 
   // role=STUDENT үед бүртгэлийн бүх талбар + одоогийн анги. Өмнө нь 500-аар

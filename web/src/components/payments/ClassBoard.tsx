@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { BackLink } from "@/components/layout/ContextNavigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Download, Users } from "lucide-react";
+import { Download, Users } from "lucide-react";
 import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { Button } from "@/components/ui/kit/button";
@@ -14,9 +14,12 @@ import { BlockLegend } from "./MonthBlocks";
 import { isOwed, millions, mnt, monthName } from "./ledgerFormat";
 import { downloadLedgerCsv } from "./ledgerCsv";
 import { errMsg } from "./paymentHelpers";
-import type { LedgerBoard, LedgerRow } from "./ledgerTypes";
+import type { LedgerBoard, LedgerRow, PlanKind } from "./ledgerTypes";
 
 type Filter = "all" | "owed" | "notes";
+type KindFilter = "all" | PlanKind;
+/** Багцаар ангилах (эзэн 2026-11-16): сар бүр / хагас жил (2 хувааж) / бүтэн жил */
+const KIND_LABEL: Record<PlanKind, string> = { MONTHLY: "Сар бүр", INSTALLMENT: "Хагас жил", FULL_YEAR: "Бүтэн жил" };
 
 /**
  * Нэг ангийн сурагчид — сар бүрийн блок, шүүлтүүр, блок дээр дарж бүртгэх.
@@ -26,6 +29,7 @@ export default function ClassBoard({ id, embedded = false }: { id: string; embed
   const [data, setData] = useState<LedgerBoard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
+  const [kind, setKind] = useState<KindFilter>("all");
 
   const load = useCallback(() => {
     api<LedgerBoard>(`/payments/ledger/board?classroomId=${encodeURIComponent(id)}`)
@@ -77,24 +81,34 @@ export default function ClassBoard({ id, embedded = false }: { id: string; embed
       </div>
     );
 
+  const byKind = kind === "all" ? data.rows : data.rows.filter((r) => r.plan.kind === kind);
   const rows =
     filter === "owed"
-      ? data.rows.filter(isOwed)
+      ? byKind.filter(isOwed)
       : filter === "notes"
-        ? data.rows.filter((r) => r.notes.count > 0)
-        : data.rows;
+        ? byKind.filter((r) => r.notes.count > 0)
+        : byKind;
   const chips: { key: Filter; label: string; n: number }[] = [
-    { key: "all", label: "Бүгд", n: data.rows.length },
-    { key: "owed", label: "Өртэй", n: stats.owed },
-    { key: "notes", label: "Тэмдэглэлтэй", n: stats.notes },
+    { key: "all", label: "Бүгд", n: byKind.length },
+    { key: "owed", label: "Өртэй", n: byKind.filter(isOwed).length },
+    { key: "notes", label: "Тэмдэглэлтэй", n: byKind.filter((r) => r.notes.count > 0).length },
   ];
+  const kindChips: { key: KindFilter; label: string; n: number }[] = [
+    { key: "all", label: "Бүх багц", n: data.rows.length },
+  ];
+  for (const k of ["MONTHLY", "INSTALLMENT", "FULL_YEAR"] as const) {
+    const n = data.rows.filter((r) => r.plan.kind === k).length;
+    if (n > 0) kindChips.push({ key: k, label: KIND_LABEL[k], n });
+  }
+  const chipCls = (on: boolean) =>
+    `min-h-11 rounded-xl border px-3 text-sm font-semibold transition ${
+      on ? "border-brand bg-brand-tint text-ink" : "border-line text-ink-dim hover:text-ink"
+    }`;
 
   return (
     <div className="space-y-4">
       {!embedded && (
-        <Link href="/app/payments" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand">
-          <ArrowLeft className="h-4 w-4" aria-hidden /> Төлбөр
-        </Link>
+        <BackLink href="/app/payments" label="Төлбөр" />
       )}
       <header className={`flex flex-wrap items-end justify-between gap-4 ${embedded ? "rounded-2xl border border-line bg-surface px-4 py-3" : "chunky p-4 sm:p-5"}`}>
         <div className={embedded ? "hidden" : undefined}>
@@ -123,6 +137,14 @@ export default function ClassBoard({ id, embedded = false }: { id: string; embed
         </dl>
       </header>
 
+      <div role="radiogroup" aria-label="Төлбөрийн багц" className="flex flex-wrap gap-1.5">
+        {kindChips.map((c) => (
+          <button key={c.key} type="button" role="radio" aria-checked={kind === c.key} onClick={() => setKind(c.key)} className={chipCls(kind === c.key)}>
+            {c.label} <span className="tabular-nums">{c.n}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-wrap items-center gap-2">
         <div role="radiogroup" aria-label="Шүүлтүүр" className="flex flex-wrap gap-1.5">
           {chips.map((c) => (
@@ -132,9 +154,7 @@ export default function ClassBoard({ id, embedded = false }: { id: string; embed
               role="radio"
               aria-checked={filter === c.key}
               onClick={() => setFilter(c.key)}
-              className={`min-h-11 rounded-xl border px-3 text-sm font-semibold transition ${
-                filter === c.key ? "border-brand bg-brand-tint text-ink" : "border-line text-ink-dim hover:text-ink"
-              }`}
+              className={chipCls(filter === c.key)}
             >
               {c.label} <span className="tabular-nums">{c.n}</span>
             </button>
@@ -157,7 +177,7 @@ export default function ClassBoard({ id, embedded = false }: { id: string; embed
       </div>
 
       {rows.length === 0 ? (
-        <EmptyState title={filter === "owed" ? "Өртэй сурагч алга" : "Тэмдэглэлтэй сурагч алга"} />
+        <EmptyState title={filter === "owed" ? "Өртэй сурагч алга" : filter === "notes" ? "Тэмдэглэлтэй сурагч алга" : "Энэ багцтай сурагч алга"} />
       ) : (
         <LedgerList rows={rows} year={data.year} current={data.month} onPaid={replace} />
       )}

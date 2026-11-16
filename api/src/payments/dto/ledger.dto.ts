@@ -95,22 +95,52 @@ export class LedgerSettleDto {
   note?: string;
 }
 
-/** Сар бүрийн төлбөрийн хугацаа сунгах (эзэн 2026-11-12) — хэмжээ хязгааргүй, шалтгаан заавал */
+/**
+ * Сар бүрийн төлбөрийн хугацаа сунгах (эзэн 2026-11-12) — хэмжээ хязгааргүй, шалтгаан заавал.
+ * Хоёр хэлбэр: (month + days) эсвэл «ирээгүй» хугацаа (gapFrom + gapTo, эзэн 2026-11-16) — сервер
+ * хоног, сарыг өөрөө тооцно.
+ */
 export class LedgerExtendDto {
-  @ApiProperty({ type: String, example: '2026-09' })
+  @ApiPropertyOptional({ type: String, example: '2026-09' })
+  @IsOptional()
   @Matches(/^\d{4}-(0[1-9]|1[0-2])$/, { message: 'Сар YYYY-MM хэлбэртэй байх ёстой' })
-  month: string;
+  month?: string;
 
-  @ApiProperty({ type: Number })
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1, { message: 'Сунгах хоног 1-ээс багагүй' })
   @Max(365)
-  days: number;
+  days?: number;
+
+  @ApiPropertyOptional({ type: String, example: '2026-10-10' })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Өдөр YYYY-MM-DD хэлбэртэй байх ёстой' })
+  gapFrom?: string;
+
+  @ApiPropertyOptional({ type: String, example: '2026-10-20' })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Өдөр YYYY-MM-DD хэлбэртэй байх ёстой' })
+  gapTo?: string;
 
   @ApiProperty({ type: String })
   @IsString()
   @MaxLength(300)
   @Matches(/\S/, { message: 'Шалтгаанаа бичнэ үү' })
   reason: string;
+}
+
+/** Энэ жил суж эхэлсэн өдөр (эзэн 2026-11-16); on = null бол гараар тавьсныг арилгана */
+export class LedgerCycleStartDto {
+  @ApiPropertyOptional({ type: String, nullable: true, example: '2026-09-07' })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Өдөр YYYY-MM-DD хэлбэртэй байх ёстой' })
+  on?: string | null;
+
+  @ApiPropertyOptional({ type: String })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  note?: string;
 }
