@@ -303,6 +303,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
                 <tr>
                   <th className="border-r border-line px-3 py-2">Дүн</th>
                   <th className="border-r border-line px-3 py-2">Сурагчийн код</th>
+                  <th className="border-r border-line px-3 py-2">Анги</th>
                   <th className="px-3 py-2">Байр</th>
                 </tr>
               </thead>
@@ -324,6 +325,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
                         </Badge>
                       )}
                     </td>
+                    <td className="border-r border-line px-3 py-1.5 text-ink">{r.group}</td>
                     <td className="px-3 py-1.5 tabular-nums text-ink">{r.rankLabel}</td>
                   </tr>
                 ))}
