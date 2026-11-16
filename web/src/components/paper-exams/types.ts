@@ -195,6 +195,7 @@ export interface MyPaperDetail {
     rank: number;
     participants: number;
     group: string;
+    variant: string;
     weak: string[];
     areas: AreaScore[];
     topics: AreaScore[];
@@ -258,9 +259,12 @@ export interface GuideEntry {
   content: GuideContent;
 }
 
+export type GuideMark = "CORRECT" | "MISSED" | "UNGRADED";
 export interface MyPaperGuide {
   variant: string;
   entries: GuideEntry[];
+  /** Зөвхөн сурагчид: бодлого (label) бүрт өөрийнх нь зөв/алдсан */
+  marks?: Record<string, GuideMark>;
 }
 
 /** «2026-11-10» → «2026.11.10» (цагийн бүсгүй өдөр) */
@@ -403,6 +407,9 @@ export interface GuideStageData {
 export interface PaperMaterial {
   variant: string;
   pages: string[];
+  /** Зөвхөн сурагчид: өөрийн хувилбар ба материалтай бүх хувилбар */
+  own?: string;
+  variants?: string[];
 }
 
 /**
