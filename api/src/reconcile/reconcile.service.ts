@@ -178,8 +178,9 @@ export class ReconcileService {
   private async statementAccount(read: string | null): Promise<string> {
     const known = (await this.prisma.bankCursor.findMany({ select: { accountNo: true } })).map((c) => c.accountNo);
     if (read && known.includes(read)) return read;
+    // 10 оронтой дансны дугаар = IBAN-ын сүүлийн 10 орон (MN54 0005 00 5720838844)
     const digits = read?.replace(/\D/g, '') ?? '';
-    const bySuffix = digits.length >= 8 ? known.filter((k) => k.replace(/\D/g, '').endsWith(digits) || digits.endsWith(k.replace(/\D/g, ''))) : [];
+    const bySuffix = digits.length === 10 ? known.filter((k) => /^MN\d{18}$/.test(k) && k.endsWith(digits)) : [];
     if (bySuffix.length === 1) return bySuffix[0];
     if (read) return read;
     const real = known.filter((k) => k !== 'KHAN');

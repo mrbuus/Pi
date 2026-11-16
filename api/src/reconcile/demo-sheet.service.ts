@@ -67,6 +67,8 @@ export class DemoSheetService {
     const L = LAYOUT[layout];
     const date = new Date(bookedAt.getTime() + 8 * 3_600_000).toISOString().slice(0, 10);
     const tab = `'${L.tab}'`;
+    const out: DemoSheetWrite[] = [];
+    let current: string | null = null;
     try {
       const [raw, shown] = await Promise.all([this.client.readRange(`${tab}!A1:BA`, 'UNFORMATTED_VALUE'), this.client.readRange(`${tab}!A1:BA`, 'FORMATTED_VALUE')]);
       const rows = raw.map((r, i) => r.map((v, c) => toCell(v, shown[i]?.[c])));
@@ -74,7 +76,6 @@ export class DemoSheetService {
       const cycles = L.sequential && found.length ? found.map((c, i) => ({ ...c, month: addMonths(found[0].month, i) })) : found;
       const keys = assignRowKeys(rows, 2);
       const byKey = new Map([...keys].map(([i, k]) => [k, i]));
-      const out: DemoSheetWrite[] = [];
       for (const p of parts) {
         const links = await this.prisma.sheetRow.findMany({ where: { tab: L.tab, studentId: p.studentId, goneAt: null }, select: { rowKey: true } });
         const user = await this.prisma.user.findUnique({ where: { id: p.studentId }, select: { firstName: true, lastName: true } });
@@ -109,17 +110,31 @@ export class DemoSheetService {
         const w = writeTuition(state, { amount: p.amount, date }, L.prices);
         const c = state.cycles[w.idx];
         const col = cycles[w.idx].col;
+        current = p.studentId;
         await this.client.writeValues([{ range: `${tab}!${colLetter(col)}${r}:${colLetter(col + 2)}${r}`, values: [[c.amount, c.period ?? '', c.receipts.join(', ')]] }]);
         // Дараагийн хэсэг (ах дүү ижил мөрөнд биш ч) шинэчлэгдсэн утгыг харна
         row[col] = c.amount;
         row[col + 1] = c.period;
         row[col + 2] = c.receipts.join(', ');
         out.push({ studentId: p.studentId, ok: true, cell: `${colLetter(col)}${r}`, month: c.month });
+        current = null;
       }
       return out;
     } catch (e) {
       this.logger.warn(`Шийтэд бичсэнгүй: ${e instanceof Error ? e.message : e}`);
-      return parts.map((p) => ({ studentId: p.studentId, ok: false, reason: 'Шийттэй холбогдож чадсангүй' }));
+      // Бичсэнийг хадгална; бичих үед тасарсан хүүхэд бичигдсэн байж магадгүй — дахин оролдохгүй (хүн шалгана);
+      // эхлээгүй хүүхэд — «холбогдож чадсангүй» (дахин оролдоно)
+      const done = new Set(out.map((o) => o.studentId));
+      return [
+        ...out,
+        ...parts
+          .filter((p) => !done.has(p.studentId))
+          .map((p) =>
+            p.studentId === current
+              ? { studentId: p.studentId, ok: false, reason: 'Шийтэд бичих үед тасарсан — бичигдсэн эсэхийг шалгана уу' }
+              : { studentId: p.studentId, ok: false, reason: 'Шийттэй холбогдож чадсангүй' },
+          ),
+      ];
     }
   }
 }
