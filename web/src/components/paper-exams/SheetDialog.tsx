@@ -48,7 +48,7 @@ export default function SheetDialog({
               row.code,
               `${scoreText(row.totalScore)} / ${scoreText(row.maxScore)} оноо`,
               row.pct !== null ? `${row.pct}%` : null,
-              row.rank ? `төвд ${row.rank}-р байр` : null,
+              row.rank ? `бүх сурагчаас ${row.rank}-р байр` : null,
             ]}
           />
         ) : undefined

@@ -158,7 +158,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
         <Card padding="tight" className="text-center">
           <Medal className="mx-auto mb-1 size-5 text-brand-soft" aria-hidden />
           <div className="font-display text-2xl font-bold tabular-nums text-ink">{me.pct ?? ""}%</div>
-          <div className="text-xs text-ink-dim">төвийн дундаж {data.center.avgPct ?? ""}%</div>
+          <div className="text-xs text-ink-dim">бүх сурагчийн дундаж {data.center.avgPct ?? ""}%</div>
         </Card>
         <Card padding="tight" className="text-center">
           <Trophy className="mx-auto mb-1 size-5 text-brand-soft" aria-hidden />
@@ -198,7 +198,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
             </span>
           )}
         </div>
-        <AreaBars areas={mineBy} compare={centerBy} compareLabel="төв" />
+        <AreaBars areas={mineBy} compare={centerBy} compareLabel="бүх сурагчийн дундаж" />
       </Card>
 
       {view.review.length > 0 && (
@@ -371,7 +371,7 @@ function WrongItem({ item, all, formulaBy, showTopic }: { item: MyItem; all: MyI
         </span>
         <Meta
           className="ml-auto text-xs text-ink-dim"
-          items={[showTopic ? item.topic : null, item.centerPct !== null ? `төвийн ${item.centerPct}% зөв бодсон` : null]}
+          items={[showTopic ? item.topic : null, item.centerPct !== null ? `бүх сурагчийн ${item.centerPct}% нь зөв бодсон` : null]}
         />
       </div>
       {formulas.length > 0 && (
