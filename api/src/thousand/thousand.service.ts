@@ -4,7 +4,9 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
 import { Prisma } from '../generated/prisma/client';
 import {
   AttemptSessionStatus,
@@ -109,7 +111,17 @@ export function lockVariantA(
 
 @Injectable()
 export class ThousandService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly capabilities?: StaffCapabilityService,
+  ) {}
+
+  /** Эрхийн матриц: Админ, «Контент» эрхтэй Багш+ (анхдагч нээлттэй) */
+  private async canEditContent(userId: string, role: Role): Promise<boolean> {
+    if (role === Role.ADMIN) return true;
+    if (role !== Role.TEACHER_PLUS) return false;
+    return this.capabilities ? this.capabilities.has(userId, 'content.manage') : true;
+  }
 
   // ================= Эрхийн туслахууд =================
 
@@ -178,7 +190,7 @@ export class ThousandService {
     });
     return {
       role: 'STAFF' as const,
-      canEditContent: role === Role.ADMIN || role === Role.TEACHER_PLUS,
+      canEditContent: await this.canEditContent(userId, role),
       classrooms,
       tests: tests.map((t) => ({
         id: t.id,
@@ -511,7 +523,7 @@ export class ThousandService {
       timeLimitMin: test.timeLimitMin,
       ready: test.gradingMode === TestGradingMode.AUTO,
       price: test.price,
-      canEditContent: role === Role.ADMIN || role === Role.TEACHER_PLUS,
+      canEditContent: await this.canEditContent(userId, role),
       problems: test.problems.map((tp) => {
         const p = tp.problem;
         const g: GradableProblem = {

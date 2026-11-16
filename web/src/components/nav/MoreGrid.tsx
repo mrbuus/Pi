@@ -1,5 +1,6 @@
 "use client";
 
+import { useStaffCanFn } from "@/lib/staffCapabilities";
 import Link from "next/link";
 import MakeupNavBadge from "@/components/makeup/MakeupNavBadge";
 import { NavIcon } from "./icons";
@@ -24,7 +25,8 @@ export default function MoreGrid({
   pathname: string;
   onNavigate: () => void;
 }) {
-  const { main, groups } = getRoleNav(role);
+  const can = useStaffCanFn(role);
+  const { main, groups } = getRoleNav(role, can);
   const onBar = new Set(getBottomTabs(role).map((t) => t.href));
   const sections: Section[] = [
     { key: "main", label: null, tone: GROUP_TONE.learn, items: main },

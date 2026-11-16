@@ -1,5 +1,6 @@
 "use client";
 
+import { useStaffCanFn } from "@/lib/staffCapabilities";
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
@@ -66,7 +67,8 @@ interface SidebarProps {
 // Хувийн цэс, гарах, цагаан/хар нь баруун дээд булангийн хэрэглэгчийн цэст
 // (nav/UserMenu.tsx) шилжсэн (эзэн 2026-10-13).
 export default function Sidebar({ role, pathname, mobileOpen, onMobileOpenChange }: SidebarProps) {
-  const { home, main, groups } = getRoleNav(role);
+  const can = useStaffCanFn(role);
+  const { home, main, groups } = getRoleNav(role, can);
   const railPreference = useSyncExternalStore(subscribeRail, readRailCollapsed, getServerRailCollapsed);
   const wide = useSyncExternalStore(subscribeWide, readWide, getServerWide);
   const railCollapsed = railPreference || !wide;

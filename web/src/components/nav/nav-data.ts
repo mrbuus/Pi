@@ -1,3 +1,4 @@
+import type { StaffCapabilityId } from "@/lib/staffCapabilities";
 import type { IconName } from "./icons";
 import { SMS_ENABLED } from "@/lib/features";
 
@@ -322,8 +323,27 @@ const GROUP_ORDER: GroupKey[] = ["learn", "class", "finance", "admin", "internal
 const STAFF_GROUP_ORDER: GroupKey[] = ["class", "learn", "finance", "admin", "internal", "personal", "soon"];
 const STAFF_ROLES = new Set(["ADMIN", "TEACHER_PLUS", "TEACHER"]);
 
-export function getRoleNav(role: string | null): RoleNav {
-  const items = (role ? NAV_BY_ROLE[role] ?? [] : []).filter((i) => SMS_ENABLED || i.href !== "/app/sms");
+/**
+ * Эрхийн матриц (эзэн 2026-11-17): Багш+-ээс тухайн эрхийг хаасан бол цэсний холбоос нуугдана.
+ * Хуудас нь бүхэлдээ удирдлагын (харах ч хориотой) холбоосууд л — Хуваарь, Сурагчид зэрэг харах хуудас үлдэнэ.
+ */
+const NAV_CAPABILITY: Record<string, StaffCapabilityId> = {
+  "/app/admin/analytics": "reports.view",
+  "/app/admin/audit": "reports.view",
+  "/app/sms": "reports.view",
+  "/app/admin/reconcile": "finance.manage",
+  "/app/admin/store": "finance.manage",
+  "/app/admin/finance": "finance.manage",
+  "/app/import": "content.manage",
+  "/app/internal": "content.manage",
+  "/app/admin/sorils": "exams.manage",
+  "/app/admin/leads": "students.manage",
+};
+
+export function getRoleNav(role: string | null, can?: (cap: StaffCapabilityId) => boolean): RoleNav {
+  const items = (role ? NAV_BY_ROLE[role] ?? [] : []).filter(
+    (i) => (SMS_ENABLED || i.href !== "/app/sms") && (!can || !NAV_CAPABILITY[i.href] || can(NAV_CAPABILITY[i.href])),
+  );
   const home = items[0] ?? null;
   const flat = !!role && FLAT_ROLES.has(role);
   const main = flat ? items.slice(1).filter((i) => !i.soon) : [];

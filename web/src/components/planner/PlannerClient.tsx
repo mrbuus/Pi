@@ -1,5 +1,6 @@
 "use client";
 
+import { useStaffCan } from "@/lib/staffCapabilities";
 import { BarChart3, CalendarRange, ClipboardList, type LucideIcon } from "lucide-react";
 import { LoadingState } from "@/components/ui/StateBlock";
 import { useEffect, useState } from "react";
@@ -49,7 +50,8 @@ function buildTaskQuery(filters: TaskFilters): string {
 
 export default function PlannerClient() {
   const role = getRole();
-  const canEditAll = role === "ADMIN" || role === "TEACHER_PLUS";
+  // Эрхийн матриц: Багш+-ээс «Ажил оноох» хаасан бол үүсгэх, бүх ажлыг засах товч нуугдана
+  const canEditAll = useStaffCan("tasks.manage", role);
 
   const [me, setMe] = useState<Me | null>(null);
   const [view, setView] = useState<View>("board");

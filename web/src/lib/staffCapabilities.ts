@@ -91,3 +91,19 @@ export function useStaffCan(cap: StaffCapabilityId, role?: string | null): boole
   }, [r]);
   return staffCan(cap, r);
 }
+
+/** Олон эрхийг нэг дор (цэс) — эрх ачаалагдахад дахин зурна */
+export function useStaffCanFn(role?: string | null): (cap: StaffCapabilityId) => boolean {
+  const [, bump] = useState(0);
+  const r = role === undefined ? getRole() : role;
+  useEffect(() => {
+    if (r !== "TEACHER_PLUS") return;
+    const l = () => bump((n) => n + 1);
+    listeners.add(l);
+    void loadStaffCaps().then(l);
+    return () => {
+      listeners.delete(l);
+    };
+  }, [r]);
+  return (cap) => staffCan(cap, r);
+}
