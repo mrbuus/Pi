@@ -1468,9 +1468,24 @@ export class PaperExamsService {
         groupLabel: true,
         answers: true,
         variant: true,
-        student: { select: { studentCode: true } },
+        student: {
+          select: {
+            studentCode: true,
+            enrollments: {
+              where: { leftAt: null, classroom: { archived: false } },
+              orderBy: { joinedAt: 'desc' },
+              take: 1,
+              select: { classroom: { select: { name: true } } },
+            },
+          },
+        },
       },
     });
+    // Анги = сурагчийн одоогийн анги (файлд бичсэн биш); олдохгүй бол файлын шошго
+    const currentGroup = (s: (typeof sheets)[number]) =>
+      (s.student?.enrollments[0]?.classroom.name ?? s.groupLabel)
+        .replace(/\s*\(.*\)\s*$/, '')
+        .trim();
     const mine = sheets.find((s) => s.studentId === studentId);
     if (!mine) throw new NotFoundException('Энэ шалгалтад таны дүн алга');
     const items: PaperItem[] = exam.items;
@@ -1499,7 +1514,7 @@ export class PaperExamsService {
         rankLabel: rankText[i],
         // Жагсаалтад зөвхөн сурагчийн код (нэр харуулахгүй — эзэн 2026-11-15)
         name: x.s.student?.studentCode ?? '',
-        group: x.s.groupLabel,
+        group: currentGroup(x.s),
         totalScore: x.g.totalScore,
         maxScore: x.g.maxScore,
         isMe: x.s.id === mine.id,
@@ -1519,7 +1534,7 @@ export class PaperExamsService {
         pct: pct(me.g.totalScore, me.g.maxScore),
         rank: myRank,
         participants: graded.length,
-        group: mine.groupLabel,
+        group: currentGroup(mine),
         variant: mine.variant ?? '',
         weak: weakAreas(by === 'topic' ? myTopics : myAreas),
         areas: myAreas,
