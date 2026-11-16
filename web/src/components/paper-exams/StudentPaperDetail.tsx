@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Medal, Sigma, Target, Trophy } from "lucide-react";
 import MaterialViewer from "./MaterialViewer";
-import StudentGuide from "./StudentGuide";
+import PaperGuide from "./PaperGuide";
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
 import { Card } from "@/components/ui/Surface";
@@ -29,21 +29,14 @@ import {
 
 type Filter = "wrong" | "all";
 type Tab = "result" | "guide" | "material" | "ranking";
-// Одоохондоо сурагч өөрийн задаргаа, материал, дүнгийн жагсаалтыг харна (эзэн 2026-11-15).
-// Алдсан бодлогын тайлбарыг дараагийн ээлжид нээхдээ SHOW_GUIDE-ийг true болгоно.
-const SHOW_GUIDE = false;
-const TABS: [Tab, string][] = SHOW_GUIDE
-  ? [
-      ["result", "Задаргаа"],
-      ["guide", "Тайлбар"],
-      ["material", "Материал"],
-      ["ranking", "Жагсаалт"],
-    ]
-  : [
-      ["result", "Задаргаа"],
-      ["material", "Материал"],
-      ["ranking", "Жагсаалт"],
-    ];
+// Сурагч (эзэн 2026-11-16): задаргаа, ӨӨРИЙН хувилбарын бодлого тайлбартай (бусдын гүйцэтгэлийн
+// хувьгүй, зөвхөн өөрийн зөв/алдсан), A·B хоёр хувилбарын материал, дүнгийн жагсаалт.
+const TABS: [Tab, string][] = [
+  ["result", "Задаргаа"],
+  ["guide", "Бодлого"],
+  ["material", "Материал"],
+  ["ranking", "Жагсаалт"],
+];
 
 /** URL-ийн ?tab=&p= — хөтчийн «буцах» өмнөх таб/бодлого руу очно (эзэн 2026-11-15) */
 function readNav(): { tab: Tab; p: string | null } {
@@ -167,7 +160,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
         </Card>
       </div>
 
-      <div className={cn("grid gap-1 rounded-2xl border border-line bg-panel p-1", SHOW_GUIDE ? "grid-cols-4" : "grid-cols-3")} role="tablist" aria-label="Хэсэг">
+      <div className={cn("grid gap-1 rounded-2xl border border-line bg-panel p-1", "grid-cols-4")} role="tablist" aria-label="Хэсэг">
         {TABS.map(([t, text]) => (
           <button
             key={t}
@@ -184,7 +177,16 @@ export default function StudentPaperDetail({ id }: { id: string }) {
         ))}
       </div>
 
-      {SHOW_GUIDE && nav.tab === "guide" && <StudentGuide examId={id} open={nav.p} onOpen={(p) => go("guide", p)} />}
+      {nav.tab === "guide" && (
+        <PaperGuide
+          examId={id}
+          path={`/paper-exams/my/${encodeURIComponent(id)}/problems`}
+          variants={[me.variant]}
+          items={[]}
+          open={nav.p}
+          onOpen={(p) => go("guide", p)}
+        />
+      )}
       {nav.tab === "material" && <MaterialViewer examId={id} />}
 
       {nav.tab === "result" && (
@@ -281,11 +283,9 @@ export default function StudentPaperDetail({ id }: { id: string }) {
           </ol>
         )}
       </Card>
-      {SHOW_GUIDE && view.wrong.length > 0 && (
-        <button onClick={() => go("guide")} className="min-h-12 w-full rounded-xl bg-brand px-4 font-semibold text-on-brand">
-          Алдсан бодлогын тайлбар үзэх
-        </button>
-      )}
+      <button onClick={() => go("guide")} className="min-h-12 w-full rounded-xl bg-brand px-4 font-semibold text-on-brand">
+        Бодлогын тайлбар, бодолт үзэх
+      </button>
       </>
       )}
 

@@ -104,8 +104,19 @@ export class PaperExamsController {
 
   @Roles(Role.STUDENT)
   @Get('my/:id/material')
-  myMaterial(@Param('id') id: string, @Req() req: RequestWithUser) {
-    return this.paper.myMaterial(id, req.user.userId);
+  myMaterial(
+    @Param('id') id: string,
+    @Query('variant') variant: string | undefined,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.paper.myMaterial(id, req.user.userId, variant);
+  }
+
+  /** Өөрийн хувилбарын бүх бодлого тайлбартай + өөрийн зөв/алдсан тэмдэг */
+  @Roles(Role.STUDENT)
+  @Get('my/:id/problems')
+  myProblems(@Param('id') id: string, @Req() req: RequestWithUser) {
+    return this.paper.myProblems(id, req.user.userId);
   }
 
   /** Шалгалтын материал (ажилтан, дурын хувилбар) */

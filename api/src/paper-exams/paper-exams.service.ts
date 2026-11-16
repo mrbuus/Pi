@@ -31,6 +31,7 @@ import {
   checkGuide,
   guideStage,
   isMissed,
+  itemsOfGuide,
   publicGuide,
   type GuideRow,
 } from './paper-exam-student';
@@ -1504,6 +1505,7 @@ export class PaperExamsService {
         rank: myRank,
         participants: graded.length,
         group: mine.groupLabel,
+        variant: mine.variant ?? '',
         weak: weakAreas(by === 'topic' ? myTopics : myAreas),
         areas: myAreas,
         topics: myTopics,
@@ -1629,6 +1631,38 @@ export class PaperExamsService {
     return { variant, entries: guides.map(publicGuide) };
   }
 
+  /**
+   * Сурагчийн «Бодлого» таб (эзэн 2026-11-16): ӨӨРИЙН өгсөн хувилбарын бүх бодлого
+   * тайлбар, бодолттой нь; бодлого бүрт зөвхөн өөрийнх нь зөв/алдсан тэмдэг
+   * (бусад сурагчийн гүйцэтгэлийн хувь ирэхгүй). Нөгөө хувилбарын бодолт ирэхгүй.
+   */
+  async myProblems(examId: string, studentId: string) {
+    const sheet = await this.mySheet(examId, studentId);
+    const variant = sheet.variant ?? '';
+    const [exam, rows] = await Promise.all([
+      this.activeExam(examId),
+      this.prisma.paperExamGuide.findMany({
+        where: { examId, variant },
+        select: { label: true, number: true, content: true },
+        orderBy: { order: 'asc' },
+      }),
+    ]);
+    const items: PaperItem[] = exam.items;
+    const { statuses } = gradeSheet(answersOf(sheet.answers), items, sheet.variant);
+    const entries = rows as unknown as GuideRow[];
+    const marks: Record<string, 'CORRECT' | 'MISSED' | 'UNGRADED'> = {};
+    for (const row of entries) {
+      const own = itemsOfGuide(row, items);
+      if (own.length === 0) continue;
+      marks[row.label] = isMissed(row, items, statuses)
+        ? 'MISSED'
+        : own.every((it) => statuses[items.indexOf(it)] === 'UNGRADED')
+          ? 'UNGRADED'
+          : 'CORRECT';
+    }
+    return { variant, entries, marks };
+  }
+
   /** Нэг бодлогын санамжийн шат (1 чанар … 3+k бодолтын алхам, сүүлд хариу) */
   async myGuideStage(
     examId: string,
@@ -1677,10 +1711,25 @@ export class PaperExamsService {
     return { variant, pages };
   }
 
-  /** Сурагч — зөвхөн өөрийн хувилбарын материал */
-  async myMaterial(examId: string, studentId: string) {
+  /**
+   * Сурагч — шалгалт өгсөн бол материалын БҮХ хувилбар (эзэн 2026-11-16: A, B хоёуланг
+   * харна); хувилбар заагаагүй бол өөрийнх нь. Бодолт, тайлбар энд байхгүй — зөвхөн даалгавар.
+   */
+  async myMaterial(examId: string, studentId: string, variant?: string) {
     const sheet = await this.mySheet(examId, studentId);
-    return this.materialPages(examId, sheet.variant ?? '');
+    const own = sheet.variant ?? '';
+    const prefix = `paperexam-${examId}-`;
+    const files = await this.prisma.storedFile.findMany({
+      where: { key: { startsWith: prefix } },
+      select: { key: true },
+    });
+    const variants = [
+      ...new Set(files.map((f) => f.key.slice(prefix.length).split('-')[0])),
+    ]
+      .filter((v) => /^[A-Z]$/.test(v))
+      .sort();
+    const pick = variant && variants.includes(variant) ? variant : own;
+    return { ...(await this.materialPages(examId, pick)), own, variants };
   }
 
   /** Ажилтан — дурын хувилбар */
