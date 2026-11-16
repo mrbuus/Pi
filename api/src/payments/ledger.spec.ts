@@ -2,7 +2,10 @@ import {
   ACADEMIC_YEAR,
   PRICE_TIERS,
   amountThrough,
+  blockSources,
+  gapTarget,
   monthlyPeriods,
+  resolveCycleStart,
   plusMonth,
   computeLedger,
   promiseState,
@@ -391,5 +394,110 @@ describe('Сар бүрийн хугацаа — шийтийн хугацаа, 
     expect(after.blocks[0]).toMatchObject({ state: 'FUTURE', dueOn: '2026-09-14', period: { from: '2026-09-14', to: '2026-10-14' }, extDays: 13 });
     const full = computeLedger(base({ plan: 'FULL_YEAR', tuitionAmount: 2_500_000, extensions: [{ month: '2026-09', days: 13 }] }));
     expect(full.blocks[0].period).toBeUndefined();
+  });
+});
+
+describe('энэ жилийн мөчлөг эхлэх өдөр (эзэн 2026-11-16)', () => {
+  const summer = (over: Partial<LedgerInput>) =>
+    base({ startDate: '2026-06-17', today: '2026-11-16', ...over });
+
+  it('зунаас суусан, 9/7-нд анх ирсэн (ирцээс) → 10-р сарын төлөх өдөр 10/07', () => {
+    const cs = resolveCycleStart(null, { firstAny: '2026-09-07', classFirst: '2026-09-01', firstPresent: '2026-09-07' }, '2026-06-17');
+    expect(cs).toEqual({ on: '2026-09-07', source: 'ATTENDANCE' });
+    const r = computeLedger(summer({ cycleStart: { on: cs.on!, source: 'ATTENDANCE' } }));
+    expect(r.blocks[0].dueOn).toBe('2026-09-07');
+    expect(r.blocks[1].dueOn).toBe('2026-10-07');
+    expect(r.blocks[1].period).toEqual({ from: '2026-10-07', to: '2026-11-07' });
+  });
+
+  it('мөчлөгийн эхлэлгүй зуны сурагч → хуучнаараа 1-ний өдөр', () => {
+    const r = computeLedger(summer({}));
+    expect(r.blocks[1].dueOn).toBe('2026-10-01');
+  });
+
+  it('ирц бүртгэж эхэлсэн өдөр жагсаалтад байсан хүүхдийн ирцэд итгэхгүй (өмнөөс сууж байсан)', () => {
+    expect(resolveCycleStart(null, { firstAny: '2026-10-23', classFirst: '2026-10-23', firstPresent: '2026-10-23' }, '2026-06-17'))
+      .toEqual({ on: null, source: 'DEFAULT' });
+    expect(resolveCycleStart(null, { firstAny: '2026-10-23', classFirst: '2026-10-23', firstPresent: '2026-10-23' }, '2026-09-14'))
+      .toEqual({ on: '2026-09-14', source: 'JOINED' });
+  });
+
+  it('гараар тавьсан нь ирцээс давуу; жилээс гадуурх гар утгыг үл тооно', () => {
+    const att = { firstAny: '2026-10-25', classFirst: '2026-10-23', firstPresent: '2026-10-25' };
+    expect(resolveCycleStart('2026-09-07', att, '2026-06-17')).toEqual({ on: '2026-09-07', source: 'MANUAL' });
+    expect(resolveCycleStart('2026-08-20', att, '2026-06-17')).toEqual({ on: '2026-10-25', source: 'ATTENDANCE' });
+  });
+
+  it('гараар тавьсан эхлэл шийтийн зөрсөн хугацааг дарна; таарвал шийтийнх хэвээр', () => {
+    const periods = { '2026-09': { from: '2026-09-01', to: '2026-10-01' }, '2026-10': { from: '2026-10-01', to: '2026-11-01' } };
+    const r = computeLedger(summer({ periods, cycleStart: { on: '2026-09-07', source: 'MANUAL' } }));
+    expect(r.blocks[1].dueOn).toBe('2026-10-07');
+    const same = { '2026-09': { from: '2026-09-07', to: '2026-10-12' } };
+    const r2 = computeLedger(summer({ periods: same, cycleStart: { on: '2026-09-07', source: 'MANUAL' } }));
+    expect(r2.blocks[1].dueOn).toBe('2026-10-12');
+  });
+
+  it('10/15-нд эхэлсэн (гараар) → 9-р сар идэвхгүй, сар бүрийн 15-нд төлөх', () => {
+    const r = computeLedger(summer({ cycleStart: { on: '2026-10-15', source: 'MANUAL' } }));
+    expect(r.blocks[0].state).toBe('OFF');
+    expect(r.blocks[1].dueOn).toBe('2026-10-15');
+    expect(r.blocks[2].dueOn).toBe('2026-11-15');
+  });
+
+  it('бүтэн жилийн багцад мөчлөгийн эхлэл нөлөөлөхгүй', () => {
+    const r = computeLedger(summer({ plan: 'FULL_YEAR', cycleStart: { on: '2026-09-07', source: 'MANUAL' } }));
+    expect(r.blocks[0].dueOn).toBe('2026-09-01');
+  });
+
+  it('эхлэлийн дараах сунгалт: 10/10–10/20 ирээгүй (11 хоног) → 11-р сар 11/18, 12-р сар 12/18', () => {
+    const r = computeLedger(
+      summer({ cycleStart: { on: '2026-09-07', source: 'MANUAL' }, extensions: [{ month: '2026-11', days: 11 }] }),
+    );
+    expect(r.blocks[1].dueOn).toBe('2026-10-07');
+    expect(r.blocks[2].dueOn).toBe('2026-11-18');
+    expect(r.blocks[3].dueOn).toBe('2026-12-18');
+    expect(gapTarget(computeLedger(summer({ cycleStart: { on: '2026-09-07', source: 'MANUAL' } })).blocks, '2026-10-10')).toBe('2026-11');
+  });
+});
+
+describe('зуны төлбөр илүү төлөлт биш (эзэн 2026-11-16)', () => {
+  const ym = base({
+    plan: 'FULL_YEAR',
+    agreed: 2_000_000,
+    tier: PRICE_TIERS.g9_11,
+    today: '2026-11-16',
+    payments: [
+      { id: 'p-june', ...pay(300_000, '2026-09', '2026-06-08') },
+      { id: 'p-nov', ...pay(2_000_000, '2026-11', '2026-11-14') },
+    ],
+  });
+
+  it('зунаас суусан бол 6-р сарын 300 мянга зуны төлбөр — илүү төлсөнгүй', () => {
+    const r = computeLedger({ ...ym, startDate: '2026-06-01' });
+    expect(r.credit).toBe(0);
+    expect(r.summerPaid).toBe(300_000);
+    expect(r.summerPaymentIds).toEqual(['p-june']);
+    expect(r.paidTotal).toBe(2_000_000);
+    expect(r.blocks.every((b) => b.state === 'PAID')).toBe(true);
+    expect(blockSources(r.blocks, ym.payments as never, r.plan.kind, '2026-06-01', ACADEMIC_YEAR, r.summerPaymentIds)['2026-09'][0].paymentId).toBe('p-nov');
+  });
+
+  it('9-р сараас эхэлсэн бол хэвээр илүү төлсөн', () => {
+    const r = computeLedger({ ...ym, startDate: '2026-09-01' });
+    expect(r.credit).toBe(300_000);
+    expect(r.summerPaid).toBe(0);
+  });
+
+  it('зуны урьдчилгаа гэрээг нөхөж байвал хасахгүй (шинэ өр үүсгэхгүй)', () => {
+    const r = computeLedger(
+      base({
+        plan: 'FULL_YEAR',
+        startDate: '2026-07-01',
+        payments: [pay(350_000, '2026-09', '2026-07-01'), pay(2_150_000, '2026-09', '2026-09-20')],
+      }),
+    );
+    expect(r.owedNow).toBe(0);
+    expect(r.credit).toBe(0);
+    expect(r.summerPaid).toBe(0);
   });
 });

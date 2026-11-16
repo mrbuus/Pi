@@ -40,6 +40,8 @@ export type TuitionExtensionMinAggregateOutputType = {
   month: string | null
   days: number | null
   reason: string | null
+  gapFrom: Date | null
+  gapTo: Date | null
   createdById: string | null
   createdAt: Date | null
   deletedAt: Date | null
@@ -52,6 +54,8 @@ export type TuitionExtensionMaxAggregateOutputType = {
   month: string | null
   days: number | null
   reason: string | null
+  gapFrom: Date | null
+  gapTo: Date | null
   createdById: string | null
   createdAt: Date | null
   deletedAt: Date | null
@@ -64,6 +68,8 @@ export type TuitionExtensionCountAggregateOutputType = {
   month: number
   days: number
   reason: number
+  gapFrom: number
+  gapTo: number
   createdById: number
   createdAt: number
   deletedAt: number
@@ -86,6 +92,8 @@ export type TuitionExtensionMinAggregateInputType = {
   month?: true
   days?: true
   reason?: true
+  gapFrom?: true
+  gapTo?: true
   createdById?: true
   createdAt?: true
   deletedAt?: true
@@ -98,6 +106,8 @@ export type TuitionExtensionMaxAggregateInputType = {
   month?: true
   days?: true
   reason?: true
+  gapFrom?: true
+  gapTo?: true
   createdById?: true
   createdAt?: true
   deletedAt?: true
@@ -110,6 +120,8 @@ export type TuitionExtensionCountAggregateInputType = {
   month?: true
   days?: true
   reason?: true
+  gapFrom?: true
+  gapTo?: true
   createdById?: true
   createdAt?: true
   deletedAt?: true
@@ -209,6 +221,8 @@ export type TuitionExtensionGroupByOutputType = {
   month: string
   days: number
   reason: string
+  gapFrom: Date | null
+  gapTo: Date | null
   createdById: string
   createdAt: Date
   deletedAt: Date | null
@@ -244,6 +258,8 @@ export type TuitionExtensionWhereInput = {
   month?: Prisma.StringFilter<"TuitionExtension"> | string
   days?: Prisma.IntFilter<"TuitionExtension"> | number
   reason?: Prisma.StringFilter<"TuitionExtension"> | string
+  gapFrom?: Prisma.DateTimeNullableFilter<"TuitionExtension"> | Date | string | null
+  gapTo?: Prisma.DateTimeNullableFilter<"TuitionExtension"> | Date | string | null
   createdById?: Prisma.StringFilter<"TuitionExtension"> | string
   createdAt?: Prisma.DateTimeFilter<"TuitionExtension"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"TuitionExtension"> | Date | string | null
@@ -256,6 +272,8 @@ export type TuitionExtensionOrderByWithRelationInput = {
   month?: Prisma.SortOrder
   days?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  gapFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  gapTo?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -271,6 +289,8 @@ export type TuitionExtensionWhereUniqueInput = Prisma.AtLeast<{
   month?: Prisma.StringFilter<"TuitionExtension"> | string
   days?: Prisma.IntFilter<"TuitionExtension"> | number
   reason?: Prisma.StringFilter<"TuitionExtension"> | string
+  gapFrom?: Prisma.DateTimeNullableFilter<"TuitionExtension"> | Date | string | null
+  gapTo?: Prisma.DateTimeNullableFilter<"TuitionExtension"> | Date | string | null
   createdById?: Prisma.StringFilter<"TuitionExtension"> | string
   createdAt?: Prisma.DateTimeFilter<"TuitionExtension"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"TuitionExtension"> | Date | string | null
@@ -283,6 +303,8 @@ export type TuitionExtensionOrderByWithAggregationInput = {
   month?: Prisma.SortOrder
   days?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  gapFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  gapTo?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -303,6 +325,8 @@ export type TuitionExtensionScalarWhereWithAggregatesInput = {
   month?: Prisma.StringWithAggregatesFilter<"TuitionExtension"> | string
   days?: Prisma.IntWithAggregatesFilter<"TuitionExtension"> | number
   reason?: Prisma.StringWithAggregatesFilter<"TuitionExtension"> | string
+  gapFrom?: Prisma.DateTimeNullableWithAggregatesFilter<"TuitionExtension"> | Date | string | null
+  gapTo?: Prisma.DateTimeNullableWithAggregatesFilter<"TuitionExtension"> | Date | string | null
   createdById?: Prisma.StringWithAggregatesFilter<"TuitionExtension"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"TuitionExtension"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TuitionExtension"> | Date | string | null
@@ -315,6 +339,8 @@ export type TuitionExtensionCreateInput = {
   month: string
   days: number
   reason: string
+  gapFrom?: Date | string | null
+  gapTo?: Date | string | null
   createdById: string
   createdAt?: Date | string
   deletedAt?: Date | string | null
@@ -327,6 +353,8 @@ export type TuitionExtensionUncheckedCreateInput = {
   month: string
   days: number
   reason: string
+  gapFrom?: Date | string | null
+  gapTo?: Date | string | null
   createdById: string
   createdAt?: Date | string
   deletedAt?: Date | string | null
@@ -339,6 +367,8 @@ export type TuitionExtensionUpdateInput = {
   month?: Prisma.StringFieldUpdateOperationsInput | string
   days?: Prisma.IntFieldUpdateOperationsInput | number
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  gapFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gapTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -351,6 +381,8 @@ export type TuitionExtensionUncheckedUpdateInput = {
   month?: Prisma.StringFieldUpdateOperationsInput | string
   days?: Prisma.IntFieldUpdateOperationsInput | number
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  gapFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gapTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -363,6 +395,8 @@ export type TuitionExtensionCreateManyInput = {
   month: string
   days: number
   reason: string
+  gapFrom?: Date | string | null
+  gapTo?: Date | string | null
   createdById: string
   createdAt?: Date | string
   deletedAt?: Date | string | null
@@ -375,6 +409,8 @@ export type TuitionExtensionUpdateManyMutationInput = {
   month?: Prisma.StringFieldUpdateOperationsInput | string
   days?: Prisma.IntFieldUpdateOperationsInput | number
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  gapFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gapTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -387,6 +423,8 @@ export type TuitionExtensionUncheckedUpdateManyInput = {
   month?: Prisma.StringFieldUpdateOperationsInput | string
   days?: Prisma.IntFieldUpdateOperationsInput | number
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  gapFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gapTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -399,6 +437,8 @@ export type TuitionExtensionCountOrderByAggregateInput = {
   month?: Prisma.SortOrder
   days?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  gapFrom?: Prisma.SortOrder
+  gapTo?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -415,6 +455,8 @@ export type TuitionExtensionMaxOrderByAggregateInput = {
   month?: Prisma.SortOrder
   days?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  gapFrom?: Prisma.SortOrder
+  gapTo?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -427,6 +469,8 @@ export type TuitionExtensionMinOrderByAggregateInput = {
   month?: Prisma.SortOrder
   days?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  gapFrom?: Prisma.SortOrder
+  gapTo?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -445,6 +489,8 @@ export type TuitionExtensionSelect<ExtArgs extends runtime.Types.Extensions.Inte
   month?: boolean
   days?: boolean
   reason?: boolean
+  gapFrom?: boolean
+  gapTo?: boolean
   createdById?: boolean
   createdAt?: boolean
   deletedAt?: boolean
@@ -457,6 +503,8 @@ export type TuitionExtensionSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   month?: boolean
   days?: boolean
   reason?: boolean
+  gapFrom?: boolean
+  gapTo?: boolean
   createdById?: boolean
   createdAt?: boolean
   deletedAt?: boolean
@@ -469,6 +517,8 @@ export type TuitionExtensionSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   month?: boolean
   days?: boolean
   reason?: boolean
+  gapFrom?: boolean
+  gapTo?: boolean
   createdById?: boolean
   createdAt?: boolean
   deletedAt?: boolean
@@ -481,13 +531,15 @@ export type TuitionExtensionSelectScalar = {
   month?: boolean
   days?: boolean
   reason?: boolean
+  gapFrom?: boolean
+  gapTo?: boolean
   createdById?: boolean
   createdAt?: boolean
   deletedAt?: boolean
   deletedById?: boolean
 }
 
-export type TuitionExtensionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "month" | "days" | "reason" | "createdById" | "createdAt" | "deletedAt" | "deletedById", ExtArgs["result"]["tuitionExtension"]>
+export type TuitionExtensionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "month" | "days" | "reason" | "gapFrom" | "gapTo" | "createdById" | "createdAt" | "deletedAt" | "deletedById", ExtArgs["result"]["tuitionExtension"]>
 
 export type $TuitionExtensionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "TuitionExtension"
@@ -501,6 +553,11 @@ export type $TuitionExtensionPayload<ExtArgs extends runtime.Types.Extensions.In
     month: string
     days: number
     reason: string
+    /**
+     * * «Ирээгүй X-ээс Y хүртэл» гэж оруулсан бол тэр хугацаа (хоног = Y − X + 1)
+     */
+    gapFrom: Date | null
+    gapTo: Date | null
     createdById: string
     createdAt: Date
     deletedAt: Date | null
@@ -933,6 +990,8 @@ export interface TuitionExtensionFieldRefs {
   readonly month: Prisma.FieldRef<"TuitionExtension", 'String'>
   readonly days: Prisma.FieldRef<"TuitionExtension", 'Int'>
   readonly reason: Prisma.FieldRef<"TuitionExtension", 'String'>
+  readonly gapFrom: Prisma.FieldRef<"TuitionExtension", 'DateTime'>
+  readonly gapTo: Prisma.FieldRef<"TuitionExtension", 'DateTime'>
   readonly createdById: Prisma.FieldRef<"TuitionExtension", 'String'>
   readonly createdAt: Prisma.FieldRef<"TuitionExtension", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"TuitionExtension", 'DateTime'>

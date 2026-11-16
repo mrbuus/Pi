@@ -2,12 +2,15 @@
 // сурагчид НЭГ ДОР ачаална. Төлбөр хэсэг, ангийн самбар, буцаалт бүгд ижил
 // тооцоо харуулахын тулд нэг газраас (эзэн 2026-10-31: ангийн самбар «дутуу»
 // гэж харуулдаг байсан хүүхэд Төлбөр хэсэгт «төлсөн» байсан).
-import { PaymentStatus } from '../generated/prisma/enums';
+import { AttendanceStatus, PaymentStatus } from '../generated/prisma/enums';
 import type { PrismaService } from '../prisma/prisma.service';
 import {
   ACADEMIC_YEAR,
   computeLedger,
+  resolveCycleStart,
   tierFor,
+  type AttendanceStart,
+  type CycleStartSource,
   type DateKey,
   type LedgerResult,
   type MonthKey,
@@ -89,14 +92,84 @@ export async function settlements(
   return out;
 }
 
+/**
+ * Энэ жилийн анхны ирц (resolveCycleStart-д) — 3 бөөн асуулга, хүүхэд бүрээр биш (N+1 үгүй).
+ * firstAny = жил эхэлснээс хойших хамгийн эртний бичлэг (ямар ч төлөв) ба түүний анги; classFirst =
+ * тэр ангид ирц бүртгэж эхэлсэн өдөр; firstPresent = анх ирсэн (PRESENT/LATE).
+ */
+export async function attendanceStartsFor(
+  prisma: PrismaService,
+  studentIds: string[],
+  year = ACADEMIC_YEAR,
+): Promise<Map<string, AttendanceStart>> {
+  const out = new Map<string, AttendanceStart>();
+  if (!studentIds.length) return out;
+  const from = new Date(`${year.months[0]}-01T00:00:00Z`);
+  const [any, present] = await Promise.all([
+    prisma.attendance.groupBy({
+      by: ['studentId', 'classroomId'],
+      where: { studentId: { in: studentIds }, date: { gte: from } },
+      _min: { date: true },
+    }),
+    prisma.attendance.groupBy({
+      by: ['studentId'],
+      where: {
+        studentId: { in: studentIds },
+        date: { gte: from },
+        status: { in: [AttendanceStatus.PRESENT, AttendanceStatus.LATE] },
+      },
+      _min: { date: true },
+    }),
+  ]);
+  const earliest = new Map<string, { classroomId: string; date: Date }>();
+  for (const r of any) {
+    const d = r._min.date;
+    if (!d) continue;
+    const cur = earliest.get(r.studentId);
+    if (!cur || d < cur.date) earliest.set(r.studentId, { classroomId: r.classroomId, date: d });
+  }
+  if (!earliest.size) return out;
+  const classFirst = new Map(
+    (
+      await prisma.attendance.groupBy({
+        by: ['classroomId'],
+        where: { classroomId: { in: [...new Set([...earliest.values()].map((e) => e.classroomId))] } },
+        _min: { date: true },
+      })
+    ).map((r) => [r.classroomId, r._min.date]),
+  );
+  const presentBy = new Map(present.map((r) => [r.studentId, r._min.date]));
+  for (const [id, e] of earliest) {
+    const cf = classFirst.get(e.classroomId);
+    if (!cf) continue;
+    out.set(id, { firstAny: dateKey(e.date)!, classFirst: dateKey(cf)!, firstPresent: dateKey(presentBy.get(id)) });
+  }
+  return out;
+}
+
+/** Хүүхэд бүрийн энэ жилийн мөчлөг эхлэх өдөр (гараар > ирц > joinedOn > 1-ний өдөр) */
+export async function cycleStartsFor(
+  prisma: PrismaService,
+  profiles: { id: string; cycleStartOn: Date | null | undefined; joinedOn: Date | null | undefined }[],
+): Promise<Map<string, { on: DateKey | null; source: CycleStartSource }>> {
+  const att = await attendanceStartsFor(prisma, profiles.map((p) => p.id));
+  return new Map(
+    profiles.map((p) => [p.id, resolveCycleStart(dateKey(p.cycleStartOn), att.get(p.id), dateKey(p.joinedOn))]),
+  );
+}
+
+/** computeLedger-ийн cycleStart (зөвхөн сайтын баталгаатай эх сурвалж) */
+export const siteCycleStart = (c: { on: DateKey | null; source: CycleStartSource } | undefined) =>
+  c?.on && (c.source === 'MANUAL' || c.source === 'ATTENDANCE') ? { on: c.on, source: c.source } : null;
+
 /** Сайтаас сунгасан хугацаа (идэвхтэй) — хүүхэд бүрээр */
 export async function extensionsFor(prisma: PrismaService, studentIds: string[]) {
-  const out = new Map<string, { id: string; month: MonthKey; days: number; reason: string; createdById: string; createdAt: Date }[]>();
+  const out = new Map<string, { id: string; month: MonthKey; days: number; reason: string; gapFrom: Date | null; gapTo: Date | null; createdById: string; createdAt: Date }[]>();
   if (!studentIds.length) return out;
   const rows = await prisma.tuitionExtension.findMany({
     where: { studentId: { in: studentIds }, deletedAt: null },
     orderBy: { createdAt: 'asc' },
-    select: { id: true, studentId: true, month: true, days: true, reason: true, createdById: true, createdAt: true },
+    select: { id: true, studentId: true, month: true, days: true, reason: true, gapFrom: true, gapTo: true, createdById: true, createdAt: true },
   });
   for (const { studentId, ...e } of rows) (out.get(studentId) ?? out.set(studentId, []).get(studentId)!).push(e);
   return out;
@@ -168,7 +241,7 @@ export async function ledgersFor(
       select: {
         id: true,
         studentProfile: {
-          select: { grade: true, tuitionPlan: true, tuitionAmount: true, tuitionAgreed: true, joinedOn: true, leftOn: true },
+          select: { grade: true, tuitionPlan: true, tuitionAmount: true, tuitionAgreed: true, joinedOn: true, leftOn: true, cycleStartOn: true },
         },
         enrollments: {
           where: { leftAt: null },
@@ -179,20 +252,24 @@ export async function ledgersFor(
     }),
     prisma.payment.findMany({
       where: { userId: { in: studentIds }, status: PaymentStatus.CONFIRMED, storePurchaseId: null },
-      select: { userId: true, amount: true, forMonth: true, paidAt: true },
+      select: { id: true, userId: true, amount: true, forMonth: true, paidAt: true },
     }),
     settlements(prisma, studentIds),
   ]);
-  const [extensions, sheetPeriods] = await Promise.all([extensionsFor(prisma, studentIds), sheetPeriodsFor(prisma, studentIds)]);
+  const [extensions, sheetPeriods, cycles] = await Promise.all([
+    extensionsFor(prisma, studentIds),
+    sheetPeriodsFor(prisma, studentIds),
+    cycleStartsFor(prisma, users.map((u) => ({ id: u.id, cycleStartOn: u.studentProfile?.cycleStartOn, joinedOn: u.studentProfile?.joinedOn }))),
+  ]);
   const primary = new Map(users.map((u) => [u.id, primaryEnrollment(u.enrollments)?.classroom ?? null]));
   const days = await classDays(
     prisma,
     [...primary.values()].filter((c) => !!c).map((c) => c!.id),
   );
-  const payBy = new Map<string, { amount: number; forMonth: string | null; paidOn: DateKey | null }[]>();
+  const payBy = new Map<string, { id: string; amount: number; forMonth: string | null; paidOn: DateKey | null }[]>();
   for (const p of payments) {
     const list = payBy.get(p.userId) ?? [];
-    list.push({ amount: p.amount, forMonth: p.forMonth, paidOn: dateKey(p.paidAt) });
+    list.push({ id: p.id, amount: p.amount, forMonth: p.forMonth, paidOn: dateKey(p.paidAt) });
     payBy.set(p.userId, list);
   }
   for (const u of users) {
@@ -206,6 +283,7 @@ export async function ledgersFor(
         agreed: profile?.tuitionAgreed ?? null,
         periods: sheetPeriods.get(u.id),
         extensions: extensions.get(u.id),
+        cycleStart: siteCycleStart(cycles.get(u.id)),
         tier: tierFor(profile?.grade, classroom?.name, classroom ? days.get(classroom.id) : null).tier,
         startDate: dateKey(profile?.joinedOn),
         leftOn: dateKey(profile?.leftOn),

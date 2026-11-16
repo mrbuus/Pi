@@ -286,6 +286,7 @@ POST /api/payments
 POST /api/payments/:id/confirm
 POST /api/payments/:id/reject
 POST /api/payments/:id/reverse
+POST /api/payments/ledger/student/:id/cycle-start
 POST /api/payments/ledger/student/:id/extensions
 POST /api/problems
 POST /api/progress/student/:id/assign-test

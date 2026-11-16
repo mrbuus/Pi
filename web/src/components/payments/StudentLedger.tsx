@@ -26,7 +26,7 @@ import PaymentEditModal from "./PaymentEditModal";
 import ReversePaymentModal from "./ReversePaymentModal";
 import PayDialog from "./PayDialog";
 import NoteDialog from "./NoteDialog";
-import PlanDialog from "./PlanDialog";
+import PlanDialog, { CYCLE_SOURCE_LABEL } from "./PlanDialog";
 import ExtendDialog from "./ExtendDialog";
 import { RemoveFromTrainingDialog } from "@/components/students/StudentActions";
 import SettleSwitch from "./SettleSwitch";
@@ -149,6 +149,20 @@ export default function StudentLedger({ id }: { id: string }) {
                 ]}
               />
             </p>
+            {/* Сар бүрийн мөчлөг: энэ жил суж эхэлсэн өдөр ба эх сурвалж (эзэн 2026-11-16) */}
+            {r.plan.kind === "MONTHLY" && !r.plan.settled && r.cycleStart && (
+              <button
+                type="button"
+                onClick={() => setPlanOpen(true)}
+                className="mt-1 inline-flex min-h-9 items-center gap-1.5 text-sm text-ink-dim hover:text-brand"
+              >
+                <CalendarClock className="h-4 w-4" aria-hidden />
+                {r.cycleStart.on
+                  ? `Энэ жил ${dayLabel(r.cycleStart.on)}-нд суж эхэлсэн (${CYCLE_SOURCE_LABEL[r.cycleStart.source]}), сар бүрийн ${Number(r.cycleStart.on.slice(8, 10))}-нд төлнө`
+                  : "Энэ жил суж эхэлсэн өдөр тодорхойгүй, сарын 1-нээс тооцож байна"}
+                <Pencil className="h-3.5 w-3.5" aria-label="Суж эхэлсэн өдөр засах" />
+              </button>
+            )}
           </div>
           <button
             type="button"
@@ -188,7 +202,11 @@ export default function StudentLedger({ id }: { id: string }) {
             </>
           ) : (
             <>
-              <Stat label="Төлсөн" value={mnt(r.paidTotal)} />
+              <Stat
+                label="Төлсөн"
+                value={mnt(r.paidTotal)}
+                sub={r.summerPaid ? `Зуны төлбөр ${mnt(r.summerPaid)} тусдаа` : undefined}
+              />
               <Stat
                 label="Өр"
                 value={mnt(r.owedNow)}
@@ -306,7 +324,7 @@ export default function StudentLedger({ id }: { id: string }) {
                         items={[
                           dayLabel((p.paidAt ?? p.createdAt).slice(0, 10)),
                           METHOD_LABEL[p.method] ?? p.method,
-                          p.forMonth ? monthName(p.forMonth) : null,
+                          p.summer ? "Зуны (өмнөх хугацааны) төлбөр" : p.forMonth ? monthName(p.forMonth) : null,
                           p.status !== "CONFIRMED" ? st.text : null,
                           p.confirmedBy,
                         ]}

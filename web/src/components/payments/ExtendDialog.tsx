@@ -5,8 +5,8 @@ import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/kit/button";
-import LedgerDialog, { Field, inputCls } from "./LedgerDialog";
-import { dayLabel, monthName, periodLabel, stampLabel } from "./ledgerFormat";
+import LedgerDialog, { Field, inputCls, Segmented } from "./LedgerDialog";
+import { addDays, dayLabel, monthName, periodLabel, stampLabel } from "./ledgerFormat";
 import { errMsg } from "./paymentHelpers";
 import type { StudentLedger } from "./ledgerTypes";
 
@@ -15,26 +15,44 @@ const REASONS = ["Өвчтэй байсан", "Чөлөө авсан", "Төв �
 /**
  * Сар бүрийн төлбөрийн хугацаа сунгах (эзэн 2026-11-12): сонгосон сарын төлөх өдөр N хоногоор
  * хойшилж, дараагийн бүх сар дагаж шилжинэ. Хэмжээ хязгааргүй, шалтгаан заавал. Цуцалж болно.
+ * «Ирээгүй хугацаа» (эзэн 2026-11-16): X–Y өдөр огт ирээгүй → хоног = Y − X + 1, тэр хугацааг
+ * агуулсан сарын дараагийн төлөх өдрөөс эхлэн хойшилно (сервер ledger.ts gapTarget-аар тооцно).
  */
+const span = (from: string, to: string) =>
+  Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000) + 1;
 export default function ExtendDialog({ data, onClose, onSaved }: { data: StudentLedger; onClose: () => void; onSaved: () => void }) {
   const r = data.row;
   const months = r.blocks.filter((b) => b.state !== "OFF");
   const firstOpen = months.find((b) => b.state !== "PAID") ?? months[0];
+  const [mode, setMode] = useState<"gap" | "days">("gap");
   const [month, setMonth] = useState(firstOpen?.month ?? "");
   const [days, setDays] = useState("");
+  const [gapFrom, setGapFrom] = useState("");
+  const [gapTo, setGapTo] = useState("");
   const [reason, setReason] = useState(REASONS[0]);
   const [other, setOther] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const n = Number(days) || 0;
+  const gapOk = !!gapFrom && !!gapTo && gapTo >= gapFrom;
+  // Ирээгүй хугацааг агуулсан сарын дараагийн сар (серверийн gapTarget-тай ижил)
+  const gapMonth = (() => {
+    if (!gapOk) return null;
+    const live = months.filter((b) => b.period);
+    if (!live.length) return null;
+    if (gapFrom < live[0].period!.from) return live[0].month;
+    const i = live.findIndex((b) => gapFrom >= b.period!.from && gapFrom < b.period!.to);
+    return i >= 0 ? (live[i + 1]?.month ?? null) : null;
+  })();
+  const n = mode === "gap" ? (gapOk ? span(gapFrom, gapTo) : 0) : Number(days) || 0;
+  const target = mode === "gap" ? gapMonth : month;
   const text = reason === "Бусад" ? other.trim() : reason;
-  const block = months.find((b) => b.month === month);
+  const block = months.find((b) => b.month === target);
   // Урьдчилан харах: тэр сарын шинэ хугацаа
   const preview =
     block?.period && n > 0
       ? (() => {
-          const add = (d: string) => new Date(Date.parse(`${d}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
-          return `${dayLabel(block.period.from)} – ${dayLabel(block.period.to)} → ${dayLabel(add(block.period.from))} – ${dayLabel(add(block.period.to))}`;
+          const add = (d: string) => addDays(d, n);
+          return `${monthName(block.month)}: ${dayLabel(block.period.from)} – ${dayLabel(block.period.to)} → ${dayLabel(add(block.period.from))} – ${dayLabel(add(block.period.to))}`;
         })()
       : null;
 
@@ -42,8 +60,11 @@ export default function ExtendDialog({ data, onClose, onSaved }: { data: Student
     setBusy(true);
     setError(null);
     try {
-      await api(`/payments/ledger/student/${encodeURIComponent(r.id)}/extensions`, { method: "POST", body: { month, days: n, reason: text } });
-      toast.success(`${monthName(month)}-ын хугацааг ${n} хоногоор сунгалаа`);
+      await api(`/payments/ledger/student/${encodeURIComponent(r.id)}/extensions`, {
+        method: "POST",
+        body: mode === "gap" ? { gapFrom, gapTo, reason: text } : { month, days: n, reason: text },
+      });
+      toast.success(`${target ? monthName(target) : "Дараагийн сар"}аас хойших төлөх өдрийг ${n} хоногоор хойшлууллаа`);
       onSaved();
       onClose();
     } catch (e) {
@@ -71,14 +92,45 @@ export default function ExtendDialog({ data, onClose, onSaved }: { data: Student
       open
       onOpenChange={(o) => !o && onClose()}
       title="Төлбөрийн хугацаа сунгах"
-      description="Сонгосон сарын төлөх өдөр хойшилж, дараагийн бүх сар дагаж шилжинэ"
+      description="Хүүхэд ирээгүй хоногоор дараагийн төлөх өдөр хойшилж, түүнээс хойших бүх сар дагаж шилжинэ"
       footer={
-        <Button onClick={save} disabled={busy || !month || n < 1 || !text} className="w-full sm:w-auto">
+        <Button onClick={save} disabled={busy || !target || n < 1 || !text} className="w-full sm:w-auto">
           {busy ? "Хадгалж байна" : "Сунгах"}
         </Button>
       }
     >
       <div className="space-y-4">
+        <Segmented<"gap" | "days">
+          label="Хэрхэн оруулах"
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: "gap", label: "Ирээгүй өдрүүд" },
+            { value: "days", label: "Хоногоор" },
+          ]}
+        />
+        {mode === "gap" ? (
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Ирээгүй эхэлсэн" htmlFor="ext-gap-from">
+                <input id="ext-gap-from" type="date" value={gapFrom} onChange={(e) => setGapFrom(e.target.value)} className={inputCls} />
+              </Field>
+              <Field label="Хүртэл" htmlFor="ext-gap-to">
+                <input id="ext-gap-to" type="date" min={gapFrom || undefined} value={gapTo} onChange={(e) => setGapTo(e.target.value)} className={inputCls} />
+              </Field>
+            </div>
+            <p className="text-sm text-ink-dim" aria-live="polite">
+              {!gapFrom || !gapTo
+                ? "Хүүхэд огт ирээгүй эхний ба сүүлийн өдрийг сонгоно уу"
+                : !gapOk
+                  ? "Дуусах өдөр эхлэхээс өмнө байна"
+                  : !gapMonth
+                    ? `${n} хоног. Энэ хугацааны дараа шилжих сар алга`
+                    : `${n} хоног, ${preview ?? monthName(gapMonth)}`}
+            </p>
+          </>
+        ) : (
+          <>
         <Field label="Аль сараас" htmlFor="ext-month">
           <select id="ext-month" value={month} onChange={(e) => setMonth(e.target.value)} className={inputCls}>
             {months.map((b) => (
@@ -98,6 +150,8 @@ export default function ExtendDialog({ data, onClose, onSaved }: { data: Student
             className={`${inputCls} tabular-nums`}
           />
         </Field>
+          </>
+        )}
         <Field label="Шалтгаан" htmlFor="ext-reason">
           <select id="ext-reason" value={reason} onChange={(e) => setReason(e.target.value)} className={inputCls}>
             {REASONS.map((x) => (
@@ -123,6 +177,11 @@ export default function ExtendDialog({ data, onClose, onSaved }: { data: Student
                     <span className="font-semibold text-ink">
                       {monthName(e.month)} +{e.days} хоног
                     </span>
+                    {e.gapFrom && e.gapTo && (
+                      <span className="block text-xs text-ink-dim">
+                        Ирээгүй {dayLabel(e.gapFrom)} – {dayLabel(e.gapTo)}
+                      </span>
+                    )}
                     <span className="block truncate text-xs text-ink-dim">
                       {e.reason}, {e.authorName ?? "?"}, {stampLabel(e.at).slice(0, 5)}
                     </span>

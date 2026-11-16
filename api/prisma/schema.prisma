@@ -351,6 +351,9 @@ model StudentProfile {
   tuitionNote   String?
   joinedOn      DateTime?    @db.Date
   leftOn        DateTime?    @db.Date
+  // Энэ хичээлийн жилд СУЖ ЭХЭЛСЭН өдөр (сар бүрийн төлбөрийн мөчлөг) — Багш+/Админ гараар (эзэн
+  // 2026-11-16). Хоосон бол ирцээс / joinedOn-оос (ledger.ts resolveCycleStart). joinedOn-ыг дарахгүй.
+  cycleStartOn  DateTime?    @db.Date
 
   // Онлайнаар ТАНХИМЫН ангид бүртгүүлсэн сурагчийн зөвшөөрлийн урсгал
   // (эзний дүрэм 2026-08-08): багш зөвшөөрөх + эхний сарын төлбөр CONFIRMED
@@ -1798,6 +1801,9 @@ model TuitionExtension {
   month       String
   days        Int
   reason      String
+  /** «Ирээгүй X-ээс Y хүртэл» гэж оруулсан бол тэр хугацаа (хоног = Y − X + 1) */
+  gapFrom     DateTime? @db.Date
+  gapTo       DateTime? @db.Date
   createdById String
   createdAt   DateTime  @default(now())
   deletedAt   DateTime?

@@ -5,9 +5,17 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/kit/button";
 import LedgerDialog, { Field, inputCls, Segmented } from "./LedgerDialog";
-import { mnt } from "./ledgerFormat";
+import { dayLabel, mnt } from "./ledgerFormat";
 import { errMsg } from "./paymentHelpers";
-import type { PlanKind, StudentLedger } from "./ledgerTypes";
+import type { CycleStartSource, PlanKind, StudentLedger } from "./ledgerTypes";
+
+/** Мөчлөгийн эхлэл хаанаас ирснийг хүнд ойлгомжтой */
+export const CYCLE_SOURCE_LABEL: Record<CycleStartSource, string> = {
+  MANUAL: "гараар",
+  ATTENDANCE: "ирцээс",
+  JOINED: "бүртгэлээс",
+  DEFAULT: "сарын 1-нээс",
+};
 
 /** Багц, дүн, суж эхэлсэн өдрийг засна (PATCH /users/:id/profile — Багш+/Админ). */
 export default function PlanDialog({
@@ -28,6 +36,10 @@ export default function PlanDialog({
   const [kind, setKind] = useState<PlanKind>(row.plan.kind);
   const [amount, setAmount] = useState(String(kind === "MONTHLY" ? row.plan.fee : row.plan.total || priceOf(kind)));
   const [start, setStart] = useState(row.startDate ?? "");
+  // Энэ жил суж эхэлсэн өдөр (эзэн 2026-11-16) — хоосон бол автомат (ирц / бүртгэл)
+  const manualCycle = row.cycleStart?.source === "MANUAL" ? (row.cycleStart.on ?? "") : "";
+  const [cycle, setCycle] = useState(manualCycle);
+  const yearFrom = `${data.year.months[0]}-01`;
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const value = Number(amount.replace(/\D/g, "")) || 0;
@@ -52,6 +64,11 @@ export default function PlanDialog({
           ...(start ? { joinedOn: start } : {}),
         },
       });
+      if (kind === "MONTHLY" && cycle !== manualCycle)
+        await api(`/payments/ledger/student/${encodeURIComponent(row.id)}/cycle-start`, {
+          method: "POST",
+          body: { on: cycle || null },
+        });
       toast.success("Багц хадгалагдлаа");
       onSaved();
       onClose();
@@ -99,9 +116,38 @@ export default function PlanDialog({
             />
           </Field>
         )}
-        <Field label="Сууж эхэлсэн өдөр" htmlFor="plan-start">
+        <Field label="Төвд анх суусан өдөр" htmlFor="plan-start" hint="Зун суусан бол зуны өдөр (зуны төлбөрийг ялгахад)">
           <input id="plan-start" type="date" value={start} onChange={(e) => setStart(e.target.value)} className={inputCls} />
         </Field>
+        {kind === "MONTHLY" && (
+          <Field
+            label="Энэ жил суж эхэлсэн өдөр"
+            htmlFor="plan-cycle"
+            hint={
+              cycle
+                ? `Гараар: сар бүрийн ${Number(cycle.slice(8, 10))}-нд төлнө`
+                : row.cycleStart && row.cycleStart.source !== "MANUAL" && row.cycleStart.on
+                  ? `Одоо ${dayLabel(row.cycleStart.on)} (${CYCLE_SOURCE_LABEL[row.cycleStart.source]}). Өөр бол өдрөө сонгоно уу`
+                  : "Одоо сарын 1-нээс. Ирж эхэлсэн өдрөө сонговол төлөх өдөр түүгээр болно"
+            }
+          >
+            <div className="flex gap-2">
+              <input
+                id="plan-cycle"
+                type="date"
+                min={yearFrom}
+                value={cycle}
+                onChange={(e) => setCycle(e.target.value)}
+                className={inputCls}
+              />
+              {cycle && (
+                <Button type="button" variant="outline" onClick={() => setCycle("")} className="shrink-0">
+                  Автомат
+                </Button>
+              )}
+            </div>
+          </Field>
+        )}
         {error && (
           <p role="alert" className="rounded-xl bg-error/10 px-3 py-2 text-sm text-error">
             {error}

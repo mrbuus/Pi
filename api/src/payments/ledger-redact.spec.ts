@@ -24,6 +24,7 @@ const row = (): LedgerRow => ({
   plan: { kind: 'MONTHLY', guessed: false, fee: 350_000, total: 2_500_000, first: 0, settled: false, raw: null },
   startDate: '2026-09-01',
   leftOn: null,
+  cycleStart: { on: null, source: 'DEFAULT' },
   blocks: [
     { month: '2026-09', state: 'PAID', due: 350_000, paid: 350_000, dueOn: '2026-09-05', paidOn: '2026-09-03', lateDays: 0 },
     { month: '2026-10', state: 'OWED', due: 350_000, paid: 100_000, dueOn: '2026-10-05', paidOn: null, lateDays: 0 },
@@ -35,6 +36,7 @@ const row = (): LedgerRow => ({
   owedMonths: 1,
   remaining: 3_050_000,
   credit: 0,
+  summerPaid: 0,
   nextDue: { month: '2026-10', amount: 250_000, dueOn: '2026-10-05' },
   overdueDays: 12,
   coveredThrough: '2026-09',

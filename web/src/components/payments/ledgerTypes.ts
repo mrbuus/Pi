@@ -25,9 +25,15 @@ export interface LedgerExtension {
   month: string;
   days: number;
   reason: string;
+  /** «Ирээгүй» хугацаагаар оруулсан бол */
+  gapFrom?: string | null;
+  gapTo?: string | null;
   at: string;
   authorName: string | null;
 }
+
+/** Энэ жилийн мөчлөг эхлэх өдрийн эх сурвалж */
+export type CycleStartSource = "MANUAL" | "ATTENDANCE" | "JOINED" | "DEFAULT";
 
 export interface YearView {
   id: string;
@@ -61,6 +67,10 @@ export interface LedgerRow {
   };
   startDate: string | null;
   leftOn: string | null;
+  /** Энэ жил суж эхэлсэн өдөр (сар бүрийн мөчлөг): гараар / ирцээс / бүртгэлээс / 1-ний өдөр */
+  cycleStart?: { on: string | null; source: CycleStartSource };
+  /** Зуны (жил эхлэхээс өмнөх) хичээлийн төлбөр — энэ жилийн гэрээнд ороогүй */
+  summerPaid?: number | null;
   blocks: MonthBlock[];
   price: number;
   paidTotal: number;
@@ -130,6 +140,8 @@ export interface LedgerPayment {
   paidAt: string | null;
   createdAt: string;
   confirmedBy: string | null;
+  /** Зуны (өмнөх хугацааны) төлбөр — энэ жилийн сард ороогүй */
+  summer?: true;
 }
 
 export interface LedgerNote {

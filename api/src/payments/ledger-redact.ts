@@ -23,6 +23,7 @@ export function redactRow(r: LedgerRow) {
     owedNow: null,
     remaining: null,
     credit: null,
+    summerPaid: null,
     nextDue: r.nextDue ? { ...r.nextDue, amount: null } : null,
   };
 }
