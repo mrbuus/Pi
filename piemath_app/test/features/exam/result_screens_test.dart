@@ -103,6 +103,48 @@ void main() {
       expect(find.text('Алдсан алхам: a, bc'), findsOneWidget);
     });
 
+    Map<String, Object?> wrongChoice({required bool withNotes}) => {
+      'n': 3,
+      'part': 1,
+      'items': [
+        {'label': '3', 'status': 'WRONG', 'points': 1},
+      ],
+      'lost': 1,
+      'problem': {
+        'format': 'CHOICE',
+        'statementText': 'Нөхцөл',
+        'imageKey': null,
+        'choices': [
+          {'letter': 'A', 'text': '1', 'image': null, if (withNotes) 'mistakeNote': 'Тэмдгээ алдсан'},
+          {'letter': 'B', 'text': '2', 'image': null, if (withNotes) 'mistakeNote': null},
+          {'letter': 'C', 'text': '3', 'image': null, if (withNotes) 'mistakeNote': 'Хуваахаа мартсан'},
+        ],
+        'myAnswer': 'C',
+        'correctAnswer': null,
+        'solution': withNotes ? 'Бодолт' : null,
+      },
+    };
+
+    testWidgets('«Түгээмэл алдаа»: сурагчийн сонгосон буруу хариу эхэнд, бусад нь доор', (tester) async {
+      final http = FakeHttp()
+        ..json('GET', '/exam-results/my/t1', _result(open: true, wrong: [wrongChoice(withNotes: true)]));
+      await pumpM7(tester, const ExamResultScreen(testId: 't1'), http: http);
+      await tester.scrollUntilVisible(find.text('Түгээмэл алдаа'), 200);
+      expect(find.text('Түгээмэл алдаа'), findsOneWidget);
+      final mine = tester.getTopLeft(find.text('Таны сонгосон C'));
+      final other = tester.getTopLeft(find.text('A хариу'));
+      expect(mine.dy, lessThan(other.dy));
+      expect(find.text('B хариу'), findsNothing);
+    });
+
+    testWidgets('тайлбаргүй (хуучин сервер) бол «Түгээмэл алдаа» хэсэг огт гарахгүй', (tester) async {
+      final http = FakeHttp()
+        ..json('GET', '/exam-results/my/t1', _result(open: true, wrong: [wrongChoice(withNotes: false)]));
+      await pumpM7(tester, const ExamResultScreen(testId: 't1'), http: http);
+      await tester.scrollUntilVisible(find.text('Нөхцөл', findRichText: true), 200);
+      expect(find.text('Түгээмэл алдаа'), findsNothing);
+    });
+
     testWidgets('ирээгүй гэж тэмдэглэгдсэн', (tester) async {
       final http = FakeHttp()..json('GET', '/exam-results/my/t1', _result(absent: true));
       await pumpM7(tester, const ExamResultScreen(testId: 't1'), http: http);

@@ -316,7 +316,8 @@ export class ThousandService {
                 choices: true,
                 correctAnswer: true,
                 youtubeUrl: true,
-                choiceOptions: { select: { order: true, text: true, isCorrect: true, imageKey: true } },
+                // mistakeNote: зөвхөн FULL үед «Түгээмэл алдаа» болж гарна (доор)
+                choiceOptions: { select: { order: true, text: true, isCorrect: true, imageKey: true, mistakeNote: true } },
                 analysis: { select: { answerKeyStatus: true, solutionOutline: true } },
               },
             },
@@ -444,6 +445,15 @@ export class ThousandService {
           }
         }
         const ytId = p.youtubeUrl ? parseYoutubeId(p.youtubeUrl) : null;
+        // «Түгээмэл алдаа»: буруу сонголтын багшийн тайлбар — бодолттой ижил FULL үед л
+        if (Array.isArray(item.choices) && p.choiceOptions.length > 0) {
+          const sorted = [...p.choiceOptions].sort((a, b) => a.order - b.order);
+          item.choices = (item.choices as { letter: string }[]).map((c, i) => {
+            const o = sorted[i];
+            const note = o && !o.isCorrect ? o.mistakeNote?.trim() : '';
+            return { ...c, mistakeNote: note || null };
+          });
+        }
         Object.assign(item, {
           answerKnown: known,
           correct: known && answered ? correct : null,

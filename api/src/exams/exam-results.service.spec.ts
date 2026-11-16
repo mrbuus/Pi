@@ -271,6 +271,61 @@ describe('Сурагчийн дүнгийн дэлгэц', () => {
     expectNoProblemIds(res);
   });
 
+  describe('«Түгээмэл алдаа» (choices[].mistakeNote)', () => {
+    function withNotes(db: ReturnType<typeof prismaMock>, status: string) {
+      const t = testRow('CHAPTER_EXAM');
+      for (const r of t.problems) {
+        r.problem.analysis = { ...r.problem.analysis, status };
+        r.problem.choiceOptions = [
+          { order: 0, text: 'x', isCorrect: false, mistakeNote: 'НУУЦ_ТАЙЛБАР_A' as never },
+          { order: 1, text: 'y', isCorrect: true, mistakeNote: 'зөвийн тайлбар' as never },
+        ];
+      }
+      db.test.findUnique.mockResolvedValue(t);
+    }
+
+    it('бодолт нээлттэй (VERIFIED): буруу сонголтод тайлбар, зөвд null', async () => {
+      const db = prismaMock({ type: 'CHAPTER_EXAM', source: 'CHAPTER_EXAM' });
+      withNotes(db, 'VERIFIED');
+      const res = await new ExamResultsService(db as never).myResult('test-1', 'stu', 'STUDENT');
+      const p = res.wrong![0].problem!;
+      expect(p.solution).toBe('Бодолт 2');
+      expect(p.myAnswer).toBe('A');
+      expect(p.choices).toEqual([
+        { letter: 'A', text: 'x', image: null, mistakeNote: 'НУУЦ_ТАЙЛБАР_A' },
+        { letter: 'B', text: 'y', image: null, mistakeNote: null },
+      ]);
+      expect(p.correctAnswer).toBeNull();
+      expectNoProblemIds(res);
+    });
+
+    it('бодолт хаалттай (AUTO_DRAFT): тайлбар хэзээ ч задрахгүй', async () => {
+      const db = prismaMock({ type: 'CHAPTER_EXAM', source: 'CHAPTER_EXAM' });
+      withNotes(db, 'AUTO_DRAFT');
+      const res = await new ExamResultsService(db as never).myResult('test-1', 'stu', 'STUDENT');
+      expect(res.wrong![0].problem!.solution).toBeNull();
+      expect(res.wrong![0].problem!.choices!.every((c) => c.mistakeNote === null)).toBe(true);
+      expect(JSON.stringify(res)).not.toContain('НУУЦ_ТАЙЛБАР');
+    });
+
+    it('1000 бодлого, хаалт нээгдээгүй: тайлбар задрахгүй', async () => {
+      const db = prismaMock({
+        type: 'THOUSAND',
+        access: [
+          { classroomId: 'c1', assignedAt: new Date(), reviewLevel: 'NONE', reviewAutoAt: null, reviewOpenedAt: null },
+        ],
+      });
+      const t = testRow('THOUSAND');
+      for (const r of t.problems) {
+        r.problem.analysis = { ...r.problem.analysis, status: 'VERIFIED' };
+        r.problem.choiceOptions[0].mistakeNote = 'НУУЦ_ТАЙЛБАР_A' as never;
+      }
+      db.test.findUnique.mockResolvedValue(t);
+      const res = await new ExamResultsService(db as never).myResult('test-1', 'stu', 'STUDENT');
+      expect(JSON.stringify(res)).not.toContain('НУУЦ_ТАЙЛБАР');
+    });
+  });
+
   it('дүнгүй бол 404, ирээгүй бол зөвхөн «Ирээгүй»', async () => {
     const db = prismaMock({ type: 'CHAPTER_EXAM' });
     db.testResult.findMany.mockResolvedValue([]);

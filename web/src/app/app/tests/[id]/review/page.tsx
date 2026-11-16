@@ -15,6 +15,7 @@ import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { Badge } from "@/components/ui/kit/badge";
 import FillAnswer from "@/components/thousand/FillAnswer";
 import YoutubeEmbed from "@/components/thousand/YoutubeEmbed";
+import MistakeNotes, { notesFromChoices } from "@/components/exam/MistakeNotes";
 import { dateTimeUB, LEVEL_LABEL, type ReviewLevel } from "@/components/thousand/format";
 
 interface ReviewItem {
@@ -24,7 +25,8 @@ interface ReviewItem {
   points: number;
   statementText: string | null;
   imageKey: string | null;
-  choices: { letter: string; text: string; image?: string | null }[] | null;
+  // mistakeNote: FULL үед л ирнэ (шинэ талбар — хуучин API-д байхгүй)
+  choices: { letter: string; text: string; image?: string | null; mistakeNote?: string | null }[] | null;
   answered: boolean;
   myAnswer: unknown;
   // FULL үед л ирнэ
@@ -211,6 +213,7 @@ function ReviewCard({ item, full }: { item: ReviewItem; full: boolean }) {
           <TheoryContent markdown={item.solution} className="text-sm" />
         </section>
       )}
+      {full && <MistakeNotes notes={notesFromChoices(item.choices, mine)} />}
       {full && item.youtube && <YoutubeEmbed embedUrl={item.youtube.embedUrl} title={`${item.n}-р бодлогын бодолт`} />}
     </Card>
   );
