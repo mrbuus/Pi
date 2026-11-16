@@ -11,6 +11,8 @@ import { ROLES_KEY } from '../auth/decorators/roles.decorator';
 import { Role } from '../generated/prisma/enums';
 import { ClassroomsController } from './classrooms.controller';
 import { ClassroomsService } from './classrooms.service';
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
+import { StaffCapabilityModule } from '../staff-capabilities/staff-capability.module';
 
 describe('GET /classrooms/registry — маршрутын дараалал', () => {
   let app: INestApplication;
@@ -22,7 +24,7 @@ describe('GET /classrooms/registry — маршрутын дараалал', () 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
       controllers: [ClassroomsController],
-      providers: [{ provide: ClassroomsService, useValue: service }],
+      providers: [{ provide: ClassroomsService, useValue: service }, { provide: StaffCapabilityService, useValue: { assertForTeacherPlus: jest.fn().mockResolvedValue(undefined), has: jest.fn().mockResolvedValue(true) } }],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue({

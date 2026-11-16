@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/kit/ta
 import { Meta } from "@/components/ui/Meta";
 import { SkeletonCard, SkeletonRows } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/StateBlock";
-import { api, getRole } from "@/lib/api";
+import { api } from "@/lib/api";
 import { getClassroomColor } from "@/lib/classroomColor";
 import { cn } from "@/lib/cn";
 import ClassChecksPanel from "./ClassChecksPanel";
@@ -22,6 +22,7 @@ import StudentsTab, { type QuickView } from "./StudentsTab";
 import TeacherPicker from "./TeacherPicker";
 import TopicsTab from "./TopicsTab";
 import type { ClassDashboard, MonthMetric, PersonRef } from "./types";
+import { useStaffCan } from "@/lib/staffCapabilities";
 
 type TabKey = "overview" | "month" | "students" | "payments" | "codes" | "makeup" | "topics";
 /** «Чек» нь табын жагсаалтад БИШ — толгойн товчоор нээгдэх тусдаа горим (#checks) */
@@ -71,8 +72,11 @@ export default function ClassDashboardClient({ classroomId }: { classroomId: str
   const [error, setError] = useState("");
   const [tab, setTab] = useState<ViewKey>("overview");
   // Ангийн төлбөрийн самбар — зөвхөн Админ, Багш+ (Багш төлбөрийн дүн харахгүй)
-  const [canPayments, setCanPayments] = useState(false);
-  useEffect(() => setCanPayments(["ADMIN", "TEACHER_PLUS"].includes(getRole() ?? "")), []);
+  // Эрхийн матриц: төлбөрийн эрхээ хаалгасан Багш+-д таб харагдахгүй
+  const financeCap = useStaffCan("finance.manage");
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const canPayments = mounted && financeCap;
   const [lastTab, setLastTab] = useState<TabKey>("overview");
   const [checkCount, setCheckCount] = useState<number | null>(null);
   const [metric, setMetric] = useState<MonthMetric>("attendance");

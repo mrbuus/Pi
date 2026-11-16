@@ -27,6 +27,7 @@ import { SubjectChapterDto } from './dto/subject-chapter.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { UpdateChapterDto } from './dto/update-chapter.dto';
 import { UpdateProblemDto } from './dto/update-problem.dto';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -60,6 +61,7 @@ export class ContentController {
   }
 
   // Номын мета мэдээлэл засах — Багш+ (эрхийн матрицаар шинээр нээгдсэн).
+  @RequireCapability('content.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('books/:id')
@@ -72,6 +74,7 @@ export class ContentController {
   }
 
   // Идэвхтэй бүлэг сэдэвтэй бол ?cascade=true шаардана.
+  @RequireCapability('content.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('books/:id')
@@ -133,6 +136,7 @@ export class ContentController {
 
   // Гараар эрэмбэлэх (drag-reorder UI) — заавал 'chapters/:id'-ээс ӨМНӨ
   // тодорхойлно, эс тэгвэл "reorder" ':id' болж алдаа өгнө.
+  @RequireCapability('content.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('chapters/reorder')
@@ -144,6 +148,7 @@ export class ContentController {
     );
   }
 
+  @RequireCapability('content.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('chapters/:id')
@@ -155,6 +160,7 @@ export class ContentController {
     return this.content.updateChapter(id, dto, req.user.userId, req.user.role);
   }
 
+  @RequireCapability('content.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('chapters/:id')
@@ -171,6 +177,7 @@ export class ContentController {
 
   // Агуулга (статемент/сонголт/хариу/зураг) гараар засах — ЗӨВХӨН ADMIN,
   // TEACHER_PLUS (энгийн TEACHER биш — тэд зөвхөн ангилал/tag засна).
+  @RequireCapability('content.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('problems/:problemId')
@@ -187,6 +194,7 @@ export class ContentController {
     );
   }
 
+  @RequireCapability('content.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('problems/:problemId')

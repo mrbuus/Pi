@@ -17,6 +17,7 @@ import { Role } from '../generated/prisma/enums';
 import { ContentService } from './content.service';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -34,6 +35,7 @@ export class TopicsController {
     return this.content.listTopics();
   }
 
+  @RequireCapability('content.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post()
@@ -41,6 +43,7 @@ export class TopicsController {
     return this.content.createTopic(dto, req.user.userId, req.user.role);
   }
 
+  @RequireCapability('content.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch(':id')
@@ -54,6 +57,7 @@ export class TopicsController {
 
   // Идэвхтэй бүлэг сэдэв холбоотой бол ?force=true шаардана (topicId-г л
   // null болгож салгана — Chapter-ийг устгахгүй).
+  @RequireCapability('content.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete(':id')

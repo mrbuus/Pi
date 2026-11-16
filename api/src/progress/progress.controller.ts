@@ -20,6 +20,7 @@ import {
   ResetChapterDto,
 } from './dto/adjust-progress.dto';
 import { ProgressService } from './progress.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -80,6 +81,7 @@ export class ProgressController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('student/:id/assign-test')
+  @RequireCapability('exams.manage')
   assignTest(
     @Param('id') studentId: string,
     @Body() dto: AssignTestDto,
@@ -95,6 +97,7 @@ export class ProgressController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('student/:id/attempt/:attemptId')
+  @RequireCapability('exams.manage')
   adjustAttempt(
     @Param('id') studentId: string,
     @Param('attemptId') attemptId: string,
@@ -112,6 +115,7 @@ export class ProgressController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('student/:id/attempt/:attemptId')
+  @RequireCapability('exams.manage')
   deleteAttempt(
     @Param('id') studentId: string,
     @Param('attemptId') attemptId: string,
@@ -127,6 +131,7 @@ export class ProgressController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('student/:id/reset-chapter')
+  @RequireCapability('exams.manage')
   resetChapter(
     @Param('id') studentId: string,
     @Body() dto: ResetChapterDto,

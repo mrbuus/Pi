@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeftRight, Check, Lock, Minus, Plus } from "lucide-react";
+import { ArrowLeftRight, Check, Lock, Minus, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
@@ -12,6 +12,7 @@ import { Meta } from "@/components/ui/Meta";
 import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { Card } from "@/components/ui/Surface";
 import { byFirstName, staffNames, withPlus } from "@/lib/personName";
+import { TEACHER_PLUS_DEFAULT, type StaffCapabilityId } from "@/lib/staffCapabilities";
 
 /* ============================================================================
  * «Эрхийн матриц» (эзэн 2026-10-22) — ЗӨВХӨН ADMIN.
@@ -20,12 +21,13 @@ import { byFirstName, staffNames, withPlus } from "@/lib/personName";
  * Багана = түвшин + нарийн эрх бүр. Админ:
  *   - Багш ↔ Багш+ түвшинг баталгаажуулах цонхоор, аудитад бичигдэж солино
  *     (PATCH /users/:id/staff-role; Админ болон өөрийгөө солихгүй);
- *   - Багш+-д цаг, цалингийн эрхийг олгож / цуцална (POST, DELETE /staff-capabilities).
- * Хуваарь ба төлбөр нь Багш+-д үүргээр байнга нээлттэй тул түгжээтэй.
+ *   - Багш+-д цаг, цалингийн эрхийг олгож / цуцална (POST, DELETE /staff-capabilities);
+ *   - Багш+-д анхдагчаар нээлттэй эрхийг (хуваарь, төлбөр, анги, сурагч…) хүн тус бүрд
+ *     хааж (DENY), дахин нээнэ (эзэн 2026-11-16). Шалтгаантай, аудитад бичигдэнэ.
  * ========================================================================== */
 
 type StaffRole = "ADMIN" | "TEACHER_PLUS" | "TEACHER";
-type CapabilityId = "schedule.manage" | "finance.manage" | "time.review" | "payroll.view" | "teacher-hours.edit" | "student-password.set";
+type CapabilityId = StaffCapabilityId;
 
 interface StaffUser {
   id: string;
@@ -42,12 +44,15 @@ interface Grant {
   reason: string;
   expiresAt: string | null;
   revokedAt: string | null;
+  /** DENY = анхдагч эрхийг хаасан мөр */
+  effect?: "ALLOW" | "DENY";
 }
 interface MatrixData {
   asOf: string;
   actorId: string;
   grants: Grant[];
   staff: StaffUser[];
+  teacherPlusDefault?: string[];
   teacherPlusImplicit?: string[];
 }
 
@@ -64,7 +69,49 @@ const CAPS: { id: CapabilityId; label: string; full: string; hint: string }[] = 
     id: "finance.manage",
     label: "Төлбөр",
     full: "Төлбөрийн дүн харах, засах, банкны тулгалт",
-    hint: "Төлбөрийн бүх дүнг харна; багц, дүн, хөнгөлөлттэй гэрээ, эхэлсэн өдрийг засна; төлбөр бүртгэх, буцаах, банкны тулгалт хийнэ",
+    hint: "Төлбөрийн бүх дүнг харна; багц, дүн, хөнгөлөлттэй гэрээ, эхэлсэн өдрийг засна; төлбөр бүртгэх, буцаах, банкны тулгалт, сургалтаас хасах тооцоо хийнэ",
+  },
+  {
+    id: "classes.manage",
+    label: "Анги, багш",
+    full: "Анги нээх, багш оноох",
+    hint: "Анги нээх, татан буулгах, ангийн багш оноох, элсэлтийн цонх, ирцийн шалгуур, гадны багш батлах",
+  },
+  {
+    id: "students.manage",
+    label: "Сурагч бүртгэх",
+    full: "Сурагч бүртгэх, анги солих",
+    hint: "Шинэ сурагч бүртгэх, анги руу оруулах, шилжүүлэх, хасах, мэдээлэл засах, архивлах, батлах, эцэг эхийн холболт, сонирхогчийн жагсаалт, нууц үг сэргээх код",
+  },
+  {
+    id: "students.export",
+    label: "Бүртгэл татах",
+    full: "Сурагчийн бүртгэл татах",
+    hint: "Сурагчдын бүртгэлийг Excel, CSV файлаар татна",
+  },
+  {
+    id: "exams.manage",
+    label: "Сорил, шалгалт",
+    full: "Сорил, шалгалт удирдах",
+    hint: "Тест устгах, жишиг болон цаасан шалгалт, оноо тооцох бүлэг, ангид тест нээх, хаах, сурагчид тест оноох, оноо засах, түвшин тогтоох шалгалтын тохиргоо",
+  },
+  {
+    id: "content.manage",
+    label: "Контент",
+    full: "Ном, бодлого засах",
+    hint: "Ном, бүлэг, бодлого, сэдэв, томьёо, онол, бичлэг, Word импорт, дотоод ноорог, 1000 бодлогын бичлэгийн холбоос",
+  },
+  {
+    id: "tasks.manage",
+    label: "Ажил оноох",
+    full: "Ажил үүсгэх, оноох",
+    hint: "Ажил үүсгэх, устгах, хариуцагч нэмэх, хасах",
+  },
+  {
+    id: "reports.view",
+    label: "Тайлан",
+    full: "Тайлан, аудит харах",
+    hint: "Аналитик, аудитын түүх, SMS-ийн бүртгэлийг харна",
   },
   {
     id: "time.review",
@@ -95,12 +142,15 @@ const CAPS: { id: CapabilityId; label: string; full: string; hint: string }[] = 
   },
 ];
 
-const FALLBACK_IMPLICIT = ["finance.manage", "schedule.manage"];
 
 type Dialog =
   | { kind: "role"; user: StaffUser; to: "TEACHER" | "TEACHER_PLUS" }
   | { kind: "grant"; user: StaffUser; cap: (typeof CAPS)[number] }
-  | { kind: "revoke"; user: StaffUser; cap: (typeof CAPS)[number]; grant: Grant };
+  | { kind: "revoke"; user: StaffUser; cap: (typeof CAPS)[number]; grant: Grant }
+  /** Анхдагч эрхийг тухайн хүнд хаах */
+  | { kind: "deny"; user: StaffUser; cap: (typeof CAPS)[number] }
+  /** Хаалтыг цуцалж анхдагч эрхийг дахин нээх */
+  | { kind: "allow"; user: StaffUser; cap: (typeof CAPS)[number]; grant: Grant };
 
 function errText(e: unknown) {
   return e instanceof Error ? e.message : "Алдаа гарлаа. Дахин оролдоно уу";
@@ -141,15 +191,19 @@ export default function CapabilityAdmin() {
 
   const rows = useMemo(() => [...(data?.staff ?? [])].sort(byFirstName), [data]);
   const names = useMemo(() => staffNames(rows), [rows]);
-  const implicit = useMemo(() => new Set(data?.teacherPlusImplicit ?? FALLBACK_IMPLICIT), [data]);
+  const defaults = useMemo(
+    () => new Set<string>(data?.teacherPlusDefault ?? data?.teacherPlusImplicit ?? TEACHER_PLUS_DEFAULT),
+    [data],
+  );
 
-  function activeGrant(userId: string, cap: CapabilityId): Grant | undefined {
+  function activeRow(userId: string, cap: CapabilityId, effect: "ALLOW" | "DENY"): Grant | undefined {
     if (!data) return undefined;
     const now = Date.parse(data.asOf);
     return data.grants.find(
       (g) =>
         g.userId === userId &&
         g.capability === cap &&
+        (g.effect ?? "ALLOW") === effect &&
         !g.scopeKey &&
         !g.revokedAt &&
         (!g.expiresAt || Date.parse(g.expiresAt) > now),
@@ -185,7 +239,7 @@ export default function CapabilityAdmin() {
           aria-label="Ажилтны эрхийн хүснэгт, хэвтээ гүйлгэнэ"
           tabIndex={0}
         >
-          <table className="w-full min-w-[800px] border-separate border-spacing-0 text-sm">
+          <table className="w-full min-w-[1400px] border-separate border-spacing-0 text-sm">
             <thead>
               <tr className="text-left text-xs text-ink-dim">
                 <th
@@ -247,14 +301,23 @@ export default function CapabilityAdmin() {
                     </td>
                     {CAPS.map((cap) => (
                       <td key={cap.id} className="border-b border-line px-3 py-2 text-center">
-                        <CapabilityCell
-                          label={`${nameOf(u)}: ${cap.full}`}
-                          fixed={u.role === "ADMIN" || (u.role === "TEACHER_PLUS" && implicit.has(cap.id))}
-                          grant={u.role === "TEACHER_PLUS" ? activeGrant(u.id, cap.id) : undefined}
-                          grantable={u.role === "TEACHER_PLUS" && !implicit.has(cap.id)}
-                          onGrant={() => setDialog({ kind: "grant", user: u, cap })}
-                          onRevoke={(grant) => setDialog({ kind: "revoke", user: u, cap, grant })}
-                        />
+                        {u.role === "TEACHER_PLUS" && defaults.has(cap.id) ? (
+                          <DefaultCell
+                            label={`${nameOf(u)}: ${cap.full}`}
+                            deny={activeRow(u.id, cap.id, "DENY")}
+                            onDeny={() => setDialog({ kind: "deny", user: u, cap })}
+                            onAllow={(grant) => setDialog({ kind: "allow", user: u, cap, grant })}
+                          />
+                        ) : (
+                          <CapabilityCell
+                            label={`${nameOf(u)}: ${cap.full}`}
+                            fixed={u.role === "ADMIN"}
+                            grant={u.role === "TEACHER_PLUS" ? activeRow(u.id, cap.id, "ALLOW") : undefined}
+                            grantable={u.role === "TEACHER_PLUS"}
+                            onGrant={() => setDialog({ kind: "grant", user: u, cap })}
+                            onRevoke={(grant) => setDialog({ kind: "revoke", user: u, cap, grant })}
+                          />
+                        )}
                       </td>
                     ))}
                   </tr>
@@ -291,7 +354,7 @@ function CapabilityCell({
   onRevoke,
 }: {
   label: string;
-  /** Үүргээр байнга эзэмшинэ — түгжээтэй */
+  /** Админ — бүх эрх, түгжээтэй */
   fixed: boolean;
   grant?: Grant;
   grantable: boolean;
@@ -302,8 +365,8 @@ function CapabilityCell({
     return (
       <span
         role="img"
-        aria-label={`${label}: үүргээр байнга эзэмшинэ, түгжээтэй`}
-        title="Үүргээр байнга эзэмшинэ"
+        aria-label={`${label}: Админ бүх эрхтэй, түгжээтэй`}
+        title="Админ бүх эрхтэй"
         className="inline-flex size-11 items-center justify-center gap-0.5 rounded-xl bg-ink/5 text-ink-dim"
       >
         <Check className="size-4" aria-hidden />
@@ -351,6 +414,50 @@ function CapabilityCell({
   );
 }
 
+/** Багш+-д анхдагчаар нээлттэй эрх: ✓ (дарж хаана) эсвэл хаасан ✕ (дарж дахин нээнэ) */
+function DefaultCell({
+  label,
+  deny,
+  onDeny,
+  onAllow,
+}: {
+  label: string;
+  deny?: Grant;
+  onDeny: () => void;
+  onAllow: (grant: Grant) => void;
+}) {
+  if (deny)
+    return (
+      <span className="inline-flex flex-col items-center gap-0.5">
+        <button
+          type="button"
+          role="switch"
+          aria-checked="false"
+          aria-label={`${label}: хаасан. Дахин нээх`}
+          title="Хаасан. Дарж дахин нээнэ"
+          onClick={() => onAllow(deny)}
+          className="inline-flex size-11 items-center justify-center rounded-xl border border-error/40 bg-error/5 text-error outline-none transition hover:border-error focus-visible:ring-2 focus-visible:ring-brand-bright/60"
+        >
+          <X className="size-4" aria-hidden />
+        </button>
+        {deny.expiresAt && <span className="text-xs tabular-nums text-ink-dim">{dayUB(deny.expiresAt)} хүртэл</span>}
+      </span>
+    );
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked="true"
+      aria-label={`${label}: Багш+-д анхдагчаар нээлттэй. Хаах`}
+      title="Анхдагчаар нээлттэй. Дарж хаана"
+      onClick={onDeny}
+      className="inline-flex size-11 items-center justify-center rounded-xl bg-brand-bright text-on-brand outline-none transition hover:brightness-105 focus-visible:ring-2 focus-visible:ring-brand-bright/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+    >
+      <Check className="size-4" aria-hidden />
+    </button>
+  );
+}
+
 function Legend() {
   return (
     <section aria-labelledby="matrix-legend" className="chunky space-y-3 p-4 sm:p-5">
@@ -371,18 +478,26 @@ function Legend() {
             <Check className="size-3.5" aria-hidden />
             <Lock className="size-3" aria-hidden />
           </span>
-          Түгжээтэй: Админ, Багш+-д үүргээр байнга нээлттэй, өөрчилдөггүй
+          Түгжээтэй: Админ бүх эрхтэй, өөрчилдөггүй
+        </li>
+        <li className="flex items-center gap-2">
+          <Check className="size-4 shrink-0" aria-hidden />
+          Нээлттэй: дарж тухайн Багш+-д хаана. Хуваарь, төлбөр, анги, сурагч, сорил, контент, ажил, тайлан нь Багш+-д анхдагчаар нээлттэй
+        </li>
+        <li className="flex items-center gap-2">
+          <X className="size-4 shrink-0" aria-hidden />
+          Хаасан: дарж дахин нээнэ
         </li>
         <li className="flex items-center gap-2">
           <Plus className="size-4 shrink-0" aria-hidden />
-          Олгоогүй: дарж Багш+-д олгоно. Олгосон бол дарж цуцална
+          Олгоогүй: цаг, цалин, цаг бөглөх, нууц үг солих эрхийг дарж олгоно. Олгосон бол дарж цуцална
         </li>
         <li className="flex items-center gap-2">
           <Minus className="size-4 shrink-0" aria-hidden />
           Багшид нарийн эрх олгогдохгүй, Багш+ болгосны дараа олгоно
         </li>
         <li>
-          Сургалтаас хасах (сурагч архивлах) нь бүх Багш+-д нээлттэй, тусгай эрх шаардахгүй
+          Хаасан эрхтэй үйлдлийг сервер зөвшөөрөхгүй, товч нь харагдахгүй. Багш (Багш+ биш)-ийн эрхэд нөлөөлөхгүй
         </li>
       </ul>
     </section>
@@ -440,7 +555,7 @@ function ActionBody({
   const reasonRequired = dialog.kind !== "role";
   const reasonOk = !reasonRequired || reason.trim().length >= 3;
   const promote = dialog.kind === "role" && dialog.to === "TEACHER_PLUS";
-  const danger = dialog.kind === "revoke" || (dialog.kind === "role" && !promote);
+  const danger = dialog.kind === "revoke" || dialog.kind === "deny" || (dialog.kind === "role" && !promote);
 
   const title =
     dialog.kind === "role"
@@ -449,10 +564,24 @@ function ActionBody({
         : `${name}-ийг Багш болгох уу`
       : dialog.kind === "grant"
         ? `${name}: ${dialog.cap.full}`
-        : `${name}: эрхийг цуцлах уу`;
+        : dialog.kind === "deny"
+          ? `${name}: «${dialog.cap.full}» хаах уу`
+          : dialog.kind === "allow"
+            ? `${name}: «${dialog.cap.full}» дахин нээх үү`
+            : `${name}: эрхийг цуцлах уу`;
 
   const confirmLabel =
-    dialog.kind === "role" ? (promote ? "Багш+ болгох" : "Багш болгох") : dialog.kind === "grant" ? "Эрх олгох" : "Эрх цуцлах";
+    dialog.kind === "role"
+      ? promote
+        ? "Багш+ болгох"
+        : "Багш болгох"
+      : dialog.kind === "grant"
+        ? "Эрх олгох"
+        : dialog.kind === "deny"
+          ? "Эрх хаах"
+          : dialog.kind === "allow"
+            ? "Дахин нээх"
+            : "Эрх цуцлах";
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -478,12 +607,25 @@ function ActionBody({
           },
         });
         onDone("Эрх олголоо. Аудитад хадгалагдлаа");
+      } else if (dialog.kind === "deny") {
+        await api("/staff-capabilities", {
+          method: "POST",
+          body: {
+            userId: dialog.user.id,
+            capability: dialog.cap.id,
+            scopeKey: "",
+            effect: "DENY",
+            reason: reason.trim(),
+            ...(expires ? { expiresAt: `${expires}T23:59:00+08:00` } : {}),
+          },
+        });
+        onDone("Эрх хаагдлаа. Аудитад хадгалагдлаа");
       } else {
         await api(`/staff-capabilities/${encodeURIComponent(dialog.grant.id)}`, {
           method: "DELETE",
           body: { reason: reason.trim() },
         });
-        onDone("Эрх цуцлагдлаа. Түүх хадгалагдсан");
+        onDone(dialog.kind === "allow" ? "Эрх дахин нээгдлээ. Түүх хадгалагдсан" : "Эрх цуцлагдлаа. Түүх хадгалагдсан");
       }
     } catch (err) {
       setError(errText(err));
@@ -498,10 +640,12 @@ function ActionBody({
         <p className="mt-1 text-sm leading-relaxed text-ink-dim">
           {dialog.kind === "role" &&
             (promote
-              ? "Багш+ болгоход төлбөр, хуваарь засах эрх үүргээр нээгдэнэ. Цаг, цалингийн эрхийг матрицаас тусад нь олгоно"
+              ? "Багш+ болгоход хуваарь, төлбөр, анги, сурагч, сорил, контент, ажил, тайлангийн эрх анхдагчаар нээгдэнэ (өмнө хаасан эрх хаалттай хэвээр). Цаг, цалингийн эрхийг матрицаас тусад нь олгоно"
               : "Багш болгоход Багш+-ийн нэмэлт эрх хаагдаж, олгосон нарийн эрх бүгд цуцлагдана")}
           {dialog.kind === "grant" && dialog.cap.hint}
           {dialog.kind === "revoke" && `${dialog.cap.full} эрх хаагдана. Өмнөх түүх хадгалагдана`}
+          {dialog.kind === "deny" && `${dialog.cap.hint}. Энэ хүнд эдгээр үйлдэл хаагдана, бусад Багш+-д нөлөөлөхгүй`}
+          {dialog.kind === "allow" && `${dialog.cap.full} эрх Багш+-ийн анхдагч байдлаар дахин нээгдэнэ. Түүх хадгалагдана`}
         </p>
       </div>
 
@@ -526,12 +670,14 @@ function ActionBody({
         />
       </label>
 
-      {dialog.kind === "grant" && (
+      {(dialog.kind === "grant" || dialog.kind === "deny") && (
         <label className="block text-sm font-semibold text-ink">
-          Дуусах огноо (заавал биш)
+          {dialog.kind === "deny" ? "Хаалт дуусах огноо (заавал биш)" : "Дуусах огноо (заавал биш)"}
           <input type="date" min={tomorrow} value={expires} onChange={(e) => setExpires(e.target.value)} className={field} />
           <span className="mt-1 block text-xs font-normal text-ink-dim">
-            Хоосон бол цуцлах хүртэл хүчинтэй. Тодорхой хугацаа өгөхийг зөвлөж байна
+            {dialog.kind === "deny"
+              ? "Хоосон бол дахин нээх хүртэл хаалттай"
+              : "Хоосон бол цуцлах хүртэл хүчинтэй. Тодорхой хугацаа өгөхийг зөвлөж байна"}
           </span>
         </label>
       )}

@@ -9,6 +9,7 @@ import { formatDate, formatDateTime, formatMoney } from './format';
 import RefundStatusBadge from './RefundStatusBadge';
 import { REFUND_WARNING_TEXT, type RefundDetail as RefundRecord } from './types';
 import { withPlus } from "@/lib/personName";
+import { useStaffCan } from "@/lib/staffCapabilities";
 
 type Action = 'pending' | 'approve' | 'paid' | 'cancel';
 
@@ -22,7 +23,7 @@ const ACTION_INFO: Record<Action, { title: string; confirm: string; path: string
 export default function RefundDetail({ refundId }: { refundId: string }) {
   const role = getRole();
   const isAdmin = role === 'ADMIN';
-  const canManage = isAdmin || role === 'TEACHER_PLUS';
+  const canManage = useStaffCan("finance.manage", role);
   const [refund, setRefund] = useState<RefundRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

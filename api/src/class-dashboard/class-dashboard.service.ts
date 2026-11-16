@@ -118,6 +118,15 @@ export class ClassDashboardService {
     return role === Role.ADMIN || role === Role.TEACHER_PLUS;
   }
 
+  /** UI товчны туг: Админ эсвэл эрхийн матрицын тухайн эрхтэй Багш+ */
+  private async staffCan(
+    actor: Actor,
+    capability: 'classes.manage' | 'students.manage',
+  ): Promise<boolean> {
+    if (!this.managesAll(actor.role)) return false;
+    return this.caps.has(actor.userId, capability).catch(() => false);
+  }
+
   /**
    * Энгийн багшийн харах ангиуд: ангийн багш эсвэл туслах ангийн багш
    * (Classroom.teacherId / assistantTeacherId), идэвхтэй хуваарийн багш
@@ -460,7 +469,7 @@ export class ClassDashboardService {
       windowDays: RECENT_DAYS,
       permissions: {
         money,
-        manageClasses: this.managesAll(actor.role),
+        manageClasses: await this.staffCan(actor, 'classes.manage'),
         isAdmin: actor.role === Role.ADMIN,
       },
       classes: items,
@@ -946,6 +955,12 @@ export class ClassDashboardService {
         ]);
     const overviewBy = new Map(overview.students.map((s) => [s.id, s]));
     const practiceFrom = daysAgo(PRACTICE_DAYS);
+    // Төлбөрийн эрхээ хаалгасан Багш+ дүн харахгүй (эрхийн матриц, эзэн 2026-11-16)
+    const moneyRole =
+      actor.role === Role.TEACHER_PLUS &&
+      !(await this.canSeeMoney(actor.userId))
+        ? Role.TEACHER
+        : actor.role;
 
     const students = roster.map((r) => {
       const ov = overviewBy.get(r.id)!;
@@ -1028,7 +1043,7 @@ export class ClassDashboardService {
           createdByName: markPlus(f.createdByName, f.createdById, flagPlus),
         })),
         // Дүнг Админ, Багш+ л харна (эзэн 2026-11-16) — бусдад серверээс гарахгүй
-        payment: pay ? studentPaymentView(pay, actor.role) : null,
+        payment: pay ? studentPaymentView(pay, moneyRole) : null,
       };
     });
 
@@ -1097,7 +1112,8 @@ export class ClassDashboardService {
       },
       permissions: {
         money,
-        manageClass: this.managesAll(actor.role),
+        manageClass: await this.staffCan(actor, 'classes.manage'),
+        manageStudents: await this.staffCan(actor, 'students.manage'),
         isAdmin: actor.role === Role.ADMIN,
       },
       teachers: [...teacherMap.values()].map((t) => ({

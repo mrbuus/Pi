@@ -4,6 +4,8 @@ import { MistakeCollector } from '../mistakes/mistake-collector.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProgressService } from './progress.service';
 import { ProgressModule } from './progress.module';
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
+import { StaffCapabilityModule } from '../staff-capabilities/staff-capability.module';
 
 describe('ProgressModule dependency wiring', () => {
   it('boots its reused attempt services with the mistake collector and synthetic Prisma provider', async () => {
@@ -12,7 +14,7 @@ describe('ProgressModule dependency wiring', () => {
       $disconnect: jest.fn(),
     };
     const moduleRef = await Test.createTestingModule({
-      imports: [ProgressModule],
+      imports: [ProgressModule, StaffCapabilityModule],
     })
       .overrideProvider(PrismaService)
       .useValue(prisma)

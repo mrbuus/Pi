@@ -34,6 +34,7 @@ import {
 } from './internal-drafts.dto';
 import { readStoredBytes } from '../storage/file-store';
 import { InternalDraftsService } from './internal-drafts.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 /**
  * «Дотоод» — ажилтны бодлого/тестийн ноорог. ЗӨВХӨН Багш+ ба Админ: ноорогт
@@ -48,6 +49,7 @@ export class InternalDraftsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('sets')
+  @RequireCapability('content.manage')
   list(
     @Req() req: RequestWithUser,
     @Query('q') q?: string,
@@ -58,18 +60,21 @@ export class InternalDraftsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('sets')
+  @RequireCapability('content.manage')
   create(@Body() dto: CreateDraftSetDto, @Req() req: RequestWithUser) {
     return this.drafts.createSet(dto, req.user.userId);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('sets/:id')
+  @RequireCapability('content.manage')
   get(@Param('id') id: string, @Req() req: RequestWithUser) {
     return this.drafts.getSet(id, req.user.userId);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('sets/:id')
+  @RequireCapability('content.manage')
   update(
     @Param('id') id: string,
     @Body() dto: UpdateDraftSetDto,
@@ -80,12 +85,14 @@ export class InternalDraftsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('sets/:id')
+  @RequireCapability('content.manage')
   remove(@Param('id') id: string, @Req() req: RequestWithUser) {
     return this.drafts.deleteSet(id, req.user.userId);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('sets/:id/blocks')
+  @RequireCapability('content.manage')
   addBlock(
     @Param('id') id: string,
     @Body() dto: CreateDraftBlockDto,
@@ -96,6 +103,7 @@ export class InternalDraftsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('sets/:id/blocks/bulk')
+  @RequireCapability('content.manage')
   addBlocks(
     @Param('id') id: string,
     @Body() dto: BulkDraftBlocksDto,
@@ -106,6 +114,7 @@ export class InternalDraftsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Put('sets/:id/order')
+  @RequireCapability('content.manage')
   reorder(
     @Param('id') id: string,
     @Body() dto: ReorderDraftBlocksDto,
@@ -117,6 +126,7 @@ export class InternalDraftsController {
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('sets/:id/check')
   @HttpCode(200)
+  @RequireCapability('content.manage')
   check(
     @Param('id') id: string,
     @Body() dto: CheckDraftAnswersDto,
@@ -127,6 +137,7 @@ export class InternalDraftsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('sets/:id/publish')
+  @RequireCapability('content.manage')
   publish(
     @Param('id') id: string,
     @Body() dto: PublishDraftSetDto,
@@ -137,6 +148,7 @@ export class InternalDraftsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('blocks/:blockId')
+  @RequireCapability('content.manage')
   updateBlock(
     @Param('blockId') blockId: string,
     @Body() dto: UpdateDraftBlockDto,
@@ -147,12 +159,14 @@ export class InternalDraftsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('blocks/:blockId/duplicate')
+  @RequireCapability('content.manage')
   duplicate(@Param('blockId') blockId: string, @Req() req: RequestWithUser) {
     return this.drafts.duplicateBlock(blockId, req.user.userId);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('blocks/:blockId')
+  @RequireCapability('content.manage')
   removeBlock(@Param('blockId') blockId: string, @Req() req: RequestWithUser) {
     return this.drafts.deleteBlock(blockId, req.user.userId);
   }

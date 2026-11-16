@@ -43,7 +43,7 @@ async function setup(target: {
   const service = new UsersService(
     prisma,
     { record } as unknown as AuditService,
-    {} as StaffCapabilityService,
+    { has: jest.fn().mockResolvedValue(true) } as unknown as StaffCapabilityService,
   );
   const run = (phone: string, actorRole: Role = Role.ADMIN) =>
     service.updateProfile('u1', { phone }, 'admin', actorRole);

@@ -30,6 +30,7 @@ import { ClassOverviewService } from './class-overview.service';
 import { ExamAnalyticsService } from './exam-analytics.service';
 import { ExamsService, parseExamListKind } from './exams.service';
 import { GradebookService } from './gradebook.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -136,6 +137,7 @@ export class ExamsController {
 
   @Roles(...CONTENT)
   @Patch(':testId/scoring-groups')
+  @RequireCapability('exams.manage')
   setScoringGroups(
     @Param('testId') testId: string,
     @Body() dto: SetScoringGroupsDto,

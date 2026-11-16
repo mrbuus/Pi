@@ -6,6 +6,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { FormulasController } from './formulas.controller';
 import { FormulasService } from './formulas.service';
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
+import { StaffCapabilityModule } from '../staff-capabilities/staff-capability.module';
 
 describe('PATCH /api/formulas/:slug HTTP authorization and conflicts', () => {
   let app: INestApplication;
@@ -14,7 +16,7 @@ describe('PATCH /api/formulas/:slug HTTP authorization and conflicts', () => {
   beforeAll(async () => {
     const module = await Test.createTestingModule({
       controllers: [FormulasController],
-      providers: [Reflector, RolesGuard, { provide: FormulasService, useValue: formulas }],
+      providers: [Reflector, RolesGuard, { provide: FormulasService, useValue: formulas }, { provide: StaffCapabilityService, useValue: { assertForTeacherPlus: jest.fn().mockResolvedValue(undefined), has: jest.fn().mockResolvedValue(true) } }],
     }).overrideGuard(JwtAuthGuard).useValue({
       canActivate(context: any) {
         const req = context.switchToHttp().getRequest();

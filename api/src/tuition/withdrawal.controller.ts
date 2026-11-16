@@ -23,6 +23,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { FinanceCapabilityGuard } from '../payments/finance-capability.guard';
 import { Role } from '../generated/prisma/enums';
 import { WithdrawalService } from './withdrawal.service';
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -99,10 +100,21 @@ export class WithdrawalController {
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
 export class RefundEstimateController {
-  constructor(private readonly withdrawal: WithdrawalService) {}
+  constructor(
+    private readonly withdrawal: WithdrawalService,
+    private readonly capabilities: StaffCapabilityService,
+  ) {}
 
   @Get(':studentId')
-  estimate(@Param('studentId') studentId: string, @Req() req: AuthedRequest) {
-    return this.withdrawal.estimate(studentId, req.user.role);
+  async estimate(
+    @Param('studentId') studentId: string,
+    @Req() req: AuthedRequest,
+  ) {
+    // Төлбөрийн эрхээ хаалгасан Багш+ — Багш шиг зөвхөн буцаах дүн + хичээлийн тоо
+    const role = await this.capabilities.financeRole(
+      req.user.userId,
+      req.user.role,
+    );
+    return this.withdrawal.estimate(studentId, role);
   }
 }

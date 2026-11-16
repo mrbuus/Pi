@@ -31,6 +31,8 @@ class GrantDto {
   @IsOptional() @IsString() @MaxLength(150) scopeKey?: string;
   @IsString() @Length(3, 500) reason!: string;
   @IsOptional() @IsISO8601() expiresAt?: string;
+  /** DENY = Багш+-ийн анхдагч эрхийг тухайн хүнд хаах */
+  @IsOptional() @IsIn(['ALLOW', 'DENY']) effect?: 'ALLOW' | 'DENY';
 }
 class RevokeDto {
   @IsString() @Length(3, 500) reason!: string;

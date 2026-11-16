@@ -30,6 +30,7 @@ import {
   UpdatePlacementTestDto,
 } from './placement.dto';
 import { PlacementService } from './placement.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 // Түвшин тогтоох шалгалт. Хүүхэд нэвтрэлтгүй бодно — зочны эрх нь start-аас
 // авсан нууц түлхүүр (хэш нь ӨС-д). Нийтийн маршрут тул бүгд @Throttle-тэй,
@@ -90,6 +91,7 @@ export class PlacementController {
     return this.placement.adminTest();
   }
 
+  @RequireCapability('exams.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Put('config')

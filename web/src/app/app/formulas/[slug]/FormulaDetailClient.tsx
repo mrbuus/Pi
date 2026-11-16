@@ -34,6 +34,7 @@ import { useFormulaRequest } from "@/components/formulas/useFormulaRequest";
 import type { FormulaDetail } from "@/components/formulas/types";
 import styles from "@/components/formulas/Print.module.css";
 import { FormulaEditor } from "@/components/formulas/FormulaEditor";
+import { staffCan } from "@/lib/staffCapabilities";
 const subscribe = () => () => {};
 function DetailBlock({
   title,
@@ -129,7 +130,7 @@ export default function FormulaDetailClient({ slug }: { slug: string }) {
       <div className="flex flex-wrap justify-between gap-2 print:hidden">
         {back}
         <div className="flex flex-wrap gap-2">
-          {["ADMIN", "TEACHER_PLUS"].includes(role ?? "") && (
+          {staffCan("content.manage", role) && (
             <Button variant="outline" onClick={() => setEditing(true)}>
               <Pencil aria-hidden />
               Засах

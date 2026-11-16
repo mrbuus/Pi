@@ -1066,7 +1066,9 @@ export class UsersService {
       let revokedGrants = 0;
       if (role === Role.TEACHER) {
         const revoked = await tx.staffCapabilityGrant.updateMany({
-          where: { userId: targetId, revokedAt: null },
+          // Зөвхөн олголтууд (ALLOW). Хаалт (DENY) үлдэнэ — дахин Багш+ болгоход
+          // Админы хаасан эрх нууцаар нээгдэхгүй.
+          where: { userId: targetId, revokedAt: null, effect: 'ALLOW' },
           data: { revokedAt: new Date() },
         });
         revokedGrants = revoked.count;
@@ -1162,7 +1164,13 @@ export class UsersService {
       throw new ForbiddenException('Өөр админы мэдээллийг засах боломжгүй');
 
     // Тохирсон (хөнгөлөлттэй) дүнг зөвхөн Админ тавьж/арилгана — Багш+ багц засахад дарагдахгүй
-    dto = guardTuitionFields(dto, actorRole);
+    // Төлбөрийн эрхээ хаалгасан Багш+ дүн засахгүй (эрхийн матриц, эзэн 2026-11-16)
+    const moneyRole =
+      actorRole === Role.TEACHER_PLUS &&
+      !(await this.capabilities.has(actorId, 'finance.manage'))
+        ? Role.TEACHER
+        : actorRole;
+    dto = guardTuitionFields(dto, moneyRole);
 
     const studentFields: (keyof UpdateUserProfileDto)[] = [
       'grade',

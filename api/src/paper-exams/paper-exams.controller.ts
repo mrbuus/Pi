@@ -32,6 +32,7 @@ import {
   UpdatePaperExamDto,
 } from './paper-exams.dto';
 import { PaperExamsService, type Actor } from './paper-exams.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 const STAFF = [Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER] as const;
 const MANAGE = [Role.ADMIN, Role.TEACHER_PLUS] as const;
@@ -157,6 +158,7 @@ export class PaperExamsController {
 
   @Roles(...MANAGE)
   @Post()
+  @RequireCapability('exams.manage')
   create(@Body() dto: CreatePaperExamDto, @Req() req: RequestWithUser) {
     return this.paper.create(dto, actorOf(req));
   }
@@ -169,6 +171,7 @@ export class PaperExamsController {
 
   @Roles(...MANAGE)
   @Patch(':id')
+  @RequireCapability('exams.manage')
   update(
     @Param('id') id: string,
     @Body() dto: UpdatePaperExamDto,
@@ -179,12 +182,14 @@ export class PaperExamsController {
 
   @Roles(...MANAGE)
   @Delete(':id')
+  @RequireCapability('exams.manage')
   remove(@Param('id') id: string, @Req() req: RequestWithUser) {
     return this.paper.remove(id, actorOf(req));
   }
 
   @Roles(...MANAGE)
   @Put(':id/items')
+  @RequireCapability('exams.manage')
   saveItems(
     @Param('id') id: string,
     @Body() dto: SavePaperItemsDto,
@@ -212,6 +217,7 @@ export class PaperExamsController {
             ),
     }),
   )
+  @RequireCapability('exams.manage')
   importFile(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
@@ -230,6 +236,7 @@ export class PaperExamsController {
 
   @Roles(...MANAGE)
   @Get(':id/imports')
+  @RequireCapability('exams.manage')
   imports(@Param('id') id: string) {
     return this.paper.imports(id);
   }
@@ -237,6 +244,7 @@ export class PaperExamsController {
   @Roles(...MANAGE)
   @Post('imports/:importId/revert')
   @HttpCode(200)
+  @RequireCapability('exams.manage')
   revert(@Param('importId') importId: string, @Req() req: RequestWithUser) {
     return this.paper.revertImport(importId, actorOf(req));
   }
@@ -254,6 +262,7 @@ export class PaperExamsController {
 
   @Roles(...MANAGE)
   @Patch('sheets/:sheetId')
+  @RequireCapability('exams.manage')
   link(
     @Param('sheetId') sheetId: string,
     @Body() dto: LinkSheetDto,

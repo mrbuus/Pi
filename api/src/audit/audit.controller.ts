@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import { AuditService } from './audit.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('audit')
@@ -14,6 +15,7 @@ export class AuditController {
   // бүх системийн аудит лог, шүүлтүүртэй, хуудаслалттай
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get()
+  @RequireCapability('reports.view')
   list(
     @Query('entity') entity?: string,
     @Query('entityId') entityId?: string,
@@ -39,6 +41,7 @@ export class AuditController {
   // ADMIN + TEACHER_PLUS: нэг бичлэгийн бүрэн өөрчлөлтийн түүх
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('entity/:entity/:entityId')
+  @RequireCapability('reports.view')
   history(
     @Param('entity') entity: string,
     @Param('entityId') entityId: string,

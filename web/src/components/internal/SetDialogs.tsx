@@ -8,6 +8,7 @@ import ChapterPicker from "./ChapterPicker";
 import Dialog from "./Dialog";
 import type { SetPatch } from "./draftApi";
 import { SUBJECT_LABEL, type DraftEvent, type DraftSetSummary, type Subject } from "./model";
+import { staffCan } from "@/lib/staffCapabilities";
 
 const input =
   "min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-[15px] text-ink focus:border-brand-bright focus:outline-none focus:ring-2 focus:ring-brand-bright/25";
@@ -103,8 +104,7 @@ export function HistoryDialog({
 
 /** Зөвхөн Багш+/Админ — бусдад эелдэг тайлбар (жинхэнэ хамгаалалт серверт) */
 export function canUseInternal(): boolean {
-  const role = getRole();
-  return role === "ADMIN" || role === "TEACHER_PLUS";
+  return staffCan("content.manage", getRole());
 }
 
 export function NoAccess() {

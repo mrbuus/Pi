@@ -7,6 +7,7 @@ import { Role } from '../generated/prisma/enums';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadStatusDto } from './dto/update-lead-status.dto';
 import { LeadsService } from './leads.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 // Бизнесийн хамгийн өндөр ROI-той өөрчлөлт: төв 7,900 Facebook followers-тэй
 // ч бүх элсэлтийг гараар Messenger DM-ээр боловсруулдаг байсан — шөнө/
@@ -25,6 +26,7 @@ export class LeadsController {
     return { id: lead.id, status: lead.status };
   }
 
+  @RequireCapability('students.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get()
@@ -32,6 +34,7 @@ export class LeadsController {
     return this.leads.findAll();
   }
 
+  @RequireCapability('students.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch(':id/status')

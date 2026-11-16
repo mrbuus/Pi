@@ -4,6 +4,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import { getRole } from "@/lib/api";
 import { LoadingState } from "@/components/ui/StateBlock";
 import PaperExamsList from "@/components/paper-exams/PaperExamsList";
+import { staffCan } from "@/lib/staffCapabilities";
 
 const noopSubscribe = () => () => {};
 
@@ -16,5 +17,5 @@ export default function PaperExamsPage() {
     if (mounted && !staff) window.location.replace("/app/tests?tab=paper");
   }, [mounted, staff]);
   if (!mounted || !staff) return <LoadingState rows={3} />;
-  return <PaperExamsList canManage={role === "ADMIN" || role === "TEACHER_PLUS"} />;
+  return <PaperExamsList canManage={staffCan("exams.manage", role)} />;
 }

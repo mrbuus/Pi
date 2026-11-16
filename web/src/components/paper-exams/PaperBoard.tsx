@@ -22,6 +22,7 @@ import MaterialViewer from "./MaterialViewer";
 import OverviewPanel from "./OverviewPanel";
 import PaperGuide from "./PaperGuide";
 import { dayText, type Board } from "./types";
+import { useStaffCan } from "@/lib/staffCapabilities";
 
 const ALL_TABS = [
   { value: "groups", label: "Ангиар", icon: Table2, manage: false },
@@ -38,7 +39,7 @@ type BoardTab = (typeof ALL_TABS)[number]["value"];
 export default function PaperBoard({ id }: { id: string }) {
   const router = useRouter();
   const role = getRole();
-  const canManage = role === "ADMIN" || role === "TEACHER_PLUS";
+  const canManage = useStaffCan("exams.manage", role);
   const tabs = ALL_TABS.filter((t) => canManage || !t.manage);
   // Тайлбартай шалгалтад л «Бодлогын тайлбар» таб
   const [guideOpen, setGuideOpen] = useState<string | null>(() => new URLSearchParams(window.location.search).get("p"));

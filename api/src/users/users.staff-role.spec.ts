@@ -87,7 +87,7 @@ describe('UsersService.setStaffRole', () => {
       expect.objectContaining({ role: Role.TEACHER, revokedGrants: 2 }),
     );
     expect(tx.staffCapabilityGrant.updateMany).toHaveBeenCalledWith({
-      where: { userId: 't1', revokedAt: null },
+      where: { userId: 't1', revokedAt: null, effect: 'ALLOW' },
       data: { revokedAt: expect.any(Date) },
     });
     expect(tx.teacherProfile.upsert).toHaveBeenCalledWith(

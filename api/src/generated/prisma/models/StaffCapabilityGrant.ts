@@ -29,6 +29,7 @@ export type StaffCapabilityGrantMinAggregateOutputType = {
   userId: string | null
   capability: string | null
   scopeKey: string | null
+  effect: string | null
   grantedById: string | null
   reason: string | null
   expiresAt: Date | null
@@ -42,6 +43,7 @@ export type StaffCapabilityGrantMaxAggregateOutputType = {
   userId: string | null
   capability: string | null
   scopeKey: string | null
+  effect: string | null
   grantedById: string | null
   reason: string | null
   expiresAt: Date | null
@@ -55,6 +57,7 @@ export type StaffCapabilityGrantCountAggregateOutputType = {
   userId: number
   capability: number
   scopeKey: number
+  effect: number
   grantedById: number
   reason: number
   expiresAt: number
@@ -70,6 +73,7 @@ export type StaffCapabilityGrantMinAggregateInputType = {
   userId?: true
   capability?: true
   scopeKey?: true
+  effect?: true
   grantedById?: true
   reason?: true
   expiresAt?: true
@@ -83,6 +87,7 @@ export type StaffCapabilityGrantMaxAggregateInputType = {
   userId?: true
   capability?: true
   scopeKey?: true
+  effect?: true
   grantedById?: true
   reason?: true
   expiresAt?: true
@@ -96,6 +101,7 @@ export type StaffCapabilityGrantCountAggregateInputType = {
   userId?: true
   capability?: true
   scopeKey?: true
+  effect?: true
   grantedById?: true
   reason?: true
   expiresAt?: true
@@ -182,6 +188,7 @@ export type StaffCapabilityGrantGroupByOutputType = {
   userId: string
   capability: string
   scopeKey: string
+  effect: string
   grantedById: string
   reason: string
   expiresAt: Date | null
@@ -216,6 +223,7 @@ export type StaffCapabilityGrantWhereInput = {
   userId?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   capability?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   scopeKey?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
+  effect?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   grantedById?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   reason?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   expiresAt?: Prisma.DateTimeNullableFilter<"StaffCapabilityGrant"> | Date | string | null
@@ -230,6 +238,7 @@ export type StaffCapabilityGrantOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   capability?: Prisma.SortOrder
   scopeKey?: Prisma.SortOrder
+  effect?: Prisma.SortOrder
   grantedById?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -248,6 +257,7 @@ export type StaffCapabilityGrantWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   capability?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   scopeKey?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
+  effect?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   grantedById?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   reason?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   expiresAt?: Prisma.DateTimeNullableFilter<"StaffCapabilityGrant"> | Date | string | null
@@ -262,6 +272,7 @@ export type StaffCapabilityGrantOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   capability?: Prisma.SortOrder
   scopeKey?: Prisma.SortOrder
+  effect?: Prisma.SortOrder
   grantedById?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -281,6 +292,7 @@ export type StaffCapabilityGrantScalarWhereWithAggregatesInput = {
   userId?: Prisma.StringWithAggregatesFilter<"StaffCapabilityGrant"> | string
   capability?: Prisma.StringWithAggregatesFilter<"StaffCapabilityGrant"> | string
   scopeKey?: Prisma.StringWithAggregatesFilter<"StaffCapabilityGrant"> | string
+  effect?: Prisma.StringWithAggregatesFilter<"StaffCapabilityGrant"> | string
   grantedById?: Prisma.StringWithAggregatesFilter<"StaffCapabilityGrant"> | string
   reason?: Prisma.StringWithAggregatesFilter<"StaffCapabilityGrant"> | string
   expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"StaffCapabilityGrant"> | Date | string | null
@@ -293,6 +305,7 @@ export type StaffCapabilityGrantCreateInput = {
   id?: string
   capability: string
   scopeKey?: string
+  effect?: string
   grantedById: string
   reason: string
   expiresAt?: Date | string | null
@@ -307,6 +320,7 @@ export type StaffCapabilityGrantUncheckedCreateInput = {
   userId: string
   capability: string
   scopeKey?: string
+  effect?: string
   grantedById: string
   reason: string
   expiresAt?: Date | string | null
@@ -319,6 +333,7 @@ export type StaffCapabilityGrantUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   capability?: Prisma.StringFieldUpdateOperationsInput | string
   scopeKey?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.StringFieldUpdateOperationsInput | string
   grantedById?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -333,6 +348,7 @@ export type StaffCapabilityGrantUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   capability?: Prisma.StringFieldUpdateOperationsInput | string
   scopeKey?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.StringFieldUpdateOperationsInput | string
   grantedById?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -346,6 +362,7 @@ export type StaffCapabilityGrantCreateManyInput = {
   userId: string
   capability: string
   scopeKey?: string
+  effect?: string
   grantedById: string
   reason: string
   expiresAt?: Date | string | null
@@ -358,6 +375,7 @@ export type StaffCapabilityGrantUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   capability?: Prisma.StringFieldUpdateOperationsInput | string
   scopeKey?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.StringFieldUpdateOperationsInput | string
   grantedById?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -371,6 +389,7 @@ export type StaffCapabilityGrantUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   capability?: Prisma.StringFieldUpdateOperationsInput | string
   scopeKey?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.StringFieldUpdateOperationsInput | string
   grantedById?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -400,6 +419,7 @@ export type StaffCapabilityGrantCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   capability?: Prisma.SortOrder
   scopeKey?: Prisma.SortOrder
+  effect?: Prisma.SortOrder
   grantedById?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -413,6 +433,7 @@ export type StaffCapabilityGrantMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   capability?: Prisma.SortOrder
   scopeKey?: Prisma.SortOrder
+  effect?: Prisma.SortOrder
   grantedById?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -426,6 +447,7 @@ export type StaffCapabilityGrantMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   capability?: Prisma.SortOrder
   scopeKey?: Prisma.SortOrder
+  effect?: Prisma.SortOrder
   grantedById?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -480,6 +502,7 @@ export type StaffCapabilityGrantCreateWithoutUserInput = {
   id?: string
   capability: string
   scopeKey?: string
+  effect?: string
   grantedById: string
   reason: string
   expiresAt?: Date | string | null
@@ -492,6 +515,7 @@ export type StaffCapabilityGrantUncheckedCreateWithoutUserInput = {
   id?: string
   capability: string
   scopeKey?: string
+  effect?: string
   grantedById: string
   reason: string
   expiresAt?: Date | string | null
@@ -534,6 +558,7 @@ export type StaffCapabilityGrantScalarWhereInput = {
   userId?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   capability?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   scopeKey?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
+  effect?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   grantedById?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   reason?: Prisma.StringFilter<"StaffCapabilityGrant"> | string
   expiresAt?: Prisma.DateTimeNullableFilter<"StaffCapabilityGrant"> | Date | string | null
@@ -546,6 +571,7 @@ export type StaffCapabilityGrantCreateManyUserInput = {
   id?: string
   capability: string
   scopeKey?: string
+  effect?: string
   grantedById: string
   reason: string
   expiresAt?: Date | string | null
@@ -558,6 +584,7 @@ export type StaffCapabilityGrantUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   capability?: Prisma.StringFieldUpdateOperationsInput | string
   scopeKey?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.StringFieldUpdateOperationsInput | string
   grantedById?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -570,6 +597,7 @@ export type StaffCapabilityGrantUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   capability?: Prisma.StringFieldUpdateOperationsInput | string
   scopeKey?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.StringFieldUpdateOperationsInput | string
   grantedById?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -582,6 +610,7 @@ export type StaffCapabilityGrantUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   capability?: Prisma.StringFieldUpdateOperationsInput | string
   scopeKey?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.StringFieldUpdateOperationsInput | string
   grantedById?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -597,6 +626,7 @@ export type StaffCapabilityGrantSelect<ExtArgs extends runtime.Types.Extensions.
   userId?: boolean
   capability?: boolean
   scopeKey?: boolean
+  effect?: boolean
   grantedById?: boolean
   reason?: boolean
   expiresAt?: boolean
@@ -611,6 +641,7 @@ export type StaffCapabilityGrantSelectCreateManyAndReturn<ExtArgs extends runtim
   userId?: boolean
   capability?: boolean
   scopeKey?: boolean
+  effect?: boolean
   grantedById?: boolean
   reason?: boolean
   expiresAt?: boolean
@@ -625,6 +656,7 @@ export type StaffCapabilityGrantSelectUpdateManyAndReturn<ExtArgs extends runtim
   userId?: boolean
   capability?: boolean
   scopeKey?: boolean
+  effect?: boolean
   grantedById?: boolean
   reason?: boolean
   expiresAt?: boolean
@@ -639,6 +671,7 @@ export type StaffCapabilityGrantSelectScalar = {
   userId?: boolean
   capability?: boolean
   scopeKey?: boolean
+  effect?: boolean
   grantedById?: boolean
   reason?: boolean
   expiresAt?: boolean
@@ -647,7 +680,7 @@ export type StaffCapabilityGrantSelectScalar = {
   updatedAt?: boolean
 }
 
-export type StaffCapabilityGrantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "capability" | "scopeKey" | "grantedById" | "reason" | "expiresAt" | "revokedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["staffCapabilityGrant"]>
+export type StaffCapabilityGrantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "capability" | "scopeKey" | "effect" | "grantedById" | "reason" | "expiresAt" | "revokedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["staffCapabilityGrant"]>
 export type StaffCapabilityGrantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -668,6 +701,7 @@ export type $StaffCapabilityGrantPayload<ExtArgs extends runtime.Types.Extension
     userId: string
     capability: string
     scopeKey: string
+    effect: string
     grantedById: string
     reason: string
     expiresAt: Date | null
@@ -1102,6 +1136,7 @@ export interface StaffCapabilityGrantFieldRefs {
   readonly userId: Prisma.FieldRef<"StaffCapabilityGrant", 'String'>
   readonly capability: Prisma.FieldRef<"StaffCapabilityGrant", 'String'>
   readonly scopeKey: Prisma.FieldRef<"StaffCapabilityGrant", 'String'>
+  readonly effect: Prisma.FieldRef<"StaffCapabilityGrant", 'String'>
   readonly grantedById: Prisma.FieldRef<"StaffCapabilityGrant", 'String'>
   readonly reason: Prisma.FieldRef<"StaffCapabilityGrant", 'String'>
   readonly expiresAt: Prisma.FieldRef<"StaffCapabilityGrant", 'DateTime'>

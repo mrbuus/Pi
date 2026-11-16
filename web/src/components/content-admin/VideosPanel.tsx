@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, Check } from "lucide-react";
-import { api, getRole } from "@/lib/api";
+import { api } from "@/lib/api";
 import ConfirmDialog from "./ConfirmDialog";
 import DeletedList from "./DeletedList";
 import {
@@ -17,6 +17,7 @@ import {
 } from "./types";
 import { DeletedEntry } from "./useDeletedLog";
 import { badgeCls, inputCls, pillCls, primaryBtn, secondaryBtn } from "./ui";
+import { staffCan } from "@/lib/staffCapabilities";
 
 interface VideosPanelProps {
   deletedEntries: DeletedEntry[];
@@ -96,7 +97,7 @@ export default function VideosPanel({
           title: editForm.title,
           url: editForm.url,
           chapterId: editForm.chapterId,
-          ...(["ADMIN", "TEACHER_PLUS"].includes(getRole() ?? "")
+          ...(staffCan("content.manage")
             ? { problemId: editForm.problemId.trim() || null }
             : {}),
         },
@@ -288,7 +289,7 @@ export default function VideosPanel({
                         </option>
                       ))}
                     </select>
-                    {["ADMIN", "TEACHER_PLUS"].includes(getRole() ?? "") && (
+                    {staffCan("content.manage") && (
                       <label
                         className="block space-y-1 text-sm"
                         htmlFor={`edit-video-problem-${v.id}`}

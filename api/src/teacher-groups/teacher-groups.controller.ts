@@ -18,6 +18,7 @@ import { JoinGroupDto } from './dto/join-group.dto';
 import { RegisterExternalTeacherDto } from './dto/register-external-teacher.dto';
 import { VerifyExternalTeacherDto } from './dto/verify-external-teacher.dto';
 import { RejectExternalTeacherDto } from './dto/reject-external-teacher.dto';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 // main.ts дээр setGlobalPrefix('api') бий — энд 'api/' давхардуулбал
 // зам нь /api/api/… болж, клиент 404 авна (2026-08-08-нд яг ингэж болсон).
@@ -42,6 +43,7 @@ export class TeacherGroupsController {
    * GET /api/teacher-groups/unverified
    * Админ/TEACHER_PLUS-д: баталгаажаагүй гадны багшийн жагсаалт.
    */
+  @RequireCapability('classes.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'TEACHER_PLUS')
   @Get('unverified')
@@ -53,6 +55,7 @@ export class TeacherGroupsController {
    * GET /api/teacher-groups/verified
    * Баталгаажсан гадны багшийн жагсаалт.
    */
+  @RequireCapability('classes.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'TEACHER_PLUS')
   @Get('verified')
@@ -64,6 +67,7 @@ export class TeacherGroupsController {
    * PUT /api/teacher-groups/verify/:userId
    * Админ/TEACHER_PLUS гадны багшийг баталгаажуулна.
    */
+  @RequireCapability('classes.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'TEACHER_PLUS')
   @Put('verify/:userId')
@@ -90,6 +94,7 @@ export class TeacherGroupsController {
    * PUT /api/teacher-groups/reject/:userId
    * Хүсэлтийг шалтгаантай татгалзаж, дахин шалгах боломжтойгоор тэмдэглэнэ.
    */
+  @RequireCapability('classes.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'TEACHER_PLUS')
   @Put('reject/:userId')
@@ -101,6 +106,7 @@ export class TeacherGroupsController {
   }
 
   /** Татгалзсан хүсэлтийг дахин хүлээгдэж буй жагсаалтад оруулна. */
+  @RequireCapability('classes.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'TEACHER_PLUS')
   @Put('reconsider/:userId')

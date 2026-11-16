@@ -6,6 +6,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import { StudentsFullExportService } from './students-full-export.service';
 import { UsersService } from './users.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN, Role.TEACHER_PLUS)
@@ -19,6 +20,7 @@ export class StudentsExportController {
   @Get('export.csv')
   @Header('Content-Type', 'text/csv; charset=utf-8')
   @Header('Content-Disposition', 'attachment; filename="students.csv"')
+  @RequireCapability('students.export')
   exportStudents(@Req() req: { user: { userId: string } }): Promise<string> {
     return this.users.exportStudentsCsv(req.user.userId);
   }
@@ -28,6 +30,7 @@ export class StudentsExportController {
    * сангийн бүх мэдээлэлтэй «Бүх мэдээлэл» таб (эзэн 2026-11-16)
    */
   @Get('export.xlsx')
+  @RequireCapability('students.export')
   async exportXlsx(
     @Req() req: { user: { userId: string } },
     @Res() res: Response,

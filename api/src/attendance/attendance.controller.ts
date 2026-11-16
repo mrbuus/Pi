@@ -17,6 +17,7 @@ import { AttendanceService } from './attendance.service';
 import { AttendanceDaySummaryService } from './day-summary.service';
 import { MarkAttendanceDto } from './dto/mark-attendance.dto';
 import { RiskCriteriaDto } from './dto/risk-criteria.dto';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -172,6 +173,7 @@ export class AttendanceController {
   // Шалгуур тавих — Багш+ ба Админ л (эзэн 2026-10-17)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Put('attendance/classrooms/:id/criteria')
+  @RequireCapability('classes.manage')
   setCriteria(
     @Param('id') classroomId: string,
     @Body() dto: RiskCriteriaDto,

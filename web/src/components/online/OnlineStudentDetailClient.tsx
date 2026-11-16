@@ -2,10 +2,10 @@
 
 import { LoadingState } from "@/components/ui/StateBlock";
 import { Eye, Flame, Plus, ArrowLeft, ArrowRight } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useSection } from "@/components/students/progress/useSection";
-import { api, getRole } from "@/lib/api";
+import { api } from "@/lib/api";
 import ActivityHeatmap from "@/components/activity/ActivityHeatmap";
 import { Meta } from "@/components/ui/Meta";
 import { ChapterProgressRow, OnlineStudentDetail } from "./types";
@@ -19,16 +19,14 @@ import TestHistoryList from "./TestHistoryList";
 import Timeline from "./Timeline";
 import AssignTestDialog from "./AssignTestDialog";
 import ResetChapterDialog from "./ResetChapterDialog";
+import { useStaffCan } from "@/lib/staffCapabilities";
 
 function OnlineStudentDetailClientContent({ studentId }: { studentId: string }) {
 
   // ⚠️ /progress/student/:id канэдит талбар буцаадаггүй — жинхэнэ хамгаалалт
   // сервер дээр мутаци бүрт (@Roles) хийгддэг тул энэ бол ЗӨВХӨН UI-г
   // харуулах/нуухад ашиглагдана.
-  const canEdit = useMemo(() => {
-    const role = getRole();
-    return role === "ADMIN" || role === "TEACHER_PLUS";
-  }, []);
+  const canEdit = useStaffCan("exams.manage");
 
   const [assignOpen, setAssignOpen] = useState(false);
   const [assignSaving, setAssignSaving] = useState(false);

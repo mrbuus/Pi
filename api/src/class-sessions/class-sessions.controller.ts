@@ -27,6 +27,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import { ClassSessionsService } from './class-sessions.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 class DidTestDto {
   // Бодлогын сангийн тест сонгосон бол testId. Гараар бичсэн бол хоосон
@@ -152,6 +153,7 @@ export class ClassSessionsController {
   // «Энэ ангиас хасах» / буцаах — зөвхөн Багш+, Админ
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Put('classrooms/:id/tests/:testId/status')
+  @RequireCapability('exams.manage')
   setTestStatus(
     @Param('id') classroomId: string,
     @Param('testId') testId: string,

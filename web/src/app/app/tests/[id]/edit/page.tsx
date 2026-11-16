@@ -37,6 +37,7 @@ import {
 } from "@/components/test-editor/model";
 import { Button } from "@/components/ui/kit/button";
 import { ErrorState, LoadingState } from "@/components/ui/StateBlock";
+import { useStaffCan } from "@/lib/staffCapabilities";
 
 /* ============================================================================
  * Тест засах — 40 блок (docs/v2/TEST-ZASAH-BLOK.md, эзний хүсэлт 2026-10-11):
@@ -115,7 +116,7 @@ export default function EditTestPage({ params }: { params: Promise<{ id: string 
   const router = useRouter();
   const role = getRole();
   const isAdmin = role === "ADMIN";
-  const canEditContent = role === "ADMIN" || role === "TEACHER_PLUS";
+  const canEditContent = useStaffCan("content.manage", role);
 
   const [test, setTest] = useState<TestDetails | null>(null);
   const [editInfo, setEditInfo] = useState<EditInfo | null>(null);

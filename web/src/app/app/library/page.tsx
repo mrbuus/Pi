@@ -17,6 +17,7 @@ import StudentViewModal from "@/components/library/StudentViewModal";
 import ProblemClassifyEditor from "@/components/ProblemClassifyEditor";
 import TestMenu from "@/components/library/TestMenu";
 import { api, getRole, ApiError } from "@/lib/api";
+import { useStaffCan } from "@/lib/staffCapabilities";
 
 interface Chapter {
   id: string;
@@ -232,7 +233,7 @@ export default function LibraryPage() {
     role === "ADMIN" || role === "TEACHER" || role === "TEACHER_PLUS";
   // Агуулга (статемент/сонголт/зөв хариу/зураг) засах эрх — зөвхөн ADMIN/TEACHER_PLUS.
   // Энгийн TEACHER-д зөвхөн дээрх canEdit-ийн хуучин ангилал/tag засах горим үлдэнэ.
-  const canEditContent = role === "ADMIN" || role === "TEACHER_PLUS";
+  const canEditContent = useStaffCan("content.manage", role);
 
   const topicGroups = useMemo(() => groupChapters(chapters), [chapters]);
   const activeGroup =

@@ -8,6 +8,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { ROLES_KEY } from '../auth/decorators/roles.decorator';
 import { TeacherGroupsController } from './teacher-groups.controller';
+import { CapabilityGuard } from '../staff-capabilities/capability.guard';
 
 describe('TeacherGroupsController verification routes', () => {
   const prototype = TeacherGroupsController.prototype;
@@ -44,6 +45,8 @@ describe('TeacherGroupsController verification routes', () => {
     expect(Reflect.getMetadata(GUARDS_METADATA, handler)).toEqual([
       JwtAuthGuard,
       RolesGuard,
+      // эрхийн матриц «Анги, багш» (эзэн 2026-11-16)
+      CapabilityGuard,
     ]);
   });
 
@@ -79,6 +82,8 @@ describe('TeacherGroupsController verification routes', () => {
       expect(Reflect.getMetadata(GUARDS_METADATA, handler)).toEqual([
         JwtAuthGuard,
         RolesGuard,
+        // эрхийн матриц «Анги, багш» (эзэн 2026-11-16)
+        CapabilityGuard,
       ]);
     }
   });

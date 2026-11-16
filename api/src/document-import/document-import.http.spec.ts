@@ -12,6 +12,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { DocumentImportModule } from './document-import.module';
 import type { Server } from 'node:http';
 import { DocumentImportService } from './document-import.service';
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
+import { StaffCapabilityModule } from '../staff-capabilities/staff-capability.module';
 
 describe('DOCX HTTP guards and validation', () => {
   let app: INestApplication;
@@ -28,11 +30,13 @@ describe('DOCX HTTP guards and validation', () => {
   };
   beforeAll(async () => {
     const module = await Test.createTestingModule({
-      imports: [DocumentImportModule],
+      imports: [DocumentImportModule, StaffCapabilityModule],
       providers: [{ provide: PrismaService, useValue: {} }],
     })
       .overrideProvider(DocumentImportService)
       .useValue(service)
+      .overrideProvider(StaffCapabilityService)
+      .useValue({ assertForTeacherPlus: jest.fn().mockResolvedValue(undefined) })
       .overrideGuard(JwtAuthGuard)
       .useValue({
         canActivate(context: ExecutionContext) {

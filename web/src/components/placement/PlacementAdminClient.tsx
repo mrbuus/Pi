@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/kit/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/kit/tabs";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { PageHeader } from "@/components/ui/Surface";
-import { api, fileUrl, getRole } from "@/lib/api";
+import { api, fileUrl } from "@/lib/api";
 import {
   CHOICE_KEYS,
   STATUS_LABEL,
@@ -20,6 +20,7 @@ import {
   type PlacementStatus,
   type PlacementTestPublic,
 } from "./types";
+import { useStaffCan } from "@/lib/staffCapabilities";
 
 interface Row {
   id: string; name: string; phone: string; grade: number; school: string | null; parentPhone: string | null;
@@ -228,7 +229,7 @@ const fromEdit = (e: EditProblem) => e.kind === "choice"
   : { kind: "boxes", statement: e.statement, points: e.points, boxes: e.boxes.map(({ key, digits }) => ({ key, digits })), answer: Object.fromEntries(e.boxes.map((b) => [b.key, b.answer])) };
 
 function ConfigEditor() {
-  const canEdit = ["ADMIN", "TEACHER_PLUS"].includes(getRole() ?? "");
+  const canEdit = useStaffCan("exams.manage");
   const [t, setT] = useState<{ title: string; minutes: number; instructions: string } | null>(null);
   const [ps, setPs] = useState<EditProblem[]>([]);
   const [failed, setFailed] = useState(false);

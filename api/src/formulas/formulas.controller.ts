@@ -8,6 +8,7 @@ import { Role } from '../generated/prisma/enums';
 import { FormulaDto } from './dto/formula.dto';
 import { FormulaQueryDto, FormulaStudentQueryDto } from './dto/formula-query.dto';
 import { FormulasService } from './formulas.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 export class PatchFormulaDto extends PartialType(FormulaDto) {
   @ApiPropertyOptional({ type: String, format: 'date-time', description: 'The updatedAt value read before editing. A stale value returns HTTP 409.' })
@@ -40,8 +41,10 @@ export class FormulasController {
   @ApiOperation({ summary: 'Томьёоны дэлгэрэнгүй' }) bySlug(@Param('slug') slug: string) { return this.formulas.bySlug(slug); }
 
   @Post() @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @RequireCapability('content.manage')
   @ApiOperation({ summary: 'Томьёо үүсгэх' }) create(@Body() dto: FormulaDto) { return this.formulas.create(dto); }
 
   @Patch(':slug') @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @RequireCapability('content.manage')
   @ApiOperation({ summary: 'Томьёо засах' }) update(@Param('slug') slug: string, @Body() dto: PatchFormulaDto) { return this.formulas.update(slug, dto); }
 }

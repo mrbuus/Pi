@@ -7,6 +7,7 @@ import type { RequestWithUser } from '../auth/request.interface';
 import { Role } from '../generated/prisma/enums';
 import { CreateMockExamDto, UpdateMockExamDto } from './mock-exams.dto';
 import { MockExamsService } from './mock-exams.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 // Нийтэд: удахгүй болох, явагдаж буй сорил (нэвтрэлтгүй, тестийн id-гүй)
 @Controller('catalog/mock-exams')
@@ -53,24 +54,28 @@ export class MockExamsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('tests')
+  @RequireCapability('exams.manage')
   tests() {
     return this.mock.pickableTests();
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post()
+  @RequireCapability('exams.manage')
   create(@Body() dto: CreateMockExamDto, @Req() req: RequestWithUser) {
     return this.mock.create(dto, req.user.userId);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch(':id')
+  @RequireCapability('exams.manage')
   update(@Param('id') id: string, @Body() dto: UpdateMockExamDto) {
     return this.mock.update(id, dto);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete(':id')
+  @RequireCapability('exams.manage')
   remove(@Param('id') id: string) {
     return this.mock.remove(id);
   }

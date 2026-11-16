@@ -11,6 +11,8 @@ import { FormulaReviewController } from './formula-review.controller';
 import { FormulaReviewService } from './formula-review.service';
 import { FormulasController } from './formulas.controller';
 import { FormulasService } from './formulas.service';
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
+import { StaffCapabilityModule } from '../staff-capabilities/staff-capability.module';
 
 describe('formula review HTTP routing and ownership', () => {
   let app: INestApplication;
@@ -28,6 +30,7 @@ describe('formula review HTTP routing and ownership', () => {
       providers: [
         { provide: FormulaReviewService, useValue: review },
         { provide: FormulasService, useValue: formulas },
+        { provide: StaffCapabilityService, useValue: { assertForTeacherPlus: jest.fn().mockResolvedValue(undefined), has: jest.fn().mockResolvedValue(true) } },
       ],
     })
       .overrideGuard(JwtAuthGuard)

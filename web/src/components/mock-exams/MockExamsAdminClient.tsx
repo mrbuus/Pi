@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/kit/badge";
 import { Button } from "@/components/ui/kit/button";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
 import { PageHeader } from "@/components/ui/Surface";
-import { api, getRole } from "@/lib/api";
+import { api } from "@/lib/api";
 import { fmtUb } from "@/components/books/types";
+import { useStaffCan } from "@/lib/staffCapabilities";
 
 interface AdminEvent { id: string; title: string; startsAt: string; endsAt: string; note: string | null; published: boolean; timeLimitMin: number | null; problemCount: number; registered: number; results: number; phase: "upcoming" | "live" | "done"; test: { id: string; title: string; type: string } }
 interface PickTest { id: string; title: string; type: string; timeLimitMin: number | null; problemCount: number }
@@ -36,7 +37,7 @@ export default function MockExamsAdminClient() {
 }
 
 function Body() {
-  const canEdit = ["ADMIN", "TEACHER_PLUS"].includes(getRole() ?? "");
+  const canEdit = useStaffCan("exams.manage");
   const [events, setEvents] = useState<AdminEvent[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [tick, setTick] = useState(0);

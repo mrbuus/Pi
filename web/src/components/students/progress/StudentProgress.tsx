@@ -29,6 +29,7 @@ import WithdrawalTab from "../withdrawal/WithdrawalTab";
 import PaymentsTab from "../hub/PaymentsTab";
 import BooksTab from "@/components/book-money/BooksTab";
 import StudentInfoTab from "../hub/StudentInfoTab";
+import { useStaffCan } from "@/lib/staffCapabilities";
 
 type TabKey = "class" | "exams" | "lessons" | "syllabus" | "payments" | "books" | "withdrawal" | "notes" | "independent" | "info";
 const ALL_TABS: TabKey[] = ["class", "exams", "lessons", "syllabus", "payments", "books", "withdrawal", "notes", "independent", "info"];
@@ -54,9 +55,9 @@ const TAB_LABELS: Record<TabKey, string> = {
  */
 function StudentProgressContent({ studentId }: { studentId: string }) {
   const role = getRole();
-  const canSeeMoney = role === "ADMIN" || role === "TEACHER_PLUS";
-  // Анги солих — Багш+ ба Админ (эзний шийдвэр 2026-10-11)
-  const canMove = role === "ADMIN" || role === "TEACHER_PLUS";
+  const canSeeMoney = useStaffCan("finance.manage", role);
+  // Анги солих — Багш+ ба Админ (эзний шийдвэр 2026-10-11); эрхийн матрицаар хаагдана
+  const canMove = useStaffCan("students.manage", role);
   const detailQ = useSection<StudentDetailData>(`/users/${studentId}`);
   const { data: detail, status, error, reload: load } = detailQ;
   // «Гарсан тооцоо» — сургалтаас хасагдсан сурагчид, мөнгө харах эрхтэй ажилтанд

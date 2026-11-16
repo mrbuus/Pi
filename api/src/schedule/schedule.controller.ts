@@ -37,6 +37,7 @@ import { ScheduleAccessService } from './schedule-access.service';
 import { ScheduleService } from './schedule.service';
 import { LessonPlanService } from './lesson-plan.service';
 import { PutDayMealDto, PutLessonPlanDto } from './dto/lesson-plan.dto';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -58,6 +59,7 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule')
+  @RequireCapability('schedule.manage')
   async create(@Body() dto: CreateScheduleDto, @Req() req: AuthedRequest) {
     await this.access.manage(req.user, dto.classroomId);
     return this.schedule.create(dto);
@@ -102,6 +104,7 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule/bulk')
+  @RequireCapability('schedule.manage')
   async bulkCreate(
     @Body() dto: BulkCreateScheduleDto,
     @Req() req: AuthedRequest,
@@ -114,6 +117,7 @@ export class ScheduleController {
   // өөрчилнө. Өнгөрсөн түүх хэвээр үлдэнэ (цувралыг хоёр хуваана).
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule/:id/split')
+  @RequireCapability('schedule.manage')
   async splitSeries(
     @Param('id') id: string,
     @Body() dto: SplitSeriesDto,
@@ -127,6 +131,7 @@ export class ScheduleController {
   // Хоёр ангид schedule.manage шаардана.
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule/:id/swap-room')
+  @RequireCapability('schedule.manage')
   async swapRoom(
     @Param('id') id: string,
     @Body() dto: SwapRoomDto,
@@ -141,6 +146,7 @@ export class ScheduleController {
   // Түүх хадгалагдана (effectiveTo/хуваалт); танхим давхцвал 409.
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Put('schedule/classrooms/:id/pattern')
+  @RequireCapability('schedule.manage')
   async putClassPattern(
     @Param('id') id: string,
     @Body() dto: PutClassPatternDto,
@@ -159,6 +165,7 @@ export class ScheduleController {
   // Бүх ангийн schedule.manage шаардана (Админ, Багш+).
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule/classrooms')
+  @RequireCapability('schedule.manage')
   async createClassWithPattern(
     @Body() dto: CreateClassWithPatternDto,
     @Req() req: AuthedRequest,
@@ -173,6 +180,7 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule/:id/exceptions')
+  @RequireCapability('schedule.manage')
   async upsertException(
     @Param('id') id: string,
     @Body() dto: UpsertExceptionDto,
@@ -189,6 +197,7 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('schedule/:id/exceptions/:exceptionId')
+  @RequireCapability('schedule.manage')
   async removeException(
     @Param('id') id: string,
     @Param('exceptionId') exceptionId: string,
@@ -206,6 +215,7 @@ export class ScheduleController {
   // Сэдэв/төлөвлөгөө бичих — Багш+, Админ л (эзэн 2026-10-18)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('schedule/:id/topic')
+  @RequireCapability('schedule.manage')
   async upsertTopic(
     @Param('id') id: string,
     @Body() dto: UpsertTopicDto,
@@ -218,12 +228,14 @@ export class ScheduleController {
   // Өдрийн хуваарь нийтлэх — тэр өдөр хичээлтэй багш, сурагчдад мэдэгдэл (эзэн 2026-10-11)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule/day/:date/publish')
+  @RequireCapability('schedule.manage')
   publishDay(@Param('date') date: string, @Req() req: AuthedRequest) {
     return this.schedule.publishDay(date, req.user.userId, req.user.role);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('schedule/day/:date/publication')
+  @RequireCapability('schedule.manage')
   publication(@Param('date') date: string) {
     return this.schedule.getPublication(date);
   }
@@ -231,6 +243,7 @@ export class ScheduleController {
   // Өдрийн ахлах/туслах багш оноох — Багш+ үүргээрээ (эзэн 2026-10-08)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Put('schedule/:id/staffing')
+  @RequireCapability('schedule.manage')
   setStaffing(
     @Param('id') id: string,
     @Body() dto: SetStaffingDto,
@@ -241,6 +254,7 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('schedule/:id/topic')
+  @RequireCapability('schedule.manage')
   async clearTopic(
     @Param('id') id: string,
     @Body() dto: ClearTopicDto,
@@ -276,6 +290,7 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Put('schedule/teacher-workdays')
+  @RequireCapability('schedule.manage')
   async putTeacherWorkDays(
     @Body() dto: PutTeacherWorkDaysDto,
     @Req() req: AuthedRequest,
@@ -291,6 +306,7 @@ export class ScheduleController {
   // Хүснэгтийн горим (Тогтмол / Сондгой-Тэгш) ба хүчинтэй хугацаа
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Put('schedule/teacher-workdays/config')
+  @RequireCapability('schedule.manage')
   async putRosterConfig(
     @Body() dto: PutRosterConfigDto,
     @Req() req: AuthedRequest,
@@ -301,6 +317,7 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('schedule/teacher-workdays/exception')
+  @RequireCapability('schedule.manage')
   async upsertTeacherWorkException(
     @Body() dto: TeacherWorkDayExceptionDto,
     @Req() req: AuthedRequest,
@@ -358,12 +375,14 @@ export class ScheduleController {
   // Амралтын өдрийн хоол: хэн хийх, юу хийх (эзэн 2026-10-31)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Put('schedule/day-meal')
+  @RequireCapability('schedule.manage')
   putDayMeal(@Body() dto: PutDayMealDto, @Req() req: AuthedRequest) {
     return this.plans.putMeal(req.user, dto);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('schedule/:id/plan')
+  @RequireCapability('schedule.manage')
   async getPlan(
     @Param('id') id: string,
     @Query('date') date: string,
@@ -376,6 +395,7 @@ export class ScheduleController {
   // Хичээлийн төлөвлөгөө: тестүүд (номын дарааллаар), тарах/үлдэх, онолын зураг
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Put('schedule/:id/plan')
+  @RequireCapability('schedule.manage')
   async putPlan(
     @Param('id') id: string,
     @Body() dto: PutLessonPlanDto,
@@ -393,6 +413,7 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('schedule/:id')
+  @RequireCapability('schedule.manage')
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateScheduleDto,
@@ -404,6 +425,7 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('schedule/:id')
+  @RequireCapability('schedule.manage')
   async remove(@Param('id') id: string, @Req() req: AuthedRequest) {
     await this.access.manageSchedule(req.user, id);
     return this.schedule.remove(id, req.user.userId, req.user.role);
@@ -423,6 +445,7 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('calendar')
+  @RequireCapability('schedule.manage')
   async createCalendarDay(
     @Body() dto: CreateCalendarDayDto,
     @Req() req: AuthedRequest,
@@ -443,6 +466,7 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch('calendar/:id')
+  @RequireCapability('schedule.manage')
   async updateCalendarDay(
     @Param('id') id: string,
     @Body() dto: UpdateCalendarDayDto,
@@ -456,6 +480,7 @@ export class ScheduleController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('calendar/:id')
+  @RequireCapability('schedule.manage')
   async removeCalendarDay(@Param('id') id: string, @Req() req: AuthedRequest) {
     const existing = await this.schedule.findCalendarDay(id);
     await this.manageCalendar(req.user, existing.classroomIds);

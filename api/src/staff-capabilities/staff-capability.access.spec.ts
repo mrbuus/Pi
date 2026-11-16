@@ -11,7 +11,7 @@ import { StaffCapabilityController } from './staff-capability.controller';
 import {
   STAFF_CAPABILITIES,
   StaffCapabilityService,
-  TEACHER_PLUS_IMPLICIT,
+  TEACHER_PLUS_DEFAULT,
 } from './staff-capability.service';
 
 // Эрхийн матриц: харах, олгох, цуцлах бүгд ЗӨВХӨН ADMIN (эзэн 2026-10-22).
@@ -37,9 +37,7 @@ describe('permission matrix endpoints are ADMIN-only', () => {
       (n) => n !== 'constructor' && typeof (proto as any)[n] === 'function',
     );
     const open = names.filter(
-      (n) =>
-        !Reflect.getMetadata(ROLES_KEY, (proto as any)[n]) &&
-        n !== 'mine',
+      (n) => !Reflect.getMetadata(ROLES_KEY, (proto as any)[n]) && n !== 'mine',
     );
     expect(open).toEqual([]);
     // /me yalgaa: only the caller's OWN grants (schedule/hours pages need it)
@@ -62,31 +60,40 @@ describe('permission matrix data is refused to non-admins at the service too', (
     return { prisma, service: new StaffCapabilityService(prisma) };
   }
 
-  it.each([Role.TEACHER_PLUS, Role.TEACHER, Role.STUDENT, Role.PARENT, Role.BUYER])(
-    '%s cannot list, grant or revoke',
-    async (role) => {
-      const { prisma, service } = build(role);
-      await expect(service.list('u')).rejects.toBeInstanceOf(ForbiddenException);
-      await expect(
-        service.grant('u', {
-          userId: 'x',
-          capability: 'payroll.view',
-          reason: 'туршилт',
-        }),
-      ).rejects.toBeInstanceOf(ForbiddenException);
-      await expect(
-        service.revoke('u', 'grant-1', 'туршилт'),
-      ).rejects.toBeInstanceOf(ForbiddenException);
-      // Нэг ч мөр өгөгдөл уншигдаагүй
-      expect(prisma.user.findMany).not.toHaveBeenCalled();
-      expect(prisma.staffCapabilityGrant.findMany).not.toHaveBeenCalled();
-    },
-  );
+  it.each([
+    Role.TEACHER_PLUS,
+    Role.TEACHER,
+    Role.STUDENT,
+    Role.PARENT,
+    Role.BUYER,
+  ])('%s cannot list, grant or revoke', async (role) => {
+    const { prisma, service } = build(role);
+    await expect(service.list('u')).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(
+      service.grant('u', {
+        userId: 'x',
+        capability: 'payroll.view',
+        reason: 'туршилт',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(
+      service.revoke('u', 'grant-1', 'туршилт'),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    // Нэг ч мөр өгөгдөл уншигдаагүй
+    expect(prisma.user.findMany).not.toHaveBeenCalled();
+    expect(prisma.staffCapabilityGrant.findMany).not.toHaveBeenCalled();
+  });
 
   it('ADMIN gets every active staff user (Admin, Teacher+, Teacher) with role and phone', async () => {
     const { prisma, service } = build(Role.ADMIN);
     prisma.user.findMany.mockResolvedValue([
-      { id: 'a', firstName: 'Нэр', lastName: 'Б.', phone: '99112233', role: Role.TEACHER },
+      {
+        id: 'a',
+        firstName: 'Нэр',
+        lastName: 'Б.',
+        phone: '99112233',
+        role: Role.TEACHER,
+      },
     ]);
     const res = await service.list('u');
     const query = prisma.user.findMany.mock.calls[0][0];
@@ -99,6 +106,6 @@ describe('permission matrix data is refused to non-admins at the service too', (
     );
     expect(res.staff).toHaveLength(1);
     expect(res.capabilities).toEqual(STAFF_CAPABILITIES);
-    expect(res.teacherPlusImplicit).toEqual(TEACHER_PLUS_IMPLICIT);
+    expect(res.teacherPlusDefault).toEqual(TEACHER_PLUS_DEFAULT);
   });
 });

@@ -101,7 +101,7 @@ export default function StudentsTab({
   const [openId, setOpenId] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
   const money = data.permissions.money;
-  const canManage = !!data.permissions.manageClass;
+  const canManage = !!(data.permissions.manageStudents ?? data.permissions.manageClass);
   const current: QuickView = view ?? "all";
 
   // Хадгалсан шүүлтүүрийг сэргээнэ (энэ төхөөрөмж дээр л)

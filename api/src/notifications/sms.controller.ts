@@ -17,6 +17,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { SmsBulkDto } from './dto/sms-bulk.dto';
 import { Role } from '../generated/prisma/enums';
 import { SmsManagementService } from './sms-management.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 /**
  * SMS удирдлагын HTTP гадаргуу.
@@ -39,6 +40,7 @@ export class SmsController {
   /** Нийлүүлэгч тохируулагдсан эсэх, энэ сарын хэрэглээ */
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('status')
+  @RequireCapability('reports.view')
   status(@Req() req: { user: { userId: string } }) {
     return this.sms.getStatus(req.user.userId);
   }
@@ -84,6 +86,7 @@ export class SmsController {
   /** Илгээсэн мессежийн түүх */
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('messages')
+  @RequireCapability('reports.view')
   messages(
     @Query('status') status?: string,
     @Query('kind') kind?: string,
@@ -108,6 +111,7 @@ export class SmsController {
   /** Бөөн илгээлтүүд */
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('batches')
+  @RequireCapability('reports.view')
   batches(@Query('skip') skip?: string, @Query('take') take?: string) {
     return this.sms.getBatches({
       skip: skip ? Number(skip) : undefined,
@@ -126,6 +130,7 @@ export class SmsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('templates')
+  @RequireCapability('reports.view')
   templates() {
     return this.sms.getTemplates();
   }

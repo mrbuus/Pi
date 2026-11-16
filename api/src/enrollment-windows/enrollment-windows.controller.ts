@@ -14,6 +14,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import { UpdateEnrollmentWindowDto } from './dto/enrollment-window.dto';
 import { EnrollmentWindowsService } from './enrollment-windows.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -35,6 +36,7 @@ export class EnrollmentWindowsController {
     return this.windows.findAll();
   }
 
+  @RequireCapability('classes.manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch(':subject')

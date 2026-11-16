@@ -22,6 +22,7 @@ import {
   type Tab,
   type TestRow,
 } from "@/components/test-list/types";
+import { useStaffCan } from "@/lib/staffCapabilities";
 
 /* ============================================================================
  * Шалгалтын жагсаалт — сэдвээр бүлэглэсэн, 2 ангилалтай, хайлт+хичээлийн
@@ -65,7 +66,7 @@ type StaffView = "paper" | "scores" | "hidden";
  */
 function StaffExamHome({ role }: { role: string | null }) {
   const isAdmin = role === "ADMIN";
-  const canManage = role === "ADMIN" || role === "TEACHER_PLUS";
+  const canManage = useStaffCan("exams.manage", role);
   const fromUrl = useCallback((): StaffView => {
     const v = new URLSearchParams(window.location.search).get("view");
     return v === "scores" ? "scores" : v === "hidden" && isAdmin ? "hidden" : "paper";

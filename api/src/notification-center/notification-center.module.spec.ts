@@ -9,6 +9,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { NotificationCenterController } from './notification-center.controller';
 import { NotificationCenterModule } from './notification-center.module';
 import { NotificationCenterService } from './notification-center.service';
+import { StaffCapabilityService } from '../staff-capabilities/staff-capability.service';
+import { StaffCapabilityModule } from '../staff-capabilities/staff-capability.module';
 
 describe('NotificationCenter module wiring', () => {
   it('resolves its controller and assignment/announcement trigger dependencies', async () => {
@@ -30,6 +32,7 @@ describe('NotificationCenter module wiring', () => {
         NotificationCenterModule,
         AssignmentsModule,
         AnnouncementsModule,
+        StaffCapabilityModule,
       ],
     })
       .overrideProvider(PrismaService)

@@ -17,13 +17,51 @@ export const STAFF_CAPABILITIES = [
   'teacher-hours.edit',
   // Сурагчийн нууц үгийг шууд тохируулах/утас руу буцаах (эзэн 2026-11-16). Зөвхөн СУРАГЧ.
   'student-password.set',
+  // Эзэн 2026-11-16: «бүх ийм эрхийг эрхийн матрицад оруул». Доорх эрхүүд өмнө нь
+  // кодонд Багш+ үүргээр шууд нээлттэй байсан — одоо ч Багш+ бүрд АНХДАГЧААР нээлттэй,
+  // Админ хүн тус бүрд хааж (DENY) болно. Багш (TEACHER)-ийн эрхэд хамаарахгүй.
+  /** Анги нээх/татан буулгах, ангийн багш оноох, элсэлтийн цонх, ирцийн шалгуур, гадны багш батлах */
+  'classes.manage',
+  /** Сурагч бүртгэх, анги руу оруулах/хасах, мэдээлэл засах, архивлах, батлах, эцэг эхийн холболт, сонирхогч */
+  'students.manage',
+  /** Сурагчдын бүртгэлийг Excel/CSV-ээр татах */
+  'students.export',
+  /** Сорил, жишиг/цаасан шалгалт, оноо засах, тест оноох, түвшин тогтоох тохиргоо */
+  'exams.manage',
+  /** Ном, бүлэг, бодлого, сэдэв, томьёо, онол, бичлэг, импорт, дотоод ноорог */
+  'content.manage',
+  /** Ажил үүсгэх, хариуцагч оноох */
+  'tasks.manage',
+  /** Аналитик, аудитын түүх, SMS-ийн бүртгэл */
+  'reports.view',
 ] as const;
 export type StaffCapability = (typeof STAFF_CAPABILITIES)[number];
-/** Багш+ олголтгүйгээр БАЙНГА эзэмших эрхүүд (бүх анги) */
-export const TEACHER_PLUS_IMPLICIT: readonly StaffCapability[] = [
+/**
+ * Багш+-д үүргээр АНХДАГЧААР нээлттэй эрхүүд (олголт хэрэггүй). Админ хүн тус бүрд
+ * DENY мөрөөр хаана; DENY-г цуцлахад (revokedAt) дахин нээгдэнэ. Бусад эрх
+ * (цаг, цалин, цаг бөглөх, нууц үг) олголтоор (ALLOW) л нээгдэнэ.
+ */
+export const TEACHER_PLUS_DEFAULT: readonly StaffCapability[] = [
   'finance.manage',
   'schedule.manage',
+  'classes.manage',
+  'students.manage',
+  'students.export',
+  'exams.manage',
+  'content.manage',
+  'tasks.manage',
+  'reports.view',
 ];
+/** @deprecated хуучин нэр — TEACHER_PLUS_DEFAULT */
+export const TEACHER_PLUS_IMPLICIT = TEACHER_PLUS_DEFAULT;
+export type CapabilityEffect = 'ALLOW' | 'DENY';
+export const isDefaultOn = (c: string) =>
+  (TEACHER_PLUS_DEFAULT as readonly string[]).includes(c);
+
+const activeNow = () => ({
+  revokedAt: null,
+  OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+});
 
 @Injectable()
 export class StaffCapabilityService {
@@ -48,14 +86,24 @@ export class StaffCapabilityService {
     const actor = await this.actor(userId);
     if (actor.role === Role.ADMIN) return true;
     if (actor.role !== Role.TEACHER_PLUS) return false;
-    // Эзний шийдвэр (2026-10-08): Багш+ төлбөрийн хэсгийг БАЙНГА удирдана —
-    // тусгай эрх олгох шаардлагагүй. Хуваарь мөн адил (эзэн 2026-10-18: «Багш+-д
-    // хуваарь засах эрх өгчих»). Цаг/цалин нь тусгай эрхтэй хэвээр.
-    if (TEACHER_PLUS_IMPLICIT.includes(capability)) return true;
+    // Анхдагчаар нээлттэй (эзэн 2026-10-08 төлбөр, 2026-10-18 хуваарь, 2026-11-16 бусад):
+    // Админ хаагаагүй (идэвхтэй DENY мөргүй) бол нээлттэй. Хаалт бүх ангид (scopeKey '').
+    if (isDefaultOn(capability))
+      return !(await this.prisma.staffCapabilityGrant.findFirst({
+        where: {
+          userId,
+          capability,
+          effect: 'DENY',
+          scopeKey: '',
+          ...activeNow(),
+        },
+        select: { id: true },
+      }));
     return !!(await this.prisma.staffCapabilityGrant.findFirst({
       where: {
         userId,
         capability,
+        effect: 'ALLOW',
         revokedAt: null,
         AND: [
           { OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
@@ -66,6 +114,34 @@ export class StaffCapabilityService {
       },
       select: { id: true },
     }));
+  }
+
+  /**
+   * Маршрутын хамгаалалт (CapabilityGuard): зөвхөн Багш+-ийг шүүнэ. Админ үргэлж;
+   * бусад үүрэг (Багш г.м.) энэ механизмд хамаарахгүй — тэднийг RolesGuard шийднэ.
+   */
+  async assertForTeacherPlus(userId: string, capability: StaffCapability) {
+    const actor = await this.actor(userId);
+    if (actor.role !== Role.TEACHER_PLUS) return;
+    await this.assert(userId, capability);
+  }
+
+  /**
+   * Мөнгөн дүн харах/засах дүрэмд дамжуулах «үр дүнтэй үүрэг»: Багш+ төлбөрийн эрхээ
+   * хаалгасан бол Багш шиг (дүнгүй) тооцно. Бусад үүрэг хэвээр.
+   */
+  async financeRole<R extends string>(
+    userId: string,
+    role: R,
+  ): Promise<R | 'TEACHER'> {
+    if (role !== Role.TEACHER_PLUS) return role;
+    return (await this.has(userId, 'finance.manage')) ? role : Role.TEACHER;
+  }
+
+  /** Багш+ мөн эсэх + эрх: үйлчилгээн дэх `role === TEACHER_PLUS` шалгалтыг орлоно */
+  async teacherPlusHas(userId: string, capability: StaffCapability) {
+    const actor = await this.actor(userId);
+    return actor.role === Role.TEACHER_PLUS && this.has(userId, capability);
   }
 
   async assert(
@@ -81,34 +157,64 @@ export class StaffCapabilityService {
 
   async mine(userId: string) {
     const actor = await this.actor(userId);
-    const grants =
-      actor.role === Role.TEACHER_PLUS
-        ? await this.prisma.staffCapabilityGrant.findMany({
-            where: {
-              userId,
-              revokedAt: null,
-              OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
-            },
-            select: {
-              id: true,
-              capability: true,
-              scopeKey: true,
-              expiresAt: true,
-            },
-            orderBy: { capability: 'asc' },
-          })
-        : [];
-    // Байнгын эрхүүдийг вэб ч мэдэх ёстой (засах товч харуулах эсэх) — бүх ангид
-    if (actor.role === Role.TEACHER_PLUS)
-      for (const capability of TEACHER_PLUS_IMPLICIT)
-        if (!grants.some((g) => g.capability === capability && !g.scopeKey))
-          grants.push({
-            id: `implicit:${capability}`,
-            capability,
-            scopeKey: '',
-            expiresAt: null,
-          });
-    return { administrator: actor.role === Role.ADMIN, grants };
+    if (actor.role === Role.ADMIN)
+      return {
+        administrator: true,
+        grants: [],
+        capabilities: [...STAFF_CAPABILITIES],
+        denied: [],
+      };
+    if (actor.role !== Role.TEACHER_PLUS)
+      return { administrator: false, grants: [], capabilities: [], denied: [] };
+    const rows = await this.prisma.staffCapabilityGrant.findMany({
+      where: { userId, ...activeNow() },
+      select: {
+        id: true,
+        capability: true,
+        scopeKey: true,
+        expiresAt: true,
+        effect: true,
+      },
+      orderBy: { capability: 'asc' },
+    });
+    const denied = new Set(
+      rows
+        .filter((r) => r.effect === 'DENY' && !r.scopeKey)
+        .map((r) => r.capability),
+    );
+    const grants = rows
+      .filter(
+        (r) =>
+          r.effect !== 'DENY' &&
+          !isDefaultOn(r.capability) &&
+          (STAFF_CAPABILITIES as readonly string[]).includes(r.capability),
+      )
+      .map((r) => ({
+        id: r.id,
+        capability: r.capability,
+        scopeKey: r.scopeKey,
+        expiresAt: r.expiresAt,
+      }));
+    // Анхдагч эрхүүдийг вэб ч мэдэх ёстой (засах товч харуулах эсэх) — бүх ангид
+    for (const capability of TEACHER_PLUS_DEFAULT)
+      if (!denied.has(capability))
+        grants.push({
+          id: `implicit:${capability}`,
+          capability,
+          scopeKey: '',
+          expiresAt: null,
+        });
+    const capabilities = STAFF_CAPABILITIES.filter((c) =>
+      grants.some((g) => g.capability === c && !g.scopeKey),
+    );
+    return {
+      administrator: false,
+      grants,
+      /** Бүх ангид хүчинтэй эрхүүд — UI товч нуух/харуулахад */
+      capabilities,
+      /** Админ хаасан анхдагч эрхүүд */
+      denied: [...denied],
+    };
   }
 
   private async assertAdmin(actorId: string) {
@@ -130,6 +236,7 @@ export class StaffCapabilityService {
           reason: true,
           expiresAt: true,
           revokedAt: true,
+          effect: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -166,8 +273,10 @@ export class StaffCapabilityService {
       staff,
       classrooms,
       capabilities: STAFF_CAPABILITIES,
-      /** Багш+ олголтгүйгээр байнга эзэмших эрхүүд (матрицад түгжээтэй ✓) */
-      teacherPlusImplicit: TEACHER_PLUS_IMPLICIT,
+      /** Багш+-д анхдагчаар нээлттэй эрхүүд (матрицад ✓, Админ хааж болно) */
+      teacherPlusDefault: TEACHER_PLUS_DEFAULT,
+      /** Хуучин нэр (хуучин вэб) */
+      teacherPlusImplicit: TEACHER_PLUS_DEFAULT,
     };
   }
 
@@ -179,13 +288,28 @@ export class StaffCapabilityService {
       scopeKey?: string;
       reason: string;
       expiresAt?: string;
+      effect?: CapabilityEffect;
     },
   ) {
     await this.assertAdmin(actorId);
     if (!STAFF_CAPABILITIES.includes(input.capability))
       throw new BadRequestException('Эрхийн төрөл тохирохгүй.');
+    const effect: CapabilityEffect = input.effect ?? 'ALLOW';
+    if (effect !== 'ALLOW' && effect !== 'DENY')
+      throw new BadRequestException('Эрхийн үйлдэл тохирохгүй.');
+    const defaultOn = isDefaultOn(input.capability);
+    // Анхдагч эрхийг «олгох» утгагүй (аль хэдийн нээлттэй) — зөвхөн хаана; олголтоор
+    // нээгддэг эрхийг «хаах» нь олголтыг цуцлах (DELETE) юм.
+    if (defaultOn && effect !== 'DENY')
+      throw new BadRequestException(
+        'Энэ эрх Багш+-д анхдагчаар нээлттэй. Хаахын тулд «хаах» сонгоно уу.',
+      );
+    if (!defaultOn && effect === 'DENY')
+      throw new BadRequestException(
+        'Энэ эрх олголтоор нээгддэг. Хаахын тулд олголтыг цуцална уу.',
+      );
     const scopeKey = input.scopeKey?.trim() || '';
-    if (scopeKey && input.capability !== 'schedule.manage')
+    if (scopeKey && (defaultOn || input.capability !== 'schedule.manage'))
       throw new BadRequestException('Энэ эрх ангид хязгаарлагдахгүй.');
     const reason = input.reason.trim();
     if (reason.length < 3 || reason.length > 500)
@@ -229,21 +353,29 @@ export class StaffCapabilityService {
           scopeKey,
           reason,
           expiresAt,
+          effect,
           grantedById: actorId,
         },
-        update: { reason, expiresAt, revokedAt: null, grantedById: actorId },
+        update: {
+          reason,
+          expiresAt,
+          effect,
+          revokedAt: null,
+          grantedById: actorId,
+        },
       });
       await tx.auditLog.create({
         data: {
           actorId,
           actorRole: Role.ADMIN,
-          action: 'GRANT',
+          action: effect === 'DENY' ? 'DENY' : 'GRANT',
           entity: 'StaffCapabilityGrant',
           entityId: row.id,
           before: previous
             ? {
                 capability: previous.capability,
                 scopeKey: previous.scopeKey,
+                effect: previous.effect,
                 revoked: !!previous.revokedAt,
                 expiresAt: previous.expiresAt?.toISOString() ?? null,
               }
@@ -252,6 +384,7 @@ export class StaffCapabilityService {
             userId: row.userId,
             capability: row.capability,
             scopeKey: row.scopeKey,
+            effect: row.effect,
             expiresAt: row.expiresAt?.toISOString() ?? null,
           },
           reason,
@@ -284,13 +417,15 @@ export class StaffCapabilityService {
         data: {
           actorId,
           actorRole: Role.ADMIN,
-          action: 'REVOKE',
+          // DENY-г цуцлах = анхдагч эрхийг дахин нээх
+          action: row.effect === 'DENY' ? 'ALLOW' : 'REVOKE',
           entity: 'StaffCapabilityGrant',
           entityId: id,
           before: {
             userId: row.userId,
             capability: row.capability,
             scopeKey: row.scopeKey,
+            effect: row.effect,
           },
           after: { revokedAt: row.revokedAt!.toISOString() },
           reason: cleanReason,

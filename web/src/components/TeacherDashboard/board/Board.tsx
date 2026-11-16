@@ -49,6 +49,7 @@ import {
   type OnlinePayload,
 } from "./lib";
 import { useBoard } from "./useBoard";
+import { useStaffCan } from "@/lib/staffCapabilities";
 
 const CLASS_KEY = "teacher_selected_classroom";
 
@@ -114,7 +115,8 @@ export default function Board({ link }: { link: BoardLink }) {
 
 function BoardRoot({ link }: { link: BoardLink }) {
   const role = getRole();
-  const canManage = role === "ADMIN" || role === "TEACHER_PLUS";
+  // Ангигүй сурагчийг анги руу оруулах — эрхийн матриц «Сурагч бүртгэх»
+  const canManage = useStaffCan("students.manage", role);
   // Өнөөдөр нь шөнө дунд / таб сэргээхэд шинэчлэгдэнэ (өмнө нь mount хийсэн өдөрт гацдаг байв)
   const today = useUbToday();
   const [date, setDate] = useState(() => linkDate(link.date) ?? today);

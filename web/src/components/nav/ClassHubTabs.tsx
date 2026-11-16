@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { CalendarDays, GraduationCap, Inbox, ListChecks, Settings2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { staffCan } from "@/lib/staffCapabilities";
 
 /**
  * «Анги» хэсгийн нэгдсэн табууд (эзэн 2026-10-08): өмнө нь цэсэнд 6 тусдаа
@@ -35,7 +36,7 @@ export function isClassHubPath(role: string | null | undefined, pathname: string
 /** Тухайн хуудсанд дээд табын мөр байх эсэх, байвал аль мөр, цэсэнд аль мөр идэвхтэй */
 export function hubFor(role: string | null | undefined, pathname: string) {
   if (isClassHubPath(role, pathname)) return { tabs: CLASS_HUB, label: "Хуваарь", navHref: "/app/schedule" };
-  if (role && ENROLL_ROLES.has(role) && ENROLL_HUB.some((t) => t.href === pathname))
+  if (role && ENROLL_ROLES.has(role) && staffCan("students.manage", role) && ENROLL_HUB.some((t) => t.href === pathname))
     return { tabs: ENROLL_HUB, label: "Элсэлт", navHref: "/app/admin/leads" };
   return null;
 }

@@ -1824,6 +1824,7 @@ export const StaffCapabilityGrantScalarFieldEnum = {
   userId: 'userId',
   capability: 'capability',
   scopeKey: 'scopeKey',
+  effect: 'effect',
   grantedById: 'grantedById',
   reason: 'reason',
   expiresAt: 'expiresAt',

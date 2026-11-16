@@ -16,6 +16,7 @@ import { Role } from '../generated/prisma/enums';
 import { RequestParentLinkDto } from './dto/parent-link.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { ParentsService } from './parents.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -63,18 +64,21 @@ export class ParentsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Get('links/pending')
+  @RequireCapability('students.manage')
   pendingLinks() {
     return this.parents.pendingLinks();
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('links/:id/verify')
+  @RequireCapability('students.manage')
   verify(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.parents.verify(id, req.user.userId);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('links/:id/reject')
+  @RequireCapability('students.manage')
   reject(@Param('id') id: string) {
     return this.parents.reject(id);
   }

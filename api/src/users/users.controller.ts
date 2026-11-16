@@ -41,6 +41,7 @@ import {
   UnarchiveStudentDto,
 } from './students.dto';
 import { UsersService } from './users.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 class SetTeacherStatusDto {
   @ApiProperty({ type: Boolean })
@@ -151,6 +152,7 @@ export class UsersController {
   // Сургалтаас хасах / сэргээх — Багш+ ба Админ (эзэн 2026-10-18)
   @Post(':id/archive')
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @RequireCapability('students.manage')
   archiveStudent(
     @Param('id') id: string,
     @Body() dto: ArchiveStudentDto,
@@ -167,6 +169,7 @@ export class UsersController {
   @Post(':id/unarchive')
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @HttpCode(HttpStatus.OK)
+  @RequireCapability('students.manage')
   unarchiveStudent(
     @Param('id') id: string,
     @Body() dto: UnarchiveStudentDto,
@@ -186,6 +189,7 @@ export class UsersController {
   // Live эрхийг service дотор дахин шалгана (гадны багшийн бүртгэлд хаалттай).
   @Post('students')
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @RequireCapability('students.manage')
   createClassroomStudent(
     @Body() dto: CreateClassroomStudentDto,
     @Req() req: AuthedRequest,
@@ -223,6 +227,7 @@ export class UsersController {
   // Сурагчийн бүтэн бүртгэл засах — Багш+/Админ (эрхийн матриц)
   @Patch(':id/profile')
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @RequireCapability('students.manage')
   updateProfile(
     @Param('id') id: string,
     @Body() dto: UpdateUserProfileDto,
@@ -246,6 +251,7 @@ export class UsersController {
    */
   @Post(':id/send-password-reset')
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @RequireCapability('students.manage')
   sendPasswordReset(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.passwordReset.sendForUser(id, {
       userId: req.user.userId,
@@ -309,6 +315,7 @@ export class UsersController {
   // Онлайнаар CLASSROOM-р бүртгүүлсэн сурагчдын зөвшөөрөл хүлээгч жагсаалт
   @Get('students/pending-approval')
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @RequireCapability('students.manage')
   getPendingApprovalStudents(@Req() req: AuthedRequest) {
     return this.users.getPendingApprovalStudents(req.user.userId);
   }
@@ -316,6 +323,7 @@ export class UsersController {
   // Сурагчийг зөвшөөрнө
   @Post('students/:id/approve')
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @RequireCapability('students.manage')
   approveStudent(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.users.approveStudent(id, req.user.userId);
   }

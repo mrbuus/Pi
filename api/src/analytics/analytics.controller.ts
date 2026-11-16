@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import { AnalyticsService } from './analytics.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 // Аналитикийн самбар зөвхөн ADMIN/TEACHER_PLUS-д зориулагдсан (SPEC-ийн S1
 // шат) — TEACHER бие даасан ангийнхаа идэвхийг activity/ модулиар харна.
@@ -14,26 +15,31 @@ export class AnalyticsController {
   constructor(private analytics: AnalyticsService) {}
 
   @Get('overview')
+  @RequireCapability('reports.view')
   overview(@Query('from') from?: string, @Query('to') to?: string) {
     return this.analytics.overview(from, to);
   }
 
   @Get('engagement')
+  @RequireCapability('reports.view')
   engagement(@Query('from') from?: string, @Query('to') to?: string) {
     return this.analytics.engagement(from, to);
   }
 
   @Get('classrooms')
+  @RequireCapability('reports.view')
   classrooms(@Query('from') from?: string, @Query('to') to?: string) {
     return this.analytics.classroomBreakdown(from, to);
   }
 
   @Get('topics')
+  @RequireCapability('reports.view')
   topics(@Query('from') from?: string, @Query('to') to?: string) {
     return this.analytics.topicBreakdown(from, to);
   }
 
   @Get('at-risk')
+  @RequireCapability('reports.view')
   atRisk(@Query('days') days?: string) {
     const parsed = days ? parseInt(days, 10) : undefined;
     return this.analytics.atRisk(Number.isFinite(parsed) ? parsed : undefined);

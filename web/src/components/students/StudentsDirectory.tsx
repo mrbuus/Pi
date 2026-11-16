@@ -25,6 +25,7 @@ import {
   money,
   subjectFromCode,
 } from "./types";
+import { useStaffCan } from "@/lib/staffCapabilities";
 
 interface OutstandingRow {
   studentId: string;
@@ -74,15 +75,17 @@ async function downloadRegistrationXlsx(): Promise<void> {
 export default function StudentsDirectory() {
   const role = getRole();
   const router = useRouter();
-  const canSeeMoney = role === "ADMIN" || role === "TEACHER_PLUS";
+  const canSeeMoney = useStaffCan("finance.manage", role);
   // Гараар бүртгэх эрх = элсэлт хариуцсан ажилтан (POST /users/students)
-  const canRegister = canSeeMoney;
+  const canRegister = useStaffCan("students.manage", role);
+  const canCreateClass = useStaffCan("classes.manage", role);
+  const canExport = useStaffCan("students.export", role);
   const [registering, setRegistering] = useState(false);
   const [xlsxBusy, setXlsxBusy] = useState(false);
   const [xlsxError, setXlsxError] = useState("");
   const [creatingClass, setCreatingClass] = useState(false);
-  // Анги солих, сургалтаас хасах, сэргээх, шинэ анги — Багш+ ба Админ
-  const canManage = canSeeMoney;
+  // Анги солих, сургалтаас хасах, сэргээх — Багш+ ба Админ (эрхийн матриц: «Сурагч бүртгэх»)
+  const canManage = canRegister;
 
   const [showArchived, setShowArchived] = useState(false);
   const [students, setStudents] = useState<StudentListItem[] | null>(null);
@@ -268,12 +271,14 @@ export default function StudentsDirectory() {
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-extrabold text-ink">Сурагчийн жагсаалт</h1>
-          {canRegister && (
+          {(canRegister || canCreateClass) && (
             <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" onClick={() => setCreatingClass(true)} className="min-h-11">
-                <School aria-hidden /> Шинэ анги
-              </Button>
-              {!showArchived && (
+              {canCreateClass && (
+                <Button type="button" variant="outline" onClick={() => setCreatingClass(true)} className="min-h-11">
+                  <School aria-hidden /> Шинэ анги
+                </Button>
+              )}
+              {canRegister && !showArchived && (
                 <Button type="button" onClick={() => setRegistering(true)} className="min-h-11">
                   <UserPlus aria-hidden /> Шинэ сурагч
                 </Button>
@@ -291,7 +296,7 @@ export default function StudentsDirectory() {
               Excel импорт
             </Link>
           )}
-          {canManage && !showArchived && (
+          {canExport && !showArchived && (
             <button
               type="button"
               onClick={() => {

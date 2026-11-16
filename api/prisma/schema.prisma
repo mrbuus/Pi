@@ -2751,6 +2751,9 @@ model StaffCapabilityGrant {
   user        User     @relation(fields: [userId], references: [id], onDelete: Restrict)
   capability  String
   scopeKey    String   @default("")
+  // ALLOW = олголт (олголтоор нээгддэг эрх); DENY = Багш+-д үүргээр нээлттэй эрхийг
+  // тухайн хүнд хаах (эзэн 2026-11-16). Сэргээхэд DENY мөрийг revokedAt-аар цуцална.
+  effect      String   @default("ALLOW")
   grantedById String
   reason      String
   expiresAt   DateTime?

@@ -24,6 +24,7 @@ import {
 } from './dto/theory.dto';
 import { RecordProgressDto } from './dto/progress.dto';
 import { LessonsService } from './lessons.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -78,6 +79,7 @@ export class LessonsController {
     return this.lessons.updateTheory(id, dto, req.user.userId);
   }
 
+  @RequireCapability('content.manage')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete('theory/:id')
@@ -85,6 +87,7 @@ export class LessonsController {
     return this.lessons.removeTheory(id, req.user.userId);
   }
 
+  @RequireCapability('content.manage')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post('theory/:id/restore')

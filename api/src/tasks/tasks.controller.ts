@@ -20,6 +20,7 @@ import { FindTasksQueryDto } from './dto/find-tasks-query.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { WorkloadQueryDto } from './dto/workload-query.dto';
 import { TasksService } from './tasks.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -35,6 +36,7 @@ export class TasksController {
 
   @Post()
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @RequireCapability('tasks.manage')
   create(@Body() dto: CreateTaskDto, @Req() req: AuthedRequest) {
     return this.tasks.create(dto, req.user.userId);
   }
@@ -74,18 +76,21 @@ export class TasksController {
 
   @Delete(':id')
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @RequireCapability('tasks.manage')
   remove(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.tasks.remove(id, req.user.userId);
   }
 
   @Post(':id/assignees')
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @RequireCapability('tasks.manage')
   addAssignee(@Param('id') id: string, @Body() dto: AddAssigneeDto) {
     return this.tasks.addAssignee(id, dto);
   }
 
   @Delete(':id/assignees/:userId')
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @RequireCapability('tasks.manage')
   removeAssignee(
     @Param('id') id: string,
     @Param('userId') userId: string,

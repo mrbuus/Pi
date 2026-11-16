@@ -19,6 +19,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import { AssignThousandDto, SetThousandReviewDto, SetYoutubeDto } from './thousand.dto';
 import { ThousandService } from './thousand.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -93,6 +94,7 @@ export class ThousandController {
 
   @Roles(...CONTENT)
   @Patch('problems/:problemId/youtube')
+  @RequireCapability('content.manage')
   setYoutube(
     @Param('problemId') problemId: string,
     @Body() dto: SetYoutubeDto,
@@ -108,6 +110,7 @@ export class ThousandController {
 
   @Roles(...CONTENT)
   @Get('youtube/export')
+  @RequireCapability('content.manage')
   exportYoutube(@Req() req: AuthedRequest) {
     return this.thousand.exportYoutube(req.user.userId);
   }
@@ -115,6 +118,7 @@ export class ThousandController {
   @Roles(...CONTENT)
   @Post('youtube/import')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
+  @RequireCapability('content.manage')
   importYoutube(@UploadedFile() file: Express.Multer.File | undefined, @Req() req: AuthedRequest) {
     if (!file?.buffer) throw new BadRequestException('Excel файл сонгоно уу.');
     return this.thousand.importYoutube(file.buffer, req.user.userId);

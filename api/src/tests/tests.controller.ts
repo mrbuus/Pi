@@ -23,6 +23,7 @@ import { CreateTestDraftDto, UpdateTestDraftDto } from './dto/test-draft.dto';
 import { SaveSessionDto, SubmitTestDto } from './dto/submit-test.dto';
 import { TestsService } from './tests.service';
 import { ParentsService } from '../parents/parents.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -205,6 +206,7 @@ export class TestsController {
   // орфон үлдээхгүй.
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete(':id')
+  @RequireCapability('exams.manage')
   remove(@Param('id') id: string, @Req() req: AuthedRequest) {
     return this.tests.remove(id, req.user.userId, req.user.role);
   }

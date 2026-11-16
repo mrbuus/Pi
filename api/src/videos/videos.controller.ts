@@ -19,6 +19,7 @@ import { CreateVideoDto } from './dto/create-video.dto';
 import { OpenProblemVideoDto } from './dto/open-problem-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 import { VideosService } from './videos.service';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -91,6 +92,7 @@ export class VideosController {
     return this.videos.update(id, dto, req.user.userId, req.user.role);
   }
 
+  @RequireCapability('content.manage')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Delete(':id')

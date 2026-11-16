@@ -20,6 +20,7 @@ import { MAX_DOCX_BYTES } from './docx-parser';
 import { DocumentImportService } from './document-import.service';
 import { ConfirmDocumentDto } from './confirm-document.dto';
 import type { RequestWithUser } from '../auth/request.interface';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 @Controller('document-import')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN, Role.TEACHER_PLUS)
@@ -32,6 +33,7 @@ export class DocumentImportController {
       limits: { fileSize: MAX_DOCX_BYTES, files: 1, fields: 0, parts: 2 },
     }),
   )
+  @RequireCapability('content.manage')
   async preview(
     @Req() request: RequestWithUser,
     @UploadedFile() file?: Express.Multer.File,
@@ -58,6 +60,7 @@ export class DocumentImportController {
       transform: true,
     }),
   )
+  @RequireCapability('content.manage')
   confirm(@Body() dto: ConfirmDocumentDto, @Req() request: RequestWithUser) {
     return this.imports.confirm(dto, request.user.userId, request.user.role);
   }

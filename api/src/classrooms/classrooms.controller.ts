@@ -19,6 +19,7 @@ import { CreateClassroomDto } from './dto/create-classroom.dto';
 import { EnrollStudentDto } from './dto/enroll-student.dto';
 import { UpdateClassTeachersDto } from './dto/update-class-teachers.dto';
 import { UpdateClassroomDto } from './dto/update-classroom.dto';
+import { RequireCapability } from '../staff-capabilities/capability.guard';
 
 interface AuthedRequest {
   user: { userId: string; role: Role };
@@ -32,6 +33,7 @@ export class ClassroomsController {
   // Шинэ анги — Багш+ ба Админ (эзэн 2026-10-18, «Сурагчид» хэсгээс)
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post()
+  @RequireCapability('classes.manage')
   create(@Body() dto: CreateClassroomDto, @Req() req: AuthedRequest) {
     return this.classrooms.create(dto, req.user.userId, req.user.role);
   }
@@ -72,6 +74,7 @@ export class ClassroomsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post(':id/enroll')
+  @RequireCapability('students.manage')
   enroll(
     @Param('id') id: string,
     @Body() dto: EnrollStudentDto,
@@ -87,6 +90,7 @@ export class ClassroomsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post(':id/remove-student')
+  @RequireCapability('students.manage')
   removeStudent(
     @Param('id') id: string,
     @Body() dto: EnrollStudentDto,
@@ -113,6 +117,7 @@ export class ClassroomsController {
   // Ангийн багш + туслах багш (эзэн 2026-10-13) — ангийн самбараас Багш+/Админ
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Patch(':id/teachers')
+  @RequireCapability('classes.manage')
   setTeachers(
     @Param('id') id: string,
     @Body() dto: UpdateClassTeachersDto,
@@ -143,6 +148,7 @@ export class ClassroomsController {
 
   @Roles(Role.ADMIN, Role.TEACHER_PLUS)
   @Post(':id/disband')
+  @RequireCapability('classes.manage')
   disband(
     @Param('id') id: string,
     @Req() req: AuthedRequest,

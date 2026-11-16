@@ -7,6 +7,8 @@ export type DriverKey = "exam" | "practice" | "homework" | "attendance";
 export interface Permissions {
   money: boolean;
   manageClass?: boolean;
+  /** Сурагч анги руу оруулах/шилжүүлэх (эрхийн матриц «Сурагч бүртгэх») */
+  manageStudents?: boolean;
   manageClasses?: boolean;
   isAdmin: boolean;
 }
