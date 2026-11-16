@@ -30,6 +30,8 @@ import { parsePaperWorkbook, type ParsedPaperRow } from './paper-exam-sheet';
 import {
   isMissed,
   itemsOfGuide,
+  myAnswerOf,
+  type MyAnswer,
   studentGuide,
   type GuideRow,
 } from './paper-exam-student';
@@ -1620,10 +1622,17 @@ export class PaperExamsService {
       }),
     ]);
     const items: PaperItem[] = exam.items;
-    const { statuses } = gradeSheet(answersOf(sheet.answers), items, sheet.variant);
+    const answers = answersOf(sheet.answers);
+    const { statuses } = gradeSheet(answers, items, sheet.variant);
     // Сурагчид очих талбаруудыг тодорхой жагсаана (санд нэмэгдсэн өөр талбар алдагдахгүй)
     const entries = (rows as unknown as GuideRow[]).map(studentGuide);
     const marks: Record<string, 'CORRECT' | 'MISSED' | 'UNGRADED'> = {};
+    // Өөрийн дугуйлсан/бичсэн хариу — бодлогын хуудсанд «юу гэж хариулж алдсан»-ыг харуулна
+    const mine: Record<string, MyAnswer> = {};
+    for (const row of rows as unknown as GuideRow[]) {
+      const my = myAnswerOf(row, items, answers);
+      if (my) mine[row.label] = my;
+    }
     for (const row of entries) {
       const own = itemsOfGuide(row, items);
       if (own.length === 0) continue;
@@ -1633,7 +1642,7 @@ export class PaperExamsService {
           ? 'UNGRADED'
           : 'CORRECT';
     }
-    return { variant, entries, marks };
+    return { variant, entries, marks, mine };
   }
 
   /**

@@ -1,6 +1,6 @@
 import type { GuideContent } from './paper-exam-guide';
 import type { ItemStatus, PaperItem } from './paper-exam-logic';
-import { isMissed, studentGuide, type GuideRow } from './paper-exam-student';
+import { isMissed, myAnswerOf, studentGuide, type GuideRow } from './paper-exam-student';
 
 const base: Omit<GuideContent, 'kind'> = {
   points: 2,
@@ -54,5 +54,20 @@ describe('сурагчийн тайлбар', () => {
     expect(isMissed(choice, items, st(['CORRECT', 'WRONG', 'WRONG', 'WRONG']))).toBe(false);
     expect(isMissed(fill, items, st(['CORRECT', 'CORRECT', 'CORRECT', 'BLANK']))).toBe(true);
     expect(isMissed(fill, items, st(['WRONG', 'WRONG', 'CORRECT', 'CORRECT']))).toBe(false);
+  });
+
+  it('өөрийн хариу: дугуйлсан үсэг, нөхөхөд нүд бүрийн цифр', () => {
+    expect(myAnswerOf(choice, items, ['C', 'A', '25', '7'])).toEqual({ answer: 'C' });
+    expect(myAnswerOf(choice, items, ['', 'A', '', ''])).toEqual({ answer: '' });
+    expect(myAnswerOf(choice, items, ['*', 'A', '', ''])).toEqual({ answer: '*' });
+    // багш зөв/алдсанаар оруулсан — яг хариу мэдэгдэхгүй
+    expect(myAnswerOf(choice, items, ['-', 'A', '', ''])).toBeUndefined();
+    const wide: GuideRow = {
+      ...fill,
+      content: { ...fill.content, fields: [{ key: 'ab', value: '25', part: 0 }, { key: 'c', value: '7', part: 1 }] },
+    };
+    expect(myAnswerOf(wide, items, ['C', 'A', '2_', '9'])).toEqual({ fields: { ab: '2_', c: '9' } });
+    expect(myAnswerOf(wide, items, ['C', 'A', '', ''])).toEqual({ fields: { ab: '__', c: '_' } });
+    expect(myAnswerOf(wide, items, ['C', 'A', '+', '9'])).toBeUndefined();
   });
 });
