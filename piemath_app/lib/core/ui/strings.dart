@@ -1,6 +1,6 @@
 /// Олон дэлгэцэд давтагддаг бичвэр. Бүгд монголоор (RULES §2), төгсгөлд цэггүй (товч, гарчиг).
 abstract final class AppStrings {
-  static const appName = 'Piemath';
+  static const appName = 'Pimath';
   static const orgName = 'Шинэ ирээдүйн эзэд';
 
   static const retry = 'Дахин оролдох';

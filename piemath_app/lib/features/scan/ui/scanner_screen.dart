@@ -162,7 +162,7 @@ class _CameraProblem extends StatelessWidget {
     final (title, message) = switch (error) {
       QrCameraError.permissionDenied => (
         'Камерын зөвшөөрөл алга',
-        'Утасныхаа Тохиргоо хэсэгт Piemath-д камер ашиглахыг зөвшөөрнө үү. Эсвэл кодоо гараар бичиж болно.',
+        'Утасныхаа Тохиргоо хэсэгт Pimath-д камер ашиглахыг зөвшөөрнө үү. Эсвэл кодоо гараар бичиж болно.',
       ),
       QrCameraError.unsupported => (
         'Энэ утсанд камер ажиллахгүй байна',

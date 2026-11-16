@@ -103,7 +103,7 @@ class _PhotoComposerScreenState extends ConsumerState<PhotoComposerScreen> {
       final denied = e.code.contains('access_denied') || e.code.contains('permission');
       setState(
         () => _error = denied
-            ? 'Зураг авах зөвшөөрөл өгөөгүй байна. Утасныхаа Тохиргоо хэсгээс Piemath-д камер, зургийн сангийн зөвшөөрөл өгнө үү.'
+            ? 'Зураг авах зөвшөөрөл өгөөгүй байна. Утасныхаа Тохиргоо хэсгээс Pimath-д камер, зургийн сангийн зөвшөөрөл өгнө үү.'
             : 'Зургийг нээж чадсангүй. Дахин оролдоно уу.',
       );
     }

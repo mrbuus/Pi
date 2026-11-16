@@ -15,7 +15,7 @@ final appleAvailableProvider =
     FutureProvider.autoDispose<bool>((ref) => ref.watch(nativeSignInProvider).appleAvailable());
 
 String takenText(NativeProvider p) =>
-    'Энэ ${p.label} бүртгэл өөр Piemath хэрэглэгчтэй холбогдсон байна. Өөр бүртгэл сонгох эсвэл сургалтын '
+    'Энэ ${p.label} бүртгэл өөр Pimath хэрэглэгчтэй холбогдсон байна. Өөр бүртгэл сонгох эсвэл сургалтын '
     'төвд хандана уу';
 
 /// «Миний мэдээлэл» — Google / Apple холбох, салгах. Аль нь ч боломжгүй бол юу ч зурахгүй.

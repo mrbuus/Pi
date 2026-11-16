@@ -10,8 +10,9 @@ final _forbiddenGlyph = RegExp(
   unicode: true,
 );
 
-/// «Pimath» брэнд хэзээ ч биш. Зөвхөн техникийн хаяг (`pimath.mn`) зөвшөөрөгдөнө.
-final _wrongBrand = RegExp(r'pimath(?!\.mn)', caseSensitive: false);
+/// Брэнд = «Pimath» (эзэн 2026-11-16). Хуучин «Piemath» бичвэрт орохгүй; зөвхөн кодын нэр
+/// (`PiemathApp`, `PiemathSymbols`, `PiemathExamGuard`) үлдэнэ.
+final _wrongBrand = RegExp(r'Piemath(?!App|Symbols|ExamGuard)');
 
 void main() {
   final sources = readSources(['lib']);
@@ -26,7 +27,7 @@ void main() {
     expect(hits, isEmpty, reason: hits.join('\n'));
   });
 
-  test('«Pimath» брэнд lib/-д байхгүй (зөвхөн pimath.mn хаяг)', () {
+  test('хуучин «Piemath» брэнд lib/-д байхгүй (зөвхөн кодын нэр)', () {
     final hits = <String>[];
     for (final file in sources) {
       for (final (n, line) in file.lines) {
