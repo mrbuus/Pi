@@ -4,13 +4,17 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
+import { StudentsFullExportService } from './students-full-export.service';
 import { UsersService } from './users.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN, Role.TEACHER_PLUS)
 @Controller('students')
 export class StudentsExportController {
-  constructor(private readonly users: UsersService) {}
+  constructor(
+    private readonly users: UsersService,
+    private readonly full: StudentsFullExportService,
+  ) {}
 
   @Get('export.csv')
   @Header('Content-Type', 'text/csv; charset=utf-8')
@@ -19,13 +23,16 @@ export class StudentsExportController {
     return this.users.exportStudentsCsv(req.user.userId);
   }
 
-  /** Бүртгэлийн Excel — эх БҮРТГЭЛ-2027-тэй ижил табтай, баганатай (эзэн 2026-11-03) */
+  /**
+   * Бүртгэлийн Excel — эх БҮРТГЭЛ-2027-тэй ижил табтай, баганатай (эзэн 2026-11-03) + татах агшны
+   * сангийн бүх мэдээлэлтэй «Бүх мэдээлэл» таб (эзэн 2026-11-16)
+   */
   @Get('export.xlsx')
   async exportXlsx(
     @Req() req: { user: { userId: string } },
     @Res() res: Response,
   ): Promise<void> {
-    const file = await this.users.exportStudentsXlsx(req.user.userId);
+    const file = await this.full.exportXlsx(req.user.userId);
     const stamp = new Date().toISOString().slice(0, 10);
     res.setHeader(
       'Content-Type',
