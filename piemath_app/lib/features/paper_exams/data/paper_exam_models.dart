@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../shared/mistake_notes/mistake_notes.dart';
 import '../../learning/data/json.dart';
 
 export '../../learning/data/json.dart' show Json;
@@ -517,6 +518,72 @@ class MyPaperItem {
 
   /// Зөв хариу — сервер нийтэлсэн шалгалтад л өгнө.
   final String? key;
+}
+
+/// `GET /paper-exams/my/:id/problems` → `entries[]` — сурагчийн ӨӨРИЙН хувилбарын бодлого.
+/// Апп-д одоогоор «Түгээмэл алдаа»-нд хэрэгтэй талбарууд л; бүгд null-safe (хуучин серверт `mistakes` алга).
+@immutable
+class PaperProblem {
+  const PaperProblem({
+    required this.label,
+    this.number,
+    required this.kind,
+    this.choices = const [],
+    this.answer,
+    this.mistakes = const {},
+  });
+
+  factory PaperProblem.fromJson(Object? json) {
+    final j = asMap(json);
+    final c = asMap(j['content']);
+    final m = asMap(c['mistakes']);
+    return PaperProblem(
+      label: asStr(j['label']) ?? '',
+      number: asInt(j['number']),
+      kind: asStr(c['kind']) ?? '',
+      choices: [for (final s in asList(c['choices'])) asStr(s) ?? ''],
+      answer: asStr(c['answer']),
+      mistakes: {
+        for (final e in m.entries)
+          if (asStr(e.value)?.trim().isNotEmpty ?? false) e.key: asStr(e.value)!.trim(),
+      },
+    );
+  }
+
+  final String label;
+
+  /// Дүнтэй холбогдох бодлогын дугаар; нөхөх даалгаварт null.
+  final int? number;
+
+  /// `choice` | `fill`
+  final String kind;
+
+  /// Сонголтууд LaTeX-ээр (`$` хүрээгүй), A-аас эхлэн.
+  final List<String> choices;
+  final String? answer;
+
+  /// Буруу сонголтын үсэг → тайлбар. Сервер бодолт харагдах үед л илгээнэ.
+  final Map<String, String> mistakes;
+
+  static const _letters = ['A', 'B', 'C', 'D', 'E'];
+
+  /// «Түгээмэл алдаа»: үсэг + сонголтын утга + тайлбар; [mine] (сурагчийн бичсэн үсэг) эхэнд.
+  /// Тайлбаргүй, нөхөх бодлого эсвэл зөв хариунд — хоосон.
+  List<MistakeNote> notes(String? mine) {
+    if (kind != 'choice') return const [];
+    final out = <MistakeNote>[
+      for (var i = 0; i < choices.length && i < _letters.length; i++)
+        if (_letters[i] != answer && mistakes[_letters[i]] != null)
+          MistakeNote(
+            label: _letters[i],
+            text: '\$${choices[i]}\$',
+            note: mistakes[_letters[i]]!,
+            mine: _letters[i] == mine?.trim(),
+          ),
+    ];
+    out.sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0));
+    return out;
+  }
 }
 
 /// `GET /paper-exams/my/:id` — сурагчийн өөрийн дүн + төвийн жагсаалт.

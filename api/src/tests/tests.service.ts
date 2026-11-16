@@ -48,6 +48,7 @@ import { SaveSessionDto } from './dto/submit-test.dto';
 import { countIntegrityEvents, countsAsLeave } from './integrity-events';
 import { MistakeCollector } from '../mistakes/mistake-collector.service';
 import { spentSeconds } from './problem-time';
+import { mistakeNotesOf } from './mistake-notes';
 import {
   answerToken,
   buildChoiceOrder,
@@ -129,6 +130,18 @@ function toGradable(row: TestProblemRow): GradableProblem {
     correctAnswer: row.problem.correctAnswer,
     choiceOptions: row.problem.choiceOptions,
   };
+}
+
+/** Сурагчийн сонгосон сонголтын эх индекс (order-оор эрэмбэлсэн); TEXT биш бол null. */
+function mineIndexOf(
+  g: GradableProblem,
+  raw: unknown,
+  perm: number[] | undefined,
+): number | null {
+  if (choiceModeOf(g) !== 'TEXT') return null;
+  if (typeof raw !== 'number' || !Number.isInteger(raw)) return null;
+  const orig = perm ? perm[raw] : raw;
+  return orig === undefined ? null : orig;
 }
 
 // Ирээдүйд оноосон үед огноотойгоор «удахгүй» гэж харагдах шалгалтын төрлүүд
@@ -1331,6 +1344,30 @@ export class TestsService {
     >;
     const times = asRecord(session.problemTimes);
 
+    // «Түгээмэл алдаа»: бодолт нээгдэх (VERIFIED) бодлогод л тайлбарыг татна.
+    // Шалгалтын үеийн loadTestWithProblems-ийн select-д mistakeNote ОРУУЛАХГҮЙ
+    // (start/buildProblemViews руу задрахаас сэргийлж тусад нь уншина).
+    const verifiedIds = orderIds.filter(
+      (pid) => byId.get(pid)!.problem.analysis?.status === 'VERIFIED',
+    );
+    const noteRows = verifiedIds.length
+      ? await this.prisma.problemChoice.findMany({
+          where: {
+            problemId: { in: verifiedIds },
+            isCorrect: false,
+            mistakeNote: { not: null },
+          },
+          select: { problemId: true, order: true, mistakeNote: true },
+        })
+      : [];
+    const noteBy = new Map<string, Map<number, string>>();
+    for (const r of noteRows) {
+      if (!r.mistakeNote) continue;
+      const m = noteBy.get(r.problemId) ?? new Map<number, string>();
+      m.set(r.order, r.mistakeNote);
+      noteBy.set(r.problemId, m);
+    }
+
     const items = orderIds.map((pid, i) => {
       const tp = byId.get(pid)!;
       const g = toGradable(tp);
@@ -1368,6 +1405,18 @@ export class TestsService {
           a?.status === 'VERIFIED' && a.solutionOutline
             ? a.solutionOutline
             : null,
+        // Нэмэлт (2026-11-16): буруу сонголтын тайлбар — бодолттой ИЖИЛ нөхцөлөөр
+        // (VERIFIED). Сурагчийн сонгосон нь эхэнд (mine). Байхгүй бол [].
+        mistakeNotes:
+          a?.status === 'VERIFIED' && noteBy.has(pid)
+            ? mistakeNotesOf(
+                (tp.problem.choiceOptions ?? []).map((o) => ({
+                  ...o,
+                  mistakeNote: noteBy.get(pid)!.get(o.order) ?? null,
+                })),
+                mineIndexOf(g, raw, choiceOrder[pid]),
+              )
+            : [],
         // Нэмэлт (2026-11-04): бодлогод зарцуулсан секунд, сессийн problemTimes-аас. Байхгүй бол null
         timeSpentSec: spentSeconds(times[pid]),
       };

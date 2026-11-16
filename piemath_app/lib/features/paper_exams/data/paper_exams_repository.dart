@@ -105,6 +105,12 @@ class PaperExamsRepository {
       _api.get('$_base/my', parse: (j) => [for (final e in _asList(j)) MyPaperExam.fromJson(e)]);
 
   Future<MyPaperDetail> myDetail(String id) => _api.get('$_base/my/${_enc(id)}', parse: MyPaperDetail.fromJson);
+
+  /// Өөрийн хувилбарын бодлого (тайлбар, бодолт, «Түгээмэл алдаа») — нөгөө хувилбарынх ирэхгүй.
+  Future<List<PaperProblem>> myProblems(String id) => _api.get(
+    '$_base/my/${_enc(id)}/problems',
+    parse: (j) => [for (final e in _asList(j is Map ? j['entries'] : null)) PaperProblem.fromJson(e)],
+  );
 }
 
 List<Object?> _asList(Object? j) => j is List ? j : const [];
@@ -138,6 +144,12 @@ final myPaperExamsProvider = FutureProvider.autoDispose<List<MyPaperExam>>((ref)
 final myPaperDetailProvider = FutureProvider.autoDispose.family<MyPaperDetail, String>((ref, id) {
   ref.cacheFor(const Duration(minutes: 5));
   return swr(ref, () => ref.watch(paperExamsRepositoryProvider).myDetail(id));
+});
+
+/// Сурагчийн өөрийн хувилбарын бодлогууд (`/paper-exams/my/:id/problems`).
+final myPaperProblemsProvider = FutureProvider.autoDispose.family<List<PaperProblem>, String>((ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return swr(ref, () => ref.watch(paperExamsRepositoryProvider).myProblems(id));
 });
 
 /// Ажилтны харагдацад нэг сурагчийн нэгдсэн шалгалтууд. Сурагчаар шүүх API байхгүй тул дүн оруулсан

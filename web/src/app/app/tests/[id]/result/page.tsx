@@ -11,6 +11,7 @@ import ProblemFigure from "@/components/ProblemFigure";
 import TheoryContent from "@/components/theory/TheoryContent";
 import FillAnswer from "@/components/thousand/FillAnswer";
 import YoutubeEmbed from "@/components/thousand/YoutubeEmbed";
+import MistakeNotes, { notesFromChoices } from "@/components/exam/MistakeNotes";
 import { dateTimeUB } from "@/components/thousand/format";
 import { Card } from "@/components/ui/Surface";
 import { MetaTitle } from "@/components/ui/Meta";
@@ -31,7 +32,8 @@ interface WrongProblem {
     format: "CHOICE" | "FILL_NUMBER" | "OPEN";
     statementText: string | null;
     imageKey: string | null;
-    choices: { letter: string; text: string; image?: string | null }[] | null;
+    // mistakeNote: бодолт харагдах үед л ирнэ (шинэ талбар — хуучин API-д байхгүй)
+    choices: { letter: string; text: string; image?: string | null; mistakeNote?: string | null }[] | null;
     myAnswer: unknown;
     correctAnswer: unknown;
     solution: string | null;
@@ -410,6 +412,7 @@ function WrongCard({ item }: { item: WrongProblem }) {
               <TheoryContent markdown={p.solution} className="text-sm" />
             </section>
           )}
+          <MistakeNotes notes={notesFromChoices(p.choices, mine)} />
           {p.youtube && <YoutubeEmbed embedUrl={p.youtube.embedUrl} title={`${item.n}-р бодлогын бодолт`} />}
         </>
       )}

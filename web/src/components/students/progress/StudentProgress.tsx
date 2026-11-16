@@ -30,6 +30,7 @@ import PaymentsTab from "../hub/PaymentsTab";
 import BooksTab from "@/components/book-money/BooksTab";
 import StudentInfoTab from "../hub/StudentInfoTab";
 import { useStaffCan } from "@/lib/staffCapabilities";
+import StudentPaperResults from "../hub/StudentPaperResults";
 
 type TabKey = "class" | "exams" | "lessons" | "syllabus" | "payments" | "books" | "withdrawal" | "notes" | "independent" | "info";
 const ALL_TABS: TabKey[] = ["class", "exams", "lessons", "syllabus", "payments", "books", "withdrawal", "notes", "independent", "info"];
@@ -158,6 +159,7 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
         {tab === "independent" && <IndependentProgressTab studentId={studentId} />}
         {tab === "lessons" && <LessonHistoryTab studentId={studentId} />}
         {tab === "syllabus" && <SyllabusTab studentId={studentId} />}
+        {tab === "exams" && <StudentPaperResults studentId={studentId} />}
         {tab === "exams" &&
           (status === "loading" ? (
             <LoadingState rows={4} label="Шалгалт" />

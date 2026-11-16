@@ -1,6 +1,6 @@
 import type { GuideContent } from './paper-exam-guide';
 import type { ItemStatus, PaperItem } from './paper-exam-logic';
-import { checkGuide, guideStage, isMissed, publicGuide, type GuideRow } from './paper-exam-student';
+import { isMissed, myAnswerOf, studentEntries, studentGuide, type GuideRow } from './paper-exam-student';
 
 const base: Omit<GuideContent, 'kind'> = {
   points: 2,
@@ -40,26 +40,12 @@ const item = (number: number, label: string | null = null): PaperItem => ({
 const items = [item(3), item(4), item(37, '2.1.a-b'), item(38, '2.1.c')];
 
 describe('сурагчийн тайлбар', () => {
-  it('эхний харагдацад зөв хариу, бодолт, чанар алга', () => {
-    const p = JSON.stringify(publicGuide(choice)) + JSON.stringify(publicGuide(fill));
-    for (const secret of ['чанар', 'энгийн', 'алхам', '"answer"', '"value"']) {
-      expect(p).not.toContain(secret);
-    }
-    expect(publicGuide(fill).content.fields).toEqual([
-      { key: 'a', part: 0 },
-      { key: 'b', part: 1 },
-    ]);
-  });
-
-  it('шат шатаар нээгдэж, хариу хамгийн сүүлд', () => {
-    expect(guideStage(choice, 0)).toMatchObject({ stage: 0, rule: undefined });
-    expect(guideStage(choice, 1).rule).toEqual(['чанар']);
-    expect(guideStage(choice, 2).easy).toEqual(['энгийн']);
-    expect(guideStage(choice, 4)).toMatchObject({ steps: ['алхам 1'], answer: undefined });
-    expect(guideStage(choice, 5)).toMatchObject({ steps: ['алхам 1', 'алхам 2'], answer: 'B' });
-    expect(guideStage(choice, 99).stage).toBe(5);
-    expect(guideStage(fill, 5).fields?.[0].value).toBe('2');
-    expect(guideStage(fill, 4).fields).toBeUndefined();
+  it('сурагчид зөвхөн жагсаасан талбар очно', () => {
+    const extra = { ...choice, content: { ...choice.content, secret: 'x' } } as unknown as GuideRow;
+    const out = studentGuide(extra);
+    expect(JSON.stringify(out)).not.toContain('secret');
+    expect(out.content).toEqual(choice.content);
+    expect(studentGuide(fill).content).toEqual(fill.content);
   });
 
   it('алдсан бодлого л — 2-р хэсэгт аль нэг багц', () => {
@@ -70,11 +56,58 @@ describe('сурагчийн тайлбар', () => {
     expect(isMissed(fill, items, st(['WRONG', 'WRONG', 'CORRECT', 'CORRECT']))).toBe(false);
   });
 
-  it('дахин оролдлогыг сервер шалгана', () => {
-    expect(checkGuide(choice, 'b')).toEqual({ correct: true });
-    expect(checkGuide(choice, 'C')).toEqual({ correct: false });
-    expect(checkGuide(fill, { a: '2', b: '5' })).toEqual({ correct: true, parts: [true, true] });
-    expect(checkGuide(fill, { a: '2', b: '4' })).toEqual({ correct: false, parts: [true, false] });
-    expect(checkGuide(fill, null)).toEqual({ correct: false, parts: [false, false] });
+  describe('түгээмэл алдаа (mistakes)', () => {
+    const withNotes: GuideRow = {
+      ...choice,
+      content: { ...choice.content, mistakes: { A: 'нэмэхээ мартжээ', C: '$x$-г хасчээ' } },
+    };
+
+    it('бодолт нээлттэй бол ил жагсаалтаар очно', () => {
+      expect(studentGuide(withNotes).content.mistakes).toEqual({ A: 'нэмэхээ мартжээ', C: '$x$-г хасчээ' });
+    });
+
+    it('бодолт хаалттай бол бодолт ч, тайлбар ч очихгүй', () => {
+      const out = studentGuide(withNotes, { solution: false });
+      expect(out.content.steps).toEqual([]);
+      expect(out.content.mistakes).toBeUndefined();
+      expect(JSON.stringify(out)).not.toContain('мартжээ');
+    });
+
+    it('зөв хариу, сонголтод байхгүй үсэг, хоосон тайлбар, нөхөх бодлогынх очихгүй', () => {
+      const bad = {
+        ...choice,
+        content: { ...choice.content, mistakes: { B: 'зөв', E: '', F: 'гадуур', D: 'үлдэнэ' } },
+      } as GuideRow;
+      expect(studentGuide(bad).content.mistakes).toEqual({ D: 'үлдэнэ' });
+      const f = { ...fill, content: { ...fill.content, mistakes: { A: 'т' } } } as GuideRow;
+      expect(studentGuide(f).content.mistakes).toBeUndefined();
+      expect(studentGuide(choice).content.mistakes).toBeUndefined();
+    });
+
+    it('нөгөө хувилбарын мөр (бодолт, тайлбар) очихгүй', () => {
+      const rows = [
+        { ...withNotes, variant: 'A' },
+        { ...withNotes, label: '4', number: 4, content: { ...withNotes.content, mistakes: { A: 'нөгөө хувилбар' } }, variant: 'B' },
+      ];
+      const out = studentEntries(rows, 'A');
+      expect(out.map((r) => r.label)).toEqual(['3']);
+      expect(JSON.stringify(out)).not.toContain('нөгөө хувилбар');
+      expect(JSON.stringify(studentEntries(rows, 'A', false))).not.toContain('мартжээ');
+    });
+  });
+
+  it('өөрийн хариу: дугуйлсан үсэг, нөхөхөд нүд бүрийн цифр', () => {
+    expect(myAnswerOf(choice, items, ['C', 'A', '25', '7'])).toEqual({ answer: 'C' });
+    expect(myAnswerOf(choice, items, ['', 'A', '', ''])).toEqual({ answer: '' });
+    expect(myAnswerOf(choice, items, ['*', 'A', '', ''])).toEqual({ answer: '*' });
+    // багш зөв/алдсанаар оруулсан — яг хариу мэдэгдэхгүй
+    expect(myAnswerOf(choice, items, ['-', 'A', '', ''])).toBeUndefined();
+    const wide: GuideRow = {
+      ...fill,
+      content: { ...fill.content, fields: [{ key: 'ab', value: '25', part: 0 }, { key: 'c', value: '7', part: 1 }] },
+    };
+    expect(myAnswerOf(wide, items, ['C', 'A', '2_', '9'])).toEqual({ fields: { ab: '2_', c: '9' } });
+    expect(myAnswerOf(wide, items, ['C', 'A', '', ''])).toEqual({ fields: { ab: '__', c: '_' } });
+    expect(myAnswerOf(wide, items, ['C', 'A', '+', '9'])).toBeUndefined();
   });
 });

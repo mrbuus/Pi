@@ -48,7 +48,7 @@ class BrandLogoFull extends StatelessWidget {
   }
 }
 
-/// Лого + «Piemath» + «Шинэ ирээдүйн эзэд».
+/// Лого + «Pimath» + «Шинэ ирээдүйн эзэд».
 class BrandMark extends StatelessWidget {
   const BrandMark({super.key, this.logoSize = 44, this.showOrg = true});
 

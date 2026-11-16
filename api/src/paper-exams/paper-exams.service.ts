@@ -28,12 +28,13 @@ import {
 } from './paper-exam-logic';
 import { parsePaperWorkbook, type ParsedPaperRow } from './paper-exam-sheet';
 import {
-  checkGuide,
-  guideStage,
   isMissed,
   itemsOfGuide,
-  publicGuide,
+  studentEntries,
+  type VariantGuideRow,
   type GuideRow,
+  myAnswerOf,
+  type MyAnswer,
 } from './paper-exam-student';
 import { readStoredBytes } from '../storage/file-store';
 import type {
@@ -1398,17 +1399,30 @@ export class PaperExamsService {
   // ======================= Сурагч =======================
 
   async my(studentId: string) {
+    return this.resultsOf(studentId, true);
+  }
+
+  /**
+   * Ажилтан — нэг сурагчийн бүх нэгдсэн шалгалтын дүн (сурагчийн профайлын «Шалгалт» таб,
+   * эзэн 2026-11-16). Сурагчид хараахан нээгээгүй шалгалт ч орно (`published` талбараар ялгана).
+   */
+  async studentResults(studentId: string) {
+    return this.resultsOf(studentId, false);
+  }
+
+  private async resultsOf(studentId: string, publishedOnly: boolean) {
     const own = await this.prisma.paperExamSheet.findMany({
       where: {
         studentId,
         supersededAt: null,
-        exam: { published: true, deletedAt: null },
+        exam: { deletedAt: null, ...(publishedOnly ? { published: true } : {}) },
       },
       select: {
         examId: true,
         totalScore: true,
         maxScore: true,
-        exam: { select: { title: true, heldOn: true } },
+        variant: true,
+        exam: { select: { title: true, heldOn: true, published: true } },
       },
       orderBy: { exam: { heldOn: 'desc' } },
     });
@@ -1432,6 +1446,7 @@ export class PaperExamsService {
         totalScore: o.totalScore,
         maxScore: o.maxScore,
         pct: pct(o.totalScore, o.maxScore),
+        ...(publishedOnly ? {} : { variant: o.variant, published: o.exam.published }),
         rank: 1 + scores.filter((s) => s > o.totalScore + 1e-9).length,
         participants: scores.length,
       };
@@ -1605,32 +1620,6 @@ export class PaperExamsService {
     return sheet;
   }
 
-  /** Сурагчийн АЛДСАН бодлогын тайлбарын мөрүүд — өөрийн хувилбараас л */
-  private async myMissedGuides(examId: string, studentId: string) {
-    const sheet = await this.mySheet(examId, studentId);
-    const variant = sheet.variant ?? '';
-    const [exam, rows] = await Promise.all([
-      this.activeExam(examId),
-      this.prisma.paperExamGuide.findMany({
-        where: { examId, variant },
-        select: { label: true, number: true, content: true },
-        orderBy: { order: 'asc' },
-      }),
-    ]);
-    const items: PaperItem[] = exam.items;
-    const { statuses } = gradeSheet(answersOf(sheet.answers), items, sheet.variant);
-    const guides = (rows as unknown as GuideRow[]).filter((r) =>
-      isMissed(r, items, statuses),
-    );
-    return { variant, guides };
-  }
-
-  /** Алдсан бодлогууд: нөхцөл, сонголт л (бодолт, хариугүй) */
-  async myGuide(examId: string, studentId: string) {
-    const { variant, guides } = await this.myMissedGuides(examId, studentId);
-    return { variant, entries: guides.map(publicGuide) };
-  }
-
   /**
    * Сурагчийн «Бодлого» таб (эзэн 2026-11-16): ӨӨРИЙН өгсөн хувилбарын бүх бодлого
    * тайлбар, бодолттой нь; бодлого бүрт зөвхөн өөрийнх нь зөв/алдсан тэмдэг
@@ -1643,14 +1632,23 @@ export class PaperExamsService {
       this.activeExam(examId),
       this.prisma.paperExamGuide.findMany({
         where: { examId, variant },
-        select: { label: true, number: true, content: true },
+        select: { variant: true, label: true, number: true, content: true },
         orderBy: { order: 'asc' },
       }),
     ]);
     const items: PaperItem[] = exam.items;
-    const { statuses } = gradeSheet(answersOf(sheet.answers), items, sheet.variant);
-    const entries = rows as unknown as GuideRow[];
+    const answers = answersOf(sheet.answers);
+    const { statuses } = gradeSheet(answers, items, sheet.variant);
+    // Сурагчид очих талбаруудыг тодорхой жагсаана (санд нэмэгдсэн өөр талбар алдагдахгүй);
+    // өөрийн хувилбарын бодолт, түгээмэл алдаа шууд нээлттэй (эзэн 2026-11-16)
+    const entries = studentEntries(rows as unknown as VariantGuideRow[], variant);
     const marks: Record<string, 'CORRECT' | 'MISSED' | 'UNGRADED'> = {};
+    // Өөрийн дугуйлсан/бичсэн хариу — бодлогын хуудсанд «юу гэж хариулж алдсан»-ыг харуулна
+    const mine: Record<string, MyAnswer> = {};
+    for (const row of rows as unknown as GuideRow[]) {
+      const my = myAnswerOf(row, items, answers);
+      if (my) mine[row.label] = my;
+    }
     for (const row of entries) {
       const own = itemsOfGuide(row, items);
       if (own.length === 0) continue;
@@ -1660,33 +1658,7 @@ export class PaperExamsService {
           ? 'UNGRADED'
           : 'CORRECT';
     }
-    return { variant, entries, marks };
-  }
-
-  /** Нэг бодлогын санамжийн шат (1 чанар … 3+k бодолтын алхам, сүүлд хариу) */
-  async myGuideStage(
-    examId: string,
-    studentId: string,
-    label: string,
-    stage: number,
-  ) {
-    const { guides } = await this.myMissedGuides(examId, studentId);
-    const row = guides.find((g) => g.label === label);
-    if (!row) throw new NotFoundException('Бодлого олдсонгүй');
-    return guideStage(row, stage);
-  }
-
-  /** Дахин оролдлого — зөв хариуг клиент рүү илгээхгүйгээр шалгана */
-  async myGuideCheck(
-    examId: string,
-    studentId: string,
-    label: string,
-    answer: unknown,
-  ) {
-    const { guides } = await this.myMissedGuides(examId, studentId);
-    const row = guides.find((g) => g.label === label);
-    if (!row) throw new NotFoundException('Бодлого олдсонгүй');
-    return checkGuide(row, answer);
+    return { variant, entries, marks, mine };
   }
 
   /**

@@ -31,7 +31,7 @@
          enableOnBackInvokedCallback=true: Android 13+ predictive back (Flutter PopScope-той ажиллана,
          targetSdk 36-д өгөгдмөл; COMPLIANCE.md §2.4). -->
     <application
-        android:label="Piemath"
+        android:label="Pimath"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"

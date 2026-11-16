@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/kit/button";
 import ExamDialog from "@/components/exams/ExamDialog";
 import { errorText } from "@/components/exams/types";
 import { cn } from "@/lib/cn";
-import { itemName, type BoardRow, type PaperItem, shortName } from "./types";
+import { itemName, scoreText, type BoardRow, type PaperItem, shortName } from "./types";
 
 type Mode = "answer" | "mark";
+type Status = "CORRECT" | "WRONG" | "BLANK" | "MULTI" | "UNGRADED";
 interface FoundStudent {
   id: string;
   name: string;
@@ -17,10 +18,56 @@ interface FoundStudent {
   classes: string[];
 }
 
+/** Монгол гар дээр латин руу сэлгэхгүйгээр шивэхэд: тоо 1–5 ба кирилл ижил үсэг → A–E */
+const LETTER: Record<string, string> = {
+  "1": "A",
+  "2": "B",
+  "3": "C",
+  "4": "D",
+  "5": "E",
+  А: "A",
+  В: "B",
+  Б: "B",
+  С: "C",
+  Д: "D",
+  Е: "E",
+};
+const toLetter = (raw: string): string => {
+  const ch = raw.slice(-1).toUpperCase();
+  return /^[A-E]$/.test(ch) ? ch : (LETTER[ch] ?? "");
+};
+
+/** Серверийн дүгнэлттэй ижил дүрэм (paper-exam-logic.ts statusOf) — хадгалахаас өмнө оноог урьдчилан харуулна */
+function statusOf(a: string, item: PaperItem, variant: string | null): Status {
+  if (item.voided) return "UNGRADED";
+  if (a === "+") return "CORRECT";
+  if (a === "-") return "WRONG";
+  const key = (variant && item.answerKeys?.[variant]) || item.answerKey;
+  if (!key) return "UNGRADED";
+  if ((item.cells ?? 1) > 1) {
+    if (a === "" || /^_+$/.test(a)) return "BLANK";
+    return a === key ? "CORRECT" : "WRONG";
+  }
+  if (a === "") return "BLANK";
+  if (a === "*") return "MULTI";
+  return a === key ? "CORRECT" : "WRONG";
+}
+const TONE: Record<Status, string> = {
+  CORRECT: "border-success bg-success/15",
+  WRONG: "border-error bg-error/12",
+  MULTI: "border-error bg-error/12",
+  BLANK: "border-line bg-panel",
+  UNGRADED: "border-line bg-panel opacity-60",
+};
+
 /**
- * Багшийн гараар засвар (эзэн 2026-11-15): машин уншиж чадаагүй сурагчийн дүнг нэмэх эсвэл
- * буруу уншсаныг засах. Хоёр горим: хариуг шууд шивэх (A–E, цифр) эсвэл бодлого бүрт
- * зөв/алдсан тэмдэглэх. Хуучин мөр устахгүй — сервер шинэ мөр үүсгэж хуучныг хүчингүй болгоно.
+ * Багшийн гараар засвар (эзэн 2026-11-15/16): машин уншиж чадаагүй сурагчийн дүнг нэмэх,
+ * буруу уншсаныг засах, хувилбарыг солих. Хоёр горим: хариуг шивэх эсвэл зөв/алдсан тэмдэглэх.
+ * Хуучин мөр устахгүй — сервер шинэ мөр үүсгэж хуучныг хүчингүй болгоно.
+ *
+ * Алдаа гаргуулахгүйн тулд: шивэх бүрд дараагийн нүд рүү өөрөө шилжинэ; нүд бүр зөв/бурууг
+ * шууд өнгөөр харуулна; оноо хадгалахаас өмнө харагдана; өөрчлөлтгүй бол хадгалахгүй;
+ * хагас бөглөсөн багц, сонгоогүй хувилбарыг хадгалуулахгүй; хаахад хадгалаагүйг сануулна.
  */
 export default function SheetEditor({
   examId,
@@ -40,13 +87,18 @@ export default function SheetEditor({
   onOpenChange: (open: boolean) => void;
   onSaved: () => void;
 }) {
+  const variantList = variants.length ? variants : ["A", "B"];
+  const initial = useMemo(() => items.map((_, i) => row?.answers[i] ?? ""), [items, row]);
   const [mode, setMode] = useState<Mode>("answer");
-  const [variant, setVariant] = useState(row?.variant ?? variants[0] ?? "A");
-  const [answers, setAnswers] = useState<string[]>(() => items.map((_, i) => clean(row?.answers[i])));
+  // Шинэ дүнд хувилбарыг заавал өөрөө сонгуулна (анхдагч «A»-аар буруу дүгнэхээс сэргийлнэ)
+  const [variant, setVariant] = useState<string | null>(row ? (row.variant ?? null) : variantList.length === 1 ? variantList[0] : null);
+  const [answers, setAnswers] = useState<string[]>(initial);
   const [query, setQuery] = useState("");
   const [found, setFound] = useState<FoundStudent[] | null>(null);
   const [student, setStudent] = useState<FoundStudent | null>(null);
   const [busy, setBusy] = useState(false);
+  const [tried, setTried] = useState(false);
+  const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     const text = query.trim();
@@ -60,10 +112,46 @@ export default function SheetEditor({
   }, [query, row]);
 
   const set = (i: number, v: string) => setAnswers((prev) => prev.map((a, j) => (j === i ? v : a)));
+  const focus = (i: number) => {
+    const el = inputs.current[i];
+    if (el) {
+      el.focus();
+      el.select();
+    }
+  };
+
+  const statuses = answers.map((a, i) => statusOf(a, items[i], variant));
+  const score = items.reduce((t, it, i) => t + (statuses[i] === "CORRECT" ? it.points : 0), 0);
+  const max = items.reduce((t, it) => t + (it.voided ? 0 : it.points), 0);
+  const changed = answers.filter((a, i) => a !== initial[i]).length;
+  const variantChanged = !!row && variant !== (row.variant ?? null);
+  const dirty = changed > 0 || variantChanged || (!row && student !== null);
+  // Хагас бөглөсөн багц («21» 4 нүднээс) — аль орон хоосон нь тодорхойгүй тул хадгалуулахгүй
+  const incomplete = answers.map((a, i) => {
+    const cells = items[i].cells ?? 1;
+    return cells > 1 && a !== "" && a !== "+" && a !== "-" && a.length !== cells;
+  });
+  const firstIncomplete = incomplete.indexOf(true);
+  const nothingToSave = !!row && changed === 0 && !variantChanged;
+
+  const close = (next: boolean) => {
+    if (!next && dirty && !busy && !window.confirm("Хадгалаагүй өөрчлөлт байна. Хаах уу?")) return;
+    onOpenChange(next);
+  };
 
   async function save() {
+    setTried(true);
     if (!row && !student) {
       toast.error("Сурагчаа сонгоно уу");
+      return;
+    }
+    if (!variant) {
+      toast.error("Хувилбараа сонгоно уу");
+      return;
+    }
+    if (firstIncomplete >= 0) {
+      toast.error(`${itemName(items[firstIncomplete], items)}: бүх орныг бөглөнө үү (хоосон орон «_»)`);
+      if (mode === "answer") focus(firstIncomplete);
       return;
     }
     setBusy(true);
@@ -72,7 +160,11 @@ export default function SheetEditor({
         method: "PUT",
         body: { sheetId: row?.sheetId, studentId: row ? undefined : student?.id, variant, answers },
       });
-      toast.success(`Хадгаллаа · ${r.totalScore} / ${r.maxScore} оноо`);
+      toast.success(
+        row
+          ? `Хадгаллаа: ${scoreText(row.totalScore)} → ${scoreText(r.totalScore)} оноо`
+          : `Хадгаллаа: ${scoreText(r.totalScore)} / ${scoreText(r.maxScore)} оноо`,
+      );
       onSaved();
       onOpenChange(false);
     } catch (e) {
@@ -82,19 +174,32 @@ export default function SheetEditor({
     }
   }
 
+  const sections = [
+    { choice: true, title: "Сонгох даалгавар", idx: items.flatMap((it, i) => ((it.cells ?? 1) > 1 ? [] : [i])) },
+    { choice: false, title: "Нөхөх даалгавар", idx: items.flatMap((it, i) => ((it.cells ?? 1) > 1 ? [i] : [])) },
+  ].filter((s) => s.idx.length > 0);
+
   return (
     <ExamDialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={close}
       wide
       title={row ? `Дүн засах · ${shortName(row.lastName, row.firstName)}` : "Дүн нэмэх"}
-      description="Машин уншиж чадаагүй эсвэл буруу уншсан хуудсыг гараар оруулна. Хуучин дүн устахгүй"
+      description="Хариу, хувилбарыг гараар засна. Хуучин дүн устахгүй"
       footer={
         <>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          <div className="mr-auto text-sm text-ink">
+            <span className="font-display text-lg font-bold tabular-nums">
+              {variant ? scoreText(score) : ""}
+              <span className="text-sm font-normal text-ink-dim"> / {scoreText(max)} оноо</span>
+            </span>
+            {row && <span className="ml-2 text-ink-dim">өмнө нь {scoreText(row.totalScore)}</span>}
+            {changed > 0 && <span className="ml-2 text-ink-dim">{changed} бодлого өөрчилсөн</span>}
+          </div>
+          <Button variant="ghost" onClick={() => close(false)}>
             Болих
           </Button>
-          <Button onClick={save} disabled={busy}>
+          <Button onClick={save} disabled={busy || nothingToSave}>
             Хадгалах
           </Button>
         </>
@@ -105,12 +210,16 @@ export default function SheetEditor({
           <div className="space-y-2">
             <input
               value={query}
+              autoFocus
               onChange={(e) => {
                 setQuery(e.target.value);
                 setStudent(null);
               }}
               placeholder="Сурагчийн нэр эсвэл код"
-              className="h-11 w-full rounded-xl border border-line bg-panel px-3 text-ink outline-none focus:border-brand"
+              className={cn(
+                "h-11 w-full rounded-xl border bg-panel px-3 text-ink outline-none focus:border-brand",
+                tried && !student ? "border-error" : "border-line",
+              )}
             />
             {student ? (
               <p className="text-sm font-semibold text-success">
@@ -134,7 +243,27 @@ export default function SheetEditor({
         )}
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex gap-1 rounded-xl border border-line p-1" role="group" aria-label="Горим">
+          <div className="flex items-center gap-1" role="group" aria-label="Хувилбар">
+            <span className="mr-1 text-sm font-semibold text-ink">Хувилбар</span>
+            {variantList.map((v) => (
+              <button
+                key={v}
+                aria-pressed={variant === v}
+                onClick={() => setVariant(v)}
+                className={cn(
+                  "min-h-11 min-w-12 rounded-lg border-2 text-lg font-bold",
+                  variant === v
+                    ? "border-brand-bright bg-brand-bright/15 text-brand-soft"
+                    : tried && !variant
+                      ? "border-error text-ink-dim"
+                      : "border-line text-ink-dim",
+                )}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+          <div className="ml-auto flex gap-1 rounded-xl border border-line p-1" role="group" aria-label="Оруулах арга">
             {(
               [
                 ["answer", "Хариу шивэх"],
@@ -151,76 +280,119 @@ export default function SheetEditor({
               </button>
             ))}
           </div>
-          <div className="ml-auto flex items-center gap-1" role="group" aria-label="Хувилбар">
-            <span className="mr-1 text-sm text-ink-dim">Хувилбар</span>
-            {(variants.length ? variants : ["A", "B"]).map((v) => (
-              <button
-                key={v}
-                aria-pressed={variant === v}
-                onClick={() => setVariant(v)}
-                className={cn(
-                  "min-h-10 min-w-11 rounded-lg border-2 font-bold",
-                  variant === v ? "border-brand-bright bg-brand-bright/15 text-brand-soft" : "border-line text-ink-dim",
-                )}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
         </div>
 
-        <ol className="grid grid-cols-[repeat(auto-fill,minmax(7.5rem,1fr))] gap-2">
-          {items.map((it, i) => {
-            const cells = it.cells ?? 1;
-            const a = answers[i];
-            return (
-              <li key={i} className="rounded-xl border border-line px-2 py-1.5">
-                <div className="mb-1 truncate text-xs font-bold text-ink-dim">{itemName(it, items)}</div>
-                {mode === "answer" ? (
-                  <input
-                    value={a === "+" || a === "-" ? "" : a}
-                    placeholder={a === "+" ? "зөв" : a === "-" ? "алдсан" : cells > 1 ? "_".repeat(cells) : "A–E"}
-                    maxLength={cells}
-                    inputMode={cells > 1 ? "numeric" : "text"}
-                    onChange={(e) => {
-                      const v = e.target.value.toUpperCase();
-                      set(i, cells > 1 ? v.replace(/[^0-9_-]/g, "") : v.replace(/[^A-E]/g, ""));
-                    }}
-                    className="h-10 w-full rounded-lg border border-line bg-panel text-center font-bold tracking-widest text-ink outline-none focus:border-brand"
-                  />
-                ) : (
-                  <div className="grid grid-cols-3 gap-1">
-                    {(
-                      [
-                        ["+", "Зөв", "border-success bg-success/15 text-success"],
-                        ["-", "Алдсан", "border-error bg-error/12 text-error"],
-                        ["", "Хоосон", "border-ink-dim bg-panel text-ink"],
-                      ] as const
-                    ).map(([v, text, on]) => (
-                      <button
-                        key={text}
-                        onClick={() => set(i, v)}
-                        className={cn("h-10 rounded-lg border text-[11px] font-bold", a === v ? on : "border-line text-ink-dim")}
-                      >
-                        {text}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ol>
+        {row && variantChanged && variant && (
+          <p className="rounded-xl bg-brand-bright/10 px-3 py-2 text-sm font-semibold text-ink">
+            Хувилбарыг {row.variant || "тодорхойгүй"} → {variant} болгож байна. Хариуг {variant} хувилбарын түлхүүрээр дүгнэхэд{" "}
+            {scoreText(row.totalScore)} → {scoreText(score)} оноо болно
+          </p>
+        )}
+        {!variant && <p className="text-sm font-semibold text-ink-dim">Эхлээд хувилбараа сонгоно уу. Нүдний өнгө, оноо хувилбараас хамаарна</p>}
+
+        {sections.map((sec) => (
+          <section key={sec.title}>
+            {sections.length > 1 && <h3 className="mb-2 text-sm font-bold text-ink">{sec.title}</h3>}
+            <ol
+              className={cn(
+                "grid gap-2",
+                mode === "mark"
+                  ? "grid-cols-[repeat(auto-fill,minmax(9.5rem,1fr))]"
+                  : sec.choice
+                    ? "grid-cols-[repeat(auto-fill,minmax(4rem,1fr))]"
+                    : "grid-cols-[repeat(auto-fill,minmax(7.5rem,1fr))]",
+              )}
+            >
+              {sec.idx.map((i) => {
+                const it = items[i];
+                const cells = it.cells ?? 1;
+                const a = answers[i];
+                const held = a === "+" || a === "-" || a === "*";
+                const tone = variant ? TONE[statuses[i]] : "border-line bg-panel";
+                // «Зөв / алдсан» горимд одоогийн дүгнэлт: шивсэн хариутай бодлогод ч зөв/бурууг нь тодруулна
+                const now = statuses[i] === "CORRECT" ? "+" : statuses[i] === "BLANK" ? "" : statuses[i] === "UNGRADED" ? null : "-";
+                return (
+                  <li key={i} className={cn("rounded-xl border px-2 py-1.5", a !== initial[i] ? "border-brand-bright" : "border-line")}>
+                    <div className="mb-1 truncate text-xs font-bold text-ink-dim">{itemName(it, items)}</div>
+                    {mode === "answer" ? (
+                      <input
+                        ref={(el) => {
+                          inputs.current[i] = el;
+                        }}
+                        value={held ? "" : a}
+                        placeholder={a === "+" ? "зөв" : a === "-" ? "алдсан" : a === "*" ? "2 хариу" : cells > 1 ? "_".repeat(cells) : ""}
+                        maxLength={cells > 1 ? cells : 2}
+                        inputMode={cells > 1 ? "numeric" : "text"}
+                        autoCapitalize="characters"
+                        autoComplete="off"
+                        aria-label={`${itemName(it, items)} хариу`}
+                        aria-invalid={incomplete[i] || undefined}
+                        onFocus={(e) => e.target.select()}
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          if (cells > 1) {
+                            const v = raw.replace(/[^0-9_-]/g, "").slice(0, cells);
+                            set(i, v);
+                            if (v.length === cells) focus(i + 1);
+                          } else if (raw === "") {
+                            set(i, "");
+                          } else {
+                            const v = toLetter(raw);
+                            if (!v) return;
+                            set(i, v);
+                            focus(i + 1);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Backspace" && e.currentTarget.value === "") {
+                            e.preventDefault();
+                            if (held) set(i, "");
+                            else focus(i - 1);
+                          } else if (e.key === "Enter" || e.key === "ArrowDown") {
+                            e.preventDefault();
+                            focus(i + 1);
+                          } else if (e.key === "ArrowUp") {
+                            e.preventDefault();
+                            focus(i - 1);
+                          }
+                        }}
+                        className={cn(
+                          "h-11 w-full rounded-lg border-2 text-center text-lg font-bold tracking-widest text-ink outline-none focus:border-brand",
+                          tried && incomplete[i] ? "border-error bg-error/12" : tone,
+                        )}
+                      />
+                    ) : (
+                      <div className="grid grid-cols-3 gap-1">
+                        {(
+                          [
+                            ["+", "Зөв", "border-success bg-success/15 text-success"],
+                            ["-", "Алдсан", "border-error bg-error/12 text-error"],
+                            ["", "Хоосон", "border-ink-dim bg-panel text-ink"],
+                          ] as const
+                        ).map(([v, text, on]) => (
+                          <button
+                            key={text}
+                            onClick={() => now !== v && set(i, v)}
+                            aria-pressed={now === v}
+                            className={cn("h-10 rounded-lg border text-[11px] font-bold", now === v ? on : "border-line text-ink-dim")}
+                          >
+                            {text}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        ))}
         <p className="text-xs text-ink-dim">
-          Нөхөх багцад орон бүрийн цифрийг дараалан шивнэ (хоосон орон «_»). Зөв/алдсан горимд хариу биш зөвхөн дүн хадгалагдана
+          {mode === "answer"
+            ? "Хариуг A–E үсгээр эсвэл 1–5 тоогоор шивнэ, дараагийн нүд рүү өөрөө шилжинэ. Нөхөх багцад орон бүрийн цифрийг дараалан шивнэ, хоосон орон «_». Ногоон нь зөв, улаан нь буруу"
+            : "Дүнг нь солиход л тэр бодлогын шивсэн хариу арилж, зөв/алдсан тэмдэг хадгалагдана. Хөндөөгүй бодлогын хариу хэвээр үлдэнэ"}
         </p>
       </div>
     </ExamDialog>
   );
-}
-
-/** Хадгалагдсан хариуг засварт: «*» давхар будсан → хоосон */
-function clean(a: string | undefined): string {
-  if (!a || a === "*") return "";
-  return a;
 }

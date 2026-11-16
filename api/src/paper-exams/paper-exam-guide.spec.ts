@@ -72,4 +72,40 @@ describe('guideContentErrors', () => {
       guideContentErrors({ ...choice, image: 'https://example.com/a.png' }),
     ).toContain('image нь data:image/png биш');
   });
+
+  describe('mistakes (түгээмэл алдаа)', () => {
+    it('буруу сонголтын тайлбарыг зөвшөөрнө', () => {
+      expect(
+        guideContentErrors({ ...choice, mistakes: { B: '$D$-г буруу бодсон' } }),
+      ).toEqual([]);
+    });
+
+    it('нөхөх бодлогод татгалзана', () => {
+      expect(guideContentErrors({ ...fill, mistakes: { A: 'т' } })).toEqual([
+        'mistakes зөвхөн сонгох бодлогод',
+      ]);
+    });
+
+    it('сонголтод байхгүй үсэг, зөв хариу, хоосон утгыг илрүүлнэ', () => {
+      const errs = guideContentErrors({
+        ...choice,
+        mistakes: { C: 'т', A: 'т', B: '  ' },
+      });
+      expect(errs).toContain('mistakes.C: сонголтод алга');
+      expect(errs).toContain('mistakes.A: зөв хариунд тайлбар бичихгүй');
+      expect(errs).toContain('mistakes.B: хоосон');
+    });
+
+    it('мөр биш утга, хаагдаагүй томьёог илрүүлнэ', () => {
+      expect(
+        guideContentErrors({
+          ...choice,
+          mistakes: { B: 5 } as unknown as Record<string, string>,
+        }),
+      ).toContain('mistakes.B: хоосон');
+      expect(
+        guideContentErrors({ ...choice, mistakes: { B: '$x' } }),
+      ).toContain('mistakes.B: $ тэмдэг хаагдаагүй');
+    });
+  });
 });

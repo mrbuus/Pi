@@ -211,7 +211,7 @@ void main() {
   });
 
   group('бодлогын хуудас', () {
-    testWidgets('нууцлал → нөхцөл, брэнд Piemath', (tester) async {
+    testWidgets('нууцлал → нөхцөл, брэнд Pimath', (tester) async {
       final c = await pumpAuthApp(tester, http: FakeHttp(), location: '/privacy');
       expect(find.text('Нууцлалын бодлого'), findsWidgets);
       expect(find.text(legalDraftNotice), findsOneWidget);
@@ -219,7 +219,7 @@ void main() {
       await tester.tap(find.widgetWithText(OutlinedButton, 'Үйлчилгээний нөхцөл'));
       await settle(tester);
       expect(c.read(routerProvider).routerDelegate.currentConfiguration.uri.path, '/terms');
-      expect(find.textContaining('Piemath нь сургалтын агуулга'), findsOneWidget);
+      expect(find.textContaining('Pimath нь сургалтын агуулга'), findsOneWidget);
     });
   });
 }

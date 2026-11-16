@@ -85,7 +85,7 @@ describe('Цаасан шалгалт (OMR) — эрх', () => {
   it('controller нь JwtAuthGuard + RolesGuard-тай', () => {
     expect(guardsOf(PaperExamsController)).toContain(RolesGuard);
   });
-  it.each(['my', 'myDetail', 'myGuide', 'myGuideStage', 'myGuideCheck', 'myMaterial', 'myProblems'] as const)(
+  it.each(['my', 'myDetail', 'myMaterial', 'myProblems'] as const)(
     '%s — зөвхөн STUDENT (өөрийн дүн токеноос)',
     (name) => {
       expect(rolesOf(proto[name])).toEqual(['STUDENT']);
@@ -99,7 +99,7 @@ describe('Цаасан шалгалт (OMR) — эрх', () => {
       'STUDENT',
     ]);
   });
-  it.each(['list', 'board', 'guide', 'material', 'editSheet', 'searchStudents'] as const)('%s — ажилтан', (name) => {
+  it.each(['list', 'board', 'guide', 'material', 'editSheet', 'searchStudents', 'studentResults'] as const)('%s — ажилтан', (name) => {
     expect(rolesOf(proto[name])).toEqual(['ADMIN', 'TEACHER_PLUS', 'TEACHER']);
   });
   it.each([

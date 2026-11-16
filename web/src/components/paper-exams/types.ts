@@ -242,6 +242,8 @@ export interface GuideContent {
   image?: string;
   choices?: string[];
   answer?: string;
+  /** Түгээмэл алдаа: БУРУУ сонголтын үсэг → тайлбар (бодолттой ижил нөхцөлөөр ирнэ) */
+  mistakes?: Record<string, string>;
   fields?: { key: string; value: string; part: number }[];
   parts?: { points: number }[];
   rule: string[];
@@ -265,6 +267,14 @@ export interface MyPaperGuide {
   entries: GuideEntry[];
   /** Зөвхөн сурагчид: бодлого (label) бүрт өөрийнх нь зөв/алдсан */
   marks?: Record<string, GuideMark>;
+  /** Зөвхөн сурагчид: бодлого бүрт өөрийн дугуйлсан үсэг / нөхөх нүдэнд бичсэн цифр */
+  mine?: Record<string, MyAnswer>;
+}
+export interface MyAnswer {
+  /** «A»…«E»; «» хоосон; «*» хоёр хариу дугуйлсан */
+  answer?: string;
+  /** нүдний нэр → бичсэн цифр («_» бичээгүй орон) */
+  fields?: Record<string, string>;
 }
 
 /** «2026-11-10» → «2026.11.10» (цагийн бүсгүй өдөр) */
@@ -370,39 +380,6 @@ export const CLASSIFY_LABEL: Record<ClassifyBy, { one: string; weak: string; by:
   area: { one: "Агуулга", weak: "Сул агуулга", by: "Агуулгын төрлөөр" },
   topic: { one: "Сэдэв", weak: "Сул сэдэв", by: "Сэдвээр" },
 };
-
-/** Сурагчийн алдсан бодлого — нөхцөл, сонголт л (зөв хариу, бодолт серверээс шат шатаар) */
-export interface StudentGuideEntry {
-  label: string;
-  number: number | null;
-  content: {
-    kind: "choice" | "fill";
-    points: number;
-    statement: string[];
-    image?: string;
-    choices?: string[];
-    fields?: { key: string; part: number }[];
-    parts?: { points: number }[];
-    topic: string;
-    stepCount: number;
-  };
-}
-
-export interface StudentGuide {
-  variant: string;
-  entries: StudentGuideEntry[];
-}
-
-/** Нэг шатанд нээгдсэн хэсгүүд (paper-exam-student.ts guideStage) */
-export interface GuideStageData {
-  stage: number;
-  rule?: string[];
-  easy?: string[];
-  refs?: GuideContent["refs"];
-  steps?: string[];
-  answer?: string;
-  fields?: { key: string; value: string; part: number }[];
-}
 
 export interface PaperMaterial {
   variant: string;

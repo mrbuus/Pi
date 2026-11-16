@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/math/math.dart';
 import '../../../../core/ui/ui.dart';
+import '../../../../shared/mistake_notes/mistake_notes.dart';
 import '../../../../shared/solution/solution.dart';
 import '../../data/exam_models.dart';
 import 'answer_inputs.dart';
@@ -90,6 +91,11 @@ class ReviewProblemCard extends StatelessWidget {
                 title: Text('Бодолт', style: context.text.titleSmall?.copyWith(color: c.brand)),
                 children: [SolutionView(source: p.solution, showTitle: false)],
               ),
+            ),
+          if (p.mistakeNotes.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpace.sm),
+              child: MistakeNotesView(notes: p.mistakeNotes, showLabels: choices != null && choices.isNotEmpty),
             ),
           if (p.youtube != null)
             Align(

@@ -44,7 +44,15 @@ Map<String, Object?> _board({bool published = false, String scope = 'ALL', List<
     {'slug': 'kvadrat', 'title': 'Квадрат тэгшитгэл', 'latex': r'x = \frac{-b}{2a}'},
   ],
   'items': [
-    {'number': 1, 'answerKey': 'A', 'points': 1, 'area': 'Алгебр', 'topic': null, 'formulaSlugs': <Object?>[], 'voided': false},
+    {
+      'number': 1,
+      'answerKey': 'A',
+      'points': 1,
+      'area': 'Алгебр',
+      'topic': null,
+      'formulaSlugs': <Object?>[],
+      'voided': false,
+    },
     {
       'number': 2,
       'answerKey': 'B',
@@ -54,7 +62,14 @@ Map<String, Object?> _board({bool published = false, String scope = 'ALL', List<
       'formulaSlugs': ['kvadrat'],
       'voided': false,
     },
-    {'number': 3, 'answerKey': 'D', 'points': 1, 'area': 'Геометр ба тригонометр', 'formulaSlugs': <Object?>[], 'voided': false},
+    {
+      'number': 3,
+      'answerKey': 'D',
+      'points': 1,
+      'area': 'Геометр ба тригонометр',
+      'formulaSlugs': <Object?>[],
+      'voided': false,
+    },
     {'number': 4, 'answerKey': 'E', 'points': 1, 'area': null, 'formulaSlugs': <Object?>[], 'voided': false},
   ],
   'overall': {
@@ -473,6 +488,80 @@ void main() {
       await tester.scrollUntilVisible(find.text('Д. Болд (Та)'), 300, scrollable: _vertical());
       expect(find.text('Д. Болд (Та)'), findsOneWidget);
       expect(http.count('GET', '/paper-exams'), 0);
+    });
+
+    Map<String, Object?> problems({Map<String, Object?>? mistakes}) => {
+      'variant': 'A',
+      'entries': [
+        {
+          'label': '2',
+          'number': 2,
+          'content': {
+            'kind': 'choice',
+            'points': 1,
+            'statement': [r'$x^2=4$'],
+            'choices': ['1', '2', '3', '4', '5'],
+            'answer': 'B',
+            'rule': ['чанар'],
+            'easy': ['энгийн'],
+            'refs': <Object?>[],
+            'steps': ['алхам'],
+            'topic': 'Квадрат тэгшитгэл',
+            'mistakes': ?mistakes,
+          },
+        },
+      ],
+      'marks': {'2': 'MISSED'},
+    };
+
+    Future<void> openDetail(WidgetTester tester, FakeHttp http) async {
+      await pumpInternal(tester, http: http, location: '/app/paper-exams/e1', role: UserRole.student);
+      await tester.scrollUntilVisible(find.text('Алдсан 2'), 300, scrollable: _vertical());
+      await settle(tester);
+    }
+
+    testWidgets('«Түгээмэл алдаа»: тайлбартай үед гарна, өөрийн сонголт эхэнд', (tester) async {
+      final http = FakeHttp()
+        ..json('GET', '/paper-exams/my/e1', detail)
+        ..json('GET', '/paper-exams/my/e1/problems', problems(mistakes: {'A': 'А тайлбар', 'C': 'С тайлбар'}));
+      await openDetail(tester, http);
+      await tester.scrollUntilVisible(find.text('A хариу'), 200, scrollable: _vertical());
+      expect(find.text('Түгээмэл алдаа'), findsOneWidget);
+      final mine = find.text('Таны сонгосон C');
+      expect(mine, findsOneWidget);
+      expect(tester.getTopLeft(mine).dy, lessThan(tester.getTopLeft(find.text('A хариу')).dy));
+    });
+
+    testWidgets('«Түгээмэл алдаа»: тайлбаргүй эсвэл бодлого ирээгүй бол гарахгүй', (tester) async {
+      final http = FakeHttp()
+        ..json('GET', '/paper-exams/my/e1', detail)
+        ..json('GET', '/paper-exams/my/e1/problems', problems());
+      await openDetail(tester, http);
+      await tester.scrollUntilVisible(find.text('Д. Болд (Та)'), 300, scrollable: _vertical());
+      expect(find.text('Түгээмэл алдаа'), findsNothing);
+
+      final none = FakeHttp()..json('GET', '/paper-exams/my/e1', detail);
+      await openDetail(tester, none);
+      expect(find.text('Түгээмэл алдаа'), findsNothing);
+    });
+
+    test('PaperProblem.notes: зөв хариу, нөхөх бодлого, хоосон тайлбар алгасна', () {
+      final entries = problems(mistakes: {'B': 'зөв', 'D': ' ', 'E': 'Е', 'A': 5})['entries']! as List<Object?>;
+      final p = PaperProblem.fromJson(entries.first);
+      final notes = p.notes('E');
+      expect(notes.map((n) => n.label), ['E']);
+      expect(notes.single.mine, isTrue);
+      expect(notes.single.text, r'$5$');
+      expect(
+        PaperProblem.fromJson(const {
+          'content': {
+            'kind': 'fill',
+            'mistakes': {'A': 'т'},
+          },
+        }).notes('A'),
+        isEmpty,
+      );
+      expect(PaperProblem.fromJson(null).notes(null), isEmpty);
     });
 
     for (final (loc, role, expectText) in [

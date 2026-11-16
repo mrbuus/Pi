@@ -1,9 +1,7 @@
 /**
- * Сурагчийн нэгдсэн шалгалтын тайлбар — ЦЭВЭР (ӨС-гүй) хэсэг (эзэн 2026-11-15):
- *   - зөвхөн өөрийн хувилбар, зөвхөн АЛДСАН бодлого;
- *   - бодлогын нөхцөл, сонголт л эхэндээ; чанар, тайлбар, бодолт, зөв хариу нь
- *     шат шатаар (stage) серверээс ирнэ — хуудаснаас бүх бодолтыг шууд хуулж авахгүй;
- *   - дахин оролдоход хариуг сервер шалгана (зөв хариу клиент рүү очихгүй).
+ * Сурагчийн нэгдсэн шалгалтын «Бодлого» — ЦЭВЭР (ӨС-гүй) хэсэг (эзэн 2026-11-16):
+ *   - зөвхөн ӨӨРИЙН өгсөн хувилбарын бодлого, тайлбар, бодолт (нөгөө хувилбарынх очихгүй);
+ *   - бодлого бүрт өөрийнх нь зөв/алдсан — бусад сурагчийн гүйцэтгэлийн хувь очихгүй.
  */
 import type { GuideContent } from './paper-exam-guide';
 import type { ItemStatus, PaperItem } from './paper-exam-logic';
@@ -31,8 +29,28 @@ export function isMissed(row: GuideRow, items: PaperItem[], statuses: ItemStatus
   });
 }
 
-/** Эхний харагдац: нөхцөл, сонголт, нүднүүдийн нэр — зөв хариу, бодолтгүй */
-export function publicGuide(row: GuideRow) {
+/**
+ * Түгээмэл алдаа: зөвхөн сонгох бодлогын БУРУУ сонголтын үсэгт бичсэн хоосон биш тайлбар
+ * (ачаалагч шалгадаг ч сурагчид очихын өмнө дахин шүүнэ). Тайлбаргүй бол undefined.
+ */
+function studentMistakes(c: GuideContent): Record<string, string> | undefined {
+  if (c.kind !== 'choice' || !c.mistakes || typeof c.mistakes !== 'object') return undefined;
+  const letters = ['A', 'B', 'C', 'D', 'E'].slice(0, c.choices?.length ?? 0);
+  const out: Record<string, string> = {};
+  for (const l of letters) {
+    const v = c.mistakes[l];
+    if (l !== c.answer && typeof v === 'string' && v.trim()) out[l] = v;
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
+/**
+ * Сурагчид очих бодлого (эзэн 2026-11-16: өөрийн хувилбарын тайлбар, бодолт, зөв хариу
+ * шууд нээлттэй). Талбаруудыг ил жагсаана — санд нэмэгдсэн өөр талбар дагаж гарахгүй.
+ * `solution` — бодолт харагдах эсэх; түгээмэл алдаа (`mistakes`) бодолттой ЯГ ижил
+ * нөхцөлөөр очно (хаалттай бол аль аль нь очихгүй).
+ */
+export function studentGuide(row: GuideRow, { solution = true }: { solution?: boolean } = {}): GuideRow {
   const c = row.content;
   return {
     label: row.label,
@@ -43,48 +61,72 @@ export function publicGuide(row: GuideRow) {
       statement: c.statement,
       image: c.image,
       choices: c.choices,
-      fields: c.fields?.map((f) => ({ key: f.key, part: f.part })),
-      parts: c.parts,
+      answer: c.answer,
+      fields: c.fields?.map((f) => ({ key: f.key, value: f.value, part: f.part })),
+      parts: c.parts?.map((p) => ({ points: p.points })),
+      rule: c.rule,
+      easy: c.easy,
+      refs: c.refs.map((r) => ({ chapter: r.chapter, test: r.test, number: r.number, text: r.text })),
+      steps: solution ? c.steps : [],
       topic: c.topic,
-      stepCount: c.steps.length,
+      mistakes: solution ? studentMistakes(c) : undefined,
     },
   };
 }
 
-/**
- * Шат: 1 — ашиглагдах чанар, 2 — энгийнээр, 3 — 100x100-ын төстэй бодлого,
- * 3+k — бодолтын эхний k алхам; бүх алхам нээгдсэн үед зөв хариу.
- */
-export function guideStage(row: GuideRow, stage: number) {
-  const c = row.content;
-  const s = Math.max(0, Math.min(Math.floor(stage), 3 + c.steps.length));
-  const steps = Math.max(0, s - 3);
-  const done = steps >= c.steps.length;
-  return {
-    stage: s,
-    rule: s >= 1 ? c.rule : undefined,
-    easy: s >= 2 ? c.easy : undefined,
-    refs: s >= 3 ? c.refs : undefined,
-    steps: steps > 0 ? c.steps.slice(0, steps) : undefined,
-    answer: done && c.kind === 'choice' ? c.answer : undefined,
-    fields: done && c.kind === 'fill' ? c.fields : undefined,
-  };
+export interface VariantGuideRow extends GuideRow {
+  variant: string;
 }
 
-/** Дахин оролдлого: сонгох бол үсэг, нөхөх бол {нүд: цифр}; нөхөхөд хэсэг бүрийн зөв эсэх */
-export function checkGuide(
+/**
+ * Сурагчийн «Бодлого» таб: зөвхөн ӨӨРИЙН хувилбарын мөр — нөгөө хувилбарын бодолт,
+ * түгээмэл алдаа хэзээ ч очихгүй (санд шүүсэн ч энд дахин шүүнэ).
+ */
+export function studentEntries(rows: VariantGuideRow[], variant: string, solution = true): GuideRow[] {
+  return rows.filter((r) => r.variant === variant).map((r) => studentGuide(r, { solution }));
+}
+
+/** Сурагчийн өөрийн хариу нэг бодлогод — «юу дугуйлж/бичиж алдсан» (эзэн 2026-11-16) */
+export interface MyAnswer {
+  /** Сонгох: дугуйлсан үсэг «A»…«E»; «» хоосон; «*» хоёр хариу дугуйлсан */
+  answer?: string;
+  /** Нөхөх: нүдний нэр → бичсэн цифр («a» → «2», «ef» → «18»; бичээгүй орон «_») */
+  fields?: Record<string, string>;
+}
+
+/**
+ * Хуудсан дээрх яг хариу. Багш зөв/алдсанаар (+/−) гараар оруулсан бол хариу мэдэгдэхгүй —
+ * undefined (дэлгэц зөвхөн Зөв/Алдсан тэмдгээр үлдэнэ).
+ */
+export function myAnswerOf(
   row: GuideRow,
-  answer: unknown,
-): { correct: boolean; parts?: boolean[] } {
-  const c = row.content;
-  if (c.kind === 'choice') {
-    return { correct: typeof answer === 'string' && answer.trim().toUpperCase() === c.answer };
+  items: PaperItem[],
+  answers: string[],
+): MyAnswer | undefined {
+  const own = itemsOfGuide(row, items);
+  if (own.length === 0) return undefined;
+  const raw = (it: PaperItem) => answers[items.indexOf(it)] ?? '';
+  if (row.content.kind === 'choice') {
+    const a = raw(own[0]);
+    return /^[A-E]$/.test(a) || a === '' || a === '*' ? { answer: a } : undefined;
   }
-  const given = answer && typeof answer === 'object' ? (answer as Record<string, unknown>) : {};
-  const parts = (c.parts ?? []).map((_, part) =>
-    (c.fields ?? [])
-      .filter((f) => f.part === part)
-      .every((f) => String(given[f.key] ?? '').trim() === f.value),
-  );
-  return { correct: parts.length > 0 && parts.every(Boolean), parts };
+  // «2.1.a-d» → a,b,c,d нүд; «2.1.e» → e. Хариу «2122» — нүд бүрд нэг тэмдэгт
+  const digit = new Map<string, string>();
+  for (const it of own) {
+    const a = raw(it);
+    if (a === '+' || a === '-') return undefined;
+    const m = it.label?.match(/\.([a-z])(?:-([a-z]))?$/);
+    if (!m) return undefined;
+    const from = m[1].charCodeAt(0);
+    const to = (m[2] ?? m[1]).charCodeAt(0);
+    for (let c = from; c <= to; c++) {
+      const ch = a[c - from];
+      digit.set(String.fromCharCode(c), ch && /[0-9-]/.test(ch) ? ch : '_');
+    }
+  }
+  const fields: Record<string, string> = {};
+  for (const f of row.content.fields ?? []) {
+    fields[f.key] = [...f.key].map((k) => digit.get(k) ?? '_').join('');
+  }
+  return { fields };
 }

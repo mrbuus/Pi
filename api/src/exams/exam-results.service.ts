@@ -218,11 +218,15 @@ export class ExamResultsService {
       const row = exam.rowBy.get(problemId)!;
       const p = row.problem;
       const analysis = p.analysis;
-      const solution =
+      const solutionOpen =
         policy.solutions === 'ALL' ||
-        (policy.solutions === 'VERIFIED' && analysis?.status === 'VERIFIED')
-          ? (analysis?.solutionOutline ?? null)
-          : null;
+        (policy.solutions === 'VERIFIED' && analysis?.status === 'VERIFIED');
+      const solution = solutionOpen ? (analysis?.solutionOutline ?? null) : null;
+      // «Түгээмэл алдаа»: буруу сонголтын багшийн тайлбар — бодолттой ИЖИЛ
+      // нөхцөлөөр л (хаалттай үед хэзээ ч задрахгүй). Канон үсгээр (choiceKeyOf).
+      const notes = solutionOpen
+        ? (exam.meta.get(problemId)?.choice?.notes ?? {})
+        : {};
       return {
         n: row.order,
         part: p.format === 'FILL_NUMBER' ? 2 : 1,
@@ -234,7 +238,11 @@ export class ExamResultsService {
               format: p.format,
               statementText: p.statementText,
               imageKey: p.imageKey,
-              choices: choiceView(row),
+              choices:
+                choiceView(row)?.map((c) => ({
+                  ...c,
+                  mistakeNote: notes[c.letter] ?? null,
+                })) ?? null,
               myAnswer: myAnswerOf(exam, problemId, data),
               correctAnswer: policy.correctAnswer
                 ? correctAnswerView(row)
