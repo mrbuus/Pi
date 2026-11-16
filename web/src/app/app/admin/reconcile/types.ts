@@ -1,7 +1,7 @@
 // API: /reconcile/* (api/src/reconcile/reconcile.service.ts)
 
 export type AllocKind = "TUITION" | "SOCIAL" | "BOOK" | "ANSWER_SHEET" | "STAFF_FINE" | "TRANSFER" | "EXPENSE" | "OTHER";
-export type Lane = "all" | "manual" | "tuition" | "other" | "expense" | "sheet";
+export type Lane = "all" | "manual" | "tuition" | "social" | "other" | "expense" | "sheet";
 
 export const KIND_LABEL: Record<AllocKind, string> = {
   TUITION: "Сургалтын төлбөр",
