@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { FileText } from "lucide-react";
+import { Download, FileText } from "lucide-react";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Card } from "@/components/ui/Surface";
 import { ErrorState } from "@/components/ui/StateBlock";
@@ -11,12 +12,69 @@ import { cn } from "@/lib/cn";
 import type { PaperMaterial } from "./types";
 
 /**
- * Шалгалтын материал — ЗӨВХӨН ХАРАХ (эзэн 2026-11-15, оюуны өмч). Хуудас бүр Pimath-ын
- * бүдэг саарал логотой JPEG (лого зурган дотроо шингэсэн). Татах товч байхгүй; баруун
- * товч, чирэх, утсанд удаан дарж хадгалахыг хаана. Сурагч A, B хоёр хувилбарыг хоёуланг
- * харна (эзэн 2026-11-16) — эхлээд өөрийнх нь нээгдэнэ; ажилтан `variant`-аар дурынхыг.
+ * Шалгалтын материал. Хуудас бүр Pimath-ын бүдэг саарал логотой JPEG (лого зурган дотроо
+ * шингэсэн). Сурагч A, B хоёр хувилбарыг хоёуланг харна (эзэн 2026-11-16) — эхлээд өөрийнх
+ * нь нээгдэнэ; ажилтан `variant`-аар дурынхыг.
+ * «PDF татах» (эзэн 2026-11-17): хүссэн хүн материалыг PDF-ээр татна. PDF-ийг хөтөч дээр
+ * яг эдгээр логотой хуудсуудаас угсарна (логогүй эх файл хаана ч гарахгүй); файлын нэр
+ * шалгалтын нэрээс автоматаар — «Нэгдсэн шалгалт 1» → «Нэгдсэн шалгалт-1».
  */
-export default function MaterialViewer({ examId, variant, staff }: { examId: string; variant?: string; staff?: boolean }) {
+/** «Нэгдсэн шалгалт 1» → «Нэгдсэн шалгалт-1»; файлын нэрд тохирохгүй тэмдэгтийг хасна */
+export function materialFileName(title: string, variant: string, manyVariants: boolean): string {
+  const base = title
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/\s+(\d+)$/, "-$1");
+  return `${base || "Шалгалтын материал"}${manyVariants && variant ? `-${variant}` : ""}.pdf`;
+}
+
+function dataUriBytes(src: string): Uint8Array {
+  const bin = atob(src.slice(src.indexOf(",") + 1));
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+/** Логотой хуудсуудаас PDF угсарч татна (сан нь дарах үед л ачаалагдана) */
+async function downloadPdf(pages: string[], fileName: string) {
+  const { PDFDocument } = await import("@cantoo/pdf-lib");
+  const doc = await PDFDocument.create();
+  for (const src of pages) {
+    const image = await doc.embedJpg(dataUriBytes(src));
+    // A4 хэмжээ: урт тал 842pt (хэвтээ, босоо аль ч хуудсанд), богино тал нь харьцаагаар
+    const k = 842 / Math.max(image.width, image.height);
+    const w = image.width * k;
+    const h = image.height * k;
+    doc.addPage([w, h]).drawImage(image, { x: 0, y: 0, width: w, height: h });
+  }
+  const bytes = await doc.save({ useObjectStreams: true });
+  const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: "application/pdf" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
+export default function MaterialViewer({
+  examId,
+  title,
+  variant,
+  staff,
+  variantCount,
+}: {
+  examId: string;
+  /** Шалгалтын нэр — татах файлын нэр болно */
+  title: string;
+  variant?: string;
+  staff?: boolean;
+  /** Ажилтны харагдацад хувилбарын тоо (файлын нэрд хувилбар залгах эсэх) */
+  variantCount?: number;
+}) {
+  const [saving, setSaving] = useState(false);
   const [data, setData] = useState<PaperMaterial | null>(null);
   const [error, setError] = useState("");
   // Сурагчийн сонгосон хувилбар; null = өөрийнх (сервер шийднэ)
@@ -66,9 +124,28 @@ export default function MaterialViewer({ examId, variant, staff }: { examId: str
           ))}
         </div>
       )}
-      <p className="flex items-center gap-2 text-sm text-ink-dim">
-        <FileText className="size-4" aria-hidden /> {data.variant} хувилбар · {data.pages.length} хуудас · зөвхөн харах
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-2 text-sm text-ink-dim">
+          <FileText className="size-4" aria-hidden /> {data.variant} хувилбар, {data.pages.length} хуудас
+        </p>
+        <button
+          disabled={saving}
+          onClick={async () => {
+            setSaving(true);
+            try {
+              const many = (staff ? (variantCount ?? 1) : (data.variants?.length ?? 1)) > 1;
+              await downloadPdf(data.pages, materialFileName(title, data.variant, many));
+            } catch {
+              toast.error("PDF үүсгэж чадсангүй. Дахин оролдоно уу");
+            } finally {
+              setSaving(false);
+            }
+          }}
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-on-brand disabled:opacity-60"
+        >
+          <Download className="size-4" aria-hidden /> {saving ? "Бэлдэж байна" : "PDF татах"}
+        </button>
+      </div>
       {data.pages.map((src, i) => (
         <div key={i} className="relative overflow-hidden rounded-xl border border-line bg-white">
           {/* eslint-disable-next-line @next/next/no-img-element -- лого шингэсэн data URI хуудас */}

@@ -187,7 +187,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
           onOpen={(p) => go("guide", p)}
         />
       )}
-      {nav.tab === "material" && <MaterialViewer examId={id} />}
+      {nav.tab === "material" && <MaterialViewer examId={id} title={data.exam.title} />}
 
       {nav.tab === "result" && (
       <>

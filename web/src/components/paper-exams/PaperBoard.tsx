@@ -245,7 +245,7 @@ export default function PaperBoard({ id }: { id: string }) {
             </Tabs.Content>
           )}
           <Tabs.Content value="material">
-            <StaffMaterial examId={id} variants={board.guideVariants.length > 0 ? board.guideVariants : ["A", "B"]} />
+            <StaffMaterial examId={id} title={board.exam.title} variants={board.guideVariants.length > 0 ? board.guideVariants : ["A", "B"]} />
           </Tabs.Content>
           {canManage && (
             <>
@@ -289,7 +289,7 @@ export default function PaperBoard({ id }: { id: string }) {
 }
 
 /** Ажилтанд материалын хувилбар сонгогч + харагч */
-function StaffMaterial({ examId, variants }: { examId: string; variants: string[] }) {
+function StaffMaterial({ examId, title, variants }: { examId: string; title: string; variants: string[] }) {
   const [variant, setVariant] = useState(variants[0]);
   return (
     <div className="mx-auto max-w-3xl space-y-3">
@@ -311,7 +311,7 @@ function StaffMaterial({ examId, variants }: { examId: string; variants: string[
           ))}
         </div>
       )}
-      <MaterialViewer key={variant} examId={examId} variant={variant} staff />
+      <MaterialViewer key={variant} examId={examId} title={title} variant={variant} staff variantCount={variants.length} />
     </div>
   );
 }
