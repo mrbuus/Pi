@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Ban, Check, ChevronLeft, ChevronRight, ClipboardCheck, Eye, EyeOff, MoreHorizontal, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ArrowRightLeft, Ban, Check, ChevronLeft, ChevronRight, ClipboardCheck, Eye, EyeOff, Info, MoreHorizontal, Pencil, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/kit/button";
 import { Meta } from "@/components/ui/Meta";
 import { SkeletonRows } from "@/components/ui/Skeleton";
@@ -12,12 +12,19 @@ import { cn } from "@/lib/cn";
 import { formatMnDate, formatMnDateTime } from "@/lib/dateMn";
 import { byFirstName, rosterNames, shortName, staffName } from "@/lib/personName";
 import BookMarkSheet, { type BookSheetTarget } from "@/components/book-money/BookMarkSheet";
-import { BOOKS, SHEET_KINDS, type BookMarkInput } from "@/components/book-money/books";
+import { BOOK_AMOUNT_MAX, BOOKS, SHEET_KINDS, type BookMarkInput } from "@/components/book-money/books";
 import CheckStudentSheet from "./CheckStudentSheet";
 import { Segmented } from "./parts";
-import type { CheckMark, CheckPerson, ClassCheck, ClassChecksResponse } from "./types";
+import type { CheckConvertOptions, CheckConvertResult, CheckConvertTarget, CheckMark, CheckPerson, ClassCheck, ClassChecksResponse } from "./types";
 
 type Filter = "all" | "left" | "done";
+
+/**
+ * Нэр нь шалгалтын хуудас/шалгалтын мөнгө шиг (эзэн 2026-11-18): багш нар «Бусад»-аар
+ * нээгээд хуучин маягийн чек болж байсан — ийм нэрд «Нэгдсэн/Ангийн шалгалт»-ыг санал болгоно
+ */
+const SHEET_LIKE = /хариулт|шалгалт|цаас|явц|hariult|shalgalt|tsaas|yavts/i;
+const looksLikeSheet = (title: string) => SHEET_LIKE.test(title);
 
 const mnt = (n: number) => `${n.toLocaleString("en-US")}₮`;
 /** API-ийн CHECK_AMOUNT_MAX-тай ижил */
@@ -251,6 +258,20 @@ export default function ClassChecksPanel({
     return updated;
   }
 
+  /** Энгийн чекийг ном/шалгалтын хуудасны чек болгосны дараа — бүх жагсаалтыг серверээс дахин уншина */
+  async function converted(res: CheckConvertResult) {
+    await load(true);
+    setSelectedId(res.check.id);
+    const parts = [
+      `${res.created} хүүхдийн төлбөр бүртгэгдлээ`,
+      res.skippedHere > 0 ? `${res.skippedHere} өмнө бүртгэгдсэн` : null,
+      res.skippedElsewhere > 0 ? `${res.skippedElsewhere} өөр ангид төлсөн` : null,
+    ].filter(Boolean);
+    toast.success(res.merged ? `«${res.check.title}» чек рүү нэгтгэлээ` : `«${res.check.title}» чек боллоо`, {
+      description: parts.join(", "),
+    });
+  }
+
   /** Устгах — сервер дээр зөөлөн (deletedAt): мөр, тэмдэглэгээ хадгалагдана, жагсаалтаас алга болно */
   async function remove(id: string) {
     await api(`${base}/${encodeURIComponent(id)}`, { method: "DELETE" });
@@ -301,6 +322,8 @@ export default function ClassChecksPanel({
             onMark={(sid, body) => mark(selected, sid, body)}
             onPatch={(body) => patch(selected.id, body)}
             onDelete={() => remove(selected.id)}
+            convertUrl={`${base}/${encodeURIComponent(selected.id)}`}
+            onConverted={converted}
             onOpenInfo={(p) => {
               setInfoFor(p);
               setInfoOpen(true);
@@ -455,6 +478,8 @@ function CheckDetail({
   onPatch,
   onDelete,
   onOpenInfo,
+  convertUrl,
+  onConverted,
 }: {
   check: ClassCheck;
   roster: CheckPerson[];
@@ -468,7 +493,10 @@ function CheckDetail({
   onPatch: (body: { title?: string; amount?: number | null; archived?: boolean }) => Promise<ClassCheck>;
   onDelete: () => Promise<void>;
   onOpenInfo: (student: CheckPerson) => void;
+  convertUrl: string;
+  onConverted: (res: CheckConvertResult) => Promise<void>;
 }) {
+  const [converting, setConverting] = useState(false);
   const [filter, setFilterState] = useState<Filter>("all");
   // «Үлдсэн/Болсон» шүүлттэй үед дарсан хүүхэд шууд алга болохгүй (андуурч дарвал
   // буцааж болиулна) — шүүлт солиход л жагсаалт шинэчлэгдэнэ
@@ -604,6 +632,29 @@ function CheckDetail({
         </div>
       )}
 
+      {!isBook && converting && (
+        <ConvertPanel
+          url={convertUrl}
+          check={check}
+          onCancel={() => setConverting(false)}
+          onDone={async (res) => {
+            setConverting(false);
+            await onConverted(res);
+          }}
+        />
+      )}
+      {!isBook && !converting && looksLikeSheet(check.title) && (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-brand/30 bg-brand-bright/5 px-3 py-2.5">
+          <Info className="h-4 w-4 shrink-0 text-brand" aria-hidden />
+          <p className="min-w-0 flex-1 text-sm text-ink">
+            Энэ чек хуучин маягаар нээгдсэн. Шалгалтын хуудас болговол хэн авсан, хэдийг авсан нь «Номын мөнгө»-нд бүртгэгдэнэ
+          </p>
+          <Button size="sm" disabled={busy} onClick={() => setConverting(true)}>
+            <ArrowRightLeft aria-hidden /> Шалгалтын хуудас болгох
+          </Button>
+        </div>
+      )}
+
       <div className="rounded-xl bg-bg/60 p-3">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <p className="font-display text-3xl font-bold tabular-nums text-ink" aria-label={`${s.total}-аас ${s.done} тэмдэглэгдсэн`}>
@@ -614,7 +665,7 @@ function CheckDetail({
             <p className="text-sm text-ink-dim">
               <span className="font-semibold tabular-nums text-ink">{mnt(s.collected)}</span> цугларсан
               <span className="block text-xs">
-                {isBook ? "Үнэ" : "Нэг хүүхэд"} {mnt(check.amount)}
+                Үнэ {mnt(check.amount)}
                 {s.skipped > 0 ? `, ${s.skipped} хүүхэд авахгүй` : ""}
               </span>
             </p>
@@ -666,6 +717,7 @@ function CheckDetail({
                 saving={saving.has(`${check.id}:${p.id}`)}
                 disabled={archived || busy}
                 book={isBook ? { price: check.amount } : undefined}
+                money={check.amount !== null}
                 onToggle={() => toggleStudent(p.id)}
                 onInfo={() => onOpenInfo(p)}
                 onMore={() => {
@@ -690,6 +742,7 @@ function CheckDetail({
                   saving={false}
                   disabled
                   book={isBook ? { price: check.amount, readOnly: true } : undefined}
+                  money={check.amount !== null}
                   onToggle={() => undefined}
                   onInfo={() => onOpenInfo(p)}
                 />
@@ -730,6 +783,11 @@ function CheckDetail({
         </div>
       ) : (
         <div className="flex flex-wrap gap-x-4">
+          {!isBook && !converting && (
+            <button type="button" disabled={busy} onClick={() => setConverting(true)} className={actionClass}>
+              <ArrowRightLeft className="h-4 w-4" aria-hidden /> Шалгалтын хуудас болгох
+            </button>
+          )}
           {!archived && (
             <button type="button" disabled={busy} onClick={() => setConfirm("archive")} className={actionClass}>
               <EyeOff className="h-4 w-4" aria-hidden /> Чекийг нуух
@@ -762,6 +820,7 @@ function StudentRow({
   saving,
   disabled,
   book,
+  money = false,
   onToggle,
   onInfo,
   onMore,
@@ -772,6 +831,8 @@ function StudentRow({
   disabled: boolean;
   /** Номын чек: үнэ (өөр дүнг ялгаж харуулна); readOnly = гарсан сурагч */
   book?: { price: number | null; readOnly?: boolean };
+  /** Энгийн чек дүнтэй бол «… авсан» гэж номын чектэй ижил мөрөөр */
+  money?: boolean;
   onToggle: () => void;
   onInfo: () => void;
   onMore?: () => void;
@@ -782,8 +843,11 @@ function StudentRow({
   const skipped = !!mark?.skipped;
   const collector = mark?.collectedBy ? staffName(mark.collectedBy) : null;
   // Номын чек: хэн авсан, дүн (үнээс өөр бол), өөр хүн тэмдэглэсэн бол хэн
+  // Энгийн чек — номын чектэй ижил мөр (эзэн 2026-11-18): зөвхөн тэмдэглэсэн үед, хэн + цаг
+  const plainLine = !book && mark && on ? [by ? `${by} ${money ? "авсан" : "тэмдэглэсэн"}` : null, mdhm(mark.updatedAt)] : null;
   const bookLine =
-    book && mark && (on || skipped)
+    plainLine ??
+    (book && mark && (on || skipped)
       ? [
           skipped ? "Авахгүй" : null,
           elsewhere ? `${elsewhere.name ?? "Өөр"} ангид төлсөн` : null,
@@ -792,7 +856,7 @@ function StudentRow({
           mark.note || null,
           by && (skipped || mark.updatedBy?.id !== mark.collectedBy?.id) ? `${by} тэмдэглэсэн ${mdhm(mark.updatedAt)}` : mdhm(mark.updatedAt),
         ]
-      : null;
+      : null);
   return (
     <div className={cn("flex min-h-14 items-stretch transition-colors", on ? "bg-success/10" : "bg-surface")}>
       <button
@@ -806,9 +870,7 @@ function StudentRow({
           <span className="block truncate text-xs text-ink-dim">Хадгалж байна</span>
         ) : bookLine ? (
           <Meta className="text-xs text-ink-dim" items={bookLine} />
-        ) : (
-          !book && mark && by && <span className="block truncate text-xs text-ink-dim">{`${by} ${mdhm(mark.updatedAt)}`}</span>
-        )}
+        ) : null}
       </button>
       {book && onMore && !disabled && (
         <button
@@ -952,10 +1014,36 @@ function CheckForm({
             onChange={(e) => setTitle(e.target.value)}
             maxLength={80}
             autoFocus
-            placeholder="Шалгалтын цаас"
+            placeholder="Аяллын мөнгө"
             className={inputClass}
           />
         </label>
+      )}
+      {chooseKind && kind === "other" && looksLikeSheet(title) && (
+        <div role="note" className="space-y-2 rounded-xl border border-brand/30 bg-brand-bright/5 p-3">
+          <p className="text-sm text-ink">
+            <Info className="mr-1 inline h-4 w-4 align-[-3px] text-brand" aria-hidden />
+            Шалгалтын хуудасны мөнгө бол «Нэгдсэн шалгалт» эсвэл «Ангийн шалгалт»-аар нээнэ үү — хэн авсан, хэдийг авсан нь «Номын мөнгө»-нд бүртгэгдэнэ
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {SHEET_KINDS.map((k) => (
+              <Button
+                key={k.key}
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={busy}
+                onClick={() => {
+                  setKind(k.key);
+                  setErr("");
+                  if (!amount) setAmount("1000");
+                }}
+              >
+                {k.title}
+              </Button>
+            ))}
+          </div>
+        </div>
       )}
       {kind !== null && (
       <label className="block">
@@ -985,6 +1073,180 @@ function CheckForm({
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={busy || kind === null}>
           {submitLabel}
+        </Button>
+        <Button type="button" variant="ghost" disabled={busy} onClick={onCancel}>
+          Болих
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+const CONVERT_KINDS = [
+  { value: "SHEET", label: "Нэгдсэн шалгалт" },
+  { value: "CSHEET", label: "Ангийн шалгалт" },
+  { value: "BOOK", label: "Ном" },
+] as const;
+type ConvertKind = (typeof CONVERT_KINDS)[number]["value"];
+
+/**
+ * Энгийн (хуучин маягийн) чекийг ном/шалгалтын хуудасны чек болгох (эзэн 2026-11-18).
+ * Дугаарыг сервер өгсөн сонголтоос л сонгоно. Тэмдэглэсэн хүүхэд бүрд «Номын мөнгө»-нд
+ * төлбөр бүртгэгдэнэ (авсан = тэмдэглэсэн багш, цаг хэвээр); хуучин тэмдэглэгээ устахгүй.
+ */
+function ConvertPanel({
+  url,
+  check,
+  onCancel,
+  onDone,
+}: {
+  url: string;
+  check: ClassCheck;
+  onCancel: () => void;
+  onDone: (res: CheckConvertResult) => Promise<void>;
+}) {
+  const [opts, setOpts] = useState<CheckConvertOptions | null>(null);
+  const [loadErr, setLoadErr] = useState("");
+  const [kind, setKind] = useState<ConvertKind>("SHEET");
+  const [pick, setPick] = useState<string | null>(null);
+  const [amount, setAmount] = useState(String(check.amount ?? 1000));
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    let live = true;
+    api<CheckConvertOptions>(`${url}/convert-options`)
+      .then((o) => live && setOpts(o))
+      .catch((e: unknown) => live && setLoadErr(e instanceof Error ? e.message : "Сонголтуудыг ачаалж чадсангүй"));
+    return () => {
+      live = false;
+    };
+  }, [url]);
+
+  const shown = opts?.targets.filter((t) => t.kind === kind) ?? [];
+  const target = opts?.targets.find((t) => t.key === pick) ?? null;
+  const chipLabel = (t: CheckConvertTarget) => (t.kind === "BOOK" ? t.title : t.isNew ? `${t.n} (шинэ)` : String(t.n));
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!target) {
+      setErr("Аль шалгалт, номынх болохыг сонгоно уу");
+      return;
+    }
+    const n = Number(amount);
+    if (!n || n > BOOK_AMOUNT_MAX) {
+      setErr("Үнээ зөв оруулна уу");
+      return;
+    }
+    setBusy(true);
+    setErr("");
+    try {
+      const res = await api<CheckConvertResult>(`${url}/convert`, {
+        method: "POST",
+        body: target.kind === "BOOK" ? { kind: "BOOK", bookKey: target.key, amount: n } : { kind: target.kind, n: target.n, amount: n },
+      });
+      await onDone(res);
+    } catch (error) {
+      setErr(error instanceof Error ? error.message : "Хадгалж чадсангүй");
+      setBusy(false);
+    }
+  }
+
+  const inputClass =
+    "min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-ink placeholder:text-ink-dim/70 focus-visible:outline-2 focus-visible:outline-brand";
+
+  return (
+    <form onSubmit={submit} aria-label="Шалгалтын хуудас болгох" className="space-y-3 rounded-xl border border-line bg-bg/60 p-3">
+      <div>
+        <p className="text-sm font-semibold text-ink">Шалгалтын хуудас болгох</p>
+        <p className="mt-0.5 text-xs text-ink-dim">
+          {opts ? `${opts.checkedCount} тэмдэглэсэн хүүхэд` : "Тэмдэглэсэн хүүхэд бүр"} «Номын мөнгө»-нд төлсөнөөр бүртгэгдэнэ: мөнгө авсан багш = тэмдэглэсэн багш, цаг нь хэвээр. Дараа нь «⋯»-ээр засна
+        </p>
+      </div>
+      {loadErr ? (
+        <p role="alert" className="text-sm text-error">
+          {loadErr}
+        </p>
+      ) : !opts ? (
+        <div role="status" aria-label="Сонголтууд ачаалж байна">
+          <SkeletonRows rows={2} />
+        </div>
+      ) : (
+        <>
+          <Segmented
+            label="Юуных"
+            value={kind}
+            onChange={(k) => {
+              setKind(k);
+              setPick(null);
+              setErr("");
+            }}
+            options={CONVERT_KINDS.map((k) => ({ value: k.value, label: k.label }))}
+          />
+          <div>
+            <p className="mb-1.5 text-sm font-semibold text-ink">{kind === "BOOK" ? "Ном" : "Дугаар"}</p>
+            <div role="radiogroup" aria-label={kind === "BOOK" ? "Ном" : "Шалгалтын дугаар"} className="flex flex-wrap gap-1.5">
+              {shown.map((t) => {
+                const on = pick === t.key;
+                const hidden = t.here === "archived";
+                return (
+                  <button
+                    key={t.key}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    aria-label={t.title}
+                    disabled={hidden || busy}
+                    title={hidden ? "Энэ ангид нуусан байна — эхлээд «Нуусан» хэсгээс буцааж гаргана уу" : undefined}
+                    onClick={() => {
+                      setPick(t.key);
+                      setErr("");
+                    }}
+                    className={cn(
+                      "inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border px-3.5 text-sm font-semibold tabular-nums transition disabled:opacity-40",
+                      on ? "border-transparent bg-brand-bright text-on-brand" : "border-line bg-surface text-ink-dim hover:text-ink",
+                    )}
+                  >
+                    {chipLabel(t)}
+                  </button>
+                );
+              })}
+            </div>
+            {target && (
+              <p className="mt-1.5 text-xs text-ink-dim">
+                {target.here === "open"
+                  ? `«${target.title}» чек энэ ангид аль хэдийн байна — тэмдэглэгээг түүн рүү нэгтгээд энэ чекийг нууна`
+                  : target.kind === "SHEET"
+                    ? `«${target.title}» — бүх ангид ижил шалгалт; өөр ангид төлсөн хүүхэд давхар бүртгэгдэхгүй`
+                    : `«${target.title}» чек болно`}
+              </p>
+            )}
+          </div>
+          <label className="block">
+            <span className="mb-1 block text-sm font-semibold text-ink">Үнэ</span>
+            <span className="relative block">
+              <input
+                value={amount ? Number(amount).toLocaleString("en-US") : ""}
+                onChange={(e) => setAmount(e.target.value.replace(/\D/g, "").replace(/^0+/, "").slice(0, 7))}
+                inputMode="numeric"
+                placeholder="1,000"
+                className={cn(inputClass, "pr-8 tabular-nums")}
+              />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-dim" aria-hidden>
+                ₮
+              </span>
+            </span>
+          </label>
+        </>
+      )}
+      {err && (
+        <p role="alert" className="text-sm text-error">
+          {err}
+        </p>
+      )}
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" disabled={busy || !opts || !target}>
+          {busy ? "Шилжүүлж байна" : "Шилжүүлэх"}
         </Button>
         <Button type="button" variant="ghost" disabled={busy} onClick={onCancel}>
           Болих

@@ -1,5 +1,14 @@
 /** «Чек» — цэвэр туслах функцууд (DB-гүй, jest-ээр шалгана). */
 
+import {
+  BOOKS,
+  bookTitle,
+  classSheet,
+  isBookKey,
+  nextSheetKey,
+  sheetNumber,
+} from '../book-payments/book-payments.logic';
+
 export const CHECK_TITLE_MAX = 80;
 /** Нэг сурагчийн дүн — 100 сая ₮-аас их байх учиргүй (алдаатай оруулгаас сэргийлнэ) */
 export const CHECK_AMOUNT_MAX = 100_000_000;
@@ -136,5 +145,93 @@ export function studentContacts(input: {
   add('father', input.fatherPhone);
   add('mother', input.motherPhone);
   for (const p of input.parents ?? []) add('parent', p.phone, p.name);
+  return out;
+}
+
+// ───────────── Энгийн чекийг ном/шалгалтын хуудасны чек болгох (эзэн 2026-11-18) ─────────────
+
+export type ConvertKind = 'SHEET' | 'CSHEET' | 'BOOK';
+
+export interface ConvertTarget {
+  kind: ConvertKind;
+  /** BookPayment/ClassCheck-ийн түлхүүр — клиент өөрөө зохиохгүй, эндээс сонгоно */
+  key: string;
+  title: string;
+  /** SHEET/CSHEET-ийн дугаар */
+  n: number | null;
+  /** Шинэ дугаар (төвд/ангид одоогоор байхгүй) */
+  isNew: boolean;
+  /** Энэ ангид энэ түлхүүртэй чек: нээлттэй (нэгтгэнэ), нуусан (эхлээд гаргана), байхгүй */
+  here: 'open' | 'archived' | null;
+}
+
+/**
+ * Энгийн чекийг хөрвүүлэх сонголтууд. Нэгдсэн шалгалт — төвийн аль нэг ангид
+ * нээлттэй/нуусан (устгаагүй) дугаарууд + дараагийн шинэ (устгасныг оролцуулан
+ * хамгийн их + 1). Ангийн шалгалт — энэ ангийн устгаагүй дугаарууд + дараагийнх.
+ * Ном — BOOKS бүгд.
+ */
+export function convertTargets(input: {
+  classroomId: string;
+  /** Төвийн бүх ангийн SHEET* чек (устгасныг оролцуулан) */
+  centreSheets: readonly { bookKey: string; deleted: boolean }[];
+  /** Энэ ангийн CSHEET* чек (устгасныг оролцуулан) */
+  classSheets: readonly { bookKey: string; deleted: boolean }[];
+  /** Энэ ангийн устгаагүй түлхүүртэй чекүүд */
+  here: readonly { bookKey: string; archived: boolean }[];
+}): ConvertTarget[] {
+  const hereOf = (key: string): ConvertTarget['here'] => {
+    const c = input.here.find((h) => h.bookKey === key);
+    return c ? (c.archived ? 'archived' : 'open') : null;
+  };
+  const out: ConvertTarget[] = [];
+  const live = (rows: readonly { bookKey: string; deleted: boolean }[]) =>
+    [...new Set(rows.filter((r) => !r.deleted).map((r) => r.bookKey))].filter(
+      isBookKey,
+    );
+
+  const sheetKeys = live(input.centreSheets)
+    .filter((k) => sheetNumber(k) !== null)
+    .sort((a, b) => sheetNumber(a)! - sheetNumber(b)!);
+  const nextSheet = nextSheetKey(input.centreSheets.map((r) => r.bookKey));
+  for (const key of nextSheet ? [...sheetKeys, nextSheet] : sheetKeys)
+    out.push({
+      kind: 'SHEET',
+      key,
+      title: bookTitle(key),
+      n: sheetNumber(key),
+      isNew: key === nextSheet,
+      here: hereOf(key),
+    });
+
+  const own = input.classSheets.filter(
+    (r) => classSheet(r.bookKey)?.classroomId === input.classroomId,
+  );
+  const classKeys = live(own).sort(
+    (a, b) => classSheet(a)!.n - classSheet(b)!.n,
+  );
+  const nextClass = nextSheetKey(
+    own.map((r) => r.bookKey),
+    input.classroomId,
+  );
+  for (const key of nextClass ? [...classKeys, nextClass] : classKeys)
+    out.push({
+      kind: 'CSHEET',
+      key,
+      title: bookTitle(key),
+      n: classSheet(key)?.n ?? null,
+      isNew: key === nextClass,
+      here: hereOf(key),
+    });
+
+  for (const b of BOOKS)
+    out.push({
+      kind: 'BOOK',
+      key: b.key,
+      title: b.title,
+      n: null,
+      isNew: false,
+      here: hereOf(b.key),
+    });
   return out;
 }

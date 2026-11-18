@@ -1936,5 +1936,29 @@
       "TEACHER_PLUS",
       "TEACHER"
     ]
+  },
+  {
+    "gap": "CHEK-HUVIRGAH",
+    "file": "class-checks/class-checks.controller",
+    "controller": "ClassChecksController",
+    "method": "GET",
+    "path": "/api/classrooms/:classroomId/checks/:checkId/convert-options",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
+  },
+  {
+    "gap": "CHEK-HUVIRGAH",
+    "file": "class-checks/class-checks.controller",
+    "controller": "ClassChecksController",
+    "method": "POST",
+    "path": "/api/classrooms/:classroomId/checks/:checkId/convert",
+    "roles": [
+      "ADMIN",
+      "TEACHER_PLUS",
+      "TEACHER"
+    ]
   }
 ]

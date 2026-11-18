@@ -347,6 +347,39 @@ export interface ClassCheck {
   marks: CheckMark[];
 }
 
+/** Энгийн чекийг ном/шалгалтын хуудасны чек болгох (эзэн 2026-11-18) — сервер өгсөн сонголт */
+export interface CheckConvertTarget {
+  kind: "SHEET" | "CSHEET" | "BOOK";
+  key: string;
+  title: string;
+  n: number | null;
+  /** Шинэ дугаар (одоогоор байхгүй) */
+  isNew: boolean;
+  /** Энэ ангид энэ түлхүүртэй чек: нээлттэй = нэгтгэнэ, нуусан = эхлээд гаргана */
+  here: "open" | "archived" | null;
+}
+
+/** GET /classrooms/:id/checks/:checkId/convert-options */
+export interface CheckConvertOptions {
+  checkId: string;
+  title: string;
+  amount: number | null;
+  checkedCount: number;
+  targets: CheckConvertTarget[];
+}
+
+/** POST /classrooms/:id/checks/:checkId/convert */
+export interface CheckConvertResult {
+  check: ClassCheck;
+  /** Энэ ангийн ижил чек рүү нэгтгэж, энэ чекийг нуусан */
+  merged: boolean;
+  created: number;
+  /** Энэ ангид өмнө нь бүртгэгдсэн */
+  skippedHere: number;
+  /** Өөр ангид төлсөн */
+  skippedElsewhere: number;
+}
+
 /** GET /classrooms/:id/checks/students/:studentId — нэр дарахад гарах товч мэдээлэл (төлбөргүй) */
 export interface CheckStudentContact {
   kind: "student" | "father" | "mother" | "parent";

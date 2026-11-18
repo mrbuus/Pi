@@ -9,6 +9,7 @@ import { AuditService } from '../audit/audit.service';
 import {
   bookTitle,
   isBookKey,
+  BOOK_AMOUNT_MAX,
   CLASS_SHEET_KIND,
   isSheetKey,
   nextSheetKey,
@@ -25,11 +26,13 @@ import {
   ARCHIVED_LIST_MAX,
   cleanCheckAmount,
   cleanCheckTitle,
+  convertTargets,
   isUniqueViolation,
   OPEN_CHECKS_MAX,
   studentContacts,
 } from './class-checks.logic';
 import type {
+  ConvertClassCheckDto,
   CreateClassCheckDto,
   SetClassCheckMarkDto,
   UpdateClassCheckDto,
@@ -665,6 +668,203 @@ export class ClassChecksService {
       checked: mark.checked,
       updatedAt: mark.updatedAt.toISOString(),
       updatedBy: people.get(mark.updatedById) ?? null,
+    };
+  }
+
+  // ───────────── Энгийн чекийг ном/шалгалтын хуудасны чек болгох (эзэн 2026-11-18) ─────────────
+
+  private async convertTargetsFor(classroomId: string) {
+    const [centre, own, here] = await Promise.all([
+      this.prisma.classCheck.findMany({
+        where: { bookKey: { startsWith: SHEET_KIND } },
+        select: { bookKey: true, deletedAt: true },
+      }),
+      this.prisma.classCheck.findMany({
+        where: { classroomId, bookKey: { startsWith: CLASS_SHEET_KIND } },
+        select: { bookKey: true, deletedAt: true },
+      }),
+      this.prisma.classCheck.findMany({
+        where: { classroomId, deletedAt: null, bookKey: { not: null } },
+        select: { id: true, bookKey: true, archivedAt: true },
+      }),
+    ]);
+    const rows = (list: { bookKey: string | null; deletedAt: Date | null }[]) =>
+      list.flatMap((c) =>
+        c.bookKey ? [{ bookKey: c.bookKey, deleted: !!c.deletedAt }] : [],
+      );
+    return {
+      here,
+      targets: convertTargets({
+        classroomId,
+        centreSheets: rows(centre),
+        classSheets: rows(own),
+        here: here.flatMap((c) =>
+          c.bookKey ? [{ bookKey: c.bookKey, archived: !!c.archivedAt }] : [],
+        ),
+      }),
+    };
+  }
+
+  private static assertGeneric(check: CheckRow) {
+    if (check.bookKey)
+      throw new BadRequestException(
+        'Энэ чек аль хэдийн ном эсвэл шалгалтын хуудасны чек байна',
+      );
+  }
+
+  /** Хөрвүүлэх цонхны сонголтууд + тэмдэглэсэн хүүхдийн тоо */
+  async convertOptions(classroomId: string, checkId: string, userId: string) {
+    await this.access(classroomId, userId);
+    const check = await this.findCheck(classroomId, checkId);
+    ClassChecksService.assertGeneric(check);
+    const { targets } = await this.convertTargetsFor(classroomId);
+    return {
+      checkId: check.id,
+      title: check.title,
+      amount: check.amount,
+      checkedCount: check.marks.filter((m) => m.checked).length,
+      targets,
+    };
+  }
+
+  /**
+   * Энгийн чекийг ном/шалгалтын хуудасны чек болгоно. Нэг транзакцид:
+   * тэмдэглэсэн (checked) хүүхэд бүрд идэвхтэй BookPayment PAID (дүн = сонгосон
+   * үнэ, анги = энэ анги, авсан/тэмдэглэсэн = тэр тэмдэглэгээг хийсэн багш, цаг =
+   * тэмдэглэсэн цаг) — тэр түлхүүрээр идэвхтэй мөртэй хүүхдийг алгасна (өмнө/өөр
+   * ангид төлсөн). Дараа нь чекийн bookKey/нэр/үнийг солино. Энэ ангид тэр
+   * түлхүүртэй нээлттэй чек байвал төлбөрүүд тэр чек рүү очиж, энэ чек нуугдана
+   * (давхар чек үүсэхгүй). ClassCheckMark мөрүүд ХЭЗЭЭ Ч устахгүй.
+   */
+  async convert(
+    classroomId: string,
+    checkId: string,
+    dto: ConvertClassCheckDto,
+    userId: string,
+  ) {
+    const role = await this.access(classroomId, userId);
+    const check = await this.findCheck(classroomId, checkId);
+    ClassChecksService.assertGeneric(check);
+    const amount = dto.amount;
+    if (!Number.isInteger(amount) || amount <= 0 || amount > BOOK_AMOUNT_MAX)
+      throw new BadRequestException('Үнээ зөв оруулна уу');
+    const key =
+      dto.kind === 'BOOK'
+        ? (dto.bookKey ?? '')
+        : dto.kind === 'SHEET'
+          ? `${SHEET_KIND}${dto.n ?? 0}`
+          : `${CLASS_SHEET_KIND}${dto.n ?? 0}:${classroomId}`;
+    const { targets, here } = await this.convertTargetsFor(classroomId);
+    const target = targets.find((t) => t.kind === dto.kind && t.key === key);
+    if (!target)
+      throw new BadRequestException(
+        'Сонголт хуучирсан байна — хуудсаа шинэчлээд дахин сонгоно уу',
+      );
+    if (target.here === 'archived')
+      throw new BadRequestException(
+        `«${target.title}» чек энэ ангид нуусан байна — эхлээд «Нуусан» хэсгээс буцааж гаргана уу`,
+      );
+    const into =
+      target.here === 'open'
+        ? (here.find((c) => c.bookKey === key && !c.archivedAt) ?? null)
+        : null;
+    const marks = check.marks.filter((m) => m.checked);
+    const title = bookTitle(key);
+    const now = new Date();
+
+    let res: {
+      created: string[];
+      skippedHere: number;
+      skippedElsewhere: number;
+    };
+    try {
+      res = await this.prisma.$transaction(async (tx) => {
+        const active = marks.length
+          ? await tx.bookPayment.findMany({
+              where: {
+                bookKey: key,
+                voidedAt: null,
+                studentId: { in: marks.map((m) => m.studentId) },
+              },
+              select: { studentId: true, classroomId: true },
+            })
+          : [];
+        const has = new Map(active.map((a) => [a.studentId, a.classroomId]));
+        const fresh = marks.filter((m) => !has.has(m.studentId));
+        if (fresh.length)
+          await tx.bookPayment.createMany({
+            data: fresh.map((m) => ({
+              studentId: m.studentId,
+              bookKey: key,
+              status: 'PAID',
+              amount,
+              classroomId,
+              checkId: into?.id ?? check.id,
+              collectedById: m.updatedById,
+              createdById: m.updatedById,
+              createdAt: m.updatedAt,
+            })),
+          });
+        if (into)
+          await tx.classCheck.update({
+            where: { id: check.id },
+            data: {
+              archivedAt: check.archivedAt ?? now,
+              archivedById: check.archivedAt ? check.archivedById : userId,
+            },
+          });
+        else
+          await tx.classCheck.update({
+            where: { id: check.id },
+            data: { bookKey: key, title, amount },
+          });
+        let skippedHere = 0;
+        for (const c of has.values()) if (c === classroomId) skippedHere += 1;
+        return {
+          created: fresh.map((m) => m.studentId),
+          skippedHere,
+          skippedElsewhere: has.size - skippedHere,
+        };
+      });
+    } catch (err) {
+      // Хоёр багш зэрэг ижил түлхүүр рүү хөрвүүлэх/нээх, эсвэл сурагчийг зэрэг тэмдэглэх
+      if (isUniqueViolation(err))
+        throw new BadRequestException(
+          'Өөр багш яг одоо энэ чекийг өөрчиллөө — хуудсаа шинэчлээд дахин оролдоно уу',
+        );
+      throw err;
+    }
+    await this.audit.record({
+      actorId: userId,
+      actorRole: role,
+      action: 'CONVERT',
+      entity: 'ClassCheck',
+      entityId: check.id,
+      before: {
+        classroomId,
+        title: check.title,
+        amount: check.amount,
+        bookKey: null,
+        checkedCount: marks.length,
+      },
+      after: {
+        bookKey: key,
+        title,
+        amount,
+        mergedIntoCheckId: into?.id ?? null,
+        createdPayments: res.created.length,
+        createdFor: res.created,
+        skippedHere: res.skippedHere,
+        skippedElsewhere: res.skippedElsewhere,
+      },
+    });
+    const result = await this.findCheck(classroomId, into?.id ?? check.id);
+    return {
+      check: await this.shapeOne(result),
+      merged: !!into,
+      created: res.created.length,
+      skippedHere: res.skippedHere,
+      skippedElsewhere: res.skippedElsewhere,
     };
   }
 }

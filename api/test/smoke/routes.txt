@@ -75,6 +75,7 @@ GET /api/class-dashboard/students/:studentId/flags
 GET /api/classification/categories
 GET /api/classification/problems/:id
 GET /api/classrooms
+GET /api/classrooms/:classroomId/checks/:checkId/convert-options
 GET /api/classrooms/:id
 GET /api/classrooms/:id/assignments
 GET /api/classrooms/:id/assignments/stats
@@ -253,6 +254,7 @@ POST /api/class-dashboard/flags/:flagId/remove
 POST /api/class-dashboard/students/:studentId/flags
 POST /api/classification/categories
 POST /api/classrooms
+POST /api/classrooms/:classroomId/checks/:checkId/convert
 POST /api/classrooms/:id/assignments
 POST /api/classrooms/:id/attendance
 POST /api/classrooms/:id/did-test

@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../generated/prisma/enums';
 import {
+  ConvertClassCheckDto,
   CreateClassCheckDto,
   SetClassCheckMarkDto,
   UpdateClassCheckDto,
@@ -85,6 +86,34 @@ export class ClassChecksController {
     @Param('checkId') checkId: string,
   ) {
     return this.checks.remove(classroomId, checkId, req.user.userId);
+  }
+
+  /**
+   * Энгийн чекийг ном/шалгалтын хуудасны чек болгох сонголтууд (эзэн 2026-11-18):
+   * нэгдсэн шалгалтын дугаарууд (төв даяар), энэ ангийн шалгалтын дугаарууд, номууд.
+   */
+  @Get(':checkId/convert-options')
+  convertOptions(
+    @Req() req: AuthedRequest,
+    @Param('classroomId') classroomId: string,
+    @Param('checkId') checkId: string,
+  ) {
+    return this.checks.convertOptions(classroomId, checkId, req.user.userId);
+  }
+
+  /**
+   * Хөрвүүлэх: тэмдэглэсэн хүүхэд бүрд BookPayment (PAID) үүсгэж, чекийг
+   * ном/шалгалтын хуудасны чек болгоно. ClassCheckMark мөрүүд хэвээр үлдэнэ.
+   * Энэ ангид тэр түлхүүртэй нээлттэй чек байвал түүн рүү нэгтгээд энэ чекийг нууна.
+   */
+  @Post(':checkId/convert')
+  convert(
+    @Req() req: AuthedRequest,
+    @Param('classroomId') classroomId: string,
+    @Param('checkId') checkId: string,
+    @Body() dto: ConvertClassCheckDto,
+  ) {
+    return this.checks.convert(classroomId, checkId, dto, req.user.userId);
   }
 
   @Put(':checkId/students/:studentId')

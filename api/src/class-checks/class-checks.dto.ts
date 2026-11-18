@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
@@ -99,4 +100,36 @@ export class SetClassCheckMarkDto {
   @IsString()
   @MaxLength(240)
   note?: string | null;
+}
+
+/**
+ * Энгийн чекийг ном/шалгалтын хуудасны чек болгох (эзэн 2026-11-18). Түлхүүрийг
+ * клиент зохиохгүй: төрөл + дугаар (GET …/convert-options-ийн сонголтоос) эсвэл ном.
+ */
+export class ConvertClassCheckDto {
+  @ApiProperty({ enum: ['SHEET', 'CSHEET', 'BOOK'] })
+  @IsIn(['SHEET', 'CSHEET', 'BOOK'])
+  kind: 'SHEET' | 'CSHEET' | 'BOOK';
+
+  /** SHEET/CSHEET-ийн дугаар */
+  @ApiPropertyOptional({ minimum: 1, maximum: 99 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(99)
+  n?: number;
+
+  /** kind=BOOK үед BOOKS-ийн түлхүүр */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(24)
+  bookKey?: string;
+
+  /** Нэг хүүхдийн үнэ — тэмдэглэсэн хүүхэд бүрийн төлбөрт бичигдэнэ */
+  @ApiProperty({ minimum: 1, maximum: 1_000_000 })
+  @IsInt()
+  @Min(1)
+  @Max(1_000_000)
+  amount: number;
 }
