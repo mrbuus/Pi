@@ -352,6 +352,22 @@ describe('Тохирсон (хөнгөлөлттэй) бүтэн жилийн д
     expect(computeLedger(base({ plan: 'FULL_YEAR', agreed: 300_000, payments: paid })).plan.total).toBe(g12.fullYear);
     expect(computeLedger(base({ plan: 'MONTHLY', agreed: 2_250_000, payments: [pay(350_000, '2026-09')] })).plan.kind).toBe('MONTHLY');
   });
+
+  it('ах дүүгийн хөнгөлөлт сар бүрд: 315,000 гэж тавьсан → 315,000 төлсөн сар «төлсөн» (2026-11-19)', () => {
+    const r = computeLedger(base({ plan: 'MONTHLY', agreed: 315_000, payments: [pay(315_000, '2026-09', '2026-09-01')] }));
+    expect(r.plan).toMatchObject({ kind: 'MONTHLY', fee: 315_000, discounted: true });
+    expect(r.blocks.find((b) => b.month === '2026-09')).toMatchObject({ state: 'PAID' });
+  });
+
+  it('хоёр хувааж төлөх: 3,000,000 → 2,700,000, эхний хэсэг 1,500,000 → 1,350,000', () => {
+    const r = computeLedger(base({ plan: 'INSTALLMENT', agreed: 2_700_000, payments: [] }));
+    expect(r.plan).toMatchObject({ kind: 'INSTALLMENT', total: 2_700_000, first: 1_350_000, discounted: true });
+  });
+
+  it('сар бүрд хэт бага эсвэл үнээс их дүн хөнгөлөлт болохгүй', () => {
+    expect(computeLedger(base({ plan: 'MONTHLY', agreed: 50_000, payments: [] })).plan.fee).toBe(g12.monthly);
+    expect(computeLedger(base({ plan: 'MONTHLY', agreed: 400_000, payments: [] })).plan.fee).toBe(g12.monthly);
+  });
 });
 
 describe('Сар бүрийн хугацаа — шийтийн хугацаа, сунгалт (эзэн 2026-11-12)', () => {

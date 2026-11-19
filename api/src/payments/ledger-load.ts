@@ -191,8 +191,10 @@ export async function sheetPeriodsFor(prisma: PrismaService, studentIds: string[
   const rows = await prisma.sheetRow.findMany({
     where: { studentId: { in: studentIds }, goneAt: null, tab: { in: ['Суудал баталгаажуулалт', 'Сар бүр'] } },
     select: { studentId: true, tab: true, cells: true },
-    orderBy: { tab: 'desc' }, // «Суудал…» сүүлд → давуу (дарж бичнэ)
   });
+  // «Сар бүр» эхэлж, «Суудал баталгаажуулалт» сүүлд → эзэн жагсаалт дарж бичнэ. ӨС-ийн эрэмбэ
+  // (collation)-д найдахгүй: өмнө нь «Сар бүр» сүүлд орж хуучин «10/01-11/01» эзнийхийг дардаг байв (2026-11-19)
+  rows.sort((a, b) => (a.tab === 'Сар бүр' ? 0 : 1) - (b.tab === 'Сар бүр' ? 0 : 1));
   for (const r of rows) {
     const cells = (r.cells ?? {}) as Record<string, unknown>;
     const mine = out.get(r.studentId!) ?? {};

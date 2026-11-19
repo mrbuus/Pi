@@ -27,7 +27,16 @@ export interface CellMismatch {
   sheet: number;
   web: number;
 }
+/** Ажилтан мөнгийг нэг нүднээс нөгөөд зөөсөн — вэбийн төлбөрийг шинэ нүд рүү шилжүүлнэ (дүн өөрчлөгдөхгүй) */
+export interface CellMove {
+  paymentId: string;
+  from: string;
+  to: string;
+  forMonth: string;
+  amount: number;
+}
 export interface StudentReconcile {
+  moves: CellMove[];
   inserts: CellInsert[];
   mismatches: CellMismatch[];
   /** Зөрүү (сөрөг) байсан тул нэмэлтийг хүлээлгэсэн */
@@ -90,6 +99,26 @@ export function reconcileStudent(
       label: `${last.label} — нэмэлт`,
     });
   }
-  if (mismatches.length && inserts.length) return { inserts: [], mismatches, held: inserts };
-  return { inserts, mismatches, held: [] };
+  // Нүд зөөсөн (эзэн 2026-11-19: 74 зөрүүний ихэнх нь 11-р сарын нүднээс 10-р сар руу,
+  // эсвэл бүтэн жилийн үлдэгдлийг өөр сард зөөсөн): дутсан нүдэн дэх ЯГ ИЖИЛ дүнтэй нэг
+  // төлбөрийг шинэ нүд рүү холбоно. Мөнгө үүсэхгүй, устахгүй — зөвхөн аль нүд/сарынх нь.
+  const moves: CellMove[] = [];
+  if (mismatches.length && inserts.length) {
+    const used = new Set<string>();
+    for (const ins of [...inserts]) {
+      for (const m of mismatches) {
+        if (m.web - m.sheet < ins.amount) continue;
+        const pay = existing.find((e) => !used.has(e.paymentId) && cellSlot(e.cell) === m.cell && e.amount === ins.amount);
+        if (!pay) continue;
+        used.add(pay.paymentId);
+        moves.push({ paymentId: pay.paymentId, from: pay.cell, to: ins.cell, forMonth: ins.forMonth, amount: ins.amount });
+        m.web -= ins.amount;
+        inserts.splice(inserts.indexOf(ins), 1);
+        break;
+      }
+    }
+  }
+  const left = mismatches.filter((m) => m.web !== m.sheet);
+  if (left.length && inserts.length) return { moves, inserts: [], mismatches: left, held: inserts };
+  return { moves, inserts, mismatches: left, held: [] };
 }

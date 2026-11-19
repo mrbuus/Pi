@@ -145,16 +145,34 @@ describe('нүдээр тулгах', () => {
     expect(again.inserts).toEqual([]);
     expect(again.mismatches).toEqual([]);
   });
-  it('нүд хооронд шилжсэн бол давхар оруулахгүй — Админд хүлээлгэнэ', () => {
-    const r = reconcileStudent('u1', [p('main|2026-10', 350000)], [{ paymentId: 'p1', cell: 'main|2026-09', amount: 350000 }], new Set());
+  it('ижил дүнг нүд хооронд зөөсөн — давхар оруулахгүй, төлбөрийг шинэ нүд рүү шилжүүлнэ (2026-11-19)', () => {
+    const r = reconcileStudent('u1', [p('main|2026-10', 350000, { forMonth: '2026-10' })], [{ paymentId: 'p1', cell: 'main|2026-11', amount: 350000 }], new Set());
+    expect(r.moves).toEqual([{ paymentId: 'p1', from: 'main|2026-11', to: 'main|2026-10', forMonth: '2026-10', amount: 350000 }]);
     expect(r.inserts).toEqual([]);
-    expect(r.mismatches).toEqual([{ cell: 'main|2026-09', sheet: 0, web: 350000 }]);
+    expect(r.mismatches).toEqual([]);
+    expect(r.held).toEqual([]);
+  });
+  it('бүтэн жилийн үлдэгдлийг өөр сар руу зөөсөн — урьдчилгаа хөдлөхгүй', () => {
+    const r = reconcileStudent(
+      'u1',
+      [p('main|2026-07', 2500000, { forMonth: '2026-07' })],
+      [{ paymentId: 'dep', cell: 'main|2026-07', amount: 350000 }, { paymentId: 'bal', cell: 'main|2026-10', amount: 2150000 }],
+      new Set(),
+    );
+    expect(r.moves.map((m) => [m.paymentId, m.to])).toEqual([['bal', 'main|2026-07']]);
+    expect(r.mismatches).toEqual([]);
+  });
+  it('дүн таарахгүй бол зөөхгүй — Админд хүлээлгэнэ (давхар оруулахгүй)', () => {
+    const r = reconcileStudent('u1', [p('main|2026-11', 400000)], [{ paymentId: 'p1', cell: 'main|2026-09', amount: 300000 }, { paymentId: 'p2', cell: 'main|2026-10', amount: 200000 }], new Set());
+    expect(r.moves).toEqual([]);
+    expect(r.inserts).toEqual([]);
+    expect(r.mismatches).toHaveLength(2);
     expect(r.held).toHaveLength(1);
   });
   it('«Сар бүр» ↔ эзэн жагсаалт — нэг сар', () => {
     expect(cellSlot('monthly|2026-06')).toBe('main|2026-06');
     const r = reconcileStudent('u1', [p('monthly|2026-06', 300000)], [{ paymentId: 'p1', cell: 'main|2026-06', amount: 300000 }], new Set());
-    expect(r).toEqual({ inserts: [], mismatches: [], held: [] });
+    expect(r).toEqual({ moves: [], inserts: [], mismatches: [], held: [] });
   });
   it('буцаасан гүйлгээний түлхүүртэй мөргөлдөхгүй', () => {
     const taken = new Set([paymentRequestId('u1', 'main|2026-09')]);

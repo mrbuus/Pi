@@ -94,6 +94,10 @@ export interface Overview {
   /** Шийтэд хөтлөгдсөн гэж нуусан ч шийтэд байгааг баталж чадаагүй */
   sheetCheck: number;
   lastImportAt: string | null;
+  /** Хуулгын хамгийн сүүлийн гүйлгээний цаг */
+  lastTxAt?: string | null;
+  /** Энэ цаг хүртэлх бүх гүйлгээ ангилагдсан (хамгийн эртний шийдэгдээгүй гүйлгээний өмнөх) */
+  classifiedThroughAt?: string | null;
   /** Гараар оноосон сургалтын төлбөр бичигдэх шийт (демо бол хуулбар) */
   sheetWrite?: { url: string; demo: boolean } | null;
 }

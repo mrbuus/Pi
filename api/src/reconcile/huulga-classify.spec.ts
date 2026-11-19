@@ -76,4 +76,10 @@ describe('нийгмийн сургалт', () => {
   it('«нийгэм» үггүй бол TUITION хэвээр', () => {
     expect(c(1_500_000, 'nasanbutedmaa 13-3 mat')).toMatchObject({ kind: 'TUITION' });
   });
+
+  it('«нийгэм» гэсэн ч жижиг дүн (цаасны мөнгө) бол нийгмийн төлбөр биш (2026-11-19)', () => {
+    expect(c(76_000, 'ЦААСНЫ МӨНГӨ (9-2 28) (13-2 21) НИЙГЭМ 27 НИЙТ 76', none)).toMatchObject({ kind: 'ANSWER_SHEET' });
+    expect(c(40_000, 'Хулан нийгэм E2', { ...kid, social: { known: true } })).not.toMatchObject({ kind: 'SOCIAL' });
+  });
 });
+

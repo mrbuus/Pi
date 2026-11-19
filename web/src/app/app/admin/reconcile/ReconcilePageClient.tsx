@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/kit/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/kit/tabs";
 import { EmptyState, ErrorState } from "@/components/ui/StateBlock";
 import { SkeletonRows } from "@/components/ui/Skeleton";
-import LedgerDialog, { Field, Segmented, inputCls } from "@/components/payments/LedgerDialog";
-import { dayLabel } from "@/components/payments/ledgerFormat";
+import { Segmented, inputCls } from "@/components/payments/LedgerDialog";
 import { errMsg } from "@/components/payments/paymentHelpers";
 import RowCard from "./RowCard";
 import { RECONCILE_CHANGED, TONE, type BankRow, type ImportSummary, type Lane, type Overview } from "./types";
@@ -25,6 +24,12 @@ const LANES: { key: Lane; label: string; empty: string }[] = [
 ];
 const PAGE = 50;
 
+/** «11/18 17:42» — УБ цагаар */
+function stamp(iso: string): string {
+  const d = new Date(new Date(iso).getTime() + 8 * 3_600_000).toISOString();
+  return `${d.slice(5, 7)}/${d.slice(8, 10)} ${d.slice(11, 16)}`;
+}
+
 export function ReconcilePageClient() {
   const [overview, setOverview] = useState<Overview | null>(null);
   const [lane, setLane] = useState<Lane>("all");
@@ -35,9 +40,6 @@ export function ReconcilePageClient() {
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
   const [lastImport, setLastImport] = useState<ImportSummary | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [sheetDate, setSheetDate] = useState("");
-  const [sheetSaving, setSheetSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const rowsRef = useRef<BankRow[] | null>(null);
   rowsRef.current = rows;
@@ -126,21 +128,6 @@ export function ReconcilePageClient() {
     }
   }
 
-  async function saveSheetThrough() {
-    setSheetSaving(true);
-    try {
-      const res = await api<{ marked: number }>("/reconcile/sheet-through", { method: "POST", body: { through: sheetDate } });
-      toast.success(`${res.marked} гүйлгээ «Шийтэд хөтлөгдсөн» жагсаалт руу шилжлээ`);
-      setSheetOpen(false);
-      loadOverview();
-      loadRows("reset");
-    } catch (e) {
-      toast.error(errMsg(e));
-    } finally {
-      setSheetSaving(false);
-    }
-  }
-
   const cursor = overview?.cursors[0];
   return (
     <div className="space-y-5">
@@ -157,9 +144,11 @@ export function ReconcilePageClient() {
                     : "Бүх гүйлгээ шийдэгдсэн"}
               </p>
               <p className="text-sm text-ink-dim">
-                {cursor
-                  ? `Хуулга ${dayLabel(cursor.coveredThrough)} хүртэл орсон. Шинэ хуулга оруулахад давхардалгүй, зөвхөн шинэ гүйлгээ нэмэгдэнэ`
-                  : "Хаан банкны интернэт банкнаас «Дансны хуулга»-г Excel-ээр татаж оруулна"}
+                {cursor && overview?.classifiedThroughAt
+                  ? `${stamp(overview.classifiedThroughAt)} хүртэлх бүх гүйлгээ ангилагдсан${
+                      overview.lastTxAt && overview.lastTxAt !== overview.classifiedThroughAt ? `. Хуулгын сүүлийн гүйлгээ ${stamp(overview.lastTxAt)}` : ""
+                    }`
+                  : "Хаан банкны интернэт банкнаас «Дансны хуулга»-г Excel-ээр татаж оруулна. Давхардалгүй, зөвхөн шинэ гүйлгээ нэмэгдэнэ"}
               </p>
             </div>
           </div>
@@ -168,26 +157,6 @@ export function ReconcilePageClient() {
             <FileUp /> {importing ? "Уншиж байна" : "Хуулга оруулах"}
           </Button>
         </div>
-        {cursor && (
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
-            <p className="flex items-center gap-2 text-sm text-ink-dim">
-              <FileSpreadsheet className="size-4 shrink-0 text-info" aria-hidden />
-              {cursor.sheetThrough
-                ? `${dayLabel(cursor.sheetThrough)} хүртэл ажилтан шийтэд гараар бичсэн. Түүнээс хойших гүйлгээг систем шийтэд өөрөө бичнэ`
-                : "Ажилтан шийтэд гараар бичсэн сүүлийн өдрийг тэмдэглэнэ үү — түүнээс хойших гүйлгээг систем шийтэд бичнэ"}
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSheetDate(cursor.sheetThrough ?? cursor.coveredThrough);
-                setSheetOpen(true);
-              }}
-            >
-              {cursor.sheetThrough ? "Өдрийг өөрчлөх" : "Шийтэд хөтлөгдсөн өдөр"}
-            </Button>
-          </div>
-        )}
       </section>
 
       {overview?.sheetWrite && (
@@ -292,26 +261,6 @@ export function ReconcilePageClient() {
         </div>
       )}
 
-      <LedgerDialog
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        title="Шийтэд хөтлөгдсөн өдөр"
-        description="Энэ өдрийг хүртэлх, систем тулгаж чадаагүй гүйлгээг ажилтан шийтэд аль хэдийн бүртгэсэн гэж үзээд «Шийдэх»-ээс нууна"
-        footer={
-          <Button onClick={saveSheetThrough} disabled={sheetSaving || !sheetDate} className="w-full sm:w-auto">
-            {sheetSaving ? "Хадгалж байна" : "Тэмдэглэх"}
-          </Button>
-        }
-      >
-        <div className="space-y-3">
-          <Field label="Хүртэлх өдөр" htmlFor="sheet-through">
-            <input id="sheet-through" type="date" value={sheetDate} onChange={(e) => setSheetDate(e.target.value)} className={inputCls} />
-          </Field>
-          <p className="text-sm text-ink-dim">
-            Тэдгээр гүйлгээ «Шийтэд хөтлөгдсөн» жагсаалтад харагдана. Шийтэд ижил дүнтэй бүртгэл олдоогүйг «шалгана уу» гэж тэмдэглэнэ
-          </p>
-        </div>
-      </LedgerDialog>
     </div>
   );
 }

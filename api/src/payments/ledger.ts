@@ -574,6 +574,12 @@ function computeCore(input: LedgerInput, skip: Set<number>): LedgerResult {
   // өргүй, «Бүтэн». Зөвхөн шатлалын үнээс БАГА, бүтэн жилийн багцад (tuitionAmount биш — түүнийг синк бичдэг).
   else if (plan.kind === 'FULL_YEAR' && inRange(input.agreed ?? null, 800_000, plan.total - 1))
     plan = { ...plan, total: input.agreed!, first: Math.min(plan.first, input.agreed!), discounted: true };
+  // Ах дүүгийн хөнгөлөлт (эзэн 2026-11-19): сар бүрд гараар тавьсан сарын төлбөр (350,000 → 315,000)
+  else if (plan.kind === 'MONTHLY' && inRange(input.agreed ?? null, 100_000, plan.fee - 1))
+    plan = { ...plan, fee: input.agreed!, discounted: true };
+  // Хоёр хувааж төлөх: нийт дүн хөнгөлөгдөхөд эхний хэсэг ч ижил хувиар
+  else if (plan.kind === 'INSTALLMENT' && inRange(input.agreed ?? null, 800_000, plan.total - 1))
+    plan = { ...plan, first: Math.round((plan.first * input.agreed!) / plan.total / 1000) * 1000, total: input.agreed!, discounted: true };
 
   // 1) Сар бүрийн ногдох дүн ба төлөгдөх өдөр
   const dues = new Map<MonthKey, { due: number; dueOn: DateKey }>();

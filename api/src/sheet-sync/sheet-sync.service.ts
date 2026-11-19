@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { parseClassroomLabel } from '../users/student-import';
 import { UsersService } from '../users/users.service';
 import { claimBankPayments } from './bank-claim';
-import { cellSlot, reconcileStudent } from './cell-reconcile';
+import { cellSlot, reconcileStudent, type CellMove } from './cell-reconcile';
 import {
   assignRowKeys,
   buildPlan,
@@ -479,6 +479,7 @@ export class SheetSyncService {
 
     // c) Тулгалт
     const inserts: { studentId: string; requestId: string; cell: string; amount: number; forMonth: string; paidOn: string | null; label: string }[] = [];
+    const moves: (CellMove & { studentId: string })[] = [];
     let mismatched = 0;
     let held = 0;
     const studentIds = new Set([...plan.perStudent.keys(), ...byStudent.keys()]);
@@ -499,6 +500,7 @@ export class SheetSyncService {
       }
       const r = reconcileStudent(studentId, bucket?.payments ?? [], existing, takenByStudent.get(studentId) ?? new Set());
       for (const ins of r.inserts) inserts.push({ studentId, ...ins });
+      for (const mv of r.moves) moves.push({ studentId, ...mv });
       if (r.mismatches.length) {
         mismatched++;
         held += r.held.length;
@@ -533,6 +535,25 @@ export class SheetSyncService {
         inserts.splice(0, inserts.length, ...keep);
         if (!dryRun) await this.prisma.sheetPayment.createMany({ data: links, skipDuplicates: true });
       }
+    }
+
+    // c3) Нүд зөөсөн төлбөрийг шинэ нүдтэй холбоно (дүн хэвээр, сар нь шинэ нүднийх)
+    if (moves.length && !dryRun) {
+      await this.prisma.$transaction(async (tx) => {
+        for (const mv of moves) {
+          await tx.sheetPayment.update({ where: { paymentId: mv.paymentId }, data: { cell: mv.to } });
+          await tx.payment.update({ where: { id: mv.paymentId }, data: { forMonth: mv.forMonth } });
+        }
+      });
+      await this.audit.record({
+        actorId: adminId,
+        actorRole: 'SYSTEM',
+        action: 'SHEET_MOVE',
+        entity: 'Payment',
+        entityId: 'sheet-sync',
+        after: { moves: moves.map((m) => ({ paymentId: m.paymentId, studentId: m.studentId, from: m.from, to: m.to, amount: m.amount })) },
+        reason: 'Ажилтан шийтэд төлбөрийг өөр нүд рүү зөөсөн — вэбийн төлбөрийг дагуулан шилжүүлэв',
+      });
     }
 
     // d) Бичих — нэг транзакц, гүйлгээ + нүдний холбоос хамт
@@ -588,6 +609,7 @@ export class SheetSyncService {
       inserted: dryRun ? 0 : inserted,
       amount: inserts.reduce((t, i) => t + i.amount, 0),
       mismatchedStudents: mismatched,
+      moved: moves.length,
       held,
     };
   }

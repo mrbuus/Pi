@@ -43,7 +43,9 @@ export default function PlanDialog({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const value = Number(amount.replace(/\D/g, "")) || 0;
-  const discount = kind === "FULL_YEAR" && value >= 800_000 && value < priceOf("FULL_YEAR");
+  // Үнийн жагсаалтаас БАГА дүн = тохирсон (хөнгөлөлттэй) гэрээ — ах дүү 10% гэх мэт (эзэн 2026-11-19: сар бүр, хуваан төлөхөд ч)
+  const discount = value < priceOf(kind) && value >= (kind === "MONTHLY" ? 100_000 : 800_000);
+  const tenOff = Math.round((priceOf(kind) * 0.9) / 1000) * 1000;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -58,7 +60,7 @@ export default function PlanDialog({
             ? {}
             : {
                 tuitionAmount: value || priceOf(kind),
-                // Бүтэн жилд үнийн жагсаалтаас БАГА дүн = тохирсон (хөнгөлөлттэй) гэрээ; эс бөгөөс стандарт үнэ
+                // Үнийн жагсаалтаас БАГА дүн = тохирсон (хөнгөлөлттэй) гэрээ; эс бөгөөс стандарт үнэ
                 tuitionAgreed: discount ? value : null,
               }),
           ...(start ? { joinedOn: start } : {}),
@@ -100,20 +102,35 @@ export default function PlanDialog({
             label={kind === "MONTHLY" ? "Сарын төлбөр" : "Жилийн нийт дүн"}
             htmlFor="plan-amount"
             hint={
-              kind === "INSTALLMENT" && tier.installmentFirst
-                ? `Эхний төлбөр ${mnt(tier.installmentFirst)} 12-р сар хүртэл, үлдэгдэл 12/20-нд`
-                : discount
-                  ? `Хөнгөлөлттэй гэрээ: ${mnt(value)} төлөгдвөл жилийн төлбөр бүрэн гэж тооцно (үнийн жагсаалт ${mnt(priceOf(kind))})`
+              discount
+                ? kind === "MONTHLY"
+                  ? `Хөнгөлөлттэй: сар бүр ${mnt(value)} төлбөл тэр сар төлсөн (үнийн жагсаалт ${mnt(priceOf(kind))})`
+                  : kind === "INSTALLMENT" && tier.installmentFirst && tier.installment
+                    ? `Хөнгөлөлттэй: эхний төлбөр ${mnt(Math.round((tier.installmentFirst * value) / tier.installment / 1000) * 1000)}, нийт ${mnt(value)} (үнийн жагсаалт ${mnt(priceOf(kind))})`
+                    : `Хөнгөлөлттэй гэрээ: ${mnt(value)} төлөгдвөл жилийн төлбөр бүрэн гэж тооцно (үнийн жагсаалт ${mnt(priceOf(kind))})`
+                : kind === "INSTALLMENT" && tier.installmentFirst
+                  ? `Эхний төлбөр ${mnt(tier.installmentFirst)} 12-р сар хүртэл, үлдэгдэл 12/20-нд`
                   : `Үнийн жагсаалт: ${mnt(priceOf(kind))}`
             }
           >
-            <input
-              id="plan-amount"
-              inputMode="numeric"
-              value={value ? value.toLocaleString("en-US") : amount}
-              onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
-              className={`${inputCls} font-semibold tabular-nums`}
-            />
+            <div className="flex gap-2">
+              <input
+                id="plan-amount"
+                inputMode="numeric"
+                value={value ? value.toLocaleString("en-US") : amount}
+                onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
+                className={`${inputCls} font-semibold tabular-nums`}
+              />
+              {/* Нэг айлын 2+ хүүхэд — 10% хөнгөлөлт (эзэн 2026-11-19) */}
+              <Button
+                type="button"
+                variant="outline"
+                className="shrink-0"
+                onClick={() => setAmount(String(value === tenOff ? priceOf(kind) : tenOff))}
+              >
+                {value === tenOff ? "Үнийн жагсаалт" : "Ах дүү −10%"}
+              </Button>
+            </div>
           </Field>
         )}
         <Field label="Төвд анх суусан өдөр" htmlFor="plan-start" hint="Зун суусан бол зуны өдөр (зуны төлбөрийг ялгахад)">

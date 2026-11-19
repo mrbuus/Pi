@@ -838,12 +838,25 @@ export class ReconcileService {
       this.prisma.bankTransaction.count({ where: { inSheet: true, suggestion: { path: ['sheetMissing'], equals: true } } }),
       this.prisma.bankTransaction.findFirst({ orderBy: { importedAt: 'desc' }, select: { importedAt: true } }),
     ]);
+    // «Энэ мөч хүртэлх бүх гүйлгээ ангилагдсан» (эзэн 2026-11-19): хамгийн эртний шийдэгдээгүй гүйлгээний
+    // өмнөх гүйлгээний цаг, бүгд шийдэгдсэн бол хамгийн сүүлийн гүйлгээний цаг. Гараар тэмдэглэхгүй.
+    const [firstOpen, lastTx] = await Promise.all([
+      this.prisma.bankTransaction.findFirst({ where: { resolvedAt: null }, orderBy: { bookedAt: 'asc' }, select: { bookedAt: true } }),
+      this.prisma.bankTransaction.findFirst({ orderBy: { bookedAt: 'desc' }, select: { bookedAt: true } }),
+    ]);
+    const classifiedThroughAt = firstOpen
+      ? ((await this.prisma.bankTransaction.findFirst({ where: { bookedAt: { lt: firstOpen.bookedAt } }, orderBy: { bookedAt: 'desc' }, select: { bookedAt: true } }))?.bookedAt ?? null)
+      : (lastTx?.bookedAt ?? null);
     return {
       cursors: cursors.map((c) => ({ accountNo: c.accountNo, settledThrough: c.settledThrough, coveredThrough: c.coveredThrough, sheetThrough: c.sheetThrough })),
       counts: { all, manual, tuition, social, other, expense, sheet },
       /** Шийтэд хөтлөгдсөн гэж нуусан ч шийтэд байгааг баталж чадаагүй — шалгах */
       sheetCheck,
       lastImportAt: last?.importedAt ?? null,
+      /** Хуулгын хамгийн сүүлийн гүйлгээний цаг */
+      lastTxAt: lastTx?.bookedAt ?? null,
+      /** Энэ цаг хүртэлх бүх гүйлгээ ангилагдсан */
+      classifiedThroughAt,
       /** Гараар оноосон сургалтын төлбөр бичигдэх шийт (демо бол хуулбар) */
       sheetWrite: this.demoSheet.enabled ? { url: `https://docs.google.com/spreadsheets/d/${this.demoSheet.sheetId}/edit`, demo: this.demoSheet.demo } : null,
     };

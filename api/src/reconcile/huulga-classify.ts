@@ -40,7 +40,8 @@ export const ALLOC_LABEL: Record<AllocKind, string> = {
 const NOT_LETTER = '[^\\p{L}]';
 const KW = {
   fine: new RegExp(`(^|${NOT_LETTER})(zaal|заал|torguul\\p{L}*|торгуул\\p{L}*)`, 'iu'),
-  sheet: /хариулт|hariult|шалгалтын цаас|shalgaltiin tsaas/iu,
+  // «ЦААСНЫ МӨНГӨ (9-2 28) (13-2 21) НИЙГЭМ 27» — хариултын хуудасны мөнгө (2026-11-19)
+  sheet: /хариулт|hariult|цаас|tsaas/iu,
   book: new RegExp(
     `(^|${NOT_LETTER})(ном|nom|book)(ын|ны|ний|нь|ууд|iin|nii|uud)?(${NOT_LETTER}|$)|боть|дэвтэр|devter|геометр|geometr|havtga|хавтга|(^|[^\\p{L}\\d])e-?[12](${NOT_LETTER}|$)|\\d\\s*ш(${NOT_LETTER}|$)|\\d\\s*(sh|shirheg)(${NOT_LETTER}|$)`,
     'iu',
@@ -50,6 +51,9 @@ const KW = {
 };
 
 /** Дүнг ном(ууд)-ын үнээр яг тайлбарлах уу — жижиг тоогоор (bounded search) */
+/** Нийгмийн сургалтын төлбөрийн хамгийн бага дүн (сар 300,000; хэсэгчлэн төлөхөд ч 100,000+) */
+const SOCIAL_MIN = 100_000;
+
 export function explainBooks(amount: number, maxEach = 60, only?: string[]): Record<string, number> | null {
   const prices: { name: string; price: number }[] = [];
   for (const b of HUULGA_PRICES.books) {
@@ -107,8 +111,9 @@ export function classifyTransaction(
   }
   if (bookWord && !KW.tuition.test(text)) return { kind: 'BOOK', confident: false, reason: 'Утгад «ном», дүн нь номын үнэтэй таарахгүй' };
 
-  // Нийгмийн хичээлийн төлбөр — математикийнхаас тусдаа (эзэн 2026-11-12)
-  if (SOCIAL_WORD.test(text)) {
+  // Нийгмийн хичээлийн төлбөр — математикийнхаас тусдаа (эзэн 2026-11-12). Зөвхөн сургалтын төлбөр
+  // байж болох дүн (100,000+); «нийгэм» гэсэн жижиг дүн бол ном, цаасны мөнгө (эзэн 2026-11-19)
+  if (SOCIAL_WORD.test(text) && tx.amount >= SOCIAL_MIN) {
     if (KW.math.test(text)) return { kind: 'SOCIAL', confident: false, reason: 'Утгад «нийгэм» ба «математик» хоёулаа — хувааж оноо' };
     if (!hasKid) return { kind: 'SOCIAL', confident: false, reason: 'Нийгэм: хүүхэд танигдсангүй' };
     if (!match.social?.known) return { kind: 'SOCIAL', confident: false, reason: 'Утгад «нийгэм» ч энэ хүүхэд нийгэмд бүртгэлгүй — шалгана уу' };
