@@ -28,12 +28,24 @@ import PayDialog from "./PayDialog";
 import NoteDialog from "./NoteDialog";
 import PlanDialog, { CYCLE_SOURCE_LABEL } from "./PlanDialog";
 import ExtendDialog from "./ExtendDialog";
+import MonthDialog from "./MonthDialog";
 import { RemoveFromTrainingDialog } from "@/components/students/StudentActions";
 import SettleSwitch from "./SettleSwitch";
 import { BlockLegend, LargeBlocks } from "./MonthBlocks";
-import { dayLabel, isOwed, mnt, monthName, PLAN_LABEL, stampLabel } from "./ledgerFormat";
+import {
+  dayLabel,
+  isOwed,
+  mnt,
+  monthName,
+  PLAN_LABEL,
+  stampLabel,
+} from "./ledgerFormat";
 import { METHOD_LABEL, STATUS_LABEL, errMsg } from "./paymentHelpers";
-import type { LedgerPayment, LedgerRow, StudentLedger as Data } from "./ledgerTypes";
+import type {
+  LedgerPayment,
+  LedgerRow,
+  StudentLedger as Data,
+} from "./ledgerTypes";
 import type { Payment } from "./types";
 
 const REFUND_STATUS: Record<string, string> = {
@@ -44,17 +56,35 @@ const REFUND_STATUS: Record<string, string> = {
   CANCELLED: "Цуцалсан",
 };
 
-function Stat({ label, value, tone = "text-ink", sub }: { label: string; value: string; tone?: string; sub?: string }) {
+function Stat({
+  label,
+  value,
+  tone = "text-ink",
+  sub,
+}: {
+  label: string;
+  value: string;
+  tone?: string;
+  sub?: string;
+}) {
   return (
     <div className="min-w-0">
       <p className="text-xs text-ink-dim">{label}</p>
-      <p className={`text-[15px] font-bold tabular-nums sm:text-lg ${tone}`}>{value}</p>
+      <p className={`text-[15px] font-bold tabular-nums sm:text-lg ${tone}`}>
+        {value}
+      </p>
       {sub && <p className="text-xs text-ink-dim">{sub}</p>}
     </div>
   );
 }
 
-function CallLink({ phone, label }: { phone: string | null | undefined; label: string }) {
+function CallLink({
+  phone,
+  label,
+}: {
+  phone: string | null | undefined;
+  label: string;
+}) {
   if (!phone) return null;
   return (
     <a
@@ -75,6 +105,7 @@ export default function StudentLedger({ id }: { id: string }) {
   const [pay, setPay] = useState<{ month: string | null } | null>(null);
   const [noteOpen, setNoteOpen] = useState(false);
   const [extendOpen, setExtendOpen] = useState(false);
+  const [monthOpen, setMonthOpen] = useState<string | null>(null);
   const [planOpen, setPlanOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
   const [editing, setEditing] = useState<Payment | null>(null);
@@ -92,7 +123,10 @@ export default function StudentLedger({ id }: { id: string }) {
 
   async function confirmPending(p: LedgerPayment) {
     try {
-      await api(`/payments/${encodeURIComponent(p.id)}/confirm`, { method: "POST", body: {} });
+      await api(`/payments/${encodeURIComponent(p.id)}/confirm`, {
+        method: "POST",
+        body: {},
+      });
       toast.success("Баталгаажлаа");
       load();
     } catch (e) {
@@ -112,7 +146,10 @@ export default function StudentLedger({ id }: { id: string }) {
 
   const r: LedgerRow = data.row;
   const back = r.classroom
-    ? { href: `/app/payments/class/${encodeURIComponent(r.classroom.id)}`, label: r.classroom.name }
+    ? {
+        href: `/app/payments/class/${encodeURIComponent(r.classroom.id)}`,
+        label: r.classroom.name,
+      }
     : { href: "/app/payments", label: "Төлбөр" };
   // Гараар бүтэн жилд гэрээ = төлсөн дүн — «Төлсөн»-тэй давхардуулж дүн бичихгүй
   const planText = r.plan.settled
@@ -130,7 +167,8 @@ export default function StudentLedger({ id }: { id: string }) {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="cyrillic-heading text-2xl font-extrabold text-ink">
-              {r.firstName} <span className="font-semibold text-ink-dim">{r.lastName}</span>
+              {r.firstName}{" "}
+              <span className="font-semibold text-ink-dim">{r.lastName}</span>
             </h1>
             <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-ink-dim">
               {r.classroom && (
@@ -160,7 +198,10 @@ export default function StudentLedger({ id }: { id: string }) {
                 {r.cycleStart.on
                   ? `Энэ жил ${dayLabel(r.cycleStart.on)}-нд суж эхэлсэн (${CYCLE_SOURCE_LABEL[r.cycleStart.source]}), сар бүрийн ${Number(r.cycleStart.on.slice(8, 10))}-нд төлнө`
                   : "Энэ жил суж эхэлсэн өдөр тодорхойгүй, сарын 1-нээс тооцож байна"}
-                <Pencil className="h-3.5 w-3.5" aria-label="Суж эхэлсэн өдөр засах" />
+                <Pencil
+                  className="h-3.5 w-3.5"
+                  aria-label="Суж эхэлсэн өдөр засах"
+                />
               </button>
             )}
           </div>
@@ -168,7 +209,9 @@ export default function StudentLedger({ id }: { id: string }) {
             type="button"
             onClick={() => setPlanOpen(true)}
             className={`inline-flex min-h-11 items-center gap-2 rounded-xl border px-3 text-sm font-semibold ${
-              r.plan.guessed ? "border-dashed border-error/50 text-error" : "border-line text-ink hover:border-brand"
+              r.plan.guessed
+                ? "border-dashed border-error/50 text-error"
+                : "border-line text-ink hover:border-brand"
             }`}
           >
             {planText}
@@ -182,8 +225,12 @@ export default function StudentLedger({ id }: { id: string }) {
           </p>
         )}
         {r.plan.fullYearLate && !r.plan.settled && (
-          <p role="status" className="rounded-xl border border-error/30 bg-error/5 px-3 py-2 text-sm text-ink">
-            Бүтэн жилийн дүн төлсөн ч үлдэгдлийг хугацаанаас хойш төлсөн. Шалгаад тохирвол доорх «Жилийн төлбөр» дээр «Бүрэн» сонгоно уу
+          <p
+            role="status"
+            className="rounded-xl border border-error/30 bg-error/5 px-3 py-2 text-sm text-ink"
+          >
+            Бүтэн жилийн дүн төлсөн ч үлдэгдлийг хугацаанаас хойш төлсөн.
+            Шалгаад тохирвол доорх «Жилийн төлбөр» дээр «Бүрэн» сонгоно уу
           </p>
         )}
 
@@ -191,12 +238,19 @@ export default function StudentLedger({ id }: { id: string }) {
           {data.amountsHidden ? (
             // Багш+ — зөвхөн төлөв (сервер дүнг хассан)
             <>
-              <Stat label="Төлсөн хүртэл" value={r.coveredThrough ? monthName(r.coveredThrough) : "Үгүй"} />
+              <Stat
+                label="Төлсөн хүртэл"
+                value={r.coveredThrough ? monthName(r.coveredThrough) : "Үгүй"}
+              />
               <Stat
                 label="Өр"
                 value={isOwed(r) ? `${r.owedMonths} сар` : "Өргүй"}
                 tone={isOwed(r) ? "text-error" : "text-ink"}
-                sub={r.overdueDays > 0 ? `${r.overdueDays} хоног хэтэрсэн` : undefined}
+                sub={
+                  r.overdueDays > 0
+                    ? `${r.overdueDays} хоног хэтэрсэн`
+                    : undefined
+                }
               />
               <Stat label="Төлөлт" value={String(data.payments.length)} />
             </>
@@ -205,16 +259,28 @@ export default function StudentLedger({ id }: { id: string }) {
               <Stat
                 label="Төлсөн"
                 value={mnt(r.paidTotal)}
-                sub={r.summerPaid ? `Зуны төлбөр ${mnt(r.summerPaid)} тусдаа` : undefined}
+                sub={
+                  r.summerPaid
+                    ? `Зуны төлбөр ${mnt(r.summerPaid)} тусдаа`
+                    : undefined
+                }
               />
               <Stat
                 label="Өр"
                 value={mnt(r.owedNow)}
                 tone={r.owedNow > 0 ? "text-error" : "text-ink"}
-                sub={r.overdueDays > 0 ? `${r.overdueDays} хоног хэтэрсэн` : undefined}
+                sub={
+                  r.overdueDays > 0
+                    ? `${r.overdueDays} хоног хэтэрсэн`
+                    : undefined
+                }
               />
               {r.credit > 0 ? (
-                <Stat label="Илүү төлсөн" value={mnt(r.credit)} tone="text-info" />
+                <Stat
+                  label="Илүү төлсөн"
+                  value={mnt(r.credit)}
+                  tone="text-info"
+                />
               ) : (
                 <Stat label="Жилийн үлдэгдэл" value={mnt(r.remaining)} />
               )}
@@ -224,16 +290,20 @@ export default function StudentLedger({ id }: { id: string }) {
 
         <div>
           <div className="mb-2 flex items-center gap-1.5">
-            <h2 className="text-sm font-semibold text-ink">2026–2027 оны сарууд</h2>
+            <h2 className="text-sm font-semibold text-ink">
+              2026–2027 оны сарууд
+            </h2>
             <InfoHint label="Блокийн тайлбар">
               <BlockLegend />
             </InfoHint>
           </div>
+          {/* Сар дарахад: хугацаа, төлбөр бүртгэх, суугаагүй өдөр хасах (эзэн 2026-11-19) */}
           <LargeBlocks
             blocks={r.blocks}
             current={data.month}
             settled={r.plan.settled}
-            onPick={(m) => setPay({ month: m })}
+            pickAll
+            onPick={(m) => setMonthOpen(m)}
           />
         </div>
 
@@ -250,7 +320,11 @@ export default function StudentLedger({ id }: { id: string }) {
           {r.plan.kind === "MONTHLY" && !r.plan.settled && (
             <Button variant="outline" onClick={() => setExtendOpen(true)}>
               <CalendarClock aria-hidden /> Хугацаа сунгах
-              {!!data.extensions?.length && <span className="rounded-full bg-ink/10 px-1.5 text-xs tabular-nums">{data.extensions.length}</span>}
+              {!!data.extensions?.length && (
+                <span className="rounded-full bg-ink/10 px-1.5 text-xs tabular-nums">
+                  {data.extensions.length}
+                </span>
+              )}
             </Button>
           )}
           <Button variant="outline" onClick={() => setRefundOpen(true)}>
@@ -268,7 +342,10 @@ export default function StudentLedger({ id }: { id: string }) {
       <section id="notes" className="chunky scroll-mt-20 p-4 sm:p-5">
         <h2 className="mb-3 font-bold text-ink">Тэмдэглэл</h2>
         {data.notes.length === 0 ? (
-          <EmptyState title="Тэмдэглэл алга" hint="Эцэг эхтэй ярьсан, амласан өдрөө «Тэмдэглэл»-ээр бичнэ" />
+          <EmptyState
+            title="Тэмдэглэл алга"
+            hint="Эцэг эхтэй ярьсан, амласан өдрөө «Тэмдэглэл»-ээр бичнэ"
+          />
         ) : (
           <ul className="divide-y divide-line">
             {data.notes.map((n) => (
@@ -278,7 +355,8 @@ export default function StudentLedger({ id }: { id: string }) {
                   {n.promisedOn && n.promise?.state === "BROKEN" && (
                     <span className="inline-flex items-center gap-1 font-semibold text-error">
                       <CalendarX2 className="h-3.5 w-3.5" aria-hidden />
-                      {dayLabel(n.promisedOn)} амласан, {n.promise.overdueDays} хоног хэтэрсэн
+                      {dayLabel(n.promisedOn)} амласан, {n.promise.overdueDays}{" "}
+                      хоног хэтэрсэн
                     </span>
                   )}
                   {n.promisedOn && n.promise?.state === "UPCOMING" && (
@@ -304,19 +382,29 @@ export default function StudentLedger({ id }: { id: string }) {
       <section className="chunky p-4 sm:p-5">
         <h2 className="mb-3 font-bold text-ink">Төлбөрүүд</h2>
         {data.payments.length === 0 ? (
-          <EmptyState title="Төлбөр бүртгэгдээгүй" hint="Банкны хуулга, QPay эсвэл гараар бүртгэсэн төлбөр энд гарна" />
+          <EmptyState
+            title="Төлбөр бүртгэгдээгүй"
+            hint="Банкны хуулга, QPay эсвэл гараар бүртгэсэн төлбөр энд гарна"
+          />
         ) : (
           <ul className="divide-y divide-line">
             {data.payments.map((p) => {
               const st = STATUS_LABEL[p.status] ?? STATUS_LABEL.PENDING;
               const muted = p.status === "REVERSED" || p.status === "REJECTED";
               return (
-                <li key={p.id} className="flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0">
-                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${st.cls}`}>
+                <li
+                  key={p.id}
+                  className="flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0"
+                >
+                  <span
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${st.cls}`}
+                  >
                     <st.icon className="h-4 w-4" aria-label={st.text} />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className={`block font-bold tabular-nums ${muted ? "text-ink-dim line-through" : "text-ink"}`}>
+                    <span
+                      className={`block font-bold tabular-nums ${muted ? "text-ink-dim line-through" : "text-ink"}`}
+                    >
                       {p.amount == null ? (st.text ?? "Төлөлт") : mnt(p.amount)}
                     </span>
                     <span className="block text-xs text-ink-dim">
@@ -324,26 +412,43 @@ export default function StudentLedger({ id }: { id: string }) {
                         items={[
                           dayLabel((p.paidAt ?? p.createdAt).slice(0, 10)),
                           METHOD_LABEL[p.method] ?? p.method,
-                          p.summer ? "Зуны (өмнөх хугацааны) төлбөр" : p.forMonth ? monthName(p.forMonth) : null,
+                          p.summer
+                            ? "Зуны (өмнөх хугацааны) төлбөр"
+                            : p.forMonth
+                              ? monthName(p.forMonth)
+                              : null,
                           p.status !== "CONFIRMED" ? st.text : null,
                           p.confirmedBy,
                         ]}
                       />
                     </span>
-                    {p.description && <span className="block truncate text-xs text-ink-dim">{p.description}</span>}
+                    {p.description && (
+                      <span className="block truncate text-xs text-ink-dim">
+                        {p.description}
+                      </span>
+                    )}
                   </span>
                   {p.status === "PENDING" && (
                     <span className="flex gap-2">
                       <Button size="sm" onClick={() => confirmPending(p)}>
                         Батлах
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => setEditing(p as Payment)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditing(p as Payment)}
+                      >
                         Засах
                       </Button>
                     </span>
                   )}
                   {p.status === "CONFIRMED" && (
-                    <Button size="sm" variant="danger" onClick={() => setReversing(p as Payment)} className="min-h-11">
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={() => setReversing(p as Payment)}
+                      className="min-h-11"
+                    >
                       Буцаах
                     </Button>
                   )}
@@ -365,11 +470,20 @@ export default function StudentLedger({ id }: { id: string }) {
                   className="flex min-h-11 items-center justify-between gap-3 rounded-xl border border-line px-3 py-2 hover:border-brand"
                 >
                   <span className="text-sm">
-                    <span className="font-semibold text-ink">{REFUND_STATUS[f.status] ?? f.status}</span>
-                    <span className="text-ink-dim"> {dayLabel(f.leftOn)}-нд гарсан</span>
+                    <span className="font-semibold text-ink">
+                      {REFUND_STATUS[f.status] ?? f.status}
+                    </span>
+                    <span className="text-ink-dim">
+                      {" "}
+                      {dayLabel(f.leftOn)}-нд гарсан
+                    </span>
                   </span>
                   <span className="font-bold tabular-nums text-ink">
-                    {f.refundAmount == null ? "Буцаалт" : f.refundAmount > 0 ? mnt(f.refundAmount) : `Дутуу ${mnt(f.shortfall)}`}
+                    {f.refundAmount == null
+                      ? "Буцаалт"
+                      : f.refundAmount > 0
+                        ? mnt(f.refundAmount)
+                        : `Дутуу ${mnt(f.shortfall)}`}
                   </span>
                 </Link>
               </li>
@@ -393,11 +507,48 @@ export default function StudentLedger({ id }: { id: string }) {
           onPaid={() => load()}
         />
       )}
-      {noteOpen && <NoteDialog studentId={r.id} studentName={name} onClose={() => setNoteOpen(false)} onSaved={load} />}
-      {extendOpen && <ExtendDialog data={data} onClose={() => setExtendOpen(false)} onSaved={load} />}
-      {planOpen && <PlanDialog data={data} onClose={() => setPlanOpen(false)} onSaved={load} />}
+      {noteOpen && (
+        <NoteDialog
+          studentId={r.id}
+          studentName={name}
+          onClose={() => setNoteOpen(false)}
+          onSaved={load}
+        />
+      )}
+      {extendOpen && (
+        <ExtendDialog
+          data={data}
+          onClose={() => setExtendOpen(false)}
+          onSaved={load}
+        />
+      )}
+      {monthOpen && r.blocks.find((b) => b.month === monthOpen) && (
+        <MonthDialog
+          data={data}
+          block={r.blocks.find((b) => b.month === monthOpen)!}
+          canAbsent={r.plan.kind === "MONTHLY" && !r.plan.settled}
+          onClose={() => setMonthOpen(null)}
+          onPay={() => {
+            const m = monthOpen;
+            setMonthOpen(null);
+            setPay({ month: m });
+          }}
+          onSaved={load}
+        />
+      )}
+      {planOpen && (
+        <PlanDialog
+          data={data}
+          onClose={() => setPlanOpen(false)}
+          onSaved={load}
+        />
+      )}
       {refundOpen && (
-        <RemoveFromTrainingDialog student={{ id: r.id, name }} onClose={() => setRefundOpen(false)} onDone={load} />
+        <RemoveFromTrainingDialog
+          student={{ id: r.id, name }}
+          onClose={() => setRefundOpen(false)}
+          onDone={load}
+        />
       )}
       <PaymentEditModal
         open={!!editing}

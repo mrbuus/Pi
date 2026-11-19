@@ -517,3 +517,22 @@ describe('зуны төлбөр илүү төлөлт биш (эзэн 2026-11-1
     expect(r.summerPaid).toBe(0);
   });
 });
+
+describe('Суугаагүй өдөр ба ажилтны засвар (эзэн 2026-11-19)', () => {
+  const months = ['2026-09', '2026-10', '2026-11'];
+  const first = (m: string) => `${m}-16`;
+  it('9/25–10/4 суугаагүй (10 хоног) → 9-р сар «9/16–10/26», 10-р сар 10/26-аас', () => {
+    const r = monthlyPeriods(months, first, {}, [{ month: '2026-10', days: 10, gapFrom: '2026-09-25' }]);
+    expect(r.get('2026-09')).toMatchObject({ from: '2026-09-16', to: '2026-10-26', absentDays: 10 });
+    expect(r.get('2026-10')).toMatchObject({ from: '2026-10-26', to: '2026-11-26', extDays: 0 });
+    expect(r.get('2026-11')!.from).toBe('2026-11-26');
+  });
+  it('ирцээс таамагласан эхлэл шийтэд ажилтны бичсэн эхлэлийг дарахгүй, гараар тавьсан нь дарна', () => {
+    const sheet = { '2026-09': { from: '2026-09-17', to: '2026-10-17' } };
+    const att = computeLedger(base({ plan: 'MONTHLY', startDate: '2026-09-01', periods: sheet, cycleStart: { on: '2026-09-01', source: 'ATTENDANCE' }, payments: [] }));
+    expect(att.blocks.find((b) => b.month === '2026-09')!.period).toEqual({ from: '2026-09-17', to: '2026-10-17' });
+    const man = computeLedger(base({ plan: 'MONTHLY', startDate: '2026-09-01', periods: sheet, cycleStart: { on: '2026-09-20', source: 'MANUAL' }, payments: [] }));
+    expect(man.blocks.find((b) => b.month === '2026-09')!.period!.from).toBe('2026-09-20');
+  });
+});
+

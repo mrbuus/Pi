@@ -18,6 +18,8 @@ export interface MonthBlock {
   period?: { from: string; to: string };
   /** Энэ сард сунгасан хоног */
   extDays?: number;
+  /** Энэ сарын хугацаанд суугаагүй хоног — төгсгөл нь хойшилсон */
+  absentDays?: number;
 }
 
 export interface LedgerExtension {

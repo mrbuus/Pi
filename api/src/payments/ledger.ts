@@ -160,7 +160,8 @@ export interface LedgerInput {
   /** Шийтийн «Хугацаа» нүд (сар бүрийн багц): ажилтны бичсэн «08/04-09/14» — үүнийг үнэн гэж үзнэ */
   periods?: Record<MonthKey, MonthPeriod>;
   /** Сайтаас сунгасан төлөх хугацаа (сар бүрийн багц): тэр сар ба түүнээс хойших бүх сар шилжинэ */
-  extensions?: { month: MonthKey; days: number }[];
+  /** gapFrom — «ирээгүй X–Y» хэлбэрээр оруулсан (өмнөх сарын блок дээр «N хоног суугаагүй» гэж харагдана) */
+  extensions?: { month: MonthKey; days: number; gapFrom?: DateKey | Date | null }[];
   /**
    * Энэ хичээлийн жилд СУЖ ЭХЭЛСЭН өдөр — сайтын баталгаатай эх сурвалжаас (гараар эсвэл ирцээс;
    * resolveCycleStart). Зөвхөн сар бүрийн багцын төлөх өдрийн гинжийг эхлүүлнэ; joinedOn (зуны
@@ -240,6 +241,8 @@ export interface MonthBlock {
   period?: MonthPeriod;
   /** Энэ сард сайтаас сунгасан хоног (шалтгааныг ledger.service өгнө) */
   extDays?: number;
+  /** Энэ сарын хугацаанд суугаагүй хоног — хугацааны төгсгөл тэр хэмжээгээр хойшилсон */
+  absentDays?: number;
 }
 
 export interface ResolvedPlan {
@@ -324,11 +327,11 @@ export function monthlyPeriods(
   months: MonthKey[],
   firstDue: (m: MonthKey) => DateKey,
   sheet: Record<MonthKey, MonthPeriod> = {},
-  extensions: { month: MonthKey; days: number }[] = [],
-): Map<MonthKey, MonthPeriod & { extDays: number }> {
+  extensions: { month: MonthKey; days: number; gapFrom?: DateKey | Date | null }[] = [],
+): Map<MonthKey, MonthPeriod & { extDays: number; absentDays?: number }> {
   const ext = new Map<MonthKey, number>();
   for (const e of extensions) if (e.days > 0) ext.set(e.month, (ext.get(e.month) ?? 0) + e.days);
-  const out = new Map<MonthKey, MonthPeriod & { extDays: number }>();
+  const out = new Map<MonthKey, MonthPeriod & { extDays: number; absentDays?: number }>();
   let prevEnd: DateKey | null = null;
   let shifted = false;
   for (const m of months) {
@@ -341,6 +344,18 @@ export function monthlyPeriods(
     const to = s && !extDays && s.to > s.from ? s.to : plusMonth(from);
     out.set(m, { from, to, extDays });
     prevEnd = to;
+  }
+  // «Ирээгүй X–Y» (эзэн 2026-11-19): хоног нь дараагийн сарын эхлэлийг хойшлуулдаг ч ажилтанд
+  // суугаагүй сар дээрээ харагдана — тэр сарын хугацаа «9/16–10/26, 10 хоног суугаагүй»
+  const gaps = new Map<MonthKey, number>();
+  for (const e of extensions) if (e.days > 0 && e.gapFrom) gaps.set(e.month, (gaps.get(e.month) ?? 0) + e.days);
+  for (let i = 1; i < months.length; i++) {
+    const g = gaps.get(months[i]);
+    if (!g) continue;
+    const prev = out.get(months[i - 1])!;
+    const cur = out.get(months[i])!;
+    out.set(months[i - 1], { ...prev, to: cur.from, absentDays: (prev.absentDays ?? 0) + g });
+    out.set(months[i], { ...cur, extDays: cur.extDays - g });
   }
   return out;
 }
@@ -583,13 +598,16 @@ function computeCore(input: LedgerInput, skip: Set<number>): LedgerResult {
 
   // 1) Сар бүрийн ногдох дүн ба төлөгдөх өдөр
   const dues = new Map<MonthKey, { due: number; dueOn: DateKey }>();
-  const periods = new Map<MonthKey, MonthPeriod & { extDays: number }>();
+  const periods = new Map<MonthKey, MonthPeriod & { extDays: number; absentDays?: number }>();
   if (plan.kind === 'MONTHLY') {
     // Шийт ба сайтын эхлэлийн давуу байдал (эзэн 2026-11-16): сайт эхлэлийг мэдэж байгаа (гараар /
     // ирцээс) бол шийтийн «Хугацаа»-г зөвхөн эхний сарын эхлэх өдөр нь сайтынхтай ТААРВАЛ авна
     // (ажилтны сунгалт агуулж болно). Зөрвөл шийтийнх хуучин таамаг («09/01» гэх мэт) — бүгдийг
     // орхиж, гинжийг сайтын эхлэлээс + сайтын сунгалтаар тооцно (сунгалт шийтийг дардагтай адил).
-    const sheet = site && input.periods?.[active[0]]?.from !== site ? {} : input.periods;
+    // Ажилтны засвар үнэн (эзэн 2026-11-19): ирцээс таамагласан эхлэл шийтэд ажилтны бичсэн эхний
+    // сарын хугацааг ДАРАХГҮЙ — зөвхөн сайтад гараар тавьсан (MANUAL) эхлэл шийтээс давуу.
+    const sheetFirst = input.periods?.[active[0]]?.from;
+    const sheet = site && sheetFirst !== site && (input.cycleStart?.source === 'MANUAL' || !sheetFirst) ? {} : input.periods;
     const firstDue = (x: MonthKey) => (site && x === active[0] ? site : `${x}-${day}`);
     for (const [m, p] of monthlyPeriods(active, firstDue, sheet, input.extensions)) periods.set(m, p);
     for (const m of active) dues.set(m, { due: plan.fee, dueOn: periods.get(m)!.from });
@@ -667,7 +685,9 @@ function computeCore(input: LedgerInput, skip: Set<number>): LedgerResult {
       dueOn: d.dueOn,
       paidOn,
       lateDays,
-      ...(pr ? { period: { from: pr.from, to: pr.to }, ...(pr.extDays ? { extDays: pr.extDays } : {}) } : {}),
+      ...(pr
+        ? { period: { from: pr.from, to: pr.to }, ...(pr.extDays ? { extDays: pr.extDays } : {}), ...(pr.absentDays ? { absentDays: pr.absentDays } : {}) }
+        : {}),
     };
   });
 

@@ -14,7 +14,7 @@ import AllocateDialog from "./AllocateDialog";
 import PayerInfo from "./PayerInfo";
 import StudentDetailDialog from "./StudentDetailDialog";
 import { MoreButton } from "./StudentPicker";
-import { KIND_LABEL, SIGNAL_LABEL, STUDENT_KINDS, TONE, isTuitionKind, phonesInText, rowTone, sheetWriteText, splitSender, type SheetWrite, type AllocKind, type AllocPart, type BankRow, type Candidate } from "./types";
+import { SIGNAL_LABEL, STUDENT_KINDS, TONE, isTuitionKind, phonesInText, rowTone, sheetWriteText, splitSender, type SheetWrite, type AllocPart, type BankRow, type Candidate } from "./types";
 
 /** Яагаад энэ хүүхэд гэж үзсэн — хүний хэлээр («утас таарсан, нэр таарсан») */
 const signals = (c: Candidate) => [...new Set(c.signals.map((s) => SIGNAL_LABEL[s]))].join(", ");
@@ -36,10 +36,6 @@ function sheetNote(row: BankRow, studentId: string | null, inSheet: boolean): st
 
 /** Банкны нэг гүйлгээ: шийдэгдээгүй бол санал + товч, шийдэгдсэн бол хуваарилалт + «Буцаах». */
 /** onDone: тэр мөр жагсаалтаас гарна (хуудас дахин ачаалахгүй); alsoResolved — сурсан данс/утсаар нэмж шийдэгдсэн */
-/** Хүүхэд сонгохгүйгээр шууд ангилж болох зориулалт */
-const QUICK_CREDIT: AllocKind[] = ["BOOK", "ANSWER_SHEET", "STAFF_FINE", "TRANSFER", "OTHER"];
-const QUICK_DEBIT: AllocKind[] = ["EXPENSE", "TRANSFER", "OTHER"];
-
 export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId: string, alsoResolved?: number) => void }) {
   const [dialog, setDialog] = useState(false);
   const [confirmUndo, setConfirmUndo] = useState(false);
@@ -230,17 +226,25 @@ export default function RowCard({ row, onDone }: { row: BankRow; onDone: (rowId:
           </span>
         )}
       </footer>
-      {/* Хүүхэдгүй гүйлгээг нэг товшоод ангилах (эзэн 2026-11-19: «13-4» гэх мэт утгатай ном, цаасны мөнгө) */}
+      {/* Шууд ангилах — жагсаалтын 3 үндсэн ангилалаар л (эзэн 2026-11-19): орлого бол сургалтын
+          төлбөр (хүүхэд сонгоно) эсвэл бусад орлого, зарлага бол зарлага */}
       {open && (
         <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Шууд ангилах">
           <span className="text-xs text-ink-dim">Ангилах:</span>
-          {(row.direction === "DEBIT" ? QUICK_DEBIT : QUICK_CREDIT)
-            .filter((k) => k !== nonKidKind)
-            .map((k) => (
-              <Button key={k} size="sm" variant="ghost" disabled={busy} onClick={() => quick([{ kind: k, amount: row.amount }])}>
-                {KIND_LABEL[k]}
+          {row.direction === "CREDIT" ? (
+            <>
+              <Button size="sm" variant="ghost" disabled={busy} onClick={() => setDialog(true)}>
+                Сургалтын төлбөр
               </Button>
-            ))}
+              <Button size="sm" variant="ghost" disabled={busy} onClick={() => quick([{ kind: "OTHER", amount: row.amount }])}>
+                Бусад орлого
+              </Button>
+            </>
+          ) : (
+            <Button size="sm" variant="ghost" disabled={busy} onClick={() => quick([{ kind: "EXPENSE", amount: row.amount }])}>
+              Зарлага
+            </Button>
+          )}
         </div>
       )}
 

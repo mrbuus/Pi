@@ -61,6 +61,41 @@ export class DemoSheetService {
     return !!this.client;
   }
 
+  /**
+   * Сайтад суугаагүй өдөр / эхлэх өдөр өөрчлөгдөхөд шийтийн «Хугацаа» нүдийг сайттай ижил болгоно
+   * (эзэн 2026-11-19: сан ба шийт таарч байх ёстой). Зөвхөн аль хэдийн «MM/DD-MM/DD» хугацаа бичигдсэн
+   * нүдийг — хоосон, «бүтэн» зэрэг бичвэртэй нүдэнд хүрэхгүй. Тухайн сараас хойших сарууд.
+   */
+  async writePeriods(studentId: string, periods: { month: string; from: string; to: string }[], fromMonth: string): Promise<number> {
+    if (!this.client) return 0;
+    const tab = `'${SHEET.MAIN}'`;
+    try {
+      const [raw, shown] = await Promise.all([this.client.readRange(`${tab}!A1:BA`, 'UNFORMATTED_VALUE'), this.client.readRange(`${tab}!A1:BA`, 'FORMATTED_VALUE')]);
+      const rows = raw.map((r, i) => r.map((v, c) => toCell(v, shown[i]?.[c])));
+      const cycles = findCycles(rows, SHEET.MAIN, []);
+      const byKey = new Map([...assignRowKeys(rows, 2)].map(([i, k]) => [k, i]));
+      const links = await this.prisma.sheetRow.findMany({ where: { tab: SHEET.MAIN, studentId, goneAt: null }, select: { rowKey: true } });
+      const user = await this.prisma.user.findUnique({ where: { id: studentId }, select: { firstName: true } });
+      const idx = links.map((l) => byKey.get(l.rowKey)).find((i) => i != null);
+      if (idx == null || !user || normText(rows[idx][2]).toLowerCase() !== normText(user.firstName).toLowerCase()) return 0;
+      const text = (d: string) => `${d.slice(5, 7)}/${d.slice(8, 10)}`;
+      const writes: { range: string; values: unknown[][] }[] = [];
+      for (const { month, col } of cycles) {
+        const p = periods.find((x) => x.month === month);
+        if (!p || month < fromMonth) continue;
+        const cur = normText(rows[idx][col + 1]);
+        const want = `${text(p.from)}-${text(p.to)}`;
+        if (!/^\d{1,2}\/\d{1,2}\s*-\s*\d{1,2}\/\d{1,2}$/.test(cur) || cur.replace(/\s+/g, '') === want) continue;
+        writes.push({ range: `${tab}!${colLetter(col + 1)}${idx + 1}`, values: [[want]] });
+      }
+      if (writes.length) await this.client.writeValues(writes);
+      return writes.length;
+    } catch (e) {
+      this.logger.warn(`Шийтийн хугацааг шинэчилсэнгүй: ${e instanceof Error ? e.message : e}`);
+      return 0;
+    }
+  }
+
   /** layout: MAIN — математик («Суудал баталгаажуулалт»), SOCIAL — нийгэм («Нийгэм» хуудас) */
   async writeTuition(parts: { studentId: string; amount: number }[], bookedAt: Date, layout: keyof typeof LAYOUT = 'MAIN'): Promise<DemoSheetWrite[]> {
     if (!this.client || !parts.length) return [];

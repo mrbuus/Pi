@@ -30,6 +30,7 @@ import {
 import { withPlus } from '../revisions/revision-snapshot';
 import { AuditService } from '../audit/audit.service';
 import { PaymentsService, type PaymentActor } from './payments.service';
+import { DemoSheetService } from '../reconcile/demo-sheet.service';
 import {
   classDays,
   cycleStartsFor,
@@ -115,7 +116,15 @@ export class PaymentsLedgerService {
     private prisma: PrismaService,
     private payments: PaymentsService,
     private audit: AuditService,
+    private sheet: DemoSheetService,
   ) {}
+
+  /** Сайтын хугацаа өөрчлөгдсөний дараа шийтийн «Хугацаа»-г ижил болгоно (алдаа гарвал хүсэлтийг унагахгүй) */
+  private async syncSheetPeriods(row: { id: string; plan: { kind: string }; blocks: { month: string; period?: { from: string; to: string } }[] } | undefined, fromMonth: string) {
+    if (!row || row.plan.kind !== 'MONTHLY' || !this.sheet.enabled) return 0;
+    const periods = row.blocks.filter((b) => b.period).map((b) => ({ month: b.month, from: b.period!.from, to: b.period!.to }));
+    return this.sheet.writePeriods(row.id, periods, fromMonth);
+  }
 
   private baseWhere(): Prisma.UserWhereInput {
     return {
@@ -745,7 +754,10 @@ export class PaymentsLedgerService {
       reason: created.reason,
     });
     const [after] = await this.rows({ id: studentId });
-    return { row: after };
+    // Ирээгүй хугацаа нь өмнөх сарынх (гинж тэр сарын төгсгөлөөс шилжинэ)
+    const prev = row.blocks[row.blocks.findIndex((b) => b.month === month) - 1]?.month ?? month;
+    const sheetUpdated = await this.syncSheetPeriods(after, gap ? prev : month);
+    return { row: after, sheetUpdated };
   }
 
   /**
@@ -780,7 +792,8 @@ export class PaymentsLedgerService {
       });
     }
     const [row] = await this.rows({ id: studentId });
-    return { row };
+    const sheetUpdated = before !== on ? await this.syncSheetPeriods(row, row?.blocks.find((b) => b.period)?.month ?? '2026-09') : 0;
+    return { row, sheetUpdated };
   }
 
   async unextend(studentId: string, extId: string, actor: PaymentActor) {
@@ -801,7 +814,9 @@ export class PaymentsLedgerService {
       reason: 'Сунгалтыг цуцалсан',
     });
     const [row] = await this.rows({ id: studentId });
-    return { row };
+    const prev = row?.blocks[row.blocks.findIndex((b) => b.month === ext.month) - 1]?.month ?? ext.month;
+    const sheetUpdated = await this.syncSheetPeriods(row, ext.gapFrom ? prev : ext.month);
+    return { row, sheetUpdated };
   }
 }
 

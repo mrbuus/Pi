@@ -1,7 +1,13 @@
 "use client";
 
 import { Check, CircleAlert, Clock3, Minus } from "lucide-react";
-import { blockLabel, dayLabel, monthName, monthNo, periodLabel, shortMnt } from "./ledgerFormat";
+import {
+  blockLabel,
+  dayLabel,
+  monthName,
+  monthNo,
+  shortMnt,
+} from "./ledgerFormat";
 import type { BlockState, MonthBlock } from "./ledgerTypes";
 
 /*
@@ -16,11 +22,16 @@ import type { BlockState, MonthBlock } from "./ledgerTypes";
  * Шар/алтан өнгө ХЭРЭГЛЭХГҮЙ (эзний амт).
  */
 
+/** «2026-09-16» → «9/16» (шийт шиг) */
+const shortDay = (d: string) =>
+  `${Number(d.slice(5, 7))}/${Number(d.slice(8, 10))}`;
+
 const HATCH =
   "bg-[repeating-linear-gradient(135deg,color-mix(in_oklab,var(--error)_32%,transparent)_0_2px,transparent_2px_6px)]";
 
 // Утсан дээр өргөнөөрөө, компьютер дээр 44px багана (хүрэх талбай §6.9)
-export const GRID = "grid grid-cols-9 gap-1 md:grid-cols-[repeat(9,2.75rem)] md:gap-1.5";
+export const GRID =
+  "grid grid-cols-9 gap-1 md:grid-cols-[repeat(9,2.75rem)] md:gap-1.5";
 
 // Том блок дээр бичвэр байгаа тул зураас зөөлөн
 const HATCH_SOFT =
@@ -37,7 +48,13 @@ const COMPACT: Record<BlockState, string> = {
 function Fill({ b }: { b: MonthBlock }) {
   if (b.state !== "PARTIAL" || b.due <= 0) return null;
   const pct = Math.max(8, Math.min(100, Math.round((b.paid / b.due) * 100)));
-  return <span aria-hidden className="absolute inset-x-0 bottom-0 bg-info/70" style={{ height: `${pct}%` }} />;
+  return (
+    <span
+      aria-hidden
+      className="absolute inset-x-0 bottom-0 bg-info/70"
+      style={{ height: `${pct}%` }}
+    />
+  );
 }
 
 /** Жагсаалтын жижиг блокийн мөр. `onPick` өгвөл төлөгдөөгүй блок товч болно (компьютер). */
@@ -58,9 +75,13 @@ export function CompactBlocks({
       {blocks.map((b) => {
         const label = blockLabel(b, settled);
         const cls = `relative block h-7 overflow-hidden rounded-md md:h-11 md:rounded-lg ${COMPACT[b.state]} ${
-          b.month === current ? "outline outline-2 outline-offset-1 outline-brand/35" : ""
+          b.month === current
+            ? "outline outline-2 outline-offset-1 outline-brand/35"
+            : ""
         }`;
-        const pickable = onPick && (b.state === "OWED" || b.state === "PARTIAL" || b.state === "FUTURE");
+        const pickable =
+          onPick &&
+          (b.state === "OWED" || b.state === "PARTIAL" || b.state === "FUTURE");
         if (pickable)
           return (
             <button
@@ -75,7 +96,13 @@ export function CompactBlocks({
             </button>
           );
         return (
-          <span key={b.month} role="img" title={label} aria-label={label} className={cls}>
+          <span
+            key={b.month}
+            role="img"
+            title={label}
+            aria-label={label}
+            className={cls}
+          >
             <Fill b={b} />
           </span>
         );
@@ -85,7 +112,13 @@ export function CompactBlocks({
 }
 
 /** Сарын дугаарын толгой — жагсаалтын баганатай яг таарна. */
-export function MonthHeader({ months, current }: { months: string[]; current?: string }) {
+export function MonthHeader({
+  months,
+  current,
+}: {
+  months: string[];
+  current?: string;
+}) {
   return (
     <div className={GRID} aria-hidden>
       {months.map((m) => (
@@ -115,7 +148,11 @@ function LargeBody({ b, settled }: { b: MonthBlock; settled: boolean }) {
       // Хоцорч төлсөн сар — тэмдгийн оронд цаг (хоног нь тайлбарт).
       return (
         <>
-          {b.lateDays > 0 ? <Clock3 className="h-4 w-4" aria-hidden /> : <Check className="h-4 w-4" aria-hidden />}
+          {b.lateDays > 0 ? (
+            <Clock3 className="h-4 w-4" aria-hidden />
+          ) : (
+            <Check className="h-4 w-4" aria-hidden />
+          )}
           {!settled && <span className="tabular-nums">{shortMnt(b.paid)}</span>}
         </>
       );
@@ -140,10 +177,15 @@ function LargeBody({ b, settled }: { b: MonthBlock; settled: boolean }) {
         </>
       );
     case "FUTURE":
+      // Хугацаатай (сар бүр) блокт төлөх өдөр нь хугацааны эхлэл — давхардуулахгүй
       return (
         <>
           <Clock3 className="h-3.5 w-3.5" aria-hidden />
-          <span className="tabular-nums">{dayLabel(b.dueOn)}</span>
+          {b.period ? (
+            <span className="tabular-nums">{shortMnt(b.due)}</span>
+          ) : (
+            <span className="tabular-nums">{dayLabel(b.dueOn)}</span>
+          )}
         </>
       );
     default:
@@ -173,9 +215,17 @@ export function LargeBlocks({
     <div className={gridClass}>
       {blocks.map((b) => {
         const label = blockLabel(b, settled);
-        const pickable = onPick && (pickAll ? b.state !== "OFF" : b.state === "OWED" || b.state === "PARTIAL" || b.state === "FUTURE");
+        const pickable =
+          onPick &&
+          (pickAll
+            ? b.state !== "OFF"
+            : b.state === "OWED" ||
+              b.state === "PARTIAL" ||
+              b.state === "FUTURE");
         const cls = `relative flex min-h-16 flex-col justify-between overflow-hidden rounded-xl p-2 text-left text-sm font-semibold ${LARGE[b.state]} ${
-          b.month === current ? "ring-2 ring-brand/40 ring-offset-2 ring-offset-surface" : ""
+          b.month === current
+            ? "ring-2 ring-brand/40 ring-offset-2 ring-offset-surface"
+            : ""
         }`;
         const body = (
           <>
@@ -183,14 +233,42 @@ export function LargeBlocks({
               <span
                 aria-hidden
                 className="absolute inset-x-0 bottom-0 bg-info/25"
-                style={{ height: `${Math.max(8, Math.round((b.paid / Math.max(1, b.due)) * 100))}%` }}
+                style={{
+                  height: `${Math.max(8, Math.round((b.paid / Math.max(1, b.due)) * 100))}%`,
+                }}
               />
             )}
-            <span className={`relative text-xs ${b.state === "PAID" ? "" : "text-ink-dim"}`}>{monthName(b.month)}</span>
-            {b.period && (
-              <span className={`relative text-[11px] leading-tight tabular-nums ${b.state === "PAID" ? "" : "text-ink-dim"}`}>
-                {periodLabel(b)}
-                {!!b.extDays && <span className="font-bold"> +{b.extDays} хоног</span>}
+            {/* Сар бүрд шийт шиг хугацаа гол («09/16 – 10/16»), сарын нэр жижиг (эзэн 2026-11-19) */}
+            {b.period ? (
+              <>
+                <span className="relative flex flex-wrap text-[13px] font-bold leading-tight tabular-nums">
+                  <span className="whitespace-nowrap">
+                    {shortDay(b.period.from)}&nbsp;–
+                  </span>
+                  <span className="whitespace-nowrap">
+                    &nbsp;{shortDay(b.period.to)}
+                  </span>
+                </span>
+                <span
+                  className={`relative text-[11px] leading-tight ${b.state === "PAID" ? "" : "text-ink-dim"}`}
+                >
+                  {monthName(b.month)}
+                  {!!b.absentDays && (
+                    <span className="font-bold" title={`${b.absentDays} хоног суугаагүй`}>
+                      {" "}
+                      −{b.absentDays} хоног
+                    </span>
+                  )}
+                  {!!b.extDays && (
+                    <span className="font-bold"> · +{b.extDays} хоног</span>
+                  )}
+                </span>
+              </>
+            ) : (
+              <span
+                className={`relative text-xs ${b.state === "PAID" ? "" : "text-ink-dim"}`}
+              >
+                {monthName(b.month)}
               </span>
             )}
             <span className="relative flex items-center gap-1">
@@ -202,7 +280,9 @@ export function LargeBlocks({
           <button
             key={b.month}
             type="button"
-            aria-label={pickAll ? `${label}. Төлбөрийг харах` : `${label}. Төлбөр бүртгэх`}
+            aria-label={
+              pickAll ? `${label}. Төлбөрийг харах` : `${label}. Төлбөр бүртгэх`
+            }
             title={label}
             onClick={() => onPick(b.month)}
             className={`${cls} transition hover:brightness-95`}
@@ -210,7 +290,13 @@ export function LargeBlocks({
             {body}
           </button>
         ) : (
-          <div key={b.month} role="img" aria-label={label} title={label} className={cls}>
+          <div
+            key={b.month}
+            role="img"
+            aria-label={label}
+            title={label}
+            className={cls}
+          >
             {body}
           </div>
         );
@@ -232,8 +318,12 @@ export function BlockLegend() {
     <ul className="space-y-1.5">
       {items.map((i) => (
         <li key={i.s} className="flex items-center gap-2 text-sm">
-          <span className={`relative inline-block h-4 w-6 overflow-hidden rounded ${COMPACT[i.s]}`}>
-            {i.s === "PARTIAL" && <span className="absolute inset-x-0 bottom-0 h-1/2 bg-info/70" />}
+          <span
+            className={`relative inline-block h-4 w-6 overflow-hidden rounded ${COMPACT[i.s]}`}
+          >
+            {i.s === "PARTIAL" && (
+              <span className="absolute inset-x-0 bottom-0 h-1/2 bg-info/70" />
+            )}
           </span>
           {i.t}
         </li>
