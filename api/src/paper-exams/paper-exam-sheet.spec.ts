@@ -390,6 +390,29 @@ describe('parsePaperWorkbook — V2 боловсруулалтын файл (Х�
     ]);
   });
 
+  it('хувилбар бүр 2-р хэсгийн багцыг өөрөөр хуваасан (Нэгдсэн шалгалт 2) — өөрийн нүднүүдээр уншина', () => {
+    const wb = new ExcelJS.Workbook();
+    const ans = wb.addWorksheet('Хариулт');
+    ans.addRow(['Зөв', 'Буруу']);
+    ans.addRow(['Код', 'Овог', 'Нэр', 'Анги', 'Хувилбар', 'Нийт', 1, '2.1a', '2.1b', '2.1c']);
+    ans.addRow(['2027001', 'Бат', 'Анар', '12-1', 'A', 4, 'D', '1', '6', '1']);
+    ans.addRow(['2027002', 'Бат', 'Сараа', '12-1', 'B', 4, 'A', '6', '1', '9']);
+    const key = wb.addWorksheet('Түлхүүр');
+    key.addRow(['Асуулт', 'A хариу', 'A оноо', 'B хариу', 'B оноо']);
+    key.addRow([1, 'D', 1, 'A', 1]);
+    key.addRow(['2.1 a-c', '161', 3]);
+    key.addRow(['2.1 a-b', null, null, '61', 3]);
+    key.addRow(['Нийт', null, 4, null, 4]);
+    const p = parsePaperWorkbook(wb);
+    // A: 1, 2.1.a-c (3); B: 1, 2.1.a-b (3) — байрлал, оноо ижил тул нэг бодлого
+    expect(p.skipped).toEqual([]);
+    expect(p.rows.map((r) => [r.code, r.answers, r.error])).toEqual([
+      ['2027001', ['D', '161'], null],
+      ['2027002', ['A', '61'], null],
+    ]);
+    expect(p.v2Items?.[1].labels).toEqual({ A: '2.1.a-c', B: '2.1.a-b' });
+  });
+
   it('expandLabel — багцын нүднүүд', () => {
     expect(expandLabel('2.1.a-d')).toEqual([
       '2.1.a',

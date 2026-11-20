@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/kit/button";
 import ExamDialog from "@/components/exams/ExamDialog";
 import { errorText } from "@/components/exams/types";
 import { cn } from "@/lib/cn";
-import { itemName, scoreText, type BoardRow, type PaperItem, shortName } from "./types";
+import { itemName, scoreText, type BoardRow, type PaperItem, shortName, variantCells } from "./types";
 
 type Mode = "answer" | "mark";
 type Status = "CORRECT" | "WRONG" | "BLANK" | "MULTI" | "UNGRADED";
@@ -128,8 +128,9 @@ export default function SheetEditor({
   const dirty = changed > 0 || variantChanged || (!row && student !== null);
   // Хагас бөглөсөн багц («21» 4 нүднээс) — аль орон хоосон нь тодорхойгүй тул хадгалуулахгүй
   const incomplete = answers.map((a, i) => {
-    const cells = items[i].cells ?? 1;
-    return cells > 1 && a !== "" && a !== "+" && a !== "-" && a.length !== cells;
+    const cells = variantCells(items[i], variant);
+    const digit = (items[i].cells ?? 1) > 1;
+    return digit && a !== "" && a !== "+" && a !== "-" && a.length !== cells;
   });
   const firstIncomplete = incomplete.indexOf(true);
   const nothingToSave = !!row && changed === 0 && !variantChanged;
@@ -305,7 +306,8 @@ export default function SheetEditor({
             >
               {sec.idx.map((i) => {
                 const it = items[i];
-                const cells = it.cells ?? 1;
+                const cells = variantCells(it, variant);
+                const digit = (it.cells ?? 1) > 1;
                 const a = answers[i];
                 const held = a === "+" || a === "-" || a === "*";
                 const tone = variant ? TONE[statuses[i]] : "border-line bg-panel";
@@ -320,9 +322,9 @@ export default function SheetEditor({
                           inputs.current[i] = el;
                         }}
                         value={held ? "" : a}
-                        placeholder={a === "+" ? "зөв" : a === "-" ? "алдсан" : a === "*" ? "2 хариу" : cells > 1 ? "_".repeat(cells) : ""}
-                        maxLength={cells > 1 ? cells : 2}
-                        inputMode={cells > 1 ? "numeric" : "text"}
+                        placeholder={a === "+" ? "зөв" : a === "-" ? "алдсан" : a === "*" ? "2 хариу" : digit ? "_".repeat(cells) : ""}
+                        maxLength={digit ? cells : 2}
+                        inputMode={digit ? "numeric" : "text"}
                         autoCapitalize="characters"
                         autoComplete="off"
                         aria-label={`${itemName(it, items)} хариу`}
@@ -330,7 +332,7 @@ export default function SheetEditor({
                         onFocus={(e) => e.target.select()}
                         onChange={(e) => {
                           const raw = e.target.value;
-                          if (cells > 1) {
+                          if (digit) {
                             const v = raw.replace(/[^0-9_-]/g, "").slice(0, cells);
                             set(i, v);
                             if (v.length === cells) focus(i + 1);

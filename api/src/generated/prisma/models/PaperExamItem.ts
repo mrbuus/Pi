@@ -77,6 +77,7 @@ export type PaperExamItemCountAggregateOutputType = {
   answerKeys: number
   label: number
   cells: number
+  labels: number
   _all: number
 }
 
@@ -132,6 +133,7 @@ export type PaperExamItemCountAggregateInputType = {
   answerKeys?: true
   label?: true
   cells?: true
+  labels?: true
   _all?: true
 }
 
@@ -234,6 +236,7 @@ export type PaperExamItemGroupByOutputType = {
   answerKeys: runtime.JsonValue | null
   label: string | null
   cells: number | null
+  labels: runtime.JsonValue | null
   _count: PaperExamItemCountAggregateOutputType | null
   _avg: PaperExamItemAvgAggregateOutputType | null
   _sum: PaperExamItemSumAggregateOutputType | null
@@ -272,6 +275,7 @@ export type PaperExamItemWhereInput = {
   answerKeys?: Prisma.JsonNullableFilter<"PaperExamItem">
   label?: Prisma.StringNullableFilter<"PaperExamItem"> | string | null
   cells?: Prisma.IntNullableFilter<"PaperExamItem"> | number | null
+  labels?: Prisma.JsonNullableFilter<"PaperExamItem">
   exam?: Prisma.XOR<Prisma.PaperExamScalarRelationFilter, Prisma.PaperExamWhereInput>
 }
 
@@ -288,6 +292,7 @@ export type PaperExamItemOrderByWithRelationInput = {
   answerKeys?: Prisma.SortOrderInput | Prisma.SortOrder
   label?: Prisma.SortOrderInput | Prisma.SortOrder
   cells?: Prisma.SortOrderInput | Prisma.SortOrder
+  labels?: Prisma.SortOrderInput | Prisma.SortOrder
   exam?: Prisma.PaperExamOrderByWithRelationInput
 }
 
@@ -308,6 +313,7 @@ export type PaperExamItemWhereUniqueInput = Prisma.AtLeast<{
   answerKeys?: Prisma.JsonNullableFilter<"PaperExamItem">
   label?: Prisma.StringNullableFilter<"PaperExamItem"> | string | null
   cells?: Prisma.IntNullableFilter<"PaperExamItem"> | number | null
+  labels?: Prisma.JsonNullableFilter<"PaperExamItem">
   exam?: Prisma.XOR<Prisma.PaperExamScalarRelationFilter, Prisma.PaperExamWhereInput>
 }, "id" | "examId_number">
 
@@ -324,6 +330,7 @@ export type PaperExamItemOrderByWithAggregationInput = {
   answerKeys?: Prisma.SortOrderInput | Prisma.SortOrder
   label?: Prisma.SortOrderInput | Prisma.SortOrder
   cells?: Prisma.SortOrderInput | Prisma.SortOrder
+  labels?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PaperExamItemCountOrderByAggregateInput
   _avg?: Prisma.PaperExamItemAvgOrderByAggregateInput
   _max?: Prisma.PaperExamItemMaxOrderByAggregateInput
@@ -347,6 +354,7 @@ export type PaperExamItemScalarWhereWithAggregatesInput = {
   answerKeys?: Prisma.JsonNullableWithAggregatesFilter<"PaperExamItem">
   label?: Prisma.StringNullableWithAggregatesFilter<"PaperExamItem"> | string | null
   cells?: Prisma.IntNullableWithAggregatesFilter<"PaperExamItem"> | number | null
+  labels?: Prisma.JsonNullableWithAggregatesFilter<"PaperExamItem">
 }
 
 export type PaperExamItemCreateInput = {
@@ -361,6 +369,7 @@ export type PaperExamItemCreateInput = {
   answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   label?: string | null
   cells?: number | null
+  labels?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   exam: Prisma.PaperExamCreateNestedOneWithoutItemsInput
 }
 
@@ -377,6 +386,7 @@ export type PaperExamItemUncheckedCreateInput = {
   answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   label?: string | null
   cells?: number | null
+  labels?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PaperExamItemUpdateInput = {
@@ -391,6 +401,7 @@ export type PaperExamItemUpdateInput = {
   answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  labels?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   exam?: Prisma.PaperExamUpdateOneRequiredWithoutItemsNestedInput
 }
 
@@ -407,6 +418,7 @@ export type PaperExamItemUncheckedUpdateInput = {
   answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  labels?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PaperExamItemCreateManyInput = {
@@ -422,6 +434,7 @@ export type PaperExamItemCreateManyInput = {
   answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   label?: string | null
   cells?: number | null
+  labels?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PaperExamItemUpdateManyMutationInput = {
@@ -436,6 +449,7 @@ export type PaperExamItemUpdateManyMutationInput = {
   answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  labels?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PaperExamItemUncheckedUpdateManyInput = {
@@ -451,6 +465,7 @@ export type PaperExamItemUncheckedUpdateManyInput = {
   answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  labels?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PaperExamItemListRelationFilter = {
@@ -481,6 +496,7 @@ export type PaperExamItemCountOrderByAggregateInput = {
   answerKeys?: Prisma.SortOrder
   label?: Prisma.SortOrder
   cells?: Prisma.SortOrder
+  labels?: Prisma.SortOrder
 }
 
 export type PaperExamItemAvgOrderByAggregateInput = {
@@ -584,6 +600,7 @@ export type PaperExamItemCreateWithoutExamInput = {
   answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   label?: string | null
   cells?: number | null
+  labels?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PaperExamItemUncheckedCreateWithoutExamInput = {
@@ -598,6 +615,7 @@ export type PaperExamItemUncheckedCreateWithoutExamInput = {
   answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   label?: string | null
   cells?: number | null
+  labels?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PaperExamItemCreateOrConnectWithoutExamInput = {
@@ -642,6 +660,7 @@ export type PaperExamItemScalarWhereInput = {
   answerKeys?: Prisma.JsonNullableFilter<"PaperExamItem">
   label?: Prisma.StringNullableFilter<"PaperExamItem"> | string | null
   cells?: Prisma.IntNullableFilter<"PaperExamItem"> | number | null
+  labels?: Prisma.JsonNullableFilter<"PaperExamItem">
 }
 
 export type PaperExamItemCreateManyExamInput = {
@@ -656,6 +675,7 @@ export type PaperExamItemCreateManyExamInput = {
   answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   label?: string | null
   cells?: number | null
+  labels?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PaperExamItemUpdateWithoutExamInput = {
@@ -670,6 +690,7 @@ export type PaperExamItemUpdateWithoutExamInput = {
   answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  labels?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PaperExamItemUncheckedUpdateWithoutExamInput = {
@@ -684,6 +705,7 @@ export type PaperExamItemUncheckedUpdateWithoutExamInput = {
   answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  labels?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PaperExamItemUncheckedUpdateManyWithoutExamInput = {
@@ -698,6 +720,7 @@ export type PaperExamItemUncheckedUpdateManyWithoutExamInput = {
   answerKeys?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cells?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  labels?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 
@@ -715,6 +738,7 @@ export type PaperExamItemSelect<ExtArgs extends runtime.Types.Extensions.Interna
   answerKeys?: boolean
   label?: boolean
   cells?: boolean
+  labels?: boolean
   exam?: boolean | Prisma.PaperExamDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paperExamItem"]>
 
@@ -731,6 +755,7 @@ export type PaperExamItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   answerKeys?: boolean
   label?: boolean
   cells?: boolean
+  labels?: boolean
   exam?: boolean | Prisma.PaperExamDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paperExamItem"]>
 
@@ -747,6 +772,7 @@ export type PaperExamItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   answerKeys?: boolean
   label?: boolean
   cells?: boolean
+  labels?: boolean
   exam?: boolean | Prisma.PaperExamDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paperExamItem"]>
 
@@ -763,9 +789,10 @@ export type PaperExamItemSelectScalar = {
   answerKeys?: boolean
   label?: boolean
   cells?: boolean
+  labels?: boolean
 }
 
-export type PaperExamItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "examId" | "number" | "answerKey" | "points" | "area" | "topic" | "formulaSlugs" | "voided" | "answerKeys" | "label" | "cells", ExtArgs["result"]["paperExamItem"]>
+export type PaperExamItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "examId" | "number" | "answerKey" | "points" | "area" | "topic" | "formulaSlugs" | "voided" | "answerKeys" | "label" | "cells" | "labels", ExtArgs["result"]["paperExamItem"]>
 export type PaperExamItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   exam?: boolean | Prisma.PaperExamDefaultArgs<ExtArgs>
 }
@@ -816,9 +843,14 @@ export type $PaperExamItemPayload<ExtArgs extends runtime.Types.Extensions.Inter
      */
     label: string | null
     /**
-     * Багцын нүдний тоо (a–h-ийн хэд нь); null/1 бол сонгох бодлого
+     * Багцын нүдний тоо (a–h-ийн хэд нь); null/1 бол сонгох бодлого. Хувилбар бүр өөр
+     * хуваалттай бол хамгийн их нь; хувилбарын бодит тоо = answerKeys[variant]-ийн урт
      */
     cells: number | null
+    /**
+     * Хувилбар бүрийн багцын нэр {"A":"2.1.c-e","B":"2.1.c-d"} — хувилбараар хуваалт өөр үед
+     */
+    labels: runtime.JsonValue | null
   }, ExtArgs["result"]["paperExamItem"]>
   composites: {}
 }
@@ -1255,6 +1287,7 @@ export interface PaperExamItemFieldRefs {
   readonly answerKeys: Prisma.FieldRef<"PaperExamItem", 'Json'>
   readonly label: Prisma.FieldRef<"PaperExamItem", 'String'>
   readonly cells: Prisma.FieldRef<"PaperExamItem", 'Int'>
+  readonly labels: Prisma.FieldRef<"PaperExamItem", 'Json'>
 }
     
 

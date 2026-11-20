@@ -51,8 +51,18 @@ export interface PaperItem {
   answerKeys?: Record<string, string> | null;
   /** «2.1.a-d» — 2-р хэсгийн багц */
   label?: string | null;
-  /** Багцын нүдний тоо */
+  /** Багцын нүдний тоо (хувилбараар өөр бол хамгийн их нь) */
   cells?: number | null;
+  /** Хувилбар бүрийн багцын нэр {"A":"2.1.c-e","B":"2.1.c-d"} */
+  labels?: Record<string, string> | null;
+}
+
+/** Тухайн хувилбарын хуудсан дээрх нүдний тоо: багцад түлхүүрийн урт, сонгох бодлогод 1 */
+export function variantCells(it: PaperItem, variant: string | null): number {
+  const cells = it.cells ?? 1;
+  if (cells <= 1) return 1;
+  const key = (variant && it.answerKeys?.[variant]) || null;
+  return key?.length || cells;
 }
 
 /** Бодлогод оноосон томьёо (Томьёоны сангаас) */
@@ -110,7 +120,7 @@ export interface BoardGroup {
 }
 
 export interface Board {
-  exam: { id: string; title: string; heldOn: string; itemCount: number; published: boolean };
+  exam: { id: string; title: string; heldOn: string; itemCount: number; published: boolean; studentDetail: boolean };
   scope: "ALL" | "OWN_CLASSES";
   /** Бодлогын тайлбар ачаалсан хувилбарууд («A», «B») — ажилтанд */
   guideVariants: string[];
@@ -182,12 +192,27 @@ export interface MyPaperExam {
   totalScore: number;
   maxScore: number;
   pct: number | null;
-  rank: number;
-  participants: number;
+  /** Дэлгэрэнгүй нээгээгүй шалгалтад null */
+  rank: number | null;
+  participants: number | null;
+  studentDetail?: boolean;
+}
+
+/** Дэлгэрэнгүй нээгээгүй шалгалт (studentDetail=false): зөвхөн оноо, бодлого бүрийн зөв/буруу */
+export interface MyPaperBasic {
+  exam: { id: string; title: string; heldOn: string; itemCount: number; studentDetail: false };
+  me: {
+    totalScore: number;
+    maxScore: number;
+    pct: number | null;
+    group: string;
+    variant: string;
+    items: { number: number; label: string | null; points: number; earned: number; status: ItemStatus }[];
+  };
 }
 
 export interface MyPaperDetail {
-  exam: { id: string; title: string; heldOn: string; itemCount: number };
+  exam: { id: string; title: string; heldOn: string; itemCount: number; studentDetail?: boolean };
   me: {
     totalScore: number;
     maxScore: number;

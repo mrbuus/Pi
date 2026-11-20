@@ -42,7 +42,7 @@ export default function StudentPaperExams() {
           <Link href={`/app/paper-exams/${r.id}`} className="chunky surface-interactive flex min-h-11 items-center gap-3 p-4">
             <div className="min-w-0 flex-1">
               <div className="font-bold text-ink">{r.title}</div>
-              <Meta className="mt-1 text-sm text-ink-dim" items={[dayText(r.heldOn), `${r.rank}-р байр, ${r.participants} сурагчаас`]} />
+              <Meta className="mt-1 text-sm text-ink-dim" items={[dayText(r.heldOn), r.rank != null ? `${r.rank}-р байр, ${r.participants} сурагчаас` : null]} />
             </div>
             <div className="shrink-0 text-right">
               <div className="font-display text-xl font-bold tabular-nums text-ink">

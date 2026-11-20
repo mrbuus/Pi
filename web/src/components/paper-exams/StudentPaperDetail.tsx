@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Medal, Sigma, Target, Trophy } from "lucide-react";
 import MaterialViewer from "./MaterialViewer";
 import PaperGuide from "./PaperGuide";
+import StudentPaperBasic from "./StudentPaperBasic";
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
 import { Card } from "@/components/ui/Surface";
@@ -24,6 +25,7 @@ import {
   STATUS_CELL,
   STATUS_LABEL,
   type FormulaRef,
+  type MyPaperBasic,
   type MyPaperDetail,
 } from "./types";
 
@@ -54,7 +56,7 @@ const missed = (i: MyItem) => i.status === "WRONG" || i.status === "BLANK" || i.
  * жагсаалт зөвхөн нийт оноогоор.
  */
 export default function StudentPaperDetail({ id }: { id: string }) {
-  const [data, setData] = useState<MyPaperDetail | null>(null);
+  const [raw, setData] = useState<MyPaperDetail | MyPaperBasic | null>(null);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState<Filter>("wrong");
   const [nav, setNav] = useState(readNav);
@@ -74,7 +76,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
   };
 
   const load = useCallback(() => {
-    api<MyPaperDetail>(`/paper-exams/my/${encodeURIComponent(id)}`)
+    api<MyPaperDetail | MyPaperBasic>(`/paper-exams/my/${encodeURIComponent(id)}`)
       .then((d) => {
         setError("");
         setData(d);
@@ -83,7 +85,9 @@ export default function StudentPaperDetail({ id }: { id: string }) {
   }, [id]);
   useEffect(load, [load]);
 
+  const full = raw && raw.exam.studentDetail !== false ? (raw as MyPaperDetail) : null;
   const view = useMemo(() => {
+    const data = full;
     if (!data) return null;
     const by = data.classifyBy;
     const wrong = data.me.items.filter(missed);
@@ -105,7 +109,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
       })
       .sort((a, b) => b.numbers.length - a.numbers.length);
     return { by, wrong, groups: names.map((name) => ({ name, items: groups.get(name)! })), formulaBy, review };
-  }, [data]);
+  }, [full]);
 
   if (error) {
     return (
@@ -115,7 +119,10 @@ export default function StudentPaperDetail({ id }: { id: string }) {
       </div>
     );
   }
-  if (!data || !view) {
+  if (raw && raw.exam.studentDetail === false) {
+    return <StudentPaperBasic data={raw as MyPaperBasic} tab={nav.tab} onTab={(t) => go(t)} back={<BackLink />} />;
+  }
+  if (!full || !view) {
     return (
       <div className="space-y-4">
         <SkeletonCard />
@@ -123,6 +130,7 @@ export default function StudentPaperDetail({ id }: { id: string }) {
       </div>
     );
   }
+  const data = full;
   const me = data.me;
   // Ижил оноотой (ижил байртай) бүлэг бүрийг ээлжлэн өнгөөр ялгана
   const bandOf = new Map<string, number>();

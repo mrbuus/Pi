@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -21,12 +22,13 @@ import {
   pct,
   rankLabels,
   keyFor,
+  labelFor,
   weakAreas,
   type ItemStatus,
   type PaperItem,
   type SheetAnswer,
 } from './paper-exam-logic';
-import { parsePaperWorkbook, type ParsedPaperRow } from './paper-exam-sheet';
+import { parsePaperWorkbook, type ParsedPaperRow, type V2Item } from './paper-exam-sheet';
 import {
   isMissed,
   itemsOfGuide,
@@ -105,6 +107,21 @@ function sheetTarget(
   return `raw:${raw.code}|${normalizeName(raw.lastName)}|${normalizeName(raw.firstName)}|${raw.groupLabel}`;
 }
 
+/** Багцын нүдний тоо: хувилбар бүр өөр хуваалттай бол хамгийн их нь (>1 = 2-р хэсгийн багц) */
+function cellsOf(it: V2Item): number | null {
+  if (it.colsBy)
+    return Math.max(2, ...Object.values(it.colsBy).map((c) => c.length));
+  return it.cols.length > 1 ? it.cols.length : null;
+}
+
+/** Тухайн хувилбарын хуудсан дээрх нүдний тоо (түлхүүрийн урт), сонгох бодлогод 1.
+ *  Багц эсэхийг `cells > 1`-ээр шийднэ (нэг хувилбарт ганц нүдтэй багц байж болно) */
+function variantCells(item: PaperItem, variant: string): number {
+  const cells = item.cells ?? 1;
+  if (cells <= 1) return 1;
+  return keyFor(item, variant)?.length || cells;
+}
+
 /** «Баг 27» → 27 (багуудыг дугаараар эрэмбэлнэ) */
 function groupOrder(label: string): number {
   const m = label.match(/\d+/);
@@ -122,6 +139,7 @@ const ITEM_SELECT = {
   answerKeys: true,
   label: true,
   cells: true,
+  labels: true,
 } as const;
 
 @Injectable()
@@ -247,6 +265,7 @@ export class PaperExamsService {
     if (dto.title !== undefined) data.title = dto.title;
     if (dto.heldOn !== undefined) data.heldOn = toDate(dto.heldOn);
     if (dto.published !== undefined) data.published = dto.published;
+    if (dto.studentDetail !== undefined) data.studentDetail = dto.studentDetail;
     if (dto.published === true && !exam.published) {
       const linked = await this.prisma.paperExamSheet.count({
         where: { examId: id, supersededAt: null, studentId: { not: null } },
@@ -457,7 +476,8 @@ export class PaperExamsService {
         answerKeys: keys,
         answerKey: keys[Object.keys(keys).sort()[0]] ?? null,
         label: it.label.includes('.') ? it.label : null,
-        cells: it.cols.length > 1 ? it.cols.length : null,
+        cells: cellsOf(it),
+        labels: it.labels ?? null,
       };
     };
     const gradeItems: PaperItem[] = v2
@@ -472,6 +492,7 @@ export class PaperExamsService {
           i.points !== f.points ||
           (i.label ?? null) !== f.label ||
           (i.cells ?? null) !== f.cells ||
+          JSON.stringify(i.labels ?? null) !== JSON.stringify(f.labels) ||
           JSON.stringify(i.answerKeys ?? null) !== JSON.stringify(f.answerKeys)
         );
       });
@@ -652,6 +673,7 @@ export class PaperExamsService {
                 answerKey: f.answerKey,
                 label: f.label,
                 cells: f.cells,
+                labels: json(f.labels),
               },
             });
           }
@@ -1070,10 +1092,11 @@ export class PaperExamsService {
     const variant = dto.variant.trim().toUpperCase();
     const answers = dto.answers.map((raw, i) => {
       const a = raw.trim().toUpperCase();
-      const cells = items[i].cells ?? 1;
+      const cells = variantCells(items[i], variant);
+      const digit = (items[i].cells ?? 1) > 1;
       const ok =
         a === '' || a === '+' || a === '-' ||
-        (cells > 1 ? new RegExp(`^[0-9_*-]{${cells}}$`).test(a) : /^[A-E*]$/.test(a));
+        (digit ? new RegExp(`^[0-9_*-]{${cells}}$`).test(a) : /^[A-E*]$/.test(a));
       if (!ok)
         throw new BadRequestException(
           `${items[i].label ?? items[i].number}: «${raw}» хариу буруу хэлбэртэй`,
@@ -1355,6 +1378,7 @@ export class PaperExamsService {
         heldOn: dayOf(exam.heldOn),
         itemCount: exam.itemCount,
         published: exam.published,
+        studentDetail: exam.studentDetail,
       },
       scope: 'ALL' as const,
       guideVariants: await this.guideVariants(id),
@@ -1422,7 +1446,7 @@ export class PaperExamsService {
         totalScore: true,
         maxScore: true,
         variant: true,
-        exam: { select: { title: true, heldOn: true, published: true } },
+        exam: { select: { title: true, heldOn: true, published: true, studentDetail: true } },
       },
       orderBy: { exam: { heldOn: 'desc' } },
     });
@@ -1447,8 +1471,14 @@ export class PaperExamsService {
         maxScore: o.maxScore,
         pct: pct(o.totalScore, o.maxScore),
         ...(publishedOnly ? {} : { variant: o.variant, published: o.exam.published }),
-        rank: 1 + scores.filter((s) => s > o.totalScore + 1e-9).length,
-        participants: scores.length,
+        // Сурагчид: дэлгэрэнгүй нээгээгүй шалгалтын байр харагдахгүй
+        ...(publishedOnly && !o.exam.studentDetail
+          ? { rank: null, participants: null, studentDetail: false }
+          : {
+              rank: 1 + scores.filter((s) => s > o.totalScore + 1e-9).length,
+              participants: scores.length,
+              studentDetail: o.exam.studentDetail,
+            }),
       };
     });
   }
@@ -1496,6 +1526,32 @@ export class PaperExamsService {
     }));
     const ranks = competitionRanks(graded.map((x) => x.g.totalScore));
     const me = graded.find((x) => x.s.id === mine.id)!;
+    // Дэлгэрэнгүй нээгээгүй шалгалт (эзэн 2026-11-20, Нэгдсэн шалгалт 2): зөвхөн оноо,
+    // бодлого бүрийн зөв/буруу. Байр, дундаж, хариу, түлхүүр, сэдэв ирэхгүй
+    if (!exam.studentDetail)
+      return {
+        exam: {
+          id: exam.id,
+          title: exam.title,
+          heldOn: dayOf(exam.heldOn),
+          itemCount: exam.itemCount,
+          studentDetail: false as const,
+        },
+        me: {
+          totalScore: me.g.totalScore,
+          maxScore: me.g.maxScore,
+          pct: pct(me.g.totalScore, me.g.maxScore),
+          group: currentGroup(mine),
+          variant: mine.variant ?? '',
+          items: items.map((item, i) => ({
+            number: item.number,
+            label: labelFor(item, mine.variant),
+            points: item.points,
+            earned: me.g.statuses[i] === 'CORRECT' ? item.points : 0,
+            status: me.g.statuses[i],
+          })),
+        },
+      };
     const myRank = ranks[graded.indexOf(me)];
     const myAreas = areaScores([me.g.statuses], items);
     const myTopics = areaScores([me.g.statuses], items, 'topic');
@@ -1527,6 +1583,7 @@ export class PaperExamsService {
         title: exam.title,
         heldOn: dayOf(exam.heldOn),
         itemCount: exam.itemCount,
+        studentDetail: true as const,
       },
       me: {
         totalScore: me.g.totalScore,
@@ -1550,7 +1607,7 @@ export class PaperExamsService {
           const status = me.g.statuses[i];
           return {
             number: item.number,
-            label: item.label ?? null,
+            label: labelFor(item, mine.variant),
             cells: item.cells ?? null,
             earned: status === 'CORRECT' ? item.points : 0,
             area: item.area,
@@ -1629,9 +1686,12 @@ export class PaperExamsService {
         supersededAt: null,
         exam: { published: true, deletedAt: null },
       },
-      select: { variant: true, answers: true },
+      select: { variant: true, answers: true, exam: { select: { studentDetail: true } } },
     });
     if (!sheet) throw new NotFoundException('Энэ шалгалтад таны дүн алга');
+    // Бодлого, материал — дэлгэрэнгүй нээгээгүй шалгалтад «Тун удахгүй»
+    if (!sheet.exam.studentDetail)
+      throw new ForbiddenException('Тун удахгүй нээгдэнэ');
     return sheet;
   }
 
@@ -1738,9 +1798,11 @@ export class PaperExamsService {
         deletedAt: null,
         ...(isStudent ? { published: true } : {}),
       },
-      select: { id: true, title: true, heldOn: true, published: true },
+      select: { id: true, title: true, heldOn: true, published: true, studentDetail: true },
     });
     if (!exam) throw new NotFoundException('Шалгалт олдсонгүй');
+    if (isStudent && !exam.studentDetail)
+      throw new ForbiddenException('Тун удахгүй нээгдэнэ');
     const sheets = await this.prisma.paperExamSheet.findMany({
       where: { examId, supersededAt: null, studentId: { not: null } },
       select: {

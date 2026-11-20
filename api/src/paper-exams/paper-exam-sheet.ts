@@ -296,6 +296,12 @@ export interface V2Item {
   cols: string[];
   /** Хувилбар → зөв хариу */
   keys: Record<string, string>;
+  /**
+   * Хувилбар бүрийн өөрийн багцын нэр, нүднүүд — 2-р хэсгийн багцыг хувилбар бүр өөрөөр
+   * хуваасан үед (Нэгдсэн шалгалт 2: A «2.1.c-e», B «2.1.c-d»). Байрлал, оноо нь ижил.
+   */
+  labels?: Record<string, string>;
+  colsBy?: Record<string, string[]>;
 }
 
 /** «2.1.a-d» → ["2.1.a","2.1.b","2.1.c","2.1.d"]; «2.2.e» → ["2.2.e"]; «7» → ["7"] */
@@ -368,19 +374,40 @@ function v2Items(ws: ExcelJS.Worksheet, used: Set<string>): V2Item[] | string {
     const keys: Record<string, string> = {};
     for (const v of variants) {
       const it = byVariant.get(v)!.get(n);
-      if (!it || it.label !== base.label || it.points !== base.points)
+      // Багцын хуваалт (үсгүүд) хувилбараар өөр байж болно — байрлал, оноо, хэсэг ижил л байна
+      if (
+        !it ||
+        it.points !== base.points ||
+        it.label.includes('.') !== base.label.includes('.') ||
+        it.label.split('.').slice(0, 2).join('.') !==
+          base.label.split('.').slice(0, 2).join('.')
+      )
         return `Хувилбаруудын ${n}-р бодлогын бүтэц (багц, оноо) зөрж байна`;
       keys[v] = it.key;
     }
     if (!Number.isInteger(base.points) || base.points < 0 || base.points > 100)
       return `«Түлхүүр»: ${n}-р бодлогын оноо буруу`;
-    const cols = expandLabel(base.label);
-    if (
-      cols.length > 1 &&
-      Object.values(keys).some((k) => k.length !== cols.length)
-    )
-      return `«Түлхүүр»: ${base.label} багцын цифрийн тоо нүдний тоотой таарахгүй`;
-    items.push({ label: base.label, points: base.points, cols, keys });
+    const labels: Record<string, string> = {};
+    const colsBy: Record<string, string[]> = {};
+    for (const v of variants) {
+      labels[v] = byVariant.get(v)!.get(n)!.label;
+      colsBy[v] = expandLabel(labels[v]);
+    }
+    const mixed = variants.some((v) => labels[v] !== base.label);
+    const part2 = variants.some((v) => colsBy[v].length > 1);
+    for (const v of variants)
+      if (part2 && keys[v].length !== colsBy[v].length)
+        return `«Түлхүүр»: ${v} хувилбарын ${labels[v]} багцын цифрийн тоо нүдний тоотой таарахгүй`;
+    const cols = mixed
+      ? [...new Set(variants.flatMap((v) => colsBy[v]))]
+      : expandLabel(base.label);
+    items.push({
+      label: base.label,
+      points: base.points,
+      cols,
+      keys,
+      ...(mixed ? { labels, colsBy } : {}),
+    });
   }
   if (items.length === 0) return '«Түлхүүр» шийтэд 1-р бодлого алга';
   return items;
@@ -541,7 +568,7 @@ function parseV2(workbook: ExcelJS.Workbook): ParsedPaperFile | null {
         if (c.odd) odd += 1;
         return c.v;
       }
-      return it.cols
+      return ((variant && it.colsBy?.[variant]) || it.cols)
         .map((h) => {
           const c = digitCell(text(header.get(h.toLowerCase())!));
           if (c.odd) odd += 1;

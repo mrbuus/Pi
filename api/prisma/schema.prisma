@@ -3697,6 +3697,9 @@ model PaperExam {
   itemCount   Int
   /// Сурагчид харагдах эсэх (дүн, жагсаалт)
   published   Boolean   @default(false)
+  /// Сурагчид дэлгэрэнгүй (бодлого, материал, сэдвийн задаргаа, жагсаалт) нээх эсэх.
+  /// false = зөвхөн оноо, бодлого бүрийн зөв/буруу; бусад нь «Тун удахгүй»
+  studentDetail Boolean @default(false)
   createdById String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -3731,8 +3734,11 @@ model PaperExamItem {
   answerKeys Json?
   /// Дэлгэцийн нэр: «2.1.a-d» (2-р хэсгийн багц); null бол дугаар
   label     String?
-  /// Багцын нүдний тоо (a–h-ийн хэд нь); null/1 бол сонгох бодлого
+  /// Багцын нүдний тоо (a–h-ийн хэд нь); null/1 бол сонгох бодлого. Хувилбар бүр өөр
+  /// хуваалттай бол хамгийн их нь; хувилбарын бодит тоо = answerKeys[variant]-ийн урт
   cells     Int?
+  /// Хувилбар бүрийн багцын нэр {"A":"2.1.c-e","B":"2.1.c-d"} — хувилбараар хуваалт өөр үед
+  labels    Json?
 
   @@unique([examId, number])
 }

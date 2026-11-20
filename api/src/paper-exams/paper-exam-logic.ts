@@ -41,6 +41,21 @@ export interface PaperItem {
   label?: string | null;
   /** Багцын нүдний тоо (>1 бол цифрүүдийг бүгдийг нь тулгана) */
   cells?: number | null;
+  /** Хувилбар бүрийн багцын нэр {"A":"2.1.c-e","B":"2.1.c-d"} */
+  labels?: unknown;
+}
+
+/** Тухайн хувилбарын багцын нэр: labels[variant] → label. */
+export function labelFor(
+  item: PaperItem,
+  variant?: string | null,
+): string | null {
+  const l = item.labels;
+  if (variant && l && typeof l === 'object' && !Array.isArray(l)) {
+    const v = (l as Record<string, unknown>)[variant];
+    if (typeof v === 'string' && v) return v;
+  }
+  return item.label ?? null;
 }
 
 /** Тухайн хувилбарын зөв хариу: answerKeys[variant] → answerKey. */

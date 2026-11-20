@@ -114,6 +114,21 @@ export default function PaperBoard({ id }: { id: string }) {
     }
   }
 
+  /** Сурагчид дэлгэрэнгүй (бодлого, материал, задаргаа, жагсаалт) нээх / зөвхөн зөв-буруу */
+  async function toggleDetail() {
+    if (!board) return;
+    setBusy(true);
+    try {
+      await api(`/paper-exams/${encodeURIComponent(id)}`, { method: "PATCH", body: { studentDetail: !board.exam.studentDetail } });
+      toast.success(board.exam.studentDetail ? "Сурагчид зөвхөн зөв, буруугаа харна" : "Сурагчид дэлгэрэнгүй нээлээ");
+      load();
+    } catch (e) {
+      toast.error(errorText(e, "Өөрчилж чадсангүй"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function remove() {
     setBusy(true);
     try {
@@ -171,6 +186,7 @@ export default function PaperBoard({ id }: { id: string }) {
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <Meta className="text-sm text-ink-dim" items={[dayText(e.heldOn), `${e.itemCount} бодлого`, `${board.overall.count} сурагч`]} />
             {e.published ? <Badge tone="success">Сурагчид нээлттэй</Badge> : <Badge>Нийтлээгүй</Badge>}
+            {!e.studentDetail && <Badge tone="info">Сурагчид зөвхөн зөв, буруу</Badge>}
             {board.scope === "OWN_CLASSES" && <Badge tone="info">Таны ангийн сурагчид</Badge>}
           </div>
         </div>
@@ -179,6 +195,10 @@ export default function PaperBoard({ id }: { id: string }) {
             <Button variant={e.published ? "outline" : "default"} disabled={busy} onClick={togglePublish}>
               {e.published ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
               {e.published ? "Сурагчдаас нуух" : "Сурагчид нээх"}
+            </Button>
+            <Button variant="outline" disabled={busy} onClick={toggleDetail}>
+              {e.studentDetail ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
+              {e.studentDetail ? "Дэлгэрэнгүйг нуух" : "Дэлгэрэнгүй нээх"}
             </Button>
             <Button variant="ghost" size="icon" aria-label="Шалгалтыг устгах" onClick={() => setConfirmDelete(true)}>
               <Trash2 aria-hidden />

@@ -14328,6 +14328,7 @@ export const PaperExamScalarFieldEnum = {
   heldOn: 'heldOn',
   itemCount: 'itemCount',
   published: 'published',
+  studentDetail: 'studentDetail',
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -14349,7 +14350,8 @@ export const PaperExamItemScalarFieldEnum = {
   voided: 'voided',
   answerKeys: 'answerKeys',
   label: 'label',
-  cells: 'cells'
+  cells: 'cells',
+  labels: 'labels'
 } as const
 
 export type PaperExamItemScalarFieldEnum = (typeof PaperExamItemScalarFieldEnum)[keyof typeof PaperExamItemScalarFieldEnum]

@@ -60,6 +60,11 @@ export class UpdatePaperExamDto {
   @IsOptional()
   @IsBoolean()
   published?: boolean;
+
+  /** Сурагчид бодлого, материал, задаргаа, жагсаалт нээх эсэх (false = зөвхөн зөв/буруу) */
+  @IsOptional()
+  @IsBoolean()
+  studentDetail?: boolean;
 }
 
 export class PaperItemDto {

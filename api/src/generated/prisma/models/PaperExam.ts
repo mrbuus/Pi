@@ -40,6 +40,7 @@ export type PaperExamMinAggregateOutputType = {
   heldOn: Date | null
   itemCount: number | null
   published: boolean | null
+  studentDetail: boolean | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -52,6 +53,7 @@ export type PaperExamMaxAggregateOutputType = {
   heldOn: Date | null
   itemCount: number | null
   published: boolean | null
+  studentDetail: boolean | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -64,6 +66,7 @@ export type PaperExamCountAggregateOutputType = {
   heldOn: number
   itemCount: number
   published: number
+  studentDetail: number
   createdById: number
   createdAt: number
   updatedAt: number
@@ -86,6 +89,7 @@ export type PaperExamMinAggregateInputType = {
   heldOn?: true
   itemCount?: true
   published?: true
+  studentDetail?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -98,6 +102,7 @@ export type PaperExamMaxAggregateInputType = {
   heldOn?: true
   itemCount?: true
   published?: true
+  studentDetail?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -110,6 +115,7 @@ export type PaperExamCountAggregateInputType = {
   heldOn?: true
   itemCount?: true
   published?: true
+  studentDetail?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -209,6 +215,7 @@ export type PaperExamGroupByOutputType = {
   heldOn: Date
   itemCount: number
   published: boolean
+  studentDetail: boolean
   createdById: string
   createdAt: Date
   updatedAt: Date
@@ -244,6 +251,7 @@ export type PaperExamWhereInput = {
   heldOn?: Prisma.DateTimeFilter<"PaperExam"> | Date | string
   itemCount?: Prisma.IntFilter<"PaperExam"> | number
   published?: Prisma.BoolFilter<"PaperExam"> | boolean
+  studentDetail?: Prisma.BoolFilter<"PaperExam"> | boolean
   createdById?: Prisma.StringFilter<"PaperExam"> | string
   createdAt?: Prisma.DateTimeFilter<"PaperExam"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PaperExam"> | Date | string
@@ -260,6 +268,7 @@ export type PaperExamOrderByWithRelationInput = {
   heldOn?: Prisma.SortOrder
   itemCount?: Prisma.SortOrder
   published?: Prisma.SortOrder
+  studentDetail?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -279,6 +288,7 @@ export type PaperExamWhereUniqueInput = Prisma.AtLeast<{
   heldOn?: Prisma.DateTimeFilter<"PaperExam"> | Date | string
   itemCount?: Prisma.IntFilter<"PaperExam"> | number
   published?: Prisma.BoolFilter<"PaperExam"> | boolean
+  studentDetail?: Prisma.BoolFilter<"PaperExam"> | boolean
   createdById?: Prisma.StringFilter<"PaperExam"> | string
   createdAt?: Prisma.DateTimeFilter<"PaperExam"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PaperExam"> | Date | string
@@ -295,6 +305,7 @@ export type PaperExamOrderByWithAggregationInput = {
   heldOn?: Prisma.SortOrder
   itemCount?: Prisma.SortOrder
   published?: Prisma.SortOrder
+  studentDetail?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -315,6 +326,7 @@ export type PaperExamScalarWhereWithAggregatesInput = {
   heldOn?: Prisma.DateTimeWithAggregatesFilter<"PaperExam"> | Date | string
   itemCount?: Prisma.IntWithAggregatesFilter<"PaperExam"> | number
   published?: Prisma.BoolWithAggregatesFilter<"PaperExam"> | boolean
+  studentDetail?: Prisma.BoolWithAggregatesFilter<"PaperExam"> | boolean
   createdById?: Prisma.StringWithAggregatesFilter<"PaperExam"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PaperExam"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"PaperExam"> | Date | string
@@ -327,6 +339,7 @@ export type PaperExamCreateInput = {
   heldOn: Date | string
   itemCount: number
   published?: boolean
+  studentDetail?: boolean
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -343,6 +356,7 @@ export type PaperExamUncheckedCreateInput = {
   heldOn: Date | string
   itemCount: number
   published?: boolean
+  studentDetail?: boolean
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -359,6 +373,7 @@ export type PaperExamUpdateInput = {
   heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  studentDetail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -375,6 +390,7 @@ export type PaperExamUncheckedUpdateInput = {
   heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  studentDetail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -391,6 +407,7 @@ export type PaperExamCreateManyInput = {
   heldOn: Date | string
   itemCount: number
   published?: boolean
+  studentDetail?: boolean
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -403,6 +420,7 @@ export type PaperExamUpdateManyMutationInput = {
   heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  studentDetail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -415,6 +433,7 @@ export type PaperExamUncheckedUpdateManyInput = {
   heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  studentDetail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -427,6 +446,7 @@ export type PaperExamCountOrderByAggregateInput = {
   heldOn?: Prisma.SortOrder
   itemCount?: Prisma.SortOrder
   published?: Prisma.SortOrder
+  studentDetail?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -443,6 +463,7 @@ export type PaperExamMaxOrderByAggregateInput = {
   heldOn?: Prisma.SortOrder
   itemCount?: Prisma.SortOrder
   published?: Prisma.SortOrder
+  studentDetail?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -455,6 +476,7 @@ export type PaperExamMinOrderByAggregateInput = {
   heldOn?: Prisma.SortOrder
   itemCount?: Prisma.SortOrder
   published?: Prisma.SortOrder
+  studentDetail?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -532,6 +554,7 @@ export type PaperExamCreateWithoutItemsInput = {
   heldOn: Date | string
   itemCount: number
   published?: boolean
+  studentDetail?: boolean
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -547,6 +570,7 @@ export type PaperExamUncheckedCreateWithoutItemsInput = {
   heldOn: Date | string
   itemCount: number
   published?: boolean
+  studentDetail?: boolean
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -578,6 +602,7 @@ export type PaperExamUpdateWithoutItemsInput = {
   heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  studentDetail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -593,6 +618,7 @@ export type PaperExamUncheckedUpdateWithoutItemsInput = {
   heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  studentDetail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -608,6 +634,7 @@ export type PaperExamCreateWithoutGuidesInput = {
   heldOn: Date | string
   itemCount: number
   published?: boolean
+  studentDetail?: boolean
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -623,6 +650,7 @@ export type PaperExamUncheckedCreateWithoutGuidesInput = {
   heldOn: Date | string
   itemCount: number
   published?: boolean
+  studentDetail?: boolean
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -654,6 +682,7 @@ export type PaperExamUpdateWithoutGuidesInput = {
   heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  studentDetail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -669,6 +698,7 @@ export type PaperExamUncheckedUpdateWithoutGuidesInput = {
   heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  studentDetail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -684,6 +714,7 @@ export type PaperExamCreateWithoutSheetsInput = {
   heldOn: Date | string
   itemCount: number
   published?: boolean
+  studentDetail?: boolean
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -699,6 +730,7 @@ export type PaperExamUncheckedCreateWithoutSheetsInput = {
   heldOn: Date | string
   itemCount: number
   published?: boolean
+  studentDetail?: boolean
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -730,6 +762,7 @@ export type PaperExamUpdateWithoutSheetsInput = {
   heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  studentDetail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -745,6 +778,7 @@ export type PaperExamUncheckedUpdateWithoutSheetsInput = {
   heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  studentDetail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -760,6 +794,7 @@ export type PaperExamCreateWithoutImportsInput = {
   heldOn: Date | string
   itemCount: number
   published?: boolean
+  studentDetail?: boolean
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -775,6 +810,7 @@ export type PaperExamUncheckedCreateWithoutImportsInput = {
   heldOn: Date | string
   itemCount: number
   published?: boolean
+  studentDetail?: boolean
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -806,6 +842,7 @@ export type PaperExamUpdateWithoutImportsInput = {
   heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  studentDetail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -821,6 +858,7 @@ export type PaperExamUncheckedUpdateWithoutImportsInput = {
   heldOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  studentDetail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -894,6 +932,7 @@ export type PaperExamSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   heldOn?: boolean
   itemCount?: boolean
   published?: boolean
+  studentDetail?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -911,6 +950,7 @@ export type PaperExamSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   heldOn?: boolean
   itemCount?: boolean
   published?: boolean
+  studentDetail?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -923,6 +963,7 @@ export type PaperExamSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   heldOn?: boolean
   itemCount?: boolean
   published?: boolean
+  studentDetail?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -935,13 +976,14 @@ export type PaperExamSelectScalar = {
   heldOn?: boolean
   itemCount?: boolean
   published?: boolean
+  studentDetail?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type PaperExamOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "heldOn" | "itemCount" | "published" | "createdById" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["paperExam"]>
+export type PaperExamOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "heldOn" | "itemCount" | "published" | "studentDetail" | "createdById" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["paperExam"]>
 export type PaperExamInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | Prisma.PaperExam$itemsArgs<ExtArgs>
   sheets?: boolean | Prisma.PaperExam$sheetsArgs<ExtArgs>
@@ -969,6 +1011,11 @@ export type $PaperExamPayload<ExtArgs extends runtime.Types.Extensions.InternalA
      * Сурагчид харагдах эсэх (дүн, жагсаалт)
      */
     published: boolean
+    /**
+     * Сурагчид дэлгэрэнгүй (бодлого, материал, сэдвийн задаргаа, жагсаалт) нээх эсэх.
+     * false = зөвхөн оноо, бодлого бүрийн зөв/буруу; бусад нь «Тун удахгүй»
+     */
+    studentDetail: boolean
     createdById: string
     createdAt: Date
     updatedAt: Date
@@ -1405,6 +1452,7 @@ export interface PaperExamFieldRefs {
   readonly heldOn: Prisma.FieldRef<"PaperExam", 'DateTime'>
   readonly itemCount: Prisma.FieldRef<"PaperExam", 'Int'>
   readonly published: Prisma.FieldRef<"PaperExam", 'Boolean'>
+  readonly studentDetail: Prisma.FieldRef<"PaperExam", 'Boolean'>
   readonly createdById: Prisma.FieldRef<"PaperExam", 'String'>
   readonly createdAt: Prisma.FieldRef<"PaperExam", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"PaperExam", 'DateTime'>
