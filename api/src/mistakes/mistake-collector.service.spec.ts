@@ -151,3 +151,51 @@ describe('MistakeCollector', () => {
     expect(h.reviews.recordWrong).not.toHaveBeenCalled();
   });
 });
+
+describe('MistakeCollector: хаах цаг болоогүй шалгалт (result-release)', () => {
+  let loggerError: jest.SpyInstance;
+  beforeEach(() => { loggerError = jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined); });
+  afterEach(() => loggerError.mockRestore());
+
+  const attemptRow = {
+    id: 'exam-attempt', studentId: 'learner-1', problemId: 'problem-1',
+    source: 'ONLINE_TEST', testId: 'test-1', createdAt: new Date(), givenAnswer: 'wrong',
+  };
+
+  it('closesAt ирээгүй бол дэвтэр, давтлагад оруулахгүй, pending хэвээр', async () => {
+    const h = makeHarness();
+    h.prisma.attempt.findFirst.mockResolvedValue(attemptRow);
+    h.prisma.test.findUnique.mockResolvedValue({ title: 'Нэгдсэн', closesAt: new Date(Date.now() + 60 * 60_000) });
+    await expect(h.collector.collectAttempt('exam-attempt')).resolves.toBe(false);
+    expect(h.tx.mistakeEntry.upsert).not.toHaveBeenCalled();
+    expect(h.reviews.recordWrong).not.toHaveBeenCalled();
+    expect(h.prisma.attempt.updateMany).not.toHaveBeenCalled();
+    expect(loggerError).not.toHaveBeenCalled();
+  });
+
+  it('closesAt өнгөрсөн бол ердийнхөөр цуглуулна', async () => {
+    const h = makeHarness();
+    h.prisma.attempt.findFirst.mockResolvedValue(attemptRow);
+    h.prisma.test.findUnique.mockResolvedValue({ title: 'Нэгдсэн', closesAt: new Date(Date.now() - 60_000) });
+    h.prisma.attempt.updateMany.mockResolvedValue({ count: 1 });
+    await expect(h.collector.collectAttempt('exam-attempt')).resolves.toBe(true);
+    expect(h.tx.mistakeEntry.upsert).toHaveBeenCalled();
+  });
+
+  it('closesAt-гүй шалгалт өмнөх шигээ цуглуулагдана', async () => {
+    const h = makeHarness();
+    h.prisma.attempt.findFirst.mockResolvedValue(attemptRow);
+    h.prisma.test.findUnique.mockResolvedValue({ title: 'Энгийн', closesAt: null });
+    h.prisma.attempt.updateMany.mockResolvedValue({ count: 1 });
+    await expect(h.collector.collectAttempt('exam-attempt')).resolves.toBe(true);
+  });
+
+  it('retryPending хаагдаагүй шалгалтыг алгасна, testId-гүй мөрийг хасахгүй', async () => {
+    const h = makeHarness();
+    (h.prisma.test as any).findMany = jest.fn(async () => [{ id: 'test-held' }]);
+    h.prisma.attempt.findMany.mockResolvedValue([]);
+    await h.collector.retryPending();
+    const where = h.prisma.attempt.findMany.mock.calls[0][0].where;
+    expect(where.AND).toEqual([{ OR: [{ testId: null }, { testId: { notIn: ['test-held'] } }] }]);
+  });
+});

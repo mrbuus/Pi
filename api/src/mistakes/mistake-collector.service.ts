@@ -4,6 +4,7 @@ import { Prisma } from '../generated/prisma/client';
 import { SelfState } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProblemReviewService } from './problem-review.service';
+import { resultsHiddenUntil } from '../tests/result-release';
 
 type MistakeSource = 'PRACTICE' | 'TEST';
 
@@ -174,9 +175,13 @@ export class MistakeCollector implements OnModuleDestroy {
       const test = attempt.testId
         ? await this.prisma.test.findUnique({
             where: { id: attempt.testId },
-            select: { title: true },
+            select: { title: true, closesAt: true },
           })
         : null;
+      // Хаах цаг нь болоогүй шалгалтын алдааг дэвтэр, давтлагад ОРУУЛАХГҮЙ — эрт илгээсэн
+      // сурагч аль бодлогыг алдсанаа (зөв хариуг) хаах цагаас өмнө мэдэж, бусдад дамжуулахаас
+      // сэргийлнэ (result-release.ts). Мөр pending хэвээр үлдэж, хаагдсаны дараа retryPending авна.
+      if (test && resultsHiddenUntil(test)) return false;
       const collected = await this.collect({
         userId: attempt.studentId,
         problemId: attempt.problemId,
@@ -209,11 +214,20 @@ export class MistakeCollector implements OnModuleDestroy {
     const pageSize = 100;
     let cursorId: string | undefined;
     try {
+      const held = (
+        await this.prisma.test.findMany({
+          where: { closesAt: { gt: new Date() } },
+          select: { id: true },
+        })
+      ).map((t) => t.id);
       for (let page = 0; page < 5; page += 1) {
         const pending = await this.prisma.attempt.findMany({
           where: {
             mistakeCollectedAt: null,
             deletedAt: null,
+            // Хаах цаг нь болоогүй шалгалтынхыг алгасна (дараалал тэдгээрт гацахгүй)
+            // (NULL testId-ыг хасахгүйн тулд NOT биш OR — SQL-ийн NULL логик)
+            ...(held.length > 0 ? { AND: [{ OR: [{ testId: null }, { testId: { notIn: held } }] }] } : {}),
             OR: [
               { autoCorrect: false },
               { selfState: { in: [SelfState.FAILED, SelfState.FIXED_AFTER_ERROR] } },
