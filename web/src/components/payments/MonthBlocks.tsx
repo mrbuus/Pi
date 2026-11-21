@@ -63,15 +63,18 @@ export function CompactBlocks({
   current,
   onPick,
   settled = false,
+  fluid = false,
 }: {
   blocks: MonthBlock[];
   current?: string;
   onPick?: (month: string) => void;
   /** Гараар бүтэн жил — тайлбарт дүн биш «бүтэн жилд тооцсон» */
   settled?: boolean;
+  /** Нарийн картад (сурагчийн тойм) — 9 багана өргөнд нь багтана */
+  fluid?: boolean;
 }) {
   return (
-    <div className={GRID}>
+    <div className={fluid ? "grid grid-cols-9 gap-1" : GRID}>
       {blocks.map((b) => {
         const label = blockLabel(b, settled);
         const cls = `relative block h-7 overflow-hidden rounded-md md:h-11 md:rounded-lg ${COMPACT[b.state]} ${

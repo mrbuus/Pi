@@ -99,7 +99,16 @@ function CallLink({
 }
 
 /** Сурагчийн төлбөрийн дэлгэрэнгүй: блок, бүртгэх, тэмдэглэл, түүх, буцаалт. */
-export default function StudentLedger({ id }: { id: string }) {
+export default function StudentLedger({
+  id,
+  embedded = false,
+  onChanged,
+}: {
+  id: string;
+  /** Сурагчийн профайлын «Төлбөр» таб дотор — буцах холбоосгүй (эзэн 2026-11-21: хаанаас ч ижил блок) */
+  embedded?: boolean;
+  onChanged?: () => void;
+}) {
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pay, setPay] = useState<{ month: string | null } | null>(null);
@@ -116,8 +125,10 @@ export default function StudentLedger({ id }: { id: string }) {
       .then((d) => {
         setData(d);
         setError(null);
+        onChanged?.();
       })
       .catch((e) => setError(errMsg(e)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- onChanged нь эцэг талын мэдэгдэл, дахин татах шалтгаан биш
   }, [id]);
   useEffect(load, [load]);
 
@@ -161,7 +172,7 @@ export default function StudentLedger({ id }: { id: string }) {
 
   return (
     <div className="space-y-5">
-      <BackLink href={back.href} label={back.label} />
+      {!embedded && <BackLink href={back.href} label={back.label} />}
 
       <section className="chunky space-y-4 p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">

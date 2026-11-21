@@ -5,11 +5,18 @@ import { useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { ClassStudentDetail } from "@/components/exams/ClassStudentDialog";
 import { SkeletonLine } from "@/components/ui/Skeleton";
-import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "@/components/ui/StateBlock";
 import { getRole } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import ChangeClassDialog from "../ChangeClassDialog";
-import { RemoveFromTrainingDialog, RestoreStudentDialog } from "../StudentActions";
+import {
+  RemoveFromTrainingDialog,
+  RestoreStudentDialog,
+} from "../StudentActions";
 import StudentNotesPanel from "../StudentNotesPanel";
 import RequireRole from "@/components/nav/RequireRole";
 import { useSection } from "./useSection";
@@ -27,13 +34,36 @@ import LessonHistoryTab from "../hub/LessonHistoryTab";
 import SyllabusTab from "../calendar/SyllabusTab";
 import WithdrawalTab from "../withdrawal/WithdrawalTab";
 import PaymentsTab from "../hub/PaymentsTab";
+import StudentLedger from "@/components/payments/StudentLedger";
+import type { StudentLedger as StudentLedgerData } from "@/components/payments/ledgerTypes";
 import BooksTab from "@/components/book-money/BooksTab";
 import StudentInfoTab from "../hub/StudentInfoTab";
 import { useStaffCan } from "@/lib/staffCapabilities";
 import StudentPaperResults from "../hub/StudentPaperResults";
 
-type TabKey = "class" | "exams" | "lessons" | "syllabus" | "payments" | "books" | "withdrawal" | "notes" | "independent" | "info";
-const ALL_TABS: TabKey[] = ["class", "exams", "lessons", "syllabus", "payments", "books", "withdrawal", "notes", "independent", "info"];
+type TabKey =
+  | "class"
+  | "exams"
+  | "lessons"
+  | "syllabus"
+  | "payments"
+  | "books"
+  | "withdrawal"
+  | "notes"
+  | "independent"
+  | "info";
+const ALL_TABS: TabKey[] = [
+  "class",
+  "exams",
+  "lessons",
+  "syllabus",
+  "payments",
+  "books",
+  "withdrawal",
+  "notes",
+  "independent",
+  "info",
+];
 const TAB_LABELS: Record<TabKey, string> = {
   class: "Ангийн явц",
   exams: "Шалгалт",
@@ -66,24 +96,37 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
   const tabs = useMemo(
     () =>
       ALL_TABS.filter(
-        (t) => (t !== "payments" || canSeeMoney) && (t !== "withdrawal" || (canSeeMoney && archived)),
+        (t) =>
+          (t !== "payments" || canSeeMoney) &&
+          (t !== "withdrawal" || (canSeeMoney && archived)),
       ),
     [canSeeMoney, archived],
   );
   const classId = detail?.currentClassroom?.id ?? null;
+  // Төлбөрийг хаанаас ч ижил сарын блокоор (эзэн 2026-11-21) — төлбөрийн хуудасны тооцоо (ledger).
+  // Сургалтаас гарсан сурагчид ledger байхгүй тул хуучин түүхийг (PaymentsTab) харуулна.
+  const ledgerQ = useSection<StudentLedgerData | null>(
+    canSeeMoney && !archived ? `/payments/ledger/student/${studentId}` : null,
+    null,
+  );
   const paymentsQ = useSection<StudentPaymentHistory | null>(
-    canSeeMoney ? `/payments/student/${studentId}` : null,
+    canSeeMoney && archived ? `/payments/student/${studentId}` : null,
     null,
   );
   const summaryQ = useSection<ClassSummary | null>(
-    classId ? `/exams/classes/${encodeURIComponent(classId)}/students/${encodeURIComponent(studentId)}` : null,
+    classId
+      ? `/exams/classes/${encodeURIComponent(classId)}/students/${encodeURIComponent(studentId)}`
+      : null,
     null,
   );
 
   const params = useSearchParams();
   const fromUrl = params.get("tab") as TabKey | null;
   const [tab, setTab] = useState<TabKey>(
-    fromUrl && (tabs.includes(fromUrl) || (fromUrl === "withdrawal" && canSeeMoney)) ? fromUrl : "class",
+    fromUrl &&
+      (tabs.includes(fromUrl) || (fromUrl === "withdrawal" && canSeeMoney))
+      ? fromUrl
+      : "class",
   );
   const changeTab = useCallback((next: TabKey) => {
     setTab(next);
@@ -96,14 +139,14 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
 
   // Жилийн төлбөрөө бүтэн төлсөн сурагчид PAYMENT тэмдэглэл шаардлагагүй
   // (notes.service assertPaymentNoteAllowed-тэй ижил). Мэдэхгүй бол хаахгүй — сервер хэлнэ.
-  const payments = paymentsQ.data;
   // Зөвхөн жилийн төлбөрөө БҮТЭН төлсөн үед хаана (урьдчилгаатай бол амлалтын
   // тэмдэглэл хэрэгтэй — notes.service-тэй ижил, 2026-10-13).
+  const lr = ledgerQ.data?.row;
   const paymentNotesBlocked = !!(
-    payments &&
-    payments.tuitionPlan === "FULL_YEAR" &&
-    payments.payments.some((p) => p.status === "CONFIRMED") &&
-    payments.summary.outstanding <= 0
+    lr &&
+    lr.plan.kind === "FULL_YEAR" &&
+    lr.paidTotal > 0 &&
+    lr.remaining <= 0
   );
 
   return (
@@ -129,14 +172,21 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
             onRemove={() => setDialog("remove")}
             onRestore={() => setDialog("restore")}
             canSeeMoney={canSeeMoney}
-            payments={{ status: paymentsQ.status, data: paymentsQ.data }}
+            ledger={{ status: ledgerQ.status, data: ledgerQ.data }}
+            onOpenPayments={
+              canSeeMoney && !archived ? () => changeTab("payments") : undefined
+            }
             summary={{ status: summaryQ.status, data: summaryQ.data }}
           />
         )}
 
         {/* Табууд — утсан дээр зөвхөн мөр нь хөндлөн гүйнэ, хуудас биш */}
         <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-          <div role="tablist" aria-label="Сурагчийн хэсгүүд" className="flex w-max min-w-full border-b border-line">
+          <div
+            role="tablist"
+            aria-label="Сурагчийн хэсгүүд"
+            className="flex w-max min-w-full border-b border-line"
+          >
             {tabs.map((key) => (
               <button
                 key={key}
@@ -146,7 +196,9 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
                 onClick={() => changeTab(key)}
                 className={cn(
                   "min-h-11 shrink-0 whitespace-nowrap px-3 text-sm font-semibold transition md:px-4",
-                  tab === key ? "border-b-2 border-brand-bright text-brand" : "text-ink-dim hover:text-ink",
+                  tab === key
+                    ? "border-b-2 border-brand-bright text-brand"
+                    : "text-ink-dim hover:text-ink",
                 )}
               >
                 {TAB_LABELS[key]}
@@ -156,7 +208,9 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
         </div>
 
         {tab === "class" && <ClassProgressTab studentId={studentId} />}
-        {tab === "independent" && <IndependentProgressTab studentId={studentId} />}
+        {tab === "independent" && (
+          <IndependentProgressTab studentId={studentId} />
+        )}
         {tab === "lessons" && <LessonHistoryTab studentId={studentId} />}
         {tab === "syllabus" && <SyllabusTab studentId={studentId} />}
         {tab === "exams" && <StudentPaperResults studentId={studentId} />}
@@ -164,11 +218,21 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
           (status === "loading" ? (
             <LoadingState rows={4} label="Шалгалт" />
           ) : classId ? (
-            <ClassStudentDetail key={classId} classId={classId} studentId={studentId} />
+            <ClassStudentDetail
+              key={classId}
+              classId={classId}
+              studentId={studentId}
+            />
           ) : (
-            <EmptyState title="Сурагч ангид бүртгэлгүй" hint="Ангид оруулсны дараа ангийн шалгалтын дүн энд гарна." />
+            <EmptyState
+              title="Сурагч ангид бүртгэлгүй"
+              hint="Ангид оруулсны дараа ангийн шалгалтын дүн энд гарна."
+            />
           ))}
-        {tab === "payments" && canSeeMoney && (
+        {tab === "payments" && canSeeMoney && !archived && (
+          <StudentLedger id={studentId} embedded onChanged={ledgerQ.reload} />
+        )}
+        {tab === "payments" && canSeeMoney && archived && (
           <PaymentsTab
             profile={detail?.studentProfile ?? null}
             status={paymentsQ.status}
@@ -178,7 +242,9 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
           />
         )}
         {tab === "books" && <BooksTab studentId={studentId} />}
-        {tab === "withdrawal" && canSeeMoney && <WithdrawalTab studentId={studentId} />}
+        {tab === "withdrawal" && canSeeMoney && (
+          <WithdrawalTab studentId={studentId} />
+        )}
         {tab === "notes" && (
           <StudentNotesPanel
             studentId={studentId}
@@ -194,6 +260,7 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
               setDetail={detailQ.setData}
               reload={() => {
                 load();
+                ledgerQ.reload();
                 paymentsQ.reload();
               }}
               canEdit={canEditProfile(role, detail.role)}
@@ -239,7 +306,12 @@ function StudentProgressContent({ studentId }: { studentId: string }) {
 
 function OverviewSkeleton() {
   return (
-    <div className="chunky p-4 md:p-6" aria-busy="true" role="status" aria-label="Ачаалж байна">
+    <div
+      className="chunky p-4 md:p-6"
+      aria-busy="true"
+      role="status"
+      aria-label="Ачаалж байна"
+    >
       <SkeletonLine width="45%" height={22} />
       <SkeletonLine width="30%" height={12} className="mt-2" />
       <div className="mt-4 grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3">
