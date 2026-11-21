@@ -140,7 +140,7 @@ body = sub1(body, '<a class="btn" href="#enter">Бүртгүүлэх', '<a class
 body = sub1(body, '<a href="#enter">Нэвтрэх', '<a href="/login">Нэвтрэх')
 body = sub1(body, '<span>Нэвтрэх, Бүртгүүлэх</span>', '<a href="/login">Нэвтрэх</a><a href="/register">Бүртгүүлэх</a>')
 body = sub_opt(body, '<a class="tlink" href="#">Төлбөр</a>', '<a class="tlink" href="#plan">Төлбөр</a>')
-body = sub1(body, '<a class="it" href="#foot"><small>11</small>Тусламж</a>', '<a class="it" href="/help"><small>11</small>Тусламж</a>')
+body = sub1(body, '<a class="it" href="#foot"><small>10</small>Тусламж</a>', '<a class="it" href="/help"><small>10</small>Тусламж</a>')
 if 'href="#enter"' in body:
     raise SystemExit('href="#enter" үлдлээ')
 if re.search(r'href="#"', body):

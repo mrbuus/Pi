@@ -504,30 +504,55 @@ html.lenis,html.lenis body{height:auto}
 .sie .acc .a .tuit-list li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;color:var(--muted);font-size:15px;line-height:1.45}
 .sie .acc .a .tuit-list li b{color:var(--text);font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 @media (min-width:900px){.sie .tuit .acc.tuit-grid{grid-template-columns:1fr 1fr}}
-.sie[data-page="home"] #results,.sie[data-page="home"] #wall,.sie[data-page="home"] #lab,.sie[data-page="home"] #team,.sie[data-page="home"] #classes{display:none}
-.sie[data-page="amjiltuud"] main>section:not(#results):not(#wall):not(.pghd){display:none}
+.sie[data-page="home"] main>section:not(#hero):not(#how){display:none}
+.sie[data-page="amjiltuud"] main>section:not(#results):not(#wall):not(.clients):not(.pghd){display:none}
 .sie[data-page="bagsh-nar"] main>section:not(#team):not(#classes):not(.pghd){display:none}
+.sie[data-page="nomuud"] main>section:not(#books):not(.pghd){display:none}
+.sie[data-page="tulbur"] main>section:not(#access):not(.pghd){display:none}
+.sie[data-page="salbar"] main>section:not(#addr):not(#branches):not(.pghd){display:none}
 .sie[data-page="ogtlol"] main>section:not(#lab):not(.pghd){display:none}
-.sie .pghd{display:none;padding:112px var(--pad) 8px}
-.sie[data-page="amjiltuud"] .pghd,.sie[data-page="bagsh-nar"] .pghd,.sie[data-page="ogtlol"] .pghd{display:block}
-.sie .pgtabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.sie[data-page="amjiltuud"] main{display:flex;flex-direction:column}
+.sie[data-page="amjiltuud"] .clients{order:9}
+.sie .pghd{display:none;padding:96px var(--pad) 8px}
+.sie[data-page="amjiltuud"] .pghd,.sie[data-page="bagsh-nar"] .pghd,.sie[data-page="nomuud"] .pghd,.sie[data-page="tulbur"] .pghd,.sie[data-page="salbar"] .pghd,.sie[data-page="ogtlol"] .pghd{display:block}
+.sie .pgtabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 calc(var(--pad)*-1);padding:0 var(--pad)}
 .sie .pgtabs::-webkit-scrollbar{display:none}
-.sie[data-page="amjiltuud"] #results,.sie[data-page="bagsh-nar"] #team,.sie[data-page="ogtlol"] #lab{padding-top:clamp(20px,4vh,40px)}
-.sie .pgtabs a{padding:12px 20px;border-radius:999px;border:1px solid var(--line);font-size:16px;font-weight:600;color:var(--muted);transition:background .2s,color .2s}
-.sie .pgtabs a:hover{color:var(--text)}
+.sie .pgtabs a{flex:none;padding:10px 16px;border-radius:999px;border:1px solid var(--line);font-size:15px;font-weight:600;color:var(--muted);white-space:nowrap}
 .sie .pgtabs a.on{background:var(--text);color:var(--bg);border-color:var(--text)}
-@media (max-width:520px){.sie .pghd{padding-top:96px}.sie .pgtabs{gap:6px}.sie .pgtabs a{flex:1 1 auto;text-align:center;padding:10px 6px;font-size:15px;white-space:nowrap}}
+@media (min-width:1000px){.sie .pghd{padding:104px 0 0}.sie .pgtabs{display:none}.sie[data-page="nomuud"] .pghd{display:none}}
 .sie .nav .links a.on{background:rgba(255,255,255,.1);color:var(--text)}
 .sie.light .nav .links a.on{background:rgba(24,41,80,.08)}
-.sie .tgo{display:grid;gap:16px;padding:clamp(40px,8vh,80px) var(--pad)}
-@media (min-width:900px){.sie .tgo{grid-template-columns:repeat(3,1fr)}}
-.sie .tg{display:flex;flex-direction:column;gap:8px;padding:26px;border-radius:22px;background:var(--s1);border:1px solid var(--line);transition:border-color .2s,transform .2s}
-.sie .tg:hover{border-color:var(--line-2);transform:translateY(-2px)}
-.sie .tg>svg{color:var(--accent);margin-bottom:6px}
-.sie .tg .k{font-size:15px;font-weight:600;color:var(--accent)}
-.sie .tg b{font-size:clamp(22px,2.2vw,28px);line-height:1.2;font-weight:700;letter-spacing:-.02em}
-.sie .tg .d{font-size:16px;line-height:1.5;color:var(--muted)}
-.sie .tg .go{display:inline-flex;align-items:center;gap:8px;margin-top:auto;padding-top:14px;font-size:16px;font-weight:600;color:var(--text)}
+.sie[data-page="amjiltuud"] #results,.sie[data-page="bagsh-nar"] #team,.sie[data-page="ogtlol"] #lab,.sie[data-page="tulbur"] #access{padding-top:clamp(20px,4vh,40px)}
+.sie .addr{padding:clamp(20px,4vh,40px) var(--pad) clamp(40px,7vh,72px)}
+.sie .addr h2{font-size:clamp(34px,5vw,60px);line-height:1.05;letter-spacing:-.03em;font-weight:800}
+.sie .addr .lead{font-size:18px;line-height:1.5;color:var(--muted);margin-top:12px}
+.sie .ads{display:grid;gap:14px;margin-top:26px}
+@media (min-width:800px){.sie .ads{grid-template-columns:1fr 1fr}}
+.sie .ad{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:24px;border-radius:22px;background:var(--s1);border:1px solid var(--line)}
+.sie .ad>svg{color:var(--accent);margin-bottom:6px}
+.sie .ad h3{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.sie .ad p{font-size:17px;line-height:1.5;color:var(--muted);margin-bottom:12px}
+.sie .addr .tel{font-size:18px;margin-top:22px;color:var(--muted)}
+.sie .addr .tel a{color:var(--text);font-weight:600}
+.sie .hx-sec{margin-top:clamp(36px,6vh,60px)}
+.sie .hx-sec h2{font-size:clamp(21px,1.8vw,25px);font-weight:700;letter-spacing:-.01em}
+.sie .hx-tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+@media (min-width:700px){.sie .hx-tabs{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:1100px){.sie .hx-tabs{grid-template-columns:repeat(6,1fr)}}
+.sie .tb{display:flex;flex-direction:column;gap:4px;padding:18px;border-radius:18px;background:var(--s1);border:1px solid var(--line);transition:border-color .2s,transform .2s}
+.sie .tb:hover{border-color:var(--accent);transform:translateY(-2px)}
+.sie .tb svg{color:var(--accent);margin-bottom:8px}
+.sie .tb b{font-size:19px;font-weight:700}
+.sie .tb small{font-size:15px;line-height:1.4;color:var(--muted)}
+.sie .hx-steps{list-style:none;display:grid;gap:10px;margin-top:14px}
+@media (min-width:1100px){.sie .hx-steps{grid-template-columns:repeat(4,1fr)}}
+.sie .hx-steps a{display:flex;align-items:center;gap:12px;height:100%;padding:16px;border-radius:18px;border:1px solid var(--line);transition:border-color .2s}
+.sie .hx-steps a:hover{border-color:var(--accent)}
+.sie .hx-steps .t{flex:1;display:flex;flex-direction:column;gap:2px}
+.sie .hx-steps b{font-size:17px;font-weight:600}
+.sie .hx-steps small{font-size:14px;line-height:1.35;color:var(--muted)}
+.sie .hx-steps .n{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--text);color:var(--bg);font-weight:700;font-size:16px}
+.sie .hx-steps a>svg{flex:none;color:var(--accent)}
 .sie .hx{padding:clamp(104px,15vh,150px) var(--pad) clamp(40px,7vh,72px)}
 .sie .hx-top{display:grid;gap:clamp(28px,4vw,64px);align-items:center}
 @media (min-width:1000px){.sie .hx-top{grid-template-columns:1.15fr .85fr}}
@@ -551,18 +576,6 @@ html.lenis,html.lenis body{height:auto}
 .sie .hx-proof .rows b{font-size:24px;font-weight:700;color:var(--text);white-space:nowrap}
 .sie .hx-proof .rows small{font-size:14px;color:var(--muted);font-weight:500;margin-left:6px}
 .sie .hx-proof .go{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:16px;font-weight:600;color:var(--accent)}
-.sie .hx-do{display:grid;gap:16px;margin-top:clamp(36px,6vh,64px)}
-@media (min-width:1000px){.sie .hx-do{grid-template-columns:1fr 1fr}}
-.sie .hx-do .col{padding:clamp(20px,2.4vw,28px);border-radius:24px;border:1px solid var(--line)}
-.sie .hx-do h2{font-size:clamp(21px,1.8vw,24px);font-weight:700;letter-spacing:-.01em}
-.sie .hx-do ol,.sie .hx-do ul{list-style:none;margin-top:14px;display:grid;gap:8px}
-.sie .hx-do a{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;background:var(--s1);border:1px solid transparent;transition:border-color .2s}
-.sie .hx-do a:hover{border-color:var(--line-2)}
-.sie .hx-do .t{flex:1;display:flex;flex-direction:column;gap:2px}
-.sie .hx-do b{font-size:18px;font-weight:600}
-.sie .hx-do small{font-size:15px;color:var(--muted)}
-.sie .hx-do .n{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--text);color:var(--bg);font-weight:700;font-size:16px}
-.sie .hx-do a>svg{flex:none;color:var(--accent)}
 .sie .how{padding:clamp(48px,9vh,96px) var(--pad)}
 .sie .how-hd{display:grid;gap:14px;max-width:760px}
 .sie .how-hd h2{font-size:clamp(30px,4vw,48px);line-height:1.08;letter-spacing:-.03em;font-weight:800}

@@ -611,32 +611,61 @@ body.light .subj button[aria-selected=true]{background:rgba(11,24,52,.08);color:
 .acc .a .tuit-list li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;color:var(--muted);font-size:15px;line-height:1.45}
 .acc .a .tuit-list li b{color:var(--text);font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 @media (min-width:900px){.tuit .acc.tuit-grid{grid-template-columns:1fr 1fr}}
-/* Таб хуудас (2026-11-21): нэг markup, хуудас бүр өөрийн хэсгүүдээ л харуулна */
-body[data-page="home"] #results,body[data-page="home"] #wall,body[data-page="home"] #lab,body[data-page="home"] #team,body[data-page="home"] #classes{display:none}
-body[data-page="amjiltuud"] main>section:not(#results):not(#wall):not(.pghd){display:none}
+/* Таб хуудас (2026-11-21): нэг markup, хуудас бүр өөрийн хэсгүүдээ л харуулна.
+   Мэдээлэл бүр ганц газарт: #idea, #slide, #plan аль ч хуудсанд харагдахгүй (бусад хэсгийн давхардал) */
+body[data-page="home"] main>section:not(#hero):not(#how){display:none}
+body[data-page="amjiltuud"] main>section:not(#results):not(#wall):not(.clients):not(.pghd){display:none}
 body[data-page="bagsh-nar"] main>section:not(#team):not(#classes):not(.pghd){display:none}
+body[data-page="nomuud"] main>section:not(#books):not(.pghd){display:none}
+body[data-page="tulbur"] main>section:not(#access):not(.pghd){display:none}
+body[data-page="salbar"] main>section:not(#addr):not(#branches):not(.pghd){display:none}
 body[data-page="ogtlol"] main>section:not(#lab):not(.pghd){display:none}
-.pghd{display:none;padding:112px var(--pad) 8px}
-body[data-page="amjiltuud"] .pghd,body[data-page="bagsh-nar"] .pghd,body[data-page="ogtlol"] .pghd{display:block}
-.pgtabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+body[data-page="amjiltuud"] main{display:flex;flex-direction:column}
+body[data-page="amjiltuud"] .clients{order:9}
+/* Утсанд: дэд хуудасны дээр гүйлгэдэг таб мөр. Компьютерт дээд цэс өөрөө таб тул зөвхөн зай */
+.pghd{display:none;padding:96px var(--pad) 8px}
+body[data-page="amjiltuud"] .pghd,body[data-page="bagsh-nar"] .pghd,body[data-page="nomuud"] .pghd,body[data-page="tulbur"] .pghd,body[data-page="salbar"] .pghd,body[data-page="ogtlol"] .pghd{display:block}
+.pgtabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 calc(var(--pad)*-1);padding:0 var(--pad)}
 .pgtabs::-webkit-scrollbar{display:none}
-/* дэд хуудсанд эхний хэсэг таб мөрөөс шууд эхэлнэ (нүүрэн дээрх том дээд зай хэрэггүй) */
-body[data-page="amjiltuud"] #results,body[data-page="bagsh-nar"] #team,body[data-page="ogtlol"] #lab{padding-top:clamp(20px,4vh,40px)}
-.pgtabs a{padding:12px 20px;border-radius:999px;border:1px solid var(--line);font-size:16px;font-weight:600;color:var(--muted);transition:background .2s,color .2s}
-.pgtabs a:hover{color:var(--text)}
+.pgtabs a{flex:none;padding:10px 16px;border-radius:999px;border:1px solid var(--line);font-size:15px;font-weight:600;color:var(--muted);white-space:nowrap}
 .pgtabs a.on{background:var(--text);color:var(--bg);border-color:var(--text)}
-@media (max-width:520px){.pghd{padding-top:96px}.pgtabs{gap:6px}.pgtabs a{flex:1 1 auto;text-align:center;padding:10px 6px;font-size:15px;white-space:nowrap}}
+@media (min-width:1000px){.pghd{padding:104px 0 0}.pgtabs{display:none}
+  body[data-page="nomuud"] .pghd{display:none}}
 .nav .links a.on{background:rgba(255,255,255,.1);color:var(--text)}
 body.light .nav .links a.on{background:rgba(24,41,80,.08)}
-.tgo{display:grid;gap:16px;padding:clamp(40px,8vh,80px) var(--pad)}
-@media (min-width:900px){.tgo{grid-template-columns:repeat(3,1fr)}}
-.tg{display:flex;flex-direction:column;gap:8px;padding:26px;border-radius:22px;background:var(--s1);border:1px solid var(--line);transition:border-color .2s,transform .2s}
-.tg:hover{border-color:var(--line-2);transform:translateY(-2px)}
-.tg>svg{color:var(--accent);margin-bottom:6px}
-.tg .k{font-size:15px;font-weight:600;color:var(--accent)}
-.tg b{font-size:clamp(22px,2.2vw,28px);line-height:1.2;font-weight:700;letter-spacing:-.02em}
-.tg .d{font-size:16px;line-height:1.5;color:var(--muted)}
-.tg .go{display:inline-flex;align-items:center;gap:8px;margin-top:auto;padding-top:14px;font-size:16px;font-weight:600;color:var(--text)}
+/* дэд хуудсанд эхний хэсэг таб мөрөөс шууд эхэлнэ */
+body[data-page="amjiltuud"] #results,body[data-page="bagsh-nar"] #team,body[data-page="ogtlol"] #lab,body[data-page="tulbur"] #access{padding-top:clamp(20px,4vh,40px)}
+.addr{padding:clamp(20px,4vh,40px) var(--pad) clamp(40px,7vh,72px)}
+.addr h2{font-size:clamp(34px,5vw,60px);line-height:1.05;letter-spacing:-.03em;font-weight:800}
+.addr .lead{font-size:18px;line-height:1.5;color:var(--muted);margin-top:12px}
+.ads{display:grid;gap:14px;margin-top:26px}
+@media (min-width:800px){.ads{grid-template-columns:1fr 1fr}}
+.ad{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:24px;border-radius:22px;background:var(--s1);border:1px solid var(--line)}
+.ad>svg{color:var(--accent);margin-bottom:6px}
+.ad h3{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.ad p{font-size:17px;line-height:1.5;color:var(--muted);margin-bottom:12px}
+.addr .tel{font-size:18px;margin-top:22px;color:var(--muted)}
+.addr .tel a{color:var(--text);font-weight:600}
+/* Hero-гийн доод хэсэг: хэсгүүдийн таб, анх ирэгчийн алхмууд */
+.hx-sec{margin-top:clamp(36px,6vh,60px)}
+.hx-sec h2{font-size:clamp(21px,1.8vw,25px);font-weight:700;letter-spacing:-.01em}
+.hx-tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+@media (min-width:700px){.hx-tabs{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:1100px){.hx-tabs{grid-template-columns:repeat(6,1fr)}}
+.tb{display:flex;flex-direction:column;gap:4px;padding:18px;border-radius:18px;background:var(--s1);border:1px solid var(--line);transition:border-color .2s,transform .2s}
+.tb:hover{border-color:var(--accent);transform:translateY(-2px)}
+.tb svg{color:var(--accent);margin-bottom:8px}
+.tb b{font-size:19px;font-weight:700}
+.tb small{font-size:15px;line-height:1.4;color:var(--muted)}
+.hx-steps{list-style:none;display:grid;gap:10px;margin-top:14px}
+@media (min-width:1100px){.hx-steps{grid-template-columns:repeat(4,1fr)}}
+.hx-steps a{display:flex;align-items:center;gap:12px;height:100%;padding:16px;border-radius:18px;border:1px solid var(--line);transition:border-color .2s}
+.hx-steps a:hover{border-color:var(--accent)}
+.hx-steps .t{flex:1;display:flex;flex-direction:column;gap:2px}
+.hx-steps b{font-size:17px;font-weight:600}
+.hx-steps small{font-size:14px;line-height:1.35;color:var(--muted)}
+.hx-steps .n{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--text);color:var(--bg);font-weight:700;font-size:16px}
+.hx-steps a>svg{flex:none;color:var(--accent)}
 /* Хөдөлгөөнгүй hero (2026-11-21): 3D, гүйлгэлтийн хөдөлгөөнгүй; эцэг эх нэг харахад ойлгох */
 .hx{padding:clamp(104px,15vh,150px) var(--pad) clamp(40px,7vh,72px)}
 .hx-top{display:grid;gap:clamp(28px,4vw,64px);align-items:center}
@@ -661,18 +690,6 @@ body.light .nav .links a.on{background:rgba(24,41,80,.08)}
 .hx-proof .rows b{font-size:24px;font-weight:700;color:var(--text);white-space:nowrap}
 .hx-proof .rows small{font-size:14px;color:var(--muted);font-weight:500;margin-left:6px}
 .hx-proof .go{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:16px;font-weight:600;color:var(--accent)}
-.hx-do{display:grid;gap:16px;margin-top:clamp(36px,6vh,64px)}
-@media (min-width:1000px){.hx-do{grid-template-columns:1fr 1fr}}
-.hx-do .col{padding:clamp(20px,2.4vw,28px);border-radius:24px;border:1px solid var(--line)}
-.hx-do h2{font-size:clamp(21px,1.8vw,24px);font-weight:700;letter-spacing:-.01em}
-.hx-do ol,.hx-do ul{list-style:none;margin-top:14px;display:grid;gap:8px}
-.hx-do a{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;background:var(--s1);border:1px solid transparent;transition:border-color .2s}
-.hx-do a:hover{border-color:var(--line-2)}
-.hx-do .t{flex:1;display:flex;flex-direction:column;gap:2px}
-.hx-do b{font-size:18px;font-weight:600}
-.hx-do small{font-size:15px;color:var(--muted)}
-.hx-do .n{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--text);color:var(--bg);font-weight:700;font-size:16px}
-.hx-do a>svg{flex:none;color:var(--accent)}
 .how{padding:clamp(48px,9vh,96px) var(--pad)}
 .how-hd{display:grid;gap:14px;max-width:760px}
 .how-hd h2{font-size:clamp(30px,4vw,48px);line-height:1.08;letter-spacing:-.03em;font-weight:800}
@@ -692,7 +709,7 @@ body.light .nav .links a.on{background:rgba(24,41,80,.08)}
 <nav class="nav" aria-label="Үндсэн цэс">
   <a class="logo-fix" id="logoFix" href="#top" aria-label="Шинэ Ирээдүйн Эзэд, нүүр"><img class="w" src="logo-full-dark.png" alt="Шинэ Ирээдүйн Эзэд"><img class="n" src="logo-full.png" alt=""></a>
   <div class="links">
-    <a href="#hero">Хичээлүүд</a><a href="/amjiltuud" data-pg="amjiltuud">Амжилт</a><a href="/bagsh-nar" data-pg="bagsh-nar">Багш нар</a><a href="/ogtlol" data-pg="ogtlol">Огтлол</a><a href="/sorils">Жишиг сорил</a><a href="#access">Төлбөр</a>
+    <a href="/amjiltuud" data-pg="amjiltuud">Амжилт</a><a href="/bagsh-nar" data-pg="bagsh-nar">Багш нар</a><a href="/nomuud" data-pg="nomuud">Ном</a><a href="/tulbur" data-pg="tulbur">Төлбөр</a><a href="/salbar" data-pg="salbar">Салбар</a><a href="/ogtlol" data-pg="ogtlol">Огтлол</a>
   </div>
   <div class="thm" role="group" aria-label="Өнгө сонгох"><button data-th="light" aria-pressed="false" aria-label="Цагаан"><i data-lucide="sun" width="17" height="17"></i></button><button data-th="dark" aria-pressed="true" aria-label="Хөх"><i data-lucide="moon" width="17" height="17"></i></button></div>
   <a class="btn sm cta" href="#enter">Нэвтрэх<span class="ic"><i data-lucide="arrow-up-right" width="16" height="16"></i></span></a>
@@ -704,14 +721,13 @@ body.light .nav .links a.on{background:rgba(24,41,80,.08)}
   <a class="it" href="/" data-pg="home"><small>01</small>Нүүр</a>
   <a class="it" href="/amjiltuud" data-pg="amjiltuud"><small>02</small>Амжилт</a>
   <a class="it" href="/bagsh-nar" data-pg="bagsh-nar"><small>03</small>Багш нар</a>
-  <a class="it" href="/ogtlol" data-pg="ogtlol"><small>04</small>Огтлол</a>
-  <a class="it" href="#hero"><small>05</small>Хичээлүүд</a>
-  <a class="it" href="#access"><small>06</small>Төлбөр</a>
-  <a class="it" href="#branches"><small>07</small>Салбар</a>
-  <a class="it" href="#books"><small>08</small>Номоос үзэх</a>
-  <a class="it" href="/sorils"><small>09</small>Жишиг сорил</a>
-  <a class="it" href="/placement"><small>10</small>Түвшин тогтоох</a>
-  <a class="it" href="#foot"><small>11</small>Тусламж</a>
+  <a class="it" href="/nomuud" data-pg="nomuud"><small>04</small>Ном</a>
+  <a class="it" href="/tulbur" data-pg="tulbur"><small>05</small>Төлбөр</a>
+  <a class="it" href="/salbar" data-pg="salbar"><small>06</small>Салбар</a>
+  <a class="it" href="/ogtlol" data-pg="ogtlol"><small>07</small>Огтлол</a>
+  <a class="it" href="/sorils"><small>08</small>Жишиг сорил</a>
+  <a class="it" href="/placement"><small>09</small>Түвшин тогтоох</a>
+  <a class="it" href="#foot"><small>10</small>Тусламж</a>
   <div class="meta"><span>9590 4411</span><span>shineireedui2023@gmail.com</span><span>Нэвтрэх, Бүртгүүлэх</span></div>
 </div>
 
@@ -719,7 +735,7 @@ body.light .nav .links a.on{background:rgba(24,41,80,.08)}
 
 <!-- Таб хуудас (2026-11-21): дэд хуудсанд л харагдана ========= -->
 <section class="pghd" aria-label="Хэсгүүд">
-  <nav class="pgtabs"><a href="/" data-pg="home">Нүүр</a><a href="/amjiltuud" data-pg="amjiltuud">Амжилт</a><a href="/bagsh-nar" data-pg="bagsh-nar">Багш нар</a><a href="/ogtlol" data-pg="ogtlol">Огтлол</a></nav>
+  <nav class="pgtabs"><a href="/" data-pg="home">Нүүр</a><a href="/amjiltuud" data-pg="amjiltuud">Амжилт</a><a href="/bagsh-nar" data-pg="bagsh-nar">Багш нар</a><a href="/nomuud" data-pg="nomuud">Ном</a><a href="/tulbur" data-pg="tulbur">Төлбөр</a><a href="/salbar" data-pg="salbar">Салбар</a><a href="/ogtlol" data-pg="ogtlol">Огтлол</a></nav>
 </section>
 
 <!-- 1. HERO ============================================== -->
@@ -747,25 +763,26 @@ body.light .nav .links a.on{background:rgba(24,41,80,.08)}
     </a>
   </div>
 
-  <div class="hx-do">
-    <div class="col">
-      <h2>Анх удаа ирж байгаа бол</h2>
-      <ol class="steps">
-        <li><a href="/placement"><span class="n">1</span><span class="t"><b>Түвшингээ тогтоох</b><small>Онлайн тест, хаанаас эхлэхээ мэдэнэ</small></span><i data-lucide="arrow-right" width="18" height="18"></i></a></li>
-        <li><a href="/sorils"><span class="n">2</span><span class="t"><b>Жишиг сорил өгөх</b><small>Элсэлтийн шалгалтын хэлбэрээр</small></span><i data-lucide="arrow-right" width="18" height="18"></i></a></li>
-        <li><a href="#access"><span class="n">3</span><span class="t"><b>Анги, төлбөрөө сонгох</b><small>Хуваарь, үнэ, хөнгөлөлт</small></span><i data-lucide="arrow-right" width="18" height="18"></i></a></li>
-        <li><a href="/register"><span class="n">4</span><span class="t"><b>Бүртгүүлэх</b><small>Утасны дугаараар</small></span><i data-lucide="arrow-right" width="18" height="18"></i></a></li>
-      </ol>
-    </div>
-    <div class="col">
-      <h2>Манай сурагч, эцэг эх бол</h2>
-      <ul class="quick">
-        <li><a href="/login"><i data-lucide="log-in" width="22" height="22"></i><span class="t"><b>Нэвтрэх</b><small>Анги, даалгавар, дүн, төлбөр</small></span></a></li>
-        <li><a href="/books"><i data-lucide="book-open" width="22" height="22"></i><span class="t"><b>Номоос бодох</b><small>Манай номын тест, бодлого</small></span></a></li>
-        <li><a href="/tools"><i data-lucide="calculator" width="22" height="22"></i><span class="t"><b>Хэрэглэгдэхүүн</b><small>Бодогч, график, томьёо</small></span></a></li>
-        <li><a href="#branches"><i data-lucide="map-pin" width="22" height="22"></i><span class="t"><b>Салбарууд</b><small>Хаяг, газрын зураг</small></span></a></li>
-      </ul>
-    </div>
+  <div class="hx-sec">
+    <h2>Дэлгэрэнгүйг хэсэг бүрээс</h2>
+    <nav class="hx-tabs" aria-label="Хэсгүүд">
+      <a class="tb" href="/amjiltuud" data-pg="amjiltuud"><i data-lucide="trophy" width="24" height="24"></i><b>Амжилт</b><small>Төгсөгчдийн оноо, он оноор</small></a>
+      <a class="tb" href="/bagsh-nar" data-pg="bagsh-nar"><i data-lucide="users" width="24" height="24"></i><b>Багш нар</b><small>Багш нар, тэдний ангиуд</small></a>
+      <a class="tb" href="/nomuud" data-pg="nomuud"><i data-lucide="book-open" width="24" height="24"></i><b>Ном</b><small>Манай төвөөс гаргасан номууд</small></a>
+      <a class="tb" href="/tulbur" data-pg="tulbur"><i data-lucide="wallet" width="24" height="24"></i><b>Төлбөр</b><small>Сургалтын төлбөр, цахим эрх</small></a>
+      <a class="tb" href="/salbar" data-pg="salbar"><i data-lucide="map-pin" width="24" height="24"></i><b>Салбар</b><small>Хаяг, газрын зураг</small></a>
+      <a class="tb" href="/ogtlol" data-pg="ogtlol"><i data-lucide="scissors" width="24" height="24"></i><b>Огтлол</b><small>Биетийг өөрөө огтолж үзэх</small></a>
+    </nav>
+  </div>
+
+  <div class="hx-sec">
+    <h2>Анх удаа ирж байгаа бол</h2>
+    <ol class="hx-steps">
+      <li><a href="/placement"><span class="n">1</span><span class="t"><b>Түвшингээ тогтоох</b><small>Онлайн тест, хаанаас эхлэхээ мэдэнэ</small></span><i data-lucide="arrow-right" width="18" height="18"></i></a></li>
+      <li><a href="/sorils"><span class="n">2</span><span class="t"><b>Жишиг сорил өгөх</b><small>Элсэлтийн шалгалтын хэлбэрээр</small></span><i data-lucide="arrow-right" width="18" height="18"></i></a></li>
+      <li><a href="/tulbur" data-pg="tulbur"><span class="n">3</span><span class="t"><b>Анги, төлбөрөө сонгох</b><small>Хуваарь, үнэ, хөнгөлөлт</small></span><i data-lucide="arrow-right" width="18" height="18"></i></a></li>
+      <li><a href="/register"><span class="n">4</span><span class="t"><b>Бүртгүүлэх</b><small>Утасны дугаараар</small></span><i data-lucide="arrow-right" width="18" height="18"></i></a></li>
+    </ol>
   </div>
 </section>
 
@@ -773,7 +790,7 @@ body.light .nav .links a.on{background:rgba(24,41,80,.08)}
 <section class="how" id="how">
   <div class="how-hd">
     <h2>Анги бүр ингэж явагдана</h2>
-    <p>Зөв хариулсан нь ойлгосон гэсэн үг биш. Хүүхэд юу чадахгүйгээ мэдэж, сууриасаа эхэлж, шинэ бодлогыг өөрөө бодтол бид зогсохгүй</p>
+    <p>Зөв хариулсан нь ойлгосон гэсэн үг биш. Хүүхэд юу чадахгүйгээ мэдэж, сууриасаа эхэлж, шинэ бодлогыг өөрөө бодтол бид зогсохгүй. 7 хоногт 4 удаа, бүтэн жилийн хөтөлбөр</p>
   </div>
   <ol>
     <li><span class="n">1</span><h3>Онол</h3><p>Бүлэг сэдэв, тест бүрийн онолыг багш тайлбарлана</p></li>
@@ -790,12 +807,6 @@ body.light .nav .links a.on{background:rgba(24,41,80,.08)}
   <div class="mq" id="schools"></div>
 </section>
 
-<!-- Нүүрээс таб руу: том, ойлгомжтой гурван карт ============ -->
-<section class="tgo" aria-label="Дэлгэрэнгүй хэсгүүд">
-  <a class="tg" href="/amjiltuud" data-pg="amjiltuud"><i data-lucide="trophy" width="26" height="26"></i><span class="k">Амжилт</span><b>ЭШ-2026: 6 сурагч 800 оноо</b><span class="d">2018 оноос хойших бүх сурагчийн амжилт, он оноор</span><span class="go">Амжилтыг үзэх<i data-lucide="arrow-right" width="18" height="18"></i></span></a>
-  <a class="tg" href="/bagsh-nar" data-pg="bagsh-nar"><i data-lucide="users" width="26" height="26"></i><span class="k">Багш нар</span><b>Хичээлийн ард байдаг хүмүүс</b><span class="d">Ахлах болон туслах багш нар, тэдний ангиуд</span><span class="go">Багш нарыг үзэх<i data-lucide="arrow-right" width="18" height="18"></i></span></a>
-  <a class="tg" href="/ogtlol" data-pg="ogtlol"><i data-lucide="scissors" width="26" height="26"></i><span class="k">Огтлол</span><b>Биетийг өөрөө огтолж үз</b><span class="d">Куб, пирамид, цилиндрийг хүссэн өнцгөөр огтолж, огтлолын хэлбэрийг хар</span><span class="go">Огтолж үзэх<i data-lucide="arrow-right" width="18" height="18"></i></span></a>
-</section>
 
 <!-- Амжилт: суваг бүр нэг тоо, ард нь тэр тоонд орсон сурагчдын нүүр ======== -->
 <section class="tvs" id="results">
@@ -937,6 +948,17 @@ body.light .nav .links a.on{background:rgba(24,41,80,.08)}
   <div class="ln o" id="sl2">Улаанбаатарт бэлтгэж, улс даяар сорьдог<i class="sep"></i>Улаанбаатарт бэлтгэж, улс даяар сорьдог<i class="sep"></i></div>
 </section>
 
+<!-- Салбарын хаяг: хуудасны эхэнд, гүйлгэлгүй шууд харагдана (2026-11-21) -->
+<section class="addr" id="addr">
+  <h2>Салбарууд</h2>
+  <p class="lead">Танхимын хичээл Улаанбаатарт хоёр салбарт явагдана</p>
+  <div class="ads">
+    <div class="ad"><i data-lucide="map-pin" width="24" height="24"></i><h3>Бунда-Рага байр, 5 давхар</h3><p>Барилгын политехник коллежийн хойно</p><a class="btn sm" target="_blank" rel="noopener" href="https://www.google.com/maps/place/Shine+ireeduin+ezed/@47.9162193,106.8944537,650m/data=!3m2!1e3!4b1!4m6!3m5!1s0x5d96933abd758de7:0xd3766e0f5031a891!8m2!3d47.9162193!4d106.8944537!16s%2Fg%2F11vb_7xhq9">Газрын зураг нээх<span class="ic"><i data-lucide="arrow-up-right" width="16" height="16"></i></span></a></div>
+    <div class="ad"><i data-lucide="map-pin" width="24" height="24"></i><h3>Жоби-72 төв, 3 давхар</h3><p>301, 302 тоот, Жуковын буудлын баруун талд</p><a class="btn sm" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Jobi+72+%D0%A3%D0%BB%D0%B0%D0%B0%D0%BD%D0%B1%D0%B0%D0%B0%D1%82%D0%B0%D1%80">Газрын зураг нээх<span class="ic"><i data-lucide="arrow-up-right" width="16" height="16"></i></span></a></div>
+  </div>
+  <p class="tel">Утас: <a href="tel:95904411">9590 4411</a>, <a href="tel:88106256">8810 6256</a></p>
+</section>
+
 <!-- 8. Дэлхий ============================================== -->
 <section class="globe" id="branches">
   <div class="stick">
@@ -1031,8 +1053,8 @@ body.light .nav .links a.on{background:rgba(24,41,80,.08)}
   </div>
   <div class="cols">
     <div class="br"><img src="logo-full-dark.png" alt="Шинэ Ирээдүйн Эзэд"><p>Математик, нийгэм судлалын элсэлтийн шалгалтын бэлтгэл: танхимын сургалт, цахим ном, бодлогын сан</p></div>
-    <div><h4>Төв</h4><a href="#idea">Манай төв</a><a href="#results">Амжилтууд</a><a href="#team">Багш нар</a><a href="#branches">Салбар</a></div>
-    <div><h4>Суралцах</h4><a href="#hero">Хичээлүүд</a><a href="#books">Номоос үзэх</a><a href="#access">Төлбөр</a><a href="/placement">Түвшин тогтоох шалгалт</a><a href="/sorils">Жишиг сорил</a><a href="#enter">Нэвтрэх</a></div>
+    <div><h4>Төв</h4><a href="/amjiltuud" data-pg="amjiltuud">Амжилт</a><a href="/bagsh-nar" data-pg="bagsh-nar">Багш нар</a><a href="/salbar" data-pg="salbar">Салбар</a><a href="/ogtlol" data-pg="ogtlol">Огтлол</a></div>
+    <div><h4>Суралцах</h4><a href="/nomuud" data-pg="nomuud">Ном</a><a href="/tulbur" data-pg="tulbur">Төлбөр</a><a href="/placement">Түвшин тогтоох шалгалт</a><a href="/sorils">Жишиг сорил</a><a href="/tools">Хэрэглэгдэхүүн</a><a href="#enter">Нэвтрэх</a></div>
     <div><h4>Холбогдох</h4><a href="tel:95904411">9590 4411</a><a href="tel:88106256">8810 6256</a><a href="mailto:shineireedui2023@gmail.com">shineireedui2023@gmail.com</a><a href="https://www.facebook.com/Baasanjaw2022" target="_blank" rel="noopener">Facebook</a></div>
   </div>
   <div class="wmk" id="wmk">Шинэ Ирээдүйн Эзэд</div>
@@ -1062,9 +1084,10 @@ const PG_EL=document.body, PG_Q=new URLSearchParams(location.search);
 if(!PG_EL.dataset.page) PG_EL.dataset.page=PG_Q.get('page')||'home';
 const PG=PG_EL.dataset.page;
 const PG_URL=p=>'?page='+p;
-const PG_OWN={results:'amjiltuud',wall:'amjiltuud',team:'bagsh-nar',classes:'bagsh-nar',lab:'ogtlol'};
+const PG_OWN={results:'amjiltuud',wall:'amjiltuud',team:'bagsh-nar',classes:'bagsh-nar',books:'nomuud',access:'tulbur',branches:'salbar',addr:'salbar',lab:'ogtlol'};
 $$('a[data-pg]').forEach(a=>{ const u=new URL(PG_URL(a.dataset.pg),location.href); if(a.dataset.ch) u.searchParams.set('ch',a.dataset.ch);
-  a.href=u.pathname+u.search; if(a.dataset.pg===PG && !a.classList.contains('tg')){ a.classList.add('on'); a.setAttribute('aria-current','page'); } });
+  a.href=u.pathname+u.search; if(a.dataset.pg===PG && !a.classList.contains('tb')){ a.classList.add('on'); a.setAttribute('aria-current','page'); } });
+{ const on=$('.pgtabs a.on'); if(on) on.scrollIntoView({inline:'center',block:'nearest'}); }
 // #холбоос өөр хуудсанд байгаа хэсгийг тэр хуудас руу (нүүр дээрх #results -> /amjiltuud#results)
 $$('a[href^="#"]').forEach(a=>{ const id=a.getAttribute('href').slice(1); if(!id||id==='top'||id==='foot') return;
   const own=PG_OWN[id]||'home'; if(own!==PG) a.setAttribute('href',PG_URL(own)+'#'+id); });

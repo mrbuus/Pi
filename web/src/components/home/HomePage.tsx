@@ -48,7 +48,11 @@ function showStillTag(root: HTMLElement) {
 }
 
 // Таб хуудас (2026-11-21): нэг markup, хуудас бүр өөрийн хэсгүүдээ л харуулна (home.css-ийн data-page дүрэм)
-export type HomeTab = "home" | "amjiltuud" | "bagsh-nar" | "ogtlol";
+export type HomeTab = "home" | "amjiltuud" | "bagsh-nar" | "nomuud" | "tulbur" | "salbar" | "ogtlol";
+
+// 3D (three.js, ~600KB) зөвхөн 3D-тэй хуудсанд: огтлолын лаборатори, салбарын бөмбөрцөг.
+// Нүүр болон бусад таб WebGL огт асаахгүй — утас, хуучин компьютер гацахгүй (эзэн 2026-11-21).
+const NEEDS_3D: readonly HomeTab[] = ["ogtlol", "salbar"];
 
 export default function HomePage({ page = "home" }: { page?: HomeTab }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -69,6 +73,7 @@ export default function HomePage({ page = "home" }: { page?: HomeTab }) {
       const { mountDom } = await import("./dom");
       if (dead) return;
       offDom = mountDom(root);
+      if (!NEEDS_3D.includes(page)) return;
       if (!canRender3D()) return fallBack();
       try {
         const { mountThree } = await import("./three");
@@ -83,7 +88,7 @@ export default function HomePage({ page = "home" }: { page?: HomeTab }) {
       // dom.ts нь markup-ийг өөрчилдөг (үгс задлах, ном нэмэх) — дахин холбогдоход цэвэр эх хэрэгтэй
       if (offDom) { root.innerHTML = MARKUP; root.classList.remove("ready"); }
     };
-  }, []);
+  }, [page]);
 
   // Нэвтэрсэн хэрэглэгчид «Нэвтрэх»-ийн оронд өөрийн хэсэг рүү
   useEffect(() => {
