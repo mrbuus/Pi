@@ -1040,6 +1040,13 @@ model Test {
   // Аппаас/табаас гарах дүрэм: хэд дэх гаралтад автоматаар илгээх (3 = Зөөлөн, 2 = Хатуу).
   // Шийдвэрийг клиент гаргана; сервер зөвхөн утгыг дамжуулж, багшид ялгаж харуулна (tests/leave-limit.ts).
   leaveLimit   Int             @default(3)
+  // Нийтлэг цонх (tests/exam-window.ts): opensAt-аас өмнө, closesAt-аас хойш эхлүүлэхгүй;
+  // deadlineAt = min(эхэлсэн + timeLimitMin, closesAt). null = хязгааргүй (өмнөх зан төлөв).
+  opensAt      DateTime?
+  closesAt     DateTime?
+  // Цаасан шалгалтын горим (Нэгдсэн шалгалт): сонголт A–E үсэгтэй, ХОЛИХГҮЙ; A/B хувилбарыг
+  // сервер сурагч бүрд оноож нөгөөг хаана (tests/variant-assign.ts). null/false = өмнөх зан төлөв.
+  paperMode    Boolean?
   pdfKey       String? // PDF-ээр оруулсан тест (Багш+/Админ)
   price        Int?
   // A/B хувилбарууд: groupKey ижил, variantLabel ялгаатай (ж: "Тест 18" → A, B)

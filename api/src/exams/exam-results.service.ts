@@ -42,6 +42,7 @@ import {
   youtubeOf,
 } from './exam-data';
 import { EXAM_TYPES } from './exams.service';
+import { keepAssignedVariants } from '../tests/variant-assign';
 
 /** Бодлого бүрийн дугаар ба зарцуулсан секунд (онлайн сесстэй үед л). */
 export function itemTimesOf(
@@ -131,6 +132,10 @@ export class ExamResultsService {
         timeLimitMin: true,
         variantLabel: true,
         groupKey: true,
+        opensAt: true,
+        closesAt: true,
+        paperMode: true,
+        createdAt: true,
         chapterId: true,
         chapter: { select: { bookId: true, book: { select: { code: true, displayName: true } } } },
         _count: { select: { problems: true } },
@@ -151,8 +156,23 @@ export class ExamResultsService {
       orderBy: { createdAt: 'desc' },
     });
 
+    // Цаасан горимын A/B бүлэгт зөвхөн сурагчид оноогдсон хувилбар (tests/variant-assign.ts)
+    const visible = keepAssignedVariants(
+      tests.map((t) => ({
+        id: t.id,
+        title: t.title,
+        groupKey: t.groupKey,
+        createdAt: t.createdAt,
+        hasResult: t.results.length > 0,
+        sessionStatus: t.attemptSessions[0]?.status ?? null,
+        t,
+      })),
+      userId,
+      (w) => !!w.t.paperMode && !!w.t.variantLabel,
+    ).map((w) => w.t);
+
     return {
-      exams: tests.map((t) => {
+      exams: visible.map((t) => {
         const result = t.results[0] ?? null;
         const session = t.attemptSessions[0] ?? null;
         const assigned = t.access
@@ -166,6 +186,9 @@ export class ExamResultsService {
           timeLimitMin: t.timeLimitMin,
           variantLabel: t.variantLabel,
           groupKey: t.groupKey,
+          // Нэмэлт (2026-11-21): нийтлэг цонх
+          opensAt: t.opensAt,
+          closesAt: t.closesAt,
           chapter: t.chapter ? { book: t.chapter.book } : null,
           _count: t._count,
           results: result

@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayUnique,
   IsArray,
+  IsDateString,
   IsEnum,
   IsIn,
   IsInt,
@@ -68,6 +69,17 @@ export class UpdateTestDto extends ExpectedVersionDto {
   @ValidateIf((_object, value) => value !== undefined)
   @IsIn(LEAVE_LIMITS)
   leaveLimit?: LeaveLimit;
+
+  // Нийтлэг цонх (exam-window.ts): ISO огноо, null = арилгах. Сурагч эхлүүлсний дараа ч засна.
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'date-time' })
+  @ValidateIf((_object, value) => value !== undefined && value !== null)
+  @IsDateString()
+  opensAt?: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'date-time' })
+  @ValidateIf((_object, value) => value !== undefined && value !== null)
+  @IsDateString()
+  closesAt?: string | null;
 
   @ApiPropertyOptional({ type: String, nullable: true })
   @ValidateIf((_object, value) => value !== undefined && value !== null)

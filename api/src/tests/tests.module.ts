@@ -3,6 +3,7 @@ import { RankingService } from './ranking.service';
 import { Module } from '@nestjs/common';
 import { StudentTestResultsController, TestsController } from './tests.controller';
 import { TestsService } from './tests.service';
+import { SessionSweepCron } from './session-sweep.cron';
 import { ParentsModule } from '../parents/parents.module';
 import { MistakesModule } from '../mistakes/mistakes.module';
 import { ExamsModule } from '../exams/exams.module';
@@ -10,6 +11,6 @@ import { ExamsModule } from '../exams/exams.module';
 @Module({
   imports: [ParentsModule, MistakesModule, ExamsModule],
   controllers: [TestsController, StudentTestResultsController, RankingController],
-  providers: [TestsService, RankingService],
+  providers: [TestsService, RankingService, SessionSweepCron],
 })
 export class TestsModule {}

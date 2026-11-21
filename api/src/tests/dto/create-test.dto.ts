@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsDateString,
   IsEnum,
   IsIn,
   IsInt,
@@ -65,6 +66,17 @@ export class CreateTestDto {
   @ValidateIf((_object, value) => value !== undefined)
   @IsIn(LEAVE_LIMITS)
   leaveLimit?: LeaveLimit;
+
+  // Нийтлэг цонх (exam-window.ts): ISO огноо
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  opensAt?: string;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  closesAt?: string;
 
   @ApiPropertyOptional({ type: String })
   @IsOptional()

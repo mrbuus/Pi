@@ -661,10 +661,6 @@ export type AttemptUncheckedUpdateManyWithoutProblemNestedInput = {
   deleteMany?: Prisma.AttemptScalarWhereInput | Prisma.AttemptScalarWhereInput[]
 }
 
-export type NullableBoolFieldUpdateOperationsInput = {
-  set?: boolean | null
-}
-
 export type NullableEnumSelfStateFieldUpdateOperationsInput = {
   set?: $Enums.SelfState | null
 }

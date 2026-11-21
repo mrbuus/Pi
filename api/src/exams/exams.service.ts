@@ -273,6 +273,9 @@ export class ExamsService {
       gradingMode: true,
       timeLimitMin: true,
       leaveLimit: true,
+      opensAt: true,
+      closesAt: true,
+      paperMode: true,
       price: true,
       version: true,
       problems: {
@@ -351,6 +354,10 @@ export class ExamsService {
         timeLimitMin: test.timeLimitMin,
         // Аппаас гарах дүрэм: 3 = Зөөлөн, 2 = Хатуу (засах эрх = canEditTime, сурагч эхлэхээс өмнө)
         leaveLimit: normalizeLeaveLimit(test.leaveLimit),
+        // Нийтлэг цонх (UTC ISO; UI Улаанбаатарын цагаар), цаасан горим (импортоор)
+        opensAt: test.opensAt,
+        closesAt: test.closesAt,
+        paperMode: !!test.paperMode,
         price: role === Role.ADMIN ? test.price : undefined,
         taken: resultCount + sessionCount > 0,
         // Буцаах/түүх: засварлагч expectedVersion болгон илгээнэ (зөрвөл 409)

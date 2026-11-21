@@ -47,6 +47,13 @@ import {
 import { SaveSessionDto } from './dto/submit-test.dto';
 import { countIntegrityEvents, countsAsLeave } from './integrity-events';
 import { normalizeLeaveLimit, reachedLeaveLimit } from './leave-limit';
+import { sessionDeadline, startWindowError, windowError } from './exam-window';
+import {
+  keepAssignedVariants,
+  orderVariants,
+  pickAssignedVariant,
+  VariantRow,
+} from './variant-assign';
 import { MistakeCollector } from '../mistakes/mistake-collector.service';
 import { spentSeconds } from './problem-time';
 import { mistakeNotesOf } from './mistake-notes';
@@ -70,6 +77,12 @@ import {
 // Хугацаа дууссаны дараах уужим байдал: сүлжээний саатал, эцсийн autosave-д
 const GRACE_MS = 30_000;
 const MAX_EVENTS = 100;
+// Үечилсэн хаалт (session-sweep.cron.ts): GRACE-ээс хойш нэмэлт 90с хүлээнэ — сүүлийн
+// офлайн хариу, клиентийн автомат илгээлт серверийн хаалтаас түрүүлэх зай.
+export const SWEEP_EXTRA_MS = 90_000;
+// Хэт хуучин хаягдсан сессийг (энэ ажил нэмэгдэхээс өмнөх) автоматаар дүгнэхгүй —
+// өнөөдрийн огноотой Attempt, алдааны цуглуулга үүсгэж дата бохирдуулахаас сэргийлнэ.
+export const SWEEP_LOOKBACK_MS = 2 * 24 * 3600_000;
 
 // Prisma-гийн include-тэй тестийн бодлогын мөр
 type TestProblemRow = {
@@ -488,6 +501,10 @@ export class TestsService {
     if (dto.chapterId !== undefined) data.chapterId = dto.chapterId;
     if (dto.timeLimitMin !== undefined) data.timeLimitMin = dto.timeLimitMin;
     if (dto.leaveLimit !== undefined) data.leaveLimit = dto.leaveLimit;
+    if (dto.opensAt !== undefined)
+      data.opensAt = dto.opensAt === null ? null : new Date(dto.opensAt);
+    if (dto.closesAt !== undefined)
+      data.closesAt = dto.closesAt === null ? null : new Date(dto.closesAt);
     if (dto.pdfKey !== undefined) data.pdfKey = dto.pdfKey;
     if (dto.groupKey !== undefined) data.groupKey = dto.groupKey;
     if (dto.variantLabel !== undefined) data.variantLabel = dto.variantLabel;
@@ -522,13 +539,25 @@ export class TestsService {
         if (
           taken &&
           changedFields.some(
-            (field) => field !== 'title' && field !== 'timeLimitMin',
+            (field) =>
+              field !== 'title' &&
+              field !== 'timeLimitMin' &&
+              // Нээх/хаах цагийг шалгалтын явцад ч засна (эхэлсэн сессийн дуусах цаг хэвээр)
+              field !== 'opensAt' &&
+              field !== 'closesAt',
           )
         ) {
           throw new ConflictException(
             'Энэ тестийг сурагчид өгсөн тул зөвхөн нэр, хугацааг засах боломжтой',
           );
         }
+        const badWindow = windowError({
+          opensAt:
+            data.opensAt !== undefined ? (data.opensAt as Date | null) : test.opensAt,
+          closesAt:
+            data.closesAt !== undefined ? (data.closesAt as Date | null) : test.closesAt,
+        });
+        if (badWindow) throw new BadRequestException(badWindow);
 
         const shortensTime =
           dto.timeLimitMin !== undefined &&
@@ -691,6 +720,10 @@ export class TestsService {
     const answerWarning = dto.classroomIds?.length
       ? await this.checkAnswerCoverage(dto.problems ?? [])
       : undefined;
+    const opensAt = dto.opensAt ? new Date(dto.opensAt) : undefined;
+    const closesAt = dto.closesAt ? new Date(dto.closesAt) : undefined;
+    const badWindow = windowError({ opensAt, closesAt });
+    if (badWindow) throw new BadRequestException(badWindow);
 
     // Тест + түүхийн хувилбар 0 нэг transaction-д.
     const test = await this.prisma.$transaction(async (tx) => {
@@ -702,6 +735,8 @@ export class TestsService {
           chapterId: dto.chapterId,
           timeLimitMin: dto.timeLimitMin,
           leaveLimit: dto.leaveLimit,
+          opensAt,
+          closesAt,
           pdfKey: dto.pdfKey,
           groupKey: dto.groupKey,
           variantLabel: dto.variantLabel,
@@ -836,6 +871,10 @@ export class TestsService {
         timeLimitMin: true,
         variantLabel: true,
         groupKey: true, // сэдвээр бүлэглэх UI-д: "Илтгэгч тэгшитгэл 1"
+        // Нэмэлт (2026-11-21): нийтлэг цонх, цаасан шалгалтын горим
+        opensAt: true,
+        closesAt: true,
+        paperMode: true,
         chapter: { select: { book: { select: { code: true, displayName: true } } } }, // номын өнгө
         createdAt: true,
         _count: { select: { problems: true } },
@@ -857,7 +896,7 @@ export class TestsService {
     }));
     // Ирээдүйд оноосон ШАЛГАЛТ — зөвхөн огноотой «удахгүй» мөр (бодлого,
     // эхлэх товчгүй). DAILY/CUSTOM/THEORY дасгал огт харагдахгүй.
-    if (!scope.classroomIds.length) return listed;
+    if (!scope.classroomIds.length) return this.ownVariantsOnly(listed, userId);
     const seen = new Set(listed.map((t) => t.id));
     const upcomingTypes = UPCOMING_EXAM_TYPES.filter(
       (t) => includeThousand || t !== TestType.THOUSAND,
@@ -886,6 +925,9 @@ export class TestsService {
         timeLimitMin: true,
         variantLabel: true,
         groupKey: true,
+        opensAt: true,
+        closesAt: true,
+        paperMode: true,
         chapter: { select: { book: { select: { code: true, displayName: true } } } },
         createdAt: true,
         access: {
@@ -908,7 +950,36 @@ export class TestsService {
             .map((a) => a.assignedAt)
             .sort((a, b) => a.getTime() - b.getTime())[0] ?? null,
       }));
-    return [...listed, ...upcoming];
+    return this.ownVariantsOnly([...listed, ...upcoming], userId);
+  }
+
+  /** Цаасан горимын A/B бүлэгт зөвхөн сурагчид оноогдсон хувилбар (variant-assign.ts). */
+  private ownVariantsOnly<
+    T extends {
+      id: string;
+      title: string;
+      groupKey: string | null;
+      variantLabel: string | null;
+      paperMode: boolean | null;
+      createdAt: Date;
+      results: unknown[];
+      sessionStatus: string | null;
+    },
+  >(rows: T[], userId: string): T[] {
+    const wrapped = rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      groupKey: row.groupKey,
+      createdAt: row.createdAt,
+      hasResult: row.results.length > 0,
+      sessionStatus: row.sessionStatus,
+      row,
+    }));
+    return keepAssignedVariants(
+      wrapped,
+      userId,
+      (w) => !!w.row.paperMode && !!w.row.variantLabel,
+    ).map((w) => w.row);
   }
 
   // GET /tests/:id — багшид бүрэн бүтэц, сурагчид зөвхөн интро мета
@@ -1010,6 +1081,10 @@ export class TestsService {
       gradingMode: test.gradingMode,
       timeLimitMin: test.timeLimitMin,
       leaveLimit: normalizeLeaveLimit(test.leaveLimit),
+      // Нэмэлт (2026-11-21): нийтлэг цонх (UTC ISO; UI Улаанбаатарын цагаар), цаасан горим
+      opensAt: test.opensAt,
+      closesAt: test.closesAt,
+      paperMode: !!test.paperMode,
       variantLabel: test.variantLabel,
       problemCount: test.problems.length,
       totalPoints: test.problems.reduce((s, p) => s + p.points, 0),
@@ -1078,11 +1153,18 @@ export class TestsService {
           return { test: lockedTest, session: null, result: existingResult };
         }
 
+        // Нийтлэг цонх: зөвхөн ШИНЭ сесс эхлүүлэхэд (эхэлсэн сесс өөрийн deadlineAt-аар)
+        const now = new Date();
+        const closedMessage = startWindowError(lockedTest, now);
+        if (closedMessage) throw new ForbiddenException(closedMessage);
+
         const seed = randomInt(1, 2 ** 31);
         const gradables = lockedTest.problems.map(toGradable);
-        const choiceOrder = buildChoiceOrder(gradables, seed);
+        // Цаасан горим: сонголт цаас шиг A–E дарааллаар, холихгүй
+        const choiceOrder = lockedTest.paperMode
+          ? {}
+          : buildChoiceOrder(gradables, seed);
         const problemOrder = lockedTest.problems.map((tp) => tp.problemId);
-        const now = new Date();
         await tx.testAttemptSession.createMany({
           data: [
             {
@@ -1091,9 +1173,12 @@ export class TestsService {
               seed,
               problemOrder,
               choiceOrder: choiceOrder,
-              deadlineAt: lockedTest.timeLimitMin
-                ? new Date(now.getTime() + lockedTest.timeLimitMin * 60_000)
-                : null,
+              // min(эхэлсэн + хугацаа, хаах цаг) — хоцорсон сурагч хаах цаг хүртэл л
+              deadlineAt: sessionDeadline(
+                now,
+                lockedTest.timeLimitMin,
+                lockedTest.closesAt,
+              ),
             },
           ],
           skipDuplicates: true,
@@ -1147,9 +1232,13 @@ export class TestsService {
         timeLimitMin: test.timeLimitMin,
         // Аппаас гарах дүрэм (2 = Хатуу, 3 = Зөөлөн) — шийдвэрийг клиент гаргана
         leaveLimit: normalizeLeaveLimit(test.leaveLimit),
+        // Нэмэлт (2026-11-21): нийтлэг цонх, цаасан горим
+        opensAt: test.opensAt,
+        closesAt: test.closesAt,
+        paperMode: !!test.paperMode,
       },
       session: this.sessionView(session),
-      problems: this.buildProblemViews(test.problems, session),
+      problems: this.buildProblemViews(test.problems, session, !!test.paperMode),
     };
   }
 
@@ -1189,8 +1278,9 @@ export class TestsService {
       if (events.length > MAX_EVENTS)
         events.splice(0, events.length - MAX_EVENTS);
 
-      await this.prisma.testAttemptSession.update({
-        where: { id: session.id },
+      // Зөвхөн IN_PROGRESS үед (зэрэг илгээгдсэн сессийн мөрийг хөндөхгүй, P2025 гоожихгүй)
+      await this.prisma.testAttemptSession.updateMany({
+        where: { id: session.id, status: AttemptSessionStatus.IN_PROGRESS },
         data: { events: events as Prisma.InputJsonValue },
       });
     }
@@ -1249,27 +1339,55 @@ export class TestsService {
 
     const merged = this.mergeDrafts(problemRefs, session, dto);
 
-    if (this.isExpired(session)) {
+    // Сервер талын гаралтын хязгаар: энэ хүсэлтийн гаралтаар leaveCount >= leaveLimit болбол
+    // клиентийн автомат илгээлтийг хүлээхгүй, сесс өөрөө дүгнэгдэнэ (хуучин/засварласан клиент).
+    // Гаралтгүй ердийн autosave-д нэмэлт query хийхгүй (HOT PATH).
+    const leftNow = merged.leaveCount > session.leaveCount;
+    const leaveLimit = leftNow
+      ? (
+          await this.prisma.test.findUnique({
+            where: { id: testId },
+            select: { leaveLimit: true },
+          })
+        )?.leaveLimit
+      : undefined;
+    const reachedLimit =
+      leftNow && reachedLeaveLimit(merged.leaveCount, leaveLimit);
+
+    if (this.isExpired(session) || reachedLimit) {
       // Зөвхөн ЭНД бүтэн тест хэрэгтэй — оноо бодоход хариун түлхүүр шаардлагатай.
       const test = await this.loadTestWithProblems(testId);
       const { result } = await this.finalizeExpired(test, session, userId, merged);
       return {
         status: AttemptSessionStatus.SUBMITTED,
         result: { totalScore: result.totalScore, maxScore: result.maxScore },
+        ...(reachedLimit ? { leftByLeaves: true } : {}),
       };
     }
 
-    const updated = await this.prisma.testAttemptSession.update({
-      where: { id: session.id },
-      data: {
-        draftAnswers: merged.answers as Prisma.InputJsonValue,
-        draftStates: merged.states as Prisma.InputJsonValue,
-        problemTimes: merged.times as Prisma.InputJsonValue,
-        leaveCount: merged.leaveCount,
-        events: merged.events as Prisma.InputJsonValue,
-      },
-      select: { leaveCount: true, deadlineAt: true, status: true },
-    });
+    // Зөвхөн IN_PROGRESS үед бичнэ: зэрэг ирсэн submit/cron сессийг хаасны ДАРАА хоцорсон
+    // autosave илгээгдсэн хариуг (дүгнэсэн хариутай зөрүүтэйгээр) дарж бичихгүй.
+    let updated: { leaveCount: number; deadlineAt: Date | null; status: AttemptSessionStatus };
+    try {
+      updated = await this.prisma.testAttemptSession.update({
+        where: { id: session.id, status: AttemptSessionStatus.IN_PROGRESS },
+        data: {
+          draftAnswers: merged.answers as Prisma.InputJsonValue,
+          draftStates: merged.states as Prisma.InputJsonValue,
+          problemTimes: merged.times as Prisma.InputJsonValue,
+          leaveCount: merged.leaveCount,
+          events: merged.events as Prisma.InputJsonValue,
+        },
+        select: { leaveCount: true, deadlineAt: true, status: true },
+      });
+    } catch (error) {
+      if ((error as { code?: unknown } | null)?.code !== 'P2025') throw error;
+      const result = await this.prisma.testResult.findUnique({
+        where: { testId_studentId: { testId, studentId: userId } },
+        select: { totalScore: true, maxScore: true },
+      });
+      return { status: AttemptSessionStatus.SUBMITTED, result };
+    }
 
     return {
       status: updated.status,
@@ -1430,6 +1548,77 @@ export class TestsService {
     });
 
     return { result, items, leaveCount: session.leaveCount };
+  }
+
+  // ============ Хугацаа дууссан сессийг хаах (session-sweep.cron.ts) ============
+
+  /**
+   * deadlineAt + GRACE + SWEEP_EXTRA өнгөрсөн, илгээгээгүй сессийг сурагчийн дараагийн
+   * хүсэлттэй ИЖИЛ замаар (finalize) дүгнэнэ — хадгалагдсан хариу бүрэн тооцогдоно.
+   * Idempotent: finalize нь зөвхөн IN_PROGRESS мөрийг SUBMITTED болгодог тул зэрэг ирсэн
+   * submit/autosave/өөр instance түрүүлбэл энэ сесс алгасагдана (давхар дүн үүсэхгүй).
+   * Нэг сессийн алдаа бусдыг зогсоохгүй (курсороор цааш).
+   */
+  async sweepExpiredSessions(
+    opts: { pageSize?: number; maxPages?: number; now?: Date } = {},
+  ): Promise<{ closed: number; skipped: number; failed: number }> {
+    const pageSize = opts.pageSize ?? 100;
+    const maxPages = opts.maxPages ?? 5;
+    const now = opts.now ?? new Date();
+    const cutoff = new Date(now.getTime() - GRACE_MS - SWEEP_EXTRA_MS);
+    const floor = new Date(now.getTime() - SWEEP_LOOKBACK_MS);
+    const tests = new Map<
+      string,
+      Awaited<ReturnType<TestsService['loadTestWithProblems']>> | null
+    >();
+    const out = { closed: 0, skipped: 0, failed: 0 };
+    let cursor: { id: string } | undefined;
+    for (let page = 0; page < maxPages; page += 1) {
+      const due = (await this.prisma.testAttemptSession.findMany({
+        where: {
+          status: AttemptSessionStatus.IN_PROGRESS,
+          deadlineAt: { lt: cutoff, gte: floor },
+          test: { deletedAt: null, gradingMode: TestGradingMode.AUTO },
+        },
+        orderBy: [{ deadlineAt: 'asc' }, { id: 'asc' }],
+        ...(cursor ? { cursor, skip: 1 } : {}),
+        take: pageSize,
+      })) as (SessionRow & { testId: string; studentId: string })[];
+      if (due.length === 0) break;
+      for (const session of due) {
+        try {
+          if (!tests.has(session.testId)) {
+            tests.set(
+              session.testId,
+              await this.loadTestWithProblems(session.testId).catch(() => null),
+            );
+          }
+          const test = tests.get(session.testId);
+          if (!test || test.problems.length === 0) {
+            out.skipped += 1;
+            continue;
+          }
+          await this.finalize(test, session, session.studentId);
+          out.closed += 1;
+        } catch (error) {
+          if (error instanceof SessionAlreadyFinalizedError) {
+            out.skipped += 1;
+            continue;
+          }
+          out.failed += 1;
+          console.error(
+            '[Session Sweep Failed]',
+            'sessionId:',
+            session.id,
+            'error:',
+            error instanceof Error ? error.message : String(error),
+          );
+        }
+      }
+      cursor = { id: due[due.length - 1].id };
+      if (due.length < pageSize) break;
+    }
+    return out;
   }
 
   // ============ Багшийн хэсэг (өөрчлөлтгүй үлдсэн урсгалууд) ============
@@ -1700,12 +1889,95 @@ export class TestsService {
       chapterId: string | null;
       access: { classroomId: string }[];
       isDraft?: boolean;
+      groupKey?: string | null;
+      variantLabel?: string | null;
+      paperMode?: boolean | null;
     },
     userId: string,
     db: TestDatabase = this.prisma,
   ): Promise<void> {
-    if (test.isDraft)
-      throw new ForbiddenException('Ноорог тестэд сурагч нэвтрэх боломжгүй');
+    const denied = await this.studentAccessError(test, userId, db);
+    if (denied) throw new ForbiddenException(denied);
+    await this.assertAssignedVariant(test, userId, db);
+  }
+
+  /**
+   * Цаасан горимын A/B хувилбар: сурагчид оноогдоогүй хувилбарыг шууд ID-аар нээхийг хаана
+   * (variant-assign.ts). Өөрийн дүн/сесстэй хувилбар үргэлж нээлттэй. Хувилбар бүрийн эрхийг
+   * ижил дүрмээр шалгаж, зөвхөн сурагчийн нэвтэрч чадах хувилбаруудаас сонгоно.
+   */
+  private async assertAssignedVariant(
+    test: {
+      id: string;
+      groupKey?: string | null;
+      variantLabel?: string | null;
+      paperMode?: boolean | null;
+    },
+    userId: string,
+    db: TestDatabase,
+  ): Promise<void> {
+    if (!test.paperMode || !test.groupKey || !test.variantLabel) return;
+    const siblings = await db.test.findMany({
+      where: {
+        groupKey: test.groupKey,
+        paperMode: true,
+        variantLabel: { not: null },
+        deletedAt: null,
+        isDraft: false,
+      },
+      select: {
+        id: true,
+        title: true,
+        groupKey: true,
+        chapterId: true,
+        createdAt: true,
+        access: { select: { classroomId: true } },
+        results: { where: { studentId: userId }, select: { id: true } },
+        attemptSessions: {
+          where: { studentId: userId },
+          select: { status: true },
+        },
+      },
+    });
+    const own = siblings.find((s) => s.id === test.id);
+    if (!own || siblings.length < 2) return;
+    if (own.results.length > 0 || own.attemptSessions.length > 0) return;
+    const usable: VariantRow[] = [];
+    for (const s of siblings) {
+      if (
+        s.id === test.id ||
+        (await this.studentAccessError(s, userId, db)) === null
+      ) {
+        usable.push({
+          id: s.id,
+          title: s.title,
+          groupKey: s.groupKey,
+          createdAt: s.createdAt,
+          hasResult: s.results.length > 0,
+          sessionStatus: s.attemptSessions[0]?.status ?? null,
+        });
+      }
+    }
+    const chosen = pickAssignedVariant(orderVariants(usable), userId);
+    if (chosen.id !== test.id) {
+      throw new ForbiddenException(
+        'Танд энэ шалгалтын өөр хувилбар оноогдсон байна',
+      );
+    }
+  }
+
+  /** Сурагчийн эрхийн суурь шалгалт: нэвтэрч болохгүй бол шалтгаан, болох бол null. */
+  private async studentAccessError(
+    test: {
+      id: string;
+      chapterId: string | null;
+      access: { classroomId: string }[];
+      isDraft?: boolean;
+    },
+    userId: string,
+    db: TestDatabase = this.prisma,
+  ): Promise<string | null> {
+    if (test.isDraft) return 'Ноорог тестэд сурагч нэвтрэх боломжгүй';
     // Хичээлээр хаалттай (эзэн 2026-10-18): MATH-аас бусад хичээлийн тестийг
     // зөвхөн тухайн хичээлийн идэвхтэй ангийн сурагч бодно
     if (test.chapterId) {
@@ -1718,9 +1990,7 @@ export class TestsService {
         subject !== Subject.MATH &&
         !(await activeClassSubjects(db as PrismaService, userId)).has(subject)
       )
-        throw new ForbiddenException(
-          'Энэ тест таны ангийн хичээлд хамаарахгүй байна',
-        );
+        return 'Энэ тест таны ангийн хичээлд хамаарахгүй байна';
     }
     // Ангид оноосон тест — оноосон цаг (assignedAt) нь ирээгүй бол хараахан
     // нээгдэхгүй (эзэн 2026-10-29: ирээдүйн огноотой шалгалтыг урьдчилан эхлүүлдэг байсан)
@@ -1738,7 +2008,7 @@ export class TestsService {
       },
     });
     if (enrollment) {
-      return;
+      return null;
     }
     // Нөхөх хичээл: энэ сурагчид ТУСГАЙЛАН нээсэн тест (эзэн 2026-11-03) — бусад сурагчид нээгдэхгүй
     const own = await db.studentTestAccess.findUnique({
@@ -1758,7 +2028,7 @@ export class TestsService {
         select: { id: true },
       }))
     ) {
-      return;
+      return null;
     }
 
     let bookId: string | null = null;
@@ -1778,7 +2048,7 @@ export class TestsService {
       Role.STUDENT,
     );
     const target = { id: test.id, chapterId: test.chapterId, bookId };
-    if (scopeGrantsTest(scope, target)) return;
+    if (scopeGrantsTest(scope, target)) return null;
     if (
       scope.releasedChapterIds !== null &&
       scopeGrantsTest({ ...scope, releasedChapterIds: null }, target) &&
@@ -1787,7 +2057,7 @@ export class TestsService {
         select: { id: true },
       }))
     )
-      return;
+      return null;
     const now = new Date();
 
     // Жишиг сорил (MockExamEvent): бүртгүүлсэн хэрэглэгч цонхны дотор эхэлнэ;
@@ -1798,17 +2068,15 @@ export class TestsService {
       select: { event: { select: { endsAt: true } } },
     });
     if (reg) {
-      if (reg.event.endsAt >= now) return;
+      if (reg.event.endsAt >= now) return null;
       const session = await db.testAttemptSession.findUnique({
         where: { testId_studentId: { testId: test.id, studentId: userId } },
         select: { id: true },
       });
-      if (session) return;
+      if (session) return null;
     }
 
-    throw new ForbiddenException(
-      'Энэ тестийг худалдаж авууд эсвэл танай ангид оноогдоон байна',
-    );
+    return 'Энэ тестийг худалдаж авууд эсвэл танай ангид оноогдоон байна';
   }
 
   private isExpired(session: SessionRow): boolean {
@@ -1836,7 +2104,11 @@ export class TestsService {
 
   // Сурагчид очих бодлогын харагдац: token/зөв хариу байхгүй, сонголтууд
   // session-д хөлдсөн дарааллаар (Шийдвэр 2, 6)
-  private buildProblemViews(problems: TestProblemRow[], session: SessionRow) {
+  private buildProblemViews(
+    problems: TestProblemRow[],
+    session: SessionRow,
+    paperMode = false,
+  ) {
     const byId = new Map(problems.map((tp) => [tp.problemId, tp]));
     const orderIds = (session.problemOrder as string[]).filter((id) =>
       byId.has(id),
@@ -1852,10 +2124,15 @@ export class TestsService {
       const mode = choiceModeOf(g);
       let choices: string[] | null = null;
       let choiceImages: (string | null)[] | null = null;
+      // Нэмэлт (2026-11-21): цаасан горимд (холиогүй) сонголтын шошго A–E — бодолт,
+      // «Түгээмэл алдаа»-ны үсэгтэй таарна. Бусад үед null (клиент дугаараар харуулна).
+      let choiceLabels: string[] | null = null;
       if (mode === 'TEXT') {
         const texts = choiceTextsOf(g);
         const perm = choiceOrder[pid];
         choices = perm ? perm.map((origIdx) => texts[origIdx]) : texts;
+        if (paperMode && !perm)
+          choiceLabels = texts.map((_t, i) => String.fromCharCode(65 + i));
         // Зурагтай сонголт: текстийн дараалалтай ижил (shuffle) — нэг ч зураггүй бол null
         const images = choiceImagesOf(g);
         if (images) choiceImages = perm ? perm.map((origIdx) => images[origIdx] ?? null) : images;
@@ -1871,6 +2148,7 @@ export class TestsService {
         choiceMode: mode,
         choices,
         choiceImages,
+        choiceLabels,
       };
     });
   }
