@@ -185,8 +185,8 @@ describe('хувилбарыг сервер оноох (assertAssignedVariant)',
     chapterId: null,
     createdAt: new Date(createdAt),
     access: [{ classroomId: 'c1' }],
-    results: [],
-    attemptSessions: [],
+    results: [] as { id: string }[],
+    attemptSessions: [] as { status: string }[],
     ...extra,
   });
 
