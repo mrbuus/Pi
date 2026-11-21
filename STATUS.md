@@ -527,7 +527,30 @@ Pi.mn/
   ижил hash-аар оноож (`tests/variant-assign.ts`) нөгөөг 403, жагсаалтад өөрийнх л. paperMode-гүй тестэд
   хувилбарын түгжээ ҮГҮЙ (нөхөх хичээлд A, B хоёуланг өгдөг — `lesson-day/makeup.logic.ts`). Минут тутмын
   `SessionSweepCron`: `deadlineAt + 30с + 90с` өнгөрсөн (2 хоногоос хуучингүй) сессийг `finalize`-аар
-  хаана. Autosave-ийн гаралтаар `leaveCount >= leaveLimit` болбол сервер өөрөө дүгнэнэ.
+  хаана. Autosave-ийн гаралтаар `leaveCount >= leaveLimit` болбол сервер өөрөө дүгнэнэ — тухайн хүсэлтийн
+  хариуг ЭХЛЭЭД хадгалаад дүгнэнэ; `leaveCount` хязгаараас хэтрэхгүй
+- **Дүн нээгдэх цаг (2026-11-21, `tests/result-release.ts`)**: `closesAt`-тэй шалгалтад хаах цаг хүртэл сурагч,
+  эцэг эх юу ч харахгүй — нийт оноо, зөв/буруу, зөв хариу, бодолт, «Түгээмэл алдаа», бичлэг, эрэмбэ (submit, start,
+  heartbeat, autosave, review, getOne, жагсаалт, my-results, exam-results/my, эцэг эхийн карт, test-rankings, жишиг
+  сорил). Оронд нь `resultsPending { releaseAt, message }` = «Хариу хүлээн авлаа. Дүн, бодолт HH:MM цагт нээгдэнэ»
+  (өөр өдөр бол огноотой). Хуучин апп `result: null`, `review.opensAt`-аар ойлгомжтой харуулна. closesAt null бол өмнөх шиг
+- **Сессийн түгжээ**: autosave ба submit сессийн мөрийг `SELECT ... FOR UPDATE`-ээр түгжиж бодлого бүрээр нэгтгэнэ
+  (зэрэг хүсэлтийн `leaveCount`, хариу алдагдахгүй). `finalize` нь `updatedAt`-аар уншсанаас хойшх бичилтийг
+  илрүүлж (`SessionChangedError`) дахин уншина; давхар дүн үүсэхгүй (`SessionAlreadyFinalizedError`)
+- **Хоцорч ирсэн хариу (`tests/late-answers.ts`, `TestAttemptSession.lateAnswers/lateReceivedAt`)**: сесс хаагдсаны
+  (sweep, гаралт, хугацаа) болон `deadlineAt + GRACE(30с)`-ийн дараа ирсэн хариу дүгнэлтэд ОРОХГҮЙ; дүгнэгдснээс
+  зөрүүтэй бол тусад нь хадгалагдана (draftAnswers, дүн хөндөгдөхгүй). Хариунд `answersReceived: true` (апп локал
+  хуулбараа ЗӨВХӨН энэ баталгаагаар устгана), хүлээгдэж буй бол `lateAnswers: true` — сурагчид «Хариу хоцорч ирсэн
+  тул багш шийднэ». Багшийн дүнд `lateAnswers { pending, differing, canAccept, previousScore }`; Админ / Багш+
+  (`OVERRIDE_ROLES`) `POST /tests/:id/results/:studentId/accept-late` — ижил `scoreAnswers`-аар дахин дүгнэж,
+  TestResult.version +1, AuditLog `ACCEPT_LATE_ANSWERS`, өмнөх оноо `lateAnswers.accepted.previousScore`-д.
+  Гараар оруулсан дүнд (enteredById) хүлээн авахгүй. `SWEEP_EXTRA_MS` 90с хэвээр (нийт 120с)
+- **Хаах цаг / хугацаа засвар**: эхэлсэн IN_PROGRESS сесс бүрийн `deadlineAt = max(одоо, min(эхэлсэн + хугацаа,
+  closesAt))` ижил transaction-д (сунгах, богиносгох). Хугацааг богиносгохыг идэвхтэй сесстэй үед хориглосон хэвээр
+- **Апп**: хуримтлагдсан LEAVE бүр одоогийн бүх хариутай; хариунд SUBMITTED ирвэл давталт зогсоно; 409 бол хариуг
+  хоцорсон хариу замаар (PATCH session) илгээнэ; баталгаагүй бол бүх хариуг локалд үлдээж дараагийн нээлтэд илгээнэ
+- Импорт `prisma/paper-exam-to-test.cjs --commit`: бичилт нэг transaction; локал бус DATABASE_URL-д
+  `--confirm-host=<яг тэр хост>` заавал
 - `finalize()` хоёр хэсэгт: атомик хэсэг `$transaction([...])` + `createMany`,
   бодлогын статистик тусад нь bulk SQL (transaction 1-2с барихаас сэргийлнэ)
 
