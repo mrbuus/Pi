@@ -3,9 +3,9 @@
 // @ts-nocheck
 import katex from 'katex';
 import Lenis from 'lenis';
-import { createIcons, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, MapPin, Menu, Minus, Moon, Phone, Plus, RotateCcw, Scissors, Sun, Trophy, Users, Wifi, X } from 'lucide';
+import { createIcons, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Award, BookOpen, Calculator, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, LogIn, MapPin, Menu, Minus, Moon, Phone, Plus, RotateCcw, Scissors, Sun, Trophy, Users, Wifi, X } from 'lucide';
 
-const ICONS = { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, MapPin, Menu, Minus, Moon, Phone, Plus, RotateCcw, Scissors, Sun, Trophy, Users, Wifi, X };
+const ICONS = { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Award, BookOpen, Calculator, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, LogIn, MapPin, Menu, Minus, Moon, Phone, Plus, RotateCcw, Scissors, Sun, Trophy, Users, Wifi, X };
 
 export function mountDom(root) {
   let dead = false, rafId = 0;
@@ -30,7 +30,7 @@ $$('a[data-pg]').forEach(a=>{ const u=new URL(PG_URL(a.dataset.pg),location.href
 $$('a[href^="#"]').forEach(a=>{ const id=a.getAttribute('href').slice(1); if(!id||id==='top'||id==='foot') return;
   const own=PG_OWN[id]||'home'; if(own!==PG) a.setAttribute('href',PG_URL(own)+'#'+id); });
 
-const S={hero:0,idea:0,globe:0,club:0,vLab:false,vHero:true,vIdea:false,vGlobe:false,vClub:false,nearGlobe:false,nearClub:false,mx:0,my:0,vel:0,go:null};
+const S={hero:0,idea:0,globe:0,club:0,vLab:false,vHero:false,vIdea:false,vGlobe:false,vClub:false,nearGlobe:false,nearClub:false,mx:0,my:0,vel:0,go:null};
 window.S=S;
 
 let lenis=null;
@@ -78,9 +78,6 @@ $('#tgCut').addEventListener('click',e=>{ LAB.away=!LAB.away; e.currentTarget.se
 const SCHOOLS=['33-р сургууль','Хөгжил сургууль','Ирээдүй сургууль','Өнөр сургууль','1-р сургууль','31-р сургууль','44-р сургууль','141-р сургууль','Мандах лицей','МУИС лицей','Монгени','Оюуны Ундраа','Эрдмийн Өргөө','96-р сургууль','77-р сургууль','48-р сургууль','50-р сургууль','18-р сургууль','Шинэ Монгол','Оюуны Тулга'];
 $('#schools').innerHTML=[...SCHOOLS,...SCHOOLS].map(s=>`<span>${s}</span>`).join('');
 
-const say=$('#say');
-say.innerHTML=say.textContent.trim().split(/\s+/).map((w,i,a)=>w==='|'?'<br>':`<span class="w${i>=a.length-4?' gw':''}">${w}</span>`).join(' ');
-const sayW=$$('#say .w');
 
 /* Номууд */
 const BOOKS=[
@@ -328,9 +325,6 @@ const cur=$('#cur'); let cx=innerWidth/2, cy=innerHeight/2, tx=cx, ty=cy;
 on(window,'pointermove',e=>{ tx=e.clientX; ty=e.clientY; cur.style.transform=`translate3d(${tx}px,${ty}px,0)`; S.mx=e.clientX/innerWidth-.5; S.my=e.clientY/innerHeight-.5; cur.classList.toggle('big',!!e.target.closest('a,button,.chip,.tv.side,.tag')); },{passive:true});
 
 const EL={lab:$('#labView'),hero:$('#hero'),idea:$('#idea'),ring:$('#books'),slide:$('#slide'),glb:$('#branches'),notew:$('#notew'),wmk:wmk};
-const heroView=$('#heroView'), shade=$('#heroShade'), fly=$('#fly'), b1=$('#b1'), b2=$('#b2'), out=$('#out'), tag=$('#tag'), b2li=$$('#b2 li');
-// Утсанд биетийн шошго (.tag) гарчгийн дээр зогсоно: гарчгийн блокийн өндрийг CSS-д дамжуулна
-const setFlyH=()=>tag.parentElement.style.setProperty('--flyH',fly.offsetHeight+'px'); setFlyH(); on(window,'resize',setFlyH); if(document.fonts) document.fonts.ready.then(setFlyH);
 const w1=$('#w1'), w2=$('#w2'), bigA=$('#bigA'), bigB=$('#bigB');
 const sl1=$('#sl1'), sl2=$('#sl2');
 const gv=$('#gv'), gl=$('#gl'), gr=$('#gr'), glt=$('#glt'), glbl=$('#glb'), gt=$('#gt');
@@ -359,24 +353,7 @@ function frame(now){
 
   const past=R.hero.bottom<vh*.5; root.classList.toggle('past',past); logoTone();
 
-  /* 1. HERO */
-  S.vHero=seen(R.hero);
-  if(S.vHero){
-    const p=S.hero=pinP(R.hero);
-    const fo=range(p,0,.09);
-    fly.style.opacity=1-fo; fly.style.transform=`translate3d(0,${-ease(fo)*90}px,0)`; fly.style.pointerEvents=fo>.5?'none':'auto';
-    const o1=range(p,.11,.15)*(1-range(p,.34,.38)); b1.style.opacity=o1;
-    const fill=Math.round(range(p,.15,.31)*sayW.length); sayW.forEach((w,i)=>w.classList.toggle('on',i<fill));
-    const o2=range(p,.39,.43)*(1-range(p,.65,.69)); b2.style.opacity=o2;
-    b2li.forEach((li,i)=>{ const c=ease(range(p,.43+i*.035,.48+i*.035)); li.style.opacity=c; li.style.transform=`translate3d(0,${(1-c)*30}px,0)`; });
-    const k=easeIO(range(p,.72,.9));
-    const top=k*(desk?.12:.1)*vh, bot=k*(desk?.14:.16)*vh, side=k*(desk?64:16), rad=k*28;
-    heroView.style.clipPath=k>0?`inset(${top}px ${side}px ${bot}px ${side}px round ${rad}px)`:'none';
-    const q=ease(range(p,.8,.9)); out.style.opacity=q; out.style.transform=`translate3d(0,${(1-q)*40}px,0)`; out.style.pointerEvents=q>.6?'auto':'none';
-    shade.style.opacity=clamp(.85+.15*Math.max(o1,o2)-.55*k);
-    const tagOff=1-range(p,.36,.4)*(1-range(p,.66,.7)); // 4 алхамтай давхцахгүй
-    tag.style.opacity=(desk? clamp(1-range(p,.06,.1)*.35+range(p,.86,.92)) : clamp(1-range(p,.06,.1))*(1-range(p,.7,.78)))*tagOff; tag.style.pointerEvents=tagOff<.5?'none':'auto';
-  }
+  S.vHero=false; // 3D hero хасагдсан (2026-11-21)
 
   S.vLab=seen(R.lab);
 

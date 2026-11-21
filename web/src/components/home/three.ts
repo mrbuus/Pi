@@ -316,8 +316,6 @@ class SolidStage{
 }
 
 /* ---------- Hero ба лабораторийн тайз ---------- */
-const hc=$('#heroGL');
-const heroStage=new SolidStage(hc,$('#heroAnn'),{hero:true,mobile:MOBILE,bx:MOBILE?.5:.66,by:MOBILE?.26:.45});
 const labC=$('#labGL');
 const labStage=new SolidStage(labC,$('#labAnn'),{mobile:MOBILE,bx:.5,by:.42});
 labStage.cam.position.set(4.6,2.9,8.2);
@@ -330,7 +328,7 @@ let shown=-1, labShown=-1, roKey='';
 const THEMES={dark:{bg:['#22386A','#13244A','#0B1834'],edge:EDGE,dim:DIMC,em:EM,dot:0xFFFFFF,tint:0xC9D7F2},
   light:{bg:['#FFFFFF','#F3F6FC','#E6ECF7'],edge:0x182950,dim:0x8592AE,em:0x2E57B8,dot:0x182950,tint:0x9DB2DA}};
 window.__theme=light=>{ const T=THEMES[light?'light':'dark'];
-  [heroStage,labStage].forEach(st=>{ st.M.vis.color.set(T.edge); st.M.hid.color.set(T.dim); st.M.dim.color.set(T.dim);
+  [labStage].forEach(st=>{ st.M.vis.color.set(T.edge); st.M.hid.color.set(T.dim); st.M.dim.color.set(T.dim);
     ['em','rt','aux','sec'].forEach(k=>st.M[k].color.set(T.em)); st.secFill.material.color.set(T.em);
     st.dotsV.material.color.set(T.dot); st.dotsH.material.color.set(T.dim); st.tintM.color.set(T.tint);
     const old=st.scene.background; st.scene.background=backdropTex(st.o.bx??.5,st.o.by??.45,T.bg); if(old&&old.dispose) old.dispose(); });
@@ -338,12 +336,9 @@ window.__theme=light=>{ const T=THEMES[light?'light':'dark'];
 if(window.__themeNow==='light') window.__theme(true);
 function applySolid(i){
   const s=SOLIDS[i]; shown=i;
-  $('#tName').textContent=s.n;
-  const fx=$('#tFx'); fx.innerHTML=s.fx.map(()=>'<span></span>').join(''); [...fx.children].forEach((el,k)=>tex(el,s.fx[k]));
-  heroStage.setSolid(s); ideaTarget(i);
+  ideaTarget(i);
   if(window.LAB&&window.LAB.solid<0&&window.labPick) window.labPick(i);
 }
-(function k(){ if(!katex||shown<0) return setTimeout(k,120); const s=SOLIDS[shown]; [...$('#tFx').children].forEach((el,j)=>tex(el,s.fx[j])); })();
 function labReadout(){
   const info=labStage.secInfo, def=labStage.def; if(!def) return;
   const key=def.id+'|'+(info?info.name+info.A.toFixed(2):'none');
@@ -480,7 +475,7 @@ const qCur=new THREE.Quaternion(), qSpin=new THREE.Quaternion(), Yax=V(0,1,0);
 const clock=new THREE.Clock();
 const fmt=ms=>{ const s=Math.max(0,Math.ceil(ms/1000)); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); };
 let lastSec=-1;
-const tHl=$('#tHl'), HC=V(0,0,0), HT=V(0,0,0), HR=V(0,0,0), V0=V(0,0,0);
+const V0=V(0,0,0);
 // hero-ийн камерын зам (24 градусын линз)
 const ZD=[[0,10],[.12,9],[.36,8.2],[.42,8.8],[.66,8.8],[.82,12],[1,13]];
 const SXD=[[0,1.95],[.14,1.3],[.36,1.3],[.42,.7],[.66,.7],[.82,0],[1,0]];
@@ -492,19 +487,6 @@ const SXM=[[0,0],[1,0]];
 window.__three=(S,t)=>{
   const dt=Math.min(.1,clock.getDelta()), now=performance.now();
   const idx=currentIdx(); if(idx!==shown) applySolid(idx);
-
-  /* ---- HERO ---- */
-  if(S.vHero){
-    const p=S.hero, mob=hc.clientWidth/Math.max(1,hc.clientHeight)<.9;
-    let sx,sy,z;
-    if(mob){ z=kf(p,ZM); sx=kf(p,SXM); sy=kf(p,FYM)*2*z*TAN12; HC.set(S.mx*.4,z*.22,z); HT.set(0,0,0); }
-    else { z=kf(p,ZD); sx=kf(p,SXD); sy=kf(p,SYD); HC.set(S.mx*.6+sx*.2,z*.24-S.my*.4,z); HT.set(sx*.55,sy,0); }
-    HR.set(sx,sy,0);
-    const cutK=range(p,.42,.48)*(1-range(p,.64,.7));
-    heroStage.update(t,{camPos:HC,target:HT,rootPos:HR,rotY:t*.22+.5,scale:mob?.92:1,
-      cut:{on:cutK>0,h:lerp(.92,.4,easeIO(range(p,.43,.58))),tilt:22*easeIO(range(p,.5,.62)),away:false},labelOpacity:1-range(p,.72,.8)});
-    const info=heroStage.secInfo, want=info?('Огтлол: '+info.name):''; if(tHl.textContent!==want) tHl.textContent=want;
-  }
 
   /* ---- ЛАБОРАТОРИ ---- */
   if(S.vLab){
@@ -583,6 +565,6 @@ applySolid(currentIdx());
 
   return () => {
     dead = true; delete window.__three; offs.forEach((f) => f()); controls.dispose();
-    [heroStage.r, labStage.r, ir, gr2].forEach((r) => { r.dispose(); r.forceContextLoss(); });
+    [labStage.r, ir, gr2].forEach((r) => { r.dispose(); r.forceContextLoss(); });
   };
 }

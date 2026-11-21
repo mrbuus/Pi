@@ -131,8 +131,8 @@ for a, b in [('src="logo-white.png"', 'src="/home/logo-white.png"'),
              ('src="logo-full.png"', 'src="/logo-full.png"')]:
     body = body.replace(a, b)
 body = body.replace('src="amjilt/', 'src="/amjilt/')
-body = sub1(body, '<a class="btn" href="#">Нэвтрэх', '<a class="btn" href="/login">Нэвтрэх')
-body = sub1(body, '<a class="tlink" href="#">Бүртгүүлэх</a>', '<a class="tlink" href="/register">Бүртгүүлэх</a>')
+body = sub_opt(body, '<a class="btn" href="#">Нэвтрэх', '<a class="btn" href="/login">Нэвтрэх')
+body = sub_opt(body, '<a class="tlink" href="#">Бүртгүүлэх</a>', '<a class="tlink" href="/register">Бүртгүүлэх</a>')
 # Мокапад «Нэвтрэх/Бүртгүүлэх» нь hero-гийн карт руу гүйлгэдэг — жинхэнэ вэбд шууд хуудас руу
 body = sub1(body, '<a class="btn sm cta" href="#enter">Нэвтрэх', '<a class="btn sm cta" href="/login">Нэвтрэх')
 body = sub1(body, '<a class="go" href="#enter" aria-label="Нэвтрэх">', '<a class="go" href="/login" aria-label="Нэвтрэх">')
@@ -244,7 +244,7 @@ three_ts = (HEADER + '/* eslint-disable */\n// @ts-nocheck\n'
             '\n  return () => {\n'
             '    dead = true; delete window.__three; offs.forEach((f) => f());'
             + (' controls.dispose();' if 'new OrbitControls(' in three else '') + '\n'
-            '    [' + ', '.join(['heroStage.r'] + (['labStage.r'] if 'const labStage' in three else [])
+            '    [' + ', '.join((['heroStage.r'] if 'const heroStage' in three else []) + (['labStage.r'] if 'const labStage' in three else [])
                             + (['ir'] if 'const ir=' in three else []) + ['gr2'])
             + '].forEach((r) => { r.dispose(); r.forceContextLoss(); });\n'
             '  };\n}\n')
