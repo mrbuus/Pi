@@ -10,6 +10,7 @@ import {
   slotKeysOf,
   wrapMath,
 } from './paper-exam-to-test';
+import { commitHostError } from './paper-exam-to-test';
 
 const DATA = join(__dirname, '../../prisma/data/paper-exam-guides');
 const read = <T>(name: string): T => JSON.parse(readFileSync(join(DATA, name), 'utf8')) as T;
@@ -203,5 +204,21 @@ describe('туслах функц', () => {
   it('normalizeSlots, slotKeysOf', () => {
     expect(normalizeSlots('\\overline{[1d]} ба [e2]').text).toBe('\\overline{1[d]} ба [e]2');
     expect(slotKeysOf('k\\in[[a];[b]] [g][\\,\\cup\\,][g]')).toEqual(['a', 'b', 'g']);
+  });
+});
+
+describe('commitHostError — --commit зөвхөн локал санд, бусдад --confirm-host', () => {
+  it('локал хост — зөвшөөрнө', () => {
+    expect(commitHostError('postgresql://u:p@127.0.0.1:5544/pimn_scan', undefined)).toBeNull();
+    expect(commitHostError('postgresql://u:p@localhost:5432/x', '')).toBeNull();
+  });
+  it('локал бус — яг тэр хостыг давтуулна', () => {
+    const url = 'postgresql://u:p@db.example.rds.amazonaws.com:5432/pimn';
+    expect(commitHostError(url, undefined)).toContain('--confirm-host=db.example.rds.amazonaws.com');
+    expect(commitHostError(url, 'other.host')).not.toBeNull();
+    expect(commitHostError(url, 'db.example.rds.amazonaws.com')).toBeNull();
+  });
+  it('буруу URL — бичихгүй', () => {
+    expect(commitHostError(undefined, undefined)).toBe('DATABASE_URL буруу байна');
   });
 });

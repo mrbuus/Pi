@@ -402,3 +402,22 @@ export function planPaperExam(
 function choiceCountTotal(entries: GuideEntry[]): number {
   return entries.filter((e) => e?.content?.kind === 'choice').length;
 }
+
+/**
+ * Импортын --commit-ийн хамгаалалт: DATABASE_URL-ийн хост 127.0.0.1 / localhost биш бол
+ * --confirm-host=<яг тэр хост> заавал (андуурч прод руу бичихээс сэргийлнэ). Зөв бол null.
+ */
+export function commitHostError(
+  databaseUrl: string | undefined,
+  confirmHost: string | undefined,
+): string | null {
+  let host: string;
+  try {
+    host = new URL(databaseUrl ?? '').hostname;
+  } catch {
+    return 'DATABASE_URL буруу байна';
+  }
+  if (['127.0.0.1', 'localhost', '::1', '[::1]'].includes(host)) return null;
+  if (confirmHost && confirmHost === host) return null;
+  return `Локал бус сан (${host}) руу бичихгүй: --confirm-host=${host} нэмж баталгаажуулна уу`;
+}

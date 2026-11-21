@@ -16,6 +16,7 @@
  *   --type=EESH_MOCK   Test.type (EESH_MOCK | CHAPTER_EXAM), анхдагч EESH_MOCK
  *   --minutes=100      Test.timeLimitMin
  *   --no-images        зургийг алгасна (imageKey хоосон)
+ *   --confirm-host=<хост>  DATABASE_URL локал (127.0.0.1/localhost) биш бол --commit-д заавал, яг тэр хост
  *
  * Үр дүн: Test (paperMode = true — сонголт A–E, холихгүй, хувилбарыг сервер онооно;
  * isDraft = true — ангид оноогоогүй, багш «Шалгалт → Тохиргоо»-оос A, B ХОЁУЛАНГ ангид онооно),
@@ -32,7 +33,7 @@ const crypto = require('crypto');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env'), quiet: true });
 const { PrismaPg } = require('@prisma/adapter-pg');
 const { PrismaClient, Prisma } = require('../dist/src/generated/prisma/client');
-const { planPaperExam } = require('../dist/src/tests/paper-exam-to-test');
+const { planPaperExam, commitHostError } = require('../dist/src/tests/paper-exam-to-test');
 const { saveStoredFile, s3Enabled } = require('../dist/src/storage/file-store');
 
 const arg = (name) => (process.argv.find((a) => a.startsWith(`--${name}=`)) || '').slice(name.length + 3);
@@ -164,84 +165,92 @@ async function main() {
       console.log('DRY-RUN — бичихийн тулд --commit нэмнэ');
       return;
     }
+    // Локал бус сан руу бичихийн өмнө хостыг яг давтуулна (андуурч прод руу бичихээс сэргийлнэ)
+    const hostError = commitHostError(process.env.DATABASE_URL, arg('confirm-host'));
+    if (hostError) throw new Error(hostError);
 
-    // ---- Бичих (устгалгүй) ----
-    const chapterId =
-      chapter?.id ?? (await prisma.chapter.create({ data: { title: plan.examTitle, order: 0, freePreview: false }, select: { id: true } })).id;
-    const tagIds = new Map();
-    for (const name of new Set(plan.tests.flatMap((t) => t.problems.flatMap((p) => p.topics)))) {
-      const tag = await prisma.tag.upsert({ where: { type_name: { type: 'SUBTOPIC', name } }, update: {}, create: { type: 'SUBTOPIC', name }, select: { id: true } });
-      tagIds.set(name, tag.id);
-    }
-    for (const t of plan.tests) {
-      const existing = testBy.get(t.variantLabel);
-      const taken = existing && existing._count.attemptSessions + existing._count.results > 0;
-      const idByToken = new Map();
-      for (const p of t.problems) {
-        let imageKey = null;
-        if (p.image && !noImages) {
-          imageKey = p.image.key;
-          if (!existingFiles.has(imageKey)) {
-            await saveStoredFile(prisma, { key: imageKey, mime: p.image.mime, bytes: Buffer.from(p.image.base64, 'base64'), ownerId: author.id, purpose: 'general' });
-            existingFiles.add(imageKey);
+    // ---- Бичих (устгалгүй) — НЭГ transaction: алдаа гарвал юу ч бичигдэхгүй ----
+    await prisma.$transaction(
+      async (tx) => {
+        const chapterId =
+          chapter?.id ?? (await tx.chapter.create({ data: { title: plan.examTitle, order: 0, freePreview: false }, select: { id: true } })).id;
+        const tagIds = new Map();
+        for (const name of new Set(plan.tests.flatMap((t) => t.problems.flatMap((p) => p.topics)))) {
+          const tag = await tx.tag.upsert({ where: { type_name: { type: 'SUBTOPIC', name } }, update: {}, create: { type: 'SUBTOPIC', name }, select: { id: true } });
+          tagIds.set(name, tag.id);
+        }
+        for (const t of plan.tests) {
+          const existing = testBy.get(t.variantLabel);
+          const taken = existing && existing._count.attemptSessions + existing._count.results > 0;
+          const idByToken = new Map();
+          for (const p of t.problems) {
+            let imageKey = null;
+            if (p.image && !noImages) {
+              imageKey = p.image.key;
+              if (!existingFiles.has(imageKey)) {
+                await saveStoredFile(tx, { key: imageKey, mime: p.image.mime, bytes: Buffer.from(p.image.base64, 'base64'), ownerId: author.id, purpose: 'general' });
+                existingFiles.add(imageKey);
+              }
+            }
+            const old = problemBy.get(p.token);
+            const data = {
+              chapterId,
+              number: p.number,
+              format: p.format,
+              statementText: p.statementText,
+              imageKey: imageKey ?? old?.imageKey ?? null,
+              choices: Prisma.DbNull,
+              correctAnswer: p.correctAnswer,
+              scoringGroups: p.scoringGroups ?? Prisma.DbNull,
+              points: p.points,
+            };
+            let id = old?.id;
+            if (!old) {
+              id = (await tx.problem.create({ data: { ...data, token: p.token, createdById: author.id }, select: { id: true } })).id;
+            } else if (!locked.has(p.token) && !taken) {
+              await tx.problem.update({ where: { id: old.id }, data: { ...data, deletedAt: null } });
+            }
+            if (!locked.has(p.token) && !taken) {
+              for (const c of p.choices) {
+                await tx.problemChoice.upsert({
+                  where: { problemId_label: { problemId: id, label: c.label } },
+                  update: { text: c.text, isCorrect: c.isCorrect, mistakeNote: c.mistakeNote, order: c.order },
+                  create: { problemId: id, label: c.label, text: c.text, isCorrect: c.isCorrect, mistakeNote: c.mistakeNote, order: c.order },
+                });
+              }
+            }
+            if (p.topics.length) {
+              await tx.problemTag.createMany({ data: p.topics.map((n) => ({ problemId: id, tagId: tagIds.get(n) })), skipDuplicates: true });
+            }
+            idByToken.set(p.token, id);
           }
-        }
-        const old = problemBy.get(p.token);
-        const data = {
-          chapterId,
-          number: p.number,
-          format: p.format,
-          statementText: p.statementText,
-          imageKey: imageKey ?? old?.imageKey ?? null,
-          choices: Prisma.DbNull,
-          correctAnswer: p.correctAnswer,
-          scoringGroups: p.scoringGroups ?? Prisma.DbNull,
-          points: p.points,
-        };
-        let id = old?.id;
-        if (!old) {
-          id = (await prisma.problem.create({ data: { ...data, token: p.token, createdById: author.id }, select: { id: true } })).id;
-        } else if (!locked.has(p.token) && !taken) {
-          await prisma.problem.update({ where: { id: old.id }, data: { ...data, deletedAt: null } });
-        }
-        if (!locked.has(p.token) && !taken) {
-          for (const c of p.choices) {
-            await prisma.problemChoice.upsert({
-              where: { problemId_label: { problemId: id, label: c.label } },
-              update: { text: c.text, isCorrect: c.isCorrect, mistakeNote: c.mistakeNote, order: c.order },
-              create: { problemId: id, label: c.label, text: c.text, isCorrect: c.isCorrect, mistakeNote: c.mistakeNote, order: c.order },
+          const links = t.problems.map((p) => ({ problemId: idByToken.get(p.token), order: p.order, points: p.points }));
+          if (!existing) {
+            await tx.test.create({
+              data: {
+                title: t.title, type, gradingMode: 'AUTO', timeLimitMin: t.timeLimitMin, groupKey: t.groupKey, variantLabel: t.variantLabel,
+                paperMode: true, isDraft: true, createdById: author.id,
+                problems: { create: links },
+              },
             });
+          } else {
+            if (!existing.paperMode) await tx.test.update({ where: { id: existing.id }, data: { paperMode: true } });
+            const have = new Map(existing.problems.map((tp) => [tp.problemId, tp]));
+            const missing = links.filter((l) => !have.has(l.problemId));
+            if (missing.length && taken) console.log(`  ! ${t.title}: сурагч өгсөн тул ${missing.length} бодлого нэмсэнгүй`);
+            else if (missing.length) await tx.testProblem.createMany({ data: missing.map((l) => ({ testId: existing.id, ...l })), skipDuplicates: true });
+            if (!taken) {
+              for (const l of links) {
+                const h = have.get(l.problemId);
+                if (h && (h.points !== l.points || h.order !== l.order))
+                  await tx.testProblem.update({ where: { testId_problemId: { testId: existing.id, problemId: l.problemId } }, data: { points: l.points, order: l.order } });
+              }
+            }
           }
         }
-        if (p.topics.length) {
-          await prisma.problemTag.createMany({ data: p.topics.map((n) => ({ problemId: id, tagId: tagIds.get(n) })), skipDuplicates: true });
-        }
-        idByToken.set(p.token, id);
-      }
-      const links = t.problems.map((p) => ({ problemId: idByToken.get(p.token), order: p.order, points: p.points }));
-      if (!existing) {
-        await prisma.test.create({
-          data: {
-            title: t.title, type, gradingMode: 'AUTO', timeLimitMin: t.timeLimitMin, groupKey: t.groupKey, variantLabel: t.variantLabel,
-            paperMode: true, isDraft: true, createdById: author.id,
-            problems: { create: links },
-          },
-        });
-      } else {
-        if (!existing.paperMode) await prisma.test.update({ where: { id: existing.id }, data: { paperMode: true } });
-        const have = new Map(existing.problems.map((tp) => [tp.problemId, tp]));
-        const missing = links.filter((l) => !have.has(l.problemId));
-        if (missing.length && taken) console.log(`  ! ${t.title}: сурагч өгсөн тул ${missing.length} бодлого нэмсэнгүй`);
-        else if (missing.length) await prisma.testProblem.createMany({ data: missing.map((l) => ({ testId: existing.id, ...l })), skipDuplicates: true });
-        if (!taken) {
-          for (const l of links) {
-            const h = have.get(l.problemId);
-            if (h && (h.points !== l.points || h.order !== l.order))
-              await prisma.testProblem.update({ where: { testId_problemId: { testId: existing.id, problemId: l.problemId } }, data: { points: l.points, order: l.order } });
-          }
-        }
-      }
-    }
+      },
+      { timeout: 300_000, maxWait: 20_000 },
+    );
     const after = await prisma.test.findMany({
       where: { groupKey: plan.examTitle, deletedAt: null },
       select: { id: true, title: true, variantLabel: true, isDraft: true, paperMode: true, problems: { select: { points: true } } },
