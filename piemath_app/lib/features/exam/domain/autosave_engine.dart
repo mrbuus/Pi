@@ -114,6 +114,9 @@ class AutosaveEngine {
   Map<String, int> get times => Map.unmodifiable(_times);
   bool get stopped => _stopped;
 
+  /// Хүсэлт явж байгаа эсэх (хариу ирэхэд үйл явдлыг ack хийнэ).
+  bool get inFlight => _inFlight;
+
   /// Heartbeat эхлүүлэх (шалгалт эхэлсэн мөчөөс).
   void start() {
     _stopped = false;

@@ -29,7 +29,11 @@ void main() {
         _row('1', 'Тэмүүжин', leave: 2, shot: 1, rec: 1),
         _row('2', 'Сараа', leave: 0, shot: null, rec: null),
       ]);
-    await pumpTeacher(tester, const TestRunScreen(testId: 't1', title: 'Сорил 3'), http: http);
+    await pumpTeacher(
+      tester,
+      const TestRunScreen(testId: 't1', title: 'Сорил 3'),
+      http: http,
+    );
     await settle(tester);
     expect(find.text('Тэмүүжин Бат'), findsOneWidget);
     expect(find.text('Гарсан 2'), findsOneWidget);
@@ -37,6 +41,27 @@ void main() {
     expect(find.text('Бичлэг 1'), findsOneWidget);
     expect(find.textContaining('Гарсан 0'), findsNothing);
     expect(find.textContaining('автомат дүгнэлт биш'), findsOneWidget);
+  });
+
+  testWidgets('Хатуу горим харагдана; гаралтаар автоматаар илгээгдсэн сурагч ялгарна', (tester) async {
+    final http = FakeHttp()
+      ..json('GET', '/tests/t1/results', [
+        {..._row('1', 'Тэмүүжин', leave: 2), 'leaveLimit': 2, 'leftByLeaves': true},
+        {..._row('2', 'Сараа', leave: 1), 'leaveLimit': 2, 'leftByLeaves': false},
+      ]);
+    await pumpTeacher(tester, const TestRunScreen(testId: 't1'), http: http);
+    await settle(tester);
+    expect(find.text('Аппаас гарах дүрэм: Хатуу (2 дахь гаралтад илгээгдэнэ)'), findsOneWidget);
+    expect(find.byType(LeftByLeavesChip), findsOneWidget);
+    expect(find.text('Гаралтаар илгээгдсэн'), findsOneWidget);
+  });
+
+  test('хуучин сервер (leaveLimit-гүй): дүрэм харагдахгүй, шошгогүй', () {
+    final r = TestRunRow.fromJson(_row('1', 'А', leave: 3));
+    expect(r.leaveLimit, isNull);
+    expect(r.leftByLeaves, isFalse);
+    expect(TestRunRow.leaveRuleLabel(null), isNull);
+    expect(TestRunRow.leaveRuleLabel(3), 'Зөөлөн (3 дахь гаралтад илгээгдэнэ)');
   });
 
   testWidgets('алдаа → дахин оролдох', (tester) async {

@@ -283,6 +283,15 @@ class _EditTestBodyState extends ConsumerState<_EditTestBody> {
               SelectOption(GradingModes.manual, 'Багшийн дүн'),
             ],
           ),
+          FormSelectField<int>(
+            name: 'leaves',
+            label: 'Аппаас гарах дүрэм',
+            initial: s.leaveLimit,
+            options: const [
+              SelectOption(3, 'Зөөлөн (3 дахь гаралтад дуусна)'),
+              SelectOption(2, 'Хатуу (2 дахь гаралтад дуусна)'),
+            ],
+          ),
           FormTextField(name: 'group', label: 'Хувилбарын бүлэг', initial: s.groupKey, hint: 'ж: Тест 18'),
           FormTextField(name: 'variant', label: 'Хувилбар', initial: s.variantLabel, hint: 'A'),
           FormTextField(name: 'pdf', label: 'PDF эх сурвалжийн түлхүүр', initial: s.pdfKey),
@@ -295,6 +304,7 @@ class _EditTestBodyState extends ConsumerState<_EditTestBody> {
         timeLimit: v.integer('time')?.toString() ?? '',
         type: limited ? null : (v.get<String>('type') ?? s.type),
         gradingMode: limited ? null : (v.get<String>('grading') ?? s.gradingMode),
+        leaveLimit: limited ? null : (v.get<int>('leaves') ?? s.leaveLimit),
         groupKey: limited ? null : v.text('group'),
         variantLabel: limited ? null : v.text('variant'),
         pdfKey: limited ? null : v.text('pdf'),

@@ -725,6 +725,7 @@ export const TestScalarFieldEnum = {
   gradingMode: 'gradingMode',
   chapterId: 'chapterId',
   timeLimitMin: 'timeLimitMin',
+  leaveLimit: 'leaveLimit',
   pdfKey: 'pdfKey',
   price: 'price',
   groupKey: 'groupKey',

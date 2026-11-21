@@ -12,6 +12,8 @@ class TestRunRow {
     this.leaveCount,
     this.screenshotCount,
     this.recordingCount,
+    this.leaveLimit,
+    this.leftByLeaves = false,
   });
 
   factory TestRunRow.fromJson(Map<String, Object?> j) {
@@ -27,6 +29,8 @@ class TestRunRow {
       leaveCount: _num(j['leaveCount'])?.toInt(),
       screenshotCount: _num(j['screenshotCount'])?.toInt(),
       recordingCount: _num(j['recordingCount'])?.toInt(),
+      leaveLimit: _num(j['leaveLimit'])?.toInt(),
+      leftByLeaves: j['leftByLeaves'] == true,
     );
   }
 
@@ -38,6 +42,19 @@ class TestRunRow {
   final int? leaveCount;
   final int? screenshotCount;
   final int? recordingCount;
+
+  /// Шалгалтын аппаас гарах дүрэм: 2 = Хатуу, 3 = Зөөлөн (хуучин сервер: null).
+  final int? leaveLimit;
+
+  /// Гаралтын хязгаарт хүрч шалгалт автоматаар илгээгдсэн.
+  final bool leftByLeaves;
+
+  /// «Хатуу (2 дахь гаралтад илгээгдэнэ)» — хуучин сервер утга өгөхгүй бол null.
+  static String? leaveRuleLabel(int? leaveLimit) => switch (leaveLimit) {
+    null => null,
+    2 => 'Хатуу (2 дахь гаралтад илгээгдэнэ)',
+    _ => 'Зөөлөн (3 дахь гаралтад илгээгдэнэ)',
+  };
 
   /// Тоо > 0 байгаа үзүүлэлтүүд л (дараалал: гарсан, скриншот, бичлэг).
   List<({IntegrityKind kind, int count})> get indicators => [

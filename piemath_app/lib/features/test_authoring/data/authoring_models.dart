@@ -288,6 +288,7 @@ class TestDetails {
     required this.gradingMode,
     this.chapterId,
     this.timeLimitMin,
+    this.leaveLimit,
     this.groupKey,
     this.variantLabel,
     this.pdfKey,
@@ -309,6 +310,7 @@ class TestDetails {
       gradingMode: _str(j['gradingMode']) ?? GradingModes.auto,
       chapterId: _str(j['chapterId']),
       timeLimitMin: _int(j['timeLimitMin']),
+      leaveLimit: _int(j['leaveLimit']),
       groupKey: _str(j['groupKey']),
       variantLabel: _str(j['variantLabel']),
       pdfKey: _str(j['pdfKey']),
@@ -339,6 +341,9 @@ class TestDetails {
   final String gradingMode;
   final String? chapterId;
   final int? timeLimitMin;
+
+  /// Аппаас гарах дүрэм: 2 = Хатуу, 3 = Зөөлөн (хуучин сервер: null → 3).
+  final int? leaveLimit;
   final String? groupKey;
   final String? variantLabel;
   final String? pdfKey;

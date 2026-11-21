@@ -150,6 +150,8 @@ export interface ExamSettings {
     type: string;
     gradingMode: string;
     timeLimitMin: number | null;
+    /** Аппаас гарах дүрэм: 3 = Зөөлөн, 2 = Хатуу (хуучин API-д байхгүй → 3) */
+    leaveLimit?: number;
     price?: number | null;
     taken: boolean;
     /** Буцаах/түүх: PATCH /tests/:id-д expectedVersion */

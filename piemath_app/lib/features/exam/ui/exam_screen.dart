@@ -18,8 +18,12 @@ import '../domain/test_list_logic.dart';
 import 'widgets/exam_parts.dart';
 
 /// Дүн/эргэн харалтын зам (вэб: шалгалтын төрөлд `/result`, бусдад `/review`).
-String resultPathFor(String testId, String? type) =>
-    isExamType(type) ? '/app/tests/$testId/result' : '/app/tests/$testId/review';
+/// [leftAfter] — гаралтын хязгаарт хүрч автоматаар илгээгдсэн бол гаралтын тоо (дүнгийн
+/// дэлгэц шалтгааныг харуулна).
+String resultPathFor(String testId, String? type, {int? leftAfter}) {
+  final path = isExamType(type) ? '/app/tests/$testId/result' : '/app/tests/$testId/review';
+  return leftAfter == null ? path : '$path?leaves=$leftAfter';
+}
 
 /// `/app/tests/:id` — интро → шалгалт өгөх (бүтэн дэлгэц, доод табгүй).
 class ExamScreen extends ConsumerStatefulWidget {
@@ -78,7 +82,10 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
     if (_c.phase == ExamPhase.finished && !_navigated) {
       _navigated = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.go(resultPathFor(widget.testId, _c.meta?.type));
+        if (mounted) {
+          final byLeaves = _c.finishReason == FinishReason.leaves;
+          context.go(resultPathFor(widget.testId, _c.meta?.type, leftAfter: byLeaves ? _c.leaveCount : null));
+        }
       });
     }
     setState(() {});
@@ -217,7 +224,7 @@ class _Taking extends ConsumerWidget {
           if (c.notice != null)
             LeaveNoticeView(
               leaveCount: c.notice!.leaveCount,
-              maxLeaves: c.policy.maxLeaves,
+              policy: c.policy,
               away: c.notice!.away,
               finalWarning: c.notice!.finalWarning,
               onContinue: c.dismissNotice,

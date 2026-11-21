@@ -28,12 +28,14 @@ export type AggregateTest = {
 
 export type TestAvgAggregateOutputType = {
   timeLimitMin: number | null
+  leaveLimit: number | null
   price: number | null
   version: number | null
 }
 
 export type TestSumAggregateOutputType = {
   timeLimitMin: number | null
+  leaveLimit: number | null
   price: number | null
   version: number | null
 }
@@ -45,6 +47,7 @@ export type TestMinAggregateOutputType = {
   gradingMode: $Enums.TestGradingMode | null
   chapterId: string | null
   timeLimitMin: number | null
+  leaveLimit: number | null
   pdfKey: string | null
   price: number | null
   groupKey: string | null
@@ -65,6 +68,7 @@ export type TestMaxAggregateOutputType = {
   gradingMode: $Enums.TestGradingMode | null
   chapterId: string | null
   timeLimitMin: number | null
+  leaveLimit: number | null
   pdfKey: string | null
   price: number | null
   groupKey: string | null
@@ -85,6 +89,7 @@ export type TestCountAggregateOutputType = {
   gradingMode: number
   chapterId: number
   timeLimitMin: number
+  leaveLimit: number
   pdfKey: number
   price: number
   groupKey: number
@@ -102,12 +107,14 @@ export type TestCountAggregateOutputType = {
 
 export type TestAvgAggregateInputType = {
   timeLimitMin?: true
+  leaveLimit?: true
   price?: true
   version?: true
 }
 
 export type TestSumAggregateInputType = {
   timeLimitMin?: true
+  leaveLimit?: true
   price?: true
   version?: true
 }
@@ -119,6 +126,7 @@ export type TestMinAggregateInputType = {
   gradingMode?: true
   chapterId?: true
   timeLimitMin?: true
+  leaveLimit?: true
   pdfKey?: true
   price?: true
   groupKey?: true
@@ -139,6 +147,7 @@ export type TestMaxAggregateInputType = {
   gradingMode?: true
   chapterId?: true
   timeLimitMin?: true
+  leaveLimit?: true
   pdfKey?: true
   price?: true
   groupKey?: true
@@ -159,6 +168,7 @@ export type TestCountAggregateInputType = {
   gradingMode?: true
   chapterId?: true
   timeLimitMin?: true
+  leaveLimit?: true
   pdfKey?: true
   price?: true
   groupKey?: true
@@ -266,6 +276,7 @@ export type TestGroupByOutputType = {
   gradingMode: $Enums.TestGradingMode
   chapterId: string | null
   timeLimitMin: number | null
+  leaveLimit: number
   pdfKey: string | null
   price: number | null
   groupKey: string | null
@@ -309,6 +320,7 @@ export type TestWhereInput = {
   gradingMode?: Prisma.EnumTestGradingModeFilter<"Test"> | $Enums.TestGradingMode
   chapterId?: Prisma.StringNullableFilter<"Test"> | string | null
   timeLimitMin?: Prisma.IntNullableFilter<"Test"> | number | null
+  leaveLimit?: Prisma.IntFilter<"Test"> | number
   pdfKey?: Prisma.StringNullableFilter<"Test"> | string | null
   price?: Prisma.IntNullableFilter<"Test"> | number | null
   groupKey?: Prisma.StringNullableFilter<"Test"> | string | null
@@ -337,6 +349,7 @@ export type TestOrderByWithRelationInput = {
   gradingMode?: Prisma.SortOrder
   chapterId?: Prisma.SortOrderInput | Prisma.SortOrder
   timeLimitMin?: Prisma.SortOrderInput | Prisma.SortOrder
+  leaveLimit?: Prisma.SortOrder
   pdfKey?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrderInput | Prisma.SortOrder
   groupKey?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -368,6 +381,7 @@ export type TestWhereUniqueInput = Prisma.AtLeast<{
   gradingMode?: Prisma.EnumTestGradingModeFilter<"Test"> | $Enums.TestGradingMode
   chapterId?: Prisma.StringNullableFilter<"Test"> | string | null
   timeLimitMin?: Prisma.IntNullableFilter<"Test"> | number | null
+  leaveLimit?: Prisma.IntFilter<"Test"> | number
   pdfKey?: Prisma.StringNullableFilter<"Test"> | string | null
   price?: Prisma.IntNullableFilter<"Test"> | number | null
   groupKey?: Prisma.StringNullableFilter<"Test"> | string | null
@@ -396,6 +410,7 @@ export type TestOrderByWithAggregationInput = {
   gradingMode?: Prisma.SortOrder
   chapterId?: Prisma.SortOrderInput | Prisma.SortOrder
   timeLimitMin?: Prisma.SortOrderInput | Prisma.SortOrder
+  leaveLimit?: Prisma.SortOrder
   pdfKey?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrderInput | Prisma.SortOrder
   groupKey?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -424,6 +439,7 @@ export type TestScalarWhereWithAggregatesInput = {
   gradingMode?: Prisma.EnumTestGradingModeWithAggregatesFilter<"Test"> | $Enums.TestGradingMode
   chapterId?: Prisma.StringNullableWithAggregatesFilter<"Test"> | string | null
   timeLimitMin?: Prisma.IntNullableWithAggregatesFilter<"Test"> | number | null
+  leaveLimit?: Prisma.IntWithAggregatesFilter<"Test"> | number
   pdfKey?: Prisma.StringNullableWithAggregatesFilter<"Test"> | string | null
   price?: Prisma.IntNullableWithAggregatesFilter<"Test"> | number | null
   groupKey?: Prisma.StringNullableWithAggregatesFilter<"Test"> | string | null
@@ -443,6 +459,7 @@ export type TestCreateInput = {
   type: $Enums.TestType
   gradingMode?: $Enums.TestGradingMode
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -471,6 +488,7 @@ export type TestUncheckedCreateInput = {
   gradingMode?: $Enums.TestGradingMode
   chapterId?: string | null
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -497,6 +515,7 @@ export type TestUpdateInput = {
   type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -525,6 +544,7 @@ export type TestUncheckedUpdateInput = {
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -552,6 +572,7 @@ export type TestCreateManyInput = {
   gradingMode?: $Enums.TestGradingMode
   chapterId?: string | null
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -571,6 +592,7 @@ export type TestUpdateManyMutationInput = {
   type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -591,6 +613,7 @@ export type TestUncheckedUpdateManyInput = {
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -621,6 +644,7 @@ export type TestCountOrderByAggregateInput = {
   gradingMode?: Prisma.SortOrder
   chapterId?: Prisma.SortOrder
   timeLimitMin?: Prisma.SortOrder
+  leaveLimit?: Prisma.SortOrder
   pdfKey?: Prisma.SortOrder
   price?: Prisma.SortOrder
   groupKey?: Prisma.SortOrder
@@ -636,6 +660,7 @@ export type TestCountOrderByAggregateInput = {
 
 export type TestAvgOrderByAggregateInput = {
   timeLimitMin?: Prisma.SortOrder
+  leaveLimit?: Prisma.SortOrder
   price?: Prisma.SortOrder
   version?: Prisma.SortOrder
 }
@@ -647,6 +672,7 @@ export type TestMaxOrderByAggregateInput = {
   gradingMode?: Prisma.SortOrder
   chapterId?: Prisma.SortOrder
   timeLimitMin?: Prisma.SortOrder
+  leaveLimit?: Prisma.SortOrder
   pdfKey?: Prisma.SortOrder
   price?: Prisma.SortOrder
   groupKey?: Prisma.SortOrder
@@ -667,6 +693,7 @@ export type TestMinOrderByAggregateInput = {
   gradingMode?: Prisma.SortOrder
   chapterId?: Prisma.SortOrder
   timeLimitMin?: Prisma.SortOrder
+  leaveLimit?: Prisma.SortOrder
   pdfKey?: Prisma.SortOrder
   price?: Prisma.SortOrder
   groupKey?: Prisma.SortOrder
@@ -682,6 +709,7 @@ export type TestMinOrderByAggregateInput = {
 
 export type TestSumOrderByAggregateInput = {
   timeLimitMin?: Prisma.SortOrder
+  leaveLimit?: Prisma.SortOrder
   price?: Prisma.SortOrder
   version?: Prisma.SortOrder
 }
@@ -845,6 +873,7 @@ export type TestCreateWithoutChapterInput = {
   type: $Enums.TestType
   gradingMode?: $Enums.TestGradingMode
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -871,6 +900,7 @@ export type TestUncheckedCreateWithoutChapterInput = {
   type: $Enums.TestType
   gradingMode?: $Enums.TestGradingMode
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -927,6 +957,7 @@ export type TestScalarWhereInput = {
   gradingMode?: Prisma.EnumTestGradingModeFilter<"Test"> | $Enums.TestGradingMode
   chapterId?: Prisma.StringNullableFilter<"Test"> | string | null
   timeLimitMin?: Prisma.IntNullableFilter<"Test"> | number | null
+  leaveLimit?: Prisma.IntFilter<"Test"> | number
   pdfKey?: Prisma.StringNullableFilter<"Test"> | string | null
   price?: Prisma.IntNullableFilter<"Test"> | number | null
   groupKey?: Prisma.StringNullableFilter<"Test"> | string | null
@@ -946,6 +977,7 @@ export type TestCreateWithoutProblemsInput = {
   type: $Enums.TestType
   gradingMode?: $Enums.TestGradingMode
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -973,6 +1005,7 @@ export type TestUncheckedCreateWithoutProblemsInput = {
   gradingMode?: $Enums.TestGradingMode
   chapterId?: string | null
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1014,6 +1047,7 @@ export type TestUpdateWithoutProblemsInput = {
   type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1041,6 +1075,7 @@ export type TestUncheckedUpdateWithoutProblemsInput = {
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1066,6 +1101,7 @@ export type TestCreateWithoutAccessInput = {
   type: $Enums.TestType
   gradingMode?: $Enums.TestGradingMode
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1093,6 +1129,7 @@ export type TestUncheckedCreateWithoutAccessInput = {
   gradingMode?: $Enums.TestGradingMode
   chapterId?: string | null
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1134,6 +1171,7 @@ export type TestUpdateWithoutAccessInput = {
   type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1161,6 +1199,7 @@ export type TestUncheckedUpdateWithoutAccessInput = {
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1186,6 +1225,7 @@ export type TestCreateWithoutAttemptSessionsInput = {
   type: $Enums.TestType
   gradingMode?: $Enums.TestGradingMode
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1213,6 +1253,7 @@ export type TestUncheckedCreateWithoutAttemptSessionsInput = {
   gradingMode?: $Enums.TestGradingMode
   chapterId?: string | null
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1254,6 +1295,7 @@ export type TestUpdateWithoutAttemptSessionsInput = {
   type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1281,6 +1323,7 @@ export type TestUncheckedUpdateWithoutAttemptSessionsInput = {
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1306,6 +1349,7 @@ export type TestCreateWithoutResultsInput = {
   type: $Enums.TestType
   gradingMode?: $Enums.TestGradingMode
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1333,6 +1377,7 @@ export type TestUncheckedCreateWithoutResultsInput = {
   gradingMode?: $Enums.TestGradingMode
   chapterId?: string | null
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1374,6 +1419,7 @@ export type TestUpdateWithoutResultsInput = {
   type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1401,6 +1447,7 @@ export type TestUncheckedUpdateWithoutResultsInput = {
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1426,6 +1473,7 @@ export type TestCreateWithoutItemMarksInput = {
   type: $Enums.TestType
   gradingMode?: $Enums.TestGradingMode
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1453,6 +1501,7 @@ export type TestUncheckedCreateWithoutItemMarksInput = {
   gradingMode?: $Enums.TestGradingMode
   chapterId?: string | null
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1494,6 +1543,7 @@ export type TestUpdateWithoutItemMarksInput = {
   type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1521,6 +1571,7 @@ export type TestUncheckedUpdateWithoutItemMarksInput = {
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1546,6 +1597,7 @@ export type TestCreateWithoutAbsencesInput = {
   type: $Enums.TestType
   gradingMode?: $Enums.TestGradingMode
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1573,6 +1625,7 @@ export type TestUncheckedCreateWithoutAbsencesInput = {
   gradingMode?: $Enums.TestGradingMode
   chapterId?: string | null
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1614,6 +1667,7 @@ export type TestUpdateWithoutAbsencesInput = {
   type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1641,6 +1695,7 @@ export type TestUncheckedUpdateWithoutAbsencesInput = {
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1666,6 +1721,7 @@ export type TestCreateWithoutMockEventsInput = {
   type: $Enums.TestType
   gradingMode?: $Enums.TestGradingMode
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1693,6 +1749,7 @@ export type TestUncheckedCreateWithoutMockEventsInput = {
   gradingMode?: $Enums.TestGradingMode
   chapterId?: string | null
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1734,6 +1791,7 @@ export type TestUpdateWithoutMockEventsInput = {
   type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1761,6 +1819,7 @@ export type TestUncheckedUpdateWithoutMockEventsInput = {
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   chapterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1786,6 +1845,7 @@ export type TestCreateManyChapterInput = {
   type: $Enums.TestType
   gradingMode?: $Enums.TestGradingMode
   timeLimitMin?: number | null
+  leaveLimit?: number
   pdfKey?: string | null
   price?: number | null
   groupKey?: string | null
@@ -1805,6 +1865,7 @@ export type TestUpdateWithoutChapterInput = {
   type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1831,6 +1892,7 @@ export type TestUncheckedUpdateWithoutChapterInput = {
   type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1857,6 +1919,7 @@ export type TestUncheckedUpdateManyWithoutChapterInput = {
   type?: Prisma.EnumTestTypeFieldUpdateOperationsInput | $Enums.TestType
   gradingMode?: Prisma.EnumTestGradingModeFieldUpdateOperationsInput | $Enums.TestGradingMode
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leaveLimit?: Prisma.IntFieldUpdateOperationsInput | number
   pdfKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   groupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1962,6 +2025,7 @@ export type TestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   gradingMode?: boolean
   chapterId?: boolean
   timeLimitMin?: boolean
+  leaveLimit?: boolean
   pdfKey?: boolean
   price?: boolean
   groupKey?: boolean
@@ -1991,6 +2055,7 @@ export type TestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   gradingMode?: boolean
   chapterId?: boolean
   timeLimitMin?: boolean
+  leaveLimit?: boolean
   pdfKey?: boolean
   price?: boolean
   groupKey?: boolean
@@ -2012,6 +2077,7 @@ export type TestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   gradingMode?: boolean
   chapterId?: boolean
   timeLimitMin?: boolean
+  leaveLimit?: boolean
   pdfKey?: boolean
   price?: boolean
   groupKey?: boolean
@@ -2033,6 +2099,7 @@ export type TestSelectScalar = {
   gradingMode?: boolean
   chapterId?: boolean
   timeLimitMin?: boolean
+  leaveLimit?: boolean
   pdfKey?: boolean
   price?: boolean
   groupKey?: boolean
@@ -2046,7 +2113,7 @@ export type TestSelectScalar = {
   updatedById?: boolean
 }
 
-export type TestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "type" | "gradingMode" | "chapterId" | "timeLimitMin" | "pdfKey" | "price" | "groupKey" | "variantLabel" | "createdById" | "createdAt" | "deletedAt" | "isDraft" | "version" | "updatedAt" | "updatedById", ExtArgs["result"]["test"]>
+export type TestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "type" | "gradingMode" | "chapterId" | "timeLimitMin" | "leaveLimit" | "pdfKey" | "price" | "groupKey" | "variantLabel" | "createdById" | "createdAt" | "deletedAt" | "isDraft" | "version" | "updatedAt" | "updatedById", ExtArgs["result"]["test"]>
 export type TestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   chapter?: boolean | Prisma.Test$chapterArgs<ExtArgs>
   problems?: boolean | Prisma.Test$problemsArgs<ExtArgs>
@@ -2084,6 +2151,7 @@ export type $TestPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     gradingMode: $Enums.TestGradingMode
     chapterId: string | null
     timeLimitMin: number | null
+    leaveLimit: number
     pdfKey: string | null
     price: number | null
     groupKey: string | null
@@ -2532,6 +2600,7 @@ export interface TestFieldRefs {
   readonly gradingMode: Prisma.FieldRef<"Test", 'TestGradingMode'>
   readonly chapterId: Prisma.FieldRef<"Test", 'String'>
   readonly timeLimitMin: Prisma.FieldRef<"Test", 'Int'>
+  readonly leaveLimit: Prisma.FieldRef<"Test", 'Int'>
   readonly pdfKey: Prisma.FieldRef<"Test", 'String'>
   readonly price: Prisma.FieldRef<"Test", 'Int'>
   readonly groupKey: Prisma.FieldRef<"Test", 'String'>

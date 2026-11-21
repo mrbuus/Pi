@@ -28,11 +28,17 @@ final examRoutes = FeatureRoutes(
     GoRoute(path: '/app/results-ranking', redirect: (context, state) => '/app/tests?tab=rank'),
     GoRoute(
       path: '/app/tests/:id/result',
-      builder: (context, state) => ExamResultScreen(testId: state.pathParameters['id']!),
+      builder: (context, state) => ExamResultScreen(
+        testId: state.pathParameters['id']!,
+        leftAfter: int.tryParse(state.uri.queryParameters['leaves'] ?? ''),
+      ),
     ),
     GoRoute(
       path: '/app/tests/:id/review',
-      builder: (context, state) => ReviewScreen(testId: state.pathParameters['id']!),
+      builder: (context, state) => ReviewScreen(
+        testId: state.pathParameters['id']!,
+        leftAfter: int.tryParse(state.uri.queryParameters['leaves'] ?? ''),
+      ),
     ),
     GoRoute(
       path: '/app/tests/:id/ranking',

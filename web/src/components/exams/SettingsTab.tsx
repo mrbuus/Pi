@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { CalendarDays, Clock, Plus, Save, Tag, Trash2, Users, Workflow } from "lucide-react";
+import { CalendarDays, Clock, LogOut, Plus, Save, Tag, Trash2, Users, Workflow } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
@@ -22,6 +22,12 @@ const REVIEW: { value: ReviewMode; label: string }[] = [
   { value: "FULL", label: "Бүгд" },
 ];
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Аппаас/табаас гарах дүрэм — api/src/tests/leave-limit.ts */
+const LEAVE_RULES: { value: 2 | 3; label: string; hint: string }[] = [
+  { value: 3, label: "Зөөлөн", hint: "1, 2 дахь гаралтад анхааруулга, 3 дахь гаралтад автоматаар илгээгдэнэ" },
+  { value: 2, label: "Хатуу", hint: "1 дэх гаралтад сүүлчийн анхааруулга, 2 дахь гаралтад автоматаар илгээгдэнэ" },
+];
 
 function todayInput(): string {
   return toLocalInputUB(new Date()).slice(0, 10);
@@ -339,6 +345,56 @@ export default function SettingsTab({ testId, onChanged }: { testId: string; onC
         ) : (
           <p className="text-sm text-ink">{data.test.timeLimitMin ? `${data.test.timeLimitMin} минут` : "Хугацаагүй"}</p>
         )}
+      </Section>
+
+      <Section icon={LogOut} title="Аппаас гарах дүрэм">
+        {(() => {
+          const current = data.test.leaveLimit === 2 ? 2 : 3;
+          const editable = data.permissions.canEditTime && !data.test.taken;
+          return (
+            <div className="space-y-2">
+              <div role="radiogroup" aria-label="Аппаас гарах дүрэм" className="grid gap-2 sm:grid-cols-2">
+                {LEAVE_RULES.map((r) => {
+                  const active = r.value === current;
+                  return (
+                    <button
+                      key={r.value}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      disabled={!editable || busy !== null}
+                      onClick={() => {
+                        if (active) return;
+                        void run(
+                          "leave",
+                          async () => {
+                            await api(`/tests/${encodeURIComponent(testId)}`, {
+                              method: "PATCH",
+                              body: { leaveLimit: r.value, expectedVersion: data.test.version },
+                            });
+                          },
+                          "Дүрэм хадгалагдлаа",
+                        );
+                      }}
+                      className={cn(
+                        "min-h-11 rounded-xl border px-3 py-2 text-left transition-colors focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-not-allowed",
+                        active ? "border-brand-bright bg-brand-bright/15" : "border-line bg-surface",
+                        editable && !active && "hover:bg-ink/5",
+                        !editable && !active && "opacity-60",
+                      )}
+                    >
+                      <span className="block font-semibold text-ink">{r.label}</span>
+                      <span className="block text-sm text-ink-dim">{r.hint}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {data.permissions.canEditTime && data.test.taken && (
+                <p className="text-sm text-ink-dim">Сурагч шалгалт эхлүүлсэн тул дүрмийг өөрчлөхгүй</p>
+              )}
+            </div>
+          );
+        })()}
       </Section>
 
       {fills.length > 0 && (

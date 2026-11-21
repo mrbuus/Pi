@@ -40,7 +40,7 @@ void main() {
     expect(find.byType(ExamIntroView), findsOneWidget);
     expect(find.textContaining('3 дахь удаад шалгалт автоматаар илгээгдэнэ'), findsOneWidget);
     expect(find.textContaining('2 секундээс богино'), findsOneWidget);
-    await tester.tap(find.text('Шалгалт эхлүүлэх'));
+    await tester.tap(find.text('Ойлголоо, эхлүүлэх'));
     await ExamTestApp.settle(tester);
     await tester.tap(find.text('Эхлэх'));
     await ExamTestApp.settle(tester);
@@ -112,7 +112,7 @@ void main() {
     await ExamTestApp.settle(tester, 4);
     expect(find.byType(LeaveNoticeView), findsOneWidget);
     expect(find.text('Шалгалтын үеэр аппаас гарсан нь багшид харагдана'), findsOneWidget);
-    expect(find.text('2 удаа үлдсэн'), findsOneWidget);
+    expect(find.text('3 дахь гаралтад шалгалт автоматаар илгээгдэнэ, дахин 1 удаа анхааруулга авна'), findsOneWidget);
     await tester.tap(find.text('Үргэлжлүүлэх'));
     await ExamTestApp.settle(tester, 4);
     expect(find.byType(LeaveNoticeView), findsNothing);
@@ -130,6 +130,63 @@ void main() {
     expect(find.byType(RecordingCover), findsNothing);
     await app.close(tester);
     expect(app.guard!.isActive, isFalse);
+  });
+
+  testWidgets('Хатуу горим: интро дүрэм, 1 дэх гаралтад сүүлчийн анхааруулга, 2 дахьд илгээж шалтгааныг хэлнэ', (
+    tester,
+  ) async {
+    final submits = <Map<String, Object?>>[];
+    final http = FakeHttp()
+      ..json('GET', '/tests/t1', {...fakeMeta(), 'leaveLimit': 2})
+      ..json('POST', '/tests/t1/start', {
+        ...fakeStart(),
+        'test': {'id': 't1', 'title': 'Илтгэгч тэгшитгэл 1', 'timeLimitMin': 40, 'leaveLimit': 2},
+      })
+      ..json('PATCH', '/tests/t1/session', {'status': 'IN_PROGRESS', 'leaveCount': 1, 'remainingSec': 2000})
+      ..on('POST', '/tests/t1/submit', (req) {
+        submits.add((req.data as Map).cast<String, Object?>());
+        return const FakeResponse({
+          'result': {'totalScore': 0, 'maxScore': 2},
+        });
+      })
+      ..json('GET', '/tests/t1/review', {
+        'result': {'totalScore': 0, 'maxScore': 2, 'createdAt': '2026-11-01T03:00:00.000Z'},
+        'items': <Object?>[],
+        'leaveCount': 2,
+      });
+    final app = ExamTestApp(http);
+    await app.pump(tester, location: '/app/tests/t1');
+
+    // Эхлэхээс өмнөх дүрэм: хатуу горимын бичвэр, скриншот, мэдэгдэл.
+    expect(find.text('Шалгалтын дүрэм'), findsOneWidget);
+    expect(find.textContaining('1 дэх удаад сүүлчийн анхааруулга'), findsOneWidget);
+    expect(find.textContaining('2 дахь удаад шалгалт автоматаар илгээгдэнэ'), findsOneWidget);
+    expect(find.textContaining('Дэлгэцийн зураг авах, дэлгэц бичих', skipOffstage: false), findsOneWidget);
+    expect(find.textContaining('мэдэгдлээ түр унтрааж', skipOffstage: false), findsOneWidget);
+    await tester.tap(find.text('Ойлголоо, эхлүүлэх'));
+    await ExamTestApp.settle(tester);
+    await tester.tap(find.text('Эхлэх'));
+    await ExamTestApp.settle(tester);
+    expect(find.text('1-р бодлого'), findsOneWidget);
+
+    app.guard!.emit(IntegrityEventType.backgrounded);
+    await tester.pump(const Duration(seconds: 3));
+    app.guard!.emit(IntegrityEventType.resumed);
+    await ExamTestApp.settle(tester, 4);
+    expect(find.byType(LeaveNoticeView), findsOneWidget);
+    expect(find.text('Дахин гарвал шалгалт автоматаар илгээгдэнэ'), findsOneWidget);
+    await tester.tap(find.text('Үргэлжлүүлэх'));
+    await ExamTestApp.settle(tester, 4);
+
+    app.guard!.emit(IntegrityEventType.backgrounded);
+    await tester.pump(const Duration(seconds: 3));
+    await ExamTestApp.settle(tester, 10);
+    expect(submits, hasLength(1));
+    expect(submits.single['event'], 'LEAVE');
+    expect(find.byType(ReviewScreen), findsOneWidget);
+    expect(find.byType(LeavesFinishedBanner), findsOneWidget);
+    expect(find.text('Аппаас 2 удаа гарсан тул шалгалт илгээгдлээ'), findsOneWidget);
+    await app.close(tester);
   });
 
   testWidgets('аль хэдийн өгсөн шалгалт → дүнгийн хуудас (шалгалтын төрөл)', (tester) async {

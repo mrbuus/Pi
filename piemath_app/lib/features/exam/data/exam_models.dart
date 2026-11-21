@@ -186,6 +186,7 @@ class TestMeta {
     this.totalPoints = 0,
     this.myResult,
     this.sessionStatus = SessionStatus.none,
+    this.leaveLimit,
   });
 
   factory TestMeta.fromJson(Object? raw) {
@@ -201,6 +202,7 @@ class TestMeta {
       totalPoints: _num(j['totalPoints']) ?? 0,
       myResult: j['myResult'] is Map ? ScorePair.fromJson(j['myResult']) : null,
       sessionStatus: SessionStatus.parse(j['sessionStatus']),
+      leaveLimit: _int(j['leaveLimit']),
     );
   }
 
@@ -214,6 +216,9 @@ class TestMeta {
   final double totalPoints;
   final ScorePair? myResult;
   final SessionStatus sessionStatus;
+
+  /// Аппаас гарах дүрэм: 2 = Хатуу, 3 = Зөөлөн. Хуучин сервер илгээхгүй (null) → 3.
+  final int? leaveLimit;
 
   bool get manual => gradingMode == 'MANUAL';
   bool get finished => sessionStatus == SessionStatus.submitted || myResult != null;
@@ -294,6 +299,7 @@ class StartResult {
     this.draftStates = const {},
     this.problems = const [],
     this.result,
+    this.leaveLimit,
   });
 
   factory StartResult.fromJson(Object? raw) {
@@ -317,6 +323,7 @@ class StartResult {
       },
       problems: [for (final p in _list(j['problems'])) ExamProblem.fromJson(p)],
       result: j['result'] is Map ? ScorePair.fromJson(j['result']) : null,
+      leaveLimit: _int(t['leaveLimit']),
     );
   }
 
@@ -332,6 +339,9 @@ class StartResult {
   final Map<String, SelfState> draftStates;
   final List<ExamProblem> problems;
   final ScorePair? result;
+
+  /// Аппаас гарах дүрэм (`test.leaveLimit`): 2 = Хатуу, 3 = Зөөлөн, null = хуучин сервер (3).
+  final int? leaveLimit;
 }
 
 /// `PATCH /tests/:id/session` хариу.

@@ -141,6 +141,7 @@ class TestSettings {
     this.variantLabel = '',
     this.pdfKey = '',
     this.price = '',
+    this.leaveLimit = 3,
   });
 
   factory TestSettings.fromDetails(TestDetails d) => TestSettings(
@@ -154,6 +155,7 @@ class TestSettings {
     variantLabel: d.variantLabel ?? '',
     pdfKey: d.pdfKey ?? '',
     price: d.price?.toString() ?? '',
+    leaveLimit: d.leaveLimit == 2 ? 2 : 3,
   );
 
   final String title;
@@ -167,6 +169,9 @@ class TestSettings {
   final String pdfKey;
   final String price;
 
+  /// Аппаас гарах дүрэм: 3 = Зөөлөн, 2 = Хатуу (`api/src/tests/leave-limit.ts`).
+  final int leaveLimit;
+
   TestSettings copyWith({
     String? title,
     String? type,
@@ -178,6 +183,7 @@ class TestSettings {
     String? variantLabel,
     String? pdfKey,
     String? price,
+    int? leaveLimit,
   }) => TestSettings(
     title: title ?? this.title,
     type: type ?? this.type,
@@ -189,6 +195,7 @@ class TestSettings {
     variantLabel: variantLabel ?? this.variantLabel,
     pdfKey: pdfKey ?? this.pdfKey,
     price: price ?? this.price,
+    leaveLimit: leaveLimit ?? this.leaveLimit,
   );
 
   @override
@@ -203,11 +210,23 @@ class TestSettings {
       other.groupKey == groupKey &&
       other.variantLabel == variantLabel &&
       other.pdfKey == pdfKey &&
-      other.price == price;
+      other.price == price &&
+      other.leaveLimit == leaveLimit;
 
   @override
-  int get hashCode =>
-      Object.hash(title, type, gradingMode, chapterId, subject, timeLimit, groupKey, variantLabel, pdfKey, price);
+  int get hashCode => Object.hash(
+    title,
+    type,
+    gradingMode,
+    chapterId,
+    subject,
+    timeLimit,
+    groupKey,
+    variantLabel,
+    pdfKey,
+    price,
+    leaveLimit,
+  );
 }
 
 /// Засварлагчийн бүтэн төлөв.
@@ -495,6 +514,8 @@ Map<String, Object?> _settingsPatch(TestSettings a, TestSettings b, SaveContext 
   }
   if (a.pdfKey != b.pdfKey) out['pdfKey'] = b.pdfKey.trim().isEmpty ? null : b.pdfKey.trim();
   if (ctx.isAdmin && a.price != b.price) out['price'] = b.price.trim().isEmpty ? null : int.tryParse(b.price.trim());
+  // Сурагч эхлүүлсэн (limited) үед сервер татгалзана — дээр нь буцсан.
+  if (a.leaveLimit != b.leaveLimit) out['leaveLimit'] = b.leaveLimit;
   return out;
 }
 

@@ -42,6 +42,7 @@ import {
   SetScoringGroupsDto,
   UpdateExamClassDto,
 } from './exams.dto';
+import { normalizeLeaveLimit } from '../tests/leave-limit';
 
 export const EXAM_TYPES: TestType[] = [
   TestType.CHAPTER_EXAM,
@@ -271,6 +272,7 @@ export class ExamsService {
       type: true,
       gradingMode: true,
       timeLimitMin: true,
+      leaveLimit: true,
       price: true,
       version: true,
       problems: {
@@ -347,6 +349,8 @@ export class ExamsService {
         type: test.type,
         gradingMode: test.gradingMode,
         timeLimitMin: test.timeLimitMin,
+        // Аппаас гарах дүрэм: 3 = Зөөлөн, 2 = Хатуу (засах эрх = canEditTime, сурагч эхлэхээс өмнө)
+        leaveLimit: normalizeLeaveLimit(test.leaveLimit),
         price: role === Role.ADMIN ? test.price : undefined,
         taken: resultCount + sessionCount > 0,
         // Буцаах/түүх: засварлагч expectedVersion болгон илгээнэ (зөрвөл 409)

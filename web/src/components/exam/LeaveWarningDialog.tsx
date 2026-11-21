@@ -41,7 +41,7 @@ export default function LeaveWarningDialog({
           <AlertTriangle className="mx-auto h-9 w-9 text-warning" aria-hidden />
         )}
         <p className={`mt-2 text-lg font-bold ${finalWarning ? "text-error" : "text-warning"}`}>
-          Та шалгалтын дэлгэцээс гарлаа.
+          Та шалгалтын дэлгэцээс гарлаа
         </p>
         <p className="mt-3 text-sm text-ink-dim">
           Үргэлжлүүлэхийн тулд бүтэн дэлгэц рүү буцна уу.
@@ -57,11 +57,16 @@ export default function LeaveWarningDialog({
           ))}
         </div>
         <p className={`mt-2 text-xs font-semibold ${finalWarning ? "text-error" : "text-warning"}`}>
-          {maxLeaves - leaveCount} {maxLeaves - leaveCount === 1 ? "удаа" : "удаа"} үлдсэн
+          {leaveCount}/{maxLeaves} гаралт
         </p>
-        {finalWarning && (
+        {finalWarning ? (
           <p className="mt-3 text-sm font-semibold text-error">
-            Сүүлийн сунуулга! Дахин гарвал шалгалт автоматаар илгээгдэнэ.
+            Сүүлийн сануулга. Дахин гарвал шалгалт автоматаар илгээгдэнэ.
+          </p>
+        ) : (
+          <p className="mt-3 text-sm text-ink-dim">
+            {maxLeaves} дахь гаралтад шалгалт автоматаар илгээгдэнэ. Дахин {maxLeaves - leaveCount - 1} удаа
+            анхааруулга авна.
           </p>
         )}
         <button

@@ -33,6 +33,11 @@ class TestRunScreen extends ConsumerWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.sm, AppSpace.gutter, AppSpace.xxl),
               children: [
+                if (TestRunRow.leaveRuleLabel(rows.first.leaveLimit) case final rule?)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpace.sm),
+                    child: Text('Аппаас гарах дүрэм: $rule', style: context.text.bodySmall),
+                  ),
                 for (final r in rows) ...[_RunCard(row: r), const SizedBox(height: AppSpace.sm)],
                 const SizedBox(height: AppSpace.sm),
                 const IntegrityLegend(),
@@ -63,18 +68,45 @@ class _RunCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(row.name, style: context.text.titleSmall),
-                if (inds.isNotEmpty) ...[
+                if (inds.isNotEmpty || row.leftByLeaves) ...[
                   const SizedBox(height: AppSpace.xs),
                   Wrap(
                     spacing: AppSpace.md,
                     runSpacing: AppSpace.xs,
-                    children: [for (final i in inds) IntegrityChip(kind: i.kind, count: i.count)],
+                    children: [
+                      if (row.leftByLeaves) const LeftByLeavesChip(),
+                      for (final i in inds) IntegrityChip(kind: i.kind, count: i.count),
+                    ],
                   ),
                 ],
               ],
             ),
           ),
           Text('${_n(row.totalScore)}/${_n(row.maxScore)}', style: context.text.titleMedium),
+        ],
+      ),
+    );
+  }
+}
+
+/// «Гаралтаар илгээгдсэн» — аппаас гарах хязгаарт хүрч шалгалт автоматаар илгээгдсэн.
+class LeftByLeavesChip extends StatelessWidget {
+  const LeftByLeavesChip({super.key});
+
+  static const label = 'Гаралтаар илгээгдсэн';
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Semantics(
+      label: label,
+      excludeSemantics: true,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(AppIcons.logout, size: 16, color: c.error),
+          const SizedBox(width: AppSpace.xs),
+          Flexible(child: Text(label, style: context.text.bodySmall?.copyWith(color: c.ink))),
         ],
       ),
     );

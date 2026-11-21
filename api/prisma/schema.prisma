@@ -1037,6 +1037,9 @@ model Test {
   chapterId    String?
   chapter      Chapter?        @relation(fields: [chapterId], references: [id])
   timeLimitMin Int?
+  // Аппаас/табаас гарах дүрэм: хэд дэх гаралтад автоматаар илгээх (3 = Зөөлөн, 2 = Хатуу).
+  // Шийдвэрийг клиент гаргана; сервер зөвхөн утгыг дамжуулж, багшид ялгаж харуулна (tests/leave-limit.ts).
+  leaveLimit   Int             @default(3)
   pdfKey       String? // PDF-ээр оруулсан тест (Багш+/Админ)
   price        Int?
   // A/B хувилбарууд: groupKey ижил, variantLabel ялгаатай (ж: "Тест 18" → A, B)

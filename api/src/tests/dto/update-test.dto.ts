@@ -4,6 +4,7 @@ import {
   ArrayUnique,
   IsArray,
   IsEnum,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsString,
@@ -13,6 +14,7 @@ import {
 } from 'class-validator';
 import { TestGradingMode, TestType } from '../../generated/prisma/enums';
 import { ExpectedVersionDto } from '../../revisions/revisions.dto';
+import { LEAVE_LIMITS, type LeaveLimit } from '../leave-limit';
 
 export class UpdateTestProblemDto {
   @ApiProperty({ type: String })
@@ -60,6 +62,12 @@ export class UpdateTestDto extends ExpectedVersionDto {
   @IsInt()
   @Min(1)
   timeLimitMin?: number | null;
+
+  // Аппаас гарах дүрэм: 3 = Зөөлөн, 2 = Хатуу. Сурагч эхлүүлсний дараа өөрчлөхгүй.
+  @ApiPropertyOptional({ enum: LEAVE_LIMITS })
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsIn(LEAVE_LIMITS)
+  leaveLimit?: LeaveLimit;
 
   @ApiPropertyOptional({ type: String, nullable: true })
   @ValidateIf((_object, value) => value !== undefined && value !== null)

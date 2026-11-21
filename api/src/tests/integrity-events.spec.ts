@@ -106,9 +106,40 @@ describe('Шалгалтын бүрэн бүтэн байдлын үйл явд�
       leaveCount: true,
       events: true,
     });
+    // Хуучин мөр (leaveLimit-гүй) — Зөөлөн (3), 1 гаралт нь автомат илгээлт биш
     expect(rows).toEqual([
-      { studentId: 's1', leaveCount: 1, screenshotCount: 1, recordingCount: 1 },
-      { studentId: 's2', leaveCount: null, screenshotCount: null, recordingCount: null },
+      { studentId: 's1', leaveCount: 1, screenshotCount: 1, recordingCount: 1, leaveLimit: 3, leftByLeaves: false },
+      { studentId: 's2', leaveCount: null, screenshotCount: null, recordingCount: null, leaveLimit: 3, leftByLeaves: false },
+    ]);
+  });
+
+  it('Хатуу горим: 2 гаралттай илгээгдсэн сурагчийг «гаралтаар илгээгдсэн» гэж ялгана', async () => {
+    const db = {
+      user: {
+        findUnique: jest
+          .fn()
+          .mockResolvedValue({ role: Role.ADMIN, archivedAt: null, externalTeacherProfile: null }),
+      },
+      test: { findFirst: jest.fn().mockResolvedValue({ createdById: 'admin', leaveLimit: 2 }) },
+      testAccess: { findFirst: jest.fn() },
+      testResult: {
+        findMany: jest.fn().mockResolvedValue([{ studentId: 's1' }, { studentId: 's2' }]),
+      },
+      testAttemptSession: {
+        findMany: jest.fn().mockResolvedValue([
+          { studentId: 's1', leaveCount: 2, events: [] },
+          { studentId: 's2', leaveCount: 1, events: [] },
+        ]),
+      },
+    };
+    const rows = (await new TestsService(db as never, {} as never).results(
+      'test',
+      'admin',
+      Role.ADMIN,
+    )) as unknown as { studentId: string; leaveLimit: number; leftByLeaves: boolean }[];
+    expect(rows.map((r) => [r.studentId, r.leaveLimit, r.leftByLeaves])).toEqual([
+      ['s1', 2, true],
+      ['s2', 2, false],
     ]);
   });
 });

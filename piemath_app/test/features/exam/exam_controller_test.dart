@@ -229,6 +229,151 @@ void main() {
     });
   });
 
+  StartResult startWith({Object? leaveLimit, int leaveCount = 0}) => StartResult.fromJson({
+    'test': {'id': 't1', 'title': 'Т', 'leaveLimit': ?leaveLimit},
+    'session': {'status': 'IN_PROGRESS', 'remainingSec': 600, 'leaveCount': leaveCount},
+    'problems': const [
+      {'id': 'p1', 'format': 'OPEN', 'points': 1},
+    ],
+  });
+
+  void leaveOnce(FakeAsync fa) {
+    guard.emit(IntegrityEventType.backgrounded);
+    fa.elapse(const Duration(seconds: 3));
+    guard.emit(IntegrityEventType.resumed);
+    fa.flushMicrotasks();
+  }
+
+  test('Хатуу горим (leaveLimit 2): 1 дэх гаралтад сүүлчийн анхааруулга, 2 дахьд LEAVE-тэй илгээнэ', () {
+    fakeAsync((fa) {
+      repo.startResult = startWith(leaveLimit: 2);
+      final c = make()..load();
+      fa.flushMicrotasks();
+      c.begin();
+      fa.flushMicrotasks();
+      expect(c.policy.maxLeaves, 2);
+      expect(c.policy.isStrict, isTrue);
+
+      leaveOnce(fa);
+      expect(c.leaveCount, 1);
+      expect(c.phase, ExamPhase.taking);
+      expect(c.notice!.finalWarning, isTrue);
+      c.dismissNotice();
+      fa.elapse(const Duration(seconds: 2));
+      expect(repo.saves.where((b) => b['event'] == 'LEAVE'), hasLength(1));
+
+      guard.emit(IntegrityEventType.backgrounded);
+      fa.elapse(const Duration(seconds: 3));
+      fa.flushMicrotasks();
+      expect(c.finishReason, FinishReason.leaves);
+      expect(c.phase, ExamPhase.finished);
+      expect(repo.submits, hasLength(1));
+      // Автомат илгээлтийг үүсгэсэн гаралт илгээлтийн хүсэлттэй хамт (серверийн тоо 2 болно).
+      expect(repo.submits.single['event'], 'LEAVE');
+      expect(repo.saves.where((b) => b['event'] == 'LEAVE'), hasLength(1));
+      c.dispose();
+    });
+  });
+
+  test('Зөөлөн горим (leaveLimit 3): 1, 2 дахьд анхааруулга, 3 дахьд илгээнэ', () {
+    fakeAsync((fa) {
+      repo.startResult = startWith(leaveLimit: 3);
+      final c = make()..load();
+      fa.flushMicrotasks();
+      c.begin();
+      fa.flushMicrotasks();
+      for (var i = 1; i <= 2; i++) {
+        leaveOnce(fa);
+        expect(c.phase, ExamPhase.taking);
+        expect(c.notice!.finalWarning, i == 2);
+        c.dismissNotice();
+        fa.elapse(const Duration(seconds: 2));
+      }
+      guard.emit(IntegrityEventType.backgrounded);
+      fa.elapse(const Duration(seconds: 3));
+      fa.flushMicrotasks();
+      expect(c.finishReason, FinishReason.leaves);
+      expect(repo.submits.single['event'], 'LEAVE');
+      c.dispose();
+    });
+  });
+
+  test('сервер leaveLimit илгээхгүй (хуучин) эсвэл буруу утга бол 3', () {
+    for (final limit in [null, 1, 5]) {
+      fakeAsync((fa) {
+        repo = FakeRepo()..startResult = startWith(leaveLimit: limit);
+        final c = make()..load();
+        fa.flushMicrotasks();
+        expect(c.policy.maxLeaves, 3);
+        c.begin();
+        fa.flushMicrotasks();
+        expect(c.policy.maxLeaves, 3);
+        leaveOnce(fa);
+        leaveOnce(fa);
+        expect(c.phase, ExamPhase.taking);
+        c.dispose();
+      });
+    }
+  });
+
+  test('интрод meta-гийн leaveLimit-ийг ашиглана (эхлэхээс өмнө дүрмийг зөв хэлэх)', () {
+    fakeAsync((fa) {
+      repo.metaValue = TestMeta.fromJson(const {'id': 't1', 'title': 'Т', 'type': 'DAILY', 'leaveLimit': 2});
+      final c = make()..load();
+      fa.flushMicrotasks();
+      expect(c.phase, ExamPhase.intro);
+      expect(c.policy.maxLeaves, 2);
+      c.dispose();
+    });
+  });
+
+  test('офлайн үед хуримтлагдсан гаралт: илгээхийн өмнө тус тусад нь, сүүлийнх нь илгээлттэй', () {
+    fakeAsync((fa) {
+      repo.startResult = startWith(leaveLimit: 2);
+      final c = make()..load();
+      fa.flushMicrotasks();
+      c.begin();
+      fa.flushMicrotasks();
+      repo.online = false;
+      leaveOnce(fa);
+      c.dismissNotice();
+      fa.elapse(const Duration(seconds: 1));
+      repo.online = true;
+      guard.emit(IntegrityEventType.backgrounded);
+      fa.elapse(const Duration(seconds: 3));
+      fa.flushMicrotasks();
+      expect(c.finishReason, FinishReason.leaves);
+      expect(repo.submits.single['event'], 'LEAVE');
+      // Офлайн үеийн нэг LEAVE тусдаа PATCH-ээр (амжилттай) хүрсэн.
+      expect(repo.saves.where((b) => b['event'] == 'LEAVE' && b.length == 1), isNotEmpty);
+      c.dispose();
+    });
+  });
+
+  test('скриншот, бичлэг серверт илгээгдэнэ, гаралтын тоонд нөлөөлөхгүй', () {
+    fakeAsync((fa) {
+      repo.startResult = startWith(leaveLimit: 2);
+      final c = make()..load();
+      fa.flushMicrotasks();
+      c.begin();
+      fa.flushMicrotasks();
+      guard.emit(IntegrityEventType.screenshot);
+      guard.emit(IntegrityEventType.recordingStarted);
+      guard.emit(IntegrityEventType.recordingStopped);
+      guard.emit(IntegrityEventType.screenshot);
+      // Heartbeat/дахин илгээлтээр бүгд очтол.
+      fa.elapse(const Duration(minutes: 3));
+      fa.flushMicrotasks();
+      final sent = [for (final b in repo.saves) ?b['event']];
+      expect(sent, ['SCREENSHOT', 'RECORDING_START', 'RECORDING_STOP', 'SCREENSHOT']);
+      expect(c.leaveCount, 0);
+      expect(c.phase, ExamPhase.taking);
+      expect(c.notice, isNull);
+      expect(repo.submits, isEmpty);
+      c.dispose();
+    });
+  });
+
   test('дэлгэц бичлэг: агуулгыг нууна; дуусахад нээнэ', () {
     fakeAsync((fa) {
       final c = make()..load();

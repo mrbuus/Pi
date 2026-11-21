@@ -174,6 +174,13 @@ void main() {
       expect(planSave(s, base, ctx(limited: true)).test, {'timeLimitMin': 60});
     });
 
+    test('аппаас гарах дүрэм: Хатуу сонговол leaveLimit 2; LIMITED үед илгээгдэхгүй', () {
+      expect(base.settings.leaveLimit, 3);
+      final s = base.copyWith(settings: base.settings.copyWith(leaveLimit: 2));
+      expect(planSave(s, base, ctx()).test, {'leaveLimit': 2});
+      expect(planSave(s, base, ctx(limited: true)).test, isNull);
+    });
+
     test('1000 бодлого: төрөл, анги илгээгдэхгүй', () {
       final s = base.copyWith(
         classes: const [],

@@ -11,7 +11,7 @@ void main() {
       ..json('PATCH', '/tests/t1/session', {'status': 'IN_PROGRESS', 'leaveCount': 0, 'remainingSec': 2300});
     final app = ExamTestApp(http);
     await app.pump(tester, location: '/app/tests/t1');
-    await tester.tap(find.text('Шалгалт эхлүүлэх'));
+    await tester.tap(find.text('Ойлголоо, эхлүүлэх'));
     await ExamTestApp.settle(tester);
     await tester.tap(find.text('Эхлэх'));
     await ExamTestApp.settle(tester);

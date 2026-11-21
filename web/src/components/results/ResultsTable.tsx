@@ -28,9 +28,18 @@ const INTEGRITY_KINDS = [
 // Тоо > 0 үед л харагдана; бүртгэгдсэн үйл явдал — автомат дүгнэлт биш. Анхааруулах өнгө зөвхөн дүрсэнд
 function IntegrityBadges({ row }: { row: ResultRow }) {
   const items = INTEGRITY_KINDS.filter((k) => (row[k.key] ?? 0) > 0);
-  if (items.length === 0) return null;
+  if (items.length === 0 && !row.leftByLeaves) return null;
   return (
     <span className="inline-flex flex-wrap items-center gap-3">
+      {row.leftByLeaves && (
+        <span
+          title="Аппаас/табаас гарах хязгаарт хүрч шалгалт автоматаар илгээгдсэн"
+          className="inline-flex items-center gap-1 rounded-md border border-line px-1.5 py-0.5 text-xs font-semibold text-ink"
+        >
+          <LogOut className="h-3.5 w-3.5 text-error" aria-hidden />
+          Гаралтаар илгээгдсэн
+        </span>
+      )}
       {items.map(({ key, label, Icon, hint }) => (
         <span
           key={key}
@@ -104,7 +113,7 @@ export default function ResultsTable({
   }, [rows]);
 
   function exportCsv() {
-    const header = ["№", "Нэр", "Оноо", "Нийт", "Хувь", "Эх сурвалж", "Горимоос гарсан тоо", "Скриншот", "Бичлэг"];
+    const header = ["№", "Нэр", "Оноо", "Нийт", "Хувь", "Эх сурвалж", "Горимоос гарсан тоо", "Скриншот", "Бичлэг", "Гаралтаар илгээгдсэн"];
     const lines = [header.map(csvEscape).join(",")];
     sorted.forEach(({ r, pct }, i) => {
       lines.push(
@@ -118,6 +127,7 @@ export default function ResultsTable({
           r.leaveCount ?? 0,
           r.screenshotCount ?? 0,
           r.recordingCount ?? 0,
+          r.leftByLeaves ? "тийм" : "",
         ]
           .map(csvEscape)
           .join(","),
@@ -161,7 +171,14 @@ export default function ResultsTable({
   return (
     <section className="rounded-2xl border border-line bg-surface p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-bold text-brand-soft">Дүнгийн жагсаалт ({rows.length})</h2>
+        <div className="min-w-0">
+          <h2 className="text-lg font-bold text-brand-soft">Дүнгийн жагсаалт ({rows.length})</h2>
+          {rows.length > 0 && typeof rows[0].leaveLimit === "number" && (
+            <p className="text-sm text-ink-dim">
+              Аппаас гарах дүрэм: {rows[0].leaveLimit === 2 ? "Хатуу (2 дахь гаралтад илгээгдэнэ)" : "Зөөлөн (3 дахь гаралтад илгээгдэнэ)"}
+            </p>
+          )}
+        </div>
         {rows.length > 0 && (
           <button
             type="button"

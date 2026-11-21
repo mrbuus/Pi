@@ -29,6 +29,7 @@ export default function ExamResult({
   total,
   max,
   leaveCount,
+  leftByLeaves = false,
   items,
   onBackToList,
 }: {
@@ -36,6 +37,8 @@ export default function ExamResult({
   total: number;
   max: number;
   leaveCount: number;
+  /** Гаралтын хязгаарт хүрч автоматаар илгээгдсэн */
+  leftByLeaves?: boolean;
   items: ExamReviewItem[];
   onBackToList: () => void;
 }) {
@@ -137,10 +140,16 @@ export default function ExamResult({
           />
         </div>
         <p className="text-ink-dim">{pct}% оноо авлаа</p>
-        {leaveCount > 0 && (
-          <p className="mt-2 text-xs text-warning">
-            Шалгалтын горимоос {leaveCount} удаа гарсан нь бүртгэгдсэн.
+        {leftByLeaves ? (
+          <p className="mt-2 text-sm font-semibold text-error">
+            Шалгалтын горимоос {leaveCount} удаа гарсан тул шалгалт автоматаар илгээгдлээ
           </p>
+        ) : (
+          leaveCount > 0 && (
+            <p className="mt-2 text-xs text-warning">
+              Шалгалтын горимоос {leaveCount} удаа гарсан нь бүртгэгдсэн.
+            </p>
+          )
         )}
       </div>
 

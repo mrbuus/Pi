@@ -106,7 +106,7 @@ abstract final class ResultFilters {
     good => bandOf(r.percent) == ScoreBand.good,
     mid => bandOf(r.percent) == ScoreBand.mid,
     low => bandOf(r.percent) == ScoreBand.low,
-    flagged => r.run.indicators.isNotEmpty,
+    flagged => r.run.indicators.isNotEmpty || r.run.leftByLeaves,
     online => r.isOnline,
     paper => !r.isOnline,
     _ => true,

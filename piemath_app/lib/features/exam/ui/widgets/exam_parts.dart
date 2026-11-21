@@ -7,6 +7,7 @@ import '../../../../core/ui/ui.dart';
 import '../../data/exam_models.dart';
 import '../../domain/answer.dart';
 import '../../domain/autosave_engine.dart';
+import '../../domain/leave_texts.dart';
 import '../../domain/timer_format.dart';
 import 'answer_inputs.dart';
 import 'exam_timer.dart';
@@ -452,22 +453,23 @@ class LeaveNoticeView extends StatelessWidget {
   const LeaveNoticeView({
     super.key,
     required this.leaveCount,
-    required this.maxLeaves,
+    required this.policy,
     required this.away,
     required this.finalWarning,
     required this.onContinue,
   });
 
   final int leaveCount;
-  final int maxLeaves;
+  final LeavePolicy policy;
   final Duration? away;
   final bool finalWarning;
   final VoidCallback onContinue;
 
+  int get maxLeaves => policy.maxLeaves;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final left = (maxLeaves - leaveCount).clamp(0, maxLeaves);
     return Material(
       color: c.bg,
       child: SafeArea(
@@ -509,16 +511,14 @@ class LeaveNoticeView extends StatelessWidget {
                           ),
                       ],
                     ),
-                    const SizedBox(height: AppSpace.sm),
-                    Text('$left удаа үлдсэн', style: context.text.bodySmall),
-                    if (finalWarning) ...[
-                      const SizedBox(height: AppSpace.lg),
-                      Text(
-                        'Дахин гарвал шалгалт автоматаар илгээгдэнэ',
-                        style: context.text.titleSmall?.copyWith(color: c.error),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                    const SizedBox(height: AppSpace.lg),
+                    Text(
+                      leaveNoticeHint(policy, leaveCount),
+                      style: finalWarning
+                          ? context.text.titleSmall?.copyWith(color: c.error)
+                          : context.text.bodyMedium?.copyWith(color: c.inkDim),
+                      textAlign: TextAlign.center,
+                    ),
                     const SizedBox(height: AppSpace.xl),
                     FilledButton(onPressed: onContinue, child: const Text('Үргэлжлүүлэх')),
                   ],
@@ -632,16 +632,19 @@ class ExamIntroView extends StatelessWidget {
                 ],
               ),
             ),
-            const SectionHeader(title: 'Анхаарах зүйл'),
-            rule(AppIcons.cloudCheck, 'Хариулт бүр шууд хадгалагдана — сүлжээ тасарсан ч үргэлжлүүлж болно.'),
-            rule(AppIcons.timer, 'Цагийг сервер тоолно — хугацаа дуусахад хариулт автоматаар илгээгдэнэ.'),
+            // Шалгалтын дүрэм — эхлэхээс өмнө нэг дор (EXAM-PROCTORING-RESEARCH §7 А шат).
+            const SectionHeader(title: 'Шалгалтын дүрэм'),
             rule(
-              AppIcons.secure,
-              'Шалгалтын үеэр аппаас гарвал багшид харагдана. 1, ${policy.maxLeaves - 1} дахь удаад анхааруулга '
-              'гарч, ${policy.maxLeaves} дахь удаад шалгалт автоматаар илгээгдэнэ. Дуудлага, мэдэгдэл зэрэг '
-              '${policy.minAway.inSeconds} секундээс богино хугацаанд гарсныг тооцохгүй.',
+              AppIcons.timer,
+              minutes == null || minutes == 0
+                  ? '${meta.problemCount} бодлого, хугацааны хязгааргүй.'
+                  : '${meta.problemCount} бодлого, $minutes минут. Цагийг сервер тоолно — хугацаа дуусахад хариулт '
+                        'автоматаар илгээгдэнэ.',
             ),
-            rule(AppIcons.notifications, 'Эхлэхээсээ өмнө утсаа цэнэглэж, мэдэгдлээ түр унтраавал тайван бодно.'),
+            rule(AppIcons.logout, leaveRuleIntro(policy)),
+            rule(AppIcons.camera, 'Дэлгэцийн зураг авах, дэлгэц бичих оролдлого багшид бүртгэгдэнэ.'),
+            rule(AppIcons.notifications, 'Эхлэхээсээ өмнө мэдэгдлээ түр унтрааж, утасныхаа цэнэгийг шалгаарай.'),
+            rule(AppIcons.cloudCheck, 'Хариулт бүр шууд хадгалагдана — сүлжээ тасарсан ч үргэлжлүүлж болно.'),
             if (meta.manual)
               Padding(
                 padding: const EdgeInsets.only(top: AppSpace.sm),
@@ -667,7 +670,7 @@ class ExamIntroView extends StatelessWidget {
                   onPressed: starting ? null : onStart,
                   child: starting
                       ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : Text(resume ? 'Үргэлжлүүлэх' : 'Шалгалт эхлүүлэх'),
+                      : Text(resume ? 'Үргэлжлүүлэх' : 'Ойлголоо, эхлүүлэх'),
                 ),
               ),
             ),

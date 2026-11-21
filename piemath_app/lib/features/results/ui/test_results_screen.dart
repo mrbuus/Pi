@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/ui/ui.dart';
 import '../../../shared/native/native.dart';
-import '../../teacher/ui/test_run_screen.dart' show IntegrityChip;
+import '../../teacher/ui/test_run_screen.dart' show IntegrityChip, LeftByLeavesChip;
 import '../application/results_providers.dart';
 import '../data/results_models.dart';
 import '../domain/results_logic.dart';
@@ -318,14 +318,17 @@ class ResultItem extends StatelessWidget {
     return ItemRow(
       title: row.name,
       meta: [ResultSource.label(row.source)],
-      subtitle: inds.isEmpty
+      subtitle: inds.isEmpty && !row.run.leftByLeaves
           ? null
           : Padding(
               padding: const EdgeInsets.only(top: AppSpace.xs),
               child: Wrap(
                 spacing: AppSpace.md,
                 runSpacing: AppSpace.xs,
-                children: [for (final i in inds) IntegrityChip(kind: i.kind, count: i.count)],
+                children: [
+                  if (row.run.leftByLeaves) const LeftByLeavesChip(),
+                  for (final i in inds) IntegrityChip(kind: i.kind, count: i.count),
+                ],
               ),
             ),
       trailing: Column(

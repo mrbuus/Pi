@@ -14,6 +14,7 @@ import '../../../core/ui/ui.dart';
 import '../../../shared/anim/animation_slot.dart';
 import '../data/exam_models.dart';
 import '../data/exam_repository.dart';
+import '../domain/leave_texts.dart';
 import '../domain/review_breakdown.dart';
 import '../domain/timer_format.dart';
 import 'widgets/review_parts.dart';
@@ -56,24 +57,76 @@ String _opensText(DateTime? opensAt) => opensAt == null
 
 /// `/app/tests/:id/result` — шалгалтын (CHAPTER_EXAM, EESH_MOCK, THOUSAND) дүн.
 class ExamResultScreen extends ConsumerWidget {
-  const ExamResultScreen({super.key, required this.testId});
+  const ExamResultScreen({super.key, required this.testId, this.leftAfter});
 
   final String testId;
+
+  /// Гаралтын хязгаарт хүрч автоматаар илгээгдсэн бол гаралтын тоо (`?leaves=N`).
+  final int? leftAfter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(examResultProvider(testId));
     return Scaffold(
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Шалгалтын дүн')),
-      body: async.when(
-        loading: () => const LoadingState(),
-        error: (e, _) => ErrorState(
-          title: 'Дүнг ачаалж чадсангүй',
-          message: _errorText(e),
-          onRetry: () => ref.invalidate(examResultProvider(testId)),
+      body: _WithLeavesBanner(
+        leftAfter: leftAfter,
+        child: async.when(
+          loading: () => const LoadingState(),
+          error: (e, _) => ErrorState(
+            title: 'Дүнг ачаалж чадсангүй',
+            message: _errorText(e),
+            onRetry: () => ref.invalidate(examResultProvider(testId)),
+          ),
+          data: (d) => _ResultBody(data: d),
         ),
-        data: (d) => _ResultBody(data: d),
       ),
+    );
+  }
+}
+
+/// Аппаас гарах хязгаарт хүрч автоматаар илгээгдсэн шалтгааныг дээд талд нь тайлбарлана.
+class LeavesFinishedBanner extends StatelessWidget {
+  const LeavesFinishedBanner({super.key, required this.leaveCount});
+
+  final int leaveCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpace.gutter, AppSpace.md, AppSpace.gutter, 0),
+      child: AppCard(
+        child: Semantics(
+          liveRegion: true,
+          child: Row(
+            children: [
+              Icon(AppIcons.logout, size: 20, color: c.error),
+              const SizedBox(width: AppSpace.md),
+              Expanded(child: Text(leavesFinishedText(leaveCount), style: context.text.bodyMedium)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WithLeavesBanner extends StatelessWidget {
+  const _WithLeavesBanner({required this.leftAfter, required this.child});
+
+  final int? leftAfter;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final n = leftAfter;
+    if (n == null || n <= 0) return child;
+    return Column(
+      children: [
+        LeavesFinishedBanner(leaveCount: n),
+        Expanded(child: child),
+      ],
     );
   }
 }
@@ -353,26 +406,32 @@ class _PracticeButtonState extends ConsumerState<_PracticeButton> {
 
 /// `/app/tests/:id/review` — дасгал тестийн эргэн харалт эсвэл 1000 бодлогын эргэн харалт.
 class ReviewScreen extends ConsumerWidget {
-  const ReviewScreen({super.key, required this.testId});
+  const ReviewScreen({super.key, required this.testId, this.leftAfter});
 
   final String testId;
+
+  /// Гаралтын хязгаарт хүрч автоматаар илгээгдсэн бол гаралтын тоо (`?leaves=N`).
+  final int? leftAfter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(reviewProvider(testId));
     return Scaffold(
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Эргэн харалт')),
-      body: async.when(
-        loading: () => const LoadingState(),
-        error: (e, _) => ErrorState(
-          title: 'Эргэн харалтыг ачаалж чадсангүй',
-          message: _errorText(e),
-          onRetry: () => ref.invalidate(reviewProvider(testId)),
+      body: _WithLeavesBanner(
+        leftAfter: leftAfter,
+        child: async.when(
+          loading: () => const LoadingState(),
+          error: (e, _) => ErrorState(
+            title: 'Эргэн харалтыг ачаалж чадсангүй',
+            message: _errorText(e),
+            onRetry: () => ref.invalidate(reviewProvider(testId)),
+          ),
+          data: (d) => switch (d) {
+            PracticeReviewData(:final review) => _PracticeReviewBody(review: review),
+            ThousandReviewData(:final review) => _ThousandReviewBody(review: review),
+          },
         ),
-        data: (d) => switch (d) {
-          PracticeReviewData(:final review) => _PracticeReviewBody(review: review),
-          ThousandReviewData(:final review) => _ThousandReviewBody(review: review),
-        },
       ),
     );
   }

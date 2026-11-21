@@ -3,14 +3,17 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsEnum,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { TestGradingMode, TestType } from '../../generated/prisma/enums';
+import { LEAVE_LIMITS, type LeaveLimit } from '../leave-limit';
 
 export class TestProblemInputDto {
   @ApiProperty({ type: String })
@@ -55,6 +58,13 @@ export class CreateTestDto {
   @IsInt()
   @Min(1)
   timeLimitMin?: number;
+
+  // Аппаас гарах дүрэм: 3 = Зөөлөн (анхдагч), 2 = Хатуу (leave-limit.ts)
+  // IsOptional биш: null-ийг ч татгалзана (санд NOT NULL)
+  @ApiPropertyOptional({ enum: LEAVE_LIMITS, default: 3 })
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsIn(LEAVE_LIMITS)
+  leaveLimit?: LeaveLimit;
 
   @ApiPropertyOptional({ type: String })
   @IsOptional()

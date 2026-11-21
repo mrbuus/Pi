@@ -217,7 +217,7 @@ void main() {
     await app.pump(tester, location: '/app/student');
     unawaited(app.container.read(routerProvider).push('/app/tests/t1'));
     await ExamTestApp.settle(tester);
-    await tester.tap(find.text('Шалгалт эхлүүлэх'));
+    await tester.tap(find.text('Ойлголоо, эхлүүлэх'));
     await ExamTestApp.settle(tester);
     await tester.tap(find.text('Эхлэх'));
     await ExamTestApp.settle(tester);

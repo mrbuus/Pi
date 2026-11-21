@@ -47,10 +47,12 @@ class ExamController extends ChangeNotifier {
     required this.drafts,
     required this.guardFactory,
     this.config = const AutosaveConfig(),
-    this.policy = const LeavePolicy(),
+    LeavePolicy? policy,
     math.Random? random,
   }) : _repo = repository,
-       _random = random ?? math.Random();
+       _random = random ?? math.Random(),
+       _policyOverride = policy,
+       policy = policy ?? const LeavePolicy();
 
   final String testId;
   final String userId;
@@ -58,7 +60,11 @@ class ExamController extends ChangeNotifier {
   final ExamDraftStore drafts;
   final ExamGuard Function() guardFactory;
   final AutosaveConfig config;
-  final LeavePolicy policy;
+
+  /// Гаралтын дүрэм — серверийн `leaveLimit`-ээс (2 = Хатуу, 3 = Зөөлөн; утгагүй бол 3).
+  /// Тестэд [ExamController.new]-ийн `policy`-оор тогтмол болгож болно.
+  LeavePolicy policy;
+  final LeavePolicy? _policyOverride;
   final math.Random _random;
 
   static const fiveMinutes = 300;
@@ -132,6 +138,7 @@ class ExamController extends ChangeNotifier {
     try {
       final m = await _repo.meta(testId);
       meta = m;
+      policy = _policyOverride ?? LeavePolicy.fromLeaveLimit(m.leaveLimit);
       if (m.finished) {
         result = m.myResult;
         finishReason = FinishReason.alreadyDone;
@@ -163,6 +170,8 @@ class ExamController extends ChangeNotifier {
         return;
       }
       problems = r.problems;
+      // Эхлэх хариуны утга хамгийн шинэ (интро нээснээс хойш багш өөрчилсөн байж болно).
+      policy = _policyOverride ?? LeavePolicy.fromLeaveLimit(r.leaveLimit ?? meta?.leaveLimit);
       answers
         ..clear()
         ..addAll(r.draftAnswers);
@@ -288,10 +297,21 @@ class ExamController extends ChangeNotifier {
     _engine?.stop();
     _notify();
     try {
+      final tracker = _tracker;
+      if (reason == FinishReason.leaves && tracker != null && !(_engine?.inFlight ?? false)) {
+        // Офлайн үед хуримтлагдсан өмнөх гаралтыг эхлээд илгээнэ (нэг хүсэлтэд нэг үйл явдал),
+        // сүүлийнх нь илгээлтийн хүсэлттэй хамт — серверийн тоо хязгаарт хүрнэ (багшид шошго).
+        while (tracker.pendingLeaves > 1) {
+          await _repo.save(testId, {'event': ExamSessionEvent.leave.wire});
+          tracker.ackFirstLeave();
+        }
+      }
       final body = <String, Object?>{
         'answers': {for (final e in answers.entries) e.key: e.value},
         'selfStates': {for (final e in states.entries) e.key: e.value.wire},
         'problemTimes': _engine?.times ?? const <String, int>{},
+        // Автомат илгээлтийг үүсгэсэн гаралт энэ хүсэлтэд (тусдаа autosave-тэй уралдахгүй).
+        if (reason == FinishReason.leaves && (tracker?.pendingLeaves ?? 0) > 0) 'event': ExamSessionEvent.leave.wire,
       };
       final r = await _repo.submit(testId, body);
       await _finish(reason, r);
@@ -384,9 +404,11 @@ class ExamController extends ChangeNotifier {
 
   void _onLeave(LeaveOutcome o) {
     leaveCount = math.max(leaveCount, o.leaveCount);
-    _engine?.flushSoon();
     if (o.decision == LeaveDecision.autoSubmit) {
+      // LEAVE-ийг илгээлтийн хүсэлт өөртөө авч явна — autosave-ээр тусад нь илгээхгүй.
       unawaited(submit(reason: FinishReason.leaves));
+    } else {
+      _engine?.flushSoon();
     }
     _notify();
   }

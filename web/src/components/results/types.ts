@@ -13,6 +13,9 @@ export interface ResultRow {
   // Гар утасны апп: дэлгэцийн зураг / бичлэг эхлүүлсэн тоо (null = session байхгүй)
   screenshotCount?: number | null;
   recordingCount?: number | null;
+  // Шалгалтын аппаас гарах дүрэм (3 = Зөөлөн, 2 = Хатуу); гаралтын хязгаарт хүрч автоматаар илгээгдсэн
+  leaveLimit?: number;
+  leftByLeaves?: boolean;
 }
 
 export interface RosterStudent {

@@ -46,6 +46,7 @@ import {
 } from './dto/test-draft.dto';
 import { SaveSessionDto } from './dto/submit-test.dto';
 import { countIntegrityEvents, countsAsLeave } from './integrity-events';
+import { normalizeLeaveLimit, reachedLeaveLimit } from './leave-limit';
 import { MistakeCollector } from '../mistakes/mistake-collector.service';
 import { spentSeconds } from './problem-time';
 import { mistakeNotesOf } from './mistake-notes';
@@ -293,6 +294,7 @@ export class TestsService {
           type: source.type,
           gradingMode: source.gradingMode,
           timeLimitMin: source.timeLimitMin,
+          leaveLimit: source.leaveLimit,
           chapterId: source.chapterId,
           pdfKey: source.pdfKey,
           price: actorRole === Role.ADMIN ? source.price : null,
@@ -485,6 +487,7 @@ export class TestsService {
     if (dto.gradingMode !== undefined) data.gradingMode = dto.gradingMode;
     if (dto.chapterId !== undefined) data.chapterId = dto.chapterId;
     if (dto.timeLimitMin !== undefined) data.timeLimitMin = dto.timeLimitMin;
+    if (dto.leaveLimit !== undefined) data.leaveLimit = dto.leaveLimit;
     if (dto.pdfKey !== undefined) data.pdfKey = dto.pdfKey;
     if (dto.groupKey !== undefined) data.groupKey = dto.groupKey;
     if (dto.variantLabel !== undefined) data.variantLabel = dto.variantLabel;
@@ -698,6 +701,7 @@ export class TestsService {
           gradingMode: dto.gradingMode ?? TestGradingMode.AUTO,
           chapterId: dto.chapterId,
           timeLimitMin: dto.timeLimitMin,
+          leaveLimit: dto.leaveLimit,
           pdfKey: dto.pdfKey,
           groupKey: dto.groupKey,
           variantLabel: dto.variantLabel,
@@ -1005,6 +1009,7 @@ export class TestsService {
       type: test.type,
       gradingMode: test.gradingMode,
       timeLimitMin: test.timeLimitMin,
+      leaveLimit: normalizeLeaveLimit(test.leaveLimit),
       variantLabel: test.variantLabel,
       problemCount: test.problems.length,
       totalPoints: test.problems.reduce((s, p) => s + p.points, 0),
@@ -1140,6 +1145,8 @@ export class TestsService {
         variantLabel: test.variantLabel,
         gradingMode: test.gradingMode,
         timeLimitMin: test.timeLimitMin,
+        // Аппаас гарах дүрэм (2 = Хатуу, 3 = Зөөлөн) — шийдвэрийг клиент гаргана
+        leaveLimit: normalizeLeaveLimit(test.leaveLimit),
       },
       session: this.sessionView(session),
       problems: this.buildProblemViews(test.problems, session),
@@ -1580,6 +1587,9 @@ export class TestsService {
         leaveCount: s?.leaveCount ?? null,
         screenshotCount: integrity?.screenshotCount ?? null,
         recordingCount: integrity?.recordingCount ?? null,
+        // Шалгалтын дүрэм + гаралтаар автоматаар илгээгдсэн эсэх (багшид шошго)
+        leaveLimit: normalizeLeaveLimit(test.leaveLimit),
+        leftByLeaves: reachedLeaveLimit(s?.leaveCount, test.leaveLimit),
       };
     });
   }

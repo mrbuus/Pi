@@ -60,6 +60,8 @@ interface Meta {
   gradingMode?: string;
   type?: string;
   timeLimitMin?: number | null;
+  /** Аппаас/табаас гарах дүрэм: 3 = Зөөлөн, 2 = Хатуу (хуучин API-д байхгүй → 3) */
+  leaveLimit?: number;
   problemCount: number;
   totalPoints: number;
   myResult?: { totalScore: number; maxScore: number } | null;
@@ -73,7 +75,7 @@ interface SessionView {
   draftStates?: Record<string, string>;
 }
 interface StartResp {
-  test?: { title: string; variantLabel?: string | null; timeLimitMin?: number | null };
+  test?: { title: string; variantLabel?: string | null; timeLimitMin?: number | null; leaveLimit?: number };
   session: SessionView;
   problems?: ProblemView[];
   result?: { totalScore: number; maxScore: number } | null;
@@ -100,12 +102,16 @@ interface ReviewResp {
   leaveCount: number;
 }
 
-/* Шалгалтаас гарах хязгаар — эзний АНХНЫ шийдвэр рүү буцаав
-   (SHALGALT-TOLOVLOGOO §8.5, 2026-10-10): 1, 2 дахь гаралт → анхааруулга,
-   3 дахь гаралт → автоматаар илгээнэ.
+/* Шалгалтаас гарах хязгаар — шалгалт бүрд багш сонгоно (эзэн 2026-11-21):
+   Зөөлөн (3, анхдагч): 1, 2 дахь гаралт → анхааруулга, 3 дахь → автоматаар илгээнэ.
+   Хатуу (2): 1 дэх гаралт → сүүлчийн анхааруулга, 2 дахь → автоматаар илгээнэ.
+   Серверийн `leaveLimit` (api/src/tests/leave-limit.ts); хуучин сервер илгээхгүй бол 3.
    ExamIntro дээр УРЬДЧИЛАН хэлнэ — гэнэтийн шийтгэл шударга бус. */
 const LEAVE_WARN = 1;
-const LEAVE_MAX = 3;
+const DEFAULT_LEAVE_MAX = 3;
+function leaveMaxOf(v: number | null | undefined): number {
+  return v === 2 ? 2 : DEFAULT_LEAVE_MAX;
+}
 const SAVE_DEBOUNCE_MS = 1200;
 const HEARTBEAT_MS = 20_000;
 // ±20% jitter — 1000 сурагч ойролцоо мөчид шалгалт эхэлбэл heartbeat-ууд нь
@@ -146,6 +152,9 @@ export default function TakeTestPage() {
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const [leaveCount, setLeaveCount] = useState(0);
   const [leaveWarnOpen, setLeaveWarnOpen] = useState(false);
+  const [leaveMax, setLeaveMax] = useState(DEFAULT_LEAVE_MAX);
+  // Гаралтын хязгаарт хүрч автоматаар илгээгдсэн (дүнгийн дэлгэцэд шалтгаан)
+  const [leftByLeaves, setLeftByLeaves] = useState(false);
   const [result, setResult] = useState<{ total: number; max: number } | null>(null);
   const [review, setReview] = useState<ReviewResp | null>(null);
   const [error, setError] = useState("");
@@ -183,6 +192,7 @@ export default function TakeTestPage() {
   const pageIdxRef = useRef(0);
   const problemsRef = useRef<ProblemView[]>([]);
   const leaveCountRef = useRef(0);
+  const leaveMaxRef = useRef(DEFAULT_LEAVE_MAX);
   const lastLeaveAtRef = useRef(0);
   const fiveMinToastShownRef = useRef(false);
 
@@ -192,7 +202,8 @@ export default function TakeTestPage() {
     pageIdxRef.current = pageIdx;
     problemsRef.current = problems;
     leaveCountRef.current = leaveCount;
-  }, [phase, subView, pageIdx, problems, leaveCount]);
+    leaveMaxRef.current = leaveMax;
+  }, [phase, subView, pageIdx, problems, leaveCount, leaveMax]);
 
   const manualGrading = meta?.gradingMode === "MANUAL";
 
@@ -212,6 +223,7 @@ export default function TakeTestPage() {
     api<Meta>(`/tests/${params.id}`)
       .then(async (m) => {
         setMeta(m);
+        setLeaveMax(leaveMaxOf(m.leaveLimit));
         if (m.sessionStatus === "SUBMITTED" || m.myResult) {
           if (m.myResult) setResult({ total: m.myResult.totalScore, max: m.myResult.maxScore });
           await loadReview();
@@ -347,7 +359,7 @@ export default function TakeTestPage() {
 
   // ---------- Илгээх ----------
   const finish = useCallback(
-    async (reason: "USER" | "TIME" | "LEAVES") => {
+    async (reason: "USER" | "TIME" | "LEAVES", event?: "LEAVE" | "FULLSCREEN_EXIT") => {
       if (submittedRef.current) return;
       submittedRef.current = true;
       setError("");
@@ -362,10 +374,14 @@ export default function TakeTestPage() {
               answers: answersRef.current,
               selfStates: statesRef.current,
               problemTimes: timesRef.current,
+              // Автомат илгээлтийг үүсгэсэн гаралт ЭНЭ хүсэлтэд — тусдаа PATCH-тэй
+              // уралдахгүй, серверийн leaveCount хязгаарт хүрнэ (багшид шошго)
+              ...(event ? { event } : {}),
             },
           },
         );
         setResult({ total: res.result.totalScore, max: res.result.maxScore });
+        setLeftByLeaves(reason === "LEAVES");
         await loadReview();
         setPhase("result");
         setSubmitDialogOpen(false);
@@ -468,9 +484,12 @@ export default function TakeTestPage() {
       lastLeaveAtRef.current = now;
       const next = leaveCountRef.current + 1;
       setLeaveCount(next);
-      void flushSave(kind);
-      if (next >= LEAVE_MAX) void finish("LEAVES");
-      else setLeaveWarnOpen(true);
+      if (next >= leaveMaxRef.current) {
+        void finish("LEAVES", kind);
+      } else {
+        void flushSave(kind);
+        setLeaveWarnOpen(true);
+      }
     }
 
     const onVisibility = () => {
@@ -568,6 +587,7 @@ export default function TakeTestPage() {
       statesRef.current = draftS;
       setSecondsLeft(r.session.remainingSec ?? null);
       setLeaveCount(r.session.leaveCount ?? 0);
+      if (r.test) setLeaveMax(leaveMaxOf(r.test.leaveLimit));
       lastLeaveAtRef.current = Date.now(); // эхлэх мөчийн fullscreen шилжилтийг тооцохгүй
       // Autosave/heartbeat-ийн төлөв цэвэрлэнэ (resume үед хуучин утга үлдэхгүй)
       lastContactAtRef.current = Date.now();
@@ -653,7 +673,7 @@ export default function TakeTestPage() {
         totalPoints={meta.totalPoints}
         manualGrading={manualGrading}
         leaveWarn={LEAVE_WARN}
-        leaveMax={LEAVE_MAX}
+        leaveMax={leaveMax}
         resume={resume}
         starting={starting}
         confirmStart={confirmStart}
@@ -679,6 +699,7 @@ export default function TakeTestPage() {
         total={result?.total ?? 0}
         max={result?.max ?? 0}
         leaveCount={review?.leaveCount ?? 0}
+        leftByLeaves={leftByLeaves}
         items={review?.items ?? []}
         onBackToList={() => router.push("/app/tests")}
       />
@@ -704,7 +725,7 @@ export default function TakeTestPage() {
         title={meta.title}
         saveStatus={saveStatus}
         leaveCount={leaveCount}
-        maxLeaves={LEAVE_MAX}
+        maxLeaves={leaveMax}
         answeredCount={answeredCount}
         totalCount={problems.length}
         onOpenNavigator={() => setNavigatorOpen(true)}
@@ -779,7 +800,7 @@ export default function TakeTestPage() {
       <LeaveWarningDialog
         open={leaveWarnOpen}
         leaveCount={leaveCount}
-        maxLeaves={LEAVE_MAX}
+        maxLeaves={leaveMax}
         onAcknowledge={() => {
           setLeaveWarnOpen(false);
           void document.documentElement.requestFullscreen?.().catch(() => {});

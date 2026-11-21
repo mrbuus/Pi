@@ -9,10 +9,15 @@ import 'integrity_event.dart';
 /// утга — `api/src/tests/dto/submit-test.dto.ts` `SaveSessionDto.event`.
 ///
 /// Сервер НЭГ хүсэлтэд НЭГ л үйл явдал хүлээн авна, цагийг өөрөө тавьж (`t`), сүүлийн
-/// 100-г хадгална. `LEAVE` ирэх бүрд `leaveCount` нэмэгдэнэ, `RETURN` нэмэгдүүлэхгүй.
+/// 100-г хадгална. `LEAVE` ирэх бүрд `leaveCount` нэмэгдэнэ; `RETURN`, `SCREENSHOT`,
+/// `RECORDING_START`, `RECORDING_STOP` нэмэгдүүлэхгүй (`api/src/tests/integrity-events.ts`) —
+/// сүүлийн гурав нь багшийн «Скриншот», «Бичлэг» баганад л тоологдоно.
 enum ExamSessionEvent {
   leave('LEAVE'),
-  returned('RETURN');
+  returned('RETURN'),
+  screenshot('SCREENSHOT'),
+  recordingStart('RECORDING_START'),
+  recordingStop('RECORDING_STOP');
 
   const ExamSessionEvent(this.wire);
 
@@ -32,17 +37,28 @@ enum LeaveDecision {
   autoSubmit,
 }
 
-/// Гаралтын дүрэм — вэбийн `app/tests/[id]/page.tsx`-тэй ИЖИЛ (`LEAVE_WARN = 1`,
-/// `LEAVE_MAX = 3`): 1, 2 дахь удаа анхааруулга, 3 дахь удаад автоматаар илгээнэ.
+/// Гаралтын дүрэм — вэбийн `app/tests/[id]/page.tsx`-тэй ИЖИЛ. Шалгалт бүрд багш сонгоно
+/// (серверийн `leaveLimit`, `api/src/tests/leave-limit.ts`):
+/// - Зөөлөн (3, анхдагч): 1, 2 дахь удаа анхааруулга, 3 дахь удаад автоматаар илгээнэ.
+/// - Хатуу (2): 1 дэх удаа сүүлчийн анхааруулга, 2 дахь удаад автоматаар илгээнэ.
 /// 2 секундээс богино алга болохыг тоохгүй (STATUS §7.3) — мэдэгдэл, дуудлагад шударга
 /// бус шийтгэл өгөхгүй.
 @immutable
 class LeavePolicy {
-  const LeavePolicy({
-    this.warnAt = 1,
-    this.maxLeaves = 3,
-    this.minAway = const Duration(seconds: 2),
-  }) : assert(warnAt >= 1 && maxLeaves >= warnAt);
+  const LeavePolicy({this.warnAt = 1, this.maxLeaves = 3, this.minAway = const Duration(seconds: 2)})
+    : assert(warnAt >= 1 && maxLeaves >= warnAt);
+
+  /// Хатуу горим: 2 дахь гаралтад илгээнэ.
+  static const strict = LeavePolicy(maxLeaves: 2);
+
+  /// Зөөлөн горим (анхдагч): 3 дахь гаралтад илгээнэ.
+  static const lenient = LeavePolicy();
+
+  /// Серверийн `leaveLimit`-ээс. Зөвхөн 2 нь Хатуу; хуучин сервер (утгагүй) эсвэл бусад утга → 3.
+  factory LeavePolicy.fromLeaveLimit(int? leaveLimit) => leaveLimit == 2 ? strict : lenient;
+
+  /// Хатуу горим эсэх.
+  bool get isStrict => maxLeaves <= 2;
 
   final int warnAt;
   final int maxLeaves;
@@ -104,9 +120,9 @@ class LeaveTracker {
     int initialLeaveCount = 0,
     this.onLeave,
     this.onReturn,
-  })  : _now = now ?? DateTime.now,
-        _timer = timer ?? Timer.new,
-        _leaveCount = initialLeaveCount < 0 ? 0 : initialLeaveCount;
+  }) : _now = now ?? DateTime.now,
+       _timer = timer ?? Timer.new,
+       _leaveCount = initialLeaveCount < 0 ? 0 : initialLeaveCount;
 
   /// Серверийн хадгалах дээд хэмжээ (`MAX_EVENTS = 100`) — дараалал үүнээс хэтрэхгүй.
   static const maxPending = 100;
@@ -155,6 +171,9 @@ class LeaveTracker {
   }
 
   /// Хамгаалалтын үйл явдлыг боловсруулна. `backgrounded`, `resumed`-аас бусдыг үл тооно.
+  ///
+  /// Скриншот, бичлэг эхэлсэн/зогссон нь серверт илгээх дараалалд л орно — гаралтын тоонд
+  /// ([leaveCount]) огт нөлөөлөхгүй.
   void handle(IntegrityEvent event) {
     if (_disposed) return;
     switch (event.type) {
@@ -163,10 +182,30 @@ class LeaveTracker {
       case IntegrityEventType.resumed:
         _onBack(event.at);
       case IntegrityEventType.screenshot:
+        _enqueue(ExamSessionEvent.screenshot);
       case IntegrityEventType.recordingStarted:
+        _enqueue(ExamSessionEvent.recordingStart);
       case IntegrityEventType.recordingStopped:
-        break;
+        _enqueue(ExamSessionEvent.recordingStop);
     }
+  }
+
+  /// Дараалалд илгээгээгүй `LEAVE` хэд байгаа.
+  int get pendingLeaves => _queue.where((e) => e == ExamSessionEvent.leave).length;
+
+  /// Илгээгээгүй үйл явдлууд (хуучнаас шинэ рүү).
+  List<ExamSessionEvent> get pending => List.unmodifiable(_queue);
+
+  /// Хамгийн эхний илгээгээгүй `LEAVE`-ийг дарааллаас хасна — автомат илгээлтийн өмнө
+  /// хуримтлагдсан гаралтыг (офлайн) тусад нь илгээсний дараа.
+  void ackFirstLeave() {
+    final list = _queue.toList();
+    final idx = list.indexOf(ExamSessionEvent.leave);
+    if (idx < 0) return;
+    list.removeAt(idx);
+    _queue
+      ..clear()
+      ..addAll(list);
   }
 
   void _onAway(DateTime at) {
@@ -206,16 +245,14 @@ class LeaveTracker {
     final record = LeaveRecord(leftAt: leftAt);
     _history.add(record);
     _enqueue(ExamSessionEvent.leave);
-    onLeave?.call(
-      LeaveOutcome(leaveCount: _leaveCount, decision: policy.decide(_leaveCount), record: record),
-    );
+    onLeave?.call(LeaveOutcome(leaveCount: _leaveCount, decision: policy.decide(_leaveCount), record: record));
   }
 
   void _enqueue(ExamSessionEvent e) {
     _queue.add(e);
     while (_queue.length > maxPending) {
-      // Эхлээд хуучин RETURN-ийг хаяна (LEAVE нь серверийн тоонд нөлөөлдөг).
-      final idx = _queue.toList().indexOf(ExamSessionEvent.returned);
+      // Эхлээд хуучин LEAVE-ээс бусдыг хаяна (LEAVE нь серверийн тоонд нөлөөлдөг).
+      final idx = _queue.toList().indexWhere((x) => x != ExamSessionEvent.leave);
       if (idx >= 0) {
         final list = _queue.toList()..removeAt(idx);
         _queue

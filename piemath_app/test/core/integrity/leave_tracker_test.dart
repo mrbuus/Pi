@@ -51,12 +51,12 @@ void main() {
   late LeaveTracker tracker;
 
   LeaveTracker make({int initial = 0}) => LeaveTracker(
-        now: () => clock.now,
-        timer: clock.create,
-        initialLeaveCount: initial,
-        onLeave: leaves.add,
-        onReturn: returns.add,
-      );
+    now: () => clock.now,
+    timer: clock.create,
+    initialLeaveCount: initial,
+    onLeave: leaves.add,
+    onReturn: returns.add,
+  );
 
   void away() => tracker.handle(IntegrityEvent(IntegrityEventType.backgrounded, clock.now));
   void back() => tracker.handle(IntegrityEvent(IntegrityEventType.resumed, clock.now));
@@ -94,6 +94,80 @@ void main() {
       expect(p.remaining(1), 2);
       expect(p.remaining(5), 0);
     });
+  });
+
+  group('LeavePolicy.fromLeaveLimit (шалгалт бүрийн горим)', () {
+    test('Хатуу (2): 1 дэх гаралтад сүүлчийн анхааруулга, 2 дахьд илгээнэ', () {
+      final p = LeavePolicy.fromLeaveLimit(2);
+      expect(p.isStrict, isTrue);
+      expect(p.warnAt, 1);
+      expect(p.maxLeaves, 2);
+      expect(p.decide(0), LeaveDecision.none);
+      expect(p.decide(1), LeaveDecision.warn);
+      expect(p.isFinalWarning(1), isTrue);
+      expect(p.decide(2), LeaveDecision.autoSubmit);
+      expect(p.decide(3), LeaveDecision.autoSubmit);
+      expect(p.minAway, const Duration(seconds: 2));
+    });
+    test('Зөөлөн (3): 1, 2 дахьд анхааруулга, 3 дахьд илгээнэ', () {
+      final p = LeavePolicy.fromLeaveLimit(3);
+      expect(p.isStrict, isFalse);
+      expect(p.decide(1), LeaveDecision.warn);
+      expect(p.isFinalWarning(1), isFalse);
+      expect(p.decide(2), LeaveDecision.warn);
+      expect(p.isFinalWarning(2), isTrue);
+      expect(p.decide(3), LeaveDecision.autoSubmit);
+    });
+    test('сервер утга илгээхгүй эсвэл буруу утга бол 3', () {
+      for (final v in [null, 0, 1, 4, 10]) {
+        expect(LeavePolicy.fromLeaveLimit(v).maxLeaves, 3, reason: '$v');
+      }
+    });
+    test('Хатуу tracker: 2 дахь тоологдсон гаралт autoSubmit', () {
+      tracker = LeaveTracker(
+        policy: LeavePolicy.fromLeaveLimit(2),
+        now: () => clock.now,
+        timer: clock.create,
+        onLeave: leaves.add,
+      );
+      away();
+      clock.advance(const Duration(seconds: 3));
+      back();
+      expect(leaves.last.decision, LeaveDecision.warn);
+      away();
+      clock.advance(const Duration(seconds: 3));
+      expect(leaves.last.decision, LeaveDecision.autoSubmit);
+      expect(tracker.pendingLeaves, 2);
+    });
+  });
+
+  test('ackFirstLeave нь эхний LEAVE-ийг л хасна, бусдыг хадгална', () {
+    tracker.handle(IntegrityEvent(IntegrityEventType.screenshot, clock.now));
+    away();
+    clock.advance(const Duration(seconds: 3));
+    back();
+    away();
+    clock.advance(const Duration(seconds: 3));
+    expect(tracker.pending, [
+      ExamSessionEvent.screenshot,
+      ExamSessionEvent.leave,
+      ExamSessionEvent.returned,
+      ExamSessionEvent.leave,
+    ]);
+    tracker.ackFirstLeave();
+    expect(tracker.pending, [ExamSessionEvent.screenshot, ExamSessionEvent.returned, ExamSessionEvent.leave]);
+    expect(tracker.pendingLeaves, 1);
+  });
+
+  test('дараалал дүүрэхэд LEAVE-ээс бусдыг түрүүлж хаяна', () {
+    away();
+    clock.advance(const Duration(seconds: 3));
+    for (var i = 0; i < LeaveTracker.maxPending + 5; i++) {
+      tracker.handle(IntegrityEvent(IntegrityEventType.screenshot, clock.now));
+    }
+    expect(tracker.pending.length, LeaveTracker.maxPending);
+    expect(tracker.pending.first, ExamSessionEvent.leave);
+    expect(tracker.leaveCount, 1);
   });
 
   test('2 секундээс богино алга болохыг тоохгүй', () {
@@ -148,19 +222,23 @@ void main() {
       back();
       clock.advance(const Duration(seconds: 20));
     }
-    expect(leaves.map((o) => o.decision).toList(), [
-      LeaveDecision.warn,
-      LeaveDecision.warn,
-      LeaveDecision.autoSubmit,
-    ]);
+    expect(leaves.map((o) => o.decision).toList(), [LeaveDecision.warn, LeaveDecision.warn, LeaveDecision.autoSubmit]);
     expect(tracker.history, hasLength(3));
   });
 
-  test('скриншот, бичлэгийн үйл явдал гаралтад тоологдохгүй', () {
+  test('скриншот, бичлэгийн үйл явдал серверт илгээгдэх ч гаралтад тоологдохгүй', () {
     tracker.handle(IntegrityEvent(IntegrityEventType.screenshot, clock.now));
     tracker.handle(IntegrityEvent(IntegrityEventType.recordingStarted, clock.now));
+    tracker.handle(IntegrityEvent(IntegrityEventType.recordingStopped, clock.now));
     expect(tracker.leaveCount, 0);
-    expect(tracker.hasPending, isFalse);
+    expect(tracker.decision, LeaveDecision.none);
+    expect(tracker.pendingLeaves, 0);
+    expect(tracker.pending, [
+      ExamSessionEvent.screenshot,
+      ExamSessionEvent.recordingStart,
+      ExamSessionEvent.recordingStop,
+    ]);
+    expect([for (final e in tracker.pending) e.wire], ['SCREENSHOT', 'RECORDING_START', 'RECORDING_STOP']);
   });
 
   test('resumed нь өмнө нь гараагүй бол юу ч биш', () {
