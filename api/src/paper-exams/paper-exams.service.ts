@@ -1746,10 +1746,19 @@ export class PaperExamsService {
       where: { key: { startsWith: prefix } },
       select: { key: true },
     });
-    const keys = files
-      .map((f) => ({ key: f.key, n: Number(f.key.slice(prefix.length).split('.')[0]) }))
-      .filter((f) => Number.isInteger(f.n))
-      .sort((a, b) => a.n - b.n);
+    // `A-1.jpg` эсвэл шинэ хувилбар `A-1.r2.jpg` (чанар сайжруулсан, эзэн 2026-11-21) — хуучныг
+    // устгахгүй, хуудас бүрийн хамгийн сүүлийн хувилбарыг авна
+    const best = new Map<number, { key: string; rev: number }>();
+    for (const f of files) {
+      const m = f.key.slice(prefix.length).match(/^(\d+)(?:\.r(\d+))?\.jpg$/);
+      if (!m) continue;
+      const n = Number(m[1]);
+      const rev = m[2] ? Number(m[2]) : 1;
+      if ((best.get(n)?.rev ?? 0) < rev) best.set(n, { key: f.key, rev });
+    }
+    const keys = [...best.entries()]
+      .sort(([a], [b]) => a - b)
+      .map(([, v]) => v);
     const pages: string[] = [];
     for (const { key } of keys) {
       const file = await readStoredBytes(this.prisma, key);

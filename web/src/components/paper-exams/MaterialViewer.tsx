@@ -36,8 +36,8 @@ function dataUriBytes(src: string): Uint8Array {
   return out;
 }
 
-/** Логотой хуудсуудаас PDF угсарч татна (сан нь дарах үед л ачаалагдана) */
-async function downloadPdf(pages: string[], fileName: string) {
+/** Логотой хуудсуудаас PDF угсарна (сан нь хэрэгтэй үед л ачаалагдана) */
+async function buildPdf(pages: string[]): Promise<Blob> {
   const { PDFDocument } = await import("@cantoo/pdf-lib");
   const doc = await PDFDocument.create();
   for (const src of pages) {
@@ -49,10 +49,36 @@ async function downloadPdf(pages: string[], fileName: string) {
     doc.addPage([w, h]).drawImage(image, { x: 0, y: 0, width: w, height: h });
   }
   const bytes = await doc.save({ useObjectStreams: true });
-  const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: "application/pdf" }));
+  return new Blob([bytes as BlobPart], { type: "application/pdf" });
+}
+
+/** iPhone, iPad (iPadOS нь өөрийгөө Mac гэж танилцуулдаг) */
+function isIos(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
+/**
+ * PDF хадгалах. iPhone дээр (эзэн 2026-11-21) хуваалцах цонх нээгдэж «Файлд хадгалах», «Books»,
+ * Messenger руу шууд илгээж болно — Safari-ийн татах цонх, апп доторх хөтөч (Facebook г.м.)-д
+ * ажилладаггүй асуудлыг тойрно. Бусад төхөөрөмжид шууд татна.
+ */
+async function savePdf(blob: Blob, fileName: string) {
+  const file = new File([blob], fileName, { type: "application/pdf" });
+  if (isIos() && typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: fileName });
+      return;
+    } catch (e) {
+      // Хэрэглэгч цонхыг хаасан — алдаа биш
+      if (e instanceof DOMException && e.name === "AbortError") return;
+    }
+  }
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = fileName;
+  a.rel = "noopener";
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -75,6 +101,9 @@ export default function MaterialViewer({
   variantCount?: number;
 }) {
   const [saving, setSaving] = useState(false);
+  // Хуудсууд ачаалагдмагц PDF-ийг урьдчилан угсарна — товч дарахад шууд хадгалагдана
+  // (iPhone-д хуваалцах цонх зөвхөн дарсан даруйд нээгддэг)
+  const [pdf, setPdf] = useState<{ pages: string[]; blob: Blob } | null>(null);
   const [data, setData] = useState<PaperMaterial | null>(null);
   const [error, setError] = useState("");
   // Сурагчийн сонгосон хувилбар; null = өөрийнх (сервер шийднэ)
@@ -91,6 +120,17 @@ export default function MaterialViewer({
       .catch((e) => setError(errorText(e, "Материалыг ачаалж чадсангүй")));
   }, [path]);
   useEffect(load, [load]);
+  useEffect(() => {
+    const pages = data?.pages;
+    if (!pages?.length) return;
+    let alive = true;
+    buildPdf(pages)
+      .then((blob) => alive && setPdf({ pages, blob }))
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [data?.pages]);
 
   if (error) return <ErrorState message={error} onRetry={load} />;
   if (!data) return <SkeletonRows rows={4} />;
@@ -134,9 +174,10 @@ export default function MaterialViewer({
             setSaving(true);
             try {
               const many = (staff ? (variantCount ?? 1) : (data.variants?.length ?? 1)) > 1;
-              await downloadPdf(data.pages, materialFileName(title, data.variant, many));
+              const blob = pdf?.pages === data.pages ? pdf.blob : await buildPdf(data.pages);
+              await savePdf(blob, materialFileName(title, data.variant, many));
             } catch {
-              toast.error("PDF үүсгэж чадсангүй. Дахин оролдоно уу");
+              toast.error("PDF хадгалж чадсангүй. Дахин оролдоно уу");
             } finally {
               setSaving(false);
             }
