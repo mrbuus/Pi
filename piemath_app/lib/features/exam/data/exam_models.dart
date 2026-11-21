@@ -54,6 +54,27 @@ class ScorePair {
   int get hashCode => Object.hash(total, max);
 }
 
+/// Нэгдсэн шалгалт: хаах цаг хүртэл оноо, зөв/буруу, бодолт нуугдана (сервер `resultsPending`).
+/// Хуучин сервер илгээхгүй — null.
+@immutable
+class ResultsPending {
+  const ResultsPending({required this.message, this.releaseAt});
+
+  static ResultsPending? fromJson(Object? v) {
+    final j = _map(v);
+    final message = _str(j['message']);
+    if (message == null || message.isEmpty) return null;
+    return ResultsPending(message: message, releaseAt: parseApiInstant(_str(j['releaseAt'])));
+  }
+
+  /// «Хариу хүлээн авлаа. Дүн, бодолт 11:40 цагт нээгдэнэ» — сервер Улаанбаатарын цагаар бэлдэнэ.
+  final String message;
+  final DateTime? releaseAt;
+}
+
+/// Хүлээгдэж буй хоцорсон хариутай үед сурагчид харуулах мөр.
+const lateAnswersText = 'Хариу хоцорч ирсэн тул багш шийднэ';
+
 /// Оноог «7» / «7.5» хэлбэрээр.
 String formatScore(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(1);
 
@@ -189,6 +210,7 @@ class TestMeta {
     this.leaveLimit,
     this.opensAt,
     this.closesAt,
+    this.resultsPending,
   });
 
   factory TestMeta.fromJson(Object? raw) {
@@ -207,6 +229,7 @@ class TestMeta {
       leaveLimit: _int(j['leaveLimit']),
       opensAt: parseApiInstant(_str(j['opensAt'])),
       closesAt: parseApiInstant(_str(j['closesAt'])),
+      resultsPending: ResultsPending.fromJson(j['resultsPending']),
     );
   }
 
@@ -219,6 +242,9 @@ class TestMeta {
   final int problemCount;
   final double totalPoints;
   final ScorePair? myResult;
+
+  /// Илгээсэн ч хаах цаг ирээгүй — оноо нуугдсан.
+  final ResultsPending? resultsPending;
   final SessionStatus sessionStatus;
 
   /// Аппаас гарах дүрэм: 2 = Хатуу, 3 = Зөөлөн. Хуучин сервер илгээхгүй (null) → 3.
@@ -361,7 +387,15 @@ class StartResult {
 /// `PATCH /tests/:id/session` хариу.
 @immutable
 class SaveResponse {
-  const SaveResponse({required this.status, this.leaveCount, this.remainingSec, this.result});
+  const SaveResponse({
+    required this.status,
+    this.leaveCount,
+    this.remainingSec,
+    this.result,
+    this.answersReceived = false,
+    this.lateAnswers = false,
+    this.resultsPending,
+  });
 
   factory SaveResponse.fromJson(Object? raw) {
     final j = _map(raw);
@@ -370,6 +404,9 @@ class SaveResponse {
       leaveCount: _int(j['leaveCount']),
       remainingSec: _int(j['remainingSec']),
       result: j['result'] is Map ? ScorePair.fromJson(j['result']) : null,
+      answersReceived: _bool(j['answersReceived']),
+      lateAnswers: _bool(j['lateAnswers']),
+      resultsPending: ResultsPending.fromJson(j['resultsPending']),
     );
   }
 
@@ -377,6 +414,44 @@ class SaveResponse {
   final int? leaveCount;
   final int? remainingSec;
   final ScorePair? result;
+
+  /// Сервер энэ хүсэлтийн хариуг бүрэн хадгалсан (дүгнэлтэд эсвэл хоцорсон хариу болж).
+  /// Хуучин сервер илгээхгүй — false (локал хуулбарыг устгахгүй).
+  final bool answersReceived;
+
+  /// Хоцорсон хариу хүлээгдэж байна (багш шийднэ).
+  final bool lateAnswers;
+  final ResultsPending? resultsPending;
+}
+
+/// `POST /tests/:id/submit` үр дүн. 409 («аль хэдийн илгээгдсэн») ч энд — [alreadyClosed].
+@immutable
+class SubmitOutcome {
+  const SubmitOutcome({
+    this.result,
+    this.alreadyClosed = false,
+    this.answersReceived = false,
+    this.lateAnswers = false,
+    this.resultsPending,
+  });
+
+  factory SubmitOutcome.fromJson(Object? raw) {
+    final j = _map(raw);
+    return SubmitOutcome(
+      result: j['result'] is Map ? ScorePair.fromJson(j['result']) : null,
+      answersReceived: _bool(j['answersReceived']),
+      lateAnswers: _bool(j['lateAnswers']),
+      resultsPending: ResultsPending.fromJson(j['resultsPending']),
+    );
+  }
+
+  final ScorePair? result;
+
+  /// Сесс аль хэдийн хаагдсан (409) — хариуг «хоцорсон хариу» замаар дахин илгээнэ.
+  final bool alreadyClosed;
+  final bool answersReceived;
+  final bool lateAnswers;
+  final ResultsPending? resultsPending;
 }
 
 /// Эргэн харалтын сонголт (`{letter, text, image, mistakeNote?}` — канон дараалал).
@@ -605,6 +680,8 @@ class ExamResultPage {
     this.practiceTopic,
     this.practiceChapterIds = const [],
     this.itemTimes = const [],
+    this.resultsPending,
+    this.lateAnswers = false,
   });
 
   factory ExamResultPage.fromJson(Object? raw) {
@@ -649,6 +726,8 @@ class ExamResultPage {
           if ((_int(_map(t)['n']), _int(_map(t)['timeSpentSec'])) case (final int n, final int sec) when sec >= 0)
             ItemTime(n: n, seconds: sec),
       ],
+      resultsPending: ResultsPending.fromJson(j['resultsPending']),
+      lateAnswers: _bool(j['lateAnswers']),
     );
   }
 
@@ -673,6 +752,12 @@ class ExamResultPage {
 
   /// Онлайнаар өгсөн бол бодлого бүрийн хугацаа (хуучин серверт хоосон).
   final List<ItemTime> itemTimes;
+
+  /// Нэгдсэн шалгалтын хаах цаг хүртэл — оноо, бодолт нуугдана.
+  final ResultsPending? resultsPending;
+
+  /// Хүлээгдэж буй хоцорсон хариу (багш шийднэ).
+  final bool lateAnswers;
 }
 
 /// `GET /tests/:id/review` мөр (§5.2).
@@ -731,7 +816,14 @@ class PracticeReviewItem {
 
 @immutable
 class PracticeReview {
-  const PracticeReview({this.result, this.items = const [], this.leaveCount = 0, this.gatedReview = false});
+  const PracticeReview({
+    this.result,
+    this.items = const [],
+    this.leaveCount = 0,
+    this.gatedReview = false,
+    this.resultsPending,
+    this.lateAnswers = false,
+  });
 
   factory PracticeReview.fromJson(Object? raw) {
     final j = _map(raw);
@@ -740,8 +832,16 @@ class PracticeReview {
       items: [for (final i in _list(j['items'])) PracticeReviewItem.fromJson(i)],
       leaveCount: _int(j['leaveCount']) ?? 0,
       gatedReview: _bool(j['gatedReview']),
+      resultsPending: ResultsPending.fromJson(j['resultsPending']),
+      lateAnswers: _bool(j['lateAnswers']),
     );
   }
+
+  /// Нэгдсэн шалгалтын хаах цаг хүртэл — оноо, зөв/буруу, бодолт нуугдана.
+  final ResultsPending? resultsPending;
+
+  /// Хүлээгдэж буй хоцорсон хариу (багш шийднэ).
+  final bool lateAnswers;
 
   final ScorePair? result;
   final List<PracticeReviewItem> items;

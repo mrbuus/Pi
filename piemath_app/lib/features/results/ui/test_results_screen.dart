@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/network/api_error.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/native/native.dart';
-import '../../teacher/ui/test_run_screen.dart' show IntegrityChip, LeftByLeavesChip;
+import '../../teacher/ui/test_run_screen.dart' show IntegrityChip, LateAnswersChip, LeftByLeavesChip;
 import '../application/results_providers.dart';
 import '../data/results_models.dart';
 import '../domain/results_logic.dart';
@@ -246,7 +247,7 @@ class _ResultsListTabState extends ConsumerState<ResultsListTab> {
       onTap: _open,
       detailBuilder: (_, r) =>
           StudentAttemptView(key: ValueKey(r.studentId), testId: widget.testId, studentId: r.studentId),
-      itemBuilder: (context, r) => ResultItem(row: r),
+      itemBuilder: (context, r) => ResultItem(row: r, testId: widget.testId),
     );
   }
 }
@@ -307,26 +308,59 @@ class _SortBar extends StatelessWidget {
 }
 
 /// Дүнгийн нэг мөр: нэр, эх сурвалж, бүрэн бүтэн байдлын тоо, оноо, хувь.
-class ResultItem extends StatelessWidget {
-  const ResultItem({super.key, required this.row});
+class ResultItem extends ConsumerWidget {
+  const ResultItem({super.key, required this.row, this.testId});
 
   final ResultRow row;
 
+  /// «Хүлээн авах» товчинд (null бол товч харагдахгүй).
+  final String? testId;
+
+  Future<void> _acceptLate(BuildContext context, WidgetRef ref) async {
+    final id = testId;
+    if (id == null) return;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Хоцорсон хариуг хүлээн авах уу?'),
+        content: Text('${row.name}-ийн хоцорч ирсэн хариугаар дахин дүгнэнэ. Өмнөх оноо түүхэнд хадгалагдана.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text(AppStrings.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Хүлээн авах')),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    try {
+      await ref.read(resultsRepositoryProvider).acceptLateAnswers(id, row.studentId);
+      ref.invalidate(testResultsProvider(id));
+      messenger?.showSnackBar(const SnackBar(content: Text('Хоцорсон хариугаар дахин дүгнэлээ')));
+    } on Object catch (e) {
+      messenger?.showSnackBar(SnackBar(content: Text(e is ApiError ? e.message : AppStrings.genericError)));
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final inds = row.run.indicators;
+    final late = row.run.late;
     return ItemRow(
       title: row.name,
       meta: [ResultSource.label(row.source)],
-      subtitle: inds.isEmpty && !row.run.leftByLeaves
+      subtitle: inds.isEmpty && !row.run.leftByLeaves && late == null
           ? null
           : Padding(
               padding: const EdgeInsets.only(top: AppSpace.xs),
               child: Wrap(
                 spacing: AppSpace.md,
                 runSpacing: AppSpace.xs,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   if (row.run.leftByLeaves) const LeftByLeavesChip(),
+                  if (late != null) LateAnswersChip(info: late),
+                  if (late != null && late.pending && late.canAccept && testId != null)
+                    TextButton(onPressed: () => _acceptLate(context, ref), child: const Text('Хүлээн авах')),
                   for (final i in inds) IntegrityChip(kind: i.kind, count: i.count),
                 ],
               ),

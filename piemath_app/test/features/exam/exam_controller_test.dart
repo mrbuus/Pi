@@ -50,6 +50,7 @@ class FakeRepo implements ExamRepository {
   final saves = <Map<String, Object?>>[];
   final submits = <Map<String, Object?>>[];
   ScorePair? submitResult = const ScorePair(2, 3);
+  bool submitConflict = false;
 
   @override
   Future<TestMeta> meta(String testId) async => metaValue;
@@ -75,10 +76,11 @@ class FakeRepo implements ExamRepository {
   }
 
   @override
-  Future<ScorePair?> submit(String testId, Map<String, Object?> body) async {
+  Future<SubmitOutcome> submit(String testId, Map<String, Object?> body) async {
     submits.add(body);
     if (!online) throw const ApiError(ApiErrorKind.network, 'Интернэт');
-    return submitResult;
+    if (submitConflict) return const SubmitOutcome(alreadyClosed: true);
+    return SubmitOutcome(result: submitResult, answersReceived: true);
   }
 
   @override
@@ -344,8 +346,8 @@ void main() {
       fa.flushMicrotasks();
       expect(c.finishReason, FinishReason.leaves);
       expect(repo.submits.single['event'], 'LEAVE');
-      // Офлайн үеийн нэг LEAVE тусдаа PATCH-ээр (амжилттай) хүрсэн.
-      expect(repo.saves.where((b) => b['event'] == 'LEAVE' && b.length == 1), isNotEmpty);
+      // Офлайн үеийн нэг LEAVE тусдаа PATCH-ээр (амжилттай) хүрсэн — одоогийн бүх хариутай хамт.
+      expect(repo.saves.where((b) => b['event'] == 'LEAVE' && b.containsKey('answers')), isNotEmpty);
       c.dispose();
     });
   });
@@ -467,6 +469,95 @@ void main() {
       expect(c.phase, ExamPhase.intro);
       expect(c.errorMessage, 'Интернэт');
       c.dispose();
+    });
+  });
+
+  group('хариу алдагдахгүй (локал хуулбарыг баталгаагүйгээр устгахгүй)', () {
+    test('409 («аль хэдийн хаагдсан»): хариуг хоцорсон хариу замаар илгээж, баталгаа авбал л устгана', () {
+      fakeAsync((fa) {
+        final c = make()..load();
+        fa.flushMicrotasks();
+        c.begin();
+        fa.flushMicrotasks();
+        c.setAnswer('p1', 2);
+        repo
+          ..online = false
+          ..submitConflict = true;
+        fa.elapse(const Duration(seconds: 2));
+        repo.online = true;
+        repo.onSave = (b) => SaveResponse(
+          status: SessionStatus.submitted,
+          answersReceived: b['answers'] is Map && (b['answers']! as Map).isNotEmpty,
+          lateAnswers: true,
+        );
+        c.submit();
+        fa.flushMicrotasks();
+        expect(c.phase, ExamPhase.finished);
+        expect(repo.saves.last['answers'], {'p1': 2});
+        expect(c.lateAnswers, isTrue);
+        expect(drafts.data, isEmpty);
+        c.dispose();
+      });
+    });
+
+    test('сервер SUBMITTED, баталгаагүй (хуучин сервер / сүлжээ): бүх хариу локалд үлдэж, дараа нь илгээгдэнэ', () {
+      fakeAsync((fa) {
+        repo.onSave = (_) => const SaveResponse(status: SessionStatus.submitted);
+        final c = make()..load();
+        fa.flushMicrotasks();
+        c.begin();
+        fa.flushMicrotasks();
+        c.setAnswer('p1', 3);
+        fa.elapse(const Duration(milliseconds: 1500));
+        fa.flushMicrotasks();
+        expect(c.phase, ExamPhase.finished);
+        c.dispose();
+        fa.flushMicrotasks();
+        expect(drafts.data.values.single.answers, {'p1': 3});
+
+        // Дахин нээхэд (сесс хаагдсан) хуулбарыг илгээж, баталгаа авмагц устгана
+        repo
+          ..metaValue = TestMeta.fromJson(const {
+            'id': 't1',
+            'title': 'Т',
+            'type': 'DAILY',
+            'sessionStatus': 'SUBMITTED',
+          })
+          ..onSave = (_) => const SaveResponse(status: SessionStatus.submitted, answersReceived: true);
+        final again = make()..load();
+        fa.flushMicrotasks();
+        expect(repo.saves.last['answers'], {'p1': 3});
+        expect(drafts.data, isEmpty);
+        again.dispose();
+      });
+    });
+
+    test('хуримтлагдсан гаралт: LEAVE бүр бүх хариутай; сервер хаавал давталт зогсож дүн рүү', () {
+      fakeAsync((fa) {
+        repo.startResult = startWith(leaveLimit: 3);
+        final c = make()..load();
+        fa.flushMicrotasks();
+        c.begin();
+        fa.flushMicrotasks();
+        c.setAnswer('p1', 4);
+        repo.online = false;
+        leaveOnce(fa);
+        c.dismissNotice();
+        leaveOnce(fa);
+        c.dismissNotice();
+        repo.online = true;
+        repo.onSave = (b) => b['event'] == 'LEAVE'
+            ? const SaveResponse(status: SessionStatus.submitted, answersReceived: true)
+            : const SaveResponse(status: SessionStatus.inProgress);
+        guard.emit(IntegrityEventType.backgrounded);
+        fa.elapse(const Duration(seconds: 3));
+        fa.flushMicrotasks();
+        expect(c.phase, ExamPhase.finished);
+        final leaves = repo.saves.where((b) => b['event'] == 'LEAVE').toList();
+        expect(leaves.first['answers'], {'p1': 4});
+        expect(repo.submits, isEmpty);
+        c.dispose();
+      });
     });
   });
 }

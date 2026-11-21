@@ -78,7 +78,20 @@ class ExamResultScreen extends ConsumerWidget {
             message: _errorText(e),
             onRetry: () => ref.invalidate(examResultProvider(testId)),
           ),
-          data: (d) => _ResultBody(data: d),
+          data: (d) => d.resultsPending != null
+              ? ListView(
+                  padding: const EdgeInsets.all(AppSpace.gutter),
+                  children: [
+                    MetaTitle(d.title, style: context.text.headlineSmall),
+                    const SizedBox(height: AppSpace.lg),
+                    ResultsPendingCard(
+                      pending: d.resultsPending!,
+                      late: d.lateAnswers,
+                      onRefresh: () => ref.invalidate(examResultProvider(testId)),
+                    ),
+                  ],
+                )
+              : _ResultBody(data: d),
         ),
       ),
     );
@@ -108,6 +121,67 @@ class LeavesFinishedBanner extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Нэгдсэн шалгалт: хаах цаг хүртэл «Хариу хүлээн авлаа. Дүн, бодолт HH:MM цагт нээгдэнэ».
+/// Оноо, зөв/буруу, бодолт харагдахгүй; цаг өнгөрмөгц «Шинэчлэх»-ээр (эсвэл дахин нээхэд) нээгдэнэ.
+class ResultsPendingCard extends StatelessWidget {
+  const ResultsPendingCard({super.key, required this.pending, this.late = false, this.onRefresh});
+
+  final ResultsPending pending;
+  final bool late;
+  final VoidCallback? onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return AppCard(
+      child: Semantics(
+        liveRegion: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(AppIcons.success, size: 20, color: c.success),
+                const SizedBox(width: AppSpace.md),
+                Expanded(child: Text(pending.message, style: context.text.bodyLarge)),
+              ],
+            ),
+            if (late) ...[const SizedBox(height: AppSpace.sm), const LateAnswersLine()],
+            if (onRefresh != null) ...[
+              const SizedBox(height: AppSpace.md),
+              OutlinedButton.icon(
+                onPressed: onRefresh,
+                icon: const Icon(AppIcons.retry, size: 18),
+                label: const Text('Шинэчлэх'),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// «Хариу хоцорч ирсэн тул багш шийднэ».
+class LateAnswersLine extends StatelessWidget {
+  const LateAnswersLine({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Row(
+      children: [
+        Icon(AppIcons.time, size: 18, color: c.inkDim),
+        const SizedBox(width: AppSpace.sm),
+        Expanded(
+          child: Text(lateAnswersText, style: context.text.bodyMedium?.copyWith(color: c.inkDim)),
+        ),
+      ],
     );
   }
 }
@@ -147,6 +221,7 @@ class _ResultBody extends ConsumerWidget {
       children: [
         MetaTitle(d.title, style: context.text.headlineSmall),
         const SizedBox(height: AppSpace.lg),
+        if (d.lateAnswers) ...[const LateAnswersLine(), const SizedBox(height: AppSpace.md)],
         if (d.absent)
           const AppCard(child: Text('Та энэ шалгалтад ирээгүй гэж тэмдэглэгдсэн.'))
         else if (d.result != null) ...[
@@ -428,6 +503,16 @@ class ReviewScreen extends ConsumerWidget {
             onRetry: () => ref.invalidate(reviewProvider(testId)),
           ),
           data: (d) => switch (d) {
+            PracticeReviewData(:final review) when review.resultsPending != null => ListView(
+              padding: const EdgeInsets.all(AppSpace.gutter),
+              children: [
+                ResultsPendingCard(
+                  pending: review.resultsPending!,
+                  late: review.lateAnswers,
+                  onRefresh: () => ref.invalidate(reviewProvider(testId)),
+                ),
+              ],
+            ),
             PracticeReviewData(:final review) => _PracticeReviewBody(review: review),
             ThousandReviewData(:final review) => _ThousandReviewBody(review: review),
           },
@@ -461,6 +546,7 @@ class _PracticeReviewBody extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (review.lateAnswers) ...[const LateAnswersLine(), const SizedBox(height: AppSpace.md)],
                 if (review.result != null)
                   ScoreSummary(
                     score: review.result!,

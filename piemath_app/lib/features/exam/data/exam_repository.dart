@@ -42,16 +42,20 @@ class ExamRepository {
   Future<SaveResponse> save(String testId, Map<String, Object?> body) =>
       _api.patch('/tests/${_id(testId)}/session', body: body, parse: SaveResponse.fromJson, retry: true);
 
-  /// Илгээх. 409 («аль хэдийн өгсөн») нь амжилт — дүн рүү шилжинэ (`null` буцаана).
-  Future<ScorePair?> submit(String testId, Map<String, Object?> body) async {
+  /// Илгээх. 409 («аль хэдийн илгээгдсэн») нь алдаа биш — [SubmitOutcome.alreadyClosed]. Тэр үед
+  /// хариуг локал хуулбараас «хоцорсон хариу» замаар ([save]) дахин илгээж баталгаа авна.
+  Future<SubmitOutcome> submit(String testId, Map<String, Object?> body) async {
     try {
-      return await _api.post(
-        '/tests/${_id(testId)}/submit',
-        body: body,
-        parse: (j) => ScorePair.fromJson((j as Map?)?['result']),
-      );
+      return await _api.post('/tests/${_id(testId)}/submit', body: body, parse: SubmitOutcome.fromJson);
     } on ApiError catch (e) {
-      if (e.kind == ApiErrorKind.conflict) return null;
+      if (e.kind == ApiErrorKind.conflict) {
+        final j = e.body is Map ? (e.body! as Map) : const <String, Object?>{};
+        return SubmitOutcome(
+          alreadyClosed: true,
+          answersReceived: j['answersReceived'] == true,
+          lateAnswers: j['lateAnswers'] == true,
+        );
+      }
       rethrow;
     }
   }

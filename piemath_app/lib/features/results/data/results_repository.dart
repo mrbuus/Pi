@@ -53,6 +53,11 @@ class ResultsRepository {
     parse: (_) {},
   );
 
+  /// `POST /tests/:id/results/:studentId/accept-late` — хоцорч ирсэн хариугаар дахин дүгнэх
+  /// (Админ / Багш+; өмнөх оноо серверт түүх, аудитад үлдэнэ).
+  Future<void> acceptLateAnswers(String testId, String studentId) =>
+      _api.post<void>('/tests/${_enc(testId)}/results/${_enc(studentId)}/accept-late', parse: (_) {});
+
   /// `GET /exams/:id/analytics?classroomId=` — бодлогын анализ. [classId] null = «Бүгд».
   Future<ExamAnalytics> analytics(String testId, {String? classId}) => _api.get(
     '/exams/${_enc(testId)}/analytics',

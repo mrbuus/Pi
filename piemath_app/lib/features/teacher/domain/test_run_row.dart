@@ -14,6 +14,7 @@ class TestRunRow {
     this.recordingCount,
     this.leaveLimit,
     this.leftByLeaves = false,
+    this.late,
   });
 
   factory TestRunRow.fromJson(Map<String, Object?> j) {
@@ -31,6 +32,7 @@ class TestRunRow {
       recordingCount: _num(j['recordingCount'])?.toInt(),
       leaveLimit: _num(j['leaveLimit'])?.toInt(),
       leftByLeaves: j['leftByLeaves'] == true,
+      late: LateAnswersInfo.fromJson(j['lateAnswers']),
     );
   }
 
@@ -48,6 +50,9 @@ class TestRunRow {
 
   /// Гаралтын хязгаарт хүрч шалгалт автоматаар илгээгдсэн.
   final bool leftByLeaves;
+
+  /// Хоцорч ирсэн хариу (сесс хаагдсаны дараа төхөөрөмжөөс) — хуучин сервер: null.
+  final LateAnswersInfo? late;
 
   /// «Хатуу (2 дахь гаралтад илгээгдэнэ)» — хуучин сервер утга өгөхгүй бол null.
   static String? leaveRuleLabel(int? leaveLimit) => switch (leaveLimit) {
@@ -74,4 +79,38 @@ enum IntegrityKind {
   const IntegrityKind(this.label);
 
   final String label;
+}
+
+/// `lateAnswers` — хоцорч ирсэн, дүнд ороогүй хариу (Админ / Багш+ «Хүлээн авах»).
+class LateAnswersInfo {
+  const LateAnswersInfo({required this.pending, this.differing = 0, this.canAccept = false, this.previousLabel});
+
+  static LateAnswersInfo? fromJson(Object? raw) {
+    if (raw is! Map) return null;
+    final prev = raw['previousScore'];
+    String? label;
+    if (prev is Map && prev['totalScore'] is num && prev['maxScore'] is num) {
+      String n(num v) => v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(1);
+      label = '${n(prev['totalScore'] as num)}/${n(prev['maxScore'] as num)}';
+    }
+    return LateAnswersInfo(
+      pending: raw['pending'] == true,
+      differing: raw['differing'] is num ? (raw['differing'] as num).toInt() : 0,
+      canAccept: raw['canAccept'] == true,
+      previousLabel: label,
+    );
+  }
+
+  final bool pending;
+  final int differing;
+  final bool canAccept;
+
+  /// Хүлээн авахаас өмнөх оноо «3/10».
+  final String? previousLabel;
+
+  String get label => pending
+      ? 'Хоцорч ирсэн хариу: $differing бодлого зөрүүтэй'
+      : previousLabel == null
+      ? 'Хоцорсон хариу хүлээн авсан'
+      : 'Хоцорсон хариу хүлээн авсан (өмнө $previousLabel)';
 }

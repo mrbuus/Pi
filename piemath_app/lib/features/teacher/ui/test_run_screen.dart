@@ -68,13 +68,14 @@ class _RunCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(row.name, style: context.text.titleSmall),
-                if (inds.isNotEmpty || row.leftByLeaves) ...[
+                if (inds.isNotEmpty || row.leftByLeaves || row.late != null) ...[
                   const SizedBox(height: AppSpace.xs),
                   Wrap(
                     spacing: AppSpace.md,
                     runSpacing: AppSpace.xs,
                     children: [
                       if (row.leftByLeaves) const LeftByLeavesChip(),
+                      if (row.late != null) LateAnswersChip(info: row.late!),
                       for (final i in inds) IntegrityChip(kind: i.kind, count: i.count),
                     ],
                   ),
@@ -106,7 +107,35 @@ class LeftByLeavesChip extends StatelessWidget {
         children: [
           Icon(AppIcons.logout, size: 16, color: c.error),
           const SizedBox(width: AppSpace.xs),
-          Flexible(child: Text(label, style: context.text.bodySmall?.copyWith(color: c.ink))),
+          Flexible(
+            child: Text(label, style: context.text.bodySmall?.copyWith(color: c.ink)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// «Хоцорч ирсэн хариу: N бодлого зөрүүтэй» — сесс хаагдсаны дараа ирсэн, дүнд ороогүй хариу.
+class LateAnswersChip extends StatelessWidget {
+  const LateAnswersChip({super.key, required this.info});
+
+  final LateAnswersInfo info;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Semantics(
+      label: info.label,
+      excludeSemantics: true,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(info.pending ? AppIcons.time : AppIcons.check, size: 16, color: info.pending ? c.warning : c.inkDim),
+          const SizedBox(width: AppSpace.xs),
+          Flexible(
+            child: Text(info.label, style: context.text.bodySmall?.copyWith(color: c.ink)),
+          ),
         ],
       ),
     );

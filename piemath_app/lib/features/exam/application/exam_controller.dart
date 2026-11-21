@@ -78,6 +78,12 @@ class ExamController extends ChangeNotifier {
   FinishReason? finishReason;
   ScorePair? result;
 
+  /// Нэгдсэн шалгалтын хаах цаг хүртэл оноо нуугдана (сервер `resultsPending`).
+  ResultsPending? resultsPending;
+
+  /// Хариу хоцорч серверт хүрсэн (багш шийднэ).
+  bool lateAnswers = false;
+
   List<ExamProblem> problems = const [];
   final answers = <String, Object?>{};
   final states = <String, SelfState>{};
@@ -141,8 +147,11 @@ class ExamController extends ChangeNotifier {
       policy = _policyOverride ?? LeavePolicy.fromLeaveLimit(m.leaveLimit);
       if (m.finished) {
         result = m.myResult;
+        resultsPending = m.resultsPending;
         finishReason = FinishReason.alreadyDone;
         phase = ExamPhase.finished;
+        // Өмнө нь баталгаа авалгүй үлдсэн локал хариу — хоцорсон хариу болгон илгээнэ
+        await _sendLeftoverDraft();
       } else {
         phase = ExamPhase.intro;
       }
@@ -166,7 +175,8 @@ class ExamController extends ChangeNotifier {
         result = r.result;
         finishReason = FinishReason.alreadyDone;
         phase = ExamPhase.finished;
-        await drafts.clear(userId, testId);
+        // Локал хуулбарыг устгахгүй — серверээс баталгаа авсны дараа л
+        await _sendLeftoverDraft();
         return;
       }
       problems = r.problems;
@@ -289,6 +299,13 @@ class ExamController extends ChangeNotifier {
 
   // ---------------------------------------------------------------- илгээх
 
+  /// Одоогийн бүх хариу, төлөв, хугацаа — илгээлт бүрд бүтнээр (хуримтлагдсан гаралтад ч).
+  Map<String, Object?> _fullBody() => <String, Object?>{
+    'answers': {for (final e in answers.entries) e.key: e.value},
+    'selfStates': {for (final e in states.entries) e.key: e.value.wire},
+    'problemTimes': _engine?.times ?? const <String, int>{},
+  };
+
   Future<void> submit({FinishReason reason = FinishReason.user}) async {
     if (phase != ExamPhase.taking || submitting) return;
     submitting = true;
@@ -301,20 +318,36 @@ class ExamController extends ChangeNotifier {
       if (reason == FinishReason.leaves && tracker != null && !(_engine?.inFlight ?? false)) {
         // Офлайн үед хуримтлагдсан өмнөх гаралтыг эхлээд илгээнэ (нэг хүсэлтэд нэг үйл явдал),
         // сүүлийнх нь илгээлтийн хүсэлттэй хамт — серверийн тоо хязгаарт хүрнэ (багшид шошго).
+        // Хүсэлт бүр одоогийн БҮХ хариуг авч явна: сервер хязгаарт хүрмэгц тэр хүсэлтийн хариугаар
+        // дүгнэдэг тул хуучин draft-аар дүгнэгдэхгүй.
         while (tracker.pendingLeaves > 1) {
-          await _repo.save(testId, {'event': ExamSessionEvent.leave.wire});
+          final r = await _repo.save(testId, {..._fullBody(), 'event': ExamSessionEvent.leave.wire});
           tracker.ackFirstLeave();
+          if (r.status == SessionStatus.submitted) {
+            // Сервер өөрөө хаасан — давталтыг зогсоож дүнгийн урсгал руу
+            resultsPending = r.resultsPending;
+            lateAnswers = r.lateAnswers;
+            await _finish(reason, r.result, confirmed: r.answersReceived);
+            return;
+          }
         }
       }
       final body = <String, Object?>{
-        'answers': {for (final e in answers.entries) e.key: e.value},
-        'selfStates': {for (final e in states.entries) e.key: e.value.wire},
-        'problemTimes': _engine?.times ?? const <String, int>{},
+        ..._fullBody(),
         // Автомат илгээлтийг үүсгэсэн гаралт энэ хүсэлтэд (тусдаа autosave-тэй уралдахгүй).
         if (reason == FinishReason.leaves && (tracker?.pendingLeaves ?? 0) > 0) 'event': ExamSessionEvent.leave.wire,
       };
       final r = await _repo.submit(testId, body);
-      await _finish(reason, r);
+      if (r.alreadyClosed) {
+        // 409 — сесс аль хэдийн хаагдсан. Хариуг «хоцорсон хариу» замаар илгээж баталгаа авна.
+        lateAnswers = r.lateAnswers;
+        await _finish(reason, null, confirmed: r.answersReceived || await _sendLate(body));
+        return;
+      }
+      resultsPending = r.resultsPending;
+      lateAnswers = r.lateAnswers;
+      // 200 — хариу дүгнэлтэд (эсвэл хоцорсон хариу болж) бүрэн хадгалагдсан
+      await _finish(reason, r.result, confirmed: true);
     } on ApiError catch (e) {
       submitting = false;
       submitError = _friendly(e);
@@ -329,13 +362,51 @@ class ExamController extends ChangeNotifier {
     }
   }
 
-  Future<void> _finish(FinishReason reason, ScorePair? r) async {
+  /// Хаагдсан сессэд хариуг илгээнэ — сервер зөрүүтэйг «хоцорсон хариу» болгон хадгална.
+  /// Баталгаа (`answersReceived`) ирвэл true. Сүлжээгүй бол false (локал хуулбар үлдэнэ).
+  Future<bool> _sendLate(Map<String, Object?> body) async {
+    try {
+      final r = await _repo.save(testId, {
+        if (body['answers'] != null) 'answers': body['answers'],
+        if (body['selfStates'] != null) 'selfStates': body['selfStates'],
+      });
+      if (r.lateAnswers) lateAnswers = true;
+      return r.answersReceived;
+    } on ApiError {
+      return false;
+    }
+  }
+
+  /// Өмнөх удаа баталгаагүй үлдсэн локал хуулбар байвал илгээж, баталгаа авбал устгана.
+  Future<void> _sendLeftoverDraft() async {
+    try {
+      final local = await drafts.read(userId, testId);
+      if (local.isEmpty) return;
+      final ok = await _sendLate({'answers': local.answers, 'selfStates': local.states});
+      if (ok) await drafts.clear(userId, testId);
+    } on Object {
+      // Дараагийн нээлтэд дахин оролдоно
+    }
+  }
+
+  /// [confirmed] — сервер хариуг бүрэн хүлээн авсныг баталсан. Үгүй бол локал хуулбарыг
+  /// ХЭЗЭЭ Ч устгахгүй: бүх хариуг хадгалж, дараагийн нээлтэд «хоцорсон хариу» болгон илгээнэ.
+  Future<void> _finish(FinishReason reason, ScorePair? r, {required bool confirmed}) async {
     result = r ?? result;
     finishReason = reason;
     submitting = false;
     phase = ExamPhase.finished;
+    final keep = ExamDraft(
+      answers: {for (final e in answers.entries) e.key: e.value},
+      states: {for (final e in states.entries) e.key: e.value.wire},
+    );
     await _teardown();
-    await drafts.clear(userId, testId);
+    await _draftWrite;
+    if (confirmed) {
+      await drafts.clear(userId, testId);
+    } else if (!keep.isEmpty) {
+      await drafts.write(userId, testId, keep);
+    }
     _notify();
   }
 
@@ -370,8 +441,11 @@ class ExamController extends ChangeNotifier {
 
   void _onSaveResponse(SaveResponse r) {
     if (r.status == SessionStatus.submitted) {
-      // Сервер хугацааг хаасан (deadline + 30с) — дүн рүү.
-      unawaited(_finish(FinishReason.server, r.result));
+      // Сервер хугацааг хаасан (deadline + 30с) — дүн рүү. Энэ хүсэлтийн хариу хүлээн
+      // авагдсан эсэхийг серверийн баталгаагаар (хуучин сервер — үгүй, локал хуулбар үлдэнэ).
+      resultsPending = r.resultsPending;
+      if (r.lateAnswers) lateAnswers = true;
+      unawaited(_finish(FinishReason.server, r.result, confirmed: r.answersReceived));
       return;
     }
     if (r.remainingSec != null) _setRemaining(r.remainingSec);
@@ -423,7 +497,8 @@ class ExamController extends ChangeNotifier {
 
   void _persistDraft() {
     final engine = _engine;
-    if (engine == null) return;
+    // Дууссаны дараа [_finish] локал хуулбарыг шийднэ (баталгаатай бол устгана, үгүй бол бүтнээр)
+    if (engine == null || phase == ExamPhase.finished) return;
     final draft = ExamDraft(answers: engine.dirtyAnswers, states: engine.dirtyStates);
     _draftWrite = _draftWrite.then((_) => drafts.write(userId, testId, draft)).catchError((Object _) {});
   }
