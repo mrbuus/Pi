@@ -3,7 +3,8 @@
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "@/components/ThemeProvider";
-import { api } from "@/lib/api";
+import { CircleCheck } from "lucide-react";
+import { api, ApiError } from "@/lib/api";
 import { type SaveStatus } from "@/components/exam/AutosaveChip";
 import OfflineBanner from "@/components/exam/OfflineBanner";
 import ExamToast from "@/components/exam/ExamToast";
@@ -101,11 +102,20 @@ interface ReviewItem {
   // Буруу сонголтын тайлбар — бодолттой ижил нөхцөлөөр (хуучин API-д байхгүй)
   mistakeNotes?: { label: string; text: string; note: string; mine: boolean }[];
 }
+// Нэмэлт (2026-11-21): нэгдсэн шалгалтын хаах цаг хүртэл оноо, зөв/буруу, бодолт нуугдана
+interface ResultsPending {
+  releaseAt: string;
+  message: string;
+}
 interface ReviewResp {
   result: { totalScore: number; maxScore: number } | null;
   items: ReviewItem[];
   leaveCount: number;
+  resultsPending?: ResultsPending | null;
+  // Хүлээгдэж буй хоцорсон хариу (багш шийднэ)
+  lateAnswers?: boolean;
 }
+const LATE_ANSWERS_TEXT = "Хариу хоцорч ирсэн тул багш шийднэ";
 
 /* Шалгалтаас гарах хязгаар — шалгалт бүрд багш сонгоно (эзэн 2026-11-21):
    Зөөлөн (3, анхдагч): 1, 2 дахь гаралт → анхааруулга, 3 дахь → автоматаар илгээнэ.
@@ -162,6 +172,8 @@ export default function TakeTestPage() {
   const [leftByLeaves, setLeftByLeaves] = useState(false);
   const [result, setResult] = useState<{ total: number; max: number } | null>(null);
   const [review, setReview] = useState<ReviewResp | null>(null);
+  const [pending, setPending] = useState<ResultsPending | null>(null);
+  const [lateNote, setLateNote] = useState(false);
   const [error, setError] = useState("");
   const [starting, setStarting] = useState(false);
 
@@ -217,11 +229,22 @@ export default function TakeTestPage() {
     try {
       const r = await api<ReviewResp>(`/tests/${params.id}/review`);
       setReview(r);
+      setPending(r.resultsPending ?? null);
+      setLateNote(!!r.lateAnswers);
       if (r.result) setResult({ total: r.result.totalScore, max: r.result.maxScore });
     } catch {
       /* цаасан дүнтэй (session-гүй) бол review байхгүй — оноо meta-гаас */
     }
   }, [params.id]);
+
+  // Хаах цаг өнгөрмөгц дахин ачаална — оноо, бодолт нээгдэнэ
+  const pendingAt = pending?.releaseAt;
+  useEffect(() => {
+    if (!pendingAt) return;
+    const wait = Math.max(1000, new Date(pendingAt).getTime() - Date.now() + 1500);
+    const t = window.setTimeout(() => void loadReview(), Math.min(wait, 2_147_000_000));
+    return () => window.clearTimeout(t);
+  }, [pendingAt, loadReview]);
 
   // ---------- Мета ачаалах ----------
   useEffect(() => {
@@ -270,7 +293,13 @@ export default function TakeTestPage() {
       if (!isRealSave && !opts?.keepalive) return;
       if (isRealSave) setSaveStatus("saving");
       try {
-        const r = await api<{ status: string; remainingSec?: number | null; leaveCount?: number; result?: { totalScore: number; maxScore: number } }>(
+        const r = await api<{
+          status: string;
+          remainingSec?: number | null;
+          leaveCount?: number;
+          result?: { totalScore: number; maxScore: number } | null;
+          resultsPending?: ResultsPending | null;
+        }>(
           `/tests/${params.id}/session`,
           { method: "PATCH", body },
         );
@@ -295,6 +324,7 @@ export default function TakeTestPage() {
           // Сервер хугацааг хаасан — үр дүн рүү шилжинэ
           submittedRef.current = true;
           if (r.result) setResult({ total: r.result.totalScore, max: r.result.maxScore });
+          setPending(r.resultsPending ?? null);
           await loadReview();
           setPhase("result");
           return;
@@ -371,7 +401,11 @@ export default function TakeTestPage() {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
       try {
-        const res = await api<{ result: { totalScore: number; maxScore: number } }>(
+        const res = await api<{
+          result: { totalScore: number; maxScore: number } | null;
+          resultsPending?: ResultsPending | null;
+          lateAnswers?: boolean;
+        }>(
           `/tests/${params.id}/submit`,
           {
             method: "POST",
@@ -385,7 +419,10 @@ export default function TakeTestPage() {
             },
           },
         );
-        setResult({ total: res.result.totalScore, max: res.result.maxScore });
+        // Хаах цаг ирээгүй бол оноо ирэхгүй — «Хариу хүлээн авлаа ...» л харуулна
+        if (res.result) setResult({ total: res.result.totalScore, max: res.result.maxScore });
+        setPending(res.resultsPending ?? null);
+        setLateNote(!!res.lateAnswers);
         setLeftByLeaves(reason === "LEAVES");
         await loadReview();
         setPhase("result");
@@ -393,6 +430,16 @@ export default function TakeTestPage() {
         if (reason !== "USER") setLeaveWarnOpen(false);
         void document.exitFullscreen?.().catch(() => {});
       } catch (e) {
+        // 409 = аль хэдийн илгээгдсэн (сервер хаасан эсвэл өөр таб) — хариу хоцорсон хариу
+        // болж хадгалагдсан; дахин илгээхгүй, дүнгийн дэлгэц рүү
+        if (e instanceof ApiError && e.status === 409) {
+          await loadReview();
+          setPhase("result");
+          setSubmitDialogOpen(false);
+          setLeaveWarnOpen(false);
+          void document.exitFullscreen?.().catch(() => {});
+          return;
+        }
         submittedRef.current = false;
         setError(e instanceof Error ? e.message : "Алдаа гарлаа");
       }
@@ -700,7 +747,30 @@ export default function TakeTestPage() {
       // (дээрх effect шилжүүлнэ).
       return <p className="text-ink-dim">Ачаалж байна…</p>;
     }
+    if (pending) {
+      return (
+        <div className="mx-auto w-full max-w-3xl space-y-4" role="status" aria-live="polite">
+          <div className="flex items-start gap-3 rounded-2xl border border-line bg-surface p-5">
+            <CircleCheck className="mt-0.5 h-5 w-5 shrink-0 text-success" aria-hidden />
+            <div>
+              <h1 className="font-bold text-ink">{meta.title}</h1>
+              <p className="mt-1 text-sm text-ink">{pending.message}</p>
+              {lateNote && <p className="mt-2 text-sm text-ink-dim">{LATE_ANSWERS_TEXT}</p>}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => router.push("/app/tests")}
+            className="inline-flex min-h-11 items-center rounded-xl border border-line px-4 text-sm font-semibold text-ink hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-brand"
+          >
+            Жагсаалт руу буцах
+          </button>
+        </div>
+      );
+    }
     return (
+      <>
+      {lateNote && <p className="mx-auto mb-3 max-w-3xl text-sm text-ink-dim">{LATE_ANSWERS_TEXT}</p>}
       <ExamResult
         title={meta.title}
         total={result?.total ?? 0}
@@ -710,6 +780,7 @@ export default function TakeTestPage() {
         items={review?.items ?? []}
         onBackToList={() => router.push("/app/tests")}
       />
+      </>
     );
   }
 

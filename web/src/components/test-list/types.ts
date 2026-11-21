@@ -22,6 +22,8 @@ export interface TestRow {
   _count: { problems: number; results?: number };
   results?: { totalScore: number; maxScore: number }[];
   sessionStatus?: "IN_PROGRESS" | "SUBMITTED" | null;
+  /** Нэгдсэн шалгалт: хаах цаг хүртэл оноо нуугдана (results хоосон) — хуучин API-д байхгүй */
+  resultsPending?: { releaseAt: string; message: string } | null;
   /** Ангид оноосон ч эхлэх цаг ирээгүй шалгалт — огноотой, эхлэх товчгүй */
   upcoming?: boolean;
   assignedAt?: string | null;

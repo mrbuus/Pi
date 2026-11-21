@@ -168,7 +168,7 @@ export default function TestResultsPage() {
         )}
       </section>
 
-      <ResultsTable rows={rows} loading={rowsLoading} error={rowsError} onRetry={loadResults} />
+      <ResultsTable rows={rows} loading={rowsLoading} error={rowsError} onRetry={loadResults} testId={params.id} />
     </div>
   );
 }

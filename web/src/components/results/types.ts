@@ -16,6 +16,15 @@ export interface ResultRow {
   // Шалгалтын аппаас гарах дүрэм (3 = Зөөлөн, 2 = Хатуу); гаралтын хязгаарт хүрч автоматаар илгээгдсэн
   leaveLimit?: number;
   leftByLeaves?: boolean;
+  // Хоцорч ирсэн хариу (2026-11-21) — хуучин API-д байхгүй; canAccept = Админ / Багш+
+  lateAnswers?: {
+    pending: boolean;
+    differing: number;
+    receivedAt: string | null;
+    acceptedAt: string | null;
+    previousScore: { totalScore: number; maxScore: number } | null;
+    canAccept: boolean;
+  } | null;
 }
 
 export interface RosterStudent {

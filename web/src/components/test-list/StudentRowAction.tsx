@@ -28,6 +28,17 @@ export default function StudentRowAction({ test }: { test: TestRow }) {
       </Link>
     );
   }
+  // Илгээсэн ч нэгдсэн шалгалтын хаах цаг ирээгүй — оноогүй «Өгсөн» (дахин эхлүүлэх товч биш)
+  if (test.sessionStatus === "SUBMITTED") {
+    return (
+      <Link
+        href={`/app/tests/${test.id}`}
+        className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-success/15 px-3 py-1.5 text-xs font-bold text-success"
+      >
+        <Check className="h-3.5 w-3.5" aria-hidden="true" /> Өгсөн
+      </Link>
+    );
+  }
   if (test.gradingMode === "MANUAL") {
     return (
       <span className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-line/30 px-3 py-1.5 text-xs text-ink-dim">

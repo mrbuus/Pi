@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, BookOpenCheck, CircleX, Lock, TriangleAlert, UserX } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpenCheck, CircleCheck, CircleX, Clock, Lock, TriangleAlert, UserX } from "lucide-react";
 import { api } from "@/lib/api";
 import MathText from "@/components/MathText";
 import ChoiceContent from "@/components/ChoiceContent";
@@ -51,7 +51,13 @@ interface ResultResp {
   topics: { name: string; percent: number; earned: number; max: number }[];
   wrong: WrongProblem[] | null;
   practice: { topic: string; chapterIds: string[] } | null;
+  // Нэмэлт (2026-11-21): нэгдсэн шалгалтын хаах цаг хүртэл дүн нуугдана
+  resultsPending?: { releaseAt: string; message: string } | null;
+  // Хүлээгдэж буй хоцорсон хариу — «Хариу хоцорч ирсэн тул багш шийднэ»
+  lateAnswers?: boolean;
 }
+
+const LATE_ANSWERS_TEXT = "Хариу хоцорч ирсэн тул багш шийднэ";
 
 /**
  * Сурагчийн дүнгийн дэлгэц — 1 хуудас (SHALGALT-TOLOVLOGOO §4): оноо, хувь,
@@ -80,6 +86,14 @@ export default function ExamResultPage() {
     const t = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(t);
   }, [load]);
+  // Хаах цаг өнгөрмөгц дахин ачаална — дүн, бодолт нээгдэнэ
+  const releaseAt = data?.resultsPending?.releaseAt;
+  useEffect(() => {
+    if (!releaseAt) return;
+    const wait = Math.max(1000, new Date(releaseAt).getTime() - Date.now() + 1500);
+    const t = window.setTimeout(() => void load(), Math.min(wait, 2_147_000_000));
+    return () => window.clearTimeout(t);
+  }, [releaseAt, load]);
 
   async function startPractice(chapterIds: string[]) {
     setBusy(true);
@@ -123,6 +137,30 @@ export default function ExamResultPage() {
 
   const title = data.test.type === "THOUSAND" ? shortTitle(data.test.title) : data.test.title;
 
+  if (data.resultsPending) {
+    return (
+      <div className="mx-auto w-full max-w-3xl space-y-5">
+        {back}
+        <div role="status" aria-live="polite">
+        <Card className="flex items-start gap-3">
+          <CircleCheck className="mt-0.5 h-5 w-5 shrink-0 text-success" aria-hidden />
+          <div>
+            <h1 className="font-bold text-ink">
+              <MetaTitle>{title}</MetaTitle>
+            </h1>
+            <p className="mt-1 text-sm text-ink">{data.resultsPending.message}</p>
+            {data.lateAnswers && (
+              <p className="mt-2 flex items-center gap-2 text-sm text-ink-dim">
+                <Clock className="h-4 w-4 shrink-0" aria-hidden /> {LATE_ANSWERS_TEXT}
+              </p>
+            )}
+          </div>
+        </Card>
+        </div>
+      </div>
+    );
+  }
+
   if (data.absent || !data.result) {
     return (
       <div className="mx-auto w-full max-w-3xl space-y-5">
@@ -162,6 +200,11 @@ export default function ExamResultPage() {
           <p className="pb-1 text-lg font-bold tabular-nums text-ink">{r.percent}%</p>
         </div>
         <Progress value={r.percent} className="mt-3" aria-label={`${r.percent} хувь`} />
+        {data.lateAnswers && (
+          <p className="mt-3 flex items-center gap-2 text-sm text-ink-dim">
+            <Clock className="h-4 w-4 shrink-0" aria-hidden /> {LATE_ANSWERS_TEXT}
+          </p>
+        )}
         {data.parts && data.parts.part2Max > 0 && (
           <div className="mt-3 grid grid-cols-2 gap-2">
             <PartBox label="I хэсэг" got={data.parts.part1} max={data.parts.part1Max} />

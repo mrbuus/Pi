@@ -7,7 +7,8 @@
  * ========================================================================== */
 
 import { useMemo, useState } from "react";
-import { Download, Camera, Check, ChevronDown, ChevronUp, ChevronsUpDown, Info, LogOut, TriangleAlert, Video, X } from "lucide-react";
+import { Download, Camera, Check, ChevronDown, ChevronUp, ChevronsUpDown, Clock, Info, LogOut, TriangleAlert, Video, X } from "lucide-react";
+import { api } from "@/lib/api";
 import type { ResultRow } from "./types";
 import { scorePercent, sourceLabel } from "./types";
 
@@ -55,16 +56,85 @@ function IntegrityBadges({ row }: { row: ResultRow }) {
   );
 }
 
+/**
+ * «Хоцорч ирсэн хариу»: сесс хаагдсаны дараа сурагчийн утаснаас ирсэн, дүгнэгдсэнээс зөрүүтэй
+ * хариу. Дүнд ороогүй — Админ / Багш+ «Хүлээн авах» дарвал дахин дүгнэнэ (өмнөх оноо хадгалагдана).
+ */
+function LateAnswersCell({
+  row,
+  testId,
+  onChanged,
+}: {
+  row: ResultRow;
+  testId?: string;
+  onChanged: () => void;
+}) {
+  const late = row.lateAnswers;
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  if (!late) return null;
+  if (!late.pending) {
+    return (
+      <span
+        title="Хоцорч ирсэн хариуг хүлээн авч дахин дүгнэсэн"
+        className="inline-flex items-center gap-1 text-xs text-ink-dim"
+      >
+        <Check className="h-3.5 w-3.5" aria-hidden />
+        Хоцорсон хариу хүлээн авсан
+        {late.previousScore ? ` (өмнө ${late.previousScore.totalScore}/${late.previousScore.maxScore})` : ""}
+      </span>
+    );
+  }
+  async function accept() {
+    if (!testId) return;
+    setBusy(true);
+    setErr("");
+    try {
+      await api(`/tests/${testId}/results/${row.student.id}/accept-late`, { method: "POST" });
+      onChanged();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Хүлээн авч чадсангүй");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      <span
+        title="Сесс хаагдсаны дараа сурагчийн төхөөрөмжөөс ирсэн хариу — дүнд ороогүй"
+        className="inline-flex items-center gap-1 rounded-md border border-line px-1.5 py-0.5 text-xs font-semibold text-ink"
+      >
+        <Clock className="h-3.5 w-3.5 text-warning" aria-hidden />
+        Хоцорч ирсэн хариу: {late.differing} бодлого зөрүүтэй
+      </span>
+      {late.canAccept && testId && (
+        <button
+          type="button"
+          onClick={() => void accept()}
+          disabled={busy}
+          className="h-11 rounded-lg border border-line px-3 text-sm font-semibold text-ink transition hover:bg-panel disabled:opacity-60"
+        >
+          {busy ? "Дүгнэж байна" : "Хүлээн авах"}
+        </button>
+      )}
+      {err && <span className="text-xs text-error">{err}</span>}
+    </span>
+  );
+}
+
 export default function ResultsTable({
   rows,
   loading,
   error,
   onRetry,
+  testId,
 }: {
   rows: ResultRow[];
   loading: boolean;
   error: string;
   onRetry: () => void;
+  /** Хоцорсон хариуг хүлээн авах товчинд (байхгүй бол товч харагдахгүй) */
+  testId?: string;
 }) {
   const [sortKey, setSortKey] = useState<SortKey>("score");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
@@ -113,7 +183,7 @@ export default function ResultsTable({
   }, [rows]);
 
   function exportCsv() {
-    const header = ["№", "Нэр", "Оноо", "Нийт", "Хувь", "Эх сурвалж", "Горимоос гарсан тоо", "Скриншот", "Бичлэг", "Гаралтаар илгээгдсэн"];
+    const header = ["№", "Нэр", "Оноо", "Нийт", "Хувь", "Эх сурвалж", "Горимоос гарсан тоо", "Скриншот", "Бичлэг", "Гаралтаар илгээгдсэн", "Хоцорч ирсэн хариу"];
     const lines = [header.map(csvEscape).join(",")];
     sorted.forEach(({ r, pct }, i) => {
       lines.push(
@@ -128,6 +198,7 @@ export default function ResultsTable({
           r.screenshotCount ?? 0,
           r.recordingCount ?? 0,
           r.leftByLeaves ? "тийм" : "",
+          r.lateAnswers?.pending ? `${r.lateAnswers.differing} бодлого` : r.lateAnswers ? "хүлээн авсан" : "",
         ]
           .map(csvEscape)
           .join(","),
@@ -255,6 +326,7 @@ export default function ResultsTable({
                 </span>
                 <span className="text-sm text-ink-dim">{sourceLabel(r.source)}</span>
                 <IntegrityBadges row={r} />
+                <LateAnswersCell row={r} testId={testId} onChanged={onRetry} />
                 <span className="w-28 text-right font-bold text-ink">
                   {r.totalScore}/{r.maxScore}
                 </span>
