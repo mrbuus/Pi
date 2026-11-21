@@ -47,6 +47,8 @@ export default function PaperBoard({ id }: { id: string }) {
   const [board, setBoard] = useState<Board | null>(null);
   const [error, setError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  // Сурагчдад нээх/нуух бүрд анхааруулга (эзэн 2026-11-21): зөвшөөрсний дараа л хийгдэнэ
+  const [confirmOpen, setConfirmOpen] = useState<null | "publish" | "detail">(null);
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(() => {
@@ -105,7 +107,7 @@ export default function PaperBoard({ id }: { id: string }) {
     setBusy(true);
     try {
       await api(`/paper-exams/${encodeURIComponent(id)}`, { method: "PATCH", body: { published: !board.exam.published } });
-      toast.success(board.exam.published ? "Сурагчдаас нуулаа" : "Сурагчид нээлээ");
+      toast.success(board.exam.published ? "Сурагчдаас нуулаа" : "Сурагчдад нээлээ");
       load();
     } catch (e) {
       toast.error(errorText(e, "Өөрчилж чадсангүй"));
@@ -185,20 +187,20 @@ export default function PaperBoard({ id }: { id: string }) {
           <h1 className="cyrillic-heading font-display text-2xl font-bold text-ink">{e.title}</h1>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <Meta className="text-sm text-ink-dim" items={[dayText(e.heldOn), `${e.itemCount} бодлого`, `${board.overall.count} сурагч`]} />
-            {e.published ? <Badge tone="success">Сурагчид нээлттэй</Badge> : <Badge>Нийтлээгүй</Badge>}
+            {e.published ? <Badge tone="success">Сурагчдад нээлттэй</Badge> : <Badge>Сурагчдад нээгээгүй</Badge>}
             {!e.studentDetail && <Badge tone="info">Сурагчид зөвхөн зөв, буруу</Badge>}
             {board.scope === "OWN_CLASSES" && <Badge tone="info">Таны ангийн сурагчид</Badge>}
           </div>
         </div>
         {canManage && (
           <div className="flex flex-wrap gap-2">
-            <Button variant={e.published ? "outline" : "default"} disabled={busy} onClick={togglePublish}>
+            <Button variant={e.published ? "outline" : "default"} disabled={busy} onClick={() => setConfirmOpen("publish")}>
               {e.published ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
-              {e.published ? "Сурагчдаас нуух" : "Сурагчид нээх"}
+              {e.published ? "Сурагчдаас нуух" : "Сурагчдад нээх"}
             </Button>
-            <Button variant="outline" disabled={busy} onClick={toggleDetail}>
+            <Button variant="outline" disabled={busy} onClick={() => setConfirmOpen("detail")}>
               {e.studentDetail ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
-              {e.studentDetail ? "Дэлгэрэнгүйг нуух" : "Дэлгэрэнгүй нээх"}
+              {e.studentDetail ? "Дэлгэрэнгүйг нуух" : "Дэлгэрэнгүйг сурагчдад нээх"}
             </Button>
             <Button variant="ghost" size="icon" aria-label="Шалгалтыг устгах" onClick={() => setConfirmDelete(true)}>
               <Trash2 aria-hidden />
@@ -285,6 +287,58 @@ export default function PaperBoard({ id }: { id: string }) {
           )}
         </div>
       </Tabs.Root>
+
+      {confirmOpen && (
+        <ExamDialog
+          open
+          onOpenChange={(o) => !o && setConfirmOpen(null)}
+          title={
+            confirmOpen === "publish"
+              ? e.published
+                ? "Сурагчдаас нуух уу?"
+                : "Сурагчдад нээх үү?"
+              : e.studentDetail
+                ? "Дэлгэрэнгүйг нуух уу?"
+                : "Дэлгэрэнгүйг сурагчдад нээх үү?"
+          }
+          description={
+            confirmOpen === "publish"
+              ? e.published
+                ? "Сурагчид энэ шалгалтын дүнгээ харахаа болино"
+                : e.studentDetail
+                  ? "Шалгалт өгсөн бүх сурагч оноо, бодлого бүрийн зөв, буруу, бодлогын тайлбар, материал, дүнгийн жагсаалтаа харна"
+                  : "Шалгалт өгсөн бүх сурагч өөрийн оноо, бодлого бүрийн зөв, буруугаа л харна. Бодлогын тайлбар, материал, жагсаалт «Тун удахгүй» хэвээр"
+              : e.studentDetail
+                ? "Сурагчид дахин зөвхөн оноо, бодлого бүрийн зөв, буруугаа харна"
+                : `Бодлогын тайлбар, бодолт, материал (PDF), задаргаа, дүнгийн жагсаалт бүх сурагчид нээгдэнэ${e.published ? "" : ". Шалгалт сурагчдад нээгээгүй тул «Сурагчдад нээх»-ийн дараа харагдана"}`
+          }
+          footer={
+            <>
+              <Button variant="ghost" onClick={() => setConfirmOpen(null)}>
+                Болих
+              </Button>
+              <Button
+                disabled={busy}
+                onClick={async () => {
+                  const which = confirmOpen;
+                  setConfirmOpen(null);
+                  await (which === "publish" ? togglePublish() : toggleDetail());
+                }}
+              >
+                {confirmOpen === "publish"
+                  ? e.published
+                    ? "Нуух"
+                    : "Тийм, нээх"
+                  : e.studentDetail
+                    ? "Нуух"
+                    : "Тийм, нээх"}
+              </Button>
+            </>
+          }
+        >
+          <span />
+        </ExamDialog>
+      )}
 
       <ExamDialog
         open={confirmDelete}
