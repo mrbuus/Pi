@@ -17,6 +17,7 @@ export default function ChoiceList({
   mode,
   choices,
   images,
+  labels,
   selected,
   onSelect,
   problemNumber,
@@ -25,6 +26,8 @@ export default function ChoiceList({
   choices: string[];
   /** TEXT горимд сонголт бүрийн зураг (choices-тэй ижил дараалал) */
   images?: (string | null)[] | null;
+  /** Цаасан горимд сонголтын шошго (A–E, холиогүй) — бодолт, «Түгээмэл алдаа»-тай таарна */
+  labels?: string[] | null;
   selected: number | string | undefined;
   onSelect: (value: number | string) => void;
   problemNumber: number;
@@ -83,7 +86,7 @@ export default function ChoiceList({
               }`}
               aria-hidden
             >
-              {sel ? <Check size={16} /> : ci + 1}
+              {sel ? <Check size={16} /> : (labels?.[ci] ?? ci + 1)}
             </span>
             <span className="min-w-0 flex-1">
               <ChoiceContent text={c} image={images?.[ci]} />

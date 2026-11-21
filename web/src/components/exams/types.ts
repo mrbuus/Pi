@@ -152,6 +152,11 @@ export interface ExamSettings {
     timeLimitMin: number | null;
     /** Аппаас гарах дүрэм: 3 = Зөөлөн, 2 = Хатуу (хуучин API-д байхгүй → 3) */
     leaveLimit?: number;
+    /** Нийтлэг цонх (ISO, UTC); хуучин API-д байхгүй */
+    opensAt?: string | null;
+    closesAt?: string | null;
+    /** Цаасан шалгалтын горим (импортоор): A–E, холихгүй, хувилбарыг сервер онооно */
+    paperMode?: boolean;
     price?: number | null;
     taken: boolean;
     /** Буцаах/түүх: PATCH /tests/:id-д expectedVersion */

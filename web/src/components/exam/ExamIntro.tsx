@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Settings, TriangleAlert, Wifi, WifiOff } from "lucide-react";
 
 import { pingApi } from "@/lib/api";
+import { dateTimeUB } from "@/components/thousand/format";
 /* ============================================================================
  * ExamIntro — шалгалт эхлэхийн өмнөх дэлгэц: дүрэм, бэлтгэл, "Эхлэх" товч
  *
@@ -44,7 +45,12 @@ export default function ExamIntro({
   onConfirmStart,
   onCancelConfirm,
   onBack,
+  opensAt,
+  closesAt,
 }: {
+  /** Нийтлэг цонх (ISO, UTC) — Улаанбаатарын цагаар харуулна */
+  opensAt?: string | null;
+  closesAt?: string | null;
   title: string;
   variantLabel?: string | null;
   problemCount: number;
@@ -155,6 +161,12 @@ export default function ExamIntro({
                   дэлгэцээс гарах, бүтэн дэлгэцээс гарах, хэмжээлэх гэх мэт оролдлого <b className="text-ink">{warnTimes(leaveWarn, leaveMax)} удаа</b> анхааруулга өгч, <b className="text-ink">{leaveMax} {ordinalSuffix(leaveMax)} удаад</b> шалгалт автоматаар дуусна.
                 </li>
                 {minutes > 0 && <li>Цагийг сервер тоолно — цаг дуусахад автоматаар илгээгдэнэ.</li>}
+                {opensAt && <li>Нээгдэх цаг: <b className="text-ink">{dateTimeUB(opensAt)}</b> (Улаанбаатарын цагаар)</li>}
+                {closesAt && (
+                  <li>
+                    Хаагдах цаг: <b className="text-ink">{dateTimeUB(closesAt)}</b>. Хоцорч эхэлбэл хугацаа хаах цаг хүртэл л үргэлжилнэ
+                  </li>
+                )}
               </ul>
 
               <button

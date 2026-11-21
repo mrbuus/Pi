@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { CalendarDays, Clock, LogOut, Plus, Save, Tag, Trash2, Users, Workflow } from "lucide-react";
+import { CalendarClock, CalendarDays, Clock, LogOut, Plus, Save, Tag, Trash2, Users, Workflow } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/kit/badge";
@@ -57,11 +57,16 @@ export default function SettingsTab({ testId, onChanged }: { testId: string; onC
   const [days, setDays] = useState<number | "">("");
   const [minutes, setMinutes] = useState<number | "">("");
   const [price, setPrice] = useState<number | "">("");
+  // Нийтлэг цонх — datetime-local (Улаанбаатарын цаг)
+  const [opensAt, setOpensAt] = useState("");
+  const [closesAt, setClosesAt] = useState("");
 
   const apply = useCallback((next: ExamSettings) => {
     setData(next);
     setMinutes(next.test.timeLimitMin ?? "");
     setPrice(next.test.price ?? "");
+    setOpensAt(next.test.opensAt ? toLocalInputUB(next.test.opensAt) : "");
+    setClosesAt(next.test.closesAt ? toLocalInputUB(next.test.closesAt) : "");
     setDays((d) => (d === "" ? next.reviewAutoDays : d));
   }, []);
 
@@ -345,6 +350,85 @@ export default function SettingsTab({ testId, onChanged }: { testId: string; onC
         ) : (
           <p className="text-sm text-ink">{data.test.timeLimitMin ? `${data.test.timeLimitMin} минут` : "Хугацаагүй"}</p>
         )}
+      </Section>
+
+      <Section icon={CalendarClock} title="Нээх, хаах цаг">
+        {(() => {
+          const savedOpens = data.test.opensAt ? toLocalInputUB(data.test.opensAt) : "";
+          const savedCloses = data.test.closesAt ? toLocalInputUB(data.test.closesAt) : "";
+          const dirty = opensAt !== savedOpens || closesAt !== savedCloses;
+          const invalid = !!opensAt && !!closesAt && closesAt <= opensAt;
+          const input =
+            "min-h-11 rounded-xl border border-line bg-surface px-3 text-ink focus-visible:outline-2 focus-visible:outline-brand";
+          if (!data.permissions.canEditTime) {
+            return (
+              <p className="text-sm text-ink">
+                <Meta
+                  items={[
+                    data.test.opensAt ? `Нээгдэх: ${dateTimeUB(data.test.opensAt)}` : "Нээгдэх цаггүй",
+                    data.test.closesAt ? `Хаагдах: ${dateTimeUB(data.test.closesAt)}` : "Хаагдах цаггүй",
+                  ]}
+                />
+              </p>
+            );
+          }
+          return (
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-end gap-2">
+                <label className="text-sm font-semibold text-ink">
+                  <span className="mb-1 block">Нээгдэх</span>
+                  <input
+                    type="datetime-local"
+                    value={opensAt}
+                    disabled={busy !== null}
+                    onChange={(e) => setOpensAt(e.target.value)}
+                    className={input}
+                  />
+                </label>
+                <label className="text-sm font-semibold text-ink">
+                  <span className="mb-1 block">Хаагдах</span>
+                  <input
+                    type="datetime-local"
+                    value={closesAt}
+                    disabled={busy !== null}
+                    onChange={(e) => setClosesAt(e.target.value)}
+                    className={input}
+                  />
+                </label>
+                <Button
+                  size="sm"
+                  type="button"
+                  disabled={busy !== null || !dirty || invalid}
+                  onClick={() =>
+                    void run(
+                      "window",
+                      async () => {
+                        await api(`/tests/${encodeURIComponent(testId)}`, {
+                          method: "PATCH",
+                          body: {
+                            opensAt: opensAt ? fromLocalInputUB(opensAt) : null,
+                            closesAt: closesAt ? fromLocalInputUB(closesAt) : null,
+                            expectedVersion: data.test.version,
+                          },
+                        });
+                      },
+                      "Цаг хадгалагдлаа",
+                    )
+                  }
+                >
+                  <Save aria-hidden /> Хадгалах
+                </Button>
+              </div>
+              {invalid ? (
+                <p className="text-sm text-error">Хаах цаг нээх цагаас хойш байх ёстой</p>
+              ) : (
+                <p className="text-sm text-ink-dim">
+                  Улаанбаатарын цагаар. Хоцорч эхэлсэн сурагчийн хугацаа хаах цаг хүртэл л үргэлжилнэ. Хоосон бол хязгааргүй
+                </p>
+              )}
+            </div>
+          );
+        })()}
       </Section>
 
       <Section icon={LogOut} title="Аппаас гарах дүрэм">

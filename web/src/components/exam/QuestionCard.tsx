@@ -25,6 +25,8 @@ export interface QuestionCardProblem {
   choices: string[] | null;
   /** Сонголтын зургууд (choices-тэй ижил дараалал); зураггүй бол null */
   choiceImages?: (string | null)[] | null;
+  /** Цаасан горим: сонголтын шошго A–E (холиогүй). Байхгүй бол дугаар */
+  choiceLabels?: string[] | null;
 }
 
 export default function QuestionCard({
@@ -70,6 +72,7 @@ export default function QuestionCard({
             mode="TEXT"
             choices={problem.choices}
             images={problem.choiceImages}
+            labels={problem.choiceLabels}
             selected={answer}
             onSelect={onAnswer}
             problemNumber={problemNumber}

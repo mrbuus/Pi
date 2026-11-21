@@ -52,6 +52,8 @@ interface ProblemView {
   choiceMode: "TEXT" | "LETTER" | null;
   choices: string[] | null;
   choiceImages?: (string | null)[] | null;
+  /** Цаасан горим: A–E шошго (холиогүй) */
+  choiceLabels?: string[] | null;
 }
 interface Meta {
   id: string;
@@ -62,6 +64,9 @@ interface Meta {
   timeLimitMin?: number | null;
   /** Аппаас/табаас гарах дүрэм: 3 = Зөөлөн, 2 = Хатуу (хуучин API-д байхгүй → 3) */
   leaveLimit?: number;
+  /** Нийтлэг цонх (ISO, UTC) — хуучин API-д байхгүй */
+  opensAt?: string | null;
+  closesAt?: string | null;
   problemCount: number;
   totalPoints: number;
   myResult?: { totalScore: number; maxScore: number } | null;
@@ -674,6 +679,8 @@ export default function TakeTestPage() {
         manualGrading={manualGrading}
         leaveWarn={LEAVE_WARN}
         leaveMax={leaveMax}
+        opensAt={meta.opensAt}
+        closesAt={meta.closesAt}
         resume={resume}
         starting={starting}
         confirmStart={confirmStart}
