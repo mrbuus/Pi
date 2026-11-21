@@ -17,7 +17,11 @@ import { toast } from "sonner";
 import { api, getRole } from "@/lib/api";
 import { Meta } from "@/components/ui/Meta";
 import { Button } from "@/components/ui/kit/button";
-import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateBlock";
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "@/components/ui/StateBlock";
 import { studentHref } from "./LedgerRowItem";
 import { dayLabel, mnt, stampLabel } from "./ledgerFormat";
 import { errMsg } from "./paymentHelpers";
@@ -36,7 +40,13 @@ interface SyncStatus {
   /** Вэбээр бүртгүүлж анх ирсэн хүүхдийг шийтэд нэмэх (SHEET_WRITE_ENABLED) */
   writeEnabled?: boolean;
   running: boolean;
-  lastRun: { startedAt: string; finishedAt: string | null; ok: boolean; skipped: boolean; error: string | null } | null;
+  lastRun: {
+    startedAt: string;
+    finishedAt: string | null;
+    ok: boolean;
+    skipped: boolean;
+    error: string | null;
+  } | null;
   lastFullAt: string | null;
   last: {
     rows?: Record<string, number>;
@@ -54,20 +64,35 @@ interface SheetIssue {
   rowNumber: number | null;
   studentId: string | null;
   title: string;
-  detail: { cells?: { cell: string; sheet: number; web: number }[]; held?: { cell: string; amount: number; label: string }[] } | null;
+  detail: {
+    cells?: { cell: string; sheet: number; web: number }[];
+    held?: { cell: string; amount: number; label: string }[];
+  } | null;
   firstSeenAt: string;
 }
 interface SheetRows {
   tabs: { tab: string; count: number }[];
   tab: string | null;
   headers: Record<string, string>;
-  items: { id: string; rowNumber: number; cells: Record<string, string | number>; studentId: string | null }[];
+  items: {
+    id: string;
+    rowNumber: number;
+    cells: Record<string, string | number>;
+    studentId: string | null;
+  }[];
   total: number;
 }
 
-const SEVERITY: Record<Severity, { label: string; icon: LucideIcon; cls: string }> = {
+const SEVERITY: Record<
+  Severity,
+  { label: string; icon: LucideIcon; cls: string }
+> = {
   ERROR: { label: "Шалгах", icon: CircleAlert, cls: "bg-error/12 text-error" },
-  WARN: { label: "Анхааруулга", icon: TriangleAlert, cls: "bg-warning/15 text-warning" },
+  WARN: {
+    label: "Анхааруулга",
+    icon: TriangleAlert,
+    cls: "bg-warning/15 text-warning",
+  },
   INFO: { label: "Мэдээлэл", icon: Info, cls: "bg-info/12 text-info" },
 };
 const KIND_LABEL: Record<string, string> = {
@@ -107,9 +132,41 @@ const FILTERS: { key: "" | Severity; label: string }[] = [
 function cellLabel(cell: string): string {
   const [sheet, rest = ""] = cell.split("|");
   const m = rest.match(/^\d{4}-(\d{2})(?:@(\w+))?/);
-  const month = m ? `${Number(m[1])}-р сар${m[2] ? ` (${m[2]} багана)` : ""}` : rest;
+  const month = m
+    ? `${Number(m[1])}-р сар${m[2] ? ` (${m[2]} багана)` : ""}`
+    : rest;
   return sheet === "social" ? `Нийгэм ${month}` : month;
 }
+/**
+ * Зөрүүг ажилтанд энгийн хэлээр (эзэн 2026-11-21: «хэн, юу болсныг харахад хялбар»):
+ * юу болсон, юу хийх. Нүд зөөсөн ижил дүнг синк өөрөө шилжүүлдэг тул энд үлдсэн нь хүний шийдвэр.
+ */
+function explainMismatch(
+  cells: { cell: string; sheet: number; web: number }[],
+  held: { cell: string; amount: number; label: string }[],
+) {
+  const lines = cells.map((c) =>
+    c.sheet === 0
+      ? `${cellLabel(c.cell)}: шийтэд мөнгө алга, вэбд ${mnt(c.web)} байна`
+      : `${cellLabel(c.cell)}: шийтэд ${mnt(c.sheet)}, вэбд ${mnt(c.web)} — вэбд ${mnt(c.web - c.sheet)} илүү`,
+  );
+  for (const h of held)
+    lines.push(
+      `${cellLabel(h.cell)}: шийтэд ${mnt(h.amount)} шинээр бичсэн — вэбийн дүнтэй таарахгүй тул хүлээлгэсэн`,
+    );
+  return held.length
+    ? {
+        what: "Мөнгийг шийтийн өөр сард, өөр дүнгээр бичсэн (жишээ нь сургалт, ном хамт төлсөнийг тусад нь)",
+        lines,
+        todo: "Банкны гүйлгээгээр зөв дүнг шалгаад шийтийг засна. Шийт зөв бол Админ «Шийтээр засах» дарна",
+      }
+    : {
+        what: "Шийтээс мөнгийг арилгасан ч вэбд үлдсэн",
+        lines,
+        todo: "Давхар эсвэл буруу хүүхдийнх бол «Сурагчийн төлбөр» → тэр төлбөрийг «Буцаах». Жинхэнэ төлбөр бол шийтэд буцааж бичнэ",
+      };
+}
+
 function ago(iso: string | null): string {
   if (!iso) return "хараахан татаагүй";
   const min = Math.round((Date.now() - Date.parse(iso)) / 60_000);
@@ -163,8 +220,12 @@ export default function SheetSyncPanel() {
   }, []);
   async function runNow() {
     try {
-      const r = await api<{ started: boolean }>("/sheet-sync/run", { method: "POST" });
-      toast(r.started ? "Шийтээс татаж эхэллээ" : "Татаж байгаа — түр хүлээнэ үү");
+      const r = await api<{ started: boolean }>("/sheet-sync/run", {
+        method: "POST",
+      });
+      toast(
+        r.started ? "Шийтээс татаж эхэллээ" : "Татаж байгаа — түр хүлээнэ үү",
+      );
       setStatus((s) => (s ? { ...s, running: true } : s));
       waitUntilDone();
     } catch (e) {
@@ -184,34 +245,63 @@ export default function SheetSyncPanel() {
     );
 
   const failed = status.lastRun && !status.lastRun.ok;
-  const rows = Object.values(status.last?.rows ?? {}).reduce((t, n) => t + n, 0);
-  const groups = status.open.filter((g) => !severity || g.severity === severity);
-  const count = (s: "" | Severity) => status.open.filter((g) => !s || g.severity === s).reduce((t, g) => t + g.count, 0);
+  const rows = Object.values(status.last?.rows ?? {}).reduce(
+    (t, n) => t + n,
+    0,
+  );
+  const groups = status.open.filter(
+    (g) => !severity || g.severity === severity,
+  );
+  const count = (s: "" | Severity) =>
+    status.open
+      .filter((g) => !s || g.severity === s)
+      .reduce((t, g) => t + g.count, 0);
 
   return (
     <div className="space-y-4">
-      <section className="chunky space-y-3 p-4" aria-label="Төлбөрийн мэдээлэл татах төлөв">
+      <section
+        className="chunky space-y-3 p-4"
+        aria-label="Төлбөрийн мэдээлэл татах төлөв"
+      >
         <div className="flex flex-wrap items-center gap-3">
           <span
             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${failed ? "bg-error/12 text-error" : "bg-success/15 text-success"}`}
           >
-            {failed ? <CircleAlert className="h-5 w-5" aria-hidden /> : <CircleCheck className="h-5 w-5" aria-hidden />}
+            {failed ? (
+              <CircleAlert className="h-5 w-5" aria-hidden />
+            ) : (
+              <CircleCheck className="h-5 w-5" aria-hidden />
+            )}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="font-bold text-ink">{failed ? "Сүүлийн удаа татаж чадсангүй" : "Шийттэй холбогдсон"}</p>
+            <p className="font-bold text-ink">
+              {failed ? "Сүүлийн удаа татаж чадсангүй" : "Шийттэй холбогдсон"}
+            </p>
             <p className="text-sm text-ink-dim">
               <Meta
                 items={[
                   `Шалгасан ${ago(status.lastRun?.finishedAt ?? null)}`,
-                  status.enabled ? "5 минут тутам автоматаар" : "Автомат татах унтраалттай",
+                  status.enabled
+                    ? "5 минут тутам автоматаар"
+                    : "Автомат татах унтраалттай",
                   status.writeEnabled ? "Шинэ хүүхдийг шийтэд нэмнэ" : null,
                 ]}
               />
             </p>
           </div>
           {isAdmin && (
-            <Button variant="outline" className="min-h-11 w-full sm:w-auto" disabled={status.running} onClick={() => void runNow()}>
-              <RefreshCw className={status.running ? "motion-safe:animate-spin" : undefined} aria-hidden />
+            <Button
+              variant="outline"
+              className="min-h-11 w-full sm:w-auto"
+              disabled={status.running}
+              onClick={() => void runNow()}
+            >
+              <RefreshCw
+                className={
+                  status.running ? "motion-safe:animate-spin" : undefined
+                }
+                aria-hidden
+              />
               {status.running ? "Татаж байна" : "Төлбөрийн мэдээлэл татах"}
             </Button>
           )}
@@ -220,13 +310,24 @@ export default function SheetSyncPanel() {
           <dl className="grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
             {[
               { label: "Шийтийн мөр", value: rows.toLocaleString("en-US") },
-              { label: "Сүүлд нэмсэн гүйлгээ", value: String(status.last.payments?.inserted ?? 0) },
-              { label: "Шинэ сурагч", value: String(status.last.createdStudents ?? 0) },
-              { label: "Шийтэд нэмсэн", value: String(status.last.appended?.appended ?? 0) },
+              {
+                label: "Сүүлд нэмсэн гүйлгээ",
+                value: String(status.last.payments?.inserted ?? 0),
+              },
+              {
+                label: "Шинэ сурагч",
+                value: String(status.last.createdStudents ?? 0),
+              },
+              {
+                label: "Шийтэд нэмсэн",
+                value: String(status.last.appended?.appended ?? 0),
+              },
             ].map((s) => (
               <div key={s.label} className="rounded-xl bg-bg px-2 py-2">
                 <dt className="text-xs text-ink-dim">{s.label}</dt>
-                <dd className="font-display text-lg font-bold tabular-nums text-ink">{s.value}</dd>
+                <dd className="font-display text-lg font-bold tabular-nums text-ink">
+                  {s.value}
+                </dd>
               </div>
             ))}
           </dl>
@@ -234,7 +335,11 @@ export default function SheetSyncPanel() {
       </section>
 
       <section className="space-y-3" aria-label="Шийтийн зөрүү">
-        <div role="radiogroup" aria-label="Зөрүүний төрөл" className="flex flex-wrap gap-1.5">
+        <div
+          role="radiogroup"
+          aria-label="Зөрүүний төрөл"
+          className="flex flex-wrap gap-1.5"
+        >
           {FILTERS.map((f) => (
             <button
               key={f.key}
@@ -243,7 +348,9 @@ export default function SheetSyncPanel() {
               aria-checked={severity === f.key}
               onClick={() => setSeverity(f.key)}
               className={`min-h-11 rounded-xl border px-3 text-sm font-semibold transition ${
-                severity === f.key ? "border-brand bg-brand-tint text-ink" : "border-line text-ink-dim hover:text-ink"
+                severity === f.key
+                  ? "border-brand bg-brand-tint text-ink"
+                  : "border-line text-ink-dim hover:text-ink"
               }`}
             >
               {f.label} <span className="tabular-nums">{count(f.key)}</span>
@@ -251,7 +358,10 @@ export default function SheetSyncPanel() {
           ))}
         </div>
         {!groups.length ? (
-          <EmptyState title="Зөрүү алга" hint="Шийт ба вэбийн мэдээлэл таарч байна" />
+          <EmptyState
+            title="Зөрүү алга"
+            hint="Шийт ба вэбийн мэдээлэл таарч байна"
+          />
         ) : (
           <ul className="chunky divide-y divide-line p-1.5">
             {groups.map((g) => {
@@ -266,14 +376,34 @@ export default function SheetSyncPanel() {
                     onClick={() => setOpen(expanded ? null : key)}
                     className="row-interactive flex min-h-12 w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left"
                   >
-                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${sev.cls}`}>
+                    <span
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${sev.cls}`}
+                    >
                       <sev.icon className="h-4 w-4" aria-label={sev.label} />
                     </span>
-                    <span className="min-w-0 flex-1 font-semibold text-ink">{KIND_LABEL[g.kind] ?? g.kind}</span>
-                    <span className="tabular-nums text-sm font-bold text-ink-dim">{g.count}</span>
-                    <ChevronDown className={`h-4 w-4 text-ink-dim transition-transform ${expanded ? "rotate-180" : ""}`} aria-hidden />
+                    <span className="min-w-0 flex-1 font-semibold text-ink">
+                      {KIND_LABEL[g.kind] ?? g.kind}
+                    </span>
+                    <span className="tabular-nums text-sm font-bold text-ink-dim">
+                      {g.count}
+                    </span>
+                    <ChevronDown
+                      className={`h-4 w-4 text-ink-dim transition-transform ${expanded ? "rotate-180" : ""}`}
+                      aria-hidden
+                    />
                   </button>
-                  {expanded && <IssueList kind={g.kind} severity={g.severity} isAdmin={isAdmin} refresh={refresh} onChanged={() => { load(); setRefresh((n) => n + 1); }} />}
+                  {expanded && (
+                    <IssueList
+                      kind={g.kind}
+                      severity={g.severity}
+                      isAdmin={isAdmin}
+                      refresh={refresh}
+                      onChanged={() => {
+                        load();
+                        setRefresh((n) => n + 1);
+                      }}
+                    />
+                  )}
                 </li>
               );
             })}
@@ -286,15 +416,34 @@ export default function SheetSyncPanel() {
   );
 }
 
-function IssueList({ kind, severity, isAdmin, refresh, onChanged }: { kind: string; severity: Severity; isAdmin: boolean; refresh: number; onChanged: () => void }) {
-  const [data, setData] = useState<{ items: SheetIssue[]; total: number } | null>(null);
+function IssueList({
+  kind,
+  severity,
+  isAdmin,
+  refresh,
+  onChanged,
+}: {
+  kind: string;
+  severity: Severity;
+  isAdmin: boolean;
+  refresh: number;
+  onChanged: () => void;
+}) {
+  const [data, setData] = useState<{
+    items: SheetIssue[];
+    total: number;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [more, setMore] = useState(false);
   const load = useCallback(
     (offset = 0) => {
-      api<{ items: SheetIssue[]; total: number }>(`/sheet-sync/issues?kind=${encodeURIComponent(kind)}&severity=${severity}&offset=${offset}&limit=30`)
+      api<{ items: SheetIssue[]; total: number }>(
+        `/sheet-sync/issues?kind=${encodeURIComponent(kind)}&severity=${severity}&offset=${offset}&limit=30`,
+      )
         .then((d) => {
-          setData((prev) => (offset && prev ? { ...d, items: [...prev.items, ...d.items] } : d));
+          setData((prev) =>
+            offset && prev ? { ...d, items: [...prev.items, ...d.items] } : d,
+          );
           setError(null);
         })
         .catch((e) => setError(errMsg(e)))
@@ -304,25 +453,58 @@ function IssueList({ kind, severity, isAdmin, refresh, onChanged }: { kind: stri
   );
   useEffect(() => load(0), [load, refresh]);
 
-  if (error && !data) return <div className="px-2 pb-3"><ErrorState message={error} onRetry={() => load(0)} /></div>;
-  if (!data) return <div className="px-2 pb-3"><LoadingState rows={3} label="Зөрүү" /></div>;
+  if (error && !data)
+    return (
+      <div className="px-2 pb-3">
+        <ErrorState message={error} onRetry={() => load(0)} />
+      </div>
+    );
+  if (!data)
+    return (
+      <div className="px-2 pb-3">
+        <LoadingState rows={3} label="Зөрүү" />
+      </div>
+    );
   return (
     <div className="space-y-2 px-2 pb-3">
       <ul className="space-y-2">
         {data.items.map((i) => (
-          <IssueItem key={i.id} issue={i} isAdmin={isAdmin} onChanged={onChanged} />
+          <IssueItem
+            key={i.id}
+            issue={i}
+            isAdmin={isAdmin}
+            onChanged={onChanged}
+          />
         ))}
       </ul>
       {data.items.length < data.total && (
-        <Button variant="outline" className="w-full" disabled={more} onClick={() => { setMore(true); load(data.items.length); }}>
-          {more ? "Ачаалж байна" : `Цааш ${Math.min(30, data.total - data.items.length)}`}
+        <Button
+          variant="outline"
+          className="w-full"
+          disabled={more}
+          onClick={() => {
+            setMore(true);
+            load(data.items.length);
+          }}
+        >
+          {more
+            ? "Ачаалж байна"
+            : `Цааш ${Math.min(30, data.total - data.items.length)}`}
         </Button>
       )}
     </div>
   );
 }
 
-function IssueItem({ issue, isAdmin, onChanged }: { issue: SheetIssue; isAdmin: boolean; onChanged: () => void }) {
+function IssueItem({
+  issue,
+  isAdmin,
+  onChanged,
+}: {
+  issue: SheetIssue;
+  isAdmin: boolean;
+  onChanged: () => void;
+}) {
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const cells = issue.detail?.cells ?? [];
@@ -331,7 +513,10 @@ function IssueItem({ issue, isAdmin, onChanged }: { issue: SheetIssue; isAdmin: 
     if (!issue.studentId) return;
     setBusy(true);
     try {
-      const r = await api<{ cells: number; inserted: number }>(`/sheet-sync/students/${encodeURIComponent(issue.studentId)}/apply`, { method: "POST" });
+      const r = await api<{ cells: number; inserted: number }>(
+        `/sheet-sync/students/${encodeURIComponent(issue.studentId)}/apply`,
+        { method: "POST" },
+      );
       toast.success(`Шийтийн дүнгээр тааруулав (${r.cells} нүд)`);
       onChanged();
     } catch (e) {
@@ -346,48 +531,100 @@ function IssueItem({ issue, isAdmin, onChanged }: { issue: SheetIssue; isAdmin: 
       <p className="mt-0.5 text-xs text-ink-dim">
         <Meta
           items={[
-            issue.tab ? `${issue.tab}${issue.rowNumber ? `, ${issue.rowNumber}-р мөр` : ""}` : null,
+            issue.tab
+              ? `${issue.tab}${issue.rowNumber ? `, ${issue.rowNumber}-р мөр` : ""}`
+              : null,
             `Илэрсэн ${dayLabel(issue.firstSeenAt.slice(0, 10))}`,
           ]}
         />
       </p>
-      {(cells.length > 0 || held.length > 0) && (
-        <ul className="mt-2 space-y-1 text-xs">
-          {cells.map((c) => (
-            <li key={c.cell} className="flex flex-wrap justify-between gap-x-3 tabular-nums">
-              <span className="font-semibold text-ink">{cellLabel(c.cell)}</span>
-              <span className="text-ink-dim">
-                шийт {mnt(c.sheet)}, вэб {mnt(c.web)}
-              </span>
-            </li>
-          ))}
-          {held.map((h) => (
-            <li key={`h-${h.cell}-${h.amount}`} className="flex flex-wrap justify-between gap-x-3 tabular-nums text-ink-dim">
-              <span>Хүлээгдэж буй: {h.label}</span>
-              <span>{mnt(h.amount)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      {issue.kind === "PAYMENT_MISMATCH" &&
+        (cells.length > 0 || held.length > 0) &&
+        (() => {
+          const x = explainMismatch(cells, held);
+          return (
+            <div className="mt-2 space-y-1.5 text-sm">
+              <p className="font-semibold text-ink">Юу болсон: {x.what}</p>
+              <ul className="list-disc space-y-0.5 pl-5 text-ink-dim tabular-nums">
+                {x.lines.map((l) => (
+                  <li key={l}>{l}</li>
+                ))}
+              </ul>
+              <p className="text-ink">
+                <span className="font-semibold">Юу хийх: </span>
+                {x.todo}
+              </p>
+            </div>
+          );
+        })()}
+      {issue.kind !== "PAYMENT_MISMATCH" &&
+        (cells.length > 0 || held.length > 0) && (
+          <ul className="mt-2 space-y-1 text-xs">
+            {cells.map((c) => (
+              <li
+                key={c.cell}
+                className="flex flex-wrap justify-between gap-x-3 tabular-nums"
+              >
+                <span className="font-semibold text-ink">
+                  {cellLabel(c.cell)}
+                </span>
+                <span className="text-ink-dim">
+                  шийт {mnt(c.sheet)}, вэб {mnt(c.web)}
+                </span>
+              </li>
+            ))}
+            {held.map((h) => (
+              <li
+                key={`h-${h.cell}-${h.amount}`}
+                className="flex flex-wrap justify-between gap-x-3 tabular-nums text-ink-dim"
+              >
+                <span>Хүлээгдэж буй: {h.label}</span>
+                <span>{mnt(h.amount)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       {(issue.studentId || (isAdmin && issue.kind === "PAYMENT_MISMATCH")) && (
         <div className="mt-2 flex flex-wrap items-center gap-2">
           {issue.studentId && (
-            <Link href={studentHref(issue.studentId)} className="inline-flex min-h-11 items-center rounded-xl px-2 text-sm font-semibold text-brand hover:underline">
+            <Link
+              href={studentHref(issue.studentId)}
+              className="inline-flex min-h-11 items-center rounded-xl px-2 text-sm font-semibold text-brand hover:underline"
+            >
               Сурагчийн төлбөр
             </Link>
           )}
-          {isAdmin && issue.kind === "PAYMENT_MISMATCH" && issue.studentId &&
+          {isAdmin &&
+            issue.kind === "PAYMENT_MISMATCH" &&
+            issue.studentId &&
             (confirming ? (
               <>
-                <Button size="sm" variant="danger" className="min-h-11" disabled={busy} onClick={() => void apply()}>
+                <Button
+                  size="sm"
+                  variant="danger"
+                  className="min-h-11"
+                  disabled={busy}
+                  onClick={() => void apply()}
+                >
                   {busy ? "Тааруулж байна" : "Тийм, шийтээр засах"}
                 </Button>
-                <Button size="sm" variant="ghost" className="min-h-11" disabled={busy} onClick={() => setConfirming(false)}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="min-h-11"
+                  disabled={busy}
+                  onClick={() => setConfirming(false)}
+                >
                   Болих
                 </Button>
               </>
             ) : (
-              <Button size="sm" variant="outline" className="min-h-11" onClick={() => setConfirming(true)}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="min-h-11"
+                onClick={() => setConfirming(true)}
+              >
                 Шийтээр засах
               </Button>
             ))}
@@ -395,7 +632,8 @@ function IssueItem({ issue, isAdmin, onChanged }: { issue: SheetIssue; isAdmin: 
       )}
       {confirming && (
         <p className="mt-1 text-xs text-ink-dim">
-          Зөрсөн нүдний вэб дэх гүйлгээг буцааж (түүх нь үлдэнэ), шийтийн дүнгээр шинээр бичнэ
+          Зөрсөн нүдний вэб дэх гүйлгээг буцааж (түүх нь үлдэнэ), шийтийн
+          дүнгээр шинээр бичнэ
         </p>
       )}
     </li>
@@ -417,7 +655,9 @@ function RawRows({ refresh }: { refresh: number }) {
       if (q.trim().length >= 2) params.set("q", q.trim());
       api<SheetRows>(`/sheet-sync/rows?${params}`)
         .then((d) => {
-          setData((prev) => (offset && prev ? { ...d, items: [...prev.items, ...d.items] } : d));
+          setData((prev) =>
+            offset && prev ? { ...d, items: [...prev.items, ...d.items] } : d,
+          );
           setError(null);
         })
         .catch((e) => setError(errMsg(e)));
@@ -440,12 +680,19 @@ function RawRows({ refresh }: { refresh: number }) {
       >
         <FileSpreadsheet className="h-5 w-5 text-ink-dim" aria-hidden />
         <span className="flex-1 font-semibold text-ink">Шийтийн бүх мөр</span>
-        <ChevronDown className={`h-4 w-4 text-ink-dim transition-transform ${shown ? "rotate-180" : ""}`} aria-hidden />
+        <ChevronDown
+          className={`h-4 w-4 text-ink-dim transition-transform ${shown ? "rotate-180" : ""}`}
+          aria-hidden
+        />
       </button>
       {shown && (
         <div className="space-y-3 px-2 pb-3 pt-1">
           {data && (
-            <div role="radiogroup" aria-label="Хуудас" className="flex flex-wrap gap-1.5">
+            <div
+              role="radiogroup"
+              aria-label="Хуудас"
+              className="flex flex-wrap gap-1.5"
+            >
               {data.tabs.map((t) => (
                 <button
                   key={t.tab}
@@ -461,7 +708,10 @@ function RawRows({ refresh }: { refresh: number }) {
             </div>
           )}
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-dim" aria-hidden />
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-dim"
+              aria-hidden
+            />
             <label htmlFor="sheet-row-search" className="sr-only">
               Мөр хайх
             </label>
@@ -480,17 +730,28 @@ function RawRows({ refresh }: { refresh: number }) {
           ) : !data ? (
             <LoadingState rows={4} label="Шийтийн мөр" />
           ) : !data.items.length ? (
-            <EmptyState title="Мөр олдсонгүй" hint={q ? "Өөр үгээр хайж үзнэ үү" : undefined} />
+            <EmptyState
+              title="Мөр олдсонгүй"
+              hint={q ? "Өөр үгээр хайж үзнэ үү" : undefined}
+            />
           ) : (
             <>
               <ul className="space-y-2">
                 {data.items.map((r) => (
                   <li key={r.id} className="rounded-xl bg-bg px-3 py-2.5">
                     <p className="flex flex-wrap items-baseline gap-x-2">
-                      <span className="font-semibold text-ink">{[r.cells.B, r.cells.C].filter(Boolean).join(" ") || "Нэргүй мөр"}</span>
-                      <span className="text-xs text-ink-dim">{r.rowNumber}-р мөр</span>
+                      <span className="font-semibold text-ink">
+                        {[r.cells.B, r.cells.C].filter(Boolean).join(" ") ||
+                          "Нэргүй мөр"}
+                      </span>
+                      <span className="text-xs text-ink-dim">
+                        {r.rowNumber}-р мөр
+                      </span>
                       {r.studentId && (
-                        <Link href={studentHref(r.studentId)} className="text-xs font-semibold text-brand hover:underline">
+                        <Link
+                          href={studentHref(r.studentId)}
+                          className="text-xs font-semibold text-brand hover:underline"
+                        >
                           Вэб дэх сурагч
                         </Link>
                       )}
@@ -500,8 +761,14 @@ function RawRows({ refresh }: { refresh: number }) {
                         .filter(([col]) => col !== "B" && col !== "C")
                         .map(([col, v]) => (
                           <div key={col} className="flex min-w-0 gap-1.5">
-                            <dt className="shrink-0 text-ink-dim">{data.headers[col] ?? col}:</dt>
-                            <dd className="min-w-0 break-words tabular-nums text-ink">{typeof v === "number" && Math.abs(v) >= 1000 ? v.toLocaleString("en-US") : String(v)}</dd>
+                            <dt className="shrink-0 text-ink-dim">
+                              {data.headers[col] ?? col}:
+                            </dt>
+                            <dd className="min-w-0 break-words tabular-nums text-ink">
+                              {typeof v === "number" && Math.abs(v) >= 1000
+                                ? v.toLocaleString("en-US")
+                                : String(v)}
+                            </dd>
                           </div>
                         ))}
                     </dl>
@@ -509,7 +776,11 @@ function RawRows({ refresh }: { refresh: number }) {
                 ))}
               </ul>
               {data.items.length < data.total && (
-                <Button variant="outline" className="w-full" onClick={() => load(data.items.length)}>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => load(data.items.length)}
+                >
                   Цааш {Math.min(50, data.total - data.items.length)}
                 </Button>
               )}

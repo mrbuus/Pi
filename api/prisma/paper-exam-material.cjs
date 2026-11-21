@@ -4,7 +4,8 @@
  * Файлын нэр `<хувилбар>-<хуудас>.jpg` (A-1.jpg …) → түлхүүр `paperexam-<examId>-A-1.jpg`.
  * Эзэнгүй (ownerId null), лавлагаагүй тул /files/ маршрутаар зөвхөн Админ уншина; сурагч
  * зөвхөн /paper-exams/my/:id/material-аар ӨӨРИЙН хувилбарыг авна. Байгаа түлхүүрийг ДАРЖ
- * БИЧИХГҮЙ (алгасна).
+ * БИЧИХГҮЙ (алгасна). Чанар сайжруулсан хуудсыг `A-1.r2.jpg` гэж нэрлэвэл шинэ түлхүүрээр нэмэгдэж,
+ * сервер хуудас бүрийн хамгийн сүүлийн хувилбарыг харуулна (хуучин нь үлдэнэ).
  *
  *   node prisma/paper-exam-material.cjs <хавтас> --title="Нэгдсэн шалгалт 1"           # урьдчилан харах
  *   node prisma/paper-exam-material.cjs <хавтас> --title="Нэгдсэн шалгалт 1" --commit  # хадгална
@@ -28,7 +29,7 @@ async function main() {
   const commit = process.argv.includes('--commit');
   const files = fs
     .readdirSync(dir)
-    .filter((f) => /^[A-Z]-\d+\.jpg$/.test(f))
+    .filter((f) => /^[A-Z]-\d+(\.r\d+)?\.jpg$/.test(f))
     .sort();
   if (files.length === 0) throw new Error('A-1.jpg хэлбэрийн файл алга');
   const app = await NestFactory.createApplicationContext(AppModule, { logger: ['error'] });

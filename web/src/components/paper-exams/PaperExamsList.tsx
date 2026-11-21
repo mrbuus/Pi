@@ -81,7 +81,7 @@ export default function PaperExamsList({ canManage }: { canManage: boolean }) {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-bold text-ink">{r.title}</span>
-                    {r.published ? <Badge tone="success">Сурагчид нээлттэй</Badge> : <Badge>Нийтлээгүй</Badge>}
+                    {r.published ? <Badge tone="success">Сурагчдад нээлттэй</Badge> : <Badge>Сурагчдад нээгээгүй</Badge>}
                     {r.unmatchedCount > 0 && canManage && (
                       <Badge tone="warning">{r.unmatchedCount} холбогдоогүй</Badge>
                     )}

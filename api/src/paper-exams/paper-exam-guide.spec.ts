@@ -67,6 +67,15 @@ describe('guideContentErrors', () => {
     ).toContain('parts-ийн онооны нийлбэр points-тэй тэнцэхгүй');
   });
 
+  it('хасах тэмдгийн нүдийг зөвшөөрнө (Нэгдсэн шалгалт 2 A II.4: «-2»)', () => {
+    expect(
+      guideContentErrors({ ...fill, fields: [{ key: 'fg', value: '-2', part: 1 }] }),
+    ).toEqual([]);
+    expect(
+      guideContentErrors({ ...fill, fields: [{ key: 'f', value: 'x', part: 1 }] }),
+    ).toContain('fields буруу (нүдний нэр, утгын урт, хэсэг)');
+  });
+
   it('data:image/png биш зургийг татгалзана', () => {
     expect(
       guideContentErrors({ ...choice, image: 'https://example.com/a.png' }),

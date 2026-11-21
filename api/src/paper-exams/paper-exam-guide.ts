@@ -104,7 +104,8 @@ export function guideContentErrors(raw: unknown): string[] {
       !c.fields.every(
         (f) =>
           /^[a-z]{1,3}$/.test(f.key) &&
-          /^[0-9]{1,3}$/.test(f.value) &&
+          // Хариултын хуудсанд хасах тэмдгийн нүд бий («-2», Нэгдсэн шалгалт 2 A II.4)
+          /^[0-9-]{1,3}$/.test(f.value) &&
           f.key.length === f.value.length &&
           Number.isInteger(f.part) &&
           f.part >= 0 &&
