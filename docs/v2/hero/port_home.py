@@ -140,7 +140,7 @@ body = sub1(body, '<a class="btn" href="#enter">Бүртгүүлэх', '<a class
 body = sub1(body, '<a href="#enter">Нэвтрэх', '<a href="/login">Нэвтрэх')
 body = sub1(body, '<span>Нэвтрэх, Бүртгүүлэх</span>', '<a href="/login">Нэвтрэх</a><a href="/register">Бүртгүүлэх</a>')
 body = sub_opt(body, '<a class="tlink" href="#">Төлбөр</a>', '<a class="tlink" href="#plan">Төлбөр</a>')
-body = sub1(body, '<a class="it" href="#foot"><small>07</small>Тусламж</a>', '<a class="it" href="/help"><small>07</small>Тусламж</a>')
+body = sub1(body, '<a class="it" href="#foot"><small>11</small>Тусламж</a>', '<a class="it" href="/help"><small>11</small>Тусламж</a>')
 if 'href="#enter"' in body:
     raise SystemExit('href="#enter" үлдлээ')
 if re.search(r'href="#"', body):
@@ -181,6 +181,9 @@ dom = sub1(dom, "requestAnimationFrame(()=>requestAnimationFrame(()=>document.bo
            "requestAnimationFrame(()=>requestAnimationFrame(()=>root.classList.add('ready')));\n})();")
 dom = sub1(dom, "document.body.classList.toggle('past',past);", "root.classList.toggle('past',past);")
 dom = sub_opt(dom, "const THEME_EL=document.body,", "const THEME_EL=root,")
+# Таб хуудас: хуудас root-ийн data-page-ээс (HomePage page prop), холбоос нь жинхэнэ зам
+dom = sub1(dom, "const PG_EL=document.body,", "const PG_EL=root,")
+dom = sub1(dom, "const PG_URL=p=>'?page='+p;", "const PG_URL=p=>p==='home'?'/':'/'+p;")
 if 'document.body' in dom:
     raise SystemExit('dom.ts-д document.body үлдлээ (root руу шилжүүл)')
 dom = re.sub(r'(?<![.\w])addEventListener\(', 'on(window,', dom)

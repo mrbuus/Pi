@@ -47,7 +47,10 @@ function showStillTag(root: HTMLElement) {
   if (lab) lab.hidden = true; // огтлолын лаборатори 3D-гүйгээр ажиллахгүй
 }
 
-export default function HomePage() {
+// Таб хуудас (2026-11-21): нэг markup, хуудас бүр өөрийн хэсгүүдээ л харуулна (home.css-ийн data-page дүрэм)
+export type HomeTab = "home" | "amjiltuud" | "bagsh-nar" | "ogtlol";
+
+export default function HomePage({ page = "home" }: { page?: HomeTab }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [stillHost, setStillHost] = useState<HTMLElement | null>(null);
   const [tuitionHost, setTuitionHost] = useState<HTMLElement | null>(null);
@@ -97,7 +100,7 @@ export default function HomePage() {
 
   return (
     <>
-      <div ref={rootRef} className="sie" dangerouslySetInnerHTML={{ __html: MARKUP }} />
+      <div ref={rootRef} className="sie" data-page={page} dangerouslySetInnerHTML={{ __html: MARKUP }} />
       {stillHost && createPortal(<HeroStill />, stillHost)}
       {tuitionHost && createPortal(<HomeTuition />, tuitionHost)}
     </>

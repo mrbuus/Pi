@@ -3,9 +3,9 @@
 // @ts-nocheck
 import katex from 'katex';
 import Lenis from 'lenis';
-import { createIcons, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, MapPin, Menu, Minus, Moon, Phone, Plus, RotateCcw, Scissors, Sun, Users, Wifi, X } from 'lucide';
+import { createIcons, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, MapPin, Menu, Minus, Moon, Phone, Plus, RotateCcw, Scissors, Sun, Trophy, Users, Wifi, X } from 'lucide';
 
-const ICONS = { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, MapPin, Menu, Minus, Moon, Phone, Plus, RotateCcw, Scissors, Sun, Users, Wifi, X };
+const ICONS = { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, MapPin, Menu, Minus, Moon, Phone, Plus, RotateCcw, Scissors, Sun, Trophy, Users, Wifi, X };
 
 export function mountDom(root) {
   let dead = false, rafId = 0;
@@ -17,6 +17,18 @@ const range=(p,a,b)=>clamp((p-a)/(b-a));
 const ease=t=>1-Math.pow(1-t,3), easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
 const tex=(el,s)=>{ if(katex) katex.render(s,el,{throwOnError:false}); else el.textContent=s; };
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Таб хуудас: home | amjiltuud | bagsh-nar | ogtlol. Мокапт ?page=, вэбд зам (/amjiltuud) */
+const PG_EL=root, PG_Q=new URLSearchParams(location.search);
+if(!PG_EL.dataset.page) PG_EL.dataset.page=PG_Q.get('page')||'home';
+const PG=PG_EL.dataset.page;
+const PG_URL=p=>p==='home'?'/':'/'+p;
+const PG_OWN={results:'amjiltuud',wall:'amjiltuud',team:'bagsh-nar',classes:'bagsh-nar',lab:'ogtlol'};
+$$('a[data-pg]').forEach(a=>{ const u=new URL(PG_URL(a.dataset.pg),location.href); if(a.dataset.ch) u.searchParams.set('ch',a.dataset.ch);
+  a.href=u.pathname+u.search; if(a.dataset.pg===PG && !a.classList.contains('tg')){ a.classList.add('on'); a.setAttribute('aria-current','page'); } });
+// #холбоос өөр хуудсанд байгаа хэсгийг тэр хуудас руу (нүүр дээрх #results -> /amjiltuud#results)
+$$('a[href^="#"]').forEach(a=>{ const id=a.getAttribute('href').slice(1); if(!id||id==='top'||id==='foot') return;
+  const own=PG_OWN[id]||'home'; if(own!==PG) a.setAttribute('href',PG_URL(own)+'#'+id); });
 
 const S={hero:0,idea:0,globe:0,club:0,vLab:false,vHero:true,vIdea:false,vGlobe:false,vClub:false,nearGlobe:false,nearClub:false,mx:0,my:0,vel:0,go:null};
 window.S=S;
@@ -169,7 +181,7 @@ function showCh(i,anim){ ch=(i+CH.length)%CH.length; const c=CH[ch];
   const gb=chGuide.children[ch]; if(gb&&chGuide.scrollWidth>chGuide.clientWidth) chGuide.scrollTo({left:gb.offsetLeft-chGuide.clientWidth/2+gb.offsetWidth/2,behavior:'smooth'});
   if(anim){ chStage.classList.add('off'); setTimeout(put,140); } else put();
 }
-showCh(0);
+showCh(PG==='amjiltuud'&&PG_Q.get('ch')?+PG_Q.get('ch'):0);
 $('#chPrev').addEventListener('click',e=>{ e.stopPropagation(); showCh(ch-1,true); });
 $('#tvL').addEventListener('click',()=>showCh(ch-1,true));
 $$('[data-ch]').forEach(a=>a.addEventListener('click',()=>showCh(+a.dataset.ch)));
