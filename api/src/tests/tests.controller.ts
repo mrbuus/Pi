@@ -196,6 +196,22 @@ export class TestsController {
     return this.tests.enterResult(id, dto, req.user.userId, req.user.role);
   }
 
+  // Хоцорч ирсэн хариугаар дахин дүгнэх — Админ / Багш+ (онлайн дүнг засах эрхтэй үүрэг)
+  @Roles(Role.ADMIN, Role.TEACHER_PLUS)
+  @Post(':id/results/:studentId/accept-late')
+  acceptLate(
+    @Param('id') id: string,
+    @Param('studentId') studentId: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.tests.acceptLateAnswers(
+      id,
+      studentId,
+      req.user.userId,
+      req.user.role,
+    );
+  }
+
   @Roles(Role.ADMIN, Role.TEACHER_PLUS, Role.TEACHER)
   @Get(':id/results')
   results(@Param('id') id: string, @Req() req: AuthedRequest) {

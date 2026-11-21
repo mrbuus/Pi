@@ -1,4 +1,5 @@
 import { mainFirst } from '../common/class-track';
+import { releasedTestWhere } from '../tests/result-release';
 import {
   Injectable,
   NotFoundException,
@@ -135,6 +136,8 @@ export class ParentsService {
               take: 8,
             },
             testResults: {
+              // Хаах цаг ирээгүй шалгалтын дүн эцэг эхэд ч харагдахгүй (tests/result-release.ts)
+              where: { test: releasedTestWhere() },
               select: {
                 id: true,
                 totalScore: true,
@@ -320,7 +323,7 @@ export class ParentsService {
         ...paging,
       }),
       this.prisma.testResult.findMany({
-        where: { studentId, createdAt: dates },
+        where: { studentId, createdAt: dates, test: releasedTestWhere() },
         select: {
           id: true,
           testId: true,

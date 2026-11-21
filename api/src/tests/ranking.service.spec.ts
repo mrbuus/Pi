@@ -28,4 +28,21 @@ describe('private exam rankings', () => {
     ).rejects.toThrow('Дууссан');
     expect(prisma.testResult.findMany).not.toHaveBeenCalled();
   });
+  it('нэгдсэн шалгалт: хаах цаг хүртэл байр, оноо задрахгүй', async () => {
+    const prisma = {
+      testResult: {
+        findFirst: jest.fn().mockResolvedValue({
+          totalScore: 5,
+          maxScore: 10,
+          source: 'ONLINE_TEST',
+          test: { id: 't', title: 'A', closesAt: new Date(Date.now() + 60_000) },
+        }),
+        findMany: jest.fn(),
+      },
+    };
+    await expect(
+      new RankingService(prisma as never).ownRanking('test', 'viewer'),
+    ).rejects.toThrow('Хариу хүлээн авлаа');
+    expect(prisma.testResult.findMany).not.toHaveBeenCalled();
+  });
 });

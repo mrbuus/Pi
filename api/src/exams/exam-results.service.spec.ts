@@ -446,3 +446,55 @@ describe('Сурагч/эцэг эхийн маршрутын эрх', () => {
     ).toEqual(roles);
   });
 });
+
+describe('Нэгдсэн шалгалт: хаах цаг хүртэл сурагч, эцэг эхэд дүн задрахгүй (result-release)', () => {
+  function pendingDb() {
+    const db = prismaMock({ type: 'EESH_MOCK' });
+    db.test.findUnique.mockResolvedValue({
+      ...testRow('EESH_MOCK'),
+      closesAt: new Date(Date.now() + 3600_000),
+    });
+    return db;
+  }
+
+  it('my/:testId: оноо, хэсэг, сэдэв, алдсан бодлого, хугацаа — юу ч алга; нээгдэх цагтай', async () => {
+    const res = await new ExamResultsService(pendingDb() as never).myResult(
+      'test-1',
+      'stu',
+      'STUDENT',
+    );
+    expect(res).toEqual(
+      expect.objectContaining({
+        result: null,
+        parts: null,
+        topics: [],
+        wrong: null,
+        itemTimes: [],
+        review: expect.objectContaining({ open: false, level: 'NONE' }),
+      }),
+    );
+    const json = JSON.stringify(res);
+    expect(json).not.toContain('Бодолт');
+    expect((res as { resultsPending?: { message: string } }).resultsPending?.message).toMatch(
+      /^Хариу хүлээн авлаа\. Дүн, бодолт .+ цагт нээгдэнэ$/,
+    );
+  });
+
+  it('эцэг эхийн карт: хаах цаг хүртэл 403 (мессежтэй)', async () => {
+    const db = pendingDb();
+    db.parentLink.findUnique.mockResolvedValue({ verifiedAt: new Date() });
+    await expect(
+      new ExamResultsService(db as never).parentCard('r1', 'parent-1'),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('хаах цаг өнгөрсний дараа хэвийн нээгдэнэ', async () => {
+    const db = prismaMock({ type: 'EESH_MOCK' });
+    db.test.findUnique.mockResolvedValue({
+      ...testRow('EESH_MOCK'),
+      closesAt: new Date(Date.now() - 1000),
+    });
+    const res = await new ExamResultsService(db as never).myResult('test-1', 'stu', 'STUDENT');
+    expect(res.result).toEqual({ totalScore: 2, maxScore: 4, percent: 50 });
+  });
+});

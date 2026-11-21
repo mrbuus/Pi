@@ -47,7 +47,21 @@ import {
 import { SaveSessionDto } from './dto/submit-test.dto';
 import { countIntegrityEvents, countsAsLeave } from './integrity-events';
 import { normalizeLeaveLimit, reachedLeaveLimit } from './leave-limit';
-import { sessionDeadline, startWindowError, windowError } from './exam-window';
+import {
+  rescheduledDeadline,
+  sessionDeadline,
+  startWindowError,
+  windowError,
+} from './exam-window';
+import { resultsPendingOf } from './result-release';
+import {
+  acceptLate,
+  effectiveAnswers,
+  latePending,
+  LateAnswers,
+  mergeLateAnswers,
+  parseLateAnswers,
+} from './late-answers';
 import {
   keepAssignedVariants,
   orderVariants,
@@ -70,6 +84,7 @@ import {
 import { buildExamItems, ExamItem, gradeProblemItems } from './exam-items';
 import {
   manualResultSource,
+  OVERRIDE_ROLES,
   overrideError,
   resultLock,
 } from './result-policy';
@@ -119,6 +134,10 @@ type SessionRow = {
   startedAt: Date;
   deadlineAt: Date | null;
   submittedAt: Date | null;
+  // Зэрэг бичилтийн хамгаалалт (finalize): уншсанаас хойш өөр хүсэлт мөрийг өөрчилсөн эсэх
+  updatedAt?: Date;
+  lateAnswers?: unknown;
+  lateReceivedAt?: Date | null;
 };
 
 type EditableTest = Prisma.TestGetPayload<{
@@ -134,6 +153,26 @@ function asRecord(v: unknown): Record<string, unknown> {
   return v && typeof v === 'object' && !Array.isArray(v)
     ? (v as Record<string, unknown>)
     : {};
+}
+
+/** Багшийн дүнгийн хүснэгтэд: хоцорч ирсэн хариуны товч (байхгүй бол null). */
+function lateView(
+  raw: unknown,
+  receivedAt: Date | null,
+  canAccept: boolean,
+) {
+  const late = parseLateAnswers(raw);
+  if (!late) return null;
+  const pending = latePending(late);
+  if (!pending && !late.accepted) return null;
+  return {
+    pending,
+    differing: pending ? late.differing : 0,
+    receivedAt,
+    acceptedAt: late.accepted?.acceptedAt ?? null,
+    previousScore: late.accepted?.previousScore ?? null,
+    canAccept: canAccept && pending,
+  };
 }
 
 function toGradable(row: TestProblemRow): GradableProblem {
@@ -172,6 +211,16 @@ export class SessionAlreadyFinalizedError extends Error {
     this.name = 'SessionAlreadyFinalizedError';
   }
 }
+
+/** finalize: уншсанаас хойш өөр хүсэлт (autosave) сессийг өөрчилсөн — шинээр уншаад дахин */
+export class SessionChangedError extends Error {
+  constructor() {
+    super('Test session changed concurrently');
+    this.name = 'SessionChangedError';
+  }
+}
+
+const ALREADY_SUBMITTED = 'Та энэ тестийг аль хэдийн өгсөн байна';
 
 @Injectable()
 export class TestsService {
@@ -617,6 +666,19 @@ export class TestsService {
             access: true,
           },
         });
+        // Хаах цаг / хугацаа өөрчлөгдвөл эхэлсэн сесс бүрийн дуусах цаг шинэ дүрмээр (сунгах,
+        // богиносгох хоёуланд), гэхдээ аль хэдийн өнгөрсөн мөч рүү татахгүй. Ижил transaction-д.
+        if (
+          (updated.timeLimitMin ?? null) !== (test.timeLimitMin ?? null) ||
+          (updated.closesAt?.getTime() ?? null) !== (test.closesAt?.getTime() ?? null)
+        ) {
+          await this.rescheduleActiveSessions(
+            tx,
+            testId,
+            updated.timeLimitMin,
+            updated.closesAt,
+          );
+        }
         const committed = await commitRevision(tx, rev, {
           actor: { id: actorId, role: actorRole },
           action: 'UPDATE',
@@ -650,6 +712,31 @@ export class TestsService {
     );
     const result = { ...updated, version, changed, mergedWith };
     return answerWarning ? { ...result, answerWarning } : result;
+  }
+
+  /** IN_PROGRESS сесс бүрийн deadlineAt = max(одоо, min(эхэлсэн + хугацаа, хаах цаг)). */
+  private async rescheduleActiveSessions(
+    tx: Prisma.TransactionClient,
+    testId: string,
+    timeLimitMin: number | null,
+    closesAt: Date | null,
+  ): Promise<number> {
+    const active = await tx.testAttemptSession.findMany({
+      where: { testId, status: AttemptSessionStatus.IN_PROGRESS },
+      select: { id: true, startedAt: true, deadlineAt: true },
+    });
+    const now = new Date();
+    let changed = 0;
+    for (const s of active) {
+      const next = rescheduledDeadline(s.startedAt, timeLimitMin, closesAt, now);
+      if ((next?.getTime() ?? null) === (s.deadlineAt?.getTime() ?? null)) continue;
+      await tx.testAttemptSession.updateMany({
+        where: { id: s.id, status: AttemptSessionStatus.IN_PROGRESS },
+        data: { deadlineAt: next },
+      });
+      changed += 1;
+    }
+    return changed;
   }
 
   // Ангид оноож байгаа (classroomIds ирсэн) тестийг хариуны түлхүүргүй
@@ -896,7 +983,8 @@ export class TestsService {
     }));
     // Ирээдүйд оноосон ШАЛГАЛТ — зөвхөн огноотой «удахгүй» мөр (бодлого,
     // эхлэх товчгүй). DAILY/CUSTOM/THEORY дасгал огт харагдахгүй.
-    if (!scope.classroomIds.length) return this.ownVariantsOnly(listed, userId);
+    if (!scope.classroomIds.length)
+      return this.maskPendingRows(this.ownVariantsOnly(listed, userId));
     const seen = new Set(listed.map((t) => t.id));
     const upcomingTypes = UPCOMING_EXAM_TYPES.filter(
       (t) => includeThousand || t !== TestType.THOUSAND,
@@ -950,7 +1038,23 @@ export class TestsService {
             .map((a) => a.assignedAt)
             .sort((a, b) => a.getTime() - b.getTime())[0] ?? null,
       }));
-    return this.ownVariantsOnly([...listed, ...upcoming], userId);
+    return this.maskPendingRows(
+      this.ownVariantsOnly([...listed, ...upcoming], userId),
+    );
+  }
+
+  /**
+   * Хаах цаг ирээгүй шалгалтын оноог сурагчийн жагсаалтад нууна (result-release.ts).
+   * `sessionStatus` хэвээр («Өгсөн»), `results: []`, нэмэлт `resultsPending`.
+   */
+  private maskPendingRows<
+    T extends { closesAt?: Date | null; results: unknown[] },
+  >(rows: T[]): (T & { resultsPending?: ReturnType<typeof resultsPendingOf> })[] {
+    const now = new Date();
+    return rows.map((row) => {
+      const pending = row.results.length ? resultsPendingOf(row, now) : null;
+      return pending ? { ...row, results: [], resultsPending: pending } : row;
+    });
   }
 
   /** Цаасан горимын A/B бүлэгт зөвхөн сурагчид оноогдсон хувилбар (variant-assign.ts). */
@@ -1073,6 +1177,7 @@ export class TestsService {
         select: { status: true, deadlineAt: true },
       }),
     ]);
+    const pending = result ? resultsPendingOf(test) : null;
 
     return {
       id: test.id,
@@ -1088,8 +1193,10 @@ export class TestsService {
       variantLabel: test.variantLabel,
       problemCount: test.problems.length,
       totalPoints: test.problems.reduce((s, p) => s + p.points, 0),
-      myResult: result,
+      // Хаах цаг ирээгүй бол оноо нуугдана (result-release.ts)
+      myResult: pending ? null : result,
       sessionStatus: session?.status ?? null,
+      ...(pending ? { resultsPending: pending } : {}),
     };
   }
 
@@ -1196,10 +1303,10 @@ export class TestsService {
       if (started.result) {
         return {
           session: { status: AttemptSessionStatus.SUBMITTED },
-          result: {
+          ...this.studentScore(started.test, {
             totalScore: started.result.totalScore,
             maxScore: started.result.maxScore,
-          },
+          }),
         };
       }
     }
@@ -1211,7 +1318,10 @@ export class TestsService {
         where: { testId_studentId: { testId, studentId: userId } },
         select: { totalScore: true, maxScore: true },
       });
-      return { session: { status: session.status }, result };
+      return {
+        session: { status: session.status },
+        ...this.studentScore(test, result),
+      };
     }
 
     // Хугацаа хэтэрсэн бол сүүлийн draft-аар автоматаар дүгнэнэ
@@ -1219,7 +1329,10 @@ export class TestsService {
       const { result } = await this.finalizeExpired(test, session, userId);
       return {
         session: { status: AttemptSessionStatus.SUBMITTED },
-        result: { totalScore: result.totalScore, maxScore: result.maxScore },
+        ...this.studentScore(test, {
+          totalScore: result.totalScore,
+          maxScore: result.maxScore,
+        }),
       };
     }
 
@@ -1251,11 +1364,11 @@ export class TestsService {
     if (!session) throw new NotFoundException('Шалгалт эхлээгүй байна');
 
     if (session.status === AttemptSessionStatus.SUBMITTED) {
-      const result = await this.prisma.testResult.findUnique({
-        where: { testId_studentId: { testId, studentId: userId } },
-        select: { totalScore: true, maxScore: true },
-      });
-      return { status: session.status, result, remainingSec: null };
+      return {
+        status: session.status,
+        ...(await this.storedStudentScore(testId, userId)),
+        remainingSec: null,
+      };
     }
 
     // Хугацаа хэтэрсэн бол эцсийн дүгнэлт хийнэ (өөрөөс үүдэлтэй)
@@ -1264,7 +1377,10 @@ export class TestsService {
       const { result } = await this.finalizeExpired(test, session, userId);
       return {
         status: AttemptSessionStatus.SUBMITTED,
-        result: { totalScore: result.totalScore, maxScore: result.maxScore },
+        ...this.studentScore(test, {
+          totalScore: result.totalScore,
+          maxScore: result.maxScore,
+        }),
         remainingSec: null,
       };
     }
@@ -1320,56 +1436,119 @@ export class TestsService {
     });
   }
 
-  async saveSession(testId: string, userId: string, dto: SaveSessionDto) {
-    const [problemRefs, session] = await Promise.all([
-      this.loadTestProblemIds(testId),
-      this.prisma.testAttemptSession.findUnique({
-        where: { testId_studentId: { testId, studentId: userId } },
-      }) as Promise<SessionRow | null>,
-    ]);
-    if (!session) throw new NotFoundException('Шалгалт эхлээгүй байна');
+  /**
+   * Сессийн мөрийг transaction дотор түгжинэ (`SELECT ... FOR UPDATE`): зэрэг ирсэн autosave,
+   * submit дараалан нэгтгэгдэнэ — leaveCount дутуу тоологдохгүй, нэг хүсэлтийн хариу нөгөөгийнхийг
+   * дарахгүй. Мөр байхгүй бол null.
+   */
+  private async lockSession(
+    tx: Prisma.TransactionClient,
+    testId: string,
+    userId: string,
+  ): Promise<SessionRow | null> {
+    const rows = await tx.$queryRaw<{ id: string }[]>(
+      Prisma.sql`SELECT "id" FROM "TestAttemptSession" WHERE "testId" = ${testId} AND "studentId" = ${userId} FOR UPDATE`,
+    );
+    if (!rows.length) return null;
+    return (await tx.testAttemptSession.findUnique({
+      where: { id: rows[0].id },
+    })) as SessionRow | null;
+  }
 
-    if (session.status === AttemptSessionStatus.SUBMITTED) {
-      const result = await this.prisma.testResult.findUnique({
+  /**
+   * Хаагдсан (эсвэл хугацаа нь дууссан) сессэд ирсэн хариуг дүгнэгдсэн хариунаас ЗӨРҮҮТЭЙ бол
+   * `lateAnswers`-д хадгална — draftAnswers, дүн хөндөгдөхгүй. Түгжсэн transaction дотор.
+   */
+  private async storeLateAnswers(
+    tx: Prisma.TransactionClient,
+    session: SessionRow,
+    problems: Parameters<TestsService['mergeDrafts']>[0],
+    dto: SaveSessionDto,
+  ): Promise<LateAnswers | null> {
+    const prev = parseLateAnswers(session.lateAnswers);
+    if (!dto.answers || !Object.keys(dto.answers).length) return prev;
+    // Баталгаажуулалт autosave-тэй ижил (бодлогын түлхүүр, нүх) — хоосон суурь дээр
+    const incoming = this.mergeDrafts(
+      problems,
+      { ...session, draftAnswers: {} },
+      { answers: dto.answers },
+    ).answers;
+    const { late, changed } = mergeLateAnswers(
+      session.draftAnswers,
+      prev,
+      incoming,
+    );
+    if (!changed || !late) return prev;
+    await tx.testAttemptSession.update({
+      where: { id: session.id },
+      data: {
+        lateAnswers: late as unknown as Prisma.InputJsonValue,
+        lateReceivedAt: new Date(),
+      },
+    });
+    return late;
+  }
+
+  /** Сурагчид очих нийт оноо: хаах цаг ирээгүй бол оноогүй + `resultsPending` (result-release.ts). */
+  private studentScore(
+    test: { closesAt?: Date | null },
+    result: { totalScore: number; maxScore: number } | null,
+  ) {
+    const pending = resultsPendingOf(test);
+    return pending
+      ? { result: null, resultsPending: pending }
+      : { result };
+  }
+
+  private async storedStudentScore(testId: string, userId: string) {
+    const [test, result] = await Promise.all([
+      this.prisma.test.findUnique({
+        where: { id: testId },
+        select: { closesAt: true },
+      }),
+      this.prisma.testResult.findUnique({
         where: { testId_studentId: { testId, studentId: userId } },
         select: { totalScore: true, maxScore: true },
-      });
-      return { status: session.status, result };
-    }
+      }),
+    ]);
+    return this.studentScore(test ?? {}, result);
+  }
 
-    const merged = this.mergeDrafts(problemRefs, session, dto);
+  async saveSession(testId: string, userId: string, dto: SaveSessionDto) {
+    const problemRefs = await this.loadTestProblemIds(testId);
+    const leaves = countsAsLeave(dto.event);
+    const step = await this.prisma.$transaction(async (tx) => {
+      const session = await this.lockSession(tx, testId, userId);
+      if (!session) return { kind: 'MISSING' as const };
 
-    // Сервер талын гаралтын хязгаар: энэ хүсэлтийн гаралтаар leaveCount >= leaveLimit болбол
-    // клиентийн автомат илгээлтийг хүлээхгүй, сесс өөрөө дүгнэгдэнэ (хуучин/засварласан клиент).
-    // Гаралтгүй ердийн autosave-д нэмэлт query хийхгүй (HOT PATH).
-    const leftNow = merged.leaveCount > session.leaveCount;
-    const leaveLimit = leftNow
-      ? (
-          await this.prisma.test.findUnique({
-            where: { id: testId },
-            select: { leaveLimit: true },
-          })
-        )?.leaveLimit
-      : undefined;
-    const reachedLimit =
-      leftNow && reachedLeaveLimit(merged.leaveCount, leaveLimit);
+      if (session.status === AttemptSessionStatus.SUBMITTED) {
+        // Хаагдсаны дараа ирсэн хариу — хоцорсон хариу болж хадгалагдана, дүн хэвээр
+        const late = await this.storeLateAnswers(tx, session, problemRefs, dto);
+        return { kind: 'SUBMITTED' as const, late };
+      }
 
-    if (this.isExpired(session) || reachedLimit) {
-      // Зөвхөн ЭНД бүтэн тест хэрэгтэй — оноо бодоход хариун түлхүүр шаардлагатай.
-      const test = await this.loadTestWithProblems(testId);
-      const { result } = await this.finalizeExpired(test, session, userId, merged);
-      return {
-        status: AttemptSessionStatus.SUBMITTED,
-        result: { totalScore: result.totalScore, maxScore: result.maxScore },
-        ...(reachedLimit ? { leftByLeaves: true } : {}),
-      };
-    }
+      // Сервер талын гаралтын хязгаар: энэ хүсэлтийн гаралтаар leaveCount >= leaveLimit болбол
+      // клиентийн автомат илгээлтийг хүлээхгүй, сесс өөрөө дүгнэгдэнэ (хуучин/засварласан клиент).
+      // Гаралтгүй ердийн autosave-д нэмэлт query хийхгүй (HOT PATH).
+      const leaveLimit = leaves
+        ? (
+            await tx.test.findUnique({
+              where: { id: testId },
+              select: { leaveLimit: true },
+            })
+          )?.leaveLimit
+        : undefined;
 
-    // Зөвхөн IN_PROGRESS үед бичнэ: зэрэг ирсэн submit/cron сессийг хаасны ДАРАА хоцорсон
-    // autosave илгээгдсэн хариуг (дүгнэсэн хариутай зөрүүтэйгээр) дарж бичихгүй.
-    let updated: { leaveCount: number; deadlineAt: Date | null; status: AttemptSessionStatus };
-    try {
-      updated = await this.prisma.testAttemptSession.update({
+      if (this.isExpired(session)) {
+        // deadline + GRACE өнгөрсний дараах шинэ хариу дүгнэлтэд ОРОХГҮЙ — хоцорсон хариу
+        const late = await this.storeLateAnswers(tx, session, problemRefs, dto);
+        return { kind: 'FINALIZE' as const, late, byLeaves: false };
+      }
+
+      const merged = this.mergeDrafts(problemRefs, session, dto, leaveLimit);
+      const reachedLimit = leaves && reachedLeaveLimit(merged.leaveCount, leaveLimit);
+      // Хариуг дүгнэхээс ӨМНӨ хадгална: хязгаарт хүрсэн хүсэлтийн хариу ч дүнд орно
+      const updated = await tx.testAttemptSession.update({
         where: { id: session.id, status: AttemptSessionStatus.IN_PROGRESS },
         data: {
           draftAnswers: merged.answers as Prisma.InputJsonValue,
@@ -1380,19 +1559,43 @@ export class TestsService {
         },
         select: { leaveCount: true, deadlineAt: true, status: true },
       });
-    } catch (error) {
-      if ((error as { code?: unknown } | null)?.code !== 'P2025') throw error;
-      const result = await this.prisma.testResult.findUnique({
-        where: { testId_studentId: { testId, studentId: userId } },
-        select: { totalScore: true, maxScore: true },
-      });
-      return { status: AttemptSessionStatus.SUBMITTED, result };
-    }
+      return reachedLimit
+        ? { kind: 'FINALIZE' as const, late: null, byLeaves: true }
+        : { kind: 'SAVED' as const, updated };
+    });
 
+    if (step.kind === 'MISSING') {
+      throw new NotFoundException('Шалгалт эхлээгүй байна');
+    }
+    if (step.kind === 'SAVED') {
+      return {
+        status: step.updated.status,
+        leaveCount: step.updated.leaveCount,
+        remainingSec: this.remainingSec(step.updated.deadlineAt),
+        // Нэмэлт (2026-11-21): энэ хүсэлтийн хариу серверт бүрэн хадгалагдсан
+        answersReceived: true,
+      };
+    }
+    if (step.kind === 'SUBMITTED') {
+      return {
+        status: AttemptSessionStatus.SUBMITTED,
+        ...(await this.storedStudentScore(testId, userId)),
+        answersReceived: true,
+        ...(latePending(step.late) ? { lateAnswers: true } : {}),
+      };
+    }
+    // Зөвхөн ЭНД бүтэн тест хэрэгтэй — оноо бодоход хариун түлхүүр шаардлагатай.
+    const test = await this.loadTestWithProblems(testId);
+    const { result } = await this.finalizeExpired(test, null, userId);
     return {
-      status: updated.status,
-      leaveCount: updated.leaveCount,
-      remainingSec: this.remainingSec(updated.deadlineAt),
+      status: AttemptSessionStatus.SUBMITTED,
+      ...this.studentScore(test, {
+        totalScore: result.totalScore,
+        maxScore: result.maxScore,
+      }),
+      answersReceived: true,
+      ...(step.byLeaves ? { leftByLeaves: true } : {}),
+      ...(latePending(step.late) ? { lateAnswers: true } : {}),
     };
   }
 
@@ -1405,32 +1608,86 @@ export class TestsService {
       );
     }
     await this.assertStudentAccess(test, userId);
-    const session = (await this.prisma.testAttemptSession.findUnique({
-      where: { testId_studentId: { testId, studentId: userId } },
-    })) as SessionRow | null;
-    if (!session) throw new NotFoundException('Шалгалт эхлээгүй байна');
-
-    if (session.status === AttemptSessionStatus.SUBMITTED) {
-      throw new ConflictException('Та энэ тестийг аль хэдийн өгсөн байна');
+    const leaves = countsAsLeave(dto.event);
+    const step = await this.prisma.$transaction(async (tx) => {
+      const session = await this.lockSession(tx, testId, userId);
+      if (!session) return { kind: 'MISSING' as const };
+      if (session.status === AttemptSessionStatus.SUBMITTED) {
+        const late = await this.storeLateAnswers(tx, session, test.problems, dto);
+        return { kind: 'SUBMITTED' as const, late };
+      }
+      if (this.isExpired(session)) {
+        // Хугацаа (deadline + GRACE) дууссаны дараах хариу дүгнэлтэд орохгүй — хоцорсон хариу
+        const late = await this.storeLateAnswers(tx, session, test.problems, dto);
+        return { kind: 'FINALIZE' as const, late };
+      }
+      const merged = this.mergeDrafts(
+        test.problems,
+        session,
+        dto,
+        leaves ? test.leaveLimit : undefined,
+      );
+      await tx.testAttemptSession.update({
+        where: { id: session.id, status: AttemptSessionStatus.IN_PROGRESS },
+        data: {
+          draftAnswers: merged.answers as Prisma.InputJsonValue,
+          draftStates: merged.states as Prisma.InputJsonValue,
+          problemTimes: merged.times as Prisma.InputJsonValue,
+          leaveCount: merged.leaveCount,
+          events: merged.events as Prisma.InputJsonValue,
+        },
+        select: { id: true },
+      });
+      return { kind: 'FINALIZE' as const, late: null };
+    });
+    if (step.kind === 'MISSING') {
+      throw new NotFoundException('Шалгалт эхлээгүй байна');
+    }
+    if (step.kind === 'SUBMITTED') {
+      // Хуучин клиент: мессеж хэвээр. Шинэ апп: хариу хүлээн авагдсан тул локал хуулбарыг устгана.
+      throw new ConflictException({
+        statusCode: 409,
+        error: 'Conflict',
+        message: ALREADY_SUBMITTED,
+        answersReceived: true,
+        lateAnswers: latePending(step.late),
+      });
     }
 
-    const merged = this.mergeDrafts(test.problems, session, dto);
-    let finalized: Awaited<ReturnType<TestsService['finalize']>>;
+    let finalized: Awaited<ReturnType<TestsService['finalizeLatest']>>;
     try {
-      finalized = await this.finalize(test, session, userId, merged);
+      finalized = await this.finalizeLatest(test, userId);
     } catch (error) {
       // Давхар товшилт / апп дахин илгээсэн — нөгөө хүсэлт түрүүлж дүгнэсэн.
       // Дараалсан давталттай ИЖИЛ хариу (409), Attempt давхардахгүй.
       if (error instanceof SessionAlreadyFinalizedError) {
-        throw new ConflictException('Та энэ тестийг аль хэдийн өгсөн байна');
+        throw new ConflictException({
+          statusCode: 409,
+          error: 'Conflict',
+          message: ALREADY_SUBMITTED,
+          answersReceived: true,
+        });
       }
       throw error;
     }
+    const late = latePending(step.late) ? { lateAnswers: true } : {};
     // 1000 бодлого: бодлого бүрийн зөв/буруу ч багшийн нээсэн түвшнээр л
     // харагдана — илгээлтийн хариунд задлахгүй.
-    return test.type === TestType.THOUSAND
-      ? { result: finalized.result }
-      : finalized;
+    if (test.type === TestType.THOUSAND) {
+      return { result: finalized.result, answersReceived: true, ...late };
+    }
+    // Хаах цаг ирээгүй: бодлого тус бүрийн зөв/буруу, оноо ХААШАА Ч очихгүй
+    const pending = resultsPendingOf(test);
+    if (pending) {
+      return {
+        result: null,
+        graded: [],
+        resultsPending: pending,
+        answersReceived: true,
+        ...late,
+      };
+    }
+    return { ...finalized, answersReceived: true, ...late };
   }
 
   // Дууссан шалгалтын эргэн харах дэлгэц: бодлого бүрийн зөв/буруу төлөв + өөрийн хариулт.
@@ -1447,6 +1704,20 @@ export class TestsService {
       where: { testId_studentId: { testId, studentId: userId } },
       select: { totalScore: true, maxScore: true, createdAt: true },
     });
+    const late = parseLateAnswers(session.lateAnswers);
+    // Нэмэлт (2026-11-21): хүлээгдэж буй хоцорсон хариу — «Хариу хоцорч ирсэн тул багш шийднэ»
+    const lateFlag = latePending(late) ? { lateAnswers: true } : {};
+    // Хаах цаг ирээгүй: оноо, зөв/буруу, бодолт, «Түгээмэл алдаа» — юу ч задрахгүй
+    const pending = resultsPendingOf(test);
+    if (pending) {
+      return {
+        result: null,
+        items: [],
+        leaveCount: session.leaveCount,
+        resultsPending: pending,
+        ...lateFlag,
+      };
+    }
     // 1000 бодлогын шалгалт: бодлого бүрийн зөв/буруу ч гэсэн багшийн нээсэн
     // түвшнээр л харагдана — /thousand/tests/:id/review (сервер талын хаалт).
     if (test.type === TestType.THOUSAND) {
@@ -1455,6 +1726,7 @@ export class TestsService {
         items: [],
         leaveCount: session.leaveCount,
         gatedReview: true,
+        ...lateFlag,
       };
     }
 
@@ -1462,7 +1734,8 @@ export class TestsService {
     const orderIds = (session.problemOrder as string[]).filter((id) =>
       byId.has(id),
     );
-    const answers = asRecord(session.draftAnswers);
+    // Хүлээн авсан хоцорсон хариу дүнтэй таарна (хүлээгдэж буй нь орохгүй)
+    const answers = effectiveAnswers(session.draftAnswers, late);
     const choiceOrder = asRecord(session.choiceOrder) as Record<
       string,
       number[]
@@ -1547,7 +1820,7 @@ export class TestsService {
       };
     });
 
-    return { result, items, leaveCount: session.leaveCount };
+    return { result, items, leaveCount: session.leaveCount, ...lateFlag };
   }
 
   // ============ Хугацаа дууссан сессийг хаах (session-sweep.cron.ts) ============
@@ -1601,7 +1874,11 @@ export class TestsService {
           await this.finalize(test, session, session.studentId);
           out.closed += 1;
         } catch (error) {
-          if (error instanceof SessionAlreadyFinalizedError) {
+          if (
+            error instanceof SessionAlreadyFinalizedError ||
+            // Яг тэр мөчид autosave ирсэн — дараагийн минутад шинэ хариугаар хаана
+            error instanceof SessionChangedError
+          ) {
             out.skipped += 1;
             continue;
           }
@@ -1764,9 +2041,16 @@ export class TestsService {
     // Анти-чит: шалгалтын горимоос гарсан тоог багшид харуулна (Шийдвэр 3)
     const sessions = await this.prisma.testAttemptSession.findMany({
       where: { testId, studentId: { in: rows.map((r) => r.studentId) } },
-      select: { studentId: true, leaveCount: true, events: true },
+      select: {
+        studentId: true,
+        leaveCount: true,
+        events: true,
+        lateAnswers: true,
+        lateReceivedAt: true,
+      },
     });
     const sessionBy = new Map(sessions.map((s) => [s.studentId, s]));
+    const canAcceptLate = OVERRIDE_ROLES.includes(role);
     return rows.map((r) => {
       const s = sessionBy.get(r.studentId);
       // Гар утасны апп: дэлгэцийн зураг / бичлэгийн тоо (leaveCount-д ордоггүй)
@@ -1779,19 +2063,133 @@ export class TestsService {
         // Шалгалтын дүрэм + гаралтаар автоматаар илгээгдсэн эсэх (багшид шошго)
         leaveLimit: normalizeLeaveLimit(test.leaveLimit),
         leftByLeaves: reachedLeaveLimit(s?.leaveCount, test.leaveLimit),
+        // Нэмэлт (2026-11-21): «Хоцорч ирсэн хариу» — null = байхгүй
+        lateAnswers: lateView(s?.lateAnswers, s?.lateReceivedAt ?? null, canAcceptLate),
+      };
+    });
+  }
+
+  /**
+   * Админ / Багш+: хоцорч ирсэн хариугаар ДАХИН дүгнэнэ (finalize-тай ижил scoreAnswers).
+   * Дүгнэгдсэн хариу (draftAnswers) хөндөгдөхгүй; өмнөх оноо lateAnswers.accepted.previousScore
+   * ба AuditLog-д (before/after) үлдэнэ. TestResult.version +1, regradeNote.
+   */
+  async acceptLateAnswers(
+    testId: string,
+    studentId: string,
+    actorId: string,
+    actorRole: Role,
+  ) {
+    actorRole = await assertInternalTeachingStaff(this.prisma, actorId);
+    if (!OVERRIDE_ROLES.includes(actorRole)) {
+      throw new ForbiddenException(
+        'Хоцорч ирсэн хариуг зөвхөн Багш+ эсвэл админ хүлээн авна',
+      );
+    }
+    const test = await this.loadTestWithProblems(testId);
+    return this.prisma.$transaction(async (tx) => {
+      const session = await this.lockSession(tx, testId, studentId);
+      if (!session || session.status !== AttemptSessionStatus.SUBMITTED) {
+        throw new NotFoundException('Дууссан шалгалт олдсонгүй');
+      }
+      const late = parseLateAnswers(session.lateAnswers);
+      if (!late || !latePending(late)) {
+        throw new ConflictException('Хүлээн авах хоцорсон хариу алга');
+      }
+      const where = { testId_studentId: { testId, studentId } };
+      const existing = await tx.testResult.findUnique({ where });
+      if (!existing) throw new NotFoundException('Шалгалтын дүн олдсонгүй');
+      if (
+        existing.source !== AttemptSource.ONLINE_TEST ||
+        existing.enteredById
+      ) {
+        throw new ConflictException(
+          'Энэ сурагчийн дүнг гараар оруулсан тул хоцорсон хариугаар дахин дүгнэхгүй',
+        );
+      }
+      const answers = {
+        ...effectiveAnswers(session.draftAnswers, late),
+        ...late.answers,
+      };
+      const choiceOrder = asRecord(session.choiceOrder) as Record<
+        string,
+        number[]
+      >;
+      const { totalScore, maxScore, marks } = this.scoreAnswers(
+        test,
+        answers,
+        choiceOrder,
+        studentId,
+      );
+      const saved = await tx.testResult.update({
+        where,
+        data: {
+          totalScore,
+          maxScore,
+          version: { increment: 1 },
+          regradeNote: 'Хоцорч ирсэн хариугаар дахин дүгнэсэн',
+        },
+      });
+      // Зүйл бүрийн тэмдэглэгээ шинэ дүнтэй таарна (мөр устгахгүй, төлөвийг шинэчилнэ)
+      for (const mark of marks) {
+        await tx.testItemMark.upsert({
+          where: {
+            testId_studentId_itemKey: {
+              testId,
+              studentId,
+              itemKey: mark.itemKey,
+            },
+          },
+          create: mark,
+          update: { status: mark.status, source: mark.source },
+        });
+      }
+      const next = acceptLate(late, {
+        acceptedAt: new Date().toISOString(),
+        acceptedById: actorId,
+        previousScore: {
+          totalScore: existing.totalScore,
+          maxScore: existing.maxScore,
+        },
+        acceptedScore: { totalScore, maxScore },
+      });
+      await tx.testAttemptSession.update({
+        where: { id: session.id },
+        data: { lateAnswers: next as unknown as Prisma.InputJsonValue },
+      });
+      await this.recordAudit(
+        actorId,
+        actorRole,
+        'ACCEPT_LATE_ANSWERS',
+        'TestResult',
+        saved.id,
+        existing,
+        saved,
+        tx,
+        'Хоцорч ирсэн хариуг хүлээн авсан',
+      );
+      return {
+        result: { totalScore: saved.totalScore, maxScore: saved.maxScore },
+        previous: { totalScore: existing.totalScore, maxScore: existing.maxScore },
+        lateAnswers: lateView(next, session.lateReceivedAt ?? null, true),
       };
     });
   }
 
   // Сурагчийн өөрийн дүнгүүд — эцэг эхэд мөн энэ өгөгдөл харагдана
-  myResults(studentId: string) {
-    return this.prisma.testResult.findMany({
+  async myResults(studentId: string) {
+    const rows = await this.prisma.testResult.findMany({
       where: { studentId },
       include: {
-        test: { select: { id: true, title: true, type: true } },
+        test: { select: { id: true, title: true, type: true, closesAt: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
+    // Хаах цаг ирээгүй шалгалтын дүн жагсаалтад ороогүй (оноо, эрэмбээр дамжуулахаас сэргийлнэ)
+    const now = new Date();
+    return rows
+      .filter((r) => !resultsPendingOf(r.test, now))
+      .map(({ test: { closesAt: _closesAt, ...test }, ...r }) => ({ ...r, test }));
   }
 
   // TEACHER зөвхөн өөрийн ангийн сурагчийг харна; TEACHER_PLUS/ADMIN бүх
@@ -2164,6 +2562,8 @@ export class TestsService {
     }[],
     session: SessionRow,
     dto: SaveSessionDto,
+    // Гаралтын хязгаар (LEAVE үед л уншина): leaveCount үүнээс хэтрэхгүй
+    leaveLimit?: unknown,
   ) {
     const validIds = new Set(problems.map((tp) => tp.problemId));
     const definitions = new Map(
@@ -2219,7 +2619,15 @@ export class TestsService {
       ? [...(session.events as unknown[])]
       : [];
     if (dto.event) {
-      if (countsAsLeave(dto.event)) leaveCount += 1;
+      if (countsAsLeave(dto.event)) {
+        leaveCount += 1;
+        if (leaveLimit !== undefined) {
+          leaveCount = Math.min(
+            leaveCount,
+            Math.max(session.leaveCount, normalizeLeaveLimit(leaveLimit)),
+          );
+        }
+      }
       events.push({ t: new Date().toISOString(), type: dto.event });
       if (events.length > MAX_EVENTS)
         events.splice(0, events.length - MAX_EVENTS);
@@ -2240,18 +2648,73 @@ export class TestsService {
   //      Статистик хоцорсон ч сурагчийн ДҮН зөв байх нь чухал тул алдааг зөвхөн
   //      log-д бичээд илгээлтийг унагаахгүй.
   /**
+   * Оноо + дүнгийн хүснэгтийн тэмдэглэгээ (TestItemMark) — finalize болон хоцорсон хариуг
+   * хүлээн авах (acceptLateAnswers) ИЖИЛ дүрмээр. Хариу тодорхойгүй бодлого maxScore-д орохгүй.
+   */
+  private scoreAnswers(
+    test: Awaited<ReturnType<TestsService['loadTestWithProblems']>>,
+    answers: Record<string, unknown>,
+    choiceOrder: Record<string, number[]>,
+    studentId: string,
+  ) {
+    let totalScore = 0;
+    // Хариу тодорхойгүй (импортын явцад ANSWER_KEY_MISSING) бодлогыг дүнгийн
+    // хуваарьт оруулахгүй — эс тэгвээс сурагч зөв бичсэн ч "буруу" гэж
+    // тооцогдож, дүнгийн хувь шударга бус болно.
+    let maxScore = 0;
+    // Дүнгийн хүснэгтийн зүйлс (сонгох бодлого / 2-р хэсгийн алхмын багц) —
+    // гар шивэлт, Excel-тэй ИЖИЛ түлхүүрээр TestItemMark бичнэ.
+    const itemsByProblem = new Map<string, ExamItem[]>();
+    for (const item of buildExamItems(test.problems)) {
+      const list = itemsByProblem.get(item.problemId) ?? [];
+      list.push(item);
+      itemsByProblem.set(item.problemId, list);
+    }
+    const marks: Prisma.TestItemMarkCreateManyInput[] = [];
+    const scoredBy = new Map<string, ReturnType<typeof gradeProblemItems>>();
+    for (const tp of test.problems) {
+      const pid = tp.problemId;
+      // canonicalAnswer — сурагчийн сонгосон ЖИНХЭНЭ утга (сонголтын текст
+      // эсвэл тоон хариу). Холилтын дараалалаас ҮЛ ХАМААРНА тул дараа нь
+      // сессийн choiceOrder байхгүй ч тайлагдана.
+      // 2-р хэсэгт алхмын багц бүр тусдаа: багцын бүх нүд зөв → багцын оноо.
+      const problemItems = itemsByProblem.get(pid) ?? [];
+      const scored = gradeProblemItems(
+        { ...toGradable(tp), statementText: tp.problem.statementText },
+        problemItems,
+        answers[pid],
+        choiceOrder[pid],
+      );
+      scoredBy.set(pid, scored);
+      if (!scored.known) continue;
+      for (const item of problemItems) {
+        const status = scored.statuses.get(item.key) ?? 'BLANK';
+        maxScore += item.points;
+        if (status === 'CORRECT') totalScore += item.points;
+        marks.push({
+          testId: test.id,
+          studentId,
+          itemKey: item.key,
+          status,
+          source: ItemMarkSource.ONLINE,
+        });
+      }
+    }
+    return { totalScore, maxScore, marks, scoredBy };
+  }
+
+  /**
    * Хугацаа дууссан сессийг дүгнэнэ. Зэрэг ирсэн өөр хүсэлт түрүүлж дүгнэсэн
    * бол (SessionAlreadyFinalizedError) хадгалагдсан дүнг буцаана — клиент
    * SUBMITTED төлөв хүлээж авна, 500/409 гоожихгүй.
    */
   private async finalizeExpired(
     test: Awaited<ReturnType<TestsService['loadTestWithProblems']>>,
-    session: SessionRow,
+    session: SessionRow | null,
     studentId: string,
-    merged?: ReturnType<TestsService['mergeDrafts']>,
   ): Promise<{ result: { totalScore: number; maxScore: number } }> {
     try {
-      return await this.finalize(test, session, studentId, merged);
+      return await this.finalizeLatest(test, studentId, session);
     } catch (error) {
       if (!(error instanceof SessionAlreadyFinalizedError)) throw error;
       const result = await this.prisma.testResult.findUnique({
@@ -2260,6 +2723,42 @@ export class TestsService {
       });
       if (!result) throw error;
       return { result };
+    }
+  }
+
+  private readSession(testId: string, studentId: string) {
+    return this.prisma.testAttemptSession.findUnique({
+      where: { testId_studentId: { testId, studentId } },
+    }) as Promise<SessionRow | null>;
+  }
+
+  /**
+   * Сессийн ХАМГИЙН СҮҮЛИЙН хадгалсан хариугаар дүгнэнэ. Уншсанаас хойш зэрэг autosave мөрийг
+   * өөрчилсөн бол (SessionChangedError) дахин уншаад давтана — тэр хүсэлтийн хариу алдагдахгүй.
+   * Өөр хүсэлт түрүүлж дүгнэсэн бол SessionAlreadyFinalizedError (давхар дүн үүсэхгүй).
+   */
+  private async finalizeLatest(
+    test: Awaited<ReturnType<TestsService['loadTestWithProblems']>>,
+    studentId: string,
+    known: SessionRow | null = null,
+  ) {
+    let session = known ?? (await this.readSession(test.id, studentId));
+    for (let attempt = 0; ; attempt += 1) {
+      if (!session) throw new NotFoundException('Шалгалт эхлээгүй байна');
+      if (session.status === AttemptSessionStatus.SUBMITTED) {
+        throw new SessionAlreadyFinalizedError();
+      }
+      try {
+        // 3 дахь давталтын дараа хамгаалалтгүй (хэт ачаалалтай үед ч дүн гарна)
+        return await this.finalize(
+          test,
+          attempt < 3 ? session : { ...session, updatedAt: undefined },
+          studentId,
+        );
+      } catch (error) {
+        if (!(error instanceof SessionChangedError)) throw error;
+        session = await this.readSession(test.id, studentId);
+      }
     }
   }
 
@@ -2285,20 +2784,12 @@ export class TestsService {
       number[]
     >;
 
-    let totalScore = 0;
-    // Хариу тодорхойгүй (импортын явцад ANSWER_KEY_MISSING) бодлогыг дүнгийн
-    // хуваарьт оруулахгүй — эс тэгвээс сурагч зөв бичсэн ч "буруу" гэж
-    // тооцогдож, дүнгийн хувь шударга бус болно.
-    let maxScore = 0;
-    // Дүнгийн хүснэгтийн зүйлс (сонгох бодлого / 2-р хэсгийн алхмын багц) —
-    // гар шивэлт, Excel-тэй ИЖИЛ түлхүүрээр TestItemMark бичнэ.
-    const itemsByProblem = new Map<string, ExamItem[]>();
-    for (const item of buildExamItems(test.problems)) {
-      const list = itemsByProblem.get(item.problemId) ?? [];
-      list.push(item);
-      itemsByProblem.set(item.problemId, list);
-    }
-    const marks: Prisma.TestItemMarkCreateManyInput[] = [];
+    const { totalScore, maxScore, marks, scoredBy } = this.scoreAnswers(
+      test,
+      m.answers,
+      choiceOrder,
+      studentId,
+    );
     const graded: { problemId: string; correct: boolean; points: number }[] =
       [];
     const attempts: Prisma.AttemptCreateManyInput[] = [];
@@ -2307,35 +2798,9 @@ export class TestsService {
 
     for (const tp of test.problems) {
       const pid = tp.problemId;
-      const raw = m.answers[pid];
       const selfState = m.states[pid] as SelfState | undefined;
-
-      // canonicalAnswer — сурагчийн сонгосон ЖИНХЭНЭ утга (сонголтын текст
-      // эсвэл тоон хариу). Холилтын дараалалаас ҮЛ ХАМААРНА тул дараа нь
-      // сессийн choiceOrder байхгүй ч тайлагдана.
-      // 2-р хэсэгт алхмын багц бүр тусдаа: багцын бүх нүд зөв → багцын оноо.
-      const problemItems = itemsByProblem.get(pid) ?? [];
-      const scored = gradeProblemItems(
-        { ...toGradable(tp), statementText: tp.problem.statementText },
-        problemItems,
-        raw,
-        choiceOrder[pid],
-      );
+      const scored = scoredBy.get(pid)!;
       const { known, answered, correct, canonicalAnswer } = scored;
-      if (known) {
-        for (const item of problemItems) {
-          const status = scored.statuses.get(item.key) ?? 'BLANK';
-          maxScore += item.points;
-          if (status === 'CORRECT') totalScore += item.points;
-          marks.push({
-            testId: test.id,
-            studentId,
-            itemKey: item.key,
-            status,
-            source: ItemMarkSource.ONLINE,
-          });
-        }
-      }
       graded.push({
         problemId: pid,
         correct: answered && correct && known,
@@ -2389,7 +2854,12 @@ export class TestsService {
     try {
       txResult = await this.prisma.$transaction([
       this.prisma.testAttemptSession.update({
-        where: { id: session.id, status: AttemptSessionStatus.IN_PROGRESS },
+        // updatedAt: уншсанаас хойш зэрэг autosave бичсэн бол 0 мөр → дахин уншина (хариу алдахгүй)
+        where: {
+          id: session.id,
+          status: AttemptSessionStatus.IN_PROGRESS,
+          ...(session.updatedAt ? { updatedAt: session.updatedAt } : {}),
+        },
         data: {
           status: AttemptSessionStatus.SUBMITTED,
           submittedAt: now,
@@ -2430,6 +2900,15 @@ export class TestsService {
       ]) as typeof txResult;
     } catch (error) {
       if ((error as { code?: unknown } | null)?.code === 'P2025') {
+        if (session.updatedAt) {
+          const now = await this.prisma.testAttemptSession.findUnique({
+            where: { id: session.id },
+            select: { status: true },
+          });
+          if (now?.status === AttemptSessionStatus.IN_PROGRESS) {
+            throw new SessionChangedError();
+          }
+        }
         throw new SessionAlreadyFinalizedError();
       }
       throw error;

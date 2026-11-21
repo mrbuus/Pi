@@ -43,6 +43,7 @@ import {
 } from './exam-data';
 import { EXAM_TYPES } from './exams.service';
 import { keepAssignedVariants } from '../tests/variant-assign';
+import { resultsPendingOf } from '../tests/result-release';
 
 /** Бодлого бүрийн дугаар ба зарцуулсан секунд (онлайн сесстэй үед л). */
 export function itemTimesOf(
@@ -173,7 +174,9 @@ export class ExamResultsService {
 
     return {
       exams: visible.map((t) => {
-        const result = t.results[0] ?? null;
+        // Хаах цаг ирээгүй: оноо нуугдана, «Өгсөн» төлөв хэвээр (result-release.ts)
+        const pending = t.results[0] ? resultsPendingOf(t, now) : null;
+        const result = pending ? null : (t.results[0] ?? null);
         const session = t.attemptSessions[0] ?? null;
         const assigned = t.access
           .map((a) => a.assignedAt.getTime())
@@ -202,18 +205,19 @@ export class ExamResultsService {
             assigned.length > 0 &&
             assigned[0] > now.getTime() &&
             !session &&
-            !result &&
+            !t.results[0] &&
             !scopeGrantsTest(scope, {
               id: t.id,
               chapterId: t.chapterId,
               bookId: t.chapter?.bookId ?? null,
             }),
           takenAt:
-            result?.createdAt ??
+            t.results[0]?.createdAt ??
             (session?.status === AttemptSessionStatus.SUBMITTED
               ? session.submittedAt
               : null),
-          absent: t.absences.length > 0 && !result,
+          absent: t.absences.length > 0 && !t.results[0],
+          ...(pending ? { resultsPending: pending } : {}),
         };
       }),
     };
@@ -288,6 +292,31 @@ export class ExamResultsService {
       userId,
     )!;
     const head = { id: test.id, title: test.title, type: test.type };
+    // Хаах цаг ирээгүй: оноо, сэдэв, алдсан бодлого, бодолт — юу ч задрахгүй. Хуучин апп
+    // «review.opensAt»-аар «...-нд автоматаар нээгдэнэ» гэж харуулна.
+    const pending =
+      data.result || data.session ? resultsPendingOf(test) : null;
+    const lateFlag = data.session?.latePending ? { lateAnswers: true } : {};
+    if (pending) {
+      return {
+        test: head,
+        absent: false,
+        result: null,
+        parts: null,
+        review: {
+          level: 'NONE',
+          opensAt: pending.releaseAt,
+          open: false,
+          fullReview: false,
+        },
+        topics: [],
+        wrong: null,
+        practice: null,
+        itemTimes: [],
+        resultsPending: pending,
+        ...lateFlag,
+      };
+    }
     if (!data.result) {
       if (data.absent) {
         return {
@@ -356,6 +385,7 @@ export class ExamResultsService {
       // Нэмэлт (2026-11-04): онлайнаар өгсөн бол бодлого бүрт зарцуулсан секунд («Удаан бодсон»).
       // Зөвхөн дугаар ба хугацаа — зөв/буруу, хариу задрахгүй.
       itemTimes: itemTimesOf(exam, data),
+      ...lateFlag,
     };
   }
 
@@ -391,6 +421,9 @@ export class ExamResultsService {
       await loadStudentData(this.prisma, exam, [result.studentId])
     ).get(result.studentId)!;
     if (!data.result) throw new NotFoundException('Шалгалтын дүн олдсонгүй');
+    // Хаах цаг ирээгүй — эцэг эхээр дамжин задрахгүй (хуучин апп мессежийг харуулна)
+    const pending = resultsPendingOf(test);
+    if (pending) throw new ForbiddenException(pending.message);
     const gate = await studentReviewLevel(
       this.prisma,
       test,

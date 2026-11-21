@@ -1,3 +1,8 @@
+import {
+  effectiveAnswers,
+  latePending,
+  parseLateAnswers,
+} from '../tests/late-answers';
 // «Шалгалт» хэсгийн анализ, сурагч/эцэг эхийн дүнгийн НЭГ ачаалагч: тест
 // (бодлого, сэдэв, сонголт) нэг query, сурагчдын дүн/ирээгүй/тэмдэглэгээ/онлайн
 // сесс тус бүр нэг query (N+1 байхгүй). Бодолт нь exam-analytics.ts-д (цэвэр).
@@ -46,6 +51,8 @@ export const EXAM_TEST_SELECT = {
   title: true,
   type: true,
   gradingMode: true,
+  // Хаах цаг ирээгүй бол сурагч, эцэг эхэд дүн нуугдана (tests/result-release.ts)
+  closesAt: true,
   chapterId: true,
   chapter: { select: { bookId: true } },
   problems: {
@@ -239,6 +246,8 @@ export interface StudentExamData {
     choiceOrder: Record<string, number[]>;
     /** Бодлого бүрт зарцуулсан секунд (сессийн problemTimes) */
     times?: Record<string, unknown>;
+    /** Хүлээгдэж буй хоцорсон хариутай (tests/late-answers.ts) */
+    latePending?: boolean;
   } | null;
   /** Онлайн дүнтэй бол сонгох бодлого бүрийн үсэг ('' = хоосон) */
   choices: Map<string, string> | null;
@@ -284,6 +293,7 @@ export async function loadStudentData(
         draftAnswers: true,
         choiceOrder: true,
         problemTimes: true,
+        lateAnswers: true,
       },
     }),
   ]);
@@ -307,7 +317,12 @@ export async function loadStudentData(
     const session = raw
       ? {
           submittedAt: raw.submittedAt,
-          answers: asRecord(raw.draftAnswers),
+          // Хүлээн авсан хоцорсон хариу дүнтэй таарна (хүлээгдэж буй нь орохгүй)
+          answers: effectiveAnswers(
+            raw.draftAnswers,
+            parseLateAnswers(raw.lateAnswers),
+          ),
+          latePending: latePending(parseLateAnswers(raw.lateAnswers)),
           choiceOrder: asRecord(raw.choiceOrder) as Record<string, number[]>,
           times: asRecord(raw.problemTimes),
         }

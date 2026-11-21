@@ -281,7 +281,7 @@ describe('saveSession — уралдаан ба серверийн гаралт�
   });
 
   function saveSetup(s: ReturnType<typeof session>, leaveLimit = 3) {
-    const prisma = {
+    const prisma: Record<string, unknown> = {
       testProblem: {
         findMany: jest.fn().mockResolvedValue([
           { problemId: 'p1', problem: { format: 'CHOICE', correctAnswer: null } },
@@ -295,34 +295,42 @@ describe('saveSession — уралдаан ба серверийн гаралт�
           status: AttemptSessionStatus.IN_PROGRESS,
         }),
       },
-      test: { findUnique: jest.fn().mockResolvedValue({ leaveLimit }) },
+      test: { findUnique: jest.fn().mockResolvedValue({ leaveLimit, closesAt: null }) },
       testResult: {
         findUnique: jest.fn().mockResolvedValue({ totalScore: 7, maxScore: 100 }),
       },
+      // Сессийн мөрийг түгжинэ (SELECT ... FOR UPDATE)
+      $queryRaw: jest.fn().mockResolvedValue([{ id: 's1' }]),
     };
+    prisma.$transaction = jest.fn((fn: (tx: unknown) => unknown) => fn(prisma));
     const service = new TestsService(prisma as never, {} as never);
     const internals = service as unknown as Internals;
     internals.loadTestWithProblems = jest.fn().mockResolvedValue(lockedTest());
     internals.finalize = jest
       .fn()
       .mockResolvedValue({ result: { totalScore: 3, maxScore: 100 }, graded: [] });
-    return { service, prisma, internals };
+    return {
+      service,
+      prisma: prisma as {
+        testAttemptSession: { update: jest.Mock; findUnique: jest.Mock };
+        test: { findUnique: jest.Mock };
+        $queryRaw: jest.Mock;
+      },
+      internals,
+    };
   }
 
-  it('зөвхөн IN_PROGRESS мөрийг бичнэ; илгээгдсэн бол хариуг дарж бичихгүй', async () => {
-    const { service, prisma } = saveSetup(session());
-    prisma.testAttemptSession.update.mockRejectedValueOnce(
-      Object.assign(new Error('not found'), { code: 'P2025' }),
+  it('илгээгдсэн сессийн хариуг дарж бичихгүй (зөрүүтэй бол хоцорсон хариу болно)', async () => {
+    const { service, prisma } = saveSetup(
+      session({ status: AttemptSessionStatus.SUBMITTED, draftAnswers: { p1: 2 } }),
     );
     await expect(service.saveSession('t1', 'stu', { answers: { p1: 2 } })).resolves.toEqual({
       status: AttemptSessionStatus.SUBMITTED,
       result: { totalScore: 7, maxScore: 100 },
+      answersReceived: true,
     });
-    expect(prisma.testAttemptSession.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: 's1', status: AttemptSessionStatus.IN_PROGRESS },
-      }),
-    );
+    expect(prisma.testAttemptSession.update).not.toHaveBeenCalled();
+    expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
   });
 
   it('гаралтгүй ердийн autosave тестийн мөр уншихгүй (HOT PATH)', async () => {
@@ -332,17 +340,19 @@ describe('saveSession — уралдаан ба серверийн гаралт�
     expect(internals.finalize).not.toHaveBeenCalled();
   });
 
-  it('Хатуу (2): 2 дахь гаралт autosave-ээр ирвэл сервер өөрөө дүгнэнэ', async () => {
-    const { service, internals } = saveSetup(session({ leaveCount: 1 }), 2);
+  it('Хатуу (2): 2 дахь гаралт autosave-ээр ирвэл хариуг хадгалаад сервер өөрөө дүгнэнэ', async () => {
+    const { service, prisma, internals } = saveSetup(session({ leaveCount: 1 }), 2);
     const out = await service.saveSession('t1', 'stu', { event: 'LEAVE', answers: { p1: 3 } });
     expect(out).toEqual({
       status: AttemptSessionStatus.SUBMITTED,
       result: { totalScore: 3, maxScore: 100 },
+      answersReceived: true,
       leftByLeaves: true,
     });
-    const merged = internals.finalize.mock.calls[0][3];
-    expect(merged.leaveCount).toBe(2);
-    expect(merged.answers).toEqual({ p1: 3 }); // тэр хүсэлтийн хариу ч тооцогдоно
+    const data = prisma.testAttemptSession.update.mock.calls[0][0].data;
+    expect(data.leaveCount).toBe(2);
+    expect(data.draftAnswers).toEqual({ p1: 3 }); // тэр хүсэлтийн хариу ч тооцогдоно
+    expect(internals.finalize).toHaveBeenCalledTimes(1);
   });
 
   it('Зөөлөн (3): 2 дахь гаралтад дүгнэхгүй', async () => {

@@ -47,6 +47,7 @@ export type TestAttemptSessionMinAggregateOutputType = {
   status: $Enums.AttemptSessionStatus | null
   submittedAt: Date | null
   updatedAt: Date | null
+  lateReceivedAt: Date | null
 }
 
 export type TestAttemptSessionMaxAggregateOutputType = {
@@ -60,6 +61,7 @@ export type TestAttemptSessionMaxAggregateOutputType = {
   status: $Enums.AttemptSessionStatus | null
   submittedAt: Date | null
   updatedAt: Date | null
+  lateReceivedAt: Date | null
 }
 
 export type TestAttemptSessionCountAggregateOutputType = {
@@ -79,6 +81,8 @@ export type TestAttemptSessionCountAggregateOutputType = {
   status: number
   submittedAt: number
   updatedAt: number
+  lateAnswers: number
+  lateReceivedAt: number
   _all: number
 }
 
@@ -104,6 +108,7 @@ export type TestAttemptSessionMinAggregateInputType = {
   status?: true
   submittedAt?: true
   updatedAt?: true
+  lateReceivedAt?: true
 }
 
 export type TestAttemptSessionMaxAggregateInputType = {
@@ -117,6 +122,7 @@ export type TestAttemptSessionMaxAggregateInputType = {
   status?: true
   submittedAt?: true
   updatedAt?: true
+  lateReceivedAt?: true
 }
 
 export type TestAttemptSessionCountAggregateInputType = {
@@ -136,6 +142,8 @@ export type TestAttemptSessionCountAggregateInputType = {
   status?: true
   submittedAt?: true
   updatedAt?: true
+  lateAnswers?: true
+  lateReceivedAt?: true
   _all?: true
 }
 
@@ -242,6 +250,8 @@ export type TestAttemptSessionGroupByOutputType = {
   status: $Enums.AttemptSessionStatus
   submittedAt: Date | null
   updatedAt: Date
+  lateAnswers: runtime.JsonValue | null
+  lateReceivedAt: Date | null
   _count: TestAttemptSessionCountAggregateOutputType | null
   _avg: TestAttemptSessionAvgAggregateOutputType | null
   _sum: TestAttemptSessionSumAggregateOutputType | null
@@ -284,6 +294,8 @@ export type TestAttemptSessionWhereInput = {
   status?: Prisma.EnumAttemptSessionStatusFilter<"TestAttemptSession"> | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.DateTimeNullableFilter<"TestAttemptSession"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"TestAttemptSession"> | Date | string
+  lateAnswers?: Prisma.JsonNullableFilter<"TestAttemptSession">
+  lateReceivedAt?: Prisma.DateTimeNullableFilter<"TestAttemptSession"> | Date | string | null
   test?: Prisma.XOR<Prisma.TestScalarRelationFilter, Prisma.TestWhereInput>
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
@@ -305,6 +317,8 @@ export type TestAttemptSessionOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  lateAnswers?: Prisma.SortOrderInput | Prisma.SortOrder
+  lateReceivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   test?: Prisma.TestOrderByWithRelationInput
   student?: Prisma.UserOrderByWithRelationInput
 }
@@ -330,6 +344,8 @@ export type TestAttemptSessionWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumAttemptSessionStatusFilter<"TestAttemptSession"> | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.DateTimeNullableFilter<"TestAttemptSession"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"TestAttemptSession"> | Date | string
+  lateAnswers?: Prisma.JsonNullableFilter<"TestAttemptSession">
+  lateReceivedAt?: Prisma.DateTimeNullableFilter<"TestAttemptSession"> | Date | string | null
   test?: Prisma.XOR<Prisma.TestScalarRelationFilter, Prisma.TestWhereInput>
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "testId_studentId">
@@ -351,6 +367,8 @@ export type TestAttemptSessionOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  lateAnswers?: Prisma.SortOrderInput | Prisma.SortOrder
+  lateReceivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TestAttemptSessionCountOrderByAggregateInput
   _avg?: Prisma.TestAttemptSessionAvgOrderByAggregateInput
   _max?: Prisma.TestAttemptSessionMaxOrderByAggregateInput
@@ -378,6 +396,8 @@ export type TestAttemptSessionScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumAttemptSessionStatusWithAggregatesFilter<"TestAttemptSession"> | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TestAttemptSession"> | Date | string | null
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"TestAttemptSession"> | Date | string
+  lateAnswers?: Prisma.JsonNullableWithAggregatesFilter<"TestAttemptSession">
+  lateReceivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TestAttemptSession"> | Date | string | null
 }
 
 export type TestAttemptSessionCreateInput = {
@@ -395,6 +415,8 @@ export type TestAttemptSessionCreateInput = {
   status?: $Enums.AttemptSessionStatus
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Date | string | null
   test: Prisma.TestCreateNestedOneWithoutAttemptSessionsInput
   student: Prisma.UserCreateNestedOneWithoutAttemptSessionsInput
 }
@@ -416,6 +438,8 @@ export type TestAttemptSessionUncheckedCreateInput = {
   status?: $Enums.AttemptSessionStatus
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Date | string | null
 }
 
 export type TestAttemptSessionUpdateInput = {
@@ -433,6 +457,8 @@ export type TestAttemptSessionUpdateInput = {
   status?: Prisma.EnumAttemptSessionStatusFieldUpdateOperationsInput | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   test?: Prisma.TestUpdateOneRequiredWithoutAttemptSessionsNestedInput
   student?: Prisma.UserUpdateOneRequiredWithoutAttemptSessionsNestedInput
 }
@@ -454,6 +480,8 @@ export type TestAttemptSessionUncheckedUpdateInput = {
   status?: Prisma.EnumAttemptSessionStatusFieldUpdateOperationsInput | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TestAttemptSessionCreateManyInput = {
@@ -473,6 +501,8 @@ export type TestAttemptSessionCreateManyInput = {
   status?: $Enums.AttemptSessionStatus
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Date | string | null
 }
 
 export type TestAttemptSessionUpdateManyMutationInput = {
@@ -490,6 +520,8 @@ export type TestAttemptSessionUpdateManyMutationInput = {
   status?: Prisma.EnumAttemptSessionStatusFieldUpdateOperationsInput | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TestAttemptSessionUncheckedUpdateManyInput = {
@@ -509,6 +541,8 @@ export type TestAttemptSessionUncheckedUpdateManyInput = {
   status?: Prisma.EnumAttemptSessionStatusFieldUpdateOperationsInput | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TestAttemptSessionListRelationFilter = {
@@ -543,6 +577,8 @@ export type TestAttemptSessionCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  lateAnswers?: Prisma.SortOrder
+  lateReceivedAt?: Prisma.SortOrder
 }
 
 export type TestAttemptSessionAvgOrderByAggregateInput = {
@@ -561,6 +597,7 @@ export type TestAttemptSessionMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  lateReceivedAt?: Prisma.SortOrder
 }
 
 export type TestAttemptSessionMinOrderByAggregateInput = {
@@ -574,6 +611,7 @@ export type TestAttemptSessionMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  lateReceivedAt?: Prisma.SortOrder
 }
 
 export type TestAttemptSessionSumOrderByAggregateInput = {
@@ -684,6 +722,8 @@ export type TestAttemptSessionCreateWithoutStudentInput = {
   status?: $Enums.AttemptSessionStatus
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Date | string | null
   test: Prisma.TestCreateNestedOneWithoutAttemptSessionsInput
 }
 
@@ -703,6 +743,8 @@ export type TestAttemptSessionUncheckedCreateWithoutStudentInput = {
   status?: $Enums.AttemptSessionStatus
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Date | string | null
 }
 
 export type TestAttemptSessionCreateOrConnectWithoutStudentInput = {
@@ -751,6 +793,8 @@ export type TestAttemptSessionScalarWhereInput = {
   status?: Prisma.EnumAttemptSessionStatusFilter<"TestAttemptSession"> | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.DateTimeNullableFilter<"TestAttemptSession"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"TestAttemptSession"> | Date | string
+  lateAnswers?: Prisma.JsonNullableFilter<"TestAttemptSession">
+  lateReceivedAt?: Prisma.DateTimeNullableFilter<"TestAttemptSession"> | Date | string | null
 }
 
 export type TestAttemptSessionCreateWithoutTestInput = {
@@ -768,6 +812,8 @@ export type TestAttemptSessionCreateWithoutTestInput = {
   status?: $Enums.AttemptSessionStatus
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Date | string | null
   student: Prisma.UserCreateNestedOneWithoutAttemptSessionsInput
 }
 
@@ -787,6 +833,8 @@ export type TestAttemptSessionUncheckedCreateWithoutTestInput = {
   status?: $Enums.AttemptSessionStatus
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Date | string | null
 }
 
 export type TestAttemptSessionCreateOrConnectWithoutTestInput = {
@@ -831,6 +879,8 @@ export type TestAttemptSessionCreateManyStudentInput = {
   status?: $Enums.AttemptSessionStatus
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Date | string | null
 }
 
 export type TestAttemptSessionUpdateWithoutStudentInput = {
@@ -848,6 +898,8 @@ export type TestAttemptSessionUpdateWithoutStudentInput = {
   status?: Prisma.EnumAttemptSessionStatusFieldUpdateOperationsInput | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   test?: Prisma.TestUpdateOneRequiredWithoutAttemptSessionsNestedInput
 }
 
@@ -867,6 +919,8 @@ export type TestAttemptSessionUncheckedUpdateWithoutStudentInput = {
   status?: Prisma.EnumAttemptSessionStatusFieldUpdateOperationsInput | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TestAttemptSessionUncheckedUpdateManyWithoutStudentInput = {
@@ -885,6 +939,8 @@ export type TestAttemptSessionUncheckedUpdateManyWithoutStudentInput = {
   status?: Prisma.EnumAttemptSessionStatusFieldUpdateOperationsInput | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TestAttemptSessionCreateManyTestInput = {
@@ -903,6 +959,8 @@ export type TestAttemptSessionCreateManyTestInput = {
   status?: $Enums.AttemptSessionStatus
   submittedAt?: Date | string | null
   updatedAt?: Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Date | string | null
 }
 
 export type TestAttemptSessionUpdateWithoutTestInput = {
@@ -920,6 +978,8 @@ export type TestAttemptSessionUpdateWithoutTestInput = {
   status?: Prisma.EnumAttemptSessionStatusFieldUpdateOperationsInput | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutAttemptSessionsNestedInput
 }
 
@@ -939,6 +999,8 @@ export type TestAttemptSessionUncheckedUpdateWithoutTestInput = {
   status?: Prisma.EnumAttemptSessionStatusFieldUpdateOperationsInput | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TestAttemptSessionUncheckedUpdateManyWithoutTestInput = {
@@ -957,6 +1019,8 @@ export type TestAttemptSessionUncheckedUpdateManyWithoutTestInput = {
   status?: Prisma.EnumAttemptSessionStatusFieldUpdateOperationsInput | $Enums.AttemptSessionStatus
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lateAnswers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lateReceivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -978,6 +1042,8 @@ export type TestAttemptSessionSelect<ExtArgs extends runtime.Types.Extensions.In
   status?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
+  lateAnswers?: boolean
+  lateReceivedAt?: boolean
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testAttemptSession"]>
@@ -999,6 +1065,8 @@ export type TestAttemptSessionSelectCreateManyAndReturn<ExtArgs extends runtime.
   status?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
+  lateAnswers?: boolean
+  lateReceivedAt?: boolean
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testAttemptSession"]>
@@ -1020,6 +1088,8 @@ export type TestAttemptSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.
   status?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
+  lateAnswers?: boolean
+  lateReceivedAt?: boolean
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testAttemptSession"]>
@@ -1041,9 +1111,11 @@ export type TestAttemptSessionSelectScalar = {
   status?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
+  lateAnswers?: boolean
+  lateReceivedAt?: boolean
 }
 
-export type TestAttemptSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "testId" | "studentId" | "seed" | "problemOrder" | "choiceOrder" | "draftAnswers" | "draftStates" | "problemTimes" | "leaveCount" | "events" | "startedAt" | "deadlineAt" | "status" | "submittedAt" | "updatedAt", ExtArgs["result"]["testAttemptSession"]>
+export type TestAttemptSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "testId" | "studentId" | "seed" | "problemOrder" | "choiceOrder" | "draftAnswers" | "draftStates" | "problemTimes" | "leaveCount" | "events" | "startedAt" | "deadlineAt" | "status" | "submittedAt" | "updatedAt" | "lateAnswers" | "lateReceivedAt", ExtArgs["result"]["testAttemptSession"]>
 export type TestAttemptSessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   test?: boolean | Prisma.TestDefaultArgs<ExtArgs>
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1080,6 +1152,8 @@ export type $TestAttemptSessionPayload<ExtArgs extends runtime.Types.Extensions.
     status: $Enums.AttemptSessionStatus
     submittedAt: Date | null
     updatedAt: Date
+    lateAnswers: runtime.JsonValue | null
+    lateReceivedAt: Date | null
   }, ExtArgs["result"]["testAttemptSession"]>
   composites: {}
 }
@@ -1521,6 +1595,8 @@ export interface TestAttemptSessionFieldRefs {
   readonly status: Prisma.FieldRef<"TestAttemptSession", 'AttemptSessionStatus'>
   readonly submittedAt: Prisma.FieldRef<"TestAttemptSession", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"TestAttemptSession", 'DateTime'>
+  readonly lateAnswers: Prisma.FieldRef<"TestAttemptSession", 'Json'>
+  readonly lateReceivedAt: Prisma.FieldRef<"TestAttemptSession", 'DateTime'>
 }
     
 

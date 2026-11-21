@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { resultsPendingOf } from './result-release';
 import { PrismaService } from '../prisma/prisma.service';
 export function rankScores(
   own: { totalScore: number; maxScore: number },
@@ -41,10 +46,13 @@ export class RankingService {
         totalScore: true,
         maxScore: true,
         source: true,
-        test: { select: { id: true, title: true } },
+        test: { select: { id: true, title: true, closesAt: true } },
       },
     });
     if (!own) throw new NotFoundException('Дууссан шалгалтын дүн олдсонгүй');
+    // Хаах цаг ирээгүй — байр, оноо задрахгүй (result-release.ts)
+    const pending = resultsPendingOf(own.test);
+    if (pending) throw new ForbiddenException(pending.message);
     const [profile, enrollments] = await Promise.all([
       this.prisma.studentProfile.findUnique({
         where: { userId: studentId },
@@ -83,7 +91,7 @@ export class RankingService {
         }
       : null;
     return {
-      test: own.test,
+      test: { id: own.test.id, title: own.test.title },
       totalScore: own.totalScore,
       maxScore: own.maxScore,
       classes,

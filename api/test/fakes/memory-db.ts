@@ -358,7 +358,12 @@ export class MemoryDb {
   };
 
   testResult = { count: async ({ where }: Row = {}) => this.takenWhere(where ?? {}, this.results) };
-  testAttemptSession = { count: async ({ where }: Row = {}) => this.takenWhere(where ?? {}, this.sessions) };
+  testAttemptSession = {
+    count: async ({ where }: Row = {}) => this.takenWhere(where ?? {}, this.sessions),
+    // Хаах цаг / хугацаа өөрчлөхөд эхэлсэн сессийн дуусах цагийг шинэчилнэ (tests.service)
+    findMany: async () => [] as Row[],
+    updateMany: async () => ({ count: 0 }),
+  };
 
   enrollment = { findMany: async () => [] };
 

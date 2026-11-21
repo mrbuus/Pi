@@ -12591,7 +12591,9 @@ export const TestAttemptSessionScalarFieldEnum = {
   deadlineAt: 'deadlineAt',
   status: 'status',
   submittedAt: 'submittedAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  lateAnswers: 'lateAnswers',
+  lateReceivedAt: 'lateReceivedAt'
 } as const
 
 export type TestAttemptSessionScalarFieldEnum = (typeof TestAttemptSessionScalarFieldEnum)[keyof typeof TestAttemptSessionScalarFieldEnum]

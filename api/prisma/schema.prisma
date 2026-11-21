@@ -1172,6 +1172,12 @@ model TestAttemptSession {
   submittedAt DateTime?
   updatedAt   DateTime             @updatedAt
 
+  // Хоцорч ирсэн хариу (2026-11-21, tests/late-answers.ts): сесс хаагдсаны дараа төхөөрөмжөөс
+  // ирсэн, дүгнэгдсэн хариунаас зөрүүтэй хариу. Дүнг өөрчлөхгүй — Админ/Багш+ «Хүлээн авах»
+  // дарвал дахин дүгнэнэ (өмнөх оноо history-д). null = хоцорсон хариугүй.
+  lateAnswers    Json?
+  lateReceivedAt DateTime?
+
   @@unique([testId, studentId])
   @@index([studentId, status])
 }

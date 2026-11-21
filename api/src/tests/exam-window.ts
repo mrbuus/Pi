@@ -64,3 +64,19 @@ export function windowError(test: ExamWindow): string | null {
   }
   return null;
 }
+
+/**
+ * Багш хаах цаг / хугацааг өөрчлөхөд эхэлсэн сессийн шинэ дуусах цаг (эзэн 2026-11-21):
+ * min(эхэлсэн + хугацаа, хаах цаг), гэхдээ аль хэдийн өнгөрсөн мөч рүү татахгүй (хамгийн багадаа
+ * «одоо»). Аль аль нь байхгүй бол null (хугацаагүй).
+ */
+export function rescheduledDeadline(
+  startedAt: Date,
+  timeLimitMin: number | null | undefined,
+  closesAt: Date | null | undefined,
+  now: Date,
+): Date | null {
+  const next = sessionDeadline(startedAt, timeLimitMin, closesAt);
+  if (!next) return null;
+  return next.getTime() < now.getTime() ? new Date(now.getTime()) : next;
+}

@@ -105,11 +105,13 @@ describe('Шалгалтын бүрэн бүтэн байдлын үйл явд�
       studentId: true,
       leaveCount: true,
       events: true,
+      lateAnswers: true,
+      lateReceivedAt: true,
     });
     // Хуучин мөр (leaveLimit-гүй) — Зөөлөн (3), 1 гаралт нь автомат илгээлт биш
     expect(rows).toEqual([
-      { studentId: 's1', leaveCount: 1, screenshotCount: 1, recordingCount: 1, leaveLimit: 3, leftByLeaves: false },
-      { studentId: 's2', leaveCount: null, screenshotCount: null, recordingCount: null, leaveLimit: 3, leftByLeaves: false },
+      { studentId: 's1', leaveCount: 1, screenshotCount: 1, recordingCount: 1, leaveLimit: 3, leftByLeaves: false, lateAnswers: null },
+      { studentId: 's2', leaveCount: null, screenshotCount: null, recordingCount: null, leaveLimit: 3, leftByLeaves: false, lateAnswers: null },
     ]);
   });
 

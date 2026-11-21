@@ -1,3 +1,4 @@
+import { releasedTestWhere } from '../tests/result-release';
 import {
   BadRequestException,
   ConflictException,
@@ -75,7 +76,8 @@ export class MockExamsService {
     const testIds = [...new Set(regs.map((r) => r.event.testId))];
     const [sessions, results] = await Promise.all([
       this.prisma.testAttemptSession.findMany({ where: { studentId: userId, testId: { in: testIds } }, select: { testId: true, status: true } }),
-      this.prisma.testResult.findMany({ where: { studentId: userId, testId: { in: testIds } }, select: { testId: true, totalScore: true, maxScore: true } }),
+      // Хаах цаг ирээгүй шалгалтын оноо харагдахгүй (tests/result-release.ts) — төлөв нь сессээр
+      this.prisma.testResult.findMany({ where: { studentId: userId, testId: { in: testIds }, test: releasedTestWhere() }, select: { testId: true, totalScore: true, maxScore: true } }),
     ]);
     return {
       registrations: regs.map((r) => {
