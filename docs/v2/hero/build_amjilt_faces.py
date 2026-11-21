@@ -7,12 +7,13 @@
 """
 import json, os, subprocess, tempfile
 import numpy as np
+from scipy import ndimage
 from PIL import Image, ImageFilter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUTS = [os.path.expanduser('~/Intern/pi.mnv2/web/public/amjilt'), os.path.join(HERE, 'home', 'amjilt')]
 SRC = OUTS[1]
-CELL, AV, COLS = 80, 240, 20
+CELL, AV, COLS = 96, 480, 20  # атлас 96px (олон нүүртэй суваг), тус бүр 480 + 240 (цөөн нүүртэй суваг)
 
 # Бүлэг картын тор (багана, мөр) ба картан дээрээс нүдээр уншсан онцгой оноо (2026-10-17).
 # Түлхүүр: (файл, k), k нь уншлагын дараалал (зүүнээс баруун, дээрээс доош). Бусад нь 700–799.
@@ -58,13 +59,32 @@ def fill_grid(dets, cols, rows):
     return out
 
 
-def unyellow(im):
-    """Картын шар, улбар шар дэвсгэрийг хөх болгоно (эзэн шар өнгө хэрэглэхгүй). Арьс хөндөгдөхгүй:
-    шар (38–62°) нь S>140, улбар шар (15–38°) нь зөвхөн тод (S>150, V>170) үед л солигдоно."""
+def unyellow(im, face=None):
+    """Картын шар, улбар шар ДЭВСГЭРИЙГ хөх болгоно (эзэн шар өнгө хэрэглэхгүй).
+    Зөвхөн зургийн ирмэгт хүрсэн шар хэсгийг (дэвсгэр) солино — нүүрэн доторх уруул, арьсны
+    улбар өнгө хөндөгдөхгүй (2026-10-22: Алтанцэцэгийн уруул хөх болсон алдаа). face=(x0,y0,x1,y1)
+    нүүрний хайрцаг пикселээр: тэр дотор хэзээ ч солихгүй."""
     hsv = np.asarray(im.convert('HSV')).astype(np.float32)
     h, s, v = hsv[..., 0] * 360 / 255, hsv[..., 1], hsv[..., 2]
-    m = (((h >= 38) & (h <= 62) & (s > 140) & (v > 110)) | ((h >= 15) & (h < 38) & (s > 150) & (v > 170))).astype(np.float32)
-    m = np.asarray(Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.2))).astype(np.float32)[..., None] / 255
+    yel = (h >= 38) & (h <= 62) & (s > 140) & (v > 110)            # цэвэр шар — арьсанд байхгүй өнгө
+    ora = (h >= 15) & (h < 38) & (s > 110) & (v > 150)             # улбар шар — арьстай ойр тул зөвхөн ирмэгээс
+    # Арьс (YCbCr): дулаан гэрэлд шар өнгөтэй харагдсан ч хэзээ ч солихгүй (2026-10-22: SAT-ын нүүрэн дээр хөх толбо гарсан)
+    rgb0 = np.asarray(im.convert('RGB')).astype(np.float32); R, G, B = rgb0[..., 0], rgb0[..., 1], rgb0[..., 2]
+    cb = 128 - .1687 * R - .3313 * G + .5 * B; cr = 128 + .5 * R - .4187 * G - .0813 * B
+    skin = (cb > 70) & (cb < 135) & (cr > 128) & (cr < 180)
+    yel &= ~skin; ora &= ~skin
+    lab, n = ndimage.label(yel | ora)
+    if not n:
+        return im
+    edge = np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))
+    keep = np.isin(lab, edge[edge > 0]) & ora
+    if face:  # нүүрэн дээрх улбар (уруул, хацар) хэзээ ч солигдохгүй
+        x0, y0, x1, y1 = face
+        keep[max(0, y0):y1, max(0, x0):x1] = False
+    keep |= yel
+    if keep.mean() < .02:
+        return im  # шар дэвсгэргүй карт
+    m = np.asarray(Image.fromarray((keep * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.2))).astype(np.float32)[..., None] / 255
     navy = np.array([46, 72, 130], np.float32) * (v[..., None] / 235) ** .8
     rgb = np.asarray(im).astype(np.float32)
     return Image.fromarray(np.clip(rgb * (1 - m) + navy * m, 0, 255).astype(np.uint8))
@@ -76,7 +96,9 @@ def crop(im, f):
     side = max(w, h) * 2.1
     cx, cy = x + w / 2, y + h / 2 + h * .12
     l = min(max(cx - side / 2, 0), max(W - side, 0)); t = min(max(cy - side / 2, 0), max(H - side, 0))
-    return unyellow(im.crop((int(l), int(t), int(l + side), int(t + side))).resize((AV, AV), Image.LANCZOS))
+    k = AV / side  # нүүрний хайрцаг тайрсан зургийн координатад (бага зэрэг агшаасан)
+    face = (int((x - l + w * .22) * k), int((y - t + h * .15) * k), int((x - l + w * .78) * k), int((y - t + h * .95) * k))  # нүдээс эрүү хүртэл
+    return unyellow(im.crop((int(l), int(t), int(l + side), int(t + side))).resize((AV, AV), Image.LANCZOS), face)
 
 
 years = json.load(open(os.path.join(SRC, 'index.json')))
@@ -112,7 +134,9 @@ idx = {'cell': CELL, 'cols': COLS, 'rows': R, 'img': 'amjilt/faces/atlas.webp',
 for out in OUTS:
     d = os.path.join(out, 'faces'); os.makedirs(d, exist_ok=True)
     atlas.save(os.path.join(d, 'atlas.webp'), 'WEBP', quality=72, method=6)
-    for k, f in enumerate(faces): f[5].save(os.path.join(d, f'{k}.webp'), 'WEBP', quality=78, method=6)
+    for k, f in enumerate(faces):
+        f[5].save(os.path.join(d, f'{k}@2.webp'), 'WEBP', quality=80, method=6)
+        f[5].resize((240, 240), Image.LANCZOS).save(os.path.join(d, f'{k}.webp'), 'WEBP', quality=80, method=6)
     json.dump(idx, open(os.path.join(d, 'index.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
 mat = [f for f in faces if f[2] == 'mat']
 print(n, 'нүүр; математик 800:', sum(f[3] == 8 for f in mat), ' 700+:', sum(f[3] >= 7 for f in mat),

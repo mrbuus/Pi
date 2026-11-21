@@ -161,7 +161,7 @@ dom = sub1(dom, "fetch('amjilt/index.json')", "fetch('/amjilt/index.json')")
 dom = sub1(dom, "fetch('amjilt/'+y+'.json')", "fetch('/amjilt/'+y+'.json')")
 # Зургийн зам JSON-д харьцангуй (мокап /home/ дотор) — вэбд ямар ч хуудаснаас (/demo/home) зөв ачаалагдахаар үндсээс
 dom = sub1(dom, "W.data[y]=r.ok?await r.json():[];",
-           "W.data[y]=r.ok?(await r.json()).map(d=>{ for(const k of ['t','f','a']) if(d[k]&&d[k][0]!=='/') d[k]='/'+d[k]; return d; }):[];")
+           "W.data[y]=r.ok?(await r.json()).map(d=>{ for(const k of ['t','f','a','s2']) if(d[k]&&d[k][0]!=='/') d[k]='/'+d[k]; return d; }):[];")
 dom = sub1(dom, "img:'100x100-front.jpg'", "img:'/home/100x100-front.jpg'")
 dom = sub_opt(dom, "const AMJ='amjilt/';", "const AMJ='/amjilt/';")  # амжилтын нүүрний атлас (демо)
 dom = sub1(dom, "club:$('#club'),", "")
@@ -171,8 +171,10 @@ dom = sub1(dom, 'function frame(now){\n', 'function frame(now){\n  if(dead) retu
 dom = dom.replace('requestAnimationFrame(frame);', 'rafId=requestAnimationFrame(frame);')
 dom = sub1(dom, 'setInterval(tickClock,15000);', 'const clockTimer=setInterval(tickClock,15000);')
 HAS_POL = "$('#pol')" in dom
-dom = sub_opt(dom, "new IntersectionObserver((e,o)=>{ if(e[0].isIntersecting){ $('#pol').classList.add('in'); o.disconnect(); } },{threshold:.25}).observe($('#pol'));",
-              "const polIO=new IntersectionObserver((e,o)=>{ if(e[0].isIntersecting){ $('#pol').classList.add('in'); o.disconnect(); } },{threshold:.25}); polIO.observe($('#pol'));")
+dom = re.sub(r"new IntersectionObserver\(\(e,o\)=>\{ if\(e\[0\]\.isIntersecting\)\{ \$\('#pol'\)\.classList\.add\('in'\); o\.disconnect\(\); \} \},\{threshold:(\.\d+)\}\)\.observe\(\$\('#pol'\)\);",
+             r"const polIO=new IntersectionObserver((e,o)=>{ if(e[0].isIntersecting){ $('#pol').classList.add('in'); o.disconnect(); } },{threshold:\1}); polIO.observe($('#pol'));", dom)
+if HAS_POL and 'const polIO=' not in dom:
+    raise SystemExit('#pol observer олдсонгүй (polIO)')
 dom = sub1(dom, "addEventListener('DOMContentLoaded',()=>{\n  lucide.createIcons({attrs:{'stroke-width':1.75}});",
            "(()=>{\n  createIcons({icons:ICONS,attrs:{'stroke-width':1.75}});")
 dom = sub1(dom, "requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('ready')));\n});",

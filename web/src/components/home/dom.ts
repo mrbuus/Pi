@@ -3,9 +3,9 @@
 // @ts-nocheck
 import katex from 'katex';
 import Lenis from 'lenis';
-import { createIcons, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, Info, MapPin, Menu, Minus, Moon, Phone, Plus, RotateCcw, Scissors, Sun, Users, Wifi, X } from 'lucide';
+import { createIcons, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, MapPin, Menu, Minus, Moon, Phone, Plus, RotateCcw, Scissors, Sun, Users, Wifi, X } from 'lucide';
 
-const ICONS = { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, Info, MapPin, Menu, Minus, Moon, Phone, Plus, RotateCcw, Scissors, Sun, Users, Wifi, X };
+const ICONS = { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, ChevronLeft, ChevronRight, ClipboardCheck, HeartHandshake, MapPin, Menu, Minus, Moon, Phone, Plus, RotateCcw, Scissors, Sun, Users, Wifi, X };
 
 export function mountDom(root) {
   let dead = false, rafId = 0;
