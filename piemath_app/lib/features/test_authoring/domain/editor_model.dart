@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../core/time/ub_time.dart';
 import '../../exam/domain/fill_slots.dart';
 import '../data/authoring_models.dart';
 
@@ -142,6 +143,8 @@ class TestSettings {
     this.pdfKey = '',
     this.price = '',
     this.leaveLimit = 3,
+    this.opensAt = '',
+    this.closesAt = '',
   });
 
   factory TestSettings.fromDetails(TestDetails d) => TestSettings(
@@ -156,6 +159,8 @@ class TestSettings {
     pdfKey: d.pdfKey ?? '',
     price: d.price?.toString() ?? '',
     leaveLimit: d.leaveLimit == 2 ? 2 : 3,
+    opensAt: normalizeInstantIso(d.opensAt),
+    closesAt: normalizeInstantIso(d.closesAt),
   );
 
   final String title;
@@ -172,6 +177,10 @@ class TestSettings {
   /// Аппаас гарах дүрэм: 3 = Зөөлөн, 2 = Хатуу (`api/src/tests/leave-limit.ts`).
   final int leaveLimit;
 
+  /// Нийтлэг цонх: UTC ISO мөр, '' = хязгааргүй. Сурагч эхлүүлсний дараа ч засна (сервер зөвшөөрнө).
+  final String opensAt;
+  final String closesAt;
+
   TestSettings copyWith({
     String? title,
     String? type,
@@ -184,6 +193,8 @@ class TestSettings {
     String? pdfKey,
     String? price,
     int? leaveLimit,
+    String? opensAt,
+    String? closesAt,
   }) => TestSettings(
     title: title ?? this.title,
     type: type ?? this.type,
@@ -196,6 +207,8 @@ class TestSettings {
     pdfKey: pdfKey ?? this.pdfKey,
     price: price ?? this.price,
     leaveLimit: leaveLimit ?? this.leaveLimit,
+    opensAt: opensAt ?? this.opensAt,
+    closesAt: closesAt ?? this.closesAt,
   );
 
   @override
@@ -211,7 +224,9 @@ class TestSettings {
       other.variantLabel == variantLabel &&
       other.pdfKey == pdfKey &&
       other.price == price &&
-      other.leaveLimit == leaveLimit;
+      other.leaveLimit == leaveLimit &&
+      other.opensAt == opensAt &&
+      other.closesAt == closesAt;
 
   @override
   int get hashCode => Object.hash(
@@ -226,7 +241,18 @@ class TestSettings {
     pdfKey,
     price,
     leaveLimit,
+    opensAt,
+    closesAt,
   );
+}
+
+/// API-ийн ISO мөрийг нэг хэлбэрт (UTC, миллисекундтэй) — харьцуулалт тогтвортой. Хоосон/буруу бол ''.
+String normalizeInstantIso(String? iso) => parseApiInstant(iso)?.toIso8601String() ?? '';
+
+/// Маягтын UB огноо + цагаас UTC ISO ('' = хязгааргүй). Цаг сонгоогүй бол 09:00.
+String windowIso(UbDateTime? date, int? hour, int? minute) {
+  if (date == null) return '';
+  return UbDateTime(date.year, date.month, date.day, hour ?? 9, minute ?? 0).toInstant().toIso8601String();
 }
 
 /// Засварлагчийн бүтэн төлөв.
@@ -504,6 +530,9 @@ Map<String, Object?> _settingsPatch(TestSettings a, TestSettings b, SaveContext 
   final out = <String, Object?>{};
   if (a.title != b.title) out['title'] = b.title.trim();
   if (a.timeLimit != b.timeLimit) out['timeLimitMin'] = _positiveInt(b.timeLimit);
+  // Нээх/хаах цагийг сурагч эхлүүлсний дараа ч засна (эхэлсэн сессийн дуусах цаг хэвээр)
+  if (a.opensAt != b.opensAt) out['opensAt'] = b.opensAt.isEmpty ? null : b.opensAt;
+  if (a.closesAt != b.closesAt) out['closesAt'] = b.closesAt.isEmpty ? null : b.closesAt;
   if (ctx.limited) return out;
   if (a.type != b.type && !ctx.thousand) out['type'] = b.type;
   if (a.gradingMode != b.gradingMode) out['gradingMode'] = b.gradingMode;

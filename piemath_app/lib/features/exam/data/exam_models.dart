@@ -187,6 +187,8 @@ class TestMeta {
     this.myResult,
     this.sessionStatus = SessionStatus.none,
     this.leaveLimit,
+    this.opensAt,
+    this.closesAt,
   });
 
   factory TestMeta.fromJson(Object? raw) {
@@ -203,6 +205,8 @@ class TestMeta {
       myResult: j['myResult'] is Map ? ScorePair.fromJson(j['myResult']) : null,
       sessionStatus: SessionStatus.parse(j['sessionStatus']),
       leaveLimit: _int(j['leaveLimit']),
+      opensAt: parseApiInstant(_str(j['opensAt'])),
+      closesAt: parseApiInstant(_str(j['closesAt'])),
     );
   }
 
@@ -219,6 +223,10 @@ class TestMeta {
 
   /// Аппаас гарах дүрэм: 2 = Хатуу, 3 = Зөөлөн. Хуучин сервер илгээхгүй (null) → 3.
   final int? leaveLimit;
+
+  /// Нийтлэг цонх (агшин, UTC): нээгдэх, хаагдах цаг. Хуучин сервер, цонхгүй тест — null.
+  final DateTime? opensAt;
+  final DateTime? closesAt;
 
   bool get manual => gradingMode == 'MANUAL';
   bool get finished => sessionStatus == SessionStatus.submitted || myResult != null;
@@ -250,6 +258,7 @@ class ExamProblem {
     this.choiceMode,
     this.choices,
     this.choiceImages,
+    this.choiceLabels,
   });
 
   factory ExamProblem.fromJson(Object? raw) {
@@ -261,6 +270,7 @@ class ExamProblem {
     };
     final choices = j['choices'] is List ? [for (final c in _list(j['choices'])) c is String ? c : ''] : null;
     final images = j['choiceImages'] is List ? [for (final c in _list(j['choiceImages'])) _str(c)] : null;
+    final labels = j['choiceLabels'] is List ? [for (final c in _list(j['choiceLabels'])) _str(c) ?? ''] : null;
     return ExamProblem(
       id: _str(j['id']) ?? '',
       format: ProblemFormat.parse(j['format']),
@@ -270,6 +280,7 @@ class ExamProblem {
       choiceMode: mode,
       choices: choices,
       choiceImages: images,
+      choiceLabels: labels,
     );
   }
 
@@ -281,6 +292,9 @@ class ExamProblem {
   final ChoiceMode? choiceMode;
   final List<String>? choices;
   final List<String?>? choiceImages;
+
+  /// Цаасан горим (Нэгдсэн шалгалт): сонголтын шошго A–E, холиогүй. null бол дугаар 1–5.
+  final List<String>? choiceLabels;
 
   bool get isChoice => format == ProblemFormat.choice && choices != null && choices!.isNotEmpty;
 }

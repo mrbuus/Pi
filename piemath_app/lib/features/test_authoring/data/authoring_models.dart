@@ -289,6 +289,8 @@ class TestDetails {
     this.chapterId,
     this.timeLimitMin,
     this.leaveLimit,
+    this.opensAt,
+    this.closesAt,
     this.groupKey,
     this.variantLabel,
     this.pdfKey,
@@ -311,6 +313,8 @@ class TestDetails {
       chapterId: _str(j['chapterId']),
       timeLimitMin: _int(j['timeLimitMin']),
       leaveLimit: _int(j['leaveLimit']),
+      opensAt: _str(j['opensAt']),
+      closesAt: _str(j['closesAt']),
       groupKey: _str(j['groupKey']),
       variantLabel: _str(j['variantLabel']),
       pdfKey: _str(j['pdfKey']),
@@ -344,6 +348,10 @@ class TestDetails {
 
   /// Аппаас гарах дүрэм: 2 = Хатуу, 3 = Зөөлөн (хуучин сервер: null → 3).
   final int? leaveLimit;
+
+  /// Нийтлэг цонх (ISO, UTC) — хуучин сервер, цонхгүй тест null.
+  final String? opensAt;
+  final String? closesAt;
   final String? groupKey;
   final String? variantLabel;
   final String? pdfKey;

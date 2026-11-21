@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:piemath_app/core/time/ub_time.dart';
 import 'package:piemath_app/features/test_authoring/data/authoring_models.dart';
 import 'package:piemath_app/features/test_authoring/domain/builder_logic.dart';
 import 'package:piemath_app/features/test_authoring/domain/editor_model.dart';
@@ -179,6 +180,21 @@ void main() {
       final s = base.copyWith(settings: base.settings.copyWith(leaveLimit: 2));
       expect(planSave(s, base, ctx()).test, {'leaveLimit': 2});
       expect(planSave(s, base, ctx(limited: true)).test, isNull);
+    });
+
+    test('нээх/хаах цаг: UB огноо, цагаас UTC ISO; LIMITED үед ч илгээгдэнэ, хоосон = null', () {
+      final opens = windowIso(UbDateTime(2026, 11, 25), 9, 0);
+      final closes = windowIso(UbDateTime(2026, 11, 25), 10, 40);
+      expect(opens, '2026-11-25T01:00:00.000Z');
+      expect(closes, '2026-11-25T02:40:00.000Z');
+      expect(windowIso(null, 9, 0), '');
+      final s = base.copyWith(
+        settings: base.settings.copyWith(opensAt: opens, closesAt: closes),
+      );
+      expect(planSave(s, base, ctx(limited: true)).test, {'opensAt': opens, 'closesAt': closes});
+      final cleared = s.copyWith(settings: s.settings.copyWith(opensAt: ''));
+      expect(planSave(cleared, s, ctx()).test, {'opensAt': null});
+      expect(normalizeInstantIso('2026-11-25T01:00:00Z'), opens);
     });
 
     test('1000 бодлого: төрөл, анги илгээгдэхгүй', () {

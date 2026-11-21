@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_error.dart';
+import '../../../core/time/ub_time.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/native/native.dart';
 import '../application/test_editor_controller.dart';
@@ -263,6 +264,11 @@ class _EditTestBodyState extends ConsumerState<_EditTestBody> {
           initial: int.tryParse(s.timeLimit),
           min: 1,
         ),
+        // Нийтлэг цонх (Улаанбаатарын цагаар): огноогүй бол хязгааргүй. Хоцорсон сурагч хаах цаг хүртэл л.
+        FormDateField(name: 'opensDate', label: 'Нээгдэх өдөр', initial: _ubOf(s.opensAt)),
+        FormTimeField(name: 'opensTime', label: 'Нээгдэх цаг', initial: _timeOf(s.opensAt)),
+        FormDateField(name: 'closesDate', label: 'Хаагдах өдөр', initial: _ubOf(s.closesAt)),
+        FormTimeField(name: 'closesTime', label: 'Хаагдах цаг', initial: _timeOf(s.closesAt)),
         if (!limited) ...[
           FormSelectField<String>(
             name: 'type',
@@ -302,6 +308,16 @@ class _EditTestBodyState extends ConsumerState<_EditTestBody> {
       onSubmit: (v) async => s.copyWith(
         title: v.text('title'),
         timeLimit: v.integer('time')?.toString() ?? '',
+        opensAt: windowIso(
+          v.date('opensDate'),
+          v.get<TimeOfDay>('opensTime')?.hour,
+          v.get<TimeOfDay>('opensTime')?.minute,
+        ),
+        closesAt: windowIso(
+          v.date('closesDate'),
+          v.get<TimeOfDay>('closesTime')?.hour,
+          v.get<TimeOfDay>('closesTime')?.minute,
+        ),
         type: limited ? null : (v.get<String>('type') ?? s.type),
         gradingMode: limited ? null : (v.get<String>('grading') ?? s.gradingMode),
         leaveLimit: limited ? null : (v.get<int>('leaves') ?? s.leaveLimit),
@@ -312,6 +328,16 @@ class _EditTestBodyState extends ConsumerState<_EditTestBody> {
       ),
     );
     if (next != null) _c.updateSettings(next);
+  }
+
+  UbDateTime? _ubOf(String iso) {
+    final at = parseApiInstant(iso);
+    return at == null ? null : UbDateTime.fromInstant(at);
+  }
+
+  TimeOfDay? _timeOf(String iso) {
+    final ub = _ubOf(iso);
+    return ub == null ? null : TimeOfDay(hour: ub.hour, minute: ub.minute);
   }
 
   Future<void> _pickSubject() async {

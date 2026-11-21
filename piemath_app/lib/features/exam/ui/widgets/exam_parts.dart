@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/integrity/integrity.dart';
 import '../../../../core/math/math.dart';
+import '../../../../core/time/date_mn.dart';
+import '../../../../core/time/ub_time.dart';
 import '../../../../core/ui/ui.dart';
 import '../../data/exam_models.dart';
 import '../../domain/answer.dart';
@@ -564,6 +566,22 @@ class RecordingCover extends StatelessWidget {
   }
 }
 
+/// Нийтлэг цонхны мөр (Улаанбаатарын цагаар): нээгдэх, хаагдах цаг; хоцорч эхэлбэл хаах цаг хүртэл л.
+/// Цонхгүй бол null.
+String? examWindowIntro(DateTime? opensAt, DateTime? closesAt) {
+  String at(DateTime d) => DateMn.numericWithTime(UbDateTime.fromInstant(d));
+  if (opensAt == null && closesAt == null) return null;
+  final parts = <String>[
+    if (opensAt != null) 'Нээгдэх цаг ${at(opensAt)}',
+    if (closesAt != null) 'хаагдах цаг ${at(closesAt)} (Улаанбаатарын цагаар)',
+  ];
+  final head = parts.join(', ');
+  final sentence = head[0].toUpperCase() + head.substring(1);
+  return closesAt == null
+      ? '$sentence (Улаанбаатарын цагаар).'
+      : '$sentence. Хоцорч эхэлбэл хугацаа хаах цаг хүртэл л үргэлжилнэ.';
+}
+
 /// Шалгалтын өмнөх тайлбар — гарах дүрмийг УРЬДЧИЛАН хэлнэ (STATUS §7.3).
 class ExamIntroView extends StatelessWidget {
   const ExamIntroView({
@@ -641,6 +659,7 @@ class ExamIntroView extends StatelessWidget {
                   : '${meta.problemCount} бодлого, $minutes минут. Цагийг сервер тоолно — хугацаа дуусахад хариулт '
                         'автоматаар илгээгдэнэ.',
             ),
+            if (examWindowIntro(meta.opensAt, meta.closesAt) case final text?) rule(AppIcons.calendar, text),
             rule(AppIcons.logout, leaveRuleIntro(policy)),
             rule(AppIcons.camera, 'Дэлгэцийн зураг авах, дэлгэц бичих оролдлого багшид бүртгэгдэнэ.'),
             rule(AppIcons.notifications, 'Эхлэхээсээ өмнө мэдэгдлээ түр унтрааж, утасныхаа цэнэгийг шалгаарай.'),

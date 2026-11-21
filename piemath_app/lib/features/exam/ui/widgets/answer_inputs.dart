@@ -38,9 +38,10 @@ class AnswerInput extends StatelessWidget {
         return ChoiceGrid(
           groupLabel: '$number-р бодлогын хариултын сонголтууд',
           // TEXT горимд сонголт сурагч бүрд өөр дарааллаар (холилдсон) — үсэг биш, дугаар.
+          // Цаасан горимд (холиогүй) сервер A–E шошго илгээнэ — бодолт, «Түгээмэл алдаа»-тай таарна.
           choices: [
             for (var i = 0; i < choices.length; i++)
-              ChoiceItem(label: letter ? choices[i] : '${i + 1}', text: letter ? '' : choices[i], image: _imageAt(i)),
+              ChoiceItem(label: letter ? choices[i] : _labelAt(i), text: letter ? '' : choices[i], image: _imageAt(i)),
           ],
           selectedIndex: selected >= 0 ? selected : null,
           onSelect: !enabled
@@ -67,6 +68,12 @@ class AnswerInput extends StatelessWidget {
           onChanged: onChanged,
         );
     }
+  }
+
+  String _labelAt(int i) {
+    final labels = problem.choiceLabels;
+    if (labels != null && i < labels.length && labels[i].isNotEmpty) return labels[i];
+    return '${i + 1}';
   }
 
   ImageProvider? _imageAt(int i) {
