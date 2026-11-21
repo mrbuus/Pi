@@ -33,6 +33,11 @@ const REDACT_KEY_PATTERN = /password|phone/i;
 
 function redactDeep(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(redactDeep);
+  // Date, Prisma.Decimal зэрэг toJSON-тэй утгыг JSON хэлбэрт нь (ISO огноо, тоон мөр) —
+  // эс бөгөөс Date нь «{}» болж, Decimal нь {constructor,s,e,d} болоод бичилт бүхэлдээ унадаг
+  if (value && typeof (value as { toJSON?: unknown }).toJSON === 'function') {
+    return (value as { toJSON: () => unknown }).toJSON();
+  }
   if (value && typeof value === 'object') {
     const out: Record<string, unknown> = {};
     for (const [key, v] of Object.entries(value as Record<string, unknown>)) {
